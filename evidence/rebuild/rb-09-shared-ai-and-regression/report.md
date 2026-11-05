@@ -40,11 +40,32 @@ The first Rust live launch installed/opened the project over MCP from Welcome bu
 
 ## Wrap-up artifact identity recheck
 
-The recorded live app hash remains `d680cf0ba8e4c8bf7d5ccd1536bf7d5720987d676a1a0946c6c3505b613b0cb9`. After the size-check/rebuild work, the current `target/release/builder3d-app.exe` hash is `0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a`; the current gateway hash is `aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e`. The final wrap-up run of `python evidence/rebuild/rb-09-shared-ai-and-regression/validate_rb09_evidence.py` exits 1 with `release binary hash mismatch: live Rust app`. The original gate-time validator output and exit 0 remain in `logs/evidence-ledger-validation.log` and `.exit`. No Rust source changed after the live sequence, and the recorded hashes continue to identify the binaries actually tested. This wrap-up does not claim the current Release outputs were live-tested.
+The recorded full-gate app hash is `d680cf0ba8e4c8bf7d5ccd1536bf7d5720987d676a1a0946c6c3505b613b0cb9`; its paired live gateway hash is `a1dba8751c5a15cafbf6e26fac8db0b8a96f8464bf750ac62336f573b729545b`. The post-run gateway hash was `9b8817015ab5c8195013ee788fb095e9393848be74c7da0221ebd33342fc99d3`. The gate-time evidence validator passed with exit 0 and its output remains in `logs/evidence-ledger-validation.log` and `.exit`.
+
+The later target-path mismatch came from subsequent Release builds. The recorded `cargo bloat --release --workspace` run warned that `--workspace` was unused and recompiled `builder3d-mcp` and `builder3d-app`; the app restore log records another completed Release build. Copies of both original stderr logs are retained as `logs/identity-recheck-bloat-workspace.stderr.log` and `logs/identity-recheck-restore-release-app.stderr.log`. The current target app hash is `0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a`; the current gateway hash is `aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e`. The previous wrap-up validator failure was `release binary hash mismatch: live Rust app`: it compared the rebuilt target path to the historical full-gate app record.
+
+The historical executables are no longer at the current Release paths; no copy of those exact binaries was found under `target/release` or this RB-09 evidence directory. The original hashes remain tied to the paired capture metadata and gate-time validator pass. No binary was restored from a G: snapshot.
+
+The current Release pair was then launched and checked separately. The app process (PID 8516) ran from the current Release path with app hash `0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a`; the MCP gateway hash stayed `aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e`. Host preflight confirmed the active Default desktop and Builder3D foreground. An official Python MCP SDK 2.2.0 client listed 60 tools and its read-only `get_status` call returned `app_state=ready`, `dirty=false`, and scene revision 0. The 1296x879 screenshot and client JSONL are under `artifact-identity-recheck/`; neither is part of the accepted 50-capture paired inventory. The app, gateway, and runtime descriptor were absent after shutdown.
+
+The validator now checks the historical app/gateway hashes against the full-gate capture metadata, and checks current target hashes against `artifact-identity-recheck.json`. It verifies both rebuild-log copies, the identity screenshot, and the read-only official-client result. The updated validator passed with exit 0; its stdout, stderr, and exit are recorded in `logs/identity-recheck-validator.*`. The 96-file Rust source manifest remains `9846a4a6dee484186283e169a9b7cdbbf74007bdca772efa5981f438ce78b457`; no Rust application source changed.
+
+This check resolves the target-path identity mismatch without repeating the full paired workflow or the 50-capture matrix. It is not visual review or owner approval. The interface and floor gaps, RB-08 native matrix and snapshot, and overall product acceptance remain open. RB-10 has not started.
 
 ## Additive recovery snapshot
 
-The new additive snapshot is G:/Builder3D-Rust_snapshot_20261104-182021_RB-09-complete. Its final independent path, byte-count, SHA-256, and reparse verification is recorded in snapshot-receipt.md. Root target, .cache, and logs are excluded; nested RB-09 evidence logs are included.
+The earlier additive snapshot `G:/Builder3D-Rust_snapshot_20261104-182021_RB-09-complete` passed verification when created, before the later Release rebuilds. The newer `G:/Builder3D-Rust_snapshot_20261104-193530_RB-09-wrapup-review` is a review snapshot, not a completion snapshot.
+
+The identity follow-up snapshot is
+`G:/Builder3D-Rust_snapshot_20261104-215904_RB-09-artifact-identity-review`.
+Robocopy exited 1 with no failures. The independent verifier passed with
+3,904 files / 701,101,053 bytes on each side and zero missing, extra,
+differing, or reparse entries. A direct-path verifier attempt was blocked by
+Windows PowerShell path-length resolution on one nested shader-cache path; the
+same verifier passed through a temporary Q: drive mapping, removed afterward.
+Root target, .cache, and logs were excluded; nested RB-09 evidence logs and Git
+metadata were included. This is a review snapshot, not a completion snapshot.
+The receipt is in snapshot-receipt.md.
 
 ## Boundary
 

@@ -35,6 +35,38 @@ The accepted clean scene pairs are python-light-initial.png with rust-final-pair
 
 Client request/result logs are rb09-python-client.jsonl, rb09-python-client-2.jsonl, rb09-python-optional-client.jsonl, rb09-rust-client.jsonl, rb09-rust-client-2.jsonl, rb09-rust-client-final-pair.jsonl, and rb09-rust-optional-client.jsonl under logs/. The initial live Rust visibility defect is retained in the early client log and rejected-journal.ndjson. Exact gates are in verification.md. No credential or bridge secret is recorded.
 
+## Current Release artifact identity recheck (2026-11-04)
+
+The historical paired gate used app hash
+d680cf0ba8e4c8bf7d5ccd1536bf7d5720987d676a1a0946c6c3505b613b0cb9 and gateway
+hash a1dba8751c5a15cafbf6e26fac8db0b8a96f8464bf750ac62336f573b729545b. Later
+Release rebuilds replaced the target outputs. The current app hash is
+0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a and the
+current gateway hash is
+aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e. The two
+rebuild logs are preserved in logs/identity-recheck-*.stderr.log.
+
+Before the identity screenshot and app-close input, host_desktop.ps1 confirmed
+the Default desktop and an active session; LockApp did not own the foreground.
+The owner video remained in Edge behind the app. No power or lock setting was
+changed. The current Release app ran as PID 8516 from
+target/release/builder3d-app.exe with window title Builder3D - Untitled. Its
+outer window was 1296x879 px, client area 1280x840 px, at 96 DPI.
+
+The official Python MCP SDK 2.2.0 connected to the current Release gateway,
+listed 60 tools, and called only get_status. The result was app_state=ready,
+profile=full, dirty=false, scene_revision=0, project_id
+4774cfc03391404f8e53775aae37fa6b. No mutation was made. The 1296x879 image
+under artifact-identity-recheck/current-app.png is identity evidence only and
+is not one of the accepted paired captures.
+
+After Alt+F4, PID 8516 and the gateway process were gone, the runtime descriptor
+was removed, and no Rust Builder3D app/gateway process remained. App and gateway
+hashes remained unchanged throughout the check. The client JSONL, screenshot
+hash, host/window fields, artifact hashes, and cleanup outcome are recorded in
+artifact-identity-recheck.json. This did not repeat the full Python/Rust
+workflow or alter the 50-capture paired inventory.
+
 ## Boundary
 
 The YouTube video was only a keep-awake aid. The owner-reported interface/floor gaps remain open; no visual approval or overall acceptance is claimed. RB-08 native matrix/completion snapshot remains open. RB-10 was not started.

@@ -6,9 +6,9 @@ recorded; their visual review and owner acceptance remain pending. RB-08
 implementation and automated checks are recorded, but its paired Rust native
 matrix and completion snapshot remain pending. RB-09 Shared AI and Regression
 passed its paired live desktop/MCP gate on the recorded build after a scoped
-presentation-sync repair. A later wrap-up recheck found that the current
-`target/release` app hash no longer matches the live-build manifest; details and
-the exact failed command are in the RB-09 review notes below. Stop before RB-10.
+presentation-sync repair. Later Release rebuilds replaced the target app and
+gateway outputs. A separate current-pair identity check and the updated evidence
+validator now pass; this did not repeat the paired workflow. Stop before RB-10.
 This does not close RB-08, resolve the owner?s interface/floor gaps, grant
 visual approval, or accept the product.
 
@@ -540,9 +540,9 @@ The eight results above are from the wrap-up rerun after initializing the docume
 | Cross-adapter reads/edits/history/save/reopen/revisions/replay/conflicts/files/cancel/failure atomicity. | cargo test --workspace --locked plus live Python/Rust SDK sessions and the inline Python JSONL assertion (python -). | PASS in the live records and 329-test suite. GUI/MCP history, no-op, lifecycle, failure preservation, replay/races, real cancellation, bounded failures and stale-result rejection are recorded in the walkthrough and client logs. |
 | Existing 60-tool catalog, profile and schema remain compatible. | cargo test -p builder3d-mcp --locked and compare the Python/Rust ready-event tool arrays (inline Python, python -). | PASS: 19 focused tests passed; both live SDK logs expose the same ordered 60-tool list. |
 | MCP can fail to start or the desktop can close without blocking ordinary GUI use; errors and cleanup are bounded. | rust_stdio_client_probe.py and the Python/Rust optional-client logs; inline Python record assertion (python -). | PASS: optional MCP leaves the GUI usable, closed Rust clients get retryable desktop_unavailable, and cleanup records show the owned descriptor/listener and processes gone. |
-| Evidence/ledgers/gates have exact outcomes and an additive snapshot is independently verified. | python evidence/rebuild/rb-09-shared-ai-and-regression/validate_rb09_evidence.py; verify_rb09_snapshot.ps1. | PARTIAL on this wrap-up. At the live gate, the evidence validator exited 0 and the RB-09 completion snapshot verified. The fresh validator rerun exits 1 with release binary hash mismatch: live Rust app because the current rebuilt app is 0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a and the recorded live app is d680cf0ba8e4c8bf7d5ccd1536bf7d5720987d676a1a0946c6c3505b613b0cb9. The additional wrap-up snapshot is recorded in the snapshot receipt and is not labeled complete. |
+| Evidence/ledgers/gates have exact outcomes and an additive snapshot is independently verified. | python evidence/rebuild/rb-09-shared-ai-and-regression/validate_rb09_evidence.py; verify_rb09_snapshot.ps1. | PASS for the evidence identity checks. The gate-time validator passed on the historical full-gate hashes. A later run failed because the validator compared current target outputs to those historical hashes; build logs show later cargo-bloat and app-restore recompiles. The current app 0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a and gateway aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e then passed a separate identity-only launch and read-only SDK probe, and the updated validator exited 0. The follow-up G: snapshot is a review snapshot, not a completion snapshot. |
 
-The inline Python assertions read only the saved SDK JSONL and capture metadata. They printed PASS for criteria 1-4; they do not replace the earlier live GUI observations. The original evidence-validator pass remains in logs/evidence-ledger-validation.log/.exit; the wrap-up failure is recorded separately above.
+The inline Python assertions read only the saved SDK JSONL and capture metadata. They printed PASS for criteria 1-4; they do not replace the earlier live GUI observations. The original evidence-validator pass remains in logs/evidence-ledger-validation.log/.exit. The stale-path failure and the later successful identity-only recheck are both retained in the updated RB-09 report and verification.
 
 ### 4. Shortcuts, warnings, hard-coded limits and untested work
 
@@ -553,7 +553,7 @@ The inline Python assertions read only the saved SDK JSONL and capture metadata.
 - cargo bloat --release --workspace exited 0 but warned that --workspace was unused and analyzed the default r5_viewport.exe; it is not a workspace measurement. The explicit app target reported 12.7 MiB .text and a 15.4 MiB file, not the total installed package.
 - A 600k-face STL import finished too quickly to cancel. Rust cancellation was verified on the 50k normalize operation at progress 90 to 95. The 600k and 250k normalize attempts hit bounded-resource failures.
 - One initial PowerShell wrapper stopped on Cargo's successful Finished stderr line; the same checks were rerun with native stderr handling corrected and all eight exits were 0.
-- Current target Release hashes do not match the recorded live app/gateway hashes. No source was changed to hide that failed recheck; current target executables are not claimed as live-tested.
+- Current target Release hashes remain different from the historical full-gate app/gateway hashes. Later rebuild logs explain the changed target paths. The current pair passed only the recorded identity launch and read-only status probe; it is not claimed to have repeated the full paired workflow.
 - Owner visual approval and overall acceptance remain pending. The interface/floor gaps and RB-08 native matrix/completion snapshot remain open. No RB-10 work was started.
 
 ### 5. Files created, changed, or deleted
@@ -723,3 +723,122 @@ No dependency, project configuration, or public MCP contract change was made for
 ### Recovery snapshot
 
 Created the additive review snapshot `G:/Builder3D-Rust_snapshot_20261104-193530_RB-09-wrapup-review` after the review evidence was finalized and before the task-scoped commit. Robocopy exited 1 with no failures. The independent path/size/SHA-256/reparse verifier passed for 3,841 files / 700,634,398 bytes on each side, with no missing, extra, or differing paths and no reparse entries. It includes Git metadata and excludes only repository-root `target`, `.cache`, and `logs`. It is a recovery review copy, not an RB-09 completion snapshot; the plan's Recovery snapshot subsection and the receipt/log updates postdate the verification pass.
+
+## Follow-up - RB-09 artifact identity (2026-11-04)
+
+The mismatch was between historical full-gate binary identities and later
+contents at the same Release output paths. The gate-time evidence validator
+passed with app hash
+`d680cf0ba8e4c8bf7d5ccd1536bf7d5720987d676a1a0946c6c3505b613b0cb9` and
+paired gateway hash
+`a1dba8751c5a15cafbf6e26fac8db0b8a96f8464bf750ac62336f573b729545b`. Later
+build logs show cargo-bloat recompiling the MCP and app crates, followed by an
+app Release restore build. The previous fresh validator failure was exactly
+`release binary hash mismatch: live Rust app`.
+
+The current app
+`0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a` and
+gateway `aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e`
+were separately launched/queried and stayed hash-stable. On the active Default
+desktop, the official Python MCP SDK 2.2.0 listed 60 tools and successfully
+called read-only get_status (ready, clean, revision 0). The current screenshot
+is identity-only; the full paired workflow and 50-capture inventory were not
+repeated. The updated evidence validator now validates historical hashes
+against capture metadata and current hashes against the separate identity
+record, and exits 0.
+
+No Rust application source or MCP interface changed, no regression gates were
+rerun, and no new commit was created. The additive review snapshot
+`G:/Builder3D-Rust_snapshot_20261104-215904_RB-09-artifact-identity-review`
+passed independent verification with 3,904 files / 701,101,053 bytes on each
+side and zero missing, extra, differing, or reparse entries. Its first direct
+path verification hit the Windows PowerShell path-length limit on one nested
+shader-cache item; the same verifier passed through a temporary Q: mapping,
+removed afterward. The snapshot receipt and exact exclusions are recorded in
+`evidence/rebuild/rb-09-shared-ai-and-regression/snapshot-receipt.md`.
+Visual review, owner acceptance, interface/floor gaps, RB-08 native matrix and
+snapshot, and overall product acceptance remain open. RB-10 has not started.
+
+Follow-up files changed: the RB-09 evidence validator, checkpoint, report,
+verification, walkthrough, requirement-test-map, snapshot receipt, and
+WORK_LOG.md; docs/product-rebuild-plan.md,
+docs/rb-09-shared-ai-and-regression-handoff.md, docs/component-catalog.toml,
+and evidence/rebuild/parity-matrix.toml. New evidence consists of
+artifact-identity-recheck.json, the identity-only screenshot and SDK client log,
+copies of the two rebuild logs, and the validator stdout/stderr/exit records.
+Deleted files: none.
+
+
+## Review notes - RB-09 artifact identity wrap-up (2026-11-05)
+
+### 2. Project check/test commands and results
+
+Commands ran from `E:\Builder3D-Rust` after dot-sourcing
+`scripts\Initialize-BuildClang.ps1` in the same PowerShell session.
+
+| Command | Result |
+|---|---|
+| `cargo fmt --all -- --check` | PASS, exit 0 |
+| `cargo check --workspace --locked` | PASS, exit 0; dev profile finished |
+| `cargo test --workspace --locked` | PASS, 28 test-result lines; 329 passed, 0 failed, 0 ignored |
+| `cargo clippy --workspace --all-targets --locked -- -D warnings` | PASS, exit 0 |
+| `cargo deny check` | PASS, exit 0; `advisories ok, bans ok, licenses ok, sources ok`; duplicate-version warnings remain |
+| `cargo metadata --locked --format-version 1 --no-deps` | PASS, exit 0 |
+| `cargo test -p builder3d-mcp --locked` | PASS, 19 passed, 0 failed, 0 ignored |
+| `cargo run -p builder3d-app --bin builder3d-app --locked -- --smoke` | PASS; `Builder3D shell smoke: objects=2 selected=1 tabs=5` |
+| `python evidence/rebuild/rb-09-shared-ai-and-regression/validate_rb09_evidence.py` | PASS, exit 0; historical identities, 50 accepted PNGs, 2 clean scene pairs, current identities, and identity-only SDK probe verified |
+
+The first PowerShell output-filter attempt stopped while merging native stderr; the direct workspace test rerun above passed. One inline snapshot assertion initially expected comma-grouped counts; the receipt uses `3904 / 701101053`, and the corrected assertion passed. Neither was a project test failure. `cargo audit` was unavailable because `cargo-audit` is not installed. `cargo bloat` was not rerun.
+
+### 3. Acceptance criteria checked one by one
+
+| Criterion | Command run | Result |
+|---|---|---|
+| Plan RB-09 row: desktop and MCP use the same live document; cross-adapter edits, geometry, and history match without a parallel scene. | `python -` inline assertions over `capture-metadata.json` and the saved Python/Rust client JSONL; evidence validator. | PASS in the recorded 2026-11-04 live gate. The assertions found the same project and stable object IDs; the validator verified 50 interactive capture hashes/dimensions and 2 accepted scene pairs. The paired GUI/MCP workflow was not repeated in this wrap-up. |
+| Handoff section 9: queries, edits, undo/redo, save/reopen, revisions, replay/conflicts, file policy, cancellation, and failure atomicity. | `cargo test --workspace --locked`; `python -` assertions over saved Python/Rust client JSONL. | PASS in the recorded gate and current test run: 329 tests passed, 0 failed, 0 ignored; saved logs include the listed operation and conflict paths. No new live transaction run was performed. |
+| Handoff section 9: existing 60-tool catalog/profile/schema compatibility. | `cargo test -p builder3d-mcp --locked`; `python -` comparison of saved official-client ready events. | PASS: 19 MCP tests passed, 0 failed, 0 ignored; saved client records expose the same ordered list of 60 tools. |
+| Handoff section 9: MCP unavailable without blocking normal desktop use. | `python -` assertion over `rust_stdio_client_probe-result.json` and optional-client JSONL; workspace tests. | PASS in saved evidence: closed desktop returns retryable `desktop_unavailable`; Python and Rust optional-client records exist. This was not freshly exercised against a running desktop. |
+| Handoff section 9: exact evidence outcomes and an independently verified RB-09 completion snapshot. | Evidence validator; `python -` assertion over `snapshot-receipt.md` and snapshot path. | INCOMPLETE as a full RB-09 completion criterion. The validator passes and the G: snapshot is independently verified, but its receipt explicitly labels it a review snapshot, not an RB-09 completion snapshot. No completion snapshot was created in this wrap-up. |
+| Artifact identity follow-up: explain the hash mismatch, verify current outputs separately, and pass the validator. | `Get-FileHash` for the current Release app/gateway; evidence validator; saved rebuild-log checks. | PASS: historical hashes match capture metadata, rebuild logs record later Release builds, current hashes match the identity record, and the validator exits 0. Current hashes remained `0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a` (app) and `aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e` (gateway). |
+
+The inline `python -` commands inspected saved records only; they do not replace a fresh native workflow. The full paired workflow remains unrerun, per the handoff boundary.
+
+### 4. Shortcuts, silenced lints, and untested work
+
+- A scan of 96 Rust files found no `todo!`, `unimplemented!`, `dbg!`, TODO/FIXME/HACK markers, or ignored tests. The current test run reports 0 ignored tests. No application source changed.
+- Existing lint allowances remain: 17 `#[allow(clippy::too_many_arguments)]` and 2 `#[allow(unsafe_code)]`; none were added for this identity task. Strict Clippy passed.
+- The evidence validator deliberately checks the recorded historical/current hashes and the fixed 60-tool contract; those are evidence expectations, not new application runtime constants.
+- The full paired desktop/MCP workflow, new captures, owner visual review, and owner acceptance were not repeated. The current identity-only probe was already recorded in this task; the saved evidence checks do not constitute overall acceptance.
+- `cargo audit` was not run because it is not installed. The Release size measurement (`cargo bloat`) was not rerun; this follow-up is not the performance/packaging slice, and the earlier bloat invocation rebuilt Release outputs implicated in the hash mismatch.
+- No Linux/macOS host run was performed. RB-08's native matrix and completion snapshot remain pending.
+- git diff --cached --check reports a trailing blank line in the exact copied bloat stderr log. Its SHA-256 matches the raw source log and is recorded in the identity manifest, so the log was left byte-identical; the tracked text/code diff passed git diff --check before staging.
+
+### 5. Files created, changed, or deleted
+
+- `WORK_LOG.md` - records the RB-09 live run and artifact identity follow-up.
+- `docs/component-catalog.toml` - updates the existing MCP/app bridge evidence references.
+- `docs/product-rebuild-plan.md` - records RB-09 identity status and this review entry.
+- `docs/rb-09-shared-ai-and-regression-handoff.md` - records current hashes, probe, and stop boundary.
+- `evidence/rebuild/parity-matrix.toml` - keeps implementation/interactive status separate from pending visual and owner review.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/checkpoint.md` - records current verification state and open boundaries.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/report.md` - explains the historical/current hash difference and its outcome.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/requirement-test-map.md` - maps identity and validator checks to their records.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/snapshot-receipt.md` - records the additive review snapshot and independent verification.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/validate_rb09_evidence.py` - validates historical capture identities separately from current Release identities.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/verification.md` - records command outcomes, identity checks, and limits.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/walkthrough.md` - records the identity-only live probe scope.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/artifact-identity-recheck.json` - records current hashes, host probe, and cleanup result.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/artifact-identity-recheck/client.jsonl` - records the read-only official SDK session.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/artifact-identity-recheck/current-app.png` - records the identity-only desktop capture.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/identity-recheck-bloat-workspace.stderr.log` - preserves the workspace-bloat rebuild diagnostic.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/identity-recheck-restore-release-app.stderr.log` - preserves the app Release rebuild diagnostic.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/identity-recheck-validator.exit` - records the validator exit code.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/identity-recheck-validator.stderr.log` - records the validator's empty stderr.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/identity-recheck-validator.stdout.log` - records the validator pass output.
+- Deleted files: none.
+
+Cargo generated or updated ignored build/test outputs under `target\`; they were not staged. The original 2,807 untracked files remain; the task's eight new evidence files bring the untracked count to 2,815.
+
+### 6. Dependency, config, and design changes
+
+None. No dependency, Cargo configuration, or public MCP catalog/schema changed. The only implementation change for this task was in the evidence validator, to compare historical gate hashes with capture metadata and current Release hashes with the separate identity record.

@@ -12,9 +12,15 @@
 | RB09-BRIDGE-08 | Keep bridge loopback/authenticated and clean owned runtime state. | Pass in normal and optional-failure shutdown tests. Descriptor/listener and app/client/gateway processes were absent after close. | Client logs; client-server-log.md; host_desktop probe records |
 | RB09-OPTIONAL-09 | MCP unavailability must not block normal desktop use; closed clients get a bounded error. | Pass in Python and Rust. GUI remained usable under startup failure; closed client got structured retryable desktop_unavailable. | Optional client logs; captures/python-mcp-startup-failed.png; captures/rust-optional-mcp-unavailable.png |
 | RB09-NATIVE-10 | Use actual MCP clients and paired live desktops for the workflow. | Pass for the RB-09 live-client/native gate after the scoped Welcome presentation repair. Clean Light and Dark screenshot pairs are recorded; alternate-size captures are recorded. | walkthrough.md; paired-comparison-board.md; capture-metadata.json; accepted-journal.ndjson |
+| RB09-ARTIFACT-11 | Preserve the historical paired-gate executable identities while separately verifying later current Release outputs. | Pass for the current identity check. The later bloat and app-restore logs show Release rebuilds; current app/gateway hashes remained stable before and after the identity-only run. This was not a rerun of the paired workflow. | artifact-identity-recheck.json; logs/identity-recheck-bloat-workspace.stderr.log; logs/identity-recheck-restore-release-app.stderr.log |
+| RB09-VALIDATOR-12 | Validate historical live hashes against paired capture metadata and current target hashes against separate current-identity evidence. | Pass. The gate-time validator exited 0; the later stale-path check had failed with release binary hash mismatch: live Rust app; the updated validator exits 0 and verifies the historical 50-capture inventory plus current identity screenshot and read-only SDK result. | validate_rb09_evidence.py; logs/evidence-ledger-validation.log; logs/identity-recheck-validator.stdout.log; logs/identity-recheck-validator.exit; artifact-identity-recheck/current-app.png; artifact-identity-recheck/client.jsonl |
 
 ## Regression gates
 
 The post-repair full workspace suite passed 329/329. The app-focused MCP filter passed 7/7; focused MCP library and core external-commit tests passed 19/19 and 3/3; focused Python reference tests passed 12/12. Exact commands, logs, and tool caveats are in verification.md.
+
+The identity-only follow-up did not change Rust application source or rerun
+Rust test suites. Its official-client status call was read-only; the updated
+evidence validator was rerun and passed.
 
 The owner-reported interface and floor gaps remain open. Visual review, owner acceptance, and RB-08’s native matrix/completion snapshot remain pending. RB-10 has not started.

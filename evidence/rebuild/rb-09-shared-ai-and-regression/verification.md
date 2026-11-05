@@ -64,19 +64,49 @@ unavailable because `cargo-audit` is not installed.
 The gate-time evidence validator passed with exit 0 in
 `logs/evidence-ledger-validation.exit`; it verified 50 PNG hashes/dimensions,
 two clean scene pairs, 10 fixture hashes, the 96-file source manifest, and the
-structured evidence. A wrap-up rerun of
+structured evidence. A later wrap-up run of
 `python evidence/rebuild/rb-09-shared-ai-and-regression/validate_rb09_evidence.py`
-exited 1 with `release binary hash mismatch: live Rust app`. The recorded live
-app hash is
-`d680cf0ba8e4c8bf7d5ccd1536bf7d5720987d676a1a0946c6c3505b613b0cb9`; current
-`target/release/builder3d-app.exe` is
-`0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a`. The
-current MCP executable hash is
-`aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e`; it is
-different from both the live gateway hash and the separately recorded post-run
-build hash. No Rust source changed after the live run. The mismatch is a failed
-current-artifact identity check; this report does not present either rebuilt
-executable as the live-tested binary.
+exited 1 with `release binary hash mismatch: live Rust app`. That validator
+compared current target paths to historical full-gate records.
+
+The recorded full-gate app hash is
+`d680cf0ba8e4c8bf7d5ccd1536bf7d5720987d676a1a0946c6c3505b613b0cb9`; the
+paired live gateway hash is
+`a1dba8751c5a15cafbf6e26fac8db0b8a96f8464bf750ac62336f573b729545b`. The
+post-run gateway hash is
+`9b8817015ab5c8195013ee788fb095e9393848be74c7da0221ebd33342fc99d3`. The
+workspace bloat log shows later recompiles of builder3d-mcp and builder3d-app;
+the app restore log shows another completed app Release build. Copies are
+retained in `logs/identity-recheck-bloat-workspace.stderr.log` and
+`logs/identity-recheck-restore-release-app.stderr.log`. These builds explain
+why the current paths no longer contain the historical binaries. No exact
+copy of the old executables was found under `target/release` or the RB-09
+evidence directory; none was restored from a G: snapshot.
+
+The current Release app hash is
+`0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a`; the
+gateway hash is
+`aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e`. Both
+hashes were unchanged before and after the identity-only live run. Host probes
+confirmed the Default desktop was active and Builder3D was foreground before
+the screenshot and Alt+F4 close. The official Python MCP SDK 2.2.0 listed all
+60 tools; read-only `get_status` succeeded with `app_state=ready`,
+`dirty=false`, and revision 0. The app, gateway, and runtime descriptor were
+absent after shutdown. The 1296x879 capture is labelled identity-only and is
+not part of the accepted 50-capture inventory. Details and hashes are in
+`artifact-identity-recheck.json`, `artifact-identity-recheck/current-app.png`,
+and `artifact-identity-recheck/client.jsonl`.
+
+The updated validator keeps historical build identity tied to
+`capture-metadata.json` and verifies current target identity against the
+recheck record. It also checks the two rebuild logs, screenshot, SDK event log,
+60-tool list, and successful read-only status result. The validator now passes;
+stdout, stderr, and exit are retained in
+`logs/identity-recheck-validator.*`. The source manifest remains 96 Rust files
+with SHA-256
+`9846a4a6dee484186283e169a9b7cdbbf74007bdca772efa5981f438ce78b457`. No Rust
+application source changed. No Rust regression gates were rerun because the
+source tree is unchanged.
 
 An initial wrap-up PowerShell wrapper stopped when it treated Cargo's successful
 `Finished` stderr line as a terminating `NativeCommandError`. The gates were
@@ -86,10 +116,28 @@ rerun with native stderr handling corrected; all eight commands above exited 0.
 
 L:/Builder3D source files were not written. Its QSettings were restored and read back exactly: object_snapping_enabled=true, ribbon_favorites=[], theme_mode=dark; the added recent_files setting from the live run was removed. The initial Python reference Git status is retained in logs/python-reference-git-status.txt and the behavior-critical source hash is unchanged.
 
-The evidence validator checks TOML/JSON/NDJSON, live interactive status, pair membership, screenshot hashes, and evidence paths. Its final output is logs/evidence-ledger-validation.log.
+The evidence validator checks TOML/JSON/NDJSON, historical build identity,
+current Release identity, live interactive status, pair membership, screenshot
+hashes, rebuild logs, official-client events, and evidence paths. The original
+gate output is logs/evidence-ledger-validation.log; the current validator run
+is in logs/identity-recheck-validator.stdout.log and
+logs/identity-recheck-validator.exit.
 
 ## Additive recovery snapshot
 
-G:/Builder3D-Rust_snapshot_20261104-182021_RB-09-complete was created only after the paired evidence and ledgers passed validation. The final independent snapshot check passed with zero missing, extra, SHA/size-different, or reparse entries. Exact included file/byte counts and root exclusions are in snapshot-receipt.md.
+G:/Builder3D-Rust_snapshot_20261104-182021_RB-09-complete passed its
+independent check when created after the original paired evidence. It predates
+the later target rebuilds. The latest G: review snapshot is
+G:/Builder3D-Rust_snapshot_20261104-193530_RB-09-wrapup-review; it is not a
+completion snapshot. The identity follow-up review snapshot is
+G:/Builder3D-Rust_snapshot_20261104-215904_RB-09-artifact-identity-review.
+Robocopy exited 1 without failures, and independent verification passed with
+3,904 files / 701,101,053 bytes on both sides and zero missing, extra,
+different, or reparse entries. The direct G: path exceeded Windows PowerShell
+path resolution for one nested shader-cache item, so the same verifier was run
+through temporary drive Q: and the mapping was removed afterward. Root target,
+.cache, and logs were excluded; nested evidence logs and Git metadata were
+included. This remains a review copy, not a completion snapshot; exact details
+are in snapshot-receipt.md.
 
 Owner interface/floor gaps, visual review, owner acceptance, and the RB-08 native matrix/completion snapshot remain pending. RB-10 has not started.

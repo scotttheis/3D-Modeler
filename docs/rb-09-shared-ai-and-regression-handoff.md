@@ -1,8 +1,8 @@
 # RB-09 Shared AI and Regression Handoff
 
-**Status:** paired live desktop/MCP gate passed 2026-11-04 after a scoped Rust presentation-sync repair. The later wrap-up recheck found a mismatch between the current Release app hash and the live-build manifest; see `verification.md`.  
+**Status:** paired live desktop/MCP gate passed 2026-11-04 after a scoped Rust presentation-sync repair. Later Release rebuilds replaced the target outputs; the current pair has now passed a separate identity-only probe and the updated evidence validator passes.
 **Written:** 2026-11-02; owner path/backup direction updated 2026-11-03; live endpoint updated 2026-11-04  
-**Boundary:** recorded live run complete; stop before RB-10
+**Boundary:** keep visual review and owner acceptance pending; no full paired rerun or RB-10 work
 
 The active Rust source/build/run copy is `E:\Builder3D-Rust`. Use `G:\` as
 the primary additive backup destination. Removable USB copies are occasional
@@ -15,16 +15,36 @@ reference/shipping build.
 ## Current RB-09 endpoint (2026-11-04)
 
 The actual Python and Rust desktop/MCP sequence passed after a scoped fix for
-Rust MCP project presentation from Welcome. The official MCP SDK exercised live
-reads and edits, immediate viewport/Items updates, shared history, lifecycle,
-file failures, replay/races, long operations, optional startup, closed-desktop
-responses, and shutdown cleanup. The post-repair workspace suite passed
-329/329, and the final additive G: snapshot is independently verified in
-evidence/rebuild/rb-09-shared-ai-and-regression/snapshot-receipt.md. A later
-wrap-up rerun of the evidence validator exits 1 because the current
-`target/release/builder3d-app.exe` hash differs from the recorded live app hash;
-the historical live artifact and the new current hash are both retained in the
-verification record. No application source changed after the live run.
+Rust MCP project presentation from Welcome. Its historical full-gate app and
+gateway hashes remain d680cf0ba8e4c8bf7d5ccd1536bf7d5720987d676a1a0946c6c3505b613b0cb9
+and a1dba8751c5a15cafbf6e26fac8db0b8a96f8464bf750ac62336f573b729545b.
+Subsequent cargo-bloat and app-restore builds replaced the target outputs; the
+original stderr logs are copied under
+evidence/rebuild/rb-09-shared-ai-and-regression/logs/.
+
+The current Release app/gateway hashes,
+0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a and
+aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e, were
+verified before and after a separate launch. Host preflight confirmed the
+active Default desktop and Builder3D foreground. An official Python MCP SDK
+2.2.0 client listed 60 tools and its read-only get_status call returned
+app_state=ready, dirty=false, and scene revision 0. The app/gateway processes
+and runtime descriptor were absent after shutdown. This was an identity check,
+not a repeat of the full paired workflow or 50-capture matrix.
+
+The original gate-time validator passed. The later wrap-up validator failure
+was caused by checking current target paths against historical live-build
+records. The updated validator now checks historical hashes against the paired
+capture metadata and current target hashes against the identity-only recheck;
+it passes. Details and hashes are in
+evidence/rebuild/rb-09-shared-ai-and-regression/artifact-identity-recheck.json
+and verification.md. The source manifest is unchanged.
+
+The additive review snapshot
+G:/Builder3D-Rust_snapshot_20261104-215904_RB-09-artifact-identity-review was
+independently verified with 3,904 matching files / 701,101,053 bytes and zero
+path, size/hash, or reparse differences. It is not a completion snapshot; see
+the snapshot receipt.
 
 Use the current report, verification, walkthrough, paired comparison board,
 and checkpoint as the endpoint record. The dated pause and starting-point notes

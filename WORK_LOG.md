@@ -3851,3 +3851,73 @@ updates were appended after the exact-tree verifier pass; the copy preserves
 the staged recovery state from before commit. The owner explicitly authorized
 the task-scoped commit in the wrap-up request; this does not alter the standing
 rule for other work.
+
+## RB-09 live-artifact identity and validator follow-up (2026-11-04)
+
+Scope: resolve only the RB-09 live-artifact identity/evidence-validator issue.
+No RB-10 work, application-source change, MCP-interface change, or new commit.
+The task-scoped HEAD remains
+53e60d6421ede93cb12f24e1f3c4502c5aec5468. The tracked tree was clean at
+resumption. The original 2,807 untracked files were preserved. The identity
+check added its screenshot/client log, two copied rebuild logs, one identity
+record, and three validator result files; the final untracked count before the
+recovery snapshot is 2,815.
+
+The historical paired gate used app hash
+d680cf0ba8e4c8bf7d5ccd1536bf7d5720987d676a1a0946c6c3505b613b0cb9 and live
+gateway hash a1dba8751c5a15cafbf6e26fac8db0b8a96f8464bf750ac62336f573b729545b.
+The historical post-run gateway hash was
+9b8817015ab5c8195013ee788fb095e9393848be74c7da0221ebd33342fc99d3. The
+gate-time validator passed with exit 0 and its original log remains in
+evidence/rebuild/rb-09-shared-ai-and-regression/logs/. A later validator run
+failed exactly with release binary hash mismatch: live Rust app because its
+historical live role was compared to the current target path.
+
+The ignored wrap-up logs show the cargo bloat --release --workspace
+invocation warned that --workspace was unused while rebuilding
+builder3d-mcp and builder3d-app; the app restore log records another completed
+Release build. Copies and hashes are retained under
+evidence/rebuild/rb-09-shared-ai-and-regression/logs/identity-recheck-*.
+Current target hashes are app
+0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a and gateway
+aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e.
+
+With the host helper confirming the active Default desktop and Builder3D
+foreground, the current Release app ran as PID 8516 and was captured at
+1296x879. The official Python MCP SDK 2.2.0 listed 60 tools; its only tool
+call, read-only get_status, succeeded with app_state=ready, profile=full,
+dirty=false, scene_revision=0, and project_id
+4774cfc03391404f8e53775aae37fa6b. Hashes stayed constant across launch and
+shutdown. PID 8516, the gateway process, and the runtime descriptor were
+absent after close. The screenshot is identity-only and is not part of the
+original 50-capture paired matrix. No owner visual review or approval was
+performed.
+
+Updated validate_rb09_evidence.py to validate the historical app/gateway hashes
+against capture-metadata.json, and the current target hashes against
+artifact-identity-recheck.json, including copied rebuild logs, the screenshot,
+and the official-client log. The validator passed: 50 historical capture PNG
+hashes/dimensions and two clean pairs; 10 fixture hashes; 96-file Rust source
+manifest; current app/gateway identities; current 60-tool/get_status result;
+TOML, JSON, NDJSON, references, and cleanup evidence. The source manifest
+remains 9846a4a6dee484186283e169a9b7cdbbf74007bdca772efa5981f438ce78b457.
+The prior 329 workspace tests, 19 focused MCP tests, fmt/check/clippy/deny,
+metadata, and smoke results were reused because Rust source did not change.
+
+The exact identity record, client event log, screenshot, copied build logs, and
+validator outputs are linked from the RB-09 report, verification, walkthrough,
+requirement map, and parity row. Created the additive review snapshot
+G:/Builder3D-Rust_snapshot_20261104-215904_RB-09-artifact-identity-review.
+Robocopy exited 1 with no failures. The first direct-path verifier attempt
+could not resolve one long nested shader-cache path; the same independent
+verifier passed through temporary drive Q:, which was removed afterward.
+Source and snapshot each contain 3,904 files / 701,101,053 bytes, with zero
+missing, extra, size/hash-different, or reparse entries. Root target, .cache,
+and logs are excluded; nested RB-09 evidence and Git metadata are included.
+This is a review snapshot, not a completion snapshot, and no prior G: copy was
+modified. The snapshot predates this receipt and the final WorkLog path/result
+update.
+
+Visual review, owner acceptance, overall product acceptance, the owner-reported
+interface/floor gaps, and the RB-08 native matrix/completion snapshot remain
+open. RB-10 has not started.

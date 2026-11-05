@@ -1,0 +1,133 @@
+{
+  "schema_version": 1,
+  "slice": "RB-09",
+  "verification_type": "current_release_artifact_identity_only",
+  "recorded_at_local": "2026-11-04T21:49:54.1529523-07:00",
+  "repository": {
+    "head": "53e60d6421ede93cb12f24e1f3c4502c5aec5468",
+    "tracked_worktree_was_clean_before_follow_up_documentation": true
+  },
+  "source_tree": {
+    "rust_source_file_count": 96,
+    "rust_source_manifest_sha256": "9846a4a6dee484186283e169a9b7cdbbf74007bdca772efa5981f438ce78b457",
+    "rust_application_source_changed": false
+  },
+  "historical_full_gate": {
+    "build_manifest": "build-manifest.json",
+    "gate_time_validator_log": "logs/evidence-ledger-validation.log",
+    "gate_time_validator_exit_file": "logs/evidence-ledger-validation.exit",
+    "gate_time_validator_exit_code": 0,
+    "live_rust_app_sha256": "d680cf0ba8e4c8bf7d5ccd1536bf7d5720987d676a1a0946c6c3505b613b0cb9",
+    "live_rust_gateway_sha256": "a1dba8751c5a15cafbf6e26fac8db0b8a96f8464bf750ac62336f573b729545b",
+    "post_run_rust_gateway_sha256": "9b8817015ab5c8195013ee788fb095e9393848be74c7da0221ebd33342fc99d3",
+    "accepted_native_capture_count": 50,
+    "full_paired_matrix_repeated": false
+  },
+  "previous_wrap_up_failure": {
+    "command": "python evidence/rebuild/rb-09-shared-ai-and-regression/validate_rb09_evidence.py",
+    "exit_code": 1,
+    "error": "release binary hash mismatch: live Rust app",
+    "app_hash_at_failure": "0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a",
+    "gateway_hash_at_failure": "aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e"
+  },
+  "mismatch_explanation": {
+    "workspace_bloat_source_log": "target/rb09-wrapup-gates/bloat-workspace.stderr.log",
+    "workspace_bloat_evidence_copy": "logs/identity-recheck-bloat-workspace.stderr.log",
+    "workspace_bloat_evidence_sha256": "2683be9b36ba5a40de96332fc8b4091f983513c02cdf42becaa2083a5f032dfb",
+    "workspace_bloat_evidence_bytes": 776,
+    "app_restore_source_log": "target/rb09-wrapup-gates/restore-release-app.stderr.log",
+    "app_restore_evidence_copy": "logs/identity-recheck-restore-release-app.stderr.log",
+    "app_restore_evidence_sha256": "2cc7bceede4eb078c7b0f16df092801e123686fbf925eb572d5e59bf28b45375",
+    "app_restore_evidence_bytes": 140,
+    "summary": "The cargo-bloat --workspace invocation warned that --workspace was unused and recompiled builder3d-mcp and builder3d-app. The subsequent app restore log records another Release rebuild of builder3d-app. These later builds replaced the target/release outputs; they do not change the historical hashes recorded for the paired live gate."
+  },
+  "release_artifacts": {
+    "rust_app": {
+      "path": "target/release/builder3d-app.exe",
+      "sha256": "0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a",
+      "bytes": 16172032,
+      "last_write_local": "2026-11-04T19:02:08.4679254-07:00",
+      "hash_observations": {
+        "before_launch": "0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a",
+        "after_launch": "0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a",
+        "after_shutdown": "0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a"
+      },
+      "process": {
+        "pid": 8516,
+        "executable_path": "E:\\Builder3D-Rust\\target\\release\\builder3d-app.exe",
+        "started_at_local": "2026-11-04T21:41:12.5455145-07:00",
+        "window_handle": 655598,
+        "window_title": "Builder3D - Untitled",
+        "exited_after_close": true
+      }
+    },
+    "rust_mcp_gateway": {
+      "path": "target/release/r4_mcp.exe",
+      "sha256": "aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e",
+      "bytes": 1649664,
+      "last_write_local": "2026-11-04T18:55:18.9542446-07:00",
+      "hash_observations": {
+        "before_app_launch": "aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e",
+        "after_app_launch": "aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e",
+        "after_client_close": "aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e"
+      },
+      "gateway_process_exited_after_client_close": true
+    }
+  },
+  "host": {
+    "current_session_id": 1,
+    "input_desktop": "Default",
+    "session_state": 0,
+    "lockapp_owned_session": false,
+    "foreground_process": "builder3d-app",
+    "window_title": "Builder3D - Untitled",
+    "screen_px": [2560, 1440],
+    "outer_window_px": [1296, 879],
+    "client_area_px": [1280, 840],
+    "dpi": 96,
+    "owner_video_background_only": true,
+    "power_or_lock_settings_changed": false
+  },
+  "mcp_probe": {
+    "client": "official Python MCP SDK",
+    "sdk_version": "2.2.0",
+    "profile": "full",
+    "client_log": "artifact-identity-recheck/client.jsonl",
+    "client_log_sha256": "e729f08a25566f659ec5f57af9b9bd97e83583e6302a9912bcc39010e2360bf4",
+    "client_log_bytes": 1719,
+    "tool_count": 60,
+    "called_tool": "get_status",
+    "is_error": false,
+    "result": {
+      "app_state": "ready",
+      "profile": "full",
+      "dirty": false,
+      "scene_revision": 0,
+      "project_id": "4774cfc03391404f8e53775aae37fa6b"
+    },
+    "mutations_performed": 0
+  },
+  "identity_capture": {
+    "file": "artifact-identity-recheck/current-app.png",
+    "sha256": "e27010aae921d4c2a1e81a2ddee0cf3c84867e9b3ae9500eb91d8dd2422f1a7c",
+    "bytes": 160605,
+    "png_dimensions_px": [1296, 879],
+    "captured_at_local": "2026-11-04T21:42:02.9584495-07:00",
+    "host_desktop_interactive": true,
+    "foreground_title": "Builder3D - Untitled",
+    "role": "identity_only_not_a_live_gate_pair"
+  },
+  "cleanup": {
+    "app_pid": 8516,
+    "app_process_exited": true,
+    "rust_builder_process_count_after_shutdown": 0,
+    "runtime_descriptor_removed": true,
+    "verified_at_local": "2026-11-04T21:49:54.1529523-07:00"
+  },
+  "scope": {
+    "full_paired_workflow_repeated": false,
+    "accepted_capture_inventory_changed": false,
+    "visual_review_or_owner_approval": false,
+    "overall_product_acceptance": false
+  }
+}
