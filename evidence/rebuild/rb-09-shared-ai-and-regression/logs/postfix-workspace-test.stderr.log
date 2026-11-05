@@ -1,0 +1,29 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.70s
+     Running unittests src\lib.rs (target\debug\deps\builder3d_app-d0e877bae8fe74a8.exe)
+     Running unittests src\main.rs (target\debug\deps\builder3d_app-e006f59cda6f1535.exe)
+     Running unittests src\bin\r5_viewport.rs (target\debug\deps\r5_viewport-d8a48baeb4850268.exe)
+     Running unittests src\lib.rs (target\debug\deps\builder3d_core-ae031462286f2546.exe)
+     Running tests\file_io_golden.rs (target\debug\deps\file_io_golden-d9aaed34ff517309.exe)
+     Running tests\gltf_golden.rs (target\debug\deps\gltf_golden-e36df00076f7a08d.exe)
+     Running tests\mesh_ops_booleans.rs (target\debug\deps\mesh_ops_booleans-5a578897f765e2b0.exe)
+     Running tests\mesh_ops_brushes.rs (target\debug\deps\mesh_ops_brushes-2fc0c6e939893435.exe)
+     Running tests\mesh_ops_density.rs (target\debug\deps\mesh_ops_density-5036bedc94ea2de7.exe)
+     Running tests\mesh_ops_repair.rs (target\debug\deps\mesh_ops_repair-a201d26a80ea4521.exe)
+     Running tests\mesh_ops_shell.rs (target\debug\deps\mesh_ops_shell-387c6f401d52bed3.exe)
+     Running tests\mesh_ops_simplify.rs (target\debug\deps\mesh_ops_simplify-6d499f1066544167.exe)
+     Running tests\mesh_ops_smooth.rs (target\debug\deps\mesh_ops_smooth-2f7c310690fba57d.exe)
+     Running tests\mesh_ops_subdivide.rs (target\debug\deps\mesh_ops_subdivide-506e3e9a6e981bd2.exe)
+     Running tests\project_golden.rs (target\debug\deps\project_golden-ddf01f16b5a19590.exe)
+     Running tests\scene_external_commit.rs (target\debug\deps\scene_external_commit-8ed789ecca23647f.exe)
+     Running tests\three_mf_golden.rs (target\debug\deps\three_mf_golden-7e2bc572408ca0f6.exe)
+     Running tests\wrl_golden.rs (target\debug\deps\wrl_golden-076d37a46fd4e4f8.exe)
+     Running unittests src\lib.rs (target\debug\deps\builder3d_mcp-e24d76dfa310c620.exe)
+     Running unittests src\bin\r0b_mcp.rs (target\debug\deps\r0b_mcp-a5819ee6c6a1f7db.exe)
+     Running unittests src\bin\r4_mcp.rs (target\debug\deps\r4_mcp-724d1bcf58ce5ad1.exe)
+     Running unittests src\lib.rs (target\debug\deps\builder3d_platform-05c9fddf0089e6ba.exe)
+     Running unittests src\lib.rs (target\debug\deps\builder3d_viewport-add93ef4049bf18b.exe)
+   Doc-tests builder3d_app
+   Doc-tests builder3d_core
+   Doc-tests builder3d_mcp
+   Doc-tests builder3d_platform
+   Doc-tests builder3d_viewport

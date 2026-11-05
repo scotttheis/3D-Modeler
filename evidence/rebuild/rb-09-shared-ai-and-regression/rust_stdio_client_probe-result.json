@@ -1,0 +1,15 @@
+{
+  "client": "official Python MCP SDK 2.2.0",
+  "closed_desktop_call": {
+    "code": "desktop_unavailable",
+    "details": {},
+    "message": "desktop unavailable: Builder3D desktop is unavailable or its runtime descriptor is stale; open the Rust desktop and retry",
+    "retryable": true
+  },
+  "first_tool": "get_status",
+  "last_tool": "launch_slicer",
+  "live_desktop_edit": "unverified; no Rust desktop process is running",
+  "protocol": "initialized and tools/list succeeded",
+  "tool_count": 60,
+  "transport": "stdio"
+}

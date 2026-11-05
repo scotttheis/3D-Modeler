@@ -1,0 +1,1 @@
+Intentional regular-file parent to force optional MCP descriptor startup failure.

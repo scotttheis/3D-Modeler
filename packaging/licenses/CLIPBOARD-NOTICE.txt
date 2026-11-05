@@ -1,0 +1,16 @@
+Builder3D native text clipboard notices
+
+The eframe clipboard feature uses clipboard-win 5.4.3 and error-code 3.4.0
+on Windows, authored by Douman (as declared in the pinned crate metadata).
+Both declare the Boost Software License 1.0 (BSL-1.0).
+
+Upstream:
+https://github.com/DoumanAsh/clipboard-win
+https://github.com/DoumanAsh/error-code
+License text: BOOST-LICENSE-1.0.txt
+Official license: https://www.boost.org/LICENSE_1_0.txt
+
+The license grant, notice condition, object-code exception and warranty
+disclaimer were reviewed for this dependency use. Package-specific cargo-deny
+exceptions are restricted to these pinned versions. The object clipboard
+remains owned by Builder3D; focused text fields use the platform clipboard.

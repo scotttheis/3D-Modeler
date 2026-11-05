@@ -1,0 +1,175 @@
+#![deny(unsafe_code)]
+
+//! Native Builder3D application shell.
+//!
+//! The crate is the desktop adapter: it presents the ribbon and shell, routes
+//! commands to `builder3d-core`, and consumes renderer-neutral data from
+//! `builder3d-viewport`. Platform paths and process capabilities stay in
+//! `builder3d-platform`.
+
+mod artwork;
+mod commands;
+mod desktop_jobs;
+mod dialogs;
+mod export;
+mod image_color;
+mod launchers;
+mod mcp_bridge;
+mod numeric_controls;
+mod operations;
+mod packaging;
+mod preferences;
+mod print_handoff;
+mod print_prep;
+mod recent_preview;
+mod rotation;
+mod shell;
+mod signals;
+mod theme;
+mod transform_gesture;
+mod transforms;
+mod ui_state;
+mod view_state;
+
+use std::{env, path::Path};
+
+use thiserror::Error;
+
+pub use artwork::{ArtworkAsset, ArtworkError, ThemeArtwork};
+pub use commands::{
+    CommandDescriptor, CommandError, CommandId, CommandOutcome, CommandState, DialogKind,
+    DisplayState, IconKey, ImportUnit, RibbonItem, RibbonTab, ViewOrientation, file_menu_spec,
+    ribbon_spec,
+};
+pub use export::{ExportError, ExportReport, export_indices, export_scene, export_scene_objects};
+pub use image_color::{ImageColorError, MAX_IMAGE_BYTES, MAX_IMAGE_PIXELS, average_image_color};
+pub use launchers::{
+    LauncherError, LauncherSpec, launcher_specs, stage_launchers, validate_launchers,
+};
+pub use numeric_controls::{
+    format_distance, parse_angle_degrees, parse_distance_mm, parse_scale_factor,
+    select_numeric_value,
+};
+pub use operations::{
+    MAX_OPERATION_RECORDS, OPERATION_RETENTION, OperationFailure, OperationHandle, OperationPhase,
+    OperationRegistry, OperationRegistryError, OperationStatus,
+};
+pub use packaging::{
+    InstalledMeasurement, InstallerSpec, MAX_COMPRESSED_BYTES, MAX_INSTALLED_BYTES, PackageEntry,
+    PackageMeasurement, PackagingError, installer_specs, measure_installed, stage_installers,
+    stage_package, validate_installers,
+};
+pub use preferences::{
+    DisplayUnit, MAX_RECENT_FILES, MAX_RIBBON_FAVORITES, Preferences, PreferencesError,
+    RecentFiles, import_unit_for_path, import_uses_authoritative_units, normalize_import_unit,
+};
+pub use print_handoff::{
+    PreparedPrint, PrintHandoffError, discover_print_slicers, launch_prepared_print, prepare_print,
+    prepare_print_by_key,
+};
+pub use print_prep::{
+    BED_SURFACE_TOLERANCE_MM, DEFAULT_BED_SIZE_MM, MAX_TYPICAL_PRINT_DIMENSION_MM,
+    MIN_PRINTABLE_DIMENSION_MM, PrintPrepError, PrintPrepReport, check_bed_fit, check_empty_hidden,
+    check_non_manifold, check_scale, full_check,
+};
+pub use shell::Builder3dApp;
+pub use signals::{Signal, SignalConnection};
+pub use theme::{ThemeMode, ThemePalette};
+pub use transforms::{Alignment, Axis, GroupTransform, TransformError, WorldBounds};
+pub use view_state::{
+    FrameTarget, ViewDisplayState, ViewState, ViewStateController, ViewStateError,
+};
+
+/// Errors returned by the native application entry point.
+#[derive(Debug, Error)]
+pub enum AppError {
+    /// eframe could not create or run the native window.
+    #[error("native shell failed: {0}")]
+    Native(#[from] eframe::Error),
+    /// A command smoke check failed.
+    #[error(transparent)]
+    Command(#[from] CommandError),
+    /// The original shell artwork failed its package validation.
+    #[error(transparent)]
+    Artwork(#[from] ArtworkError),
+    /// A native launcher contract failed validation.
+    #[error(transparent)]
+    Launcher(#[from] LauncherError),
+    /// Native package staging failed.
+    #[error(transparent)]
+    Packaging(#[from] PackagingError),
+    /// The application entry point could not inspect its own executable.
+    #[error("application I/O failed: {0}")]
+    Io(#[from] std::io::Error),
+}
+
+/// Runs the native Builder3D shell, or the bounded command smoke check.
+pub fn run() -> Result<(), AppError> {
+    ThemeArtwork::new(ThemeMode::Light).validate()?;
+    ThemeArtwork::new(ThemeMode::Dark).validate()?;
+    let artwork_root = artwork::original_asset_root();
+    artwork::validate_original_artwork(&artwork_root)?;
+    validate_launchers()?;
+    validate_installers()?;
+    if let Some(destination) = argument_value("--package") {
+        let executable = env::current_exe()?;
+        let measurement = stage_package(&executable, Path::new(&destination))?;
+        println!(
+            "packaged {} files: installed={} bytes, archive={} bytes at {}",
+            measurement.installed.file_count,
+            measurement.installed.installed_bytes,
+            measurement.compressed_bytes,
+            measurement.archive_path.display()
+        );
+        return Ok(());
+    }
+    if let Some(destination) = argument_value("--stage-launchers") {
+        let paths = stage_launchers(Path::new(&destination))?;
+        println!("staged {} native launchers in {}", paths.len(), destination);
+        return Ok(());
+    }
+    if env::args().skip(1).any(|argument| argument == "--smoke") {
+        run_smoke_check()?;
+        return Ok(());
+    }
+    let native_options = eframe::NativeOptions {
+        // Keep object clipboard shortcuts independent of the OS text clipboard.
+        // The app forwards focused text-edit shortcuts through raw_input_hook.
+        clipboard_shortcuts: false,
+        viewport: eframe::egui::ViewportBuilder::default()
+            .with_icon(artwork::load_native_icon(&artwork_root)?)
+            .with_inner_size([1_280.0, 840.0])
+            .with_min_inner_size([980.0, 640.0]),
+        ..Default::default()
+    };
+    eframe::run_native(
+        "Builder3D",
+        native_options,
+        Box::new(|creation_context| Ok(Box::new(Builder3dApp::new(creation_context)))),
+    )?;
+    Ok(())
+}
+
+fn run_smoke_check() -> Result<(), AppError> {
+    let mut state = CommandState::default();
+    state.dispatch(CommandId::AddPrimitive(builder3d_core::PrimitiveKind::Cube))?;
+    state.dispatch(CommandId::Copy)?;
+    state.dispatch(CommandId::Paste)?;
+    println!(
+        "Builder3D shell smoke: objects={} selected={} tabs={}",
+        state.scene().objects().len(),
+        state.selected_count(),
+        RibbonTab::all().len()
+    );
+    Ok(())
+}
+
+fn argument_value(name: &str) -> Option<String> {
+    let mut arguments = env::args().skip(1);
+    while let Some(argument) = arguments.next() {
+        if argument == name {
+            return arguments.next();
+        }
+    }
+    None
+}

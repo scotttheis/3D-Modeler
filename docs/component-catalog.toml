@@ -1,0 +1,464 @@
+# Stable, machine-readable map of independently patchable Builder3D Rust
+# components. Keep IDs stable after publication; update paths and anchors when
+# code moves. The rewrite plan defines the required fields and lifecycle.
+# Current product execution/acceptance: docs/product-rebuild-plan.md.
+# Component validation is scoped to named contracts, not live desktop parity.
+# Historical R8 product-completion claims were withdrawn on 2026-10-30.
+schema_version = 1
+catalog_id = "builder3d-rust"
+id_format = "builder3d.<area>.<component>"
+source_of_truth = "docs/component-catalog.toml"
+status_values = ["planned", "ported", "validated", "polish", "blocked"]
+product_end_state = "zero-python"
+python_role = "temporary-read-only-behavioral-oracle"
+patching_rule = "one-cohesive-component-per-entry-with-focused-tests"
+
+[[component]]
+id = "builder3d.core.scene"
+kind = "module"
+status = "validated"
+crate = "builder3d-core"
+rust_paths = ["crates/builder3d-core/src/scene.rs"]
+symbols = ["Scene", "Scene::undo", "Scene::redo", "Scene::replace_mesh"]
+python_paths = ["src/scene.py", "src/model_actions.py"]
+tests = ["crates/builder3d-core/src/lib.rs", "crates/builder3d-core/tests/mesh_ops_booleans.rs"]
+evidence = ["evidence/rebuild/rb-07-appearance-jobs-and-print/report.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/verification.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/requirement-test-map.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/walkthrough.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/paired-comparison-board.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/capture-metadata.json", "evidence/rebuild/rb-07-appearance-jobs-and-print/accepted-journal.ndjson", "evidence/rebuild/rb-07-appearance-jobs-and-print/checkpoint.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/fixture-manifest.json", "evidence/rebuild/rb-07-appearance-jobs-and-print/captures/rust-final-light-color-roundtrip-reimported.png"]
+contracts = ["undo-semantics", "stable-object-id", "scene-revision"]
+
+[[component]]
+id = "builder3d.core.mesh.operations"
+kind = "module"
+status = "validated"
+crate = "builder3d-core"
+rust_paths = ["crates/builder3d-core/src/mesh_ops.rs", "crates/builder3d-core/src/repair.rs", "crates/builder3d-core/src/simplify.rs", "crates/builder3d-core/src/subdivide.rs", "crates/builder3d-core/src/smooth.rs", "crates/builder3d-core/src/brushes.rs", "crates/builder3d-core/src/density.rs"]
+symbols = ["boolean_union", "repair_mesh", "simplify_mesh", "subdivide_mesh", "smooth_mesh"]
+python_paths = ["src/mesh_ops.py", "src/repair.py", "src/tools.py"]
+tests = ["crates/builder3d-core/tests/mesh_ops_booleans.rs", "crates/builder3d-core/tests/mesh_ops_repair.rs", "crates/builder3d-core/tests/mesh_ops_simplify.rs", "crates/builder3d-core/tests/mesh_ops_subdivide.rs", "crates/builder3d-core/tests/mesh_ops_smooth.rs", "crates/builder3d-core/tests/mesh_ops_brushes.rs", "crates/builder3d-core/tests/mesh_ops_density.rs"]
+contracts = ["mesh-health", "bounded-work", "cancellation", "operation-report"]
+
+[[component]]
+id = "builder3d.core.mesh.shell"
+kind = "module"
+status = "validated"
+crate = "builder3d-core"
+rust_paths = ["crates/builder3d-core/src/shell_ops.rs"]
+symbols = ["text_emboss", "hollow_mesh", "TextEmbossOptions", "HollowOptions"]
+python_paths = ["src/repair.py", "src/tools.py"]
+tests = ["crates/builder3d-core/tests/mesh_ops_shell.rs"]
+contracts = ["emboss-text", "hollow-wall-thickness", "convex-offset", "concave-voxel-offset"]
+
+[[component]]
+id = "builder3d.core.file-io"
+kind = "module"
+status = "validated"
+crate = "builder3d-core"
+rust_paths = ["crates/builder3d-core/src/file_io.rs", "crates/builder3d-core/src/gltf.rs", "crates/builder3d-core/src/three_mf.rs", "crates/builder3d-core/src/wrl.rs"]
+symbols = ["import_mesh", "export_mesh", "load_project", "save_project"]
+python_paths = ["src/project_io.py", "src/three_mf.py", "src/gltf_io.py", "src/wrl_io.py"]
+tests = ["crates/builder3d-core/tests/file_io_golden.rs", "crates/builder3d-core/tests/gltf_golden.rs", "crates/builder3d-core/tests/three_mf_golden.rs", "crates/builder3d-core/tests/wrl_golden.rs"]
+contracts = ["3dp-project", "stl", "obj", "ply", "3mf", "gltf-glb", "wrl"]
+
+[[component]]
+id = "builder3d.platform.resources"
+kind = "module"
+status = "validated"
+crate = "builder3d-platform"
+rust_paths = ["crates/builder3d-platform/src/discovery.rs", "crates/builder3d-platform/src/ledger.rs", "crates/builder3d-platform/src/routing.rs"]
+symbols = ["ResourceLedger", "WorkPlanner", "AdapterProfile"]
+python_paths = ["src/hardware.py", "src/adapter_ports.py"]
+tests = ["crates/builder3d-platform/src/ledger.rs", "crates/builder3d-platform/src/routing.rs"]
+contracts = ["resource-ledger", "cpu-gpu-routing", "budget-pressure"]
+
+[[component]]
+id = "builder3d.viewport.renderer"
+kind = "module"
+status = "validated"
+crate = "builder3d-viewport"
+rust_paths = ["crates/builder3d-viewport/src/renderer.rs", "crates/builder3d-viewport/src/cpu.rs", "crates/builder3d-viewport/src/adaptive.rs"]
+symbols = ["RenderScene", "Renderer", "CpuRasterizer", "AdaptiveController"]
+python_paths = ["src/viewport.py", "src/gl_renderer.py"]
+tests = ["crates/builder3d-viewport/src/renderer.rs", "crates/builder3d-viewport/src/cpu.rs"]
+evidence = ["evidence/rebuild/rb-07-appearance-jobs-and-print/report.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/verification.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/requirement-test-map.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/walkthrough.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/paired-comparison-board.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/capture-metadata.json", "evidence/rebuild/rb-07-appearance-jobs-and-print/accepted-journal.ndjson", "evidence/rebuild/rb-07-appearance-jobs-and-print/checkpoint.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/captures/rust-final-light-color-authored.png", "evidence/rebuild/rb-07-appearance-jobs-and-print/captures/rust-final-light-color-roundtrip-reimported.png"]
+contracts = ["full-resolution-authority", "interaction-tier", "gpu-fallback"]
+
+[[component]]
+id = "builder3d.mcp.catalog"
+kind = "surface"
+status = "validated"
+crate = "builder3d-mcp"
+rust_paths = ["crates/builder3d-mcp/src/r4/catalog.rs", "crates/builder3d-mcp/src/r4/schema.rs"]
+symbols = ["ToolSpec", "tool_schema", "Profile"]
+python_paths = ["src/ai_commands.py", "src/ai_control.py"]
+tests = ["crates/builder3d-mcp/src/r4/catalog.rs", "crates/builder3d-mcp/src/r4/schema.rs"]
+contracts = ["60-tool-order", "profile-filtering", "strict-schema"]
+
+[[component]]
+id = "builder3d.mcp.server"
+kind = "surface"
+status = "validated"
+crate = "builder3d-mcp"
+rust_paths = ["crates/builder3d-mcp/src/r4/server.rs", "crates/builder3d-mcp/src/r4/state.rs", "crates/builder3d-mcp/src/r4/security.rs", "crates/builder3d-mcp/src/r4/catalog.rs", "crates/builder3d-mcp/src/r4/schema.rs"]
+symbols = ["R4Server", "R4Document", "execute_long_operation", "execute_shell_operation"]
+python_paths = ["scripts/builder3d_mcp.py", "src/ai_bridge.py"]
+tests = ["crates/builder3d-mcp/src/r4/server.rs", "crates/builder3d-mcp/src/r4/gateway.rs", "evidence/r4b/official_behavior_probe.py"]
+evidence = ["evidence/rebuild/rb-09-shared-ai-and-regression/report.md", "evidence/rebuild/rb-09-shared-ai-and-regression/verification.md", "evidence/rebuild/rb-09-shared-ai-and-regression/requirement-test-map.md", "evidence/rebuild/rb-09-shared-ai-and-regression/client-server-log.md", "evidence/rebuild/rb-09-shared-ai-and-regression/build-manifest.json", "evidence/rebuild/rb-09-shared-ai-and-regression/fixture-manifest.json", "evidence/rebuild/rb-09-shared-ai-and-regression/logs/rb09-python-client.jsonl", "evidence/rebuild/rb-09-shared-ai-and-regression/logs/rb09-rust-client-2.jsonl", "evidence/rebuild/rb-09-shared-ai-and-regression/logs/rb09-rust-client-final-pair.jsonl"]
+contracts = ["60-tool-order", "approved-roots", "replay", "revision-conflict", "operation-lifecycle", "structured-errors"]
+
+[[component]]
+id = "builder3d.app.shell"
+kind = "surface"
+status = "polish"
+crate = "builder3d-app"
+rust_paths = ["crates/builder3d-app/src/shell.rs", "crates/builder3d-app/src/theme.rs", "crates/builder3d-app/src/artwork.rs", "crates/builder3d-app/src/ui_state.rs", "crates/builder3d-app/src/recent_preview.rs"]
+symbols = ["Builder3dApp", "ThemeMode", "ThemePalette", "ThemeArtwork", "WorkspaceSurface", "RecentEntry", "RecentEntryKind", "move_favorite", "Builder3dApp::open_recent", "Builder3dApp::update_recent_previews"]
+python_paths = ["src/main_window.py", "src/style.py", "src/icon_assets.py"]
+tests = ["crates/builder3d-app/src/shell.rs", "crates/builder3d-app/src/theme.rs", "crates/builder3d-app/src/artwork.rs", "crates/builder3d-app/src/recent_preview.rs"]
+contracts = ["ribbon-layout", "ribbon-favorites-order", "welcome-recent-surface", "recent-dispatch", "recent-preview-background", "recent-preview-fallback", "object-panel", "disabled-action-state", "status-dirty-feedback", "light-dark-theme", "theme-scoped-artwork", "viewport-cues", "keyboard-shortcuts"]
+evidence = ["evidence/r8/01-shell-foundation/report.md", "evidence/r8/01-shell-foundation/verification.md", "evidence/r8/01-shell-foundation/checkpoint.md", "evidence/r8/02-parity-polish/report.md", "evidence/r8/02-parity-polish/verification.md", "evidence/r8/02-parity-polish/checkpoint.md", "evidence/r8/final/report.md", "evidence/r8/final/verification.md", "evidence/r8/final/checkpoint.md", "evidence/rebuild/rb-03-lifecycle-and-file-completion/requirement-test-map.md", "evidence/rebuild/rb-03-lifecycle-and-file-completion/checkpoint.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/report.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/verification.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/requirement-test-map.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/walkthrough.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/paired-comparison-board.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/capture-metadata.json", "evidence/rebuild/rb-07-appearance-jobs-and-print/accepted-journal.ndjson", "evidence/rebuild/rb-07-appearance-jobs-and-print/checkpoint.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/operation-manifest.json", "evidence/rebuild/rb-07-appearance-jobs-and-print/initial-button-ledger.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/captures/rust-final-dark-job-smooth-running.png", "evidence/rebuild/rb-07-appearance-jobs-and-print/captures/rust-final-dark-print-stage-progress.png"]
+conversion_note = "R8 product acceptance withdrawn. Prototype shell requires original artwork/design, real viewport integration and observed workflow parity under docs/product-rebuild-plan.md; historical tests remain scoped evidence."
+
+[[component]]
+id = "builder3d.app.commands"
+kind = "module"
+status = "ported"
+crate = "builder3d-app"
+rust_paths = ["crates/builder3d-app/src/commands.rs", "crates/builder3d-app/src/dialogs.rs", "crates/builder3d-app/src/transforms.rs", "crates/builder3d-app/src/numeric_controls.rs"]
+symbols = ["CommandId", "CommandState", "CommandState::set_visibility", "CommandState::set_selected_position_and_size", "CommandState::rotate_selected", "CommandState::scale_selected", "DialogKind", "DialogAction"]
+python_paths = ["src/application_services.py", "src/model_actions.py", "src/toolbar.py"]
+tests = ["crates/builder3d-app/src/commands.rs", "crates/builder3d-app/src/dialogs.rs", "crates/builder3d-app/src/transforms.rs", "crates/builder3d-app/src/numeric_controls.rs"]
+evidence = ["evidence/r8/01-shell-foundation/report.md", "evidence/r8/01-shell-foundation/verification.md", "evidence/r8/01-shell-foundation/checkpoint.md", "evidence/r8/02-parity-polish/report.md", "evidence/r8/02-parity-polish/verification.md", "evidence/r8/02-parity-polish/checkpoint.md", "evidence/r8/final/report.md", "evidence/r8/final/verification.md", "evidence/r8/final/checkpoint.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/report.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/verification.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/requirement-test-map.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/walkthrough.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/paired-comparison-board.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/capture-metadata.json", "evidence/rebuild/rb-07-appearance-jobs-and-print/accepted-journal.ndjson", "evidence/rebuild/rb-07-appearance-jobs-and-print/checkpoint.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/initial-button-ledger.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/captures/rust-final-light-color-authored.png"]
+contracts = ["desktop-command-surface", "dialog-routing", "selection-modifiers", "visibility-history", "numeric-suffixes", "one-command-history", "print-prep-routing", "color-material-routing"]
+conversion_note = "Semantic tests retained; complete desktop reachability and integrated workflow acceptance remain open under the product rebuild plan."
+
+[[component]]
+id = "builder3d.app.commands.coverage"
+kind = "module"
+status = "validated"
+crate = "builder3d-app"
+rust_paths = ["crates/builder3d-app/src/commands.rs", "crates/builder3d-app/src/dialogs.rs", "crates/builder3d-app/src/shell.rs"]
+symbols = ["CommandId::ImportModel", "ImportUnit", "CommandState::import_from_path", "CommandState::import_from_path_with_unit", "DialogKind::ImportModel"]
+python_paths = ["src/main_window.py", "src/application_services.py", "src/mesh_ops.py"]
+tests = ["crates/builder3d-app/src/commands.rs", "crates/builder3d-app/src/dialogs.rs"]
+evidence = ["evidence/r7/01-import/report.md", "evidence/r7/01-import/verification.md", "evidence/r7/01-import/checkpoint.md"]
+contracts = ["add-open-import", "unit-override", "center-on-bed", "multi-object-scene-import", "atomic-history"]
+
+[[component]]
+id = "builder3d.app.commands.selection"
+kind = "module"
+status = "polish"
+crate = "builder3d-app"
+rust_paths = ["crates/builder3d-app/src/commands.rs", "crates/builder3d-app/src/shell.rs"]
+symbols = ["CommandId::SelectAll", "CommandId::Group", "CommandState::group_selected", "CommandState::cut_selected", "CommandState::invert_selection"]
+python_paths = ["src/main_window.py", "src/application_services.py", "src/scene.py"]
+tests = ["crates/builder3d-app/src/commands.rs"]
+evidence = ["evidence/r7/02-selection/report.md", "evidence/r7/02-selection/verification.md", "evidence/r7/02-selection/checkpoint.md", "evidence/rebuild/rb-04-scene-and-precise-transforms/report.md"]
+contracts = ["selection-without-history", "group-ungroup", "cut-paste", "atomic-history"]
+
+[[component]]
+id = "builder3d.app.commands.transforms"
+kind = "module"
+status = "polish"
+crate = "builder3d-app"
+rust_paths = ["crates/builder3d-app/src/transforms.rs", "crates/builder3d-app/src/commands.rs", "crates/builder3d-app/src/rotation.rs"]
+symbols = ["Axis", "Alignment", "GroupTransform", "apply_group_transform", "set_position", "set_size", "settle", "mirror"]
+python_paths = ["src/application_services.py", "src/tools.py", "src/toolbar.py"]
+tests = ["crates/builder3d-app/src/transforms.rs", "crates/builder3d-app/src/commands.rs", "crates/builder3d-app/src/rotation.rs"]
+evidence = ["evidence/r7/03-transforms/report.md", "evidence/r7/03-transforms/verification.md", "evidence/r7/03-transforms/checkpoint.md", "evidence/rebuild/rb-04-scene-and-precise-transforms/report.md"]
+contracts = ["atomic-group-transform", "world-bounds", "build-bed-y-axis", "numeric-position-size", "undo-transform"]
+
+[[component]]
+id = "builder3d.viewport.snapping"
+kind = "module"
+status = "validated"
+crate = "builder3d-viewport"
+rust_paths = ["crates/builder3d-viewport/src/snapping.rs", "crates/builder3d-viewport/src/lib.rs", "crates/builder3d-app/src/commands.rs"]
+symbols = ["SnapSceneSnapshot", "SnapViewContext", "select_snap_correction", "snap_translation_result", "CommandState::snap_selected_translation"]
+python_paths = ["src/snapping.py", "src/application_services.py", "src/gizmo.py"]
+tests = ["crates/builder3d-viewport/src/snapping.rs", "crates/builder3d-app/src/commands.rs"]
+evidence = ["evidence/r7/04-snapping/report.md", "evidence/r7/04-snapping/verification.md", "evidence/r7/04-snapping/checkpoint.md"]
+contracts = ["drag-start-snapshot", "object-landmarks", "floor-landmark", "view-scaled-tolerance", "capture-release"]
+
+[[component]]
+id = "builder3d.app.export"
+kind = "module"
+status = "validated"
+crate = "builder3d-app"
+rust_paths = ["crates/builder3d-app/src/export.rs", "crates/builder3d-app/src/commands.rs"]
+symbols = ["ExportReport", "export_indices", "export_scene", "export_scene_objects", "CommandState::export_to_path"]
+python_paths = ["src/application_services.py", "src/main_window.py", "src/gltf_io.py", "src/three_mf.py", "src/wrl_io.py"]
+tests = ["crates/builder3d-app/src/export.rs", "crates/builder3d-core/tests/file_io_golden.rs", "crates/builder3d-core/tests/gltf_golden.rs", "crates/builder3d-core/tests/three_mf_golden.rs", "crates/builder3d-core/tests/wrl_golden.rs"]
+evidence = ["evidence/r7/05-export/report.md", "evidence/r7/05-export/verification.md", "evidence/r7/05-export/checkpoint.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/report.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/verification.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/requirement-test-map.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/walkthrough.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/paired-comparison-board.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/capture-metadata.json", "evidence/rebuild/rb-07-appearance-jobs-and-print/accepted-journal.ndjson", "evidence/rebuild/rb-07-appearance-jobs-and-print/checkpoint.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/fixtures/authored-red-roundtrip.3mf", "evidence/rebuild/rb-07-appearance-jobs-and-print/captures/rust-final-light-color-roundtrip-reimported.png"]
+contracts = ["selected-visible-export", "visible-fallback-export", "multi-object-formats", "world-transform-export", "display-color-export"]
+
+[[component]]
+id = "builder3d.app.packaging"
+kind = "module"
+status = "validated"
+crate = "builder3d-app"
+rust_paths = ["crates/builder3d-app/src/packaging.rs", "packaging/"]
+symbols = ["stage_package", "PackageManifest"]
+python_paths = ["setup_windows.bat", "setup.sh", "scripts/verify_setup.py"]
+tests = ["crates/builder3d-app/src/packaging.rs"]
+contracts = ["native-launchers", "installer-guards", "40mb-installed", "15mb-compressed"]
+
+[[component]]
+id = "builder3d.app.print-prep"
+kind = "module"
+status = "validated"
+crate = "builder3d-app"
+rust_paths = ["crates/builder3d-app/src/print_prep.rs", "crates/builder3d-app/src/commands.rs"]
+symbols = ["PrintPrepReport", "check_bed_fit", "check_scale", "check_non_manifold", "full_check", "CommandState::print_prep_report"]
+python_paths = ["src/print_prep.py", "src/application_services.py", "src/main_window.py"]
+tests = ["crates/builder3d-app/src/print_prep.rs", "crates/builder3d-app/src/commands.rs"]
+evidence = ["evidence/r7/06-print-prep/report.md", "evidence/r7/06-print-prep/verification.md", "evidence/r7/06-print-prep/checkpoint.md", "evidence/r8/01-shell-foundation/report.md", "evidence/r8/01-shell-foundation/verification.md", "evidence/r8/01-shell-foundation/checkpoint.md", "evidence/r8/02-parity-polish/report.md", "evidence/r8/02-parity-polish/verification.md", "evidence/r8/02-parity-polish/checkpoint.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/report.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/verification.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/requirement-test-map.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/walkthrough.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/paired-comparison-board.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/capture-metadata.json", "evidence/rebuild/rb-07-appearance-jobs-and-print/accepted-journal.ndjson", "evidence/rebuild/rb-07-appearance-jobs-and-print/checkpoint.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/captures/rust-final-light-print-prep-clean-report.png", "evidence/rebuild/rb-07-appearance-jobs-and-print/captures/rust-final-dark-print-prep-cube-report.png"]
+contracts = ["bed-fit", "scale-warning", "mesh-health-warning", "hidden-empty-check", "stable-summary"]
+
+[[component]]
+id = "builder3d.app.operations"
+kind = "module"
+status = "validated"
+crate = "builder3d-app"
+rust_paths = ["crates/builder3d-app/src/operations.rs", "crates/builder3d-app/src/commands.rs"]
+symbols = ["OperationRegistry", "OperationPhase", "OperationHandle", "CommandState::operations"]
+python_paths = ["src/operation_manager.py", "src/application_services.py", "src/main_window.py"]
+tests = ["crates/builder3d-app/src/operations.rs", "crates/builder3d-mcp/src/r4/state.rs"]
+evidence = ["evidence/r7/07-operations/report.md", "evidence/r7/07-operations/verification.md", "evidence/r7/07-operations/checkpoint.md", "evidence/r8/01-shell-foundation/report.md", "evidence/r8/01-shell-foundation/verification.md", "evidence/r8/01-shell-foundation/checkpoint.md", "evidence/r8/02-parity-polish/report.md", "evidence/r8/02-parity-polish/verification.md", "evidence/r8/02-parity-polish/checkpoint.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/report.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/verification.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/requirement-test-map.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/walkthrough.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/paired-comparison-board.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/capture-metadata.json", "evidence/rebuild/rb-07-appearance-jobs-and-print/accepted-journal.ndjson", "evidence/rebuild/rb-07-appearance-jobs-and-print/checkpoint.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/operation-manifest.json", "evidence/rebuild/rb-07-appearance-jobs-and-print/captures/rust-final-dark-job-cancelled.png", "evidence/rebuild/rb-07-appearance-jobs-and-print/captures/python-light-job-heavy-smooth-cancelled.png"]
+contracts = ["single-active-operation", "progress-clamp", "cooperative-cancellation", "terminal-result", "bounded-history"]
+
+[[component]]
+id = "builder3d.app.view-state"
+kind = "module"
+status = "validated"
+crate = "builder3d-app"
+rust_paths = ["crates/builder3d-app/src/view_state.rs", "crates/builder3d-app/src/commands.rs", "crates/builder3d-viewport/src/camera.rs"]
+symbols = ["ViewStateController", "ViewState", "FrameTarget", "CommandState::frame_view", "Camera::set_state"]
+python_paths = ["src/application_services.py", "src/viewport.py", "src/main_window.py", "src/constants.py"]
+tests = ["crates/builder3d-app/src/view_state.rs", "crates/builder3d-app/src/commands.rs", "crates/builder3d-viewport/src/camera.rs"]
+evidence = ["evidence/r7/08-view-state/report.md", "evidence/r7/08-view-state/verification.md", "evidence/r7/08-view-state/checkpoint.md", "evidence/r8/01-shell-foundation/report.md", "evidence/r8/01-shell-foundation/verification.md", "evidence/r8/01-shell-foundation/checkpoint.md", "evidence/r8/02-parity-polish/report.md", "evidence/r8/02-parity-polish/verification.md", "evidence/r8/02-parity-polish/checkpoint.md"]
+contracts = ["validated-camera-state", "reset-preset", "top-front-side-presets", "frame-all-selected", "display-toggles", "native-camera-cue"]
+
+[[component]]
+id = "builder3d.app.preferences"
+kind = "module"
+status = "validated"
+crate = "builder3d-app"
+rust_paths = ["crates/builder3d-app/src/preferences.rs", "crates/builder3d-app/src/commands.rs", "crates/builder3d-app/src/shell.rs"]
+symbols = ["Preferences", "RecentFiles", "Preferences::load_from_path", "Preferences::save_to_path", "normalize_import_unit", "import_unit_for_path", "CommandState::preferences"]
+python_paths = ["src/main_window.py", "src/toolbar.py", "src/constants.py"]
+tests = ["crates/builder3d-app/src/preferences.rs", "crates/builder3d-app/src/commands.rs", "crates/builder3d-app/src/shell.rs"]
+evidence = ["evidence/r7/09-preferences/report.md", "evidence/r7/09-preferences/verification.md", "evidence/r7/09-preferences/checkpoint.md", "evidence/r8/01-shell-foundation/report.md", "evidence/r8/01-shell-foundation/verification.md", "evidence/r8/01-shell-foundation/checkpoint.md", "evidence/r8/02-parity-polish/report.md", "evidence/r8/02-parity-polish/verification.md", "evidence/r8/02-parity-polish/checkpoint.md", "evidence/rebuild/rb-03-lifecycle-and-file-completion/requirement-test-map.md", "evidence/rebuild/rb-03-lifecycle-and-file-completion/checkpoint.md"]
+contracts = ["recent-files-order", "recent-files-cap", "recent-files-persisted", "ambiguous-import-units", "authoritative-import-units", "ribbon-preferences"]
+
+[[component]]
+id = "builder3d.app.image-color"
+kind = "module"
+status = "validated"
+crate = "builder3d-app"
+rust_paths = ["crates/builder3d-app/src/image_color.rs", "crates/builder3d-app/src/commands.rs"]
+symbols = ["average_image_color", "ImageColorError", "CommandState::set_selected_color_from_image"]
+python_paths = ["src/image_color.py", "src/main_window.py", "src/application_services.py"]
+tests = ["crates/builder3d-app/src/image_color.rs", "crates/builder3d-app/src/commands.rs", "crates/builder3d-mcp/src/r4/server.rs"]
+evidence = ["evidence/r7/10-image-color/report.md", "evidence/r7/10-image-color/verification.md", "evidence/r7/10-image-color/checkpoint.md", "evidence/r8/01-shell-foundation/report.md", "evidence/r8/01-shell-foundation/verification.md", "evidence/r8/01-shell-foundation/checkpoint.md", "evidence/r8/02-parity-polish/report.md", "evidence/r8/02-parity-polish/verification.md", "evidence/r8/02-parity-polish/checkpoint.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/report.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/verification.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/requirement-test-map.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/walkthrough.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/paired-comparison-board.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/capture-metadata.json", "evidence/rebuild/rb-07-appearance-jobs-and-print/accepted-journal.ndjson", "evidence/rebuild/rb-07-appearance-jobs-and-print/checkpoint.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/fixture-manifest.json", "evidence/rebuild/rb-07-appearance-jobs-and-print/captures/rust-final-light-image-sampled-two.png", "evidence/rebuild/rb-07-appearance-jobs-and-print/captures/rust-final-dark-corrupt-image-error.png"]
+contracts = ["average-rgb", "opaque-rgba", "sample-step", "common-image-formats", "bounded-input"]
+
+[[component]]
+id = "builder3d.app.recent-preview"
+kind = "module"
+status = "validated"
+crate = "builder3d-app"
+rust_paths = ["crates/builder3d-app/src/recent_preview.rs", "crates/builder3d-app/src/shell.rs"]
+symbols = ["load_recent_preview", "render_scene_preview", "decode_image_thumbnail", "Builder3dApp::update_recent_previews"]
+python_paths = ["src/main_window.py"]
+tests = ["crates/builder3d-app/src/recent_preview.rs", "crates/builder3d-app/src/shell.rs"]
+evidence = ["evidence/rebuild/rb-03-lifecycle-and-file-completion/requirement-test-map.md", "evidence/rebuild/rb-03-lifecycle-and-file-completion/checkpoint.md", "evidence/rebuild/parity-matrix.toml"]
+contracts = ["background-load", "visible-mesh-thumbnail", "embedded-3mf-image", "bounded-raster-decode", "fallback-for-missing-unsupported-corrupt"]
+conversion_note = "Recent previews use a background worker and bounded CPU thumbnails; native welcome rendering and paired theme review remain part of RB-03 evidence."
+
+[[component]]
+id = "builder3d.platform.slicers"
+kind = "module"
+status = "validated"
+crate = "builder3d-platform"
+rust_paths = ["crates/builder3d-platform/src/slicer.rs", "crates/builder3d-platform/src/lib.rs"]
+symbols = ["SlicerInfo", "discover_slicers", "launch_slicer", "SlicerInfo::stl_fallback"]
+python_paths = ["src/slicer_launcher.py"]
+tests = ["crates/builder3d-platform/src/slicer.rs"]
+evidence = ["evidence/r7/11-print-handoff/report.md", "evidence/r7/11-print-handoff/verification.md", "evidence/r7/11-print-handoff/checkpoint.md", "evidence/r8/01-shell-foundation/report.md", "evidence/r8/01-shell-foundation/verification.md", "evidence/r8/01-shell-foundation/checkpoint.md", "evidence/r8/02-parity-polish/report.md", "evidence/r8/02-parity-polish/verification.md", "evidence/r8/02-parity-polish/checkpoint.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/report.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/verification.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/requirement-test-map.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/walkthrough.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/paired-comparison-board.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/capture-metadata.json", "evidence/rebuild/rb-07-appearance-jobs-and-print/accepted-journal.ndjson", "evidence/rebuild/rb-07-appearance-jobs-and-print/checkpoint.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/captures/rust-final-dark-slicer-selected.png", "evidence/rebuild/rb-07-appearance-jobs-and-print/captures/rust-final-dark-slicer-launched.png", "evidence/rebuild/rb-07-appearance-jobs-and-print/captures/bambu-studio-rust-final-staged-scene.png"]
+contracts = ["known-slicer-discovery", "path-revalidated-launch", "bambu-stl-fallback", "bounded-model-handoff"]
+
+[[component]]
+id = "builder3d.app.print-handoff"
+kind = "module"
+status = "validated"
+crate = "builder3d-app"
+rust_paths = ["crates/builder3d-app/src/print_handoff.rs", "crates/builder3d-app/src/export.rs", "crates/builder3d-app/src/lib.rs"]
+symbols = ["PreparedPrint", "prepare_print", "prepare_print_by_key", "launch_prepared_print", "export_scene_objects"]
+python_paths = ["src/application_services.py", "src/main_window.py"]
+tests = ["crates/builder3d-app/src/print_handoff.rs", "crates/builder3d-app/src/export.rs"]
+evidence = ["evidence/r7/11-print-handoff/report.md", "evidence/r7/11-print-handoff/verification.md", "evidence/r7/11-print-handoff/checkpoint.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/report.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/verification.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/requirement-test-map.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/walkthrough.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/paired-comparison-board.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/capture-metadata.json", "evidence/rebuild/rb-07-appearance-jobs-and-print/accepted-journal.ndjson", "evidence/rebuild/rb-07-appearance-jobs-and-print/checkpoint.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/fixture-manifest.json", "evidence/rebuild/rb-07-appearance-jobs-and-print/captures/rust-final-light-print-stage-ready.png", "evidence/rebuild/rb-07-appearance-jobs-and-print/captures/bambu-studio-rust-final-staged-scene.png"]
+contracts = ["visible-object-staging", "single-3mf-handoff", "individual-stl-fallback", "staging-isolation", "constrained-launch"]
+
+[[component]]
+id = "builder3d.platform.runtime"
+kind = "module"
+status = "validated"
+crate = "builder3d-platform"
+rust_paths = ["crates/builder3d-platform/src/runtime.rs", "crates/builder3d-platform/src/lib.rs"]
+symbols = ["RuntimePaths", "default_runtime_paths", "resolve_runtime_descriptor_path", "process_is_alive", "ensure_opengl_gui_platform"]
+python_paths = ["src/runtime_paths.py", "src/runtime_process.py", "src/runtime_checks.py"]
+tests = ["crates/builder3d-platform/src/runtime.rs"]
+evidence = ["evidence/r7/12-runtime/report.md", "evidence/r7/12-runtime/verification.md", "evidence/r7/12-runtime/checkpoint.md"]
+contracts = ["platform-runtime-paths", "descriptor-override", "read-only-process-check", "offscreen-guard", "injected-environment-tests"]
+
+[[component]]
+id = "builder3d.app.signals"
+kind = "module"
+status = "validated"
+crate = "builder3d-app"
+rust_paths = ["crates/builder3d-app/src/signals.rs", "crates/builder3d-app/src/lib.rs"]
+symbols = ["Signal", "SignalConnection"]
+python_paths = ["src/signals.py"]
+tests = ["crates/builder3d-app/src/signals.rs"]
+evidence = ["evidence/r7/13-desktop-adapters/report.md", "evidence/r7/13-desktop-adapters/verification.md", "evidence/r7/13-desktop-adapters/checkpoint.md"]
+contracts = ["typed-connect", "disconnect-handle", "synchronous-emit", "qt-free-callbacks"]
+
+[[component]]
+id = "builder3d.app.desktop-adapters"
+kind = "surface"
+status = "polish"
+crate = "builder3d-app"
+rust_paths = ["crates/builder3d-app/src/shell.rs", "crates/builder3d-app/src/dialogs.rs", "crates/builder3d-app/src/preferences.rs", "crates/builder3d-app/src/numeric_controls.rs", "crates/builder3d-app/src/theme.rs", "crates/builder3d-app/src/artwork.rs"]
+symbols = ["Builder3dApp", "DialogState", "Preferences::load_from_path", "Preferences::save_to_path", "select_numeric_value", "ThemeArtwork"]
+python_paths = ["src/adapter_ports.py", "src/desktop_adapters.py", "src/qt_compat.py", "src/numeric_controls.py", "src/style.py", "src/icon_assets.py", "src/branding.py", "src/constants.py"]
+tests = ["crates/builder3d-app/src/shell.rs", "crates/builder3d-app/src/dialogs.rs", "crates/builder3d-app/src/preferences.rs", "crates/builder3d-app/src/numeric_controls.rs"]
+evidence = ["evidence/r7/13-desktop-adapters/report.md", "evidence/r7/13-desktop-adapters/verification.md", "evidence/r7/13-desktop-adapters/checkpoint.md", "evidence/r8/01-shell-foundation/report.md", "evidence/r8/01-shell-foundation/verification.md", "evidence/r8/01-shell-foundation/checkpoint.md", "evidence/r8/02-parity-polish/report.md", "evidence/r8/02-parity-polish/verification.md", "evidence/r8/02-parity-polish/checkpoint.md", "evidence/r8/final/report.md", "evidence/r8/final/verification.md", "evidence/r8/final/checkpoint.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/report.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/verification.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/requirement-test-map.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/walkthrough.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/paired-comparison-board.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/capture-metadata.json", "evidence/rebuild/rb-07-appearance-jobs-and-print/accepted-journal.ndjson", "evidence/rebuild/rb-07-appearance-jobs-and-print/checkpoint.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/initial-button-ledger.md"]
+contracts = ["native-egui-adapter", "qt-free-boundary", "settings-persistence", "settings-recovery", "numeric-suffix-selection", "theme-scoped-artwork", "native-dialog-actions"]
+conversion_note = "R8 presentation completion withdrawn. Existing adapters are reuse candidates; original asset/theme/input/dialog parity and native integration require evidence under docs/product-rebuild-plan.md."
+
+[[component]]
+id = "builder3d.app.ui-state"
+kind = "module"
+status = "validated"
+crate = "builder3d-app"
+rust_paths = ["crates/builder3d-app/src/ui_state.rs"]
+symbols = ["WorkspaceSurface", "RecentEntry", "recent_entry", "normalize_favorites", "move_favorite", "normalized_tab_order"]
+python_paths = ["src/main_window.py"]
+tests = ["crates/builder3d-app/src/ui_state.rs"]
+evidence = ["evidence/r8/01-shell-foundation/report.md", "evidence/r8/01-shell-foundation/verification.md", "evidence/r8/01-shell-foundation/checkpoint.md", "evidence/r8/final/report.md", "evidence/r8/final/verification.md", "evidence/r8/final/checkpoint.md"]
+contracts = ["bounded-recent-fallback", "favorite-order", "tab-order-normalization", "gpu-free-ui-state"]
+conversion_note = "Pure presentation-state helpers replace Qt widget state without moving scene mutation into the shell."
+
+[[component]]
+id = "builder3d.app.entrypoint"
+kind = "surface"
+status = "validated"
+crate = "builder3d-app"
+rust_paths = ["crates/builder3d-app/src/main.rs", "crates/builder3d-app/src/lib.rs"]
+symbols = ["run", "AppError"]
+python_paths = ["src/__init__.py", "src/__main__.py", "src/main.py"]
+tests = ["crates/builder3d-app/src/lib.rs", "crates/builder3d-app/src/main.rs"]
+evidence = ["evidence/r7/13-desktop-adapters/report.md", "evidence/r7/13-desktop-adapters/verification.md", "evidence/r7/13-desktop-adapters/checkpoint.md"]
+contracts = ["native-entrypoint", "lazy-startup-boundary", "no-python-launcher"]
+
+[[component]]
+id = "builder3d.mcp.desktop-bridge"
+kind = "surface"
+status = "ported"
+crate = "builder3d-app"
+rust_paths = ["crates/builder3d-app/src/mcp_bridge.rs", "crates/builder3d-app/src/commands.rs", "crates/builder3d-app/src/shell.rs", "crates/builder3d-mcp/src/r4/server.rs", "crates/builder3d-core/src/scene.rs"]
+symbols = ["McpDesktopIntegration", "McpDesktopBridge", "R4Document", "install_document", "commit_mcp_operation_document"]
+python_paths = ["src/ai_qt_bridge.py", "src/ai_file_policy.py"]
+tests = ["crates/builder3d-app/src/mcp_bridge.rs", "crates/builder3d-app/src/commands.rs", "crates/builder3d-mcp/src/r4/server.rs", "crates/builder3d-core/tests/scene_external_commit.rs"]
+evidence = ["evidence/rebuild/rb-09-shared-ai-and-regression/report.md", "evidence/rebuild/rb-09-shared-ai-and-regression/verification.md", "evidence/rebuild/rb-09-shared-ai-and-regression/requirement-test-map.md", "evidence/rebuild/rb-09-shared-ai-and-regression/architecture-decision.md", "evidence/rebuild/rb-09-shared-ai-and-regression/walkthrough.md", "evidence/rebuild/rb-09-shared-ai-and-regression/paired-comparison-board.md", "evidence/rebuild/rb-09-shared-ai-and-regression/capture-metadata.json", "evidence/rebuild/rb-09-shared-ai-and-regression/fixture-manifest.json", "evidence/rebuild/rb-09-shared-ai-and-regression/client-server-log.md", "evidence/rebuild/rb-09-shared-ai-and-regression/logs/rb09-python-client.jsonl", "evidence/rebuild/rb-09-shared-ai-and-regression/logs/rb09-rust-client-2.jsonl", "evidence/rebuild/rb-09-shared-ai-and-regression/logs/rb09-rust-client-final-pair.jsonl", "evidence/rebuild/rb-09-shared-ai-and-regression/logs/rb09-rust-optional-client.jsonl"]
+contracts = ["shared-live-document", "ui-owner-thread-dispatch", "shared-undo-history", "revision-checked-single-commit", "authenticated-loopback", "bounded-request-queue", "optional-startup", "dirty-project-guard"]
+conversion_note = "Live Python and Rust MCP requests were verified against the apps shared documents and history. The repaired Rust shell switches from Welcome to Scene after MCP project installation or committed scene changes; viewport and Items updates were observed immediately. Long operations commit only when the original project/revision still matches."
+
+[[component]]
+id = "builder3d.mcp.stdio-gateway"
+kind = "surface"
+status = "ported"
+crate = "builder3d-mcp"
+rust_paths = ["crates/builder3d-mcp/src/r4/gateway.rs", "crates/builder3d-mcp/src/bin/r4_mcp.rs", "crates/builder3d-mcp/src/r4/catalog.rs", "crates/builder3d-mcp/src/r4/schema.rs"]
+symbols = ["R4Gateway", "R4Gateway::call_desktop", "R4Gateway::read_descriptor", "r4_mcp::main"]
+python_paths = ["scripts/builder3d_mcp.py", "src/ai_bridge.py"]
+tests = ["crates/builder3d-mcp/src/r4/gateway.rs", "evidence/rebuild/rb-09-shared-ai-and-regression/rust_stdio_client_probe.py"]
+evidence = ["evidence/rebuild/rb-09-shared-ai-and-regression/report.md", "evidence/rebuild/rb-09-shared-ai-and-regression/verification.md", "evidence/rebuild/rb-09-shared-ai-and-regression/rust_stdio_client_probe-result.json", "evidence/rebuild/rb-09-shared-ai-and-regression/logs/rust-stdio-client-probe.stdout.json", "evidence/rebuild/rb-09-shared-ai-and-regression/client-server-log.md", "evidence/rebuild/rb-09-shared-ai-and-regression/build-manifest.json", "evidence/rebuild/rb-09-shared-ai-and-regression/logs/rb09-rust-client-2.jsonl", "evidence/rebuild/rb-09-shared-ai-and-regression/logs/rb09-rust-client-final-pair.jsonl", "evidence/rebuild/rb-09-shared-ai-and-regression/logs/rb09-rust-optional-client.jsonl"]
+contracts = ["fixed-60-tool-catalog", "stdio-mcp", "authenticated-runtime-descriptor", "closed-desktop-structured-error", "bounded-loopback-http"]
+conversion_note = "The stdio process exposes the fixed typed 60-tool MCP catalog and proxies live requests to the optional desktop-owned bridge. The official SDK verified live Rust forwarding, full catalog discovery, structured closed-desktop errors, and cleanup after normal and failed startup."
+
+[[component]]
+id = "builder3d.reference.scripts"
+kind = "support"
+status = "validated"
+crate = "workspace-tests"
+rust_paths = ["WORK_LOG.md", "docs/component-catalog.toml"]
+symbols = ["reference-only-script-inventory"]
+python_paths = ["scripts/analyze_reference_primitives.py", "scripts/b2_stl_trace.py", "scripts/check_posix_wheels.py", "scripts/floor_label_depth_smoke.py", "scripts/gizmo_closeup_smoke.py", "scripts/high_poly_import_smoke.py", "scripts/high_poly_viewport_smoke.py", "scripts/mcp_catalog.py", "scripts/mcp_models.py", "scripts/parse_pml.py", "scripts/performance_audit.py", "scripts/prepare_icon_asset.py", "scripts/profile_high_poly.py", "scripts/renderer_cache_lifecycle_smoke.py", "scripts/renderer_smoke.py", "scripts/theme_icon_smoke.py", "scripts/under_floor_visibility_smoke.py", "scripts/builder3d_mcp.py", "scripts/verify_setup.py"]
+tests = ["docs/component-catalog.toml"]
+evidence = ["evidence/r7/13-desktop-adapters/report.md", "evidence/r7/13-desktop-adapters/verification.md", "evidence/r7/13-desktop-adapters/checkpoint.md"]
+contracts = ["not-shipped", "reference-only", "native-test-replacement"]
+conversion_note = "These Python files are developer/reference tools, not shipped product capabilities; native Rust tests, catalog data, and packaging checks replace product-facing behavior."
+
+
+[[component]]
+id = "builder3d.core.placement"
+kind = "module"
+status = "ported"
+crate = "builder3d-core"
+rust_paths = ["crates/builder3d-core/src/placement.rs", "crates/builder3d-core/src/lib.rs"]
+symbols = ["placement_rotation", "MAX_PLACEMENT_POINTS"]
+python_paths = ["src/tools.py", "src/application_services.py"]
+tests = ["crates/builder3d-core/src/placement.rs", "crates/builder3d-app/src/transforms.rs", "crates/builder3d-app/src/commands.rs"]
+evidence = ["evidence/rebuild/rb-04-scene-and-precise-transforms/settle-fix.md"]
+contracts = ["world-mm", "QHull-support-face", "bounded-native-input", "single-vs-group-composition", "one-command-history"]
+
+[[component]]
+id = "builder3d.app.transform-gesture"
+kind = "module"
+status = "ported"
+crate = "builder3d-app"
+rust_paths = ["crates/builder3d-app/src/transform_gesture.rs", "crates/builder3d-app/src/commands.rs", "crates/builder3d-app/src/shell.rs", "crates/builder3d-viewport/src/scene.rs"]
+symbols = ["TransformGesture", "ResizeFrame", "TransformSelectionSnapshot", "commit_transform_snapshot", "with_world_preview"]
+python_paths = ["src/gizmo.py", "src/scene.py", "src/viewport.py"]
+tests = ["crates/builder3d-app/src/gesture_tests.rs", "crates/builder3d-app/src/shell.rs", "crates/builder3d-viewport/src/scene.rs"]
+evidence = ["evidence/rebuild/rb-04-scene-and-precise-transforms/viewport-transforms.md", "evidence/rebuild/rb-04-scene-and-precise-transforms/gesture-oracle.json"]
+contracts = ["world-mm", "immutable-motion-preview", "durable-root-identity", "grouped-history", "opposite-face-anchor", "object-grid-basis", "bounded-cancel-stale-guard"]
+
+[[component]]
+id = "builder3d.rebuild.rb05.viewport-input-completion"
+kind = "slice"
+status = "validated"
+crate = "builder3d-app + builder3d-viewport"
+rust_paths = ["crates/builder3d-app/src/shell.rs", "crates/builder3d-app/src/commands.rs", "crates/builder3d-app/src/view_state.rs", "crates/builder3d-app/src/preferences.rs", "crates/builder3d-app/src/transform_gesture.rs", "crates/builder3d-viewport/src/camera.rs", "crates/builder3d-viewport/src/gizmo.rs", "crates/builder3d-viewport/src/floor.rs", "crates/builder3d-viewport/src/renderer.rs", "crates/builder3d-viewport/src/cpu.rs", "crates/builder3d-viewport/src/scene.rs"]
+symbols = ["ViewportInput", "TransformGesture::update_with_snap", "build_gizmo_with_bounds", "hit_test_with_bounds", "build_floor", "ViewportRenderOptions", "CpuRenderOptions"]
+python_paths = ["src/viewport.py", "src/gizmo.py", "src/snapping.py", "src/main_window.py", "src/application_services.py"]
+tests = ["crates/builder3d-app/src/view_state.rs", "crates/builder3d-app/src/commands.rs", "crates/builder3d-app/src/shell.rs", "crates/builder3d-app/src/transform_gesture.rs", "crates/builder3d-viewport/src/camera.rs", "crates/builder3d-viewport/src/gizmo.rs", "crates/builder3d-viewport/src/snapping.rs", "crates/builder3d-viewport/src/floor.rs", "crates/builder3d-viewport/src/renderer.rs", "crates/builder3d-viewport/src/cpu.rs"]
+evidence = ["evidence/rebuild/rb-05-viewport-and-input-completion/report.md", "evidence/rebuild/rb-05-viewport-and-input-completion/verification.md", "evidence/rebuild/rb-05-viewport-and-input-completion/requirement-test-map.md", "evidence/rebuild/rb-05-viewport-and-input-completion/walkthrough.md", "evidence/rebuild/rb-05-viewport-and-input-completion/paired-comparison-board.md", "evidence/rebuild/rb-05-viewport-and-input-completion/capture-metadata.json", "evidence/rebuild/rb-05-viewport-and-input-completion/checkpoint.md"]
+contracts = ["camera-navigation", "exact-double-click-frame", "bounds-aware-gizmo", "one-commit-preview", "object-landmark-snapping", "metric-floor-grid", "theme-display-options", "gpu-cpu-fallback"]
+conversion_note = "Implementation and automated/native replay are complete for RB-05. Visual review and owner acceptance remain pending; RB-06 is the next slice and has not started."
+
+[[component]]
+id = "builder3d.rebuild.rb06-modelling-tools-and-brush-completion"
+kind = "slice"
+status = "validated"
+crate = "builder3d-app + builder3d-core + builder3d-viewport"
+rust_paths = ["crates/builder3d-app/src/commands.rs", "crates/builder3d-app/src/dialogs.rs", "crates/builder3d-app/src/shell.rs", "crates/builder3d-core/src/scene.rs", "crates/builder3d-core/src/shell_ops.rs", "crates/builder3d-core/src/density.rs", "crates/builder3d-viewport/src/scene.rs"]
+symbols = ["CommandState::apply_brush_stroke", "CommandState::apply_boolean_pair", "ActiveBrush", "BrushGesture", "BooleanPick", "DialogKind::TorusPreview", "Scene::repair_selected", "Scene::emboss_text_selected", "Scene::hollow_selected", "RenderScene::with_mesh_preview"]
+python_paths = ["src/main_window.py", "src/viewport.py", "src/application_services.py", "src/scene.py"]
+tests = ["crates/builder3d-app/src/commands.rs", "crates/builder3d-app/src/dialogs.rs", "crates/builder3d-app/src/shell.rs", "crates/builder3d-core/tests/mesh_ops_booleans.rs", "crates/builder3d-core/tests/mesh_ops_brushes.rs", "crates/builder3d-core/tests/mesh_ops_density.rs", "crates/builder3d-core/tests/mesh_ops_repair.rs", "crates/builder3d-core/tests/mesh_ops_shell.rs", "crates/builder3d-core/tests/mesh_ops_simplify.rs", "crates/builder3d-core/tests/mesh_ops_smooth.rs", "crates/builder3d-core/tests/mesh_ops_subdivide.rs", "crates/builder3d-viewport/src/scene.rs"]
+evidence = ["evidence/rebuild/rb-06-modelling-tools-and-brushes/report.md", "evidence/rebuild/rb-06-modelling-tools-and-brushes/verification.md", "evidence/rebuild/rb-06-modelling-tools-and-brushes/requirement-test-map.md", "evidence/rebuild/rb-06-modelling-tools-and-brushes/walkthrough.md", "evidence/rebuild/rb-06-modelling-tools-and-brushes/paired-comparison-board.md", "evidence/rebuild/rb-06-modelling-tools-and-brushes/capture-metadata.json", "evidence/rebuild/rb-06-modelling-tools-and-brushes/checkpoint.md"]
+contracts = ["bounded-torus-parameters", "parametric-metadata-rejection", "typed-repair", "persistent-brush-gesture", "picked-density-region", "one-history-mesh-operation", "boolean-picker", "exact-two-boolean", "typed-dialog-preview", "button-audit"]
+conversion_note = "RB-06 repairs the native interaction seams for modelling tools and brushes. Python remains a read-only behavioral reference; implementation, automated tests, and paired native evidence are complete, while visual review and owner acceptance remain pending."
+
+
+[[component]]
+id = "builder3d.rebuild.rb07-appearance-jobs-and-print-handoff"
+kind = "slice"
+status = "validated"
+crate = "builder3d-app + builder3d-core + builder3d-platform + builder3d-viewport"
+rust_paths = ["crates/builder3d-app/src/commands.rs", "crates/builder3d-app/src/dialogs.rs", "crates/builder3d-app/src/shell.rs", "crates/builder3d-app/src/image_color.rs", "crates/builder3d-app/src/operations.rs", "crates/builder3d-app/src/print_prep.rs", "crates/builder3d-app/src/print_handoff.rs", "crates/builder3d-platform/src/slicer.rs", "crates/builder3d-core/src/material.rs", "crates/builder3d-viewport/src/scene.rs"]
+symbols = ["CommandState::set_selected_color", "average_image_color", "OperationRegistry", "start_desktop_job", "full_check", "prepare_print", "launch_prepared_print", "launch_slicer"]
+tests = ["crates/builder3d-app/src/commands.rs", "crates/builder3d-app/src/dialogs.rs", "crates/builder3d-app/src/shell.rs", "crates/builder3d-app/src/image_color.rs", "crates/builder3d-app/src/print_prep.rs", "crates/builder3d-app/src/print_handoff.rs", "crates/builder3d-platform/src/slicer.rs", "crates/builder3d-core/src/material.rs", "crates/builder3d-viewport/src/scene.rs"]
+evidence = ["evidence/rebuild/rb-07-appearance-jobs-and-print/report.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/verification.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/requirement-test-map.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/walkthrough.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/paired-comparison-board.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/initial-button-ledger.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/capture-metadata.json", "evidence/rebuild/rb-07-appearance-jobs-and-print/fixture-manifest.json", "evidence/rebuild/rb-07-appearance-jobs-and-print/operation-manifest.json", "evidence/rebuild/rb-07-appearance-jobs-and-print/accepted-journal.ndjson", "evidence/rebuild/rb-07-appearance-jobs-and-print/rejected-attempts.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/source-preservation.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/checkpoint.md", "evidence/rebuild/rb-07-appearance-jobs-and-print/snapshot-receipt.md"]
+contracts = ["solid-rgba-and-average-color-is-not-texture", "selection-wide-color-history", "bounded-image-errors", "off-thread-progress-cancel-retry", "stale-result-guard", "read-only-print-prep", "validated-staging", "known-slicer-launch", "button-audit"]
+conversion_note = "RB-07 appearance, native jobs, print preparation and slicer handoff are implemented and automated/native verified. Rust Light cancellation and Python native external launch remain documented capture limits. Visual review and owner acceptance remain pending; RB-08 is next."

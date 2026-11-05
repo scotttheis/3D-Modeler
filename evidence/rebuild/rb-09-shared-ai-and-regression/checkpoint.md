@@ -1,68 +1,25 @@
 # RB-09 Handoff Checkpoint
 
-**Date:** 2026-11-02; owner pause/path update: 2026-11-03  
-**Status:** paused by the owner; shared-document implementation and automated
-verification pass; mandatory live-client/native verification is pending. Do not
-mark RB-09 closed.
+**Date:** 2026-11-04  
+**Status:** the paired live desktop/MCP run and its gate-time evidence/snapshot checks passed. The wrap-up recheck later found a current Release app hash mismatch; see `verification.md`. Stop before RB-10.
 
 ## Current state
 
-- Work remains in `E:\Builder3D-Rust` on its intentionally uncommitted,
-  unstaged worktree. No stage, commit, reset, restore, or discard operation was
-  performed.
-- This E: tree is the active Rust source/build/run copy. `G:\` is the primary
-  backup destination; the current primary additive backup is
-  `G:\Builder3D-Rust_snapshot_20261103-111729_RB-09-paused-e-primary`.
-  Removable USB copies are occasional one-offs; the current one-off copy is
-  `L:\Builder3D-Rust_snapshot_20261103-103227_RB-09-paused`, recorded in
-  `usb-backup-receipt.md`. Neither copy is a working tree.
-- The read-only Python reference remains `L:\Builder3D`. Focused tests used its
-  existing venv and stored scratch files under this E: evidence directory.
-- The pre-edit additive RB-09 baseline is
-  `G:\Builder3D-Rust_snapshot_20261102-141606_RB-09-baseline`; its independently
-  verified receipt is `baseline-snapshot-receipt.md`.
-- The app-owned bridge, UI-thread document attach/detach, isolated long-operation
-  commit, R4 gateway, runtime identity checks, dirty guard, and regression tests
-  are in place. The fixed 60-tool public catalog is unchanged.
-- Focused results: MCP 19/19, app integration 5/5, core external commit 3/3,
-  Python MCP/gateway 12/12. Workspace Rust tests: 327/327. All documented gate
-  commands exited 0; cargo-audit is unavailable.
-- Release app: `target\release\builder3d-app.exe`, 16,152,576 bytes, SHA-256
-  `98ff94d0ef5938817d10cbe8c0c7ec18058ad0487ad403a2e674612f62d21d5f`.
-- Release MCP gateway: `target\release\r4_mcp.exe`, 1,649,664 bytes, SHA-256
-  `331a69b9f4661f0f3687b0e4d1588a230e9106384a5b0190a7421cd9da9c1557`.
+- Active Rust source/build/run tree: E:/Builder3D-Rust. At the live-gate start the repository worktree was uncommitted and unstaged; no reset, clean, or snapshot restore was used. The later wrap-up explicitly authorized a task-scoped commit.
+- Keep every current tracked/untracked file. The only application-code repair in this live gate is the Welcome-to-Scene presentation synchronization in shell.rs and mcp_bridge.rs, with two focused regression tests.
+- L:/Builder3D remains the read-only Python reference/shipping tree. No Python source or fixture file was changed. Its external QSettings were restored exactly to object_snapping_enabled=true, ribbon_favorites=[], theme_mode=dark; the test-created recent_files key was removed.
+- Before each host UI input/capture, host_desktop.ps1 confirmed the Default desktop was active and interactive. LockApp did not own the live test session. Edge YouTube remained background only; Windows power/lock settings were not changed.
+- The live Rust app and gateways are closed. No builder3d-app or r4_mcp process, owned runtime descriptor, or listener remained at final inspection. Edge remains running.
+- Python and Rust live clients used the official Python MCP SDK 2.2.0 and listed all 60 tools. Shared project ID: e5d81c5226e64f58b838d55d9395afa9. Stable Cube ID: 3f449b78621c467b818e8c69925e2b6c. Stable Sphere ID: dff9cc124c6d4d27b4ea9b07d6e4ae6b.
+- Rust final Release app: 16,172,032 bytes; SHA-256 d680cf0ba8e4c8bf7d5ccd1536bf7d5720987d676a1a0946c6c3505b613b0cb9. Rust source manifest: 96 files; SHA-256 9846a4a6dee484186283e169a9b7cdbbf74007bdca772efa5981f438ce78b457.
+- The live matrix passed: MCP edits were immediately visible in viewport and Items; shared GUI/MCP history and no-op behavior passed; save/close/reopen/New/Open and dirty guard passed; file failure atomicity, replay/conflicts, competing clients, long operations, optional startup, closed-desktop errors, and shutdown cleanup passed.
+- Post-repair gates: fmt pass; focused app MCP 7/7; workspace 329/329; Clippy pass; locked Release app and gateway builds pass. The evidence validator checked 50 PNG hashes/dimensions, two clean theme pairs, 10 fixture hashes, 96 Rust source files, TOML/JSON/NDJSON, and evidence references.
+- Wrap-up rerun: fmt, check, workspace tests, Clippy, deny, metadata, focused MCP tests, and smoke all exited 0; workspace tests were 329 passed, 0 failed, 0 ignored and deny reported 28 duplicate-version warnings. The current app hash `0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a` differs from the recorded live app hash `d680cf0ba8e4c8bf7d5ccd1536bf7d5720987d676a1a0946c6c3505b613b0cb9`; the current evidence validator rerun therefore exits 1. No application source changed after the live test.
 
-## Protocol result
+## Additive snapshot
 
-The installed official Python MCP SDK 2.2.0 launched the Release gateway,
-initialized stdio, listed 60 tools (`get_status` first, `launch_slicer` last),
-and received a structured retryable `desktop_unavailable` result from
-`get_status` with an intentionally absent runtime descriptor. The output is
-`rust_stdio_client_probe-result.json`. This does not establish live desktop
-forwarding.
+The additive completion snapshot is G:/Builder3D-Rust_snapshot_20261104-182021_RB-09-complete. The independent verifier reported equal included file counts and byte totals, zero missing/extra/different files, and zero included reparse entries. Exact values and exclusions are recorded in snapshot-receipt.md. The snapshot is not a working tree and no existing G: copy was overwritten.
 
-## Pending native gate
+## Boundary
 
-At final inspection, `LockApp.exe` PID 9808 was active and there was no
-`builder3d-app` or `r4_mcp` process. No app was launched or closed, no input was
-sent, and no screenshot was attempted. Keep the following explicitly
-unverified: paired Python/Rust live-client flows, shared view/panel updates,
-GUI/MCP undo/redo, path/dirty/save/reopen behavior, approved/denied file policy,
-idempotency and revision races over the bridge, long-operation cancel/failure/
-stale commit, and bridge shutdown/optional-startup behavior in a running GUI.
-
-No RB-09 complete snapshot was created because the handoff's native completion
-gate is still open. The additive staging and handoff copies are
-`G:\Builder3D-Rust_snapshot_20261102-152935_RB-09-handoff-staging` and
-`G:\Builder3D-Rust_snapshot_20261102-152935_RB-09-handoff`. Their independent
-verification is in `snapshot-receipt.md`. The final copy is not an RB-09
-completion receipt or RB-08 evidence.
-
-## Product and slice boundary
-
-The owner-reported interface and floor gaps remain open. Earlier visual review
-and owner-acceptance statuses remain pending. RB-08's paired Rust native matrix
-and completion snapshot remain pending and separate. Resume the remaining
-RB-09 native evidence first; RB-10 has not started. Future project work and run
-instructions point to `E:\Builder3D-Rust`; historical G: snapshot receipts and
-the read-only L: Python reference remain preserved as backup/reference records.
+The owner-reported interface and floor gaps remain open. Visual review, owner acceptance, and overall product acceptance remain pending. RB-08’s paired Rust native matrix and completion snapshot remain independently open. RB-10 has not started.

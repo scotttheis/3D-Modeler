@@ -1,0 +1,120 @@
+{
+  "slice": "RB-09",
+  "build_date": "2026-11-04",
+  "source_tree": {
+    "path": "E:/Builder3D-Rust",
+    "git_head": null,
+    "branch": "main",
+    "repository_state": "unborn repository; untracked files preserved; no stage, commit, reset, clean, or snapshot restore",
+    "rust_source_file_count": 96,
+    "rust_source_manifest_sha256": "9846a4a6dee484186283e169a9b7cdbbf74007bdca772efa5981f438ce78b457",
+    "manifest_algorithm": "Sort crates/**/*.rs by project-relative POSIX path; update SHA-256 with UTF-8 path, NUL, the raw 32-byte SHA-256 digest of file contents, NUL.",
+    "rust_sources_unchanged_after_final_release_build": true,
+    "scoped_source_repairs": [
+      "crates/builder3d-app/src/shell.rs",
+      "crates/builder3d-app/src/mcp_bridge.rs"
+    ],
+    "source_hashes": {
+      "crates/builder3d-app/src/shell.rs": "d87918a59ec55c354295c4d70bd3e22b2e9086cbe904e354aa36b06e9a1a59ad",
+      "crates/builder3d-app/src/mcp_bridge.rs": "8da97ae29fc5fef3875eb28070c97dec05af3bc1258a3d4eb36b00da7f23a176"
+    }
+  },
+  "toolchain": {
+    "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+    "cargo": "cargo 1.99.1 (5f94df478 2026-08-27)",
+    "target": "x86_64-pc-windows-msvc",
+    "cargo_bloat": "0.12.1",
+    "cargo_deny": "0.20.2",
+    "python_reference": "Python 3.12.10; official MCP SDK 2.2.0"
+  },
+  "builds": [
+    {
+      "role": "live Rust app",
+      "command": "cargo build --release -p builder3d-app --locked",
+      "exit_code": 0,
+      "binary": "target/release/builder3d-app.exe",
+      "size_bytes": 16172032,
+      "sha256": "d680cf0ba8e4c8bf7d5ccd1536bf7d5720987d676a1a0946c6c3505b613b0cb9"
+    },
+    {
+      "role": "live Rust MCP gateway during paired sequence",
+      "command": "cargo build --release -p builder3d-mcp --bin r4_mcp --locked",
+      "exit_code": 0,
+      "binary": "target/release/r4_mcp.exe",
+      "sha256": "a1dba8751c5a15cafbf6e26fac8db0b8a96f8464bf750ac62336f573b729545b"
+    },
+    {
+      "role": "current post-run Rust MCP gateway",
+      "command": "cargo build --release -p builder3d-mcp --bin r4_mcp --locked",
+      "exit_code": 0,
+      "binary": "target/release/r4_mcp.exe",
+      "size_bytes": 1649664,
+      "sha256": "9b8817015ab5c8195013ee788fb095e9393848be74c7da0221ebd33342fc99d3",
+      "official_sdk_probe": "rust_stdio_client_probe-result.json"
+    }
+  ],
+  "python_reference": {
+    "path": "L:/Builder3D",
+    "git_head": "3a0160a95c55f68ce9f1e89d17c792816ac001df",
+    "git_status_record_count": 116,
+    "source_entrypoint": "src/main_window.py",
+    "source_entrypoint_sha256": "3fc2b1c25a53f6f7d040d3321d331a22d7b8a462f8cb4fcd18a9631b960a7c41",
+    "app_identity": "working-tree source; no packaged executable used for the live reference run"
+  },
+  "live_rust_gateway_sha256": "a1dba8751c5a15cafbf6e26fac8db0b8a96f8464bf750ac62336f573b729545b",
+  "post_run_rust_gateway_sha256": "9b8817015ab5c8195013ee788fb095e9393848be74c7da0221ebd33342fc99d3",
+  "gate_results": [
+    {
+      "command": "cargo fmt --all -- --check",
+      "exit_code": 0,
+      "log_prefix": "logs/postfix-cargo-fmt"
+    },
+    {
+      "command": "cargo test -p builder3d-app mcp_",
+      "exit_code": 0,
+      "passed": 7,
+      "failed": 0,
+      "log_prefix": "logs/postfix-focused-app-mcp"
+    },
+    {
+      "command": "cargo test --workspace --locked",
+      "exit_code": 0,
+      "passed": 329,
+      "failed": 0,
+      "ignored": 0,
+      "log_prefix": "logs/postfix-workspace-test"
+    },
+    {
+      "command": "cargo clippy --all-targets -- -D warnings",
+      "exit_code": 0,
+      "log_prefix": "logs/postfix-cargo-clippy"
+    },
+    {
+      "command": "cargo build --release -p builder3d-app --locked",
+      "exit_code": 0,
+      "log_prefix": "logs/postfix-release-app"
+    },
+    {
+      "command": "cargo build --release -p builder3d-mcp --bin r4_mcp --locked",
+      "exit_code": 0,
+      "log_prefix": "logs/postfix-release-mcp"
+    }
+  ],
+  "earlier_gates": {
+    "focused_rust_mcp_tests": {
+      "passed": 19,
+      "log": "logs/rust-focused-mcp.log"
+    },
+    "focused_core_commit_tests": {
+      "passed": 3,
+      "log": "logs/rust-focused-core-commit.log"
+    },
+    "focused_python_reference_tests": {
+      "passed": 12,
+      "log": "logs/python-focused-mcp-gateway.log"
+    },
+    "cargo_deny": "passed; 28 duplicate-version warnings; no policy or advisory failure",
+    "cargo_audit": "not run; cargo-audit unavailable",
+    "cargo_bloat_workspace": "exit 0 but --workspace is ignored by cargo-bloat 0.12.1; not a workspace size result"
+  }
+}

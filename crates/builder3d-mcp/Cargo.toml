@@ -1,0 +1,17 @@
+[package]
+name = "builder3d-mcp"
+version = "0.1.0"
+edition = "2024"
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+builder3d-core.workspace = true
+builder3d-platform.workspace = true
+rmcp = { version = "=3.8.0", default-features = false, features = ["macros", "server", "transport-io"] }
+schemars = "=1.0.4"
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+uuid.workspace = true

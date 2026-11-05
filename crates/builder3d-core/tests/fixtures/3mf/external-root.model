@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model xmlns="http://schemas.microsoft.com/3dmanufacturing/core/2015/02" xmlns:p="http://schemas.microsoft.com/3dmanufacturing/production/2015/06" unit="millimeter">
+  <resources>
+    <object id="2" name="External assembly">
+      <components>
+        <component p:path="/3D/Objects/object_1.model" objectid="1" transform="1 0 0 0 1 0 0 0 1 2 3 4" />
+      </components>
+    </object>
+  </resources>
+  <build>
+    <item objectid="2" partnumber="External placement" transform="1 0 0 0 1 0 0 0 1 5 6 7" />
+  </build>
+</model>

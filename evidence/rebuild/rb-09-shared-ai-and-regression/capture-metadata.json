@@ -1,0 +1,1293 @@
+{
+  "slice": "RB-09",
+  "date": "2026-11-04",
+  "status": "live_interactive_gate_pass_visual_and_owner_review_pending",
+  "platform": "Windows 11 Enterprise build 10.0.26200",
+  "host_preflight": {
+    "helper": "host_desktop.ps1",
+    "desktop": "Default",
+    "session_state": "active and interactive before every input/capture",
+    "lockapp_owned_session": false,
+    "screen_px": [
+      2560,
+      1440
+    ],
+    "dpi": 96,
+    "edge_youtube_keep_awake": "left running in background; not test evidence",
+    "power_or_lock_settings_changed": false
+  },
+  "build_identity": {
+    "rust_source_manifest_files": 96,
+    "rust_source_manifest_sha256": "9846a4a6dee484186283e169a9b7cdbbf74007bdca772efa5981f438ce78b457",
+    "rust_app_sha256": "d680cf0ba8e4c8bf7d5ccd1536bf7d5720987d676a1a0946c6c3505b613b0cb9",
+    "rust_live_gateway_sha256": "a1dba8751c5a15cafbf6e26fac8db0b8a96f8464bf750ac62336f573b729545b",
+    "python_reference_git_head": "3a0160a95c55f68ce9f1e89d17c792816ac001df",
+    "python_reference_main_window_sha256": "3fc2b1c25a53f6f7d040d3321d331a22d7b8a462f8cb4fcd18a9631b960a7c41",
+    "python": "3.12.10",
+    "mcp_sdk": "2.2.0"
+  },
+  "paired_capture_sets": [
+    {
+      "name": "Initial Light scene",
+      "theme": "Light",
+      "python_capture": "captures/python-light-initial.png",
+      "rust_capture": "captures/rust-final-paired-light-initial.png",
+      "project_id": "e5d81c5226e64f58b838d55d9395afa9",
+      "python_revision": 4,
+      "rust_revision": 23,
+      "project_path": "fixtures/approved/RB09-Paired-Live.3dp",
+      "stable_object_ids": [
+        "3f449b78621c467b818e8c69925e2b6c",
+        "dff9cc124c6d4d27b4ea9b07d6e4ae6b"
+      ],
+      "comparison_note": "Stable IDs, geometry and transforms match. Python initial Cube color is blue; saved revision-23 Cube color is gold after a later Python MCP edit."
+    },
+    {
+      "name": "Initial Dark scene",
+      "theme": "Dark",
+      "python_capture": "captures/python-dark-initial.png",
+      "rust_capture": "captures/rust-final-paired-dark-scene.png",
+      "project_id": "e5d81c5226e64f58b838d55d9395afa9",
+      "python_revision": 4,
+      "rust_revision": 23,
+      "project_path": "fixtures/approved/RB09-Paired-Live.3dp",
+      "stable_object_ids": [
+        "3f449b78621c467b818e8c69925e2b6c",
+        "dff9cc124c6d4d27b4ea9b07d6e4ae6b"
+      ],
+      "comparison_note": "Stable IDs, geometry and transforms match. Cube color differs because the Rust app opened the later saved Python fixture."
+    }
+  ],
+  "alternate_size_captures": [
+    {
+      "file": "captures/python-light-alt-1600x900.png",
+      "theme": "Light",
+      "png_dimensions_px": [
+        1600,
+        900
+      ]
+    },
+    {
+      "file": "captures/rust-final-paired-dark-alt-1600x900.png",
+      "theme": "Dark",
+      "png_dimensions_px": [
+        1600,
+        900
+      ]
+    }
+  ],
+  "native_captures": [
+    {
+      "file": "captures/python-dark-initial.png",
+      "sha256": "5f59a5315b2c5cf1709436295dbe992e3060c709633137c8f7a9c39dea840b0b",
+      "bytes": 166700,
+      "png_dimensions_px": [
+        1296,
+        859
+      ],
+      "application": "Python reference",
+      "theme": "Dark",
+      "captured_at_local": "2026-11-04T16:23:38-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": "e5d81c5226e64f58b838d55d9395afa9",
+      "scene_revision": 4,
+      "project_path": "fixtures/approved/RB09-Paired-Live.3dp",
+      "evidence_role": "accepted live-gate evidence",
+      "accepted_for_live_gate": true
+    },
+    {
+      "file": "captures/python-dirty-confirmation.png",
+      "sha256": "eb2b8deb9ad6ecc445764cb37a31c3b678a9a368d19810f21d09fe6dd0cf0a28",
+      "bytes": 169574,
+      "png_dimensions_px": [
+        1600,
+        900
+      ],
+      "application": "Python reference",
+      "theme": "Light",
+      "captured_at_local": "2026-11-04T16:35:42-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": null,
+      "scene_revision": null,
+      "project_path": null,
+      "evidence_role": "accepted live-gate evidence",
+      "accepted_for_live_gate": true
+    },
+    {
+      "file": "captures/python-dirty-menu.png",
+      "sha256": "c3793007827b596e2fb16dd0efd8d0a15c35b837c02518d62fcbee83359d6926",
+      "bytes": 4795,
+      "png_dimensions_px": [
+        159,
+        436
+      ],
+      "application": "Python reference",
+      "theme": null,
+      "captured_at_local": "2026-11-04T16:35:14-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": null,
+      "scene_revision": null,
+      "project_path": null,
+      "evidence_role": "supporting UI/intermediate capture",
+      "accepted_for_live_gate": false
+    },
+    {
+      "file": "captures/python-light-after-open.png",
+      "sha256": "a175812199e27789cdefe1d5432e09e378df0370860a692e13cfee4b15301b06",
+      "bytes": 154596,
+      "png_dimensions_px": [
+        1600,
+        900
+      ],
+      "application": "Python reference",
+      "theme": "Light",
+      "captured_at_local": "2026-11-04T16:34:17-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": "e5d81c5226e64f58b838d55d9395afa9",
+      "scene_revision": 14,
+      "project_path": "fixtures/approved/RB09-Paired-Live.3dp",
+      "evidence_role": "accepted live-gate evidence",
+      "accepted_for_live_gate": true
+    },
+    {
+      "file": "captures/python-light-alt-1600x900.png",
+      "sha256": "885c0fcce7262042566da824d0d4f72181ef10b91d0cbb1a78f10a60a6f1a356",
+      "bytes": 166883,
+      "png_dimensions_px": [
+        1600,
+        900
+      ],
+      "application": "Python reference",
+      "theme": "Light",
+      "captured_at_local": "2026-11-04T16:27:29-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": "e5d81c5226e64f58b838d55d9395afa9",
+      "scene_revision": 4,
+      "project_path": "fixtures/approved/RB09-Paired-Live.3dp",
+      "evidence_role": "accepted live-gate evidence",
+      "accepted_for_live_gate": true
+    },
+    {
+      "file": "captures/python-light-gui-edit.png",
+      "sha256": "36df7716633f18f48d689f240e5111ec2ea0542b371d875c1d756cf963147c27",
+      "bytes": 150295,
+      "png_dimensions_px": [
+        1600,
+        900
+      ],
+      "application": "Python reference",
+      "theme": "Light",
+      "captured_at_local": "2026-11-04T16:28:42-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": null,
+      "scene_revision": null,
+      "project_path": null,
+      "evidence_role": "accepted live-gate evidence",
+      "accepted_for_live_gate": true
+    },
+    {
+      "file": "captures/python-light-initial.png",
+      "sha256": "cbbe26c8e0d082695baa8c19b7e62cfab752fc99cedb206872dbc1d3526f14c3",
+      "bytes": 147495,
+      "png_dimensions_px": [
+        1296,
+        859
+      ],
+      "application": "Python reference",
+      "theme": "Light",
+      "captured_at_local": "2026-11-04T16:26:54-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": "e5d81c5226e64f58b838d55d9395afa9",
+      "scene_revision": 4,
+      "project_path": "fixtures/approved/RB09-Paired-Live.3dp",
+      "evidence_role": "accepted live-gate evidence",
+      "accepted_for_live_gate": true
+    },
+    {
+      "file": "captures/python-light-mcp-race-edit.png",
+      "sha256": "9d0fee2760f7ed2b7ec188b61599d41a50138462cad67ea01d43ef7ceb38396f",
+      "bytes": 172440,
+      "png_dimensions_px": [
+        1600,
+        900
+      ],
+      "application": "Python reference",
+      "theme": "Light",
+      "captured_at_local": "2026-11-04T16:30:56-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": "e5d81c5226e64f58b838d55d9395afa9",
+      "scene_revision": 10,
+      "project_path": "fixtures/approved/RB09-Paired-Live.3dp",
+      "evidence_role": "accepted live-gate evidence",
+      "accepted_for_live_gate": true
+    },
+    {
+      "file": "captures/python-light-reopened.png",
+      "sha256": "c2c869e81f141fdbeb4c22e6ff9ea5b3e6b39d35ebf996dd8e55330b3b3108dc",
+      "bytes": 135350,
+      "png_dimensions_px": [
+        1296,
+        859
+      ],
+      "application": "Python reference",
+      "theme": "Light",
+      "captured_at_local": "2026-11-04T16:49:14-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": "e5d81c5226e64f58b838d55d9395afa9",
+      "scene_revision": null,
+      "project_path": "fixtures/approved/RB09-Paired-Live.3dp",
+      "evidence_role": "accepted live-gate evidence",
+      "accepted_for_live_gate": true
+    },
+    {
+      "file": "captures/python-light-settings-dialog.png",
+      "sha256": "df497f53dbaea28032c82777150ddc1739cdd2bbd3646124eb67b099604f69c6",
+      "bytes": 148704,
+      "png_dimensions_px": [
+        1296,
+        859
+      ],
+      "application": "Python reference",
+      "theme": "Light",
+      "captured_at_local": "2026-11-04T16:26:21-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": null,
+      "scene_revision": null,
+      "project_path": null,
+      "evidence_role": "supporting UI/intermediate capture",
+      "accepted_for_live_gate": false
+    },
+    {
+      "file": "captures/python-light-stale-edit.png",
+      "sha256": "f7030af60f02caf3b48fb3e77f4009eadda31628e24e55c305b1effcfaf3a9b8",
+      "bytes": 150548,
+      "png_dimensions_px": [
+        1600,
+        900
+      ],
+      "application": "Python reference",
+      "theme": "Light",
+      "captured_at_local": "2026-11-04T16:44:26-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": "e5d81c5226e64f58b838d55d9395afa9",
+      "scene_revision": 22,
+      "project_path": "fixtures/approved/RB09-Paired-Live.3dp",
+      "evidence_role": "accepted live-gate evidence",
+      "accepted_for_live_gate": true
+    },
+    {
+      "file": "captures/python-mcp-startup-failed.png",
+      "sha256": "647d2756c3bf391c061b7ffdb34c122d61f19b0376c869e95721ea2483d03d96",
+      "bytes": 97586,
+      "png_dimensions_px": [
+        1296,
+        859
+      ],
+      "application": "Python reference",
+      "theme": "Light",
+      "captured_at_local": "2026-11-04T16:47:46-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": null,
+      "scene_revision": null,
+      "project_path": null,
+      "evidence_role": "accepted live-gate evidence",
+      "accepted_for_live_gate": true
+    },
+    {
+      "file": "captures/python-menu.png",
+      "sha256": "e5fa4f8e6694619ef84f95bb506870c0a07757f924a2ea53509b977e1caea7d1",
+      "bytes": 4818,
+      "png_dimensions_px": [
+        159,
+        436
+      ],
+      "application": "Python reference",
+      "theme": null,
+      "captured_at_local": "2026-11-04T16:24:21-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": null,
+      "scene_revision": null,
+      "project_path": null,
+      "evidence_role": "supporting UI/intermediate capture",
+      "accepted_for_live_gate": false
+    },
+    {
+      "file": "captures/python-optional-mcp-unavailable.png",
+      "sha256": "d3f3836cc330006c6251b5cf44850ad6832631720e95633879a6fdf6345d7f79",
+      "bytes": 97326,
+      "png_dimensions_px": [
+        1296,
+        859
+      ],
+      "application": "Python reference",
+      "theme": "Light",
+      "captured_at_local": "2026-11-04T16:46:09-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": null,
+      "scene_revision": null,
+      "project_path": null,
+      "evidence_role": "accepted live-gate evidence",
+      "accepted_for_live_gate": true
+    },
+    {
+      "file": "captures/python-settings-dialog-dark.png",
+      "sha256": "40f9cc4d16d0a07874d2f68f5b957b678d49d3ae5d83f285b4d4460ceabb66b7",
+      "bytes": 160168,
+      "png_dimensions_px": [
+        1296,
+        859
+      ],
+      "application": "Python reference",
+      "theme": "Dark",
+      "captured_at_local": "2026-11-04T16:24:55-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": null,
+      "scene_revision": null,
+      "project_path": null,
+      "evidence_role": "supporting UI/intermediate capture",
+      "accepted_for_live_gate": false
+    },
+    {
+      "file": "captures/rust-dark-initial-confirmed.png",
+      "sha256": "3046b97b3a0d7b2a794766afc5177d674b71b17cf1d888d2b47d70d8a73968ec",
+      "bytes": 175348,
+      "png_dimensions_px": [
+        1296,
+        879
+      ],
+      "application": "Rust desktop",
+      "theme": "Dark",
+      "captured_at_local": "2026-11-04T16:52:53-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": null,
+      "scene_revision": null,
+      "project_path": null,
+      "evidence_role": "pre-repair or intermediate Rust capture; not used for final paired claim",
+      "accepted_for_live_gate": false
+    },
+    {
+      "file": "captures/rust-dark-initial.png",
+      "sha256": "46f7734e554fac3bb6fc9b93d9f0aad0d9aa4a29ee7e26398d2064371db47301",
+      "bytes": 165785,
+      "png_dimensions_px": [
+        1296,
+        879
+      ],
+      "application": "Rust desktop",
+      "theme": "Dark",
+      "captured_at_local": "2026-11-04T16:53:23-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": null,
+      "scene_revision": null,
+      "project_path": null,
+      "evidence_role": "pre-repair or intermediate Rust capture; not used for final paired claim",
+      "accepted_for_live_gate": false
+    },
+    {
+      "file": "captures/rust-dark-pair.png",
+      "sha256": "899cb14ad568f159ade757eabc75e8f1224c6244fc946a2458688bef406823b5",
+      "bytes": 205004,
+      "png_dimensions_px": [
+        1296,
+        879
+      ],
+      "application": "Rust desktop",
+      "theme": "Dark",
+      "captured_at_local": "2026-11-04T16:56:17-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": null,
+      "scene_revision": null,
+      "project_path": null,
+      "evidence_role": "pre-repair or intermediate Rust capture; not used for final paired claim",
+      "accepted_for_live_gate": false
+    },
+    {
+      "file": "captures/rust-dirty-confirmation-after-restart.png",
+      "sha256": "1483e0d6b3c0c16cd3298b17e7f46d29961366e61dc0ae9a96e00c8693baa6ea",
+      "bytes": 132564,
+      "png_dimensions_px": [
+        1296,
+        879
+      ],
+      "application": "Rust desktop",
+      "theme": "Dark",
+      "captured_at_local": "2026-11-04T17:12:27-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": null,
+      "scene_revision": null,
+      "project_path": null,
+      "evidence_role": "pre-repair or intermediate Rust capture; not used for final paired claim",
+      "accepted_for_live_gate": false
+    },
+    {
+      "file": "captures/rust-dirty-confirmation-hotkey.png",
+      "sha256": "f77d3540fae905fbdf4fb5b28ed127a75875d5291dc3feb424405f1392863eba",
+      "bytes": 252445,
+      "png_dimensions_px": [
+        1600,
+        900
+      ],
+      "application": "Rust desktop",
+      "theme": "Dark",
+      "captured_at_local": "2026-11-04T17:04:49-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": null,
+      "scene_revision": null,
+      "project_path": null,
+      "evidence_role": "pre-repair or intermediate Rust capture; not used for final paired claim",
+      "accepted_for_live_gate": false
+    },
+    {
+      "file": "captures/rust-dirty-confirmation.png",
+      "sha256": "c95ac3e173e1848c4f9a5b8c63cfab4d49169202bc00dda0112b099cba64e45d",
+      "bytes": 252528,
+      "png_dimensions_px": [
+        1600,
+        900
+      ],
+      "application": "Rust desktop",
+      "theme": "Dark",
+      "captured_at_local": "2026-11-04T17:03:23-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": null,
+      "scene_revision": null,
+      "project_path": null,
+      "evidence_role": "pre-repair or intermediate Rust capture; not used for final paired claim",
+      "accepted_for_live_gate": false
+    },
+    {
+      "file": "captures/rust-dirty-menu.png",
+      "sha256": "29a83513e2ee9e4b84eea984ada73cbb5483aedeb532209293d460292b586b56",
+      "bytes": 252692,
+      "png_dimensions_px": [
+        1600,
+        900
+      ],
+      "application": "Rust desktop",
+      "theme": "Dark",
+      "captured_at_local": "2026-11-04T17:02:52-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": null,
+      "scene_revision": null,
+      "project_path": null,
+      "evidence_role": "pre-repair or intermediate Rust capture; not used for final paired claim",
+      "accepted_for_live_gate": false
+    },
+    {
+      "file": "captures/rust-dirty-welcome.png",
+      "sha256": "707f8137832744541988e392ec39669ecf6c6100c2c0493edf03ec48c0a8a4c0",
+      "bytes": 246120,
+      "png_dimensions_px": [
+        1600,
+        900
+      ],
+      "application": "Rust desktop",
+      "theme": "Dark",
+      "captured_at_local": "2026-11-04T17:06:06-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": null,
+      "scene_revision": null,
+      "project_path": null,
+      "evidence_role": "pre-repair or intermediate Rust capture; not used for final paired claim",
+      "accepted_for_live_gate": false
+    },
+    {
+      "file": "captures/rust-final-paired-dark-alt-1600x900.png",
+      "sha256": "f73e41bb867c8e4d1898dbc64c12387572f8bc8689ced93b2b8f11c588ab1a55",
+      "bytes": 239020,
+      "png_dimensions_px": [
+        1600,
+        900
+      ],
+      "application": "Rust desktop",
+      "theme": "Dark",
+      "captured_at_local": "2026-11-04T18:01:25-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": "e5d81c5226e64f58b838d55d9395afa9",
+      "scene_revision": 23,
+      "project_path": "fixtures/approved/RB09-Paired-Live.3dp",
+      "evidence_role": "accepted live-gate evidence",
+      "accepted_for_live_gate": true
+    },
+    {
+      "file": "captures/rust-final-paired-dark-initial.png",
+      "sha256": "4fe91dc4232742d6945ce5f5fa195921bcbd650872b97a48cba7f24dc049af6e",
+      "bytes": 285898,
+      "png_dimensions_px": [
+        1296,
+        879
+      ],
+      "application": "Rust desktop",
+      "theme": "Dark",
+      "captured_at_local": "2026-11-04T18:00:06-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": null,
+      "scene_revision": null,
+      "project_path": null,
+      "evidence_role": "excluded from clean scene pair: Settings dialog is visible",
+      "accepted_for_live_gate": false
+    },
+    {
+      "file": "captures/rust-final-paired-dark-scene.png",
+      "sha256": "562705dce145d920330671a043a97a45547f718f120d0e21c6a1b1bb1f4be88d",
+      "bytes": 206436,
+      "png_dimensions_px": [
+        1296,
+        879
+      ],
+      "application": "Rust desktop",
+      "theme": "Dark",
+      "captured_at_local": "2026-11-04T18:00:45-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": "e5d81c5226e64f58b838d55d9395afa9",
+      "scene_revision": 23,
+      "project_path": "fixtures/approved/RB09-Paired-Live.3dp",
+      "evidence_role": "accepted live-gate evidence",
+      "accepted_for_live_gate": true
+    },
+    {
+      "file": "captures/rust-final-paired-light-initial.png",
+      "sha256": "21816c7530178df6c9e1ad9724e00768bb69282794e8e5e0701943c04f2b6dfb",
+      "bytes": 237176,
+      "png_dimensions_px": [
+        1296,
+        879
+      ],
+      "application": "Rust desktop",
+      "theme": "Light",
+      "captured_at_local": "2026-11-04T17:58:04-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": "e5d81c5226e64f58b838d55d9395afa9",
+      "scene_revision": 23,
+      "project_path": "fixtures/approved/RB09-Paired-Live.3dp",
+      "evidence_role": "accepted live-gate evidence",
+      "accepted_for_live_gate": true
+    },
+    {
+      "file": "captures/rust-final-paired-open-path.png",
+      "sha256": "528b63c5287426dedd97f4696a85392cdb5c9e79be2d7c77a4bf2a002714f818",
+      "bytes": 148593,
+      "png_dimensions_px": [
+        1296,
+        879
+      ],
+      "application": "Rust desktop",
+      "theme": "Dark",
+      "captured_at_local": "2026-11-04T17:57:31-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": null,
+      "scene_revision": null,
+      "project_path": null,
+      "evidence_role": "supporting UI/intermediate capture",
+      "accepted_for_live_gate": false
+    },
+    {
+      "file": "captures/rust-final-settings-dialog.png",
+      "sha256": "852d2f3f8a66a5bc843b514b656eae74ba3b1e00b02bf19a63788f2f35b5ca51",
+      "bytes": 301455,
+      "png_dimensions_px": [
+        1296,
+        879
+      ],
+      "application": "Rust desktop",
+      "theme": "Dark",
+      "captured_at_local": "2026-11-04T17:59:30-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": null,
+      "scene_revision": null,
+      "project_path": null,
+      "evidence_role": "supporting UI/intermediate capture",
+      "accepted_for_live_gate": false
+    },
+    {
+      "file": "captures/rust-final-settings-menu.png",
+      "sha256": "d7f9322a4937fdd96d8cea1b8e915eacfd1b0f263e050cee68d930b4df79ca4d",
+      "bytes": 239194,
+      "png_dimensions_px": [
+        1296,
+        879
+      ],
+      "application": "Rust desktop",
+      "theme": "Dark",
+      "captured_at_local": "2026-11-04T17:58:59-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": null,
+      "scene_revision": null,
+      "project_path": null,
+      "evidence_role": "supporting UI/intermediate capture",
+      "accepted_for_live_gate": false
+    },
+    {
+      "file": "captures/rust-light-gui-edit.png",
+      "sha256": "365658a8e2aebc792abd657a5685cd8efcdb3fce8ab24cac2c578f873e4a0924",
+      "bytes": 324386,
+      "png_dimensions_px": [
+        1600,
+        900
+      ],
+      "application": "Rust desktop",
+      "theme": "Light",
+      "captured_at_local": "2026-11-04T16:59:36-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": null,
+      "scene_revision": null,
+      "project_path": null,
+      "evidence_role": "pre-repair or intermediate Rust capture; not used for final paired claim",
+      "accepted_for_live_gate": false
+    },
+    {
+      "file": "captures/rust-light-initial.png",
+      "sha256": "f7d586554897af1492aedf06b05330bede8f17d3c87fcde758c23587a5570fdf",
+      "bytes": 168671,
+      "png_dimensions_px": [
+        1296,
+        879
+      ],
+      "application": "Rust desktop",
+      "theme": "Light",
+      "captured_at_local": "2026-11-04T16:54:34-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": null,
+      "scene_revision": null,
+      "project_path": null,
+      "evidence_role": "pre-repair or intermediate Rust capture; not used for final paired claim",
+      "accepted_for_live_gate": false
+    },
+    {
+      "file": "captures/rust-light-mcp-edit.png",
+      "sha256": "f248907f4fa07d11caa6314b6af037cc78561549daf4ef5182d27bbbdbb7f975",
+      "bytes": 293150,
+      "png_dimensions_px": [
+        1600,
+        900
+      ],
+      "application": "Rust desktop",
+      "theme": "Light",
+      "captured_at_local": "2026-11-04T16:59:03-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": null,
+      "scene_revision": null,
+      "project_path": null,
+      "evidence_role": "pre-repair or intermediate Rust capture; not used for final paired claim",
+      "accepted_for_live_gate": false
+    },
+    {
+      "file": "captures/rust-light-menu.png",
+      "sha256": "805f83b2bde58e09a8e0d5c9848eb3ab96faaf640bf49381a8414f04bbe574fa",
+      "bytes": 175006,
+      "png_dimensions_px": [
+        1296,
+        879
+      ],
+      "application": "Rust desktop",
+      "theme": "Light",
+      "captured_at_local": "2026-11-04T16:51:52-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": null,
+      "scene_revision": null,
+      "project_path": null,
+      "evidence_role": "pre-repair or intermediate Rust capture; not used for final paired claim",
+      "accepted_for_live_gate": false
+    },
+    {
+      "file": "captures/rust-light-pair-alt-1600x900.png",
+      "sha256": "3cca877d69945e1b2cf86e19097673b436c1eaea6897e8e2a546095a93507d67",
+      "bytes": 276427,
+      "png_dimensions_px": [
+        1600,
+        900
+      ],
+      "application": "Rust desktop",
+      "theme": "Light",
+      "captured_at_local": "2026-11-04T16:57:46-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": null,
+      "scene_revision": null,
+      "project_path": null,
+      "evidence_role": "pre-repair or intermediate Rust capture; not used for final paired claim",
+      "accepted_for_live_gate": false
+    },
+    {
+      "file": "captures/rust-optional-mcp-unavailable.png",
+      "sha256": "d7d90f5a7c200fe10f0c734c430d39806c345133bfdb4e0d8247bf9aa94f8506",
+      "bytes": 182738,
+      "png_dimensions_px": [
+        1296,
+        879
+      ],
+      "application": "Rust desktop",
+      "theme": "Dark",
+      "captured_at_local": "2026-11-04T17:51:58-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": null,
+      "scene_revision": null,
+      "project_path": null,
+      "evidence_role": "accepted live-gate evidence",
+      "accepted_for_live_gate": true
+    },
+    {
+      "file": "captures/rust-post-fix-dirty-new.png",
+      "sha256": "067d7e15a253ea30438d7146cf9ed097eef66d4d2b3c753c3b0475f4b2d38213",
+      "bytes": 347740,
+      "png_dimensions_px": [
+        1296,
+        879
+      ],
+      "application": "Rust desktop",
+      "theme": "Dark",
+      "captured_at_local": "2026-11-04T17:29:55-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": "e5d81c5226e64f58b838d55d9395afa9",
+      "scene_revision": 34,
+      "project_path": "fixtures/approved/RB09-Rust-Live.3dp",
+      "evidence_role": "accepted live-gate evidence",
+      "accepted_for_live_gate": true
+    },
+    {
+      "file": "captures/rust-post-fix-final-history-added.png",
+      "sha256": "85d1ec66a6a0ff783e5f0c1ce10d051f9e8392d38a21bf4ad53fca7584b7cf94",
+      "bytes": 274913,
+      "png_dimensions_px": [
+        1296,
+        879
+      ],
+      "application": "Rust desktop",
+      "theme": "Dark",
+      "captured_at_local": "2026-11-04T17:48:20-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": "e5d81c5226e64f58b838d55d9395afa9",
+      "scene_revision": 35,
+      "project_path": "fixtures/approved/RB09-Rust-Live.3dp",
+      "evidence_role": "accepted live-gate evidence",
+      "accepted_for_live_gate": true
+    },
+    {
+      "file": "captures/rust-post-fix-final-history-gui-redo.png",
+      "sha256": "35b8ac5aa54e3fbd6fca5312297c4cbf31dcc3247bec48c96b27f63029ec6c52",
+      "bytes": 268274,
+      "png_dimensions_px": [
+        1296,
+        879
+      ],
+      "application": "Rust desktop",
+      "theme": "Dark",
+      "captured_at_local": "2026-11-04T17:49:38-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": "e5d81c5226e64f58b838d55d9395afa9",
+      "scene_revision": 37,
+      "project_path": "fixtures/approved/RB09-Rust-Live.3dp",
+      "evidence_role": "accepted live-gate evidence",
+      "accepted_for_live_gate": true
+    },
+    {
+      "file": "captures/rust-post-fix-final-history-gui-undo.png",
+      "sha256": "bf361c31cb1ea393b98c03ebc40b7d2658dc5a794f2a8081e7fae7479cda37a5",
+      "bytes": 268565,
+      "png_dimensions_px": [
+        1296,
+        879
+      ],
+      "application": "Rust desktop",
+      "theme": "Dark",
+      "captured_at_local": "2026-11-04T17:49:02-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": "e5d81c5226e64f58b838d55d9395afa9",
+      "scene_revision": 36,
+      "project_path": "fixtures/approved/RB09-Rust-Live.3dp",
+      "evidence_role": "accepted live-gate evidence",
+      "accepted_for_live_gate": true
+    },
+    {
+      "file": "captures/rust-post-fix-gui-open-path.png",
+      "sha256": "a31cfa7d7f994a63a21653aedc8cb9cadd4ac629419568d56f3bc725b5bc898e",
+      "bytes": 136028,
+      "png_dimensions_px": [
+        1296,
+        879
+      ],
+      "application": "Rust desktop",
+      "theme": "Dark",
+      "captured_at_local": "2026-11-04T17:46:42-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": null,
+      "scene_revision": null,
+      "project_path": null,
+      "evidence_role": "supporting UI/intermediate capture",
+      "accepted_for_live_gate": false
+    },
+    {
+      "file": "captures/rust-post-fix-gui-reopen-start.png",
+      "sha256": "eceee372e6ca56774faca2130464e79c76984eb6141663ede04ae99c40da7a03",
+      "bytes": 132713,
+      "png_dimensions_px": [
+        1296,
+        879
+      ],
+      "application": "Rust desktop",
+      "theme": "Dark",
+      "captured_at_local": "2026-11-04T17:45:51-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": null,
+      "scene_revision": null,
+      "project_path": null,
+      "evidence_role": "supporting UI/intermediate capture",
+      "accepted_for_live_gate": false
+    },
+    {
+      "file": "captures/rust-post-fix-gui-reopened.png",
+      "sha256": "605bf1463b1c0736226544a92e0ac4d85aef1b89121e705ff9d10ec1d7eb8d9d",
+      "bytes": 268959,
+      "png_dimensions_px": [
+        1296,
+        879
+      ],
+      "application": "Rust desktop",
+      "theme": "Dark",
+      "captured_at_local": "2026-11-04T17:47:24-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": "e5d81c5226e64f58b838d55d9395afa9",
+      "scene_revision": 34,
+      "project_path": "fixtures/approved/RB09-Rust-Live.3dp",
+      "evidence_role": "accepted live-gate evidence",
+      "accepted_for_live_gate": true
+    },
+    {
+      "file": "captures/rust-post-fix-mcp-edit.png",
+      "sha256": "dd668394cb6b998205f3e562ba6567c9058b79ea939e56503e35d1224d06c5a6",
+      "bytes": 260801,
+      "png_dimensions_px": [
+        1296,
+        879
+      ],
+      "application": "Rust desktop",
+      "theme": "Dark",
+      "captured_at_local": "2026-11-04T17:29:22-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": "e5d81c5226e64f58b838d55d9395afa9",
+      "scene_revision": 34,
+      "project_path": "fixtures/approved/RB09-Rust-Live.3dp",
+      "evidence_role": "accepted live-gate evidence",
+      "accepted_for_live_gate": true
+    },
+    {
+      "file": "captures/rust-post-fix-new-project.png",
+      "sha256": "f04ff932cd4e6c496bc408ed8644f3bb11b07e09e01abddca66fb15fa3806087",
+      "bytes": 142121,
+      "png_dimensions_px": [
+        1296,
+        879
+      ],
+      "application": "Rust desktop",
+      "theme": "Dark",
+      "captured_at_local": "2026-11-04T17:33:23-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": "e6b3ff7558cf465198ddb2c4d410ebb0",
+      "scene_revision": 0,
+      "project_path": null,
+      "evidence_role": "accepted live-gate evidence",
+      "accepted_for_live_gate": true
+    },
+    {
+      "file": "captures/rust-post-fix-open-project.png",
+      "sha256": "4f161fde466ad6f64f787467ae46583d0016f475a0cbb98ac5e17cacd391f076",
+      "bytes": 260330,
+      "png_dimensions_px": [
+        1296,
+        879
+      ],
+      "application": "Rust desktop",
+      "theme": "Dark",
+      "captured_at_local": "2026-11-04T17:28:24-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": "e5d81c5226e64f58b838d55d9395afa9",
+      "scene_revision": 34,
+      "project_path": "fixtures/approved/RB09-Rust-Live.3dp",
+      "evidence_role": "accepted live-gate evidence",
+      "accepted_for_live_gate": true
+    },
+    {
+      "file": "captures/rust-post-fix-stale-edit.png",
+      "sha256": "6e20348ca818806528e9d3026dbdccfe71c69704b47b2c9ab6d21fb29863c753",
+      "bytes": 354395,
+      "png_dimensions_px": [
+        1296,
+        879
+      ],
+      "application": "Rust desktop",
+      "theme": "Dark",
+      "captured_at_local": "2026-11-04T17:42:19-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": "e5d81c5226e64f58b838d55d9395afa9",
+      "scene_revision": 46,
+      "project_path": "fixtures/approved/RB09-Rust-Live.3dp",
+      "evidence_role": "accepted live-gate evidence",
+      "accepted_for_live_gate": true
+    },
+    {
+      "file": "captures/rust-post-restart-mcp-dirty.png",
+      "sha256": "7438ac6cdf02fdc9c044009c4aa13db2015224af1237c4b6986e753f826637f8",
+      "bytes": 166281,
+      "png_dimensions_px": [
+        1296,
+        879
+      ],
+      "application": "Rust desktop",
+      "theme": "Dark",
+      "captured_at_local": "2026-11-04T17:11:22-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": null,
+      "scene_revision": null,
+      "project_path": null,
+      "evidence_role": "pre-repair or intermediate Rust capture; not used for final paired claim",
+      "accepted_for_live_gate": false
+    },
+    {
+      "file": "captures/rust-post-restart-welcome.png",
+      "sha256": "12704a1066d2ec908bbb72c46dbd3b7503f40ead745f1ac6baa061cacf4111eb",
+      "bytes": 165818,
+      "png_dimensions_px": [
+        1296,
+        879
+      ],
+      "application": "Rust desktop",
+      "theme": "Dark",
+      "captured_at_local": "2026-11-04T17:09:46-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": null,
+      "scene_revision": null,
+      "project_path": null,
+      "evidence_role": "pre-repair or intermediate Rust capture; not used for final paired claim",
+      "accepted_for_live_gate": false
+    },
+    {
+      "file": "captures/rust-settings-light.png",
+      "sha256": "4b7c28ad8a1c6bf9dfaf640dc13a05a78ed915a00fbce16de594976c6e430ec8",
+      "bytes": 156207,
+      "png_dimensions_px": [
+        1296,
+        879
+      ],
+      "application": "Rust desktop",
+      "theme": "Light",
+      "captured_at_local": "2026-11-04T16:52:22-07:00",
+      "host_screen_px": [
+        2560,
+        1440
+      ],
+      "dpi": 96,
+      "dpi_scale_percent": 100,
+      "host_desktop_interactive": true,
+      "project_id": null,
+      "scene_revision": null,
+      "project_path": null,
+      "evidence_role": "pre-repair or intermediate Rust capture; not used for final paired claim",
+      "accepted_for_live_gate": false
+    }
+  ],
+  "native_capture_count": 50,
+  "visual_review": "pending",
+  "owner_acceptance": "pending",
+  "open_product_gaps": [
+    "owner-reported interface gap",
+    "owner-reported floor gap"
+  ],
+  "prior_native_evidence_pending": [
+    "RB-08 paired Rust native interaction matrix",
+    "RB-08 completion snapshot"
+  ],
+  "excluded_capture_note": "rust-final-paired-dark-initial.png contains a Settings dialog and is not treated as a clean Dark scene capture."
+}

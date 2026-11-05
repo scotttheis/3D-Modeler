@@ -3776,3 +3776,78 @@ the test process.
 The owner explicitly requested a task-scoped documentation/evidence commit in
 this wrap-up, overriding the earlier no-commit direction for these files only.
 The commit does not close RB-09 or grant general commit authorization.
+
+### Post-review G: snapshot receipt (2026-11-04)
+
+After commit `8e2178e`, created the additive snapshot
+`G:\Builder3D-Rust_snapshot_20261104-073919_RB-09-review` from the E: worktree.
+Robocopy exited 1 (files copied, no failures). The independent
+`verify_rb09_snapshot.ps1` check passed: source and snapshot each contain 3,312
+included files / 585,155,060 bytes; missing, extra, size/hash-different, and
+reparse entries are all zero. Root `target`, `.cache`, and `logs` were excluded;
+the hidden Git metadata was included. This receipt was appended after copying,
+so the snapshot predates this paragraph. The snapshot is a paused/review copy,
+not an RB-09 completion snapshot.
+
+
+## RB-09 live desktop/MCP verification (2026-11-04)
+
+Completed the paired Python/Rust live desktop and MCP sequence from E:/Builder3D-Rust. The host helper confirmed the Default desktop was active and interactive before each input and capture; LockApp did not own the session. Edge?s 24-hour YouTube video stayed in the background as a keep-awake aid only. No Windows power or lock settings changed.
+
+The initial Rust live run found a scoped Welcome-to-Scene presentation defect: MCP opened/edited the document but the GUI stayed on Welcome. Updated shell presentation synchronization after MCP installs/commits and project replacement, then added two app regression tests. The repaired live run showed the Scene and updated viewport/Items immediately.
+
+The official Python MCP SDK 2.2.0 exercised the real Python and Rust app bridges. Project e5d81c5226e64f58b838d55d9395afa9 and stable Cube/Sphere IDs matched. GUI/MCP history, no-op behavior, Save/close/reopen/New/Open, dirty protection, denied/invalid files, failure atomicity, idempotency replay, expected-revision conflicts, competing clients, long-operation progress/cancel/failure/stale results, optional startup, closed-desktop responses, and shutdown cleanup passed. The Python initial capture is revision 4 with the Cube blue; the shared fixture was later saved at revision 23 with the Cube gold after a Python MCP edit. This difference is explicit in the paired board.
+
+Post-repair gates passed: cargo fmt --all -- --check; cargo test -p builder3d-app mcp_ (7/7); cargo test --workspace --locked (329/329); cargo clippy --all-targets -- -D warnings; locked Release app and gateway builds. Full logs are in evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-*. The official SDK post-run probe also passed against the current gateway with all 60 tools and structured desktop_unavailable while closed. The evidence validator passed with 50 capture hashes/dimensions, two clean Light/Dark pairs, ten fixture hashes, 96 Rust sources, and valid TOML/JSON/NDJSON references.
+
+Restored L:/Builder3D external QSettings exactly to object_snapping_enabled=true, ribbon_favorites=[], theme_mode=dark and removed the test-created recent_files key. The Python reference source tree remained untouched. The Rust live app/gateway and optional-failure app were closed; no runtime listener or descriptor remained. The uncommitted E: worktree remains intact.
+
+The additive completion recovery copy is G:/Builder3D-Rust_snapshot_20261104-182021_RB-09-complete. Its independent path/size/SHA-256/reparse verification is recorded in evidence/rebuild/rb-09-shared-ai-and-regression/snapshot-receipt.md. At the end of the live-run phase, no commit or staging had been performed; the later wrap-up request authorized the scoped RB-09 commit.
+
+The owner?s interface/floor gaps and visual review remain open. No owner visual approval or overall acceptance is claimed. RB-08 native matrix/completion snapshot remains open. RB-10 has not started.
+
+## RB-09 wrap-up review (2026-11-04)
+
+Re-read the RB-09 acceptance row in `docs/product-rebuild-plan.md`, the five
+completion checks in `docs/rb-09-shared-ai-and-regression-handoff.md`, and the
+project hard rules. No Rust source changed during this wrap-up.
+
+Reran from the E: project root after sourcing `scripts/Initialize-BuildClang.ps1`:
+`cargo fmt --all -- --check`, `cargo check --workspace --locked`,
+`cargo test --workspace --locked` (329 passed, 0 failed, 0 ignored across 28
+test-result records), `cargo clippy --all-targets -- -D warnings`,
+`cargo deny check` (28 duplicate-version warnings, no policy errors), locked
+metadata, focused MCP tests (19 passed), and app smoke. Every command exited 0;
+smoke output was `Builder3D shell smoke: objects=2 selected=1 tabs=5`.
+
+The evidence-record audit passed criteria 1-4: matching live project/object IDs
+and accepted interactive capture; cross-adapter edits/history/lifecycle,
+conflicts, cancellation and stale-result outcomes; matching 60-tool client
+catalogs and 19 focused MCP tests; optional-startup availability, bounded
+closed-desktop errors and bridge cleanup. The gate-time evidence validator and
+the prior G: snapshot check had passed. A fresh validator rerun now exits 1:
+`release binary hash mismatch: live Rust app`. The tested app hash in the
+manifest is `d680cf0ba8e4c8bf7d5ccd1536bf7d5720987d676a1a0946c6c3505b613b0cb9`;
+the current target app is `0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a`.
+The current gateway hash is also different from the recorded live and post-run
+hashes. No application code was changed to mask this identity discrepancy.
+
+The `cargo bloat --release --workspace` invocation warned that `--workspace`
+was unused and analyzed `r5_viewport.exe`, so it did not measure the workspace.
+The explicit app-target bloat run reported 12.7 MiB `.text` / 15.4 MiB file;
+this is not a total installed-size result. `cargo audit` was unavailable. The
+60-minute/256-entry replay and 3,600-second/128-entry operation-retention
+limits remain existing constants; comparison with the Python reference is
+still open. A 600k import completed too quickly to cancel; cancellation was
+verified on Rust 50k normalize progress 90 to 95. Owner visual approval,
+interface/floor parity, and the RB-08 native matrix remain open. RB-10 has not
+started.
+
+The plan's Review Notes records all five criteria, command/results, shortcuts,
+file changes and dependency/config/design scope. The new additive G: review
+snapshot and independent verification are recorded in the RB-09 snapshot
+receipt. The plan's Recovery snapshot subsection and the snapshot/log receipt
+updates were appended after the exact-tree verifier pass; the copy preserves
+the staged recovery state from before commit. The owner explicitly authorized
+the task-scoped commit in the wrap-up request; this does not alter the standing
+rule for other work.

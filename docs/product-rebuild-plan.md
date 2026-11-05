@@ -1,14 +1,16 @@
 # Builder3D product rebuild and parity plan
 
-Date: 2026-11-03. Status: active replacement plan; RB-02 is complete and
+Date: 2026-11-04. Status: active replacement plan; RB-02 is complete and
 owner-accepted. RB-03 through RB-07 implementation and engineering evidence are
 recorded; their visual review and owner acceptance remain pending. RB-08
 implementation and automated checks are recorded, but its paired Rust native
 matrix and completion snapshot remain pending. RB-09 Shared AI and Regression
-implementation and automated verification are recorded; the live-client/native
-gate is still unverified and the owner paused work on 2026-11-03. When work
-resumes, finish that RB-09 gate and stop before RB-10. This does not close RB-08
-or accept the product.
+passed its paired live desktop/MCP gate on the recorded build after a scoped
+presentation-sync repair. A later wrap-up recheck found that the current
+`target/release` app hash no longer matches the live-build manifest; details and
+the exact failed command are in the RB-09 review notes below. Stop before RB-10.
+This does not close RB-08, resolve the owner?s interface/floor gaps, grant
+visual approval, or accept the product.
 
 The active Rust source/build/run workspace is `E:\Builder3D-Rust`. Use `G:\`
 as the primary additive backup destination. Removable USB copies are occasional
@@ -509,4 +511,215 @@ for the current slice. Do not represent RB-08 as closed or treat RB-09 as
 resolving its open evidence. The owner reports that the interface and floor are
 still missing; retain them as open product parity gaps. Visual review and owner
 acceptance remain pending across the earlier slices. Keep `L:\Builder3D`
-read-only and do not stage or commit.
+read-only. The later wrap-up instruction explicitly authorized one task-scoped
+commit; it does not change the standing no-commit boundary for other work.
+## Review notes - RB-09 wrap-up (2026-11-04)
+
+Scope: RB-09 only. Re-read the plan's RB-09 acceptance row, this project's AGENTS.md hard rules, and the five completion checks in the RB-09 handoff. No RB-10 work was started.
+
+### Check/test commands and real results
+
+| Command | Result |
+|---|---|
+| cargo fmt --all -- --check | PASS, exit 0 |
+| cargo check --workspace --locked | PASS, exit 0 |
+| cargo test --workspace --locked | PASS; sum of 28 test-result lines: 329 passed, 0 failed, 0 ignored |
+| cargo clippy --all-targets -- -D warnings | PASS, exit 0 |
+| cargo deny check | PASS, exit 0; 28 duplicate-version warnings and no policy errors |
+| cargo metadata --locked --format-version 1 --no-deps | PASS, exit 0 |
+| cargo test -p builder3d-mcp --locked | PASS; 19 passed, 0 failed, 0 ignored |
+| cargo run -p builder3d-app --bin builder3d-app -- --smoke | PASS; output: Builder3D shell smoke: objects=2 selected=1 tabs=5 |
+
+The eight results above are from the wrap-up rerun after initializing the documented BuildClang helper in the same PowerShell session. The full stdout/stderr is in ignored target/rb09-wrapup-gates. The locked Release app/MCP builds passed earlier in the gate run and are retained in evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-release-*. The workspace bloat invocation is not a workspace result; see Shortcuts.
+
+### 3. Acceptance criteria checked one by one
+
+| Criterion from RB-09 handoff section 9 | Command run | Result |
+|---|---|---|
+| Real MCP client and native desktop use one live document; MCP edits appear in the GUI. | host_desktop.ps1 preflight, official Python MCP SDK live sessions using live_mcp_client.py, and the inline Python log/capture assertion (python -). | PASS on the recorded live app/gateway hashes. Both client logs identify project e5d81c5226e64f58b838d55d9395afa9 and the stable Cube/Sphere IDs; accepted interactive MCP-edit capture is present. Current hash recheck caveat is recorded under criterion 5. |
+| Cross-adapter reads/edits/history/save/reopen/revisions/replay/conflicts/files/cancel/failure atomicity. | cargo test --workspace --locked plus live Python/Rust SDK sessions and the inline Python JSONL assertion (python -). | PASS in the live records and 329-test suite. GUI/MCP history, no-op, lifecycle, failure preservation, replay/races, real cancellation, bounded failures and stale-result rejection are recorded in the walkthrough and client logs. |
+| Existing 60-tool catalog, profile and schema remain compatible. | cargo test -p builder3d-mcp --locked and compare the Python/Rust ready-event tool arrays (inline Python, python -). | PASS: 19 focused tests passed; both live SDK logs expose the same ordered 60-tool list. |
+| MCP can fail to start or the desktop can close without blocking ordinary GUI use; errors and cleanup are bounded. | rust_stdio_client_probe.py and the Python/Rust optional-client logs; inline Python record assertion (python -). | PASS: optional MCP leaves the GUI usable, closed Rust clients get retryable desktop_unavailable, and cleanup records show the owned descriptor/listener and processes gone. |
+| Evidence/ledgers/gates have exact outcomes and an additive snapshot is independently verified. | python evidence/rebuild/rb-09-shared-ai-and-regression/validate_rb09_evidence.py; verify_rb09_snapshot.ps1. | PARTIAL on this wrap-up. At the live gate, the evidence validator exited 0 and the RB-09 completion snapshot verified. The fresh validator rerun exits 1 with release binary hash mismatch: live Rust app because the current rebuilt app is 0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a and the recorded live app is d680cf0ba8e4c8bf7d5ccd1536bf7d5720987d676a1a0946c6c3505b613b0cb9. The additional wrap-up snapshot is recorded in the snapshot receipt and is not labeled complete. |
+
+The inline Python assertions read only the saved SDK JSONL and capture metadata. They printed PASS for criteria 1-4; they do not replace the earlier live GUI observations. The original evidence-validator pass remains in logs/evidence-ledger-validation.log/.exit; the wrap-up failure is recorded separately above.
+
+### 4. Shortcuts, warnings, hard-coded limits and untested work
+
+- No application stubs, todo!/unimplemented!/dbg! markers, TODO/FIXME/HACK markers, or ignored Rust tests were found; no new lint allowances were added.
+- Existing code has 17 #[allow(clippy::too_many_arguments)] and 2 #[allow(unsafe_code)] attributes. The strict Clippy command passed.
+- Existing replay/operation limits remain constants: 600 seconds / 256 replay entries and 3,600 seconds / 128 operation entries. The requested comparison with the Python reference remains open; these limits were not changed.
+- cargo deny emitted 28 duplicate-version warnings; it reported no advisory, ban, license or source-policy failure. cargo audit was unavailable because cargo-audit is not installed.
+- cargo bloat --release --workspace exited 0 but warned that --workspace was unused and analyzed the default r5_viewport.exe; it is not a workspace measurement. The explicit app target reported 12.7 MiB .text and a 15.4 MiB file, not the total installed package.
+- A 600k-face STL import finished too quickly to cancel. Rust cancellation was verified on the 50k normalize operation at progress 90 to 95. The 600k and 250k normalize attempts hit bounded-resource failures.
+- One initial PowerShell wrapper stopped on Cargo's successful Finished stderr line; the same checks were rerun with native stderr handling corrected and all eight exits were 0.
+- Current target Release hashes do not match the recorded live app/gateway hashes. No source was changed to hide that failed recheck; current target executables are not claimed as live-tested.
+- Owner visual approval and overall acceptance remain pending. The interface/floor gaps and RB-08 native matrix/completion snapshot remain open. No RB-10 work was started.
+
+### 5. Files created, changed, or deleted
+
+Compared E:/Builder3D-Rust with the read-only starting snapshot G:/Builder3D-Rust_snapshot_20261104-073919_RB-09-review (excluding root target, .cache and logs), the RB-09 delta contains 92 added files, 22 changed files and 0 deleted files. Each path and reason follows.
+
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/python-dark-initial.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/python-dirty-confirmation.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/python-dirty-menu.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/python-light-after-open.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/python-light-alt-1600x900.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/python-light-gui-edit.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/python-light-initial.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/python-light-mcp-race-edit.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/python-light-reopened.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/python-light-settings-dialog.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/python-light-stale-edit.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/python-mcp-startup-failed.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/python-menu.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/python-optional-mcp-unavailable.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/python-settings-dialog-dark.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-dark-initial-confirmed.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-dark-initial.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-dark-pair.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-dirty-confirmation-after-restart.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-dirty-confirmation-hotkey.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-dirty-confirmation.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-dirty-menu.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-dirty-welcome.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-final-paired-dark-alt-1600x900.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-final-paired-dark-initial.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-final-paired-dark-scene.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-final-paired-light-initial.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-final-paired-open-path.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-final-settings-dialog.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-final-settings-menu.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-light-gui-edit.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-light-initial.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-light-mcp-edit.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-light-menu.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-light-pair-alt-1600x900.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-optional-mcp-unavailable.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-post-fix-dirty-new.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-post-fix-final-history-added.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-post-fix-final-history-gui-redo.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-post-fix-final-history-gui-undo.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-post-fix-gui-open-path.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-post-fix-gui-reopen-start.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-post-fix-gui-reopened.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-post-fix-mcp-edit.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-post-fix-new-project.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-post-fix-open-project.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-post-fix-stale-edit.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-post-restart-mcp-dirty.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-post-restart-welcome.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-settings-light.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/fixtures/approved/RB09-Paired-Live.3dp` - paired Python/Rust live project fixture.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/fixtures/approved/RB09-Rust-Live.3dp` - Rust live save/reopen/New/Open fixture.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/fixtures/approved/RB09-long-operation-600k.stl` - large STL fixture used to observe bounded progress/cancel timing.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/fixtures/approved/RB09-malformed.3dp` - malformed project used to verify failure atomicity.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/fixtures/approved/RB09-operation-250k.stl` - bounded-resource operation failure fixture.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/fixtures/approved/RB09-operation-50k.stl` - long-operation progress and cancellation fixture.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/fixtures/approved/RB09-overwrite-refusal.3dp` - overwrite refusal sentinel fixture.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/fixtures/approved/RB09-runtime-parent-blocker.txt` - regular-file parent used to force optional bridge startup failure.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/fixtures/approved/RB09-unsupported.input` - unsupported-format failure fixture.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/fixtures/denied/RB09-denied.3dp` - denied-root path-policy fixture.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/host_desktop.ps1` - host preflight that blocks UI input/capture unless the Default desktop is interactive.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/live_mcp_client.py` - official Python MCP SDK stdio client used for wire-level live requests.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/evidence-ledger-validation.exit` - gate-time evidence-validator exit code.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-cargo-clippy.exit` - post-repair build/test/lint command stdout, stderr, and exit evidence.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-cargo-clippy.stderr.log` - post-repair build/test/lint command stdout, stderr, and exit evidence.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-cargo-clippy.stdout.log` - post-repair build/test/lint command stdout, stderr, and exit evidence.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-cargo-fmt.exit` - post-repair build/test/lint command stdout, stderr, and exit evidence.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-cargo-fmt.stderr.log` - post-repair build/test/lint command stdout, stderr, and exit evidence.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-cargo-fmt.stdout.log` - post-repair build/test/lint command stdout, stderr, and exit evidence.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-focused-app-mcp.exit` - post-repair build/test/lint command stdout, stderr, and exit evidence.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-focused-app-mcp.stderr.log` - post-repair build/test/lint command stdout, stderr, and exit evidence.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-focused-app-mcp.stdout.log` - post-repair build/test/lint command stdout, stderr, and exit evidence.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-release-app.exit` - post-repair build/test/lint command stdout, stderr, and exit evidence.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-release-app.stderr.log` - post-repair build/test/lint command stdout, stderr, and exit evidence.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-release-app.stdout.log` - post-repair build/test/lint command stdout, stderr, and exit evidence.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-release-mcp.exit` - post-repair build/test/lint command stdout, stderr, and exit evidence.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-release-mcp.stderr.log` - post-repair build/test/lint command stdout, stderr, and exit evidence.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-release-mcp.stdout.log` - post-repair build/test/lint command stdout, stderr, and exit evidence.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-workspace-test.exit` - post-repair build/test/lint command stdout, stderr, and exit evidence.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-workspace-test.stderr.log` - post-repair build/test/lint command stdout, stderr, and exit evidence.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-workspace-test.stdout.log` - post-repair build/test/lint command stdout, stderr, and exit evidence.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/python-settings-before.json` - pre-run Python reference settings baseline for exact restoration.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/rb09-client-harness-check.jsonl` - MCP client/desktop preflight harness event log.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/rb09-client-harness-tty-check.jsonl` - MCP client/desktop preflight harness event log.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/rb09-python-client-2.jsonl` - raw official-SDK live MCP request/result log.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/rb09-python-client.jsonl` - raw official-SDK live MCP request/result log.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/rb09-python-optional-client.jsonl` - raw official-SDK live MCP request/result log.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/rb09-rust-client-2.jsonl` - raw official-SDK live MCP request/result log.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/rb09-rust-client-final-pair.jsonl` - raw official-SDK live MCP request/result log.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/rb09-rust-client.jsonl` - raw official-SDK live MCP request/result log.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/rb09-rust-optional-client.jsonl` - raw official-SDK live MCP request/result log.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/rust-stdio-client-probe.exit` - official-SDK stdio/closed-desktop probe exit evidence.
+- `WORK_LOG.md` - RB-09 live run, wrap-up results, and next-boundary session record.
+- `crates/builder3d-app/src/mcp_bridge.rs` - synchronizes shell presentation after MCP scene/document commits; includes focused regressions.
+- `crates/builder3d-app/src/shell.rs` - synchronizes visible shell page after MCP document installation and replacement.
+- `docs/component-catalog.toml` - updates the existing MCP/app bridge component contract and evidence references.
+- `docs/product-rebuild-plan.md` - records RB-09 live status and this review entry.
+- `docs/rb-09-shared-ai-and-regression-handoff.md` - records the live endpoint and current artifact-identity recheck.
+- `evidence/rebuild/parity-matrix.toml` - updates RB-09 requirement and interaction statuses.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/accepted-journal.ndjson` - records accepted live-gate evidence.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/build-manifest.json` - records tested build/source identities and capture provenance.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/capture-metadata.json` - records capture hashes, dimensions, theme, DPI, and interactive provenance.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/checkpoint.md` - records tested state, open limitations, and recovery boundary.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/client-server-log.md` - indexes live client events, startup behavior, and binary identities.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/fixture-manifest.json` - records the live test fixture paths and hashes.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/evidence-ledger-validation.log` - gate-time evidence-validator pass output.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/paired-comparison-board.md` - documents the accepted Python/Rust scene capture pairs.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/rejected-journal.ndjson` - retains rejected first-run Rust visibility evidence.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/report.md` - records live results, repair scope, identity and current recheck failure.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/requirement-test-map.md` - maps RB-09 acceptance requirements to tests, clients, fixtures, and captures.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/snapshot-receipt.md` - records additive recovery snapshots and independent verification.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/validate_rb09_evidence.py` - validates the RB-09 manifest, capture, fixture, source, and journal evidence.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/verification.md` - records engineering gates, live checks, and the wrap-up hash mismatch.
+- `evidence/rebuild/rb-09-shared-ai-and-regression/walkthrough.md` - records paired live desktop/MCP steps and observed semantic state.
+- `target/rb09-wrapup-gates/bloat-app.stderr.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
+- `target/rb09-wrapup-gates/bloat-app.stdout.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
+- `target/rb09-wrapup-gates/bloat-workspace.stderr.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
+- `target/rb09-wrapup-gates/bloat-workspace.stdout.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
+- `target/rb09-wrapup-gates/check.stderr.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
+- `target/rb09-wrapup-gates/check.stdout.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
+- `target/rb09-wrapup-gates/clippy.stderr.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
+- `target/rb09-wrapup-gates/clippy.stdout.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
+- `target/rb09-wrapup-gates/deny.stderr.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
+- `target/rb09-wrapup-gates/deny.stdout.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
+- `target/rb09-wrapup-gates/fmt.stderr.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
+- `target/rb09-wrapup-gates/fmt.stdout.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
+- `target/rb09-wrapup-gates/mcp-tests.stderr.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
+- `target/rb09-wrapup-gates/mcp-tests.stdout.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
+- `target/rb09-wrapup-gates/metadata.stderr.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
+- `target/rb09-wrapup-gates/metadata.stdout.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
+- `target/rb09-wrapup-gates/release-app.stderr.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
+- `target/rb09-wrapup-gates/release-app.stdout.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
+- `target/rb09-wrapup-gates/release-mcp.stderr.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
+- `target/rb09-wrapup-gates/release-mcp.stdout.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
+- `target/rb09-wrapup-gates/restore-release-app.stderr.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
+- `target/rb09-wrapup-gates/restore-release-app.stdout.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
+- `target/rb09-wrapup-gates/review-file-list.md` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
+- `target/rb09-wrapup-gates/smoke.stderr.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
+- `target/rb09-wrapup-gates/smoke.stdout.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
+- `target/rb09-wrapup-gates/test.stderr.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
+- `target/rb09-wrapup-gates/test.stdout.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
+- `target/rb09-wrapup-gates/wrapup-check.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
+- `target/rb09-wrapup-gates/wrapup-clippy.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
+- `target/rb09-wrapup-gates/wrapup-deny.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
+- `target/rb09-wrapup-gates/wrapup-exits.json` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
+- `target/rb09-wrapup-gates/wrapup-fmt.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
+- `target/rb09-wrapup-gates/wrapup-mcp-tests.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
+- `target/rb09-wrapup-gates/wrapup-metadata.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
+- `target/rb09-wrapup-gates/wrapup-smoke.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
+- `target/rb09-wrapup-gates/wrapup-test.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
+- `target/release/builder3d-app.exe` - generated Release output; current hash/size or invalid workspace-bloat target is recorded in verification.md.
+- `target/release/r4_mcp.exe` - generated Release output; current hash/size or invalid workspace-bloat target is recorded in verification.md.
+- `target/release/r5_viewport.exe` - generated Release output; current hash/size or invalid workspace-bloat target is recorded in verification.md.
+- `.git/index.lock` - transient zero-byte lock from an interrupted status scan; removed after confirming no Git process owned it.
+
+
+### 6. Dependency, config and design changes
+
+No dependency, project configuration, or public MCP contract change was made for RB-09. The application presentation-sync repair is within the planned shared-document requirement. For the task-scoped commit only, the pre-existing untracked workspace build baseline (Cargo manifests/lock, crates, packaging, scripts, component catalog/parity ledger, and six compile-time RB-04 oracle JSON files) is included so the commit contains buildable source; these files were already present and are not new RB-09 edits. Unrelated historical evidence remains unstaged. No existing G: snapshot was changed.
+
+### Recovery snapshot
+
+Created the additive review snapshot `G:/Builder3D-Rust_snapshot_20261104-193530_RB-09-wrapup-review` after the review evidence was finalized and before the task-scoped commit. Robocopy exited 1 with no failures. The independent path/size/SHA-256/reparse verifier passed for 3,841 files / 700,634,398 bytes on each side, with no missing, extra, or differing paths and no reparse entries. It includes Git metadata and excludes only repository-root `target`, `.cache`, and `logs`. It is a recovery review copy, not an RB-09 completion snapshot; the plan's Recovery snapshot subsection and the receipt/log updates postdate the verification pass.

@@ -1,9 +1,8 @@
 # RB-09 Shared AI and Regression Handoff
 
-**Status:** implementation and automated verification pass; native live-client
-gate is unverified and paused by the owner  
-**Written:** 2026-11-02; owner path/backup direction updated 2026-11-03  
-**Boundary:** complete RB-09, then stop before RB-10
+**Status:** paired live desktop/MCP gate passed 2026-11-04 after a scoped Rust presentation-sync repair. The later wrap-up recheck found a mismatch between the current Release app hash and the live-build manifest; see `verification.md`.  
+**Written:** 2026-11-02; owner path/backup direction updated 2026-11-03; live endpoint updated 2026-11-04  
+**Boundary:** recorded live run complete; stop before RB-10
 
 The active Rust source/build/run copy is `E:\Builder3D-Rust`. Use `G:\` as
 the primary additive backup destination. Removable USB copies are occasional
@@ -12,6 +11,27 @@ recorded in
 `evidence/rebuild/rb-09-shared-ai-and-regression/usb-backup-receipt.md` and is
 not a working tree. `L:\Builder3D` remains the separate read-only Python
 reference/shipping build.
+
+## Current RB-09 endpoint (2026-11-04)
+
+The actual Python and Rust desktop/MCP sequence passed after a scoped fix for
+Rust MCP project presentation from Welcome. The official MCP SDK exercised live
+reads and edits, immediate viewport/Items updates, shared history, lifecycle,
+file failures, replay/races, long operations, optional startup, closed-desktop
+responses, and shutdown cleanup. The post-repair workspace suite passed
+329/329, and the final additive G: snapshot is independently verified in
+evidence/rebuild/rb-09-shared-ai-and-regression/snapshot-receipt.md. A later
+wrap-up rerun of the evidence validator exits 1 because the current
+`target/release/builder3d-app.exe` hash differs from the recorded live app hash;
+the historical live artifact and the new current hash are both retained in the
+verification record. No application source changed after the live run.
+
+Use the current report, verification, walkthrough, paired comparison board,
+and checkpoint as the endpoint record. The dated pause and starting-point notes
+below are historical. Keep the owner-reported interface/floor gaps, visual
+review, owner acceptance, and RB-08 native matrix/completion snapshot open.
+RB-09 verification does not mean overall product acceptance. Do not begin
+RB-10 as part of this handoff.
 
 ## 1. Objective and owner direction
 
@@ -63,7 +83,7 @@ current product-specific operation-status/cancel contract unless a tested
 client and SDK support justify a deliberate change; do not adopt an extension
 just because it exists.
 
-## 3. Verified starting point
+## 3. Verified starting point (2026-11-03 historical state)
 
 Work from the current `E:\Builder3D-Rust` tree. Inspect `git status`, process
 state, and current source again at session start. The tree is intentionally
@@ -302,11 +322,9 @@ slice or RB-11 acceptance closure.
 
 ## 10. Fresh-session prompt
 
-    Continue Builder3D Rust through RB-09 only, then stop before RB-10. Read
-    docs\rb-09-shared-ai-and-regression-handoff.md and the current instructions;
-    work from E:\Builder3D-Rust's current tree, keep L:\Builder3D read-only,
-    preserve the uncommitted work, and do not stage, commit, reset or discard.
-    Complete shared live-document MCP behavior, paired native Python/Rust
-    client checks, tests, evidence, docs, and the verified additive G: snapshot.
-    Keep the missing interface/floor and unfinished RB-08 native evidence
-    explicit. Stop before RB-10.
+    RB-09 live desktop/MCP verification and its additive G: snapshot are
+    complete; do not repeat RB-09 or start RB-10 in this handoff. Read the
+    current instructions and RB-09 checkpoint, keep E:/Builder3D-Rust as the
+    working tree and L:/Builder3D read-only, and preserve all uncommitted files.
+    Keep the interface/floor gaps, owner visual review, overall acceptance, and
+    RB-08 native matrix/completion snapshot open.

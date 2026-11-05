@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Builder3D
+Comment=Private native Builder3D mesh editor
+Exec=Builder3D %U
+Icon=builder3d
+Terminal=false
+Categories=Graphics;Engineering;
+StartupNotify=true

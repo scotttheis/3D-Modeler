@@ -1,0 +1,200 @@
+use builder3d_core::{
+    BlobOptions, BrushDirection, BrushFalloff, BrushSymmetry, CreasePolishOptions,
+    ElasticGrabOptions, Mesh, MeshOperationLimits, Scene, SceneObject, SmoothBrushOptions, blob,
+    crease_polish, elastic_grab, make_sphere, smooth_brush,
+};
+
+fn volume(mesh: &Mesh) -> f64 {
+    mesh.faces
+        .iter()
+        .map(|face| {
+            let a = mesh.vertices[face[0] as usize];
+            let b = mesh.vertices[face[1] as usize];
+            let c = mesh.vertices[face[2] as usize];
+            let cross = [
+                f64::from(b[1]) * f64::from(c[2]) - f64::from(b[2]) * f64::from(c[1]),
+                f64::from(b[2]) * f64::from(c[0]) - f64::from(b[0]) * f64::from(c[2]),
+                f64::from(b[0]) * f64::from(c[1]) - f64::from(b[1]) * f64::from(c[0]),
+            ];
+            (f64::from(a[0]) * cross[0] + f64::from(a[1]) * cross[1] + f64::from(a[2]) * cross[2])
+                / 6.0
+        })
+        .sum::<f64>()
+        .abs()
+}
+
+#[test]
+fn elastic_grab_preserves_topology_and_has_smooth_bounded_displacement() {
+    let source = make_sphere(5.0, 2).expect("sphere fixture");
+    let original = source.clone();
+    let result = elastic_grab(
+        &source,
+        [5.0, 0.0, 0.0],
+        [1.0, 0.0, 0.0],
+        ElasticGrabOptions {
+            radius_mm: 2.5,
+            strength: 1.0,
+            ..ElasticGrabOptions::default()
+        },
+    )
+    .expect("elastic grab");
+    assert_eq!(result.mesh.faces, source.faces);
+    assert_ne!(result.mesh.vertices, source.vertices);
+    let maximum = source
+        .vertices
+        .iter()
+        .zip(&result.mesh.vertices)
+        .map(|(first, second)| {
+            let delta = [
+                second[0] - first[0],
+                second[1] - first[1],
+                second[2] - first[2],
+            ];
+            (delta[0] * delta[0] + delta[1] * delta[1] + delta[2] * delta[2]).sqrt()
+        })
+        .fold(0.0_f32, f32::max);
+    assert!((maximum - 1.0).abs() < 0.08);
+    assert_eq!(source, original);
+}
+
+#[test]
+fn elastic_grab_symmetry_mirrors_center_and_offset() {
+    let source = Mesh::new(
+        vec![[1.0, 0.0, 0.0], [-1.0, 0.0, 0.0], [0.0, 1.0, 0.0]],
+        vec![[0, 1, 2]],
+    )
+    .expect("triangle fixture");
+    let result = elastic_grab(
+        &source,
+        [1.0, 0.0, 0.0],
+        [1.0, 0.0, 0.0],
+        ElasticGrabOptions {
+            radius_mm: 0.5,
+            strength: 1.0,
+            symmetry: BrushSymmetry::X,
+            ..ElasticGrabOptions::default()
+        },
+    )
+    .expect("symmetric grab");
+    assert!((result.mesh.vertices[0][0] - 2.0).abs() < 1.0e-5);
+    assert!((result.mesh.vertices[1][0] + 2.0).abs() < 1.0e-5);
+}
+
+#[test]
+fn crease_polish_preserves_topology_and_supports_both_directions() {
+    let source = make_sphere(5.0, 2).expect("sphere fixture");
+    let inward = crease_polish(
+        &source,
+        &[[5.0, 0.0, 0.0], [4.5, 0.5, 0.0]],
+        CreasePolishOptions {
+            radius_mm: 3.0,
+            strength: 1.0,
+            direction: BrushDirection::Inward,
+            falloff: BrushFalloff::Smooth,
+            ..CreasePolishOptions::default()
+        },
+    )
+    .expect("inward crease");
+    let outward = crease_polish(
+        &source,
+        &[[5.0, 0.0, 0.0]],
+        CreasePolishOptions {
+            radius_mm: 3.0,
+            strength: 1.0,
+            direction: BrushDirection::Outward,
+            falloff: BrushFalloff::Linear,
+            ..CreasePolishOptions::default()
+        },
+    )
+    .expect("outward crease");
+    assert_eq!(inward.mesh.faces, source.faces);
+    assert_ne!(inward.mesh.vertices, source.vertices);
+    assert_ne!(outward.mesh.vertices, source.vertices);
+}
+
+#[test]
+fn smooth_brush_and_blob_preserve_topology_and_blob_changes_volume_direction() {
+    let source = make_sphere(10.0, 2).expect("sphere fixture");
+    let smooth = smooth_brush(
+        &source,
+        &[[0.0, 0.0, 10.0], [0.0, 1.0, 9.5]],
+        SmoothBrushOptions::default(),
+    )
+    .expect("smooth brush");
+    assert_eq!(smooth.mesh.faces, source.faces);
+    assert_ne!(smooth.mesh.vertices, source.vertices);
+    assert!(smooth.report.maximum_displacement_mm <= 16.0 + 1.0e-5);
+    let outward = blob(
+        &source,
+        &[[0.0, 0.0, 10.0], [0.0, 1.0, 9.5]],
+        BlobOptions::default(),
+    )
+    .expect("outward blob");
+    let inward = blob(
+        &source,
+        &[[0.0, 0.0, 10.0]],
+        BlobOptions {
+            direction: BrushDirection::Inward,
+            falloff: BrushFalloff::Linear,
+            ..BlobOptions::default()
+        },
+    )
+    .expect("inward blob");
+    assert_eq!(outward.mesh.faces, source.faces);
+    assert!(volume(&outward.mesh) > volume(&source));
+    assert!(volume(&inward.mesh) < volume(&source));
+    assert!(outward.report.maximum_displacement_mm <= 16.0 + 1.0e-5);
+}
+
+#[test]
+fn brushes_reject_bad_paths_offsets_and_limits_before_scene_mutation() {
+    let source = make_sphere(2.0, 1).expect("sphere fixture");
+    let too_many = vec![[0.0, 0.0, 0.0]; 257];
+    let error =
+        crease_polish(&source, &too_many, CreasePolishOptions::default()).expect_err("path bound");
+    assert!(matches!(error, builder3d_core::CoreError::MeshOperation(_)));
+    let error = elastic_grab(
+        &source,
+        [0.0, 0.0, 0.0],
+        [2_001.0, 0.0, 0.0],
+        ElasticGrabOptions::default(),
+    )
+    .expect_err("offset bound");
+    assert!(matches!(error, builder3d_core::CoreError::MeshOperation(_)));
+    let limits = MeshOperationLimits {
+        max_work_units: 1,
+        ..MeshOperationLimits::default()
+    };
+    let error = blob(
+        &source,
+        &[[0.0, 0.0, 0.0]],
+        BlobOptions {
+            limits,
+            ..BlobOptions::default()
+        },
+    )
+    .expect_err("work bound");
+    assert!(matches!(
+        error,
+        builder3d_core::CoreError::OperationResourceLimit { .. }
+    ));
+}
+
+#[test]
+fn scene_brush_replacement_preserves_identity_and_undo() {
+    let source = make_sphere(3.0, 1).expect("sphere fixture");
+    let mut scene = Scene::new();
+    scene
+        .add_object(SceneObject::new(source.clone()))
+        .expect("add sphere");
+    let id = scene.objects()[0].object_id().to_owned();
+    let (command, report) = scene
+        .apply_blob(0, &[[0.0, 0.0, 3.0]], BlobOptions::default())
+        .expect("scene blob");
+    assert!(command.changed);
+    assert!(report.changed);
+    assert_eq!(scene.objects()[0].object_id(), id);
+    scene.undo().expect("undo blob");
+    assert_eq!(scene.objects()[0].mesh(), &source);
+    scene.redo().expect("redo blob");
+}

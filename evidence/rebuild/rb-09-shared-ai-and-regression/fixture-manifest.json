@@ -1,0 +1,135 @@
+{
+  "slice": "RB-09",
+  "paired_live_fixture": {
+    "path": "fixtures/approved/RB09-Paired-Live.3dp",
+    "bytes": 75250,
+    "sha256": "17d04d4908b367476b1503c8a578e67cf2343549ee5ebd73e9986885d226c913",
+    "project_id": "e5d81c5226e64f58b838d55d9395afa9",
+    "saved_revision": 23,
+    "objects": [
+      {
+        "name": "RB09 Shared Cube",
+        "id": "3f449b78621c467b818e8c69925e2b6c",
+        "position_mm": [
+          -15,
+          0,
+          10
+        ],
+        "size_mm": [
+          20,
+          20,
+          20
+        ],
+        "color_at_revision_23": [
+          0.95,
+          0.8,
+          0.1,
+          1
+        ]
+      },
+      {
+        "name": "RB09 Shared Sphere",
+        "id": "dff9cc124c6d4d27b4ea9b07d6e4ae6b",
+        "position_mm": [
+          15,
+          0,
+          7
+        ],
+        "size_mm": [
+          14,
+          14,
+          14
+        ],
+        "color": [
+          0.65,
+          0.35,
+          0.85,
+          1
+        ]
+      }
+    ],
+    "python_initial_capture_revision": 4,
+    "note": "Same project and stable geometry; Python later changed Cube color before the Rust final paired capture."
+  },
+  "rust_live_fixture": {
+    "path": "fixtures/approved/RB09-Rust-Live.3dp",
+    "bytes": 82694,
+    "sha256": "2aae0669bace97ad76e684fe75e046a42485ac2bfae35770aee0c9be88dd41b5",
+    "project_id": "e5d81c5226e64f58b838d55d9395afa9",
+    "saved_revision": 34,
+    "object_ids": [
+      "3f449b78621c467b818e8c69925e2b6c",
+      "dff9cc124c6d4d27b4ea9b07d6e4ae6b",
+      "cff795a29bb0454cbd01932d20e562bf",
+      "4312fa6a32c64c9f8181f21f3233a203"
+    ]
+  },
+  "overwrite_sentinel": {
+    "path": "fixtures/approved/RB09-overwrite-refusal.3dp",
+    "sha256_before": "b14dc62457f04cec9b732d6b2bab2bfd3a5827b4fed640f70c61516e1443f72f",
+    "sha256_after_python": "b14dc62457f04cec9b732d6b2bab2bfd3a5827b4fed640f70c61516e1443f72f",
+    "sha256_after_rust": "b14dc62457f04cec9b732d6b2bab2bfd3a5827b4fed640f70c61516e1443f72f"
+  },
+  "optional_startup_blocker": {
+    "path": "fixtures/approved/RB09-runtime-parent-blocker.txt",
+    "bytes": 81,
+    "sha256": "c19715ed3f027242d1d6208c6b85c894c3ba06a57cf81f61b5a32060a3f5bac4",
+    "use": "regular file supplied as runtime descriptor parent to force optional MCP startup failure while checking normal GUI usability"
+  },
+  "files": [
+    {
+      "path": "fixtures/approved/RB09-long-operation-600k.stl",
+      "bytes": 30000084,
+      "sha256": "93dfc0a5bd1d539f03c1ea3abfac3b12fd14132fd22a1c82266d07cb4f49ba0c"
+    },
+    {
+      "path": "fixtures/approved/RB09-malformed.3dp",
+      "bytes": 23,
+      "sha256": "f5a74d0b6bc93bf134f9fee18eaf77149a4e893986b9489f523f46968e1312bc"
+    },
+    {
+      "path": "fixtures/approved/RB09-operation-250k.stl",
+      "bytes": 12500084,
+      "sha256": "c5a613bdd079a91b4b517861376033e249e689c21d0673d34de39ff2b1088b24"
+    },
+    {
+      "path": "fixtures/approved/RB09-operation-50k.stl",
+      "bytes": 2500084,
+      "sha256": "963b1aac14bd9a8bb4dc7abc364eac4067b57e18eada478000557e0426f11459"
+    },
+    {
+      "path": "fixtures/approved/RB09-overwrite-refusal.3dp",
+      "bytes": 27,
+      "sha256": "b14dc62457f04cec9b732d6b2bab2bfd3a5827b4fed640f70c61516e1443f72f"
+    },
+    {
+      "path": "fixtures/approved/RB09-Paired-Live.3dp",
+      "bytes": 75250,
+      "sha256": "17d04d4908b367476b1503c8a578e67cf2343549ee5ebd73e9986885d226c913"
+    },
+    {
+      "path": "fixtures/approved/RB09-runtime-parent-blocker.txt",
+      "bytes": 81,
+      "sha256": "c19715ed3f027242d1d6208c6b85c894c3ba06a57cf81f61b5a32060a3f5bac4"
+    },
+    {
+      "path": "fixtures/approved/RB09-Rust-Live.3dp",
+      "bytes": 82694,
+      "sha256": "2aae0669bace97ad76e684fe75e046a42485ac2bfae35770aee0c9be88dd41b5"
+    },
+    {
+      "path": "fixtures/approved/RB09-unsupported.input",
+      "bytes": 26,
+      "sha256": "e08447858423aab33787149a237749df997e8cd07caccc1c1114c7d49ae7bc59"
+    },
+    {
+      "path": "fixtures/denied/RB09-denied.3dp",
+      "bytes": 19,
+      "sha256": "87963a64d8babfb1efe22b0eea91fc55919abda97142f8f6f69079495917ef85"
+    }
+  ],
+  "failure_state_observations": {
+    "python": "Denied, malformed, unsupported, and overwrite operations preserved project e5d81c5226e64f58b838d55d9395afa9 at revision 15 and did not alter the sentinel.",
+    "rust": "Denied, malformed, unsupported, and overwrite operations preserved project e5d81c5226e64f58b838d55d9395afa9 at revision 34 and did not alter the sentinel."
+  }
+}

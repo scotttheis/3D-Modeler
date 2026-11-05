@@ -1,0 +1,4 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.65s
+     Running unittests src\lib.rs (target\debug\deps\builder3d_app-d0e877bae8fe74a8.exe)
+     Running unittests src\main.rs (target\debug\deps\builder3d_app-e006f59cda6f1535.exe)
+     Running unittests src\bin\r5_viewport.rs (target\debug\deps\r5_viewport-d8a48baeb4850268.exe)

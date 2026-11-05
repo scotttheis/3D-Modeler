@@ -1,0 +1,77 @@
+﻿[
+    {
+        "command":  "cargo fmt --all -- --check",
+        "status":  "pass",
+        "exit_code":  0,
+        "warning":  null
+    },
+    {
+        "command":  "cargo check --workspace --locked",
+        "status":  "pass",
+        "exit_code":  0,
+        "warning":  null
+    },
+    {
+        "command":  "cargo test --workspace --locked",
+        "status":  "pass",
+        "exit_code":  0,
+        "summary":  "327 passed, 0 failed, 0 ignored",
+        "warning":  null
+    },
+    {
+        "command":  "cargo clippy --workspace --all-targets --all-features --locked -- -D warnings",
+        "status":  "pass",
+        "exit_code":  0,
+        "warning":  null
+    },
+    {
+        "command":  "cargo deny check",
+        "status":  "pass",
+        "exit_code":  0,
+        "warning":  "28 warning[duplicate] crate-version entries; no advisory warnings"
+    },
+    {
+        "command":  "cargo metadata --locked --format-version 1 --no-deps",
+        "status":  "pass",
+        "exit_code":  0,
+        "warning":  null
+    },
+    {
+        "command":  "cargo run -p builder3d-app --bin builder3d-app -- --smoke",
+        "status":  "pass",
+        "exit_code":  0,
+        "summary":  "2 objects, 1 selected, 5 tabs",
+        "warning":  null
+    },
+    {
+        "command":  "cargo build --release --locked -p builder3d-app --bin builder3d-app",
+        "status":  "pass",
+        "exit_code":  0,
+        "warning":  null
+    },
+    {
+        "command":  "cargo build --release --locked -p builder3d-mcp --bin r4_mcp",
+        "status":  "pass",
+        "exit_code":  0,
+        "warning":  null
+    },
+    {
+        "command":  "cargo bloat --release --workspace",
+        "status":  "pass_with_documented_scope_limit",
+        "exit_code":  0,
+        "warning":  "cargo-bloat 0.12.1 warns --workspace is unused; not a whole-workspace report"
+    },
+    {
+        "command":  "cargo bloat --release -p builder3d-app --bin builder3d-app",
+        "status":  "pass",
+        "exit_code":  0,
+        "summary":  "12.7 MiB .text; 15.4 MiB reported executable",
+        "warning":  null
+    },
+    {
+        "command":  "cargo audit --locked",
+        "status":  "unavailable",
+        "exit_code":  null,
+        "warning":  "cargo-audit is not installed; not run"
+    }
+]

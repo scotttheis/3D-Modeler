@@ -1,0 +1,22 @@
+
+running 7 tests
+test commands::tests::unrelated_mcp_operation_keeps_path_and_rejects_a_stale_path ... ok
+test shell::tests::mcp_scene_edit_synchronizes_the_welcome_surface ... ok
+test commands::tests::mcp_scene_attachment_returns_the_live_history_to_command_state ... ok
+test shell::tests::mcp_project_replacement_enters_the_scene_surface_when_empty ... ok
+test mcp_bridge::tests::project_replacement_tools_respect_the_live_dirty_guard ... ok
+test commands::tests::completed_mcp_open_replaces_a_same_identity_document ... ok
+test mcp_bridge::tests::loopback_bridge_authenticates_queues_and_removes_only_its_descriptor ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 159 filtered out; finished in 0.67s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

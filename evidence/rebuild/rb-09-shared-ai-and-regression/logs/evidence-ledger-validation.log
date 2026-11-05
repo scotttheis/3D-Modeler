@@ -1,0 +1,5 @@
+TOML valid: docs\component-catalog.toml, evidence\rebuild\parity-matrix.toml
+component IDs unique: 37; RB-09 evidence references exist
+live interactive status pass; 50 PNG hashes/dimensions and 2 clean scene pairs verified
+fixture hashes verified: 10; Rust source manifest verified: 96 files
+JSON manifests, official-client result, and accepted/rejected NDJSON journals valid

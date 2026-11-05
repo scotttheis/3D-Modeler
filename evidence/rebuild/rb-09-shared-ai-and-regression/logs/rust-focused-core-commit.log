@@ -1,0 +1,16 @@
+﻿cargo :     Finished `test` profile [unoptimized + debuginfo] target(s) in 0.35s
+At line:9 char:1
++ cargo test -p builder3d-core --test scene_external_commit 2>&1 | Out- ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (    Finished `t...get(s) in 0.35s:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+     Running tests\scene_external_commit.rs (target\debug\deps\scene_external_commit-4d71e947e620ed5a.exe)
+
+running 3 tests
+test isolated_scene_copy_preserves_an_untouched_source_archive ... ok
+test isolated_scene_result_commits_as_one_undoable_history_entry ... ok
+test isolated_scene_result_rejects_a_stale_revision_without_mutation ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

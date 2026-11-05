@@ -1,0 +1,58 @@
+[advisories]
+version = 2
+# fontdue is currently the compatible rasterizer for the named system-font
+# embossing contract. Its ttf-parser dependency is flagged as unmaintained,
+# not vulnerable; font files are selected from fixed system paths and are not
+# user-supplied. Revisit this narrow exception when a maintained compatible
+# rasterizer can preserve the same behavior.
+ignore = [
+    "RUSTSEC-2026-0192",
+    # AccessKit's Unix AT-SPI backend currently brings these informational
+    # advisories through zbus v5. They have no patched versions and are not in
+    # the Windows target tree. Revisit when the upstream backend moves to zbus 6.
+    "RUSTSEC-2026-0370",
+    "RUSTSEC-2026-0371",
+    "RUSTSEC-2026-0372",
+]
+
+[bans]
+multiple-versions = "warn"
+wildcards = "allow"
+
+[licenses]
+version = 2
+confidence-threshold = 0.8
+allow = [
+    "Apache-2.0",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "MIT",
+    "OFL-1.1",
+    "Unlicense",
+    "Unicode-3.0",
+    "Ubuntu-font-1.0",
+    "Zlib",
+]
+private = { ignore = true }
+
+# Reviewed Boost Software License 1.0 for the pinned native text-clipboard
+# backend. Full notice is staged with the application; do not allow BSL globally.
+[[licenses.exceptions]]
+name = "clipboard-win"
+version = "=5.4.3"
+allow = ["BSL-1.0"]
+
+[[licenses.exceptions]]
+name = "error-code"
+version = "=3.4.0"
+allow = ["BSL-1.0"]
+
+# qhull-sys declares the wrapper MIT license. The bundled native Qhull
+# notice was reviewed separately and is shipped under packaging/licenses/.
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+allow-git = ["https://github.com/LucaCiucci/qhull-rs"]
