@@ -1,16 +1,20 @@
 # Builder3D product rebuild and parity plan
 
-Date: 2026-11-04. Status: active replacement plan; RB-02 is complete and
+Date: 2026-11-06. Status: active replacement plan; RB-02 is complete and
 owner-accepted. RB-03 through RB-07 implementation and engineering evidence are
 recorded; their visual review and owner acceptance remain pending. RB-08
 implementation and automated checks are recorded, but its paired Rust native
-matrix and completion snapshot remain pending. RB-09 Shared AI and Regression
-passed its paired live desktop/MCP gate on the recorded build after a scoped
-presentation-sync repair. Later Release rebuilds replaced the target app and
-gateway outputs. A separate current-pair identity check and the updated evidence
-validator now pass; this did not repeat the paired workflow. Stop before RB-10.
-This does not close RB-08, resolve the owner?s interface/floor gaps, grant
-visual approval, or accept the product.
+matrix and completion snapshot remain pending. The historical RB-09 Python/Rust
+live gate passed on its recorded build after the scoped Rust presentation-sync
+repair. On 2026-11-06, the current Rust Release app/gateway completed a live
+desktop/MCP workflow and optional-MCP failure check, including GUI reopen of a
+saved project. The official Python MCP SDK was used only as a client to the Rust
+gateway; the Python Builder3D application was not launched and its saved catalog
+snapshots were not refreshed. The current Rust profile counts and ordered tool
+names match those snapshots, but the input/output schemas differ and remain an
+open RB-09 contract gap pending disposition. Stop before RB-10. This does not
+close RB-08, resolve the owner?s interface/floor gaps, grant visual approval,
+or accept the product.
 
 The active Rust source/build/run workspace is `E:\Builder3D-Rust`. Use `G:\`
 as the primary additive backup destination. Removable USB copies are occasional
@@ -496,6 +500,9 @@ app over the Python fallback occurs before the owner replacement gate passes.
 
 ## 12. Next execution session
 
+- [x] Independent review R1 (SHOULD FIX): In `evidence/rebuild/rb-09-shared-ai-and-regression/validate_rb09_evidence.py`, compare the identity probe's complete ordered tool-name list with the established 60-tool catalog (or the recorded paired-gate ready list), rather than only checking count and uniqueness at lines 308-311. Add a focused negative check proving a renamed/substituted tool fails while the unchanged evidence passes. This verifies catalog names only, not schema compatibility. Preserve the existing scope; do not change application code or start RB-10 for this repair.
+  Resolved by comparing against the ordered `TOOL_CATALOG` in `crates/builder3d-mcp/src/r4/catalog.rs`; both the evidence validator and its focused renamed-tool check pass.
+
 RB-07 Appearance, Jobs and Print is complete. Its report, verification,
 checkpoint, native evidence and snapshot receipt are under
 `evidence/rebuild/rb-07-appearance-jobs-and-print/`. The verified immutable
@@ -842,3 +849,164 @@ Cargo generated or updated ignored build/test outputs under `target\`; they were
 ### 6. Dependency, config, and design changes
 
 None. No dependency, Cargo configuration, or public MCP catalog/schema changed. The only implementation change for this task was in the evidence validator, to compare historical gate hashes with capture metadata and current Release hashes with the separate identity record.
+
+## Current Rust Release recheck (2026-11-06)
+
+The current Release app and gateway were identified by SHA-256 before the live
+run: app `0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a`,
+gateway `aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e`.
+The run is `evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261106-072716/`.
+
+The live Rust desktop and its MCP gateway read and edited the same saved
+project. The saved `.3dp` is 82,178 bytes with SHA-256
+`e6046a8d3ed7ea949b00a13928311b2fc88e476bda6d4d859af6d866246d9262`, project
+ID `e5d81c5226e64f58b838d55d9395afa9`, revision 25, clean, with the stable Cube
+and Sphere IDs. The GUI reopened that file and showed both objects in the
+viewport and Items panel. Profile counts were observe 7, model 52, files 59,
+and full 60; ordered tool names matched the saved Python catalog snapshots in
+each profile.
+
+The optional-MCP startup failure case left the Rust GUI usable for New Scene,
+Cube creation, and Undo. An official SDK client still discovered 60 tools and
+received retryable `desktop_unavailable` for `get_status` and `scene_summary`.
+No runtime descriptor or app-owned listener remained after shutdown; both
+Release app runs and the client/gateway ended normally. No unrelated process
+was terminated.
+
+The separate catalog/schema comparison found zero exact Rust/Python input- or
+output-schema matches in each of the four profiles. The Rust catalog adds
+`return_detail` on 19 tools without server-side use; `orbit_view` marks two
+defaulted fields required; all Rust input schemas set `additionalProperties`
+to false while the saved Python schemas omit it and differ in bounds and
+nullability. Rust also publishes one 104-property output-schema superset with
+untyped property schemas, while Python publishes tool-specific output schemas.
+Two annotations differ. Top-level checks of successful current Rust results
+found required-field differences for `get_status`, `scene_summary`,
+`add_primitive`, `undo`, `redo`, `set_transform`, `set_color`, and `new_project`.
+The output check is top-level only, not full nested JSON Schema validation.
+These are recorded findings against saved Python catalogs, not owner-approved
+deviations or a refreshed current-Python comparison.
+
+Evidence is in `current-run-manifest.json`, `schema-comparison.json`, the
+current client logs, captures, and the RB-09 evidence journals. The focused
+validator self-check and full RB-09 evidence validator passed after the records
+were updated. No Rust application source changed, so the Rust test suites were
+not rerun; prior recorded workspace and focused test results remain historical.
+The final short-name snapshot is G:/B3D_R09C_20261106. Its source and
+destination manifests each contain 3991 files / 756841099 bytes after the
+final synchronization, with zero missing, extra, or differing paths and zero
+reparse entries. Critical SHA-256 values match; the full receipt is in
+evidence/rebuild/rb-09-shared-ai-and-regression/snapshot-receipt.md.
+
+RB-09 schema compatibility/disposition remains pending. Keep RB-08 native
+evidence, the interface/floor gaps, visual review, owner acceptance, and
+overall product acceptance open. RB-10 has not started.
+
+## Review notes - RB-09 current Rust Release wrap-up (2026-11-06)
+
+Re-read `E:\AGENTS.md`, `E:\RustDeveloper.md`, this workspace's `AGENTS.md`,
+the RB-09 row and section 12 here, and the RB-09 handoff sections 5, 7, and 9.
+The wrap-up did not change Rust application code.
+
+### 3. Acceptance criteria checked one by one
+
+| Criterion | Command run | Result |
+|---|---|---|
+| Handoff §9: native Rust desktop and MCP client observe/edit one live document; no MCP-only scene. | `node evidence/rebuild/rb-09-shared-ai-and-regression/write_current_run_manifest.mjs evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261106-072716`; full evidence validator. | PASS for the current Rust Release pair. The GUI reopened the MCP-edited saved document (82,178 bytes, project `e5d81c5226e64f58b838d55d9395afa9`, revision 25, stable Cube/Sphere IDs). This did not launch the Python Builder3D product. |
+| Handoff §9: cross-adapter reads/edits/history/save/reopen/revisions/replay/conflicts/files/cancel/failure atomicity. | `cargo test --workspace --locked --quiet`; `cargo test -p builder3d-mcp --locked`; current-run manifest writer. | PARTIAL. Automated workspace tests passed 329/329 and focused MCP tests 19/19. The current Release workflow covered a shared-document edit/save/reopen. The exhaustive live replay/conflict/cancellation/failure sequence remains supported by the historical paired gate, not a current full native rerun. |
+| Handoff §9: 60-tool catalog, profile, and schema contract. | `node evidence/rebuild/rb-09-shared-ai-and-regression/compare_mcp_schemas.mjs evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261106-072716`. | FAIL/PENDING: ordered names/counts match saved catalogs for observe/model/files/full (7/52/59/60), but exact input- and output-schema matches are 0 in all four profiles. No owner-approved deviation exists. |
+| Handoff §9: MCP unavailable without blocking ordinary desktop use; bounded errors and cleanup. | PowerShell assertions over `currpair-20261106-072716/current-run-manifest.json` lifecycle fields. | PASS for the current Rust Release failure run: 60 tools discovered, two client reads returned `desktop_unavailable`, the GUI remained usable, and the owned descriptor/listener/client/gateway were gone at shutdown. |
+| Handoff §9: evidence/ledgers and an independently verified additive RB-09 recovery snapshot. | `py -3.13 evidence/rebuild/rb-09-shared-ai-and-regression/validate_rb09_evidence.py`; `verify_rb09_snapshot.ps1`. | Evidence validator PASS; it verifies current Release identities and nine current capture records while reporting schema parity pending. The prior `G:\B3D_R09C_20261106` comparison returned exit 1 with exactly two regenerated JSON differences and was left untouched. New additive snapshot `G:\B3D_R09W_20261106` then verified PASS: 3991 files / 756853562 bytes each, zero missing/extra/different paths or reparse entries, and 8 critical hashes matched. It is a review/recovery snapshot, not an RB-09 completion snapshot. |
+| Plan §12 SHOULD FIX: compare the identity probe's complete ordered tool list to the Rust catalog and reject a renamed tool. | `py -3.13 evidence/rebuild/rb-09-shared-ai-and-regression/validate_rb09_evidence.py --tool-name-self-test`. | PASS: unchanged ordered list accepted; renamed tool rejected. This checks names and order only, not schemas. |
+
+### Project check/test results
+
+| Command | Result |
+|---|---|
+| `cargo fmt --check` | PASS, exit 0. |
+| `cargo check --workspace --locked` | PASS, exit 0. |
+| `cargo test --workspace --locked --quiet` | PASS, 329 passed, 0 failed, 0 ignored. |
+| `cargo test -p builder3d-mcp --locked` | PASS, 19 passed, 0 failed, 0 ignored. |
+| `cargo clippy --all-targets -- -D warnings` | PASS, exit 0. |
+| `cargo deny check` | PASS, exit 0; 28 duplicate-version warnings; advisories, bans, licenses, and sources all `ok`. |
+| `git diff --check` | PASS, exit 0; line-ending normalization warnings only. |
+| Focused and full RB-09 evidence validators | PASS, exit 0; schema parity remains explicitly pending. |
+
+### 4. Shortcuts, warnings, hard-coded limits, and untested work
+
+- The current app/gateway run is the Rust Release pair. The official Python MCP
+  SDK 2.2.0 was only a client to the Rust stdio gateway; the Python Builder3D
+  product was not launched and saved Python catalogs were not refreshed.
+- The comprehensive paired live workflow is historical. This wrap-up reran
+  current Rust live shared-document and optional-MCP evidence, but did not repeat
+  the full cross-adapter replay/conflict/cancellation/failure matrix.
+- Schema comparison uses saved Python catalogs. It found no exact schema matches;
+  successful output comparison checks top-level required fields only, not full
+  nested JSON Schema validity. The 19 unused Rust `return_detail` fields,
+  `orbit_view` required/default difference, bounds/nullability and
+  `additionalProperties` differences, untyped output superset, two annotation
+  differences, and eight top-level successful-output required-field differences
+  remain open without owner-approved deviations.
+- No Rust source changed. A scan found no `todo!`, `unimplemented!`, `dbg!`,
+  TODO/FIXME/HACK markers, or ignored tests in the current workspace checks.
+  Existing lint suppressions remain: 17 `clippy::too_many_arguments` and 2
+  `unsafe_code` allows; none were added. Clippy passed with `-D warnings`.
+- `cargo deny` emitted 28 duplicate-version warnings but no policy failures.
+  `cargo audit` was not run because `cargo-audit` is not installed. `cargo bloat`
+  was not rerun in this wrap-up; the earlier `--workspace` invocation was not a
+  workspace measurement, and the explicit app binary size does not measure the
+  complete installed package or installer required by plan section 9.
+- Existing replay/operation bounds (600 seconds/256 replay entries and 3,600
+  seconds/128 operation records) were not changed or newly compared with the
+  Python reference. RB-08 native evidence, interface/floor gaps, visual review,
+  owner acceptance, and overall product acceptance remain pending. RB-10 has
+  not started.
+- One initial read-only PowerShell assertion used the wrong JSON nesting and
+  exited 1; the corrected assertion over `lifecycle` passed. The old snapshot
+  verifier also exited 1 after the two evidence JSON files were regenerated;
+  neither failure was hidden or repaired by changing product code.
+
+### 5. Files changed or created by RB-09
+
+| File | Why |
+|---|---|
+| `AGENTS.md` | Records the current Rust Release run and keeps schema/acceptance gaps open. |
+| `WORK_LOG.md` | Records the current run, wrap-up checks, and recovery result. |
+| `docs/component-catalog.toml` | Links the current RB-09 run evidence and records the open parity limits. |
+| `docs/product-rebuild-plan.md` | Records current RB-09 status and these Review notes. |
+| `docs/rb-09-shared-ai-and-regression-handoff.md` | Captures the current endpoint and stop boundary. |
+| `evidence/rebuild/parity-matrix.toml` | Updates RB-09 parity states to match the current evidence. |
+| `evidence/rebuild/rb-09-shared-ai-and-regression/accepted-journal.ndjson` | Records current accepted Rust live-run evidence. |
+| `evidence/rebuild/rb-09-shared-ai-and-regression/checkpoint.md` | Records current identities, tests, and unresolved schema boundary. |
+| `evidence/rebuild/rb-09-shared-ai-and-regression/client-server-log.md` | Indexes the client/gateway identities and shutdown outcomes. |
+| `evidence/rebuild/rb-09-shared-ai-and-regression/paired-comparison-board.md` | Records current profile-name results and schema differences. |
+| `evidence/rebuild/rb-09-shared-ai-and-regression/rejected-journal.ndjson` | Retains rejected current-run capture outcomes. |
+| `evidence/rebuild/rb-09-shared-ai-and-regression/report.md` | Summarizes current Release results and the open schema gap. |
+| `evidence/rebuild/rb-09-shared-ai-and-regression/requirement-test-map.md` | Maps RB-09 requirements to current checks and evidence. |
+| `evidence/rebuild/rb-09-shared-ai-and-regression/snapshot-receipt.md` | Records additive snapshot paths and verification outcomes. |
+| `evidence/rebuild/rb-09-shared-ai-and-regression/validate_rb09_evidence.py` | Validates current/historical identities and ordered 60-tool names. |
+| `evidence/rebuild/rb-09-shared-ai-and-regression/verification.md` | Adds current wrap-up check results and limits. |
+| `evidence/rebuild/rb-09-shared-ai-and-regression/walkthrough.md` | Records the current Rust GUI/MCP shared-document workflow. |
+| `evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261106-072716/current-run-manifest.json` | Generated summary of current Release hashes, profiles, project, and captures. |
+| `evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261106-072716/schema-comparison.json` | Generated current profile/schema comparison against saved Python catalogs. |
+
+Deleted files: none.
+
+### 6. Dependency, configuration, and design changes
+
+None beyond the RB-09 evidence and documentation updates requested by the plan.
+No Cargo dependency/lockfile, project configuration, Rust application source,
+or public MCP interface changed. The required BuildClang helper set
+`LIBCLANG_PATH` only in each verification shell and used the existing ignored
+project-local tool; no global installation or persistent configuration change
+was made.
+
+### Recovery snapshot result
+
+Created `G:\B3D_R09W_20261106` at 11:35:42 local time with Robocopy exit 1
+(3991 files copied; zero failed). The independent verifier passed at 3991 files
+/ 756853562 bytes on both sides, with zero missing, extra, differing, or reparse
+entries; all 8 critical SHA-256 comparisons matched. Full hashes and exclusions
+are in `evidence/rebuild/rb-09-shared-ai-and-regression/snapshot-receipt.md`.
+The receipt and this paragraph postdate the snapshot. Existing snapshots were
+left untouched.

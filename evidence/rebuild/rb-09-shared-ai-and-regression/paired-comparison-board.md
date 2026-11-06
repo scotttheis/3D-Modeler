@@ -36,3 +36,11 @@ Accepted clean scene pairs:
 The clean Dark Rust capture is rust-final-paired-dark-scene.png. rust-final-paired-dark-initial.png shows a Settings dialog and is not used as a clean scene. Alternate-size captures are python-light-alt-1600x900.png and rust-final-paired-dark-alt-1600x900.png. All PNG sizes and SHA-256 values are recorded in capture-metadata.json.
 
 The host UI was interactive and unlocked for every input/capture. Edge’s background YouTube video was only a keep-awake aid. The owner-reported interface/floor gaps remain open; visual review and owner acceptance remain pending. RB-08’s native matrix/completion snapshot remains open.
+
+## Current Rust Release recheck (2026-11-06)
+
+The current Rust app/gateway workflow reopened project `e5d81c5226e64f58b838d55d9395afa9` at clean revision 25. The viewport and Items panel showed the same saved Cube and Sphere; the final capture is in `currpair-20261106-072716/captures/` and the complete run record is `currpair-20261106-072716/current-run-manifest.json`.
+
+This is a Rust GUI/MCP check. The historical Python/Rust visual pairs above remain from the earlier recorded build; the Python product was not launched for this current run. The saved Python catalog snapshots were used only for a separate name/order and schema comparison.
+
+All profile names/counts matched (7/52/59/60), but exact input/output schema matches were zero in every profile. The current schema findings are recorded in `currpair-20261106-072716/schema-comparison.json`; no schema deviation has owner approval. The current capture is not a visual acceptance review.

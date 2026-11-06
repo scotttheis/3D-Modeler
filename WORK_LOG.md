@@ -3921,3 +3921,91 @@ update.
 Visual review, owner acceptance, overall product acceptance, the owner-reported
 interface/floor gaps, and the RB-08 native matrix/completion snapshot remain
 open. RB-10 has not started.
+
+## Independent incremental review (2026-11-05)
+
+Verdict: PASS WITH FIXES. Reviewed 53e60d6421ede93cb12f24e1f3c4502c5aec5468..f3b2d929d5d8ba0e30c447a6736c620b15ac4372 (20 files); no review tags existed, so the preceding recorded RB-09 wrap-up review was used as baseline. No Rust application source changed in this range. Existing untracked work was preserved.
+
+SHOULD FIX R1: validate_rb09_evidence.py:308-311 checks only 60 unique tool names. An in-memory substitution of operation_status with nonexistent_review_probe still satisfies these predicates. Compare the complete ordered list against the established catalog or recorded paired-gate list, and add a negative renamed-tool check. Queued at the top of plan section 12. No application or validator implementation was changed by this review.
+
+Fresh checks: cargo test --workspace --locked (329 passed, zero failed/ignored), cargo clippy --all-targets -- -D warnings, cargo fmt --check, cargo deny check, and the RB-09 evidence validator all passed. Logs are under ignored target/independent-review-*. The first shell attempt stopped on PowerShell native-stderr handling; the direct rerun with Continue completed successfully. Dependency duplicate warnings remain; no policy errors. Current Release app launched as PID 21848, with title Builder3D - Untitled and nonzero native window handle; left open for the owner. This is launch verification, not an interactive workflow acceptance test.
+
+Review notes accurately distinguish the historical paired workflow from the current identity-only probe, and disclose the pending completion snapshot. Not independently repeated: paired desktop/MCP mutations, visual/owner acceptance, real Linux/macOS or alternate GPU checks, recovery snapshot hash verification, audit, size/performance gates. Review scope does not close RB-08/RB-09 acceptance gaps or authorize RB-10. No commits created. Review marker reviewed-1 will identify the reviewed HEAD; plan/log review additions remain uncommitted.
+
+## 2026-11-05 - reviewed-1 ordered MCP tool-name verification
+
+- Scope: fix the SHOULD FIX finding in the RB-09 evidence validator only; no Rust application code changed and RB-10 was not started.
+- The validator now extracts the ordered 60-name `TOOL_CATALOG` from `crates/builder3d-mcp/src/r4/catalog.rs` and compares the identity probe's complete list against it. This verifies names and order only; it does not verify tool schemas.
+- Focused regression: `python evidence/rebuild/rb-09-shared-ai-and-regression/validate_rb09_evidence.py --tool-name-self-test` passed; the established list was accepted and a renamed tool was rejected.
+- Evidence validation: `python evidence/rebuild/rb-09-shared-ai-and-regression/validate_rb09_evidence.py` passed, including the 50 accepted capture hashes/dimensions, 2 paired scene records, 10 fixture hashes, and 96-file Rust source manifest.
+- Post-change launch: no Builder3D instance was running before launch. Started `target/release/builder3d-app.exe` from this workspace as PID 40272; `Builder3D - Untitled` had a nonzero window handle and responded. Left the app open. This is a launch check, not an interactive acceptance test.
+- RB-08's native matrix and completion snapshot remain pending. The recorded paired RB-09 workflow was not repeated; the identity-only probe does not close RB-09 acceptance, the interface/floor parity gaps, visual review, owner acceptance, or overall product acceptance. No RB-10 work started.
+- Changed files: `evidence/rebuild/rb-09-shared-ai-and-regression/validate_rb09_evidence.py`, `docs/product-rebuild-plan.md`, and `WORK_LOG.md`.
+- Recovery snapshot: `G:\Builder3D-Rust_snapshot_20261105-143636_RB-09-R1`, created 2026-11-05 14:36:36 local time. Robocopy exit 1; 3,933 included files and 701,519,434 bytes. Independent verification found identical relative-path sets and byte counts, zero path/size mismatches, and matching SHA-256 for 12 recovery-critical files. The copied HEAD and `reviewed-1` tag both match `f3b2d929d5d8ba0e30c447a6736c620b15ac4372`. Excluded `target/`; no other cache directories or reparse points were present. This receipt was appended after copying, so the snapshot predates this receipt.
+- An earlier long-name copy attempt, `G:\Builder3D-Rust_snapshot_20261105-143410_RB-09-reviewed-1-tool-name-validator`, is incomplete because a destination path exceeded the Win32 path limit. It was left untouched and is not a recovery point; the shorter snapshot above is the verified copy.
+
+## 2026-11-06 - current Rust Release RB-09 recheck
+
+Scope: continue RB-09 on the current Rust Release build, update only records supported by this evidence, and stop before RB-10. The historical Python/Rust paired workflow remains tied to its earlier recorded build. This continuation did not launch the Python Builder3D product or modify Rust application source.
+
+The current Rust Release app and gateway hashes were 0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a and aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e. The official Python MCP SDK 2.2.0 was used only as a stdio client to the Rust gateway. All four profile counts and ordered names matched the saved Python catalogs (7/52/59/60).
+
+The current Rust GUI/MCP workflow opened, edited, saved, and reopened the shared project. The saved output is 82,178 bytes, SHA-256 e6046a8d3ed7ea949b00a13928311b2fc88e476bda6d4d859af6d866246d9262, project e5d81c5226e64f58b838d55d9395afa9, clean at revision 25 with the stable Cube/Sphere IDs. A separate optional-MCP startup failure left the GUI usable for New Scene, Cube creation, and Undo; closed-client reads returned retryable desktop_unavailable. The normal and failure-run app/client/gateway processes exited, and owned runtime state was absent after shutdown.
+
+The schema comparison against saved Python catalog snapshots found zero exact input-schema and output-schema matches in each profile. It records return_detail on 19 tools without server-side use, orbit_view required/default differences, additionalProperties and bound/nullability differences, one untyped 104-property Rust output-schema superset, two annotation differences, and top-level required-field differences in eight successful tools. This comparison did not launch or refresh the Python product and is not full nested output-schema validation. No owner-approved deviations are recorded, so schema compatibility and RB-09 acceptance remain pending.
+
+The current evidence is under evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261106-072716/. The focused validator self-check (py -3.13 evidence/rebuild/rb-09-shared-ai-and-regression/validate_rb09_evidence.py --tool-name-self-test) passed with exit 0. The full evidence validator passed with exit 0, validating the historical 50 captures and the nine current-run capture records while explicitly reporting schema parity pending. The current-run manifest writer, schema comparator, and git diff --check also exited 0; diff-check emitted only line-ending normalization warnings. No Rust tests were rerun because no Rust source changed; the previously recorded 329 workspace and 19 focused MCP results remain historical.
+
+Created the new short-name additive snapshot G:\B3D_R09C_20261106. Initial Robocopy exit was 1 with no failures; final synchronization Robocopy exit was 1 with no failed files. The final synchronized source/snapshot manifests each contain 3991 files / 756841099 bytes, with zero missing, extra, differing, or reparse entries. The independent verifier passed after the final synchronization, and critical SHA-256 values match. The receipt records the exclusions and hashes. The verified read-only recovery point G:\Builder3D-Rust_snapshot_20261105-143636_RB-09-R1 and incomplete 143410 attempt were left untouched.
+
+RB-08 native matrix/completion snapshot, the interface/floor gaps, visual review, owner acceptance, overall product acceptance, and RB-09 schema disposition remain open. No RB-10 work started.
+
+## 2026-11-06 - RB-09 wrap-up checks
+
+Re-read the workspace and project hard rules, the RB-09 plan row and section 12,
+and handoff sections 5, 7, and 9. The current Release app/gateway hashes remain
+`0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a` and
+`aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e`. No
+Builder3D app/gateway process was running after the checks; PID 40272 was absent.
+No app launch or UI interaction was performed during this wrap-up.
+
+`cargo fmt --check`, `cargo check --workspace --locked`,
+`cargo test --workspace --locked --quiet` (329 passed, 0 failed/ignored),
+`cargo test -p builder3d-mcp --locked` (19 passed, 0 failed/ignored),
+`cargo clippy --all-targets -- -D warnings`, and `cargo deny check` all exited 0.
+Cargo Deny reported 28 duplicate-version warnings and `advisories ok, bans ok,
+licenses ok, sources ok`. The evidence-validator name self-test, full validator,
+current manifest writer, and schema comparator exited 0. The comparator reported
+matching profile counts/names but zero exact schema matches in all profiles.
+The full validator continues to report schema parity pending.
+
+The prior snapshot `G:\B3D_R09C_20261106` remains untouched. Its verifier now
+reports exactly two differing JSON evidence files because the current-run
+manifest and schema comparison were regenerated during this wrap-up. A new
+short-path recovery snapshot and its independent verification result are
+recorded in the receipt appended after the copy; that receipt postdates the
+snapshot. All older snapshots, including the verified read-only R1 recovery
+point and incomplete 143410 attempt, remain untouched.
+
+The acceptance table, shortcuts/open tests, file list, and dependency/config/
+design findings are in the Review notes entry at the end of
+`docs/product-rebuild-plan.md`. RB-09 schema disposition, the full live
+cross-adapter matrix, RB-08 native evidence, interface/floor gaps, visual review,
+owner acceptance, and overall product acceptance remain open. RB-10 has not
+started.
+
+### Wrap-up recovery snapshot receipt (appended after copy)
+
+Created new additive review/recovery snapshot `G:\B3D_R09W_20261106` on
+2026-11-06 at 11:35:42 local time; its absolute path length is 20 characters.
+Robocopy exited 1 (3991 files copied, zero failed). The independent verifier
+passed with 3991 files / 756853562 bytes on both sides; missing/extra/differing
+paths 0/0/0; source/snapshot reparse entries 0/0; and all 8 critical SHA-256
+comparisons matched. Root `target`, `.cache`, and `logs` were excluded; nested
+RB-09 evidence logs and `.git` were copied. Detailed hashes are in
+`evidence/rebuild/rb-09-shared-ai-and-regression/snapshot-receipt.md`.
+
+This log entry and the final plan/receipt updates postdate the snapshot, as
+recorded in the receipt. It is a recovery copy, not an RB-09 completion snapshot.
+The previously verified read-only R1 snapshot and incomplete `143410` attempt
+remain untouched; `G:\B3D_R09C_20261106` was also left untouched.

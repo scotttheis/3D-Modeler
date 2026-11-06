@@ -70,3 +70,13 @@ workflow or alter the 50-capture paired inventory.
 ## Boundary
 
 The YouTube video was only a keep-awake aid. The owner-reported interface/floor gaps remain open; no visual approval or overall acceptance is claimed. RB-08 native matrix/completion snapshot remains open. RB-10 was not started.
+
+## Current Rust Release GUI/MCP recheck (2026-11-06)
+
+This is a current Rust app plus Rust gateway run, not a current Python/Rust product pair. The official Python MCP SDK 2.2.0 acted only as the client to `target/release/r4_mcp.exe`; the Python Builder3D application was not launched.
+
+1. Identified the Release app (`0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a`) and gateway (`aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e`). The SDK listed 60 tools and matched saved Python catalog names/order at counts 7/52/59/60 for observe/model/files/full.
+2. Opened `RB09-Paired-Live.3dp` in the Rust desktop through MCP. The same project and revision were visible to the GUI and MCP; MCP edits appeared in the viewport and Items panel. Save completed, and the GUI closed/reopened the saved output.
+3. The reopened file was clean at revision 25, project `e5d81c5226e64f58b838d55d9395afa9`, with Cube ID `3f449b78621c467b818e8c69925e2b6c` and Sphere ID `dff9cc124c6d4d27b4ea9b07d6e4ae6b`. The accepted screenshot is `currpair-20261106-072716/captures/rust-current-live-gui-reopened-after-restart-final.png`.
+4. In a separate run, MCP startup failed because `BUILDER3D_RUNTIME_FILE` had a regular file as its parent. The desktop still supported New Scene, adding a Cube, and Undo. The client found 60 tools but received retryable `desktop_unavailable` from `get_status` and `scene_summary`. Shutdown removed no unrelated processes and left no owned runtime descriptor or listener.
+5. The separate schema comparison found no exact input/output schema matches across the four profiles. The Python product was not launched and its saved catalog snapshots were not refreshed. See `currpair-20261106-072716/schema-comparison.json`; this contract gap remains open.

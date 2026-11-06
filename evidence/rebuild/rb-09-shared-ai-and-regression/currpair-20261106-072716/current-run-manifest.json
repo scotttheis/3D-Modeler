@@ -1,0 +1,265 @@
+{
+  "run_id": "currpair-20261106-072716",
+  "recorded_utc": "2026-11-06",
+  "scope": "Current Rust Release desktop/MCP workflow and optional-bridge failure check. The Python Builder3D product was not launched; the official Python MCP SDK was used only as a client for the Rust stdio gateway.",
+  "rust_release": {
+    "app_path": "target/release/builder3d-app.exe",
+    "app_sha256": "0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a",
+    "gateway_path": "target/release/r4_mcp.exe",
+    "gateway_sha256": "aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e"
+  },
+  "client": {
+    "sdk": "official Python MCP SDK 2.2.0",
+    "role": "stdio client to the Rust r4_mcp.exe gateway only",
+    "python_product_launched": false
+  },
+  "profiles": [
+    {
+      "profile": "observe",
+      "python_count": 7,
+      "rust_count": 7,
+      "ordered_names_equal": true
+    },
+    {
+      "profile": "model",
+      "python_count": 52,
+      "rust_count": 52,
+      "ordered_names_equal": true
+    },
+    {
+      "profile": "files",
+      "python_count": 59,
+      "rust_count": 59,
+      "ordered_names_equal": true
+    },
+    {
+      "profile": "full",
+      "python_count": 60,
+      "rust_count": 60,
+      "ordered_names_equal": true
+    }
+  ],
+  "saved_project": {
+    "path": "fixtures/approved/rust-current-live-saved.3dp",
+    "bytes": 82178,
+    "sha256": "e6046a8d3ed7ea949b00a13928311b2fc88e476bda6d4d859af6d866246d9262",
+    "project_id": "e5d81c5226e64f58b838d55d9395afa9",
+    "scene_revision": 25,
+    "dirty": false,
+    "objects": [
+      {
+        "name": "RB09 Shared Cube",
+        "object_id": "3f449b78621c467b818e8c69925e2b6c",
+        "vertices": 8,
+        "triangles": 12,
+        "position_mm": [
+          -15,
+          0,
+          10
+        ],
+        "size_mm": [
+          20,
+          20,
+          20
+        ]
+      },
+      {
+        "name": "RB09 Shared Sphere",
+        "object_id": "dff9cc124c6d4d27b4ea9b07d6e4ae6b",
+        "vertices": 2562,
+        "triangles": 5120,
+        "position_mm": [
+          15,
+          0,
+          7
+        ],
+        "size_mm": [
+          14,
+          14,
+          14
+        ]
+      }
+    ]
+  },
+  "lifecycle": {
+    "paired_release_app_pid": 28536,
+    "paired_release_app_exited_normally": true,
+    "paired_release_gateway_exited_after_client_close": true,
+    "gui_reopened_saved_path": "fixtures/approved/rust-current-live-saved.3dp",
+    "gui_reopen_title": "Builder3D - rust-current-live-saved.3dp",
+    "gui_reopen_status": {
+      "app_state": "ready",
+      "approved_roots": [
+        "\\\\?\\E:\\Builder3D-Rust\\evidence\\rebuild\\rb-09-shared-ai-and-regression\\currpair-20261106-072716\\fixtures\\approved"
+      ],
+      "busy": false,
+      "dirty": false,
+      "operation_id": null,
+      "profile": "full",
+      "project_id": "e5d81c5226e64f58b838d55d9395afa9",
+      "scene_revision": 25
+    },
+    "normal_shutdown_descriptor_removed": true,
+    "normal_shutdown_listener_removed": true,
+    "optional_failure_app_pid": 5400,
+    "optional_failure_app_exited_normally": true,
+    "optional_failure_runtime_parent_is_existing_file": true,
+    "optional_failure_descriptor_created": false,
+    "optional_failure_app_owned_listener_count": 0,
+    "optional_failure_sdk_tool_count": 60,
+    "optional_failure_tool_results": [
+      {
+        "tool": "get_status",
+        "is_error": true,
+        "code": "desktop_unavailable",
+        "retryable": true
+      },
+      {
+        "tool": "scene_summary",
+        "is_error": true,
+        "code": "desktop_unavailable",
+        "retryable": true
+      }
+    ],
+    "optional_failure_client_closed_normally": true,
+    "optional_failure_gateway_exited": true,
+    "optional_failure_runtime_descriptor_absent_after_shutdown": true,
+    "optional_failure_listener_absent_after_shutdown": true,
+    "blocker_fixture_unchanged": true
+  },
+  "evidence_files": [
+    {
+      "path": "logs/rust-current-live.jsonl",
+      "bytes": 106223,
+      "sha256": "752db38300fbf29d15fe8630de4126741597a67aab36fbe2de5cfee8400ea9dc"
+    },
+    {
+      "path": "logs/rust-current-live-reopen-client.jsonl",
+      "bytes": 5629,
+      "sha256": "2b412435d02798780d322b780ba7123ab21ac2f62becc6a526dff44ebc8aa08e"
+    },
+    {
+      "path": "logs/rust-current-two-client-race.json",
+      "bytes": 1481,
+      "sha256": "4e07a634c9b5a840bc50fbce82a009970ab43935cce0c2a7a3e584e4791ce22c"
+    },
+    {
+      "path": "logs/rust-current-optional-startup.json",
+      "bytes": 1341,
+      "sha256": "65461cc952e099a7228de7637fe76070c178fe7b04ff04ad5c70b61817d5d5c8"
+    },
+    {
+      "path": "logs/rust-current-optional-failure-client.jsonl",
+      "bytes": 2356,
+      "sha256": "d0aafbd9c7f60f92918de97d2d13b204242d53741a23489de33005302be9ea9b"
+    },
+    {
+      "path": "schema-comparison.json",
+      "bytes": 18195,
+      "sha256": "fbd3c0dd54fef6a1c81dd97c1c49613c9a54586e3a4117d5e8c87f46df37bb2f"
+    }
+  ],
+  "captures": [
+    {
+      "path": "captures/rust-current-live-gui-open-dialog-retry.png",
+      "bytes": 216969,
+      "sha256": "223eeda6652f6e8cbeff82ea933fb2501a4652fc7e45b5966a31aebd75c4e264",
+      "width": 1296,
+      "height": 879,
+      "purpose": "Open Project dialog on the current Release app",
+      "disposition": "accepted",
+      "reason": "Shows the current Release GUI open workflow before path entry."
+    },
+    {
+      "path": "captures/rust-current-live-gui-open-path-retry2.png",
+      "bytes": 158249,
+      "sha256": "376cd9324220c151fbfef277915cec9791a8c1684aa102faaa2a1fd6f2ea279c",
+      "width": 1296,
+      "height": 879,
+      "purpose": "saved project path entered into the Rust Open Project dialog",
+      "disposition": "intermediate",
+      "reason": "The path is visible in the field; the final reopen is established by the later clean GUI and MCP results."
+    },
+    {
+      "path": "captures/rust-current-live-gui-reopened-after-restart-final.png",
+      "bytes": 216044,
+      "sha256": "b1223ef8a48c17c3ece09ac77ed263620709bb53a150b18fe4266814ac37e5c5",
+      "width": 1296,
+      "height": 879,
+      "purpose": "saved project after Rust Release GUI reopen",
+      "disposition": "accepted",
+      "reason": "Foreground PID 28536, title matches the saved .3dp, and the viewport and Items panel show the saved Cube and Sphere."
+    },
+    {
+      "path": "captures/rust-current-optional-startup-unavailable.png",
+      "bytes": 164410,
+      "sha256": "628e209251b6cc6d39015fa72fcdb98cc3bc5093df94555490f4a6df00e258b7",
+      "width": 1296,
+      "height": 879,
+      "purpose": "optional MCP startup failure with desktop still at Welcome",
+      "disposition": "accepted",
+      "reason": "Rust Release status bar reports MCP unavailable; the app remained responsive and had no descriptor or listener."
+    },
+    {
+      "path": "captures/rust-current-optional-gui-new-scene-retry.png",
+      "bytes": 142505,
+      "sha256": "d2382c0144b57c522c93fa138658a6bcf56d75343060d9c8efb4af608f76ef6d",
+      "width": 1296,
+      "height": 879,
+      "purpose": "New Scene through the Rust GUI while MCP startup is unavailable",
+      "disposition": "accepted",
+      "reason": "Workspace opened and remained interactive with an empty scene."
+    },
+    {
+      "path": "captures/rust-current-optional-gui-added-primitive.png",
+      "bytes": 236307,
+      "sha256": "794b7c26b8dd28bbfa3e795175e3259478bffddbfb17ef8af1006f54d6318e01",
+      "width": 1296,
+      "height": 879,
+      "purpose": "Cube added through the Rust GUI while MCP startup is unavailable",
+      "disposition": "accepted",
+      "reason": "The viewport and Items panel show the new Cube; the document became dirty."
+    },
+    {
+      "path": "captures/rust-current-optional-gui-undo.png",
+      "bytes": 143067,
+      "sha256": "ba6d6119841b18a6fd22a0dff29ada77fe0d665045be9f2424b2aaa2e3bbbbba",
+      "width": 1296,
+      "height": 879,
+      "purpose": "GUI undo after optional-MCP GUI edit",
+      "disposition": "accepted",
+      "reason": "Undo removed the Cube and returned the new scene to a clean empty state."
+    },
+    {
+      "path": "captures/rust-current-live-gui-reopened-after-restart-retry2.png",
+      "bytes": 26911,
+      "sha256": "9166ce8cf7b7408daed4c48e8e65fec59d379cf09692aa6597d73dada1fc8fa8",
+      "width": 1296,
+      "height": 879,
+      "purpose": "first reopen screenshot attempt",
+      "disposition": "rejected",
+      "reason": "Another foreground window covered Builder3D during capture; do not use it as Builder3D visual evidence."
+    },
+    {
+      "path": "captures/rust-current-optional-gui-new-scene.png",
+      "bytes": 164529,
+      "sha256": "a747f8e7c7c35596411a890810d4ca1c0509968e93fb6894828b820996ad4b9b",
+      "width": 1296,
+      "height": 879,
+      "purpose": "first New Scene click attempt under optional MCP failure",
+      "disposition": "rejected",
+      "reason": "The screen-coordinate offset was wrong and the click missed the New Scene card; the corrected retry is accepted."
+    }
+  ],
+  "schema_comparison_path": "schema-comparison.json",
+  "acceptance_boundary": {
+    "tool_names_and_order": "verified for observe/model/files/full profiles",
+    "schema_parity": "open; differences are documented, not owner-approved",
+    "visual_review": "pending",
+    "owner_acceptance": "pending",
+    "interface_and_floor_gaps": "pending",
+    "rb08_native_matrix_and_completion_snapshot": "pending",
+    "overall_product_acceptance": "pending",
+    "rb10_started": false
+  }
+}

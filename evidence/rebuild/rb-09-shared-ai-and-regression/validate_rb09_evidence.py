@@ -6,6 +6,7 @@ import hashlib
 import json
 import re
 import struct
+import sys
 import tomllib
 from pathlib import Path
 
@@ -23,6 +24,52 @@ def digest(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def established_tool_names() -> list[str]:
+    source_path = ROOT / "crates" / "builder3d-mcp" / "src" / "r4" / "catalog.rs"
+    source = source_path.read_text(encoding="utf-8")
+    catalog = re.search(
+        r"pub const TOOL_CATALOG: \[ToolSpec;\s*60\]\s*=\s*\[(.*?)\n\];",
+        source,
+        re.DOTALL,
+    )
+    require(catalog is not None, "Rust MCP TOOL_CATALOG declaration is missing")
+    names = re.findall(
+        r'^[ \t]*name:[ \t]*"([^"]+)",[ \t]*$',
+        catalog.group(1),
+        re.MULTILINE,
+    )
+    require(len(names) == 60, "Rust MCP TOOL_CATALOG does not contain 60 ordered names")
+    require(len(set(names)) == 60, "Rust MCP TOOL_CATALOG contains duplicate names")
+    return names
+
+
+def ordered_tool_names_match(actual: list[str], expected: list[str]) -> bool:
+    return actual == expected
+
+
+def check_tool_name_regression(expected: list[str]) -> None:
+    require(
+        ordered_tool_names_match(expected, expected),
+        "tool-name regression check rejected the established catalog",
+    )
+    substituted = expected.copy()
+    substituted[1] = f"{substituted[1]}_renamed_for_regression"
+    require(
+        not ordered_tool_names_match(substituted, expected),
+        "tool-name regression check accepted a renamed tool",
+    )
+
+
+if __name__ == "__main__" and sys.argv[1:] == ["--tool-name-self-test"]:
+    tool_names = established_tool_names()
+    check_tool_name_regression(tool_names)
+    print(
+        "tool-name regression passed: ordered list accepted and renamed tool "
+        f"rejected ({len(tool_names)} names)"
+    )
+    raise SystemExit(0)
+
+
 catalog_path = ROOT / "docs" / "component-catalog.toml"
 parity_path = ROOT / "evidence" / "rebuild" / "parity-matrix.toml"
 catalog = tomllib.loads(catalog_path.read_text(encoding="utf-8"))
@@ -35,8 +82,60 @@ component_by_id = {component["id"]: component for component in components}
 feature = next(
     row for row in parity["feature"] if row["id"] == "builder3d.mcp.catalog_and_parity"
 )
-require(feature["implementation"] == "pass", "RB-09 implementation status is not pass")
-require(feature["automated"] == "pass", "RB-09 automated status is not pass")
+current_run_directory = EVIDENCE / "currpair-20261106-072716"
+current_run_manifest_path = current_run_directory / "current-run-manifest.json"
+schema_comparison_path = current_run_directory / "schema-comparison.json"
+require(current_run_manifest_path.is_file(), "missing current Rust Release run manifest")
+require(schema_comparison_path.is_file(), "missing current Rust schema comparison")
+current_run = json.loads(current_run_manifest_path.read_text(encoding="utf-8"))
+schema_comparison = json.loads(schema_comparison_path.read_text(encoding="utf-8"))
+require(current_run["client"]["python_product_launched"] is False,
+        "current recheck must not claim the Python product was launched")
+require(schema_comparison["saved_python_catalogs_refreshed_in_this_run"] is False,
+        "current schema comparison must identify saved reference catalogs")
+schema_profiles = {profile["profile"]: profile for profile in schema_comparison["profiles"]}
+run_profiles = {profile["profile"]: profile for profile in current_run["profiles"]}
+require(set(schema_profiles) == set(run_profiles) == {"observe", "model", "files", "full"},
+        "current Rust/Python profile set mismatch")
+for profile_name, schema_profile in schema_profiles.items():
+    run_profile = run_profiles[profile_name]
+    require(schema_profile["ordered_tool_names_match"] is True
+            and run_profile["ordered_names_equal"] is True,
+            f"current ordered tool names differ for {profile_name}")
+    require(schema_profile["python_tool_count"] == run_profile["python_count"]
+            and schema_profile["rust_tool_count"] == run_profile["rust_count"],
+            f"current tool count differs for {profile_name}")
+for capture in current_run["captures"]:
+    path = current_run_directory / capture["path"]
+    require(path.is_file(), f"missing current-run capture: {capture['path']}")
+    data = path.read_bytes()
+    require(len(data) == capture["bytes"],
+            f"current-run capture byte count mismatch: {capture['path']}")
+    require(digest(path) == capture["sha256"],
+            f"current-run capture SHA-256 mismatch: {capture['path']}")
+    require(data[:8] == b"\x89PNG\r\n\x1a\n",
+            f"current-run capture is not a PNG: {capture['path']}")
+    require(list(struct.unpack(">II", data[16:24])) == [capture["width"], capture["height"]],
+            f"current-run capture dimensions mismatch: {capture['path']}")
+current_schema_matches = all(
+    profile["exact_input_schema_matches"] == profile["rust_tool_count"]
+    and profile["exact_output_schema_matches"] == profile["rust_tool_count"]
+    for profile in schema_profiles.values()
+)
+if current_schema_matches:
+    require(feature["implementation"] == "pass",
+            "RB-09 implementation status must reflect matching schemas")
+    require(feature["automated"] == "pass",
+            "RB-09 automated status must reflect matching schemas")
+else:
+    require(feature["implementation"] == "partial",
+            "RB-09 implementation status must disclose schema differences")
+    require(feature["automated"] == "partial",
+            "RB-09 automated status must disclose schema differences")
+    require("schema-parity-pending" in component_by_id["builder3d.mcp.stdio-gateway"]["contracts"],
+            "gateway component must disclose pending schema parity")
+    require(str(current_run["acceptance_boundary"]["schema_parity"]).startswith("open"),
+            "current run must keep schema parity open")
 require(feature["interactive"] == "pass", "RB-09 live interactive status is not pass")
 require(feature["visual"] == "pending", "visual review must remain pending")
 require(feature["owner_acceptance"] == "pending", "owner acceptance must remain pending")
@@ -309,6 +408,10 @@ require(ready_event["tool_count"] == mcp_probe["tool_count"] == 60,
         "identity-only client tool count differs from 60")
 require(len(ready_event["tools"]) == 60 and len(set(ready_event["tools"])) == 60,
         "identity-only client tool list is incomplete or duplicated")
+expected_tool_names = established_tool_names()
+check_tool_name_regression(expected_tool_names)
+require(ordered_tool_names_match(ready_event["tools"], expected_tool_names),
+        "identity-only client ordered tool list differs from Rust MCP TOOL_CATALOG")
 status_event = identity_client_events[1]
 require(status_event["name"] == "get_status" and status_event["is_error"] is False,
         "identity-only get_status call failed")
@@ -350,4 +453,5 @@ print(f"historical paired live-gate build identities match capture metadata; {le
 print(f"fixture hashes verified: {len(fixtures['files'])}; Rust source manifest verified: {len(source_files)} files")
 print(f"current Release identity verified: app {identity['release_artifacts']['rust_app']['sha256']}; gateway {identity['release_artifacts']['rust_mcp_gateway']['sha256']}")
 print("identity-only official-client probe verified: 60 tools; get_status app_state=ready; 1296x879 interactive screenshot")
+print(f"current Rust Release run verified: {len(current_run['captures'])} capture records; profile names/counts match; schema parity {'pass' if current_schema_matches else 'pending'}")
 print("JSON manifests, rebuild logs, official-client results, and accepted/rejected NDJSON journals valid")

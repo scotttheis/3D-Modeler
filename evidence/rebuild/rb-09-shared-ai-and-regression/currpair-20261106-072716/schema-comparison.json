@@ -1,0 +1,707 @@
+{
+  "generated_utc": "2026-11-06T18:27:39.231Z",
+  "run_scope": "Current Rust Release live catalog compared with the saved Python reference catalog snapshots; the Python product was not launched for this recheck.",
+  "rust_release": {
+    "app_sha256": "0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a",
+    "gateway_sha256": "aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e"
+  },
+  "comparison_method": "Canonical JSON equality ignores object key order. Input property, required, and annotation differences are listed. Live Rust successful structured outputs are checked against only the top-level Python output-schema required keys and additionalProperties rule; nested JSON Schema constraints are not evaluated.",
+  "saved_python_catalog_client": "official Python MCP SDK 2.2.0",
+  "saved_python_catalogs_refreshed_in_this_run": false,
+  "profiles": [
+    {
+      "profile": "observe",
+      "python_tool_count": 7,
+      "rust_tool_count": 7,
+      "ordered_tool_names_match": true,
+      "exact_input_schema_matches": 0,
+      "exact_output_schema_matches": 0,
+      "distinct_python_output_schemas": 7,
+      "distinct_rust_output_schemas": 1,
+      "representative_rust_output_property_count": 104,
+      "representative_rust_output_properties_without_constraints": 104,
+      "python_input_additional_properties_declared": 0,
+      "rust_input_additional_properties_false": 7,
+      "input_property_key_differences": [],
+      "required_input_differences": [],
+      "annotation_differences": []
+    },
+    {
+      "profile": "model",
+      "python_tool_count": 52,
+      "rust_tool_count": 52,
+      "ordered_tool_names_match": true,
+      "exact_input_schema_matches": 0,
+      "exact_output_schema_matches": 0,
+      "distinct_python_output_schemas": 17,
+      "distinct_rust_output_schemas": 1,
+      "representative_rust_output_property_count": 104,
+      "representative_rust_output_properties_without_constraints": 104,
+      "python_input_additional_properties_declared": 0,
+      "rust_input_additional_properties_false": 52,
+      "input_property_key_differences": [
+        {
+          "name": "set_torus_parameters",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "elastic_grab",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "crease_polish",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "smooth_brush",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "blob",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "normalize_face_density",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "snap_translate",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "settle",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "mirror",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "align",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "arrange",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "repair",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "simplify",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "subdivide",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "smooth",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "boolean_merge",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "boolean_subtract",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "boolean_intersect",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "emboss_text",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "hollow",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        }
+      ],
+      "required_input_differences": [
+        {
+          "name": "orbit_view",
+          "python": [],
+          "rust": [
+            "pitch_delta_deg",
+            "yaw_delta_deg"
+          ]
+        }
+      ],
+      "annotation_differences": [
+        {
+          "name": "emboss_text",
+          "differences": [
+            {
+              "field": "destructiveHint",
+              "python": false,
+              "rust": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "profile": "files",
+      "python_tool_count": 59,
+      "rust_tool_count": 59,
+      "ordered_tool_names_match": true,
+      "exact_input_schema_matches": 0,
+      "exact_output_schema_matches": 0,
+      "distinct_python_output_schemas": 18,
+      "distinct_rust_output_schemas": 1,
+      "representative_rust_output_property_count": 104,
+      "representative_rust_output_properties_without_constraints": 104,
+      "python_input_additional_properties_declared": 0,
+      "rust_input_additional_properties_false": 59,
+      "input_property_key_differences": [
+        {
+          "name": "set_torus_parameters",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "elastic_grab",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "crease_polish",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "smooth_brush",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "blob",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "normalize_face_density",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "snap_translate",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "settle",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "mirror",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "align",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "arrange",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "repair",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "simplify",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "subdivide",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "smooth",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "boolean_merge",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "boolean_subtract",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "boolean_intersect",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "emboss_text",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "hollow",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        }
+      ],
+      "required_input_differences": [
+        {
+          "name": "orbit_view",
+          "python": [],
+          "rust": [
+            "pitch_delta_deg",
+            "yaw_delta_deg"
+          ]
+        }
+      ],
+      "annotation_differences": [
+        {
+          "name": "emboss_text",
+          "differences": [
+            {
+              "field": "destructiveHint",
+              "python": false,
+              "rust": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "profile": "full",
+      "python_tool_count": 60,
+      "rust_tool_count": 60,
+      "ordered_tool_names_match": true,
+      "exact_input_schema_matches": 0,
+      "exact_output_schema_matches": 0,
+      "distinct_python_output_schemas": 18,
+      "distinct_rust_output_schemas": 1,
+      "representative_rust_output_property_count": 104,
+      "representative_rust_output_properties_without_constraints": 104,
+      "python_input_additional_properties_declared": 0,
+      "rust_input_additional_properties_false": 60,
+      "input_property_key_differences": [
+        {
+          "name": "set_torus_parameters",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "elastic_grab",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "crease_polish",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "smooth_brush",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "blob",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "normalize_face_density",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "snap_translate",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "settle",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "mirror",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "align",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "arrange",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "repair",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "simplify",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "subdivide",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "smooth",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "boolean_merge",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "boolean_subtract",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "boolean_intersect",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "emboss_text",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        },
+        {
+          "name": "hollow",
+          "python_only": [],
+          "rust_only": [
+            "return_detail"
+          ]
+        }
+      ],
+      "required_input_differences": [
+        {
+          "name": "orbit_view",
+          "python": [],
+          "rust": [
+            "pitch_delta_deg",
+            "yaw_delta_deg"
+          ]
+        }
+      ],
+      "annotation_differences": [
+        {
+          "name": "emboss_text",
+          "differences": [
+            {
+              "field": "destructiveHint",
+              "python": false,
+              "rust": true
+            }
+          ]
+        },
+        {
+          "name": "launch_slicer",
+          "differences": [
+            {
+              "field": "openWorldHint",
+              "python": false,
+              "rust": true
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "source_artifacts": [
+    {
+      "path": "catalogs/python-observe.json",
+      "bytes": 56915,
+      "sha256": "de6871be67a3a9d4981ecaefa011951f8ca4fff83ddda33ad53f6d5dc2b4fda9"
+    },
+    {
+      "path": "catalogs/rust-observe-live.json",
+      "bytes": 29494,
+      "sha256": "e4909ad50e5a9593a8d8c5a120289d1f4861bbcf212d84c48bb21734e7e677d6"
+    },
+    {
+      "path": "catalogs/python-model.json",
+      "bytes": 640346,
+      "sha256": "f8361378bc37ac19890707a45de14614123afe4ff54cec9461cfa8af9439aa84"
+    },
+    {
+      "path": "catalogs/rust-model-live.json",
+      "bytes": 286740,
+      "sha256": "67b02a3729ef765a82fae0f7805994822437bf67e6e91a00201d0a2528635317"
+    },
+    {
+      "path": "catalogs/python-files.json",
+      "bytes": 689131,
+      "sha256": "f2202bb6d44dbed21e5b160dc43e38b1a48369aeeb0b451ce774ee271a4e65fc"
+    },
+    {
+      "path": "catalogs/rust-files-live.json",
+      "bytes": 320598,
+      "sha256": "9b0860e349d121cbc3ffddd0a7029e5c7ad9da661de85a35538f9a53fdc27021"
+    },
+    {
+      "path": "catalogs/python-full-live.json",
+      "bytes": 695093,
+      "sha256": "8c53ff2c496ea00506b56ad7a4db70f5e480464b16ade5dad739c59ec74bd8bd"
+    },
+    {
+      "path": "catalogs/rust-full-live.json",
+      "bytes": 325396,
+      "sha256": "fabdcdb575b8fbf2448a75256bf1b328c213fcf0fcbf271ee575a3e3c64f752b"
+    }
+  ],
+  "observed_rust_outputs": {
+    "successful_structured_tool_result_samples": 86,
+    "tools_with_top_level_schema_mismatches": [
+      {
+        "name": "add_primitive",
+        "mismatching_successful_samples": 2,
+        "extra_top_level_fields": [
+          "action",
+          "affected_object_ids",
+          "changed",
+          "history_state_id"
+        ],
+        "missing_required_top_level_fields": []
+      },
+      {
+        "name": "get_status",
+        "mismatching_successful_samples": 16,
+        "extra_top_level_fields": [
+          "approved_roots",
+          "operation_id",
+          "profile"
+        ],
+        "missing_required_top_level_fields": []
+      },
+      {
+        "name": "new_project",
+        "mismatching_successful_samples": 1,
+        "extra_top_level_fields": [
+          "action",
+          "changed"
+        ],
+        "missing_required_top_level_fields": []
+      },
+      {
+        "name": "redo",
+        "mismatching_successful_samples": 1,
+        "extra_top_level_fields": [
+          "action",
+          "affected_object_ids",
+          "changed",
+          "history_state_id"
+        ],
+        "missing_required_top_level_fields": []
+      },
+      {
+        "name": "scene_summary",
+        "mismatching_successful_samples": 16,
+        "extra_top_level_fields": [
+          "dirty",
+          "history_state_id",
+          "selection"
+        ],
+        "missing_required_top_level_fields": []
+      },
+      {
+        "name": "set_color",
+        "mismatching_successful_samples": 4,
+        "extra_top_level_fields": [],
+        "missing_required_top_level_fields": [
+          "result"
+        ]
+      },
+      {
+        "name": "set_transform",
+        "mismatching_successful_samples": 1,
+        "extra_top_level_fields": [],
+        "missing_required_top_level_fields": [
+          "result"
+        ]
+      },
+      {
+        "name": "undo",
+        "mismatching_successful_samples": 4,
+        "extra_top_level_fields": [
+          "action",
+          "affected_object_ids",
+          "changed",
+          "history_state_id"
+        ],
+        "missing_required_top_level_fields": []
+      }
+    ]
+  },
+  "unresolved_contract_differences": [
+    "Rust input schemas add return_detail to 19 tools where the saved Python catalog does not advertise it; server source does not currently consume return_detail.",
+    "orbit_view marks yaw_delta_deg and pitch_delta_deg required in the Rust schema while its handler supplies defaults when omitted.",
+    "Rust input schemas declare additionalProperties=false for all tools; saved Python input schemas omit that restriction and also differ in bounds/nullability.",
+    "Rust publishes one 104-property output-schema superset with untyped property schemas for every tool; Python publishes tool-specific output schemas.",
+    "emboss_text destructiveHint and launch_slicer openWorldHint differ between the saved Python and current Rust catalogs.",
+    "No owner approval of these schema deviations is recorded."
+  ]
+}

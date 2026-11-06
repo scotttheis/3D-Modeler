@@ -1,8 +1,28 @@
 # RB-09 Shared AI and Regression Handoff
 
-**Status:** paired live desktop/MCP gate passed 2026-11-04 after a scoped Rust presentation-sync repair. Later Release rebuilds replaced the target outputs; the current pair has now passed a separate identity-only probe and the updated evidence validator passes.
-**Written:** 2026-11-02; owner path/backup direction updated 2026-11-03; live endpoint updated 2026-11-04  
-**Boundary:** keep visual review and owner acceptance pending; no full paired rerun or RB-10 work
+**Status:** the historical Python/Rust paired gate passed on its recorded build. The current Rust Release GUI/MCP workflow and optional-MCP failure check ran on 2026-11-06. Current schema comparison against saved Python catalogs found unresolved differences; schema compatibility and RB-09 acceptance remain open.
+**Written:** 2026-11-06; owner path/backup direction updated 2026-11-03; current Rust Release recheck added 2026-11-06
+**Boundary:** keep schema disposition, visual review, owner acceptance, and overall acceptance pending; stop before RB-10
+
+## Current continuation (2026-11-06)
+
+Run `currpair-20261106-072716` used app SHA-256
+`0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a` and
+gateway SHA-256 `aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e`.
+The official Python MCP SDK 2.2.0 was used only as a client to the Rust stdio
+gateway; the Python Builder3D product was not launched and the saved Python
+catalog snapshots were not refreshed. The Rust desktop reopened the saved
+project at revision 25 with the stable Cube/Sphere IDs visible in the viewport
+and Items panel. A separate optional-MCP failure run kept the Rust GUI usable,
+returned retryable `desktop_unavailable` to the client, and removed owned
+runtime state at shutdown.
+
+All four profile counts and ordered names match the saved catalogs. Exact Rust
+input/output schema matches are zero in all four profiles. The differences
+are listed in `currpair-20261106-072716/schema-comparison.json`; they are not
+approved deviations. Keep that RB-09 contract gap open. The saved-project
+run, schema comparison, logs, captures, and final snapshot receipt are the
+current evidence.
 
 The active Rust source/build/run copy is `E:\Builder3D-Rust`. Use `G:\` as
 the primary additive backup destination. Removable USB copies are occasional
@@ -342,9 +362,14 @@ slice or RB-11 acceptance closure.
 
 ## 10. Fresh-session prompt
 
-    RB-09 live desktop/MCP verification and its additive G: snapshot are
-    complete; do not repeat RB-09 or start RB-10 in this handoff. Read the
-    current instructions and RB-09 checkpoint, keep E:/Builder3D-Rust as the
-    working tree and L:/Builder3D read-only, and preserve all uncommitted files.
-    Keep the interface/floor gaps, owner visual review, overall acceptance, and
-    RB-08 native matrix/completion snapshot open.
+    The current Rust Release GUI/MCP workflow and additive G: recovery snapshot
+    are recorded. Do not start RB-10. Read the current instructions and RB-09
+    checkpoint, keep E:/Builder3D-Rust as the working tree and L:/Builder3D
+    read-only, and preserve all uncommitted files. RB-09 schema compatibility
+    remains open: compare against the current reference contract only when that
+    evidence is authorized and available, then resolve or document and test any
+    deviations. Keep the interface/floor gaps, visual review, owner acceptance,
+    overall product acceptance, and RB-08 native matrix/completion snapshot
+    pending.
+
+The final short-name additive recovery snapshot is `G:/B3D_R09C_20261106`; its independent path/count/byte/SHA-256/reparse verification is recorded in `evidence/rebuild/rb-09-shared-ai-and-regression/snapshot-receipt.md`. It does not close the schema contract or any visual/owner acceptance gate.

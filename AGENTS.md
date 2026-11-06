@@ -54,11 +54,15 @@ is that the interface and floor are still missing. Record those as open product
 gaps; RB-09 does not provide visual approval or overall acceptance. Preserve
 all earlier pending statuses. RB-08's original “stop before RB-09” boundary is
 superseded by this later owner direction, not by a claim that RB-08 is closed.
-As of 2026-11-03, RB-09's implementation and automated checks are recorded,
-but its live-client/native gate is unverified and paused by the owner. On
-resumption, work from `E:\Builder3D-Rust`, use `G:\` for the primary recovery
-snapshot, finish the RB-09 native gate, and stop before RB-10. USB copies are
-occasional one-offs only.
+As of 2026-11-06, a current Rust Release live GUI/MCP workflow and optional-
+MCP failure check are recorded under
+`evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261106-072716/`.
+The Python product was not launched for that recheck. The current Rust tool
+names/order match the saved Python catalogs, but schema differences remain an
+open RB-09 contract gap with no owner-approved deviation. Keep RB-09 acceptance
+open, use `E:\Builder3D-Rust` as the only active Rust tree, use `G:\` for
+additive recovery snapshots, and stop before RB-10. USB copies are occasional
+one-offs only.
 The RB-01 and RB-02 capture records and acceptance are in
 [`evidence/rebuild/rb-01-visual-foundations/capture-board.md`](evidence/rebuild/rb-01-visual-foundations/capture-board.md)
 and

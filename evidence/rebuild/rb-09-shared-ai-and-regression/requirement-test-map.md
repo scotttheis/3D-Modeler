@@ -2,7 +2,7 @@
 
 | ID | Requirement | Live outcome | Evidence |
 |---|---|---|---|
-| RB09-CAT-01 | Preserve the fixed 60-tool catalog, order, profiles, schemas, and structured results. | Pass. Official SDK clients listed all 60 tools in Python and Rust sessions; post-run closed Rust gateway still listed 60. | Client JSONL files; rust_stdio_client_probe-result.json |
+| RB09-CAT-01 | Preserve the fixed 60-tool catalog, order, profiles, schemas, and structured results. | Partial. Current Rust Release and saved Python catalogs have the same ordered names/counts in all four profiles; exact input and output schema matches are 0 in every profile. Schema differences are recorded and remain unresolved. The Python product was not launched for this current run. | currpair-20261106-072716/current-run-manifest.json; currpair-20261106-072716/schema-comparison.json; current client JSONL |
 | RB09-DOC-02 | Read/edit the desktop’s current document and revision through the shared command/history owner. | Pass. Both clients observed project e5d81c5226e64f58b838d55d9395afa9, stable Cube/Sphere IDs, transforms, and geometry. Rust edit updated viewport and Items immediately after the presentation-sync repair. | logs/rb09-python-client.jsonl; logs/rb09-rust-client-2.jsonl; captures/rust-post-fix-mcp-edit.png |
 | RB09-HIST-03 | Preserve stable IDs; make edits one shared undo/redo step; no-op creates none. | Pass. Python no-op remained revision 4. Final Rust object 42b03db2996a4e79bdac9fba29af4033 survived GUI undo/redo at revisions 36/37 and MCP undo/redo at 38/39. | logs/rb09-rust-client-final-pair.jsonl; captures/rust-post-fix-final-history-*.png |
 | RB09-REV-04 | Reject stale project/revision commits and preserve replay under competing requests. | Pass. Same-key replay returned same object ID; changed arguments returned idempotency_conflict. Stale revisions and losing two-client race requests returned revision_conflict in both apps. | Python/Rust client logs; captures/python-light-mcp-race-edit.png |
@@ -11,16 +11,21 @@
 | RB09-LONG-07 | Report long-operation status/progress/cancel/failure and commit only against the matching document/revision. | Pass. Python 600k import canceled at 85 and stale import result was discarded at revision 22. Rust reported progress; 50k normalize canceled at 90→95; bounded-resource failures did not commit; stale normalize result was discarded after GUI revision advanced to 46. | Python/Rust client logs; fixtures and hashes; stale-edit captures |
 | RB09-BRIDGE-08 | Keep bridge loopback/authenticated and clean owned runtime state. | Pass in normal and optional-failure shutdown tests. Descriptor/listener and app/client/gateway processes were absent after close. | Client logs; client-server-log.md; host_desktop probe records |
 | RB09-OPTIONAL-09 | MCP unavailability must not block normal desktop use; closed clients get a bounded error. | Pass in Python and Rust. GUI remained usable under startup failure; closed client got structured retryable desktop_unavailable. | Optional client logs; captures/python-mcp-startup-failed.png; captures/rust-optional-mcp-unavailable.png |
-| RB09-NATIVE-10 | Use actual MCP clients and paired live desktops for the workflow. | Pass for the RB-09 live-client/native gate after the scoped Welcome presentation repair. Clean Light and Dark screenshot pairs are recorded; alternate-size captures are recorded. | walkthrough.md; paired-comparison-board.md; capture-metadata.json; accepted-journal.ndjson |
-| RB09-ARTIFACT-11 | Preserve the historical paired-gate executable identities while separately verifying later current Release outputs. | Pass for the current identity check. The later bloat and app-restore logs show Release rebuilds; current app/gateway hashes remained stable before and after the identity-only run. This was not a rerun of the paired workflow. | artifact-identity-recheck.json; logs/identity-recheck-bloat-workspace.stderr.log; logs/identity-recheck-restore-release-app.stderr.log |
+| RB09-NATIVE-10 | Use actual MCP clients and paired live desktops for the workflow. | Historical Python/Rust live-client gate passed on its recorded build. The current Rust Release GUI/MCP workflow was also exercised with a saved-project GUI reopen and optional-MCP failure case. This did not launch the current Python product or refresh the cross-product capture matrix. | walkthrough.md; currpair-20261106-072716/current-run-manifest.json; currpair-20261106-072716/logs/rust-current-live.jsonl; accepted-journal.ndjson |
+| RB09-ARTIFACT-11 | Preserve the historical paired-gate executable identities while separately verifying later current Release outputs. | Pass for current Rust app/gateway identity and current Rust GUI/MCP workflow. It is not a current Python/Rust pair; the Python SDK was used only as a client to Rust. | artifact-identity-recheck.json; currpair-20261106-072716/current-run-manifest.json; currpair-20261106-072716/logs/rust-current-live.jsonl; logs/identity-recheck-bloat-workspace.stderr.log; logs/identity-recheck-restore-release-app.stderr.log |
 | RB09-VALIDATOR-12 | Validate historical live hashes against paired capture metadata and current target hashes against separate current-identity evidence. | Pass. The gate-time validator exited 0; the later stale-path check had failed with release binary hash mismatch: live Rust app; the updated validator exits 0 and verifies the historical 50-capture inventory plus current identity screenshot and read-only SDK result. | validate_rb09_evidence.py; logs/evidence-ledger-validation.log; logs/identity-recheck-validator.stdout.log; logs/identity-recheck-validator.exit; artifact-identity-recheck/current-app.png; artifact-identity-recheck/client.jsonl |
 
 ## Regression gates
 
 The post-repair full workspace suite passed 329/329. The app-focused MCP filter passed 7/7; focused MCP library and core external-commit tests passed 19/19 and 3/3; focused Python reference tests passed 12/12. Exact commands, logs, and tool caveats are in verification.md.
 
-The identity-only follow-up did not change Rust application source or rerun
-Rust test suites. Its official-client status call was read-only; the updated
-evidence validator was rerun and passed.
+The 2026-11-06 continuation did not change Rust application source. It exercised
+the current Rust Release desktop/MCP workflow and optional-MCP startup failure.
+The official Python MCP SDK was used only as a client to the Rust gateway; the
+Python product and its saved catalog snapshots were not refreshed. A separate
+schema comparison found no exact input/output schema matches for the saved
+Python reference snapshots, so the MCP catalog contract remains partially
+verified. The updated evidence validator was rerun and passed; Rust test suites
+were not rerun because no Rust source changed.
 
 The owner-reported interface and floor gaps remain open. Visual review, owner acceptance, and RB-08’s native matrix/completion snapshot remain pending. RB-10 has not started.

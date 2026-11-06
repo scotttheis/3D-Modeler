@@ -141,3 +141,36 @@ included. This remains a review copy, not a completion snapshot; exact details
 are in snapshot-receipt.md.
 
 Owner interface/floor gaps, visual review, owner acceptance, and the RB-08 native matrix/completion snapshot remain pending. RB-10 has not started.
+
+## Current Rust Release recheck (2026-11-06)
+
+- Current app SHA-256: `0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a`.
+- Current gateway SHA-256: `aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e`.
+- Current official SDK client listed the ordered 60-tool catalog and exercised the Rust desktop/MCP workflow against the current app. Observe/model/files/full profile counts were 7/52/59/60 and ordered names matched saved Python catalogs.
+- Saved project SHA-256: `e6046a8d3ed7ea949b00a13928311b2fc88e476bda6d4d859af6d866246d9262`; project `e5d81c5226e64f58b838d55d9395afa9`, revision 25, clean. The Rust GUI reopened it and showed the saved Cube and Sphere.
+- Optional startup failure left the GUI interactive. Client calls to `get_status` and `scene_summary` returned retryable `desktop_unavailable`; no runtime descriptor or app-owned listener remained after shutdown.
+- `schema-comparison.json` compares current Rust live catalogs and responses with saved Python catalog snapshots. Exact input/output schema matches are 0 in all four profiles. It records the input-field, required-field, additional-properties, annotation, output-schema, and top-level result differences. The Python product was not launched and the saved catalogs were not refreshed.
+- The comparison checks canonical schema equality and only top-level required/additional-properties constraints on sample successful output objects; it is not a complete nested JSON Schema validation.
+
+The current run did not change Rust application source, so no Rust test suite was rerun. Previously recorded Rust tests remain historical: workspace 329/329 and focused MCP 19/19. The focused command py -3.13 evidence/rebuild/rb-09-shared-ai-and-regression/validate_rb09_evidence.py --tool-name-self-test passed with exit 0; the full validator passed with exit 0 and reported schema parity pending while validating the nine current-run capture records. The manifest writer, schema comparator, and git diff --check also exited 0. git diff --check emitted only line-ending normalization warnings.
+
+## Current additive recovery snapshot
+
+The new G:/B3D_R09C_20261106 snapshot was synchronized after the final evidence and docs updates. The independent verifier reports 3991 files / 756841099 bytes for source and snapshot, with zero missing, extra, differing, or reparse entries. Critical file SHA-256 values match. Only root target, .cache, and logs were excluded; nested evidence logs and Git metadata were copied. See snapshot-receipt.md.
+
+## RB-09 wrap-up rerun (2026-11-06)
+
+After the current Release recheck above, the wrap-up reran `cargo fmt --check`,
+`cargo check --workspace --locked`, `cargo test --workspace --locked --quiet`
+(329 passed, 0 failed, 0 ignored), `cargo test -p builder3d-mcp --locked`
+(19 passed, 0 failed, 0 ignored), `cargo clippy --all-targets -- -D warnings`,
+and `cargo deny check`; all exited 0. Cargo Deny reported 28 duplicate-version
+warnings and no advisory, ban, license, or source-policy failures. `cargo audit`
+was unavailable because `cargo-audit` is not installed; cargo bloat and full
+installed-package size were not rerun.
+
+The current-run manifest and schema-comparison generator commands exited 0.
+Profile counts and ordered names matched (7/52/59/60), while exact input- and
+output-schema matches remained zero in every profile. The focused 60-name
+self-test and full evidence validator passed; the latter reports schema parity
+pending. The Rust application source was not changed.

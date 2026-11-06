@@ -1,9 +1,9 @@
 # RB-09 Shared AI and Regression Report
 
-**Date:** 2026-11-04  
-**Status:** Required paired live desktop/MCP verification, evidence validation, and additive G: snapshot passed after a scoped Rust presentation-sync repair. Stop before RB-10. This is not owner visual approval or overall product acceptance.
+**Date:** 2026-11-06
+**Status:** The historical Python/Rust paired gate passed on its recorded build. A current Rust Release GUI/MCP recheck and optional-MCP failure check also passed on 2026-11-06. The current schema comparison found unresolved catalog differences against saved Python catalogs, so RB-09 schema compatibility and overall acceptance remain pending. Stop before RB-10.
 
-## Delivered and verified
+## Historical paired gate evidence
 
 - The official Python MCP SDK 2.2.0 connected to both the running Python reference app and the Rust stdio gateway. Each live app exposed the fixed 60-tool catalog and edited its current desktop document through the app-owned bridge.
 - Python and Rust used project ID e5d81c5226e64f58b838d55d9395afa9 and stable Cube/Sphere IDs 3f449b78621c467b818e8c69925e2b6c and dff9cc124c6d4d27b4ea9b07d6e4ae6b. Geometry and transforms match. The initial Python capture is revision 4 with the Cube blue; the later saved shared fixture is revision 23 with the Cube gold after a Python MCP edit. Rust’s final-build paired capture opens that revision-23 file. This color/revision difference is recorded in the comparison board.
@@ -11,7 +11,7 @@
 - Shared GUI/MCP history, stable IDs, revision and no-op behavior, save/reopen, New/Open, dirty protection, approved-root and file-failure behavior, replay, revision races, long-operation progress/cancel/failure/stale-result handling, optional MCP startup, closed-desktop responses, and bridge cleanup were exercised with real clients and visible app windows.
 - An initial Rust Welcome-to-Scene visibility defect was found, repaired, and retested. Two focused regression tests cover an MCP edit from Welcome and replacing the document with an empty project.
 
-## Live gate outcomes
+## Historical live gate outcomes
 
 | Area | Observed result |
 |---|---|
@@ -70,3 +70,21 @@ The receipt is in snapshot-receipt.md.
 ## Boundary
 
 The owner-reported interface and floor gaps remain open. Earlier visual review and owner acceptance remain pending. RB-08’s paired Rust native matrix and completion snapshot remain independently open. No overall product acceptance is claimed. RB-10 has not started.
+
+## Current Rust Release recheck (2026-11-06)
+
+Run `currpair-20261106-072716` exercised the current Rust Release app and gateway. The app SHA-256 is `0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a`; the gateway SHA-256 is `aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e`.
+
+The official Python MCP SDK 2.2.0 was used only as a stdio client to the Rust gateway. The Python Builder3D application was not launched, and the saved Python catalog snapshots were not refreshed. The historical Python/Rust paired gate above remains tied to its recorded older build.
+
+The Rust client opened `RB09-Paired-Live.3dp`, edited and queried the shared desktop document, saved the result, and the GUI reopened it. The saved output is 82,178 bytes, SHA-256 `e6046a8d3ed7ea949b00a13928311b2fc88e476bda6d4d859af6d866246d9262`, project ID `e5d81c5226e64f58b838d55d9395afa9`, revision 25, clean, with the stable Cube and Sphere IDs. The final GUI capture is `currpair-20261106-072716/captures/rust-current-live-gui-reopened-after-restart-final.png` (SHA-256 `b1223ef8a48c17c3ece09ac77ed263620709bb53a150b18fe4266814ac37e5c5`).
+
+The current optional-MCP startup failure case kept the Rust GUI usable for New Scene, Cube creation, and Undo. The SDK listed 60 tools and got retryable `desktop_unavailable` from `get_status` and `scene_summary`. No runtime descriptor or app-owned listener remained after shutdown. App PID 28536 and optional-failure app PID 5400 exited normally; the gateway and clients also exited. No unrelated process was terminated.
+
+The profile counts and ordered tool names match the saved Python catalogs: observe 7, model 52, files 59, full 60. Exact input-schema and output-schema matches are zero in every profile. Rust adds `return_detail` on 19 tools without server-side use; `orbit_view` requires two fields that its handler defaults; all Rust inputs set `additionalProperties=false`, while Python omits it and differs in bounds/nullability. Rust outputs use one 104-property untyped superset instead of Python tool-specific schemas. Two annotations differ. Top-level result checks found required-field differences for `get_status`, `scene_summary`, `add_primitive`, `undo`, `redo`, `set_transform`, `set_color`, and `new_project`; this was not full nested JSON Schema validation.
+
+Schema details are in `currpair-20261106-072716/schema-comparison.json`. They are findings against saved Python catalogs, not approved deviations or a refreshed current-Python comparison. Keep schema compatibility and RB-09 acceptance pending. The interface/floor gaps, visual review, owner acceptance, RB-08 native matrix/completion snapshot, and overall product acceptance remain open. RB-10 has not started.
+
+## Current additive recovery snapshot
+
+The final snapshot is G:/B3D_R09C_20261106, a new short-name directory on G:. After the final synchronization, the independent verifier reports 3991 files / 756841099 bytes on both sides, zero missing/extra/differing paths, zero reparse entries, and matching critical SHA-256 values. Repository-root target, .cache, and logs are excluded; nested RB-09 evidence logs and Git metadata are included. Full receipt: snapshot-receipt.md.

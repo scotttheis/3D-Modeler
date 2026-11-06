@@ -39,3 +39,11 @@ The Python app’s optional startup failure and closed-client response are logge
 ## Credential and file policy
 
 No bearer token, bridge secret, or credential was written to evidence. Approved paths were under fixtures/approved. Denied-root and overwrite attempts were rejected; the overwrite sentinel remained byte-identical. The exact request outcomes and fixture hashes are in the JSONL logs and fixture-manifest.json.
+
+## Current Rust Release session (2026-11-06)
+
+Run directory: `currpair-20261106-072716/`. The app SHA-256 was `0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a`; the Rust stdio gateway SHA-256 was `aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e`. Client logs are `logs/rust-current-live.jsonl`, `logs/rust-current-live-reopen-client.jsonl`, and `logs/rust-current-optional-failure-client.jsonl` under that run.
+
+The official Python MCP SDK 2.2.0 was used only as an MCP client to the Rust gateway; the Python Builder3D product was not launched. The client found 60 ordered tools, read and edited the live Rust document, saved it, and read the same project after the Rust GUI reopened it. The optional-startup failure session returned retryable `desktop_unavailable` while leaving the GUI usable. App PIDs 28536 and 5400 exited normally. No token or credential was recorded.
+
+The schema report compares current Rust live catalog data with saved Python catalog snapshots. Exact input/output schema matches were zero in each profile; schema compatibility remains unresolved. The comparison does not refresh the Python reference or perform full nested output-schema validation.

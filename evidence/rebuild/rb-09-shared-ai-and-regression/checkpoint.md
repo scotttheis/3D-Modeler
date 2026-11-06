@@ -1,7 +1,7 @@
 # RB-09 Handoff Checkpoint
 
-**Date:** 2026-11-04  
-**Status:** the paired live desktop/MCP gate passed on its recorded build. Later Release rebuilds replaced the `target/release` outputs; a separate current-artifact identity check now verifies those outputs and the evidence validator passes. This identity check did not repeat the paired workflow. Keep visual review, owner acceptance, and overall product acceptance pending. Stop before RB-10.
+**Date:** 2026-11-06
+**Status:** the historical Python/Rust paired live gate passed on its recorded build. A current Rust Release GUI/MCP workflow and optional-MCP failure check ran on 2026-11-06. Schema compatibility against saved Python catalogs remains unresolved. Keep RB-09 acceptance, visual review, owner acceptance, and overall product acceptance pending. Stop before RB-10.
 
 ## Current state
 
@@ -27,3 +27,16 @@ This follow-up created `G:/Builder3D-Rust_snapshot_20261104-215904_RB-09-artifac
 ## Boundary
 
 The owner-reported interface and floor gaps remain open. Visual review, owner acceptance, and overall product acceptance remain pending. RB-08’s paired Rust native matrix and completion snapshot remain independently open. RB-10 has not started.
+
+## Current continuation checkpoint (2026-11-06)
+
+- Worktree: `E:\Builder3D-Rust`; existing tracked changes and untracked files were preserved. No stage, commit, push, reset, or restore was performed.
+- Current Rust Release app/gateway hashes: `0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a` / `aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e`.
+- Live run `currpair-20261106-072716` saved project `e5d81c5226e64f58b838d55d9395afa9` at clean revision 25 with the stable Cube/Sphere IDs; Rust GUI reopen was visible in the accepted capture.
+- Optional-MCP startup failure preserved usable GUI work and produced retryable `desktop_unavailable` for two client reads. Both app instances and their clients/gateways shut down normally; no unrelated process was terminated.
+- Official Python MCP SDK 2.2.0 was used only against Rust `r4_mcp.exe`; the Python product and saved catalog snapshots were not refreshed.
+- Schema names/order match for all four saved profiles, but exact input/output schema matches are zero in every profile. Schema compatibility and RB-09 acceptance remain pending.
+- No Rust source changed; no Rust tests were rerun. Previously recorded 329 workspace and 19 focused MCP tests remain historical.
+- Final validator self-check/full-validator outcomes and the short-name G: snapshot verification are recorded in `WORK_LOG.md` and `snapshot-receipt.md`.
+
+- Final additive snapshot: G:/B3D_R09C_20261106; independent verification reports 3991 files / 756841099 bytes on both sides, with zero path/hash/reparse differences. Root target, .cache, and logs are excluded; nested RB-09 evidence logs and Git metadata are included. Full receipt and critical hashes are in snapshot-receipt.md.
