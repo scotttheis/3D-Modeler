@@ -16,7 +16,7 @@ closed. Stop before RB-10 work (S3) as before.
 |---|---|
 | `cargo fmt --all -- --check` | Pass |
 | `cargo clippy --workspace --all-targets --locked -- -D warnings` | Pass |
-| `cargo test --workspace --locked --no-fail-fast` | Pass (re-run 2026-11-12 after OF-1; F2 commit `f1b581d` fixed the six below) |
+| `cargo test --workspace --locked --no-fail-fast` | Pass (re-run 2026-11-12 after each OF commit; F2 commit `f1b581d` fixed the six below) |
 | `cargo deny check` | Not run |
 | Release (fat LTO) build | Not run this session; failed with LLVM out-of-memory on 2026-11-11 |
 | `review` profile build | Pass (3m56s clean build; capture verified) |
@@ -71,11 +71,14 @@ D5 `emboss_text` metadata.
   (captures in `evidence/rebuild/captures/2026-11-12-finish-pass/`); remaining
   work is S1 tasks 1–9. **Not yet reviewed by the owner.**
 - 2026-11-12 (second batch): nine items OF-1 to OF-9 in
-  [`owner-feedback-2026-11-12.md`](owner-feedback-2026-11-12.md). OF-1
-  needs a redo: `e4c62b1` removed the floor labels, but 3D Builder reference
-  captures (`evidence/rebuild/reference/3d-builder/`, see its README) show the
-  numbers belong painted flat on the floor plane. Shots still owed by the
-  owner: X-ray with two objects, Paint/Color/Material, Merge.
+  [`owner-feedback-2026-11-12.md`](owner-feedback-2026-11-12.md), worked in
+  the owner's order (OF-1 floor, OF-1 resize + OF-3, OF-4, OF-6, OF-9, OF-2,
+  OF-7/8; OF-5 waits for shots), one commit each, **none owner-reviewed
+  yet**. Done so far: OF-1 floor numbers (flat on the floor plane, depth-
+  tested). Shots still owed by the owner: X-ray with two objects,
+  Paint/Color/Material, Merge.
+- Review harness: `BUILDER3D_REVIEW_CAMERA=yaw,pitch,distance` poses the
+  camera after auto-framing (used for the far/top floor-label captures).
 
 ## Last recovery point
 

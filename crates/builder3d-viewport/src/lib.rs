@@ -30,9 +30,11 @@ pub use cpu::{
 pub use error::ViewportError;
 pub use floor::{
     ContactCue, ContactCueCache, DEFAULT_FLOOR_SIZE, FLOOR_CHECKER_CELL_SIZE,
-    FLOOR_GRID_TARGET_PIXELS, FLOOR_MAJOR_GRID_SPACING, FLOOR_SURFACE_SUBDIVISIONS, FloorGeometry,
-    FloorLine, FloorScaleLabel, FloorSurface, MAX_CONTACT_CUES, MAX_FLOOR_GRID_LINES, build_floor,
-    build_floor_scale_labels,
+    FLOOR_GRID_TARGET_PIXELS, FLOOR_LABEL_SPACING_MM, FLOOR_LABEL_TEXT_HEIGHT_MM,
+    FLOOR_MAJOR_GRID_SPACING, FLOOR_SURFACE_SUBDIVISIONS, FloorGeometry, FloorLine,
+    FloorScaleLabel, FloorSurface, FloorTextMesh, FloorTextVertex, MAX_CONTACT_CUES,
+    MAX_FLOOR_GRID_LINES, MAX_FLOOR_LABELS_PER_AXIS, PlanarText, PlanarTextVertex, build_floor,
+    build_floor_scale_labels, build_floor_text,
 };
 pub use gizmo::{
     GIZMO_TARGET_PIXELS, GizmoAxis, GizmoGeometry, GizmoHit, GizmoLine, GizmoMode, GizmoTriangle,

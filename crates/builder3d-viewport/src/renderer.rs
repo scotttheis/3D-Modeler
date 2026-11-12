@@ -21,7 +21,8 @@ use crate::{
     cpu::{CpuRenderOptions, render_cpu_with_options, write_ppm},
     floor::{
         CONTACT_SHADOW_LAYERS, ContactCueCache, DEFAULT_FLOOR_SIZE, FLOOR_SURFACE_SUBDIVISIONS,
-        FloorGeometry, build_floor, expand_shadow_polygon, shadow_light_direction_world,
+        FloorGeometry, FloorTextMesh, build_floor, expand_shadow_polygon,
+        shadow_light_direction_world,
     },
     gizmo::{GizmoMode, build_gizmo},
     lighting::ViewportLighting,
@@ -35,6 +36,9 @@ const OVERLAY_VERTEX_STRIDE: usize = 36;
 const BYTES_PER_PIXEL: u64 = 4;
 const COPY_BYTES_PER_ROW_ALIGNMENT: u64 = 256;
 const MESH_UNIFORM_BYTES: usize = 240;
+const FLOOR_TEXT_VERTEX_STRIDE: usize = 36;
+/// Most floor-text vertices drawn in one frame.
+const MAX_FLOOR_TEXT_VERTICES: usize = 65_536;
 
 /// Configuration for the real offscreen wgpu viewport.
 #[derive(Clone, Debug)]
@@ -77,6 +81,11 @@ pub struct ViewportRenderOptions {
     pub theme: ViewportTheme,
     /// User-adjustable screen-aligned lighting and floor contact shadows.
     pub lighting: ViewportLighting,
+    /// Text lying on the build plane (floor distance labels). Drawn with
+    /// the glyph atlas set by [`ViewportRenderer::set_text_atlas`]; the CPU
+    /// fallback does not draw it, so the adapter paints it instead when a
+    /// frame report says `cpu_fallback`.
+    pub floor_text: FloorTextMesh,
 }
 
 impl Default for ViewportRenderOptions {
@@ -89,6 +98,7 @@ impl Default for ViewportRenderOptions {
             selected_tint: [0.0, 0.55, 1.0, 1.0],
             theme: ViewportTheme::Dark,
             lighting: ViewportLighting::default(),
+            floor_text: FloorTextMesh::default(),
         }
     }
 }
@@ -202,6 +212,10 @@ pub struct ViewportRenderer {
     mesh_xray_pipeline: wgpu::RenderPipeline,
     overlay_line_pipeline: wgpu::RenderPipeline,
     overlay_triangle_pipeline: wgpu::RenderPipeline,
+    floor_text_pipeline: wgpu::RenderPipeline,
+    text_atlas_layout: wgpu::BindGroupLayout,
+    text_atlas_sampler: wgpu::Sampler,
+    text_atlas: Option<wgpu::BindGroup>,
     uniform_layout: wgpu::BindGroupLayout,
     ledger: ResourceLedger,
     render_target_ledger_id: AllocationId,
@@ -328,6 +342,35 @@ impl ViewportRenderer {
             wgpu::PrimitiveTopology::TriangleList,
             "builder3d-r5-overlay-triangles",
         );
+        let text_atlas_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+            label: Some("builder3d-floor-text-atlas-layout"),
+            entries: &[
+                wgpu::BindGroupLayoutEntry {
+                    binding: 0,
+                    visibility: wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::Texture {
+                        sample_type: wgpu::TextureSampleType::Float { filterable: true },
+                        view_dimension: wgpu::TextureViewDimension::D2,
+                        multisampled: false,
+                    },
+                    count: None,
+                },
+                wgpu::BindGroupLayoutEntry {
+                    binding: 1,
+                    visibility: wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
+                    count: None,
+                },
+            ],
+        });
+        let text_atlas_sampler = device.create_sampler(&wgpu::SamplerDescriptor {
+            label: Some("builder3d-floor-text-sampler"),
+            mag_filter: wgpu::FilterMode::Linear,
+            min_filter: wgpu::FilterMode::Linear,
+            ..Default::default()
+        });
+        let floor_text_pipeline =
+            create_floor_text_pipeline(&device, &uniform_layout, &text_atlas_layout);
         Ok(Self {
             instance,
             device,
@@ -355,6 +398,10 @@ impl ViewportRenderer {
             mesh_xray_pipeline,
             overlay_line_pipeline,
             overlay_triangle_pipeline,
+            floor_text_pipeline,
+            text_atlas_layout,
+            text_atlas_sampler,
+            text_atlas: None,
             uniform_layout,
             ledger,
             render_target_ledger_id,
@@ -421,6 +468,30 @@ impl ViewportRenderer {
         self.width = width;
         self.height = height;
         Ok(())
+    }
+
+    /// Sets the glyph atlas that [`ViewportRenderOptions::floor_text`] UVs
+    /// index. The texture must be a filterable 2D colour texture on this
+    /// renderer's device whose alpha channel holds glyph coverage (the UI
+    /// toolkit's font atlas). `None` stops floor text from being drawn.
+    pub fn set_text_atlas(&mut self, atlas: Option<&wgpu::Texture>) {
+        self.text_atlas = atlas.map(|texture| {
+            let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
+            self.device.create_bind_group(&wgpu::BindGroupDescriptor {
+                label: Some("builder3d-floor-text-atlas"),
+                layout: &self.text_atlas_layout,
+                entries: &[
+                    wgpu::BindGroupEntry {
+                        binding: 0,
+                        resource: wgpu::BindingResource::TextureView(&view),
+                    },
+                    wgpu::BindGroupEntry {
+                        binding: 1,
+                        resource: wgpu::BindingResource::Sampler(&self.text_atlas_sampler),
+                    },
+                ],
+            })
+        });
     }
 
     /// Sets the sRGB-encoded clear color used by the native viewport.
@@ -687,6 +758,45 @@ impl ViewportRenderer {
         } else {
             None
         };
+        let floor_text = &options.floor_text;
+        let floor_text_drawable = self.text_atlas.is_some()
+            && !floor_text.is_empty()
+            && floor_text.vertices.len() <= MAX_FLOOR_TEXT_VERTICES;
+        let floor_text_reservation = if floor_text_drawable {
+            let bytes = floor_text
+                .vertices
+                .len()
+                .saturating_mul(FLOOR_TEXT_VERTEX_STRIDE)
+                .saturating_add(floor_text.indices.len().saturating_mul(4));
+            u64::try_from(bytes).ok().and_then(|bytes| {
+                self.ledger
+                    .reserve(
+                        AllocationKind::Staging,
+                        MemoryDomain::Adapter(self.adapter_index),
+                        bytes,
+                    )
+                    .ok()
+            })
+        } else {
+            None
+        };
+        let floor_text_buffers = floor_text_reservation.is_some().then(|| {
+            (
+                self.device
+                    .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                        label: Some("builder3d-floor-text-vertices"),
+                        contents: &pack_floor_text(floor_text),
+                        usage: wgpu::BufferUsages::VERTEX,
+                    }),
+                self.device
+                    .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                        label: Some("builder3d-floor-text-indices"),
+                        contents: &encode_indices(&floor_text.indices),
+                        usage: wgpu::BufferUsages::INDEX,
+                    }),
+                u32::try_from(floor_text.indices.len()).unwrap_or(0),
+            )
+        });
         let overlay_enabled = overlay_reservation.is_some() || overlay.total_vertices() == 0;
         let overlay = if overlay_enabled {
             overlay
@@ -815,6 +925,18 @@ impl ViewportRenderer {
                 pass.set_vertex_buffer(0, triangle_buffer.slice(..));
                 pass.draw(0..overlay.triangle_vertex_count(), 0..1);
             }
+            // Floor text lies on the build plane after the floor surface and
+            // shadows; the depth test lets objects standing on it hide it.
+            if let (Some((vertices, indices, count)), Some(atlas)) =
+                (&floor_text_buffers, &self.text_atlas)
+            {
+                pass.set_pipeline(&self.floor_text_pipeline);
+                pass.set_bind_group(0, &overlay_bind_group, &[]);
+                pass.set_bind_group(1, atlas, &[]);
+                pass.set_vertex_buffer(0, vertices.slice(..));
+                pass.set_index_buffer(indices.slice(..), wgpu::IndexFormat::Uint32);
+                pass.draw_indexed(0..*count, 0, 0..1);
+            }
             // Draw surfaces first.  Grid, contact, wireframe, and gizmo lines
             // are depth-tested over the floor so the opaque floor cannot hide
             // them when both primitives occupy the build plane.
@@ -827,6 +949,9 @@ impl ViewportRenderer {
         }
         self.queue.submit([encoder.finish()]);
         if let Some(reservation) = overlay_reservation {
+            let _ = self.ledger.release(reservation);
+        }
+        if let Some(reservation) = floor_text_reservation {
             let _ = self.ledger.release(reservation);
         }
         let capture_path = if let Some(path) = capture_path {
@@ -1518,6 +1643,97 @@ fn create_overlay_pipeline(
     })
 }
 
+fn create_floor_text_pipeline(
+    device: &wgpu::Device,
+    uniform_layout: &wgpu::BindGroupLayout,
+    atlas_layout: &wgpu::BindGroupLayout,
+) -> wgpu::RenderPipeline {
+    let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
+        label: Some("builder3d-floor-text-shader"),
+        source: wgpu::ShaderSource::Wgsl(FLOOR_TEXT_SHADER.into()),
+    });
+    let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+        label: Some("builder3d-floor-text-pipeline-layout"),
+        bind_group_layouts: &[Some(uniform_layout), Some(atlas_layout)],
+        immediate_size: 0,
+    });
+    let targets = [Some(wgpu::ColorTargetState {
+        format: wgpu::TextureFormat::Rgba8Unorm,
+        blend: Some(wgpu::BlendState::ALPHA_BLENDING),
+        write_mask: wgpu::ColorWrites::ALL,
+    })];
+    device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+        label: Some("builder3d-floor-text-pipeline"),
+        layout: Some(&pipeline_layout),
+        vertex: wgpu::VertexState {
+            module: &shader,
+            entry_point: Some("vertex_main"),
+            compilation_options: Default::default(),
+            buffers: &[Some(wgpu::VertexBufferLayout {
+                array_stride: FLOOR_TEXT_VERTEX_STRIDE as u64,
+                step_mode: wgpu::VertexStepMode::Vertex,
+                attributes: &[
+                    wgpu::VertexAttribute {
+                        format: wgpu::VertexFormat::Float32x3,
+                        offset: 0,
+                        shader_location: 0,
+                    },
+                    wgpu::VertexAttribute {
+                        format: wgpu::VertexFormat::Float32x2,
+                        offset: 12,
+                        shader_location: 1,
+                    },
+                    wgpu::VertexAttribute {
+                        format: wgpu::VertexFormat::Float32x4,
+                        offset: 20,
+                        shader_location: 2,
+                    },
+                ],
+            })],
+        },
+        primitive: wgpu::PrimitiveState {
+            topology: wgpu::PrimitiveTopology::TriangleList,
+            cull_mode: None,
+            ..Default::default()
+        },
+        depth_stencil: Some(wgpu::DepthStencilState {
+            format: wgpu::TextureFormat::Depth24Plus,
+            depth_write_enabled: Some(false),
+            depth_compare: Some(wgpu::CompareFunction::LessEqual),
+            stencil: Default::default(),
+            bias: Default::default(),
+        }),
+        multisample: wgpu::MultisampleState {
+            count: VIEWPORT_SAMPLE_COUNT,
+            ..Default::default()
+        },
+        fragment: Some(wgpu::FragmentState {
+            module: &shader,
+            entry_point: Some("fragment_main"),
+            compilation_options: Default::default(),
+            targets: &targets,
+        }),
+        multiview_mask: None,
+        cache: None,
+    })
+}
+
+fn pack_floor_text(mesh: &FloorTextMesh) -> Vec<u8> {
+    let mut bytes =
+        Vec::with_capacity(mesh.vertices.len().saturating_mul(FLOOR_TEXT_VERTEX_STRIDE));
+    for vertex in &mesh.vertices {
+        for value in vertex
+            .position
+            .iter()
+            .chain(vertex.uv.iter())
+            .chain(vertex.color.iter())
+        {
+            bytes.extend_from_slice(&value.to_le_bytes());
+        }
+    }
+    bytes
+}
+
 struct OverlayBuffers {
     lines: Vec<OverlayVertex>,
     triangles: Vec<OverlayVertex>,
@@ -1954,6 +2170,34 @@ fn fragment_main(input: VertexOutput) -> @location(0) vec4<f32> {
     let low = linear * 12.92;
     let high = 1.055 * pow(linear, vec3<f32>(1.0 / 2.4)) - vec3<f32>(0.055);
     return vec4<f32>(select(high, low, linear <= vec3<f32>(0.0031308)), color.a);
+}
+"#;
+
+const FLOOR_TEXT_SHADER: &str = r#"
+struct Uniforms {
+    view_projection: mat4x4<f32>,
+    color: vec4<f32>,
+};
+@group(0) @binding(0) var<uniform> uniforms: Uniforms;
+@group(1) @binding(0) var atlas: texture_2d<f32>;
+@group(1) @binding(1) var atlas_sampler: sampler;
+struct VertexOutput {
+    @builtin(position) position: vec4<f32>,
+    @location(0) uv: vec2<f32>,
+    @location(1) color: vec4<f32>,
+};
+@vertex
+fn vertex_main(
+    @location(0) position: vec3<f32>,
+    @location(1) uv: vec2<f32>,
+    @location(2) color: vec4<f32>,
+) -> VertexOutput {
+    return VertexOutput(uniforms.view_projection * vec4<f32>(position, 1.0), uv, color);
+}
+@fragment
+fn fragment_main(input: VertexOutput) -> @location(0) vec4<f32> {
+    let coverage = textureSample(atlas, atlas_sampler, input.uv).a;
+    return vec4<f32>(input.color.rgb, input.color.a * coverage);
 }
 "#;
 

@@ -14,6 +14,7 @@ mod desktop_jobs;
 mod diagnostics;
 mod dialogs;
 mod export;
+mod floor_labels;
 mod image_color;
 mod launchers;
 mod mcp_bridge;

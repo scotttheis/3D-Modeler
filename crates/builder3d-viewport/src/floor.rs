@@ -2,7 +2,7 @@ use crate::{
     ViewportError,
     camera::Camera,
     lighting::ViewportLighting,
-    math::{Aabb, Vec3, normalize},
+    math::{Aabb, Mat4, Vec3, add, cross, dot, normalize, scale},
     scene::RenderScene,
 };
 
@@ -93,14 +93,23 @@ impl FloorSurface {
     }
 }
 
-/// A distance label placed on a world-axis line on the floor.
+/// A distance label lying flat on the build plane.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct FloorScaleLabel {
-    /// Non-negative distance along a floor axis from the fixed world origin.
+    /// Positive distance along a floor axis from the fixed world origin.
     pub value_mm: u32,
-    /// World-space position on the build plane, stable while the camera pans.
+    /// World-space anchor of the text, stable while the camera pans.
     pub position: Vec3,
-    /// Opacity inherited from the floor's far-edge fade.
+    /// Unit direction the text block extends in from `position`, or zero
+    /// when `position` is the centre of the text.
+    pub extend: Vec3,
+    /// Unit world direction the text reads along.
+    pub baseline: Vec3,
+    /// Unit world direction from the top of a glyph to its bottom.
+    pub down: Vec3,
+    /// Em height of the text on the floor, in millimetres.
+    pub text_height_mm: f32,
+    /// Opacity from the floor's far-edge fade and the projected text size.
     pub alpha: f32,
 }
 
@@ -398,58 +407,88 @@ pub fn build_floor(
     })
 }
 
-/// Builds readable metric labels at fixed world-space floor-axis coordinates.
+/// Spacing of the floor distance labels in millimetres. Like 3D Builder, the
+/// spacing is fixed: zooming out shrinks the labels instead of thinning them.
+pub const FLOOR_LABEL_SPACING_MM: f32 = 50.0;
+/// Em height of the floor distance text, in millimetres on the build plane.
+pub const FLOOR_LABEL_TEXT_HEIGHT_MM: f32 = 5.5;
+/// Most labels laid along each floor axis.
+pub const MAX_FLOOR_LABELS_PER_AXIS: usize = 40;
+/// Projected em heights, in pixels, over which a distant label fades in
+/// instead of shimmering as an unreadable speck.
+const FLOOR_LABEL_FADE_PIXELS: (f32, f32) = (1.0, 3.5);
+/// Distance of each label row from its axis, in millimetres: the X row runs
+/// just in front of a default 40 mm primitive and the Z row just right of
+/// it, as in 3D Builder.
+const FLOOR_LABEL_ROW_OFFSET_MM: f32 = 24.0;
+
+/// Builds the floor distance labels: text lying flat on the build plane at
+/// fixed 50 mm steps along the world +X and -Z axes.
 ///
-/// Panning changes each label's screen projection but does not move its world
-/// position, keeping the text attached to the floor grid.
+/// Every label is a world-space quad, so perspective foreshortens distant
+/// labels instead of stacking upright screen text. Each label's baseline
+/// follows the world axis closest to the camera's right-hand direction, so
+/// the text reads left to right from any orbit. Positions never move while
+/// the camera pans. The list is empty when the floor itself is hidden
+/// (camera below the build plane).
 #[must_use]
 pub fn build_floor_scale_labels(camera: &Camera) -> Vec<FloorScaleLabel> {
-    if camera.position()[1] < -0.001 {
-        return Vec::new();
-    }
     let Ok(floor) = build_floor(camera, DEFAULT_FLOOR_SIZE, false, false) else {
         return Vec::new();
     };
     let Some(surface) = floor.surface else {
         return Vec::new();
     };
-    let interval = floor_label_interval(camera.distance());
-    let label_range = (surface.fade_end_distance * 1.05).max(interval * 2.0);
-    let steps = (label_range / interval).ceil().clamp(1.0, 32.0) as i32;
-    let mut labels = Vec::with_capacity((steps as usize * 2).saturating_add(1));
-    labels.push(FloorScaleLabel {
-        value_mm: 0,
-        position: [0.0, -0.01, 0.0],
-        alpha: surface.fade_alpha_at([0.0, 0.0, 0.0]),
-    });
-
-    // Keep labels on the two grid axes, on the side leading away from the
-    // camera. When the camera looks straight down an axis, use its positive
-    // direction as a stable tie-breaker.
-    let x_direction = if surface.fade_direction[0].abs() > f32::EPSILON {
-        surface.fade_direction[0].signum()
+    let yaw = camera.yaw_degrees().to_radians();
+    let right = [yaw.cos(), 0.0, -yaw.sin()];
+    let baseline = if right[0].abs() >= right[2].abs() {
+        [right[0].signum(), 0.0, 0.0]
     } else {
-        1.0
+        [0.0, 0.0, right[2].signum()]
     };
-    let z_direction = if surface.fade_direction[2].abs() > f32::EPSILON {
-        surface.fade_direction[2].signum()
-    } else {
-        1.0
-    };
-
-    for step in 1..=steps {
-        let offset = step as f32 * interval;
-        for position in [
-            [x_direction * offset, -0.01, 0.0],
-            [0.0, -0.01, z_direction * offset],
+    // Glyph "down" on the floor points toward the viewer, so the text is not
+    // mirrored when seen from above.
+    let down = cross(baseline, [0.0, 1.0, 0.0]);
+    let height = FLOOR_LABEL_TEXT_HEIGHT_MM;
+    let projection = camera.view_projection(1.0).ok();
+    let (width_px, height_px) = camera.viewport_size();
+    let mut labels = Vec::with_capacity(MAX_FLOOR_LABELS_PER_AXIS * 2);
+    for step in 1..=MAX_FLOOR_LABELS_PER_AXIS {
+        let value = step as f32 * FLOOR_LABEL_SPACING_MM;
+        // X labels are centred on their distance; Z labels start beside the
+        // Z axis and extend to the right of it.
+        for (position, extend) in [
+            ([value, 0.0, FLOOR_LABEL_ROW_OFFSET_MM], [0.0; 3]),
+            ([FLOOR_LABEL_ROW_OFFSET_MM, 0.0, -value], [1.0, 0.0, 0.0]),
         ] {
-            let alpha = surface.fade_alpha_at(position);
-            if alpha <= 0.04 {
+            let floor_alpha = surface.fade_alpha_at(position);
+            // A label seen at a grazing angle is squashed flat but still
+            // wide, and reads as a faint dash (as in 3D Builder), so the
+            // larger projected em extent decides the fade.
+            let pixel_alpha = projection.map_or(1.0, |matrix| {
+                let em = |direction: Vec3| {
+                    projected_length(
+                        matrix,
+                        position,
+                        add(position, scale(direction, height)),
+                        width_px,
+                        height_px,
+                    )
+                };
+                let pixels = em(down).max(em(baseline));
+                1.0 - smooth_fade(pixels, FLOOR_LABEL_FADE_PIXELS.0, FLOOR_LABEL_FADE_PIXELS.1)
+            });
+            let alpha = floor_alpha * pixel_alpha;
+            if alpha <= 0.02 {
                 continue;
             }
             labels.push(FloorScaleLabel {
-                value_mm: offset.round() as u32,
+                value_mm: value.round() as u32,
                 position,
+                extend,
+                baseline,
+                down,
+                text_height_mm: height,
                 alpha,
             });
         }
@@ -457,14 +496,132 @@ pub fn build_floor_scale_labels(camera: &Camera) -> Vec<FloorScaleLabel> {
     labels
 }
 
-fn floor_label_interval(camera_distance: f32) -> f32 {
-    if camera_distance <= 1_500.0 {
-        50.0
-    } else if camera_distance <= 3_500.0 {
-        100.0
-    } else {
-        500.0
+/// Pixel distance between two projected world points, or 0 when either lies
+/// behind the camera.
+fn projected_length(matrix: Mat4, first: Vec3, second: Vec3, width: u32, height: u32) -> f32 {
+    let project = |point: Vec3| {
+        let clip = matrix.transform4([point[0], point[1], point[2], 1.0]);
+        (clip[3] > 1.0e-4 && clip.iter().all(|value| value.is_finite())).then(|| {
+            [
+                clip[0] / clip[3] * width as f32 * 0.5,
+                clip[1] / clip[3] * height as f32 * 0.5,
+            ]
+        })
+    };
+    match (project(first), project(second)) {
+        (Some(a), Some(b)) => ((a[0] - b[0]).powi(2) + (a[1] - b[1]).powi(2)).sqrt(),
+        _ => 0.0,
     }
+}
+
+/// One glyph-mesh vertex of laid-out text, in the text's own flat
+/// coordinates: `position` in points with y down and the origin at the top
+/// left of the text block, `uv` normalised into the glyph atlas.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct PlanarTextVertex {
+    /// Point position, y down.
+    pub position: [f32; 2],
+    /// Normalised atlas coordinate.
+    pub uv: [f32; 2],
+    /// Coverage multiplier from the text layout (1 for plain glyphs).
+    pub alpha: f32,
+}
+
+/// Toolkit-neutral glyph mesh for one label string, produced by the UI
+/// adapter's text layout and placed on the floor by [`build_floor_text`].
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct PlanarText {
+    /// Width and height of the text block in points.
+    pub size: [f32; 2],
+    /// Em size the text was laid out at, in points.
+    pub font_size: f32,
+    /// Glyph vertices.
+    pub vertices: Vec<PlanarTextVertex>,
+    /// Triangle-list indices into `vertices`.
+    pub indices: Vec<u32>,
+}
+
+/// One vertex of floor text in world space.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct FloorTextVertex {
+    /// World position on the build plane.
+    pub position: Vec3,
+    /// Normalised atlas coordinate.
+    pub uv: [f32; 2],
+    /// sRGB-encoded colour with straight alpha.
+    pub color: [f32; 4],
+}
+
+/// World-space text mesh drawn on the build plane, depth-tested against the
+/// scene so objects standing on a label hide it.
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct FloorTextMesh {
+    /// Vertices.
+    pub vertices: Vec<FloorTextVertex>,
+    /// Triangle-list indices into `vertices`.
+    pub indices: Vec<u32>,
+}
+
+impl FloorTextMesh {
+    /// Whether there is nothing to draw.
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        self.indices.is_empty()
+    }
+}
+
+/// Maps each label's laid-out glyph mesh onto the build plane.
+///
+/// `text_for` returns the glyph mesh for a label value, or `None` to skip
+/// it. `color` is the sRGB-encoded label colour; each label's fade alpha
+/// multiplies its alpha.
+#[must_use]
+pub fn build_floor_text<'a>(
+    labels: &[FloorScaleLabel],
+    mut text_for: impl FnMut(u32) -> Option<&'a PlanarText>,
+    color: [f32; 4],
+) -> FloorTextMesh {
+    let mut mesh = FloorTextMesh::default();
+    for label in labels {
+        let Some(text) = text_for(label.value_mm) else {
+            continue;
+        };
+        if text.font_size <= 0.0 || !text.font_size.is_finite() {
+            continue;
+        }
+        let Ok(base) = u32::try_from(mesh.vertices.len()) else {
+            break;
+        };
+        let world_per_point = label.text_height_mm / text.font_size;
+        let half = [text.size[0] * 0.5, text.size[1] * 0.5];
+        let center = add(
+            label.position,
+            scale(
+                label.extend,
+                (dot(label.baseline, label.extend).abs() * half[0]
+                    + dot(label.down, label.extend).abs() * half[1])
+                    * world_per_point,
+            ),
+        );
+        for vertex in &text.vertices {
+            let across = (vertex.position[0] - half[0]) * world_per_point;
+            let along = (vertex.position[1] - half[1]) * world_per_point;
+            let position = add(
+                center,
+                add(scale(label.baseline, across), scale(label.down, along)),
+            );
+            let mut vertex_color = color;
+            vertex_color[3] *= label.alpha * vertex.alpha;
+            mesh.vertices.push(FloorTextVertex {
+                position,
+                uv: vertex.uv,
+                color: vertex_color,
+            });
+        }
+        mesh.indices
+            .extend(text.indices.iter().map(|index| base.saturating_add(*index)));
+    }
+    mesh
 }
 
 fn push_faded_line(
@@ -692,13 +849,112 @@ mod tests {
         let top = build_floor(&camera, DEFAULT_FLOOR_SIZE, true, true);
         assert!(top.is_ok_and(|value| value.visible));
         let top_labels = build_floor_scale_labels(&camera);
-        assert!(top_labels.iter().any(|label| label.value_mm == 0));
+        assert!(top_labels.iter().all(|label| label.value_mm > 0));
         assert!(top_labels.iter().any(|label| label.value_mm == 50));
         assert!(top_labels.iter().any(|label| label.value_mm == 100));
         camera.set_view(0.0, -89.0).ok();
         let hidden = build_floor(&camera, DEFAULT_FLOOR_SIZE, true, true);
         assert!(hidden.is_ok_and(|value| !value.visible));
         assert!(build_floor_scale_labels(&camera).is_empty());
+    }
+
+    #[test]
+    fn floor_labels_lie_flat_at_fixed_steps_and_read_left_to_right() {
+        let mut camera = Camera::new();
+        assert!(camera.set_viewport_size(1000, 700).is_ok());
+        let mut state = camera.state();
+        state.distance = 300.0;
+        assert!(camera.set_state(state).is_ok());
+        assert!(camera.set_view(0.0, 25.0).is_ok());
+        let labels = build_floor_scale_labels(&camera);
+        assert!(!labels.is_empty());
+        assert!(labels.len() <= MAX_FLOOR_LABELS_PER_AXIS * 2);
+        for label in &labels {
+            assert_eq!(label.position[1], 0.0, "labels lie on the build plane");
+            assert_eq!(label.value_mm % 50, 0);
+            assert_eq!(label.baseline, [1.0, 0.0, 0.0]);
+            assert_eq!(label.down, [0.0, 0.0, 1.0]);
+            assert!((0.0..=1.0).contains(&label.alpha));
+        }
+        // From behind, text turns around instead of reading mirrored.
+        assert!(camera.set_view(180.0, 25.0).is_ok());
+        let behind = build_floor_scale_labels(&camera);
+        assert!(
+            behind
+                .iter()
+                .all(|label| label.baseline == [-1.0, 0.0, 0.0])
+        );
+        // From the side, text follows the Z axis.
+        assert!(camera.set_view(90.0, 25.0).is_ok());
+        let side = build_floor_scale_labels(&camera);
+        assert!(side.iter().all(|label| label.baseline[0] == 0.0));
+    }
+
+    #[test]
+    fn distant_floor_labels_fade_instead_of_piling_up() {
+        let mut camera = Camera::new();
+        assert!(camera.set_viewport_size(1000, 700).is_ok());
+        let mut state = camera.state();
+        state.distance = 400.0;
+        assert!(camera.set_state(state).is_ok());
+        assert!(camera.set_view(20.0, 12.0).is_ok());
+        let labels = build_floor_scale_labels(&camera);
+        let alpha_at = |value: u32| {
+            labels
+                .iter()
+                .filter(|label| label.value_mm == value && label.position[0] == 24.0)
+                .map(|label| label.alpha)
+                .next()
+                .unwrap_or(0.0)
+        };
+        let near = alpha_at(50);
+        let far = alpha_at(1_500);
+        assert!(near > 0.5, "near label is readable: {near}");
+        assert!(far < 0.8 && far < near, "far label fades: {far} vs {near}");
+        // Past the floor's fade there are no labels at all.
+        assert!(alpha_at(2_000) < far);
+    }
+
+    #[test]
+    fn floor_text_maps_glyphs_onto_the_plane_at_the_label_size() {
+        let label = FloorScaleLabel {
+            value_mm: 50,
+            position: [50.0, 0.0, 24.0],
+            extend: [0.0; 3],
+            baseline: [1.0, 0.0, 0.0],
+            down: [0.0, 0.0, 1.0],
+            text_height_mm: 5.0,
+            alpha: 0.5,
+        };
+        let quad = |x0: f32, y0: f32, x1: f32, y1: f32| PlanarText {
+            size: [x1, y1],
+            font_size: 10.0,
+            vertices: [[x0, y0], [x1, y0], [x1, y1], [x0, y1]]
+                .into_iter()
+                .map(|position| PlanarTextVertex {
+                    position,
+                    uv: [0.5, 0.5],
+                    alpha: 1.0,
+                })
+                .collect(),
+            indices: vec![0, 1, 2, 0, 2, 3],
+        };
+        let text = quad(0.0, 0.0, 20.0, 10.0);
+        let mesh = build_floor_text(&[label, label], |_| Some(&text), [0.2, 0.2, 0.2, 0.8]);
+        assert_eq!(mesh.vertices.len(), 8);
+        assert_eq!(mesh.indices[6..], [4, 5, 6, 4, 6, 7]);
+        // 20 x 10 points at a 10 pt em, 5 mm high: 10 x 5 mm, centred.
+        assert_eq!(mesh.vertices[0].position, [45.0, 0.0, 21.5]);
+        assert_eq!(mesh.vertices[2].position, [55.0, 0.0, 26.5]);
+        assert!((mesh.vertices[0].color[3] - 0.4).abs() < 1.0e-6);
+        // A start-anchored label extends away from its anchor.
+        let started = FloorScaleLabel {
+            extend: [1.0, 0.0, 0.0],
+            ..label
+        };
+        let mesh = build_floor_text(&[started], |_| Some(&text), [0.2; 4]);
+        assert_eq!(mesh.vertices[0].position[0], 50.0);
+        assert!(build_floor_text(&[label], |_| None, [0.2; 4]).is_empty());
     }
 
     #[test]
@@ -712,7 +968,7 @@ mod tests {
         assert!(
             before
                 .iter()
-                .any(|label| { label.value_mm == 0 && label.position == [0.0, -0.01, 0.0] })
+                .any(|label| { label.value_mm == 50 && label.position == [24.0, 0.0, -50.0] })
         );
         let before_positions = before
             .iter()

@@ -14,6 +14,7 @@
 //! | `BUILDER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `resize`, `multi` | `move` |
 //! | `BUILDER3D_REVIEW_THEME` | `light`, `dark` | `dark` |
 //! | `BUILDER3D_REVIEW_TAB` | a ribbon tab label such as `Object` | `Insert` |
+//! | `BUILDER3D_REVIEW_CAMERA` | `yaw,pitch,distance` in degrees and mm, applied after auto-framing; distance `0` keeps the framed distance | framed view |
 //!
 //! A capture shows what was painted. It is engineering evidence for layout and
 //! styling; it does not exercise pointer behaviour and is not owner approval.
@@ -84,6 +85,7 @@ pub(crate) struct ReviewCapture {
     state: ReviewState,
     theme: ThemeMode,
     tab: Option<String>,
+    camera: Option<[f32; 3]>,
     frames: u32,
     requested: bool,
     finished: Arc<AtomicBool>,
@@ -115,11 +117,24 @@ impl ReviewCapture {
             .ok()
             .map(|value| value.trim().to_owned())
             .filter(|value| !value.is_empty());
+        let camera = match env::var("BUILDER3D_REVIEW_CAMERA") {
+            Ok(value) if !value.trim().is_empty() => match parse_camera(&value) {
+                Some(camera) => Some(camera),
+                None => {
+                    eprintln!(
+                        "review capture: BUILDER3D_REVIEW_CAMERA must be `yaw,pitch,distance`"
+                    );
+                    return None;
+                }
+            },
+            _ => None,
+        };
         Some(Self {
             output,
             state,
             theme,
             tab,
+            camera,
             frames: 0,
             requested: false,
             finished: Arc::new(AtomicBool::new(false)),
@@ -136,6 +151,11 @@ impl ReviewCapture {
 
     pub(crate) fn tab(&self) -> Option<&str> {
         self.tab.as_deref()
+    }
+
+    /// The `[yaw, pitch, distance]` camera pose to apply after auto-framing.
+    pub(crate) const fn camera(&self) -> Option<[f32; 3]> {
+        self.camera
     }
 
     /// A settings path beside the capture, so the harness never reads or
@@ -183,6 +203,14 @@ impl ReviewCapture {
     }
 }
 
+fn parse_camera(value: &str) -> Option<[f32; 3]> {
+    let parts = value
+        .split(',')
+        .map(|part| part.trim().parse::<f32>().ok().filter(|v| v.is_finite()))
+        .collect::<Option<Vec<_>>>()?;
+    <[f32; 3]>::try_from(parts).ok()
+}
+
 fn save_png(path: &Path, image: &egui::ColorImage) -> Result<(), String> {
     if let Some(parent) = path.parent()
         && !parent.as_os_str().is_empty()
@@ -210,5 +238,12 @@ mod tests {
         assert_eq!(ReviewState::from_key(" Move "), Some(ReviewState::Move));
         assert_eq!(ReviewState::from_key("WELCOME"), Some(ReviewState::Welcome));
         assert_eq!(ReviewState::from_key("mvoe"), None);
+    }
+
+    #[test]
+    fn camera_pose_needs_three_finite_numbers() {
+        assert_eq!(parse_camera("30, 25, 600"), Some([30.0, 25.0, 600.0]));
+        assert_eq!(parse_camera("30,25"), None);
+        assert_eq!(parse_camera("30,x,1"), None);
     }
 }

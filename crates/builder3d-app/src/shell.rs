@@ -3879,6 +3879,23 @@ impl Builder3dApp {
                     .filter_map(|index| self.commands.scene().objects().get(*index))
                     .map(|object| object.object_id().to_owned())
                     .collect::<Vec<_>>();
+                let text_atlas = self.wgpu_render_state.as_ref().and_then(|state| {
+                    state
+                        .renderer
+                        .read()
+                        .texture(&egui::TextureId::default())
+                        .and_then(|texture| texture.texture.clone())
+                });
+                let atlas_size = text_atlas.as_ref().map_or_else(
+                    || {
+                        ui.ctx()
+                            .fonts(|fonts| fonts.font_image_size())
+                            .map(|size| size as f32)
+                    },
+                    |texture| [texture.width() as f32, texture.height() as f32],
+                );
+                let floor_text =
+                    crate::floor_labels::floor_label_mesh(&painter, &self.camera, atlas_size);
                 let render_options = ViewportRenderOptions {
                     grid_visible: display.grid_visible,
                     wireframe: display.wireframe,
@@ -3890,6 +3907,7 @@ impl Builder3dApp {
                         ThemeMode::Light => ViewportTheme::Light,
                         ThemeMode::Dark => ViewportTheme::Dark,
                     },
+                    floor_text,
                 };
                 let derived_preview = match (&self.preview, &self.viewport_drag) {
                     (Some(scene), Some(ViewportDrag::Transform(drag))) => {
@@ -3930,6 +3948,7 @@ impl Builder3dApp {
                             clear_color_error = Some(error);
                         }
                     }
+                    renderer.set_text_atlas(text_atlas.as_ref());
                     let mut cpu_fallback = false;
                     match renderer.render_with_options(
                         scene,
@@ -3979,6 +3998,14 @@ impl Builder3dApp {
                         egui::Rect::from_min_max(egui::Pos2::ZERO, egui::pos2(1.0, 1.0)),
                         Color32::WHITE,
                     );
+                    if cpu_fallback && let Ok(matrix) = self.camera.view_projection(1.0) {
+                        crate::floor_labels::paint_floor_label_mesh(
+                            &painter,
+                            rect,
+                            matrix,
+                            &render_options.floor_text,
+                        );
+                    }
                     if cpu_fallback {
                         painter.text(
                             rect.left_top() + egui::vec2(12.0, 10.0),
@@ -4067,6 +4094,17 @@ impl Builder3dApp {
         match self.camera.frame_bounds(&bounds) {
             Ok(()) => self.camera_auto_frame_pending = false,
             Err(error) => self.viewport_error = Some(error.to_string()),
+        }
+        if let Some([yaw, pitch, distance]) = self.review.as_ref().and_then(|r| r.camera()) {
+            let mut state = self.camera.state();
+            state.yaw_degrees = yaw;
+            state.pitch_degrees = pitch.clamp(-89.0, 89.0);
+            if distance > 0.0 {
+                state.distance = distance;
+            }
+            if let Err(error) = self.camera.set_state(state) {
+                eprintln!("review capture: camera pose rejected: {error}");
+            }
         }
     }
 
