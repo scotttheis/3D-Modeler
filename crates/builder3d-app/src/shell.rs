@@ -25,8 +25,8 @@ use builder3d_core::{
 use builder3d_viewport::{
     Aabb, Camera, GIZMO_TARGET_PIXELS, GizmoAxis, GizmoLine, GizmoMode, InteractionState,
     MOVE_GIZMO_SCALE, Mat4, ROTATE_RING_SEGMENTS, RenderScene, RendererConfig, SnapViewContext,
-    ViewportRenderOptions, ViewportRenderer, ViewportTheme, add, build_floor_scale_labels,
-    build_gizmo_with_bounds, dot, hit_test_with_bounds, pick_scene, scale, subtract,
+    ViewportRenderOptions, ViewportRenderer, ViewportTheme, add, build_gizmo_with_bounds, dot,
+    hit_test_with_bounds, pick_scene, scale, subtract,
 };
 use eframe::egui::{
     self, Align, Align2, Color32, FontId, Key, Layout, RichText, Sense, Stroke, Ui, Vec2,
@@ -3989,7 +3989,6 @@ impl Builder3dApp {
                         );
                     }
                 }
-                self.paint_floor_scale_labels(&painter, rect);
                 if gizmo_mode == GizmoMode::Resize {
                     self.paint_resize_handles(&painter, rect, palette);
                 } else {
@@ -4012,38 +4011,6 @@ impl Builder3dApp {
                     self.pick_viewport_object(rect, pointer, input.modifiers);
                 }
             });
-    }
-
-    fn paint_floor_scale_labels(&self, painter: &egui::Painter, rect: egui::Rect) {
-        let Ok(matrix) = self.camera.view_projection(1.0) else {
-            return;
-        };
-        for label in build_floor_scale_labels(&self.camera) {
-            let Some((position, depth)) = project_to_viewport(matrix, rect, label.position) else {
-                continue;
-            };
-            if !(rect.left()..=rect.right()).contains(&position.x)
-                || !(rect.top()..=rect.bottom()).contains(&position.y)
-                || !(0.0..=1.0).contains(&depth)
-            {
-                continue;
-            }
-            if self
-                .preview
-                .as_ref()
-                .is_some_and(|scene| floor_label_is_occluded(scene, matrix, rect, position, depth))
-            {
-                continue;
-            }
-            let alpha = (label.alpha * 220.0).round().clamp(0.0, 255.0) as u8;
-            painter.text(
-                position + egui::vec2(4.0, -3.0),
-                Align2::LEFT_CENTER,
-                format!("{} mm", label.value_mm),
-                FontId::proportional(11.0),
-                Color32::from_rgba_unmultiplied(42, 42, 42, alpha),
-            );
-        }
     }
 
     fn resize_viewport_target(&mut self, size_points: Vec2, pixels_per_point: f32) {
@@ -4443,6 +4410,57 @@ impl Builder3dApp {
                     );
                 }
                 ResizeHandle::Edge { .. } => {}
+            }
+        }
+        let display_unit = self.commands.preferences().display_unit();
+        let frame = *frame;
+        let candidates = dimension_tag_candidates(
+            |sides| {
+                let mut point = frame.center;
+                for (axis, side) in sides.into_iter().enumerate() {
+                    point = add(
+                        point,
+                        scale(frame.axes[axis], side * frame.extents[axis] * 0.5),
+                    );
+                }
+                delta
+                    .and_then(|d| d.transform_point(point).ok())
+                    .unwrap_or(point)
+            },
+            |point| project_to_viewport(matrix, rect, point).map(|(screen, _)| screen),
+        );
+        // Every edge of one axis has the same length, so one layout per axis
+        // sizes all of that axis's candidate tags.
+        let mut texts = candidates
+            .iter()
+            .filter_map(|ranked| ranked.first())
+            .map(|first| {
+                (
+                    first.axis,
+                    DimensionTagText::layout(painter, first.length_mm, display_unit, palette),
+                )
+            })
+            .collect::<Vec<_>>();
+        let sizes = texts
+            .iter()
+            .map(|(axis, text)| (*axis, text.size()))
+            .collect::<Vec<_>>();
+        let obstacles = self.transform_strip_rect.into_iter().collect::<Vec<_>>();
+        let placed = place_dimension_tags(
+            &candidates,
+            |axis| {
+                sizes
+                    .iter()
+                    .find(|(candidate, _)| *candidate == axis)
+                    .map_or(Vec2::ZERO, |(_, size)| *size)
+            },
+            rect.shrink(6.0),
+            &obstacles,
+        );
+        for (placement, tag) in placed {
+            if let Some(index) = texts.iter().position(|(axis, _)| *axis == placement.axis) {
+                let (_, text) = texts.swap_remove(index);
+                paint_dimension_tag(painter, placement, tag, text, palette, self.theme_mode);
             }
         }
     }
@@ -7044,40 +7062,240 @@ fn clip_point_to_viewport(rect: egui::Rect, point: [f32; 4]) -> Option<egui::Pos
     ))
 }
 
-fn floor_label_is_occluded(
-    scene: &RenderScene,
-    matrix: Mat4,
-    rect: egui::Rect,
-    label_position: egui::Pos2,
-    label_depth: f32,
-) -> bool {
-    scene.objects().iter().any(|object| {
-        let Ok(bounds) = object.world_bounds() else {
-            return false;
-        };
-        let mut screen_min = egui::pos2(f32::INFINITY, f32::INFINITY);
-        let mut screen_max = egui::pos2(f32::NEG_INFINITY, f32::NEG_INFINITY);
-        let mut closest_depth = f32::INFINITY;
-        for x in [bounds.minimum[0], bounds.maximum[0]] {
-            for y in [bounds.minimum[1], bounds.maximum[1]] {
-                for z in [bounds.minimum[2], bounds.maximum[2]] {
-                    if let Some((point, depth)) = project_to_viewport(matrix, rect, [x, y, z]) {
-                        screen_min.x = screen_min.x.min(point.x);
-                        screen_min.y = screen_min.y.min(point.y);
-                        screen_max.x = screen_max.x.max(point.x);
-                        screen_max.y = screen_max.y.max(point.y);
-                        closest_depth = closest_depth.min(depth);
-                    }
+/// One measured box edge chosen for a dimension tag, in viewport points.
+#[derive(Clone, Copy, Debug, PartialEq)]
+struct DimensionTagPlacement {
+    axis: usize,
+    length_mm: f32,
+    start: egui::Pos2,
+    end: egui::Pos2,
+    /// Unit vector pointing away from the box, perpendicular to the edge.
+    outward: Vec2,
+}
+
+/// Ranks, for each box axis, its four parallel edges by how well a tag reads
+/// there: outermost first so the tag sits outside the object silhouette
+/// (3D Builder style), and for horizontal axes lower edges first so tags read
+/// along the floor. Edges seen end-on are dropped, and so are axes with none left.
+fn dimension_tag_candidates(
+    world_corner: impl Fn([f32; 3]) -> [f32; 3],
+    project: impl Fn([f32; 3]) -> Option<egui::Pos2>,
+) -> Vec<Vec<DimensionTagPlacement>> {
+    const MIN_EDGE_POINTS: f32 = 18.0;
+    let mut projected_sum = Vec2::ZERO;
+    let mut projected_count = 0.0;
+    for x in [-1.0, 1.0] {
+        for y in [-1.0, 1.0] {
+            for z in [-1.0, 1.0] {
+                if let Some(point) = project(world_corner([x, y, z])) {
+                    projected_sum += point.to_vec2();
+                    projected_count += 1.0;
                 }
             }
         }
-        screen_min.x <= label_position.x
-            && label_position.x <= screen_max.x
-            && screen_min.y <= label_position.y
-            && label_position.y <= screen_max.y
-            && closest_depth.is_finite()
-            && label_depth > closest_depth + 1.0e-4
-    })
+    }
+    if projected_count < 8.0 {
+        return Vec::new();
+    }
+    let center = (projected_sum / projected_count).to_pos2();
+    let mut axes = Vec::with_capacity(3);
+    for axis in 0..3 {
+        let mut ranked: Vec<(f32, DimensionTagPlacement)> = Vec::with_capacity(4);
+        for a in [-1.0, 1.0] {
+            for b in [-1.0, 1.0] {
+                let mut low = [0.0_f32; 3];
+                low[(axis + 1) % 3] = a;
+                low[(axis + 2) % 3] = b;
+                let mut high = low;
+                low[axis] = -1.0;
+                high[axis] = 1.0;
+                let (world_low, world_high) = (world_corner(low), world_corner(high));
+                let (Some(start), Some(end)) = (project(world_low), project(world_high)) else {
+                    continue;
+                };
+                let edge = end - start;
+                if edge.length() < MIN_EDGE_POINTS {
+                    continue;
+                }
+                let middle = start + edge * 0.5;
+                let mut outward = edge.normalized().rot90();
+                if outward.dot(middle - center) < 0.0 {
+                    outward = -outward;
+                }
+                let lower_bias = if axis == 1 {
+                    0.0
+                } else {
+                    0.35 * (middle.y - center.y)
+                };
+                let score = (middle - center).length() + lower_bias;
+                let length_mm = subtract(world_high, world_low)
+                    .iter()
+                    .map(|value| value * value)
+                    .sum::<f32>()
+                    .sqrt();
+                ranked.push((
+                    score,
+                    DimensionTagPlacement {
+                        axis,
+                        length_mm,
+                        start,
+                        end,
+                        outward,
+                    },
+                ));
+            }
+        }
+        if !ranked.is_empty() {
+            ranked.sort_by(|a, b| b.0.total_cmp(&a.0));
+            axes.push(ranked.into_iter().map(|(_, placement)| placement).collect());
+        }
+    }
+    axes
+}
+
+/// Where a tag of `size` sits for `placement`: just outside the edge midpoint.
+fn dimension_tag_rect(placement: DimensionTagPlacement, size: Vec2) -> egui::Rect {
+    let middle = placement.start + (placement.end - placement.start) * 0.5;
+    let clearance =
+        10.0 + placement.outward.x.abs() * size.x * 0.5 + placement.outward.y.abs() * size.y * 0.5;
+    egui::Rect::from_center_size(middle + placement.outward * clearance, size)
+}
+
+/// Chooses one edge per axis whose tag lies inside `bounds` and clear of the
+/// `obstacles` (floating panels) and of tags already placed. An axis with no
+/// clear edge keeps its best-ranked edge rather than losing its measurement.
+fn place_dimension_tags(
+    candidates: &[Vec<DimensionTagPlacement>],
+    tag_size: impl Fn(usize) -> Vec2,
+    bounds: egui::Rect,
+    obstacles: &[egui::Rect],
+) -> Vec<(DimensionTagPlacement, egui::Rect)> {
+    let mut placed: Vec<(DimensionTagPlacement, egui::Rect)> = Vec::with_capacity(3);
+    for ranked in candidates {
+        let Some(first) = ranked.first().copied() else {
+            continue;
+        };
+        let size = tag_size(first.axis);
+        let clear = ranked.iter().copied().find_map(|placement| {
+            let rect = dimension_tag_rect(placement, size);
+            let fits = bounds.contains_rect(rect)
+                && !obstacles.iter().any(|obstacle| obstacle.intersects(rect))
+                && !placed.iter().any(|(_, other)| other.intersects(rect));
+            fits.then_some((placement, rect))
+        });
+        placed.push(clear.unwrap_or((first, dimension_tag_rect(first, size))));
+    }
+    placed
+}
+
+struct DimensionTagText {
+    number: std::sync::Arc<egui::Galley>,
+    unit: std::sync::Arc<egui::Galley>,
+}
+
+impl DimensionTagText {
+    const PADDING_X: f32 = 8.0;
+    const GAP: f32 = 3.0;
+    const BAR: f32 = 3.0;
+
+    fn layout(
+        painter: &egui::Painter,
+        length_mm: f32,
+        display_unit: DisplayUnit,
+        palette: ThemePalette,
+    ) -> Self {
+        Self {
+            number: painter.layout_no_wrap(
+                dimension_tag_value(length_mm, display_unit),
+                crate::theme::emphasis_font(12.5),
+                palette.text,
+            ),
+            unit: painter.layout_no_wrap(
+                display_unit.label().to_owned(),
+                FontId::proportional(10.5),
+                palette.muted,
+            ),
+        }
+    }
+
+    fn size(&self) -> Vec2 {
+        egui::vec2(
+            Self::BAR
+                + Self::PADDING_X * 2.0
+                + self.number.size().x
+                + Self::GAP
+                + self.unit.size().x,
+            22.0_f32.max(self.number.size().y + 6.0),
+        )
+    }
+}
+
+/// Compact dimension text: two decimals below ten units, one above.
+fn dimension_tag_value(value_mm: f32, display_unit: DisplayUnit) -> String {
+    let value = display_unit.from_mm(value_mm);
+    if value.abs() < 10.0 {
+        format!("{value:.2}")
+    } else {
+        format!("{value:.1}")
+    }
+}
+
+fn paint_dimension_tag(
+    painter: &egui::Painter,
+    placement: DimensionTagPlacement,
+    tag: egui::Rect,
+    text: DimensionTagText,
+    palette: ThemePalette,
+    mode: ThemeMode,
+) {
+    let accent = resize_axis_color(placement.axis);
+    painter.line_segment(
+        [placement.start, placement.end],
+        Stroke::new(1.6, with_alpha(accent, 210)),
+    );
+    let DimensionTagText { number, unit } = text;
+    let (padding_x, gap, bar) = (
+        DimensionTagText::PADDING_X,
+        DimensionTagText::GAP,
+        DimensionTagText::BAR,
+    );
+    let height = tag.height();
+    let radius = egui::CornerRadius::same(6);
+    let mut shadow = crate::theme::floating_shadow(mode);
+    shadow.offset = [0, 2];
+    shadow.blur = 10;
+    painter.add(shadow.as_shape(tag, radius));
+    painter.rect(
+        tag,
+        radius,
+        palette.surface,
+        Stroke::new(1.0, with_alpha(palette.border, 200)),
+        egui::StrokeKind::Inside,
+    );
+    painter.rect_filled(
+        egui::Rect::from_min_size(
+            tag.left_top() + egui::vec2(4.0, 5.0),
+            egui::vec2(bar, height - 10.0),
+        ),
+        egui::CornerRadius::same(2),
+        accent,
+    );
+    let text_left = tag.left() + bar + padding_x;
+    let number_size = number.size();
+    painter.galley(
+        egui::pos2(text_left, tag.center().y - number_size.y * 0.5),
+        number,
+        palette.text,
+    );
+    let unit_size = unit.size();
+    painter.galley(
+        egui::pos2(
+            text_left + number_size.x + gap,
+            tag.center().y - unit_size.y * 0.5 + 0.5,
+        ),
+        unit,
+        palette.muted,
+    );
 }
 
 fn viewport_pixel_position(position: egui::Pos2, rect: egui::Rect, size: (u32, u32)) -> [f32; 2] {
@@ -7092,6 +7310,85 @@ mod tests {
     use crate::preferences::Preferences;
     use builder3d_core::PrimitiveKind;
     use serde_json::Value;
+
+    #[test]
+    fn dimension_tags_measure_each_axis_on_the_outer_lower_edges() {
+        let half = [20.0_f32, 10.0, 5.0];
+        let corner = |sides: [f32; 3]| std::array::from_fn(|i| sides[i] * half[i]);
+        // Simple oblique projection: x right, y up, z down-left, around 400,300.
+        let project = |p: [f32; 3]| {
+            Some(egui::pos2(
+                400.0 + p[0] * 4.0 - p[2] * 2.0,
+                300.0 - p[1] * 4.0 + p[2] * 2.0,
+            ))
+        };
+        let candidates = dimension_tag_candidates(corner, project);
+        let placements = candidates
+            .iter()
+            .map(|ranked| ranked[0])
+            .collect::<Vec<_>>();
+        assert_eq!(placements.len(), 3);
+        for (placement, expected) in placements.iter().zip([40.0, 20.0, 10.0]) {
+            assert!((placement.length_mm - expected).abs() < 1.0e-4);
+            assert!((placement.outward.length() - 1.0).abs() < 1.0e-4);
+            let middle = placement.start + (placement.end - placement.start) * 0.5;
+            assert!(placement.outward.dot(middle - egui::pos2(400.0, 300.0)) > 0.0);
+        }
+        // Width and depth tags sit on edges below the box centre.
+        for placement in placements.iter().filter(|placement| placement.axis != 1) {
+            assert!(placement.start.y.max(placement.end.y) > 300.0);
+        }
+    }
+
+    #[test]
+    fn dimension_tags_skip_edges_seen_end_on_and_unprojectable_boxes() {
+        let half = [20.0_f32, 10.0, 5.0];
+        let corner = |sides: [f32; 3]| std::array::from_fn(|i| sides[i] * half[i]);
+        let front_view = |p: [f32; 3]| Some(egui::pos2(400.0 + p[0] * 4.0, 300.0 - p[1] * 4.0));
+        let axes = dimension_tag_candidates(corner, front_view)
+            .iter()
+            .map(|ranked| ranked[0].axis)
+            .collect::<Vec<_>>();
+        assert_eq!(axes, vec![0, 1]);
+        assert!(dimension_tag_candidates(corner, |_| None).is_empty());
+    }
+
+    #[test]
+    fn dimension_tags_move_off_panels_and_each_other() {
+        let half = [20.0_f32, 10.0, 5.0];
+        let corner = |sides: [f32; 3]| std::array::from_fn(|i| sides[i] * half[i]);
+        let front_view = |p: [f32; 3]| Some(egui::pos2(400.0 + p[0] * 4.0, 300.0 - p[1] * 4.0));
+        let candidates = dimension_tag_candidates(corner, front_view);
+        let size = |_| egui::vec2(70.0, 22.0);
+        let bounds = egui::Rect::from_min_max(egui::pos2(0.0, 0.0), egui::pos2(800.0, 600.0));
+        let free = place_dimension_tags(&candidates, size, bounds, &[]);
+        let width_free = free[0];
+        assert!(width_free.1.top() > 340.0, "width tag starts below the box");
+
+        // A panel across the bottom pushes the width tag to the top edge.
+        let panel = egui::Rect::from_min_max(egui::pos2(0.0, 330.0), egui::pos2(800.0, 600.0));
+        let placed = place_dimension_tags(&candidates, size, bounds, &[panel]);
+        assert_eq!(placed.len(), 2);
+        for (_, tag) in &placed {
+            assert!(!tag.intersects(panel));
+        }
+        assert!(
+            placed[0].1.bottom() < 260.0,
+            "width tag moved above the box"
+        );
+        assert!(!placed[0].1.intersects(placed[1].1));
+
+        // With nowhere clear, the best-ranked edge is still measured.
+        let everywhere = place_dimension_tags(&candidates, size, bounds, &[bounds]);
+        assert_eq!(everywhere[0].0, candidates[0][0]);
+    }
+
+    #[test]
+    fn dimension_tag_values_are_compact_in_the_display_unit() {
+        assert_eq!(dimension_tag_value(42.0, DisplayUnit::Millimetre), "42.0");
+        assert_eq!(dimension_tag_value(5.0, DisplayUnit::Millimetre), "5.00");
+        assert_eq!(dimension_tag_value(25.4, DisplayUnit::Inch), "1.00");
+    }
 
     fn test_directory(label: &str) -> PathBuf {
         let unique = std::time::SystemTime::now()

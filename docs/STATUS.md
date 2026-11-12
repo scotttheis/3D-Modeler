@@ -16,7 +16,7 @@ closed. Stop before RB-10 work (S3) as before.
 |---|---|
 | `cargo fmt --all -- --check` | Pass |
 | `cargo clippy --workspace --all-targets --locked -- -D warnings` | Pass |
-| `cargo test --workspace --locked --no-fail-fast` | **6 failures** — 341 pass |
+| `cargo test --workspace --locked --no-fail-fast` | Pass (re-run 2026-11-12 after OF-1; F2 commit `f1b581d` fixed the six below) |
 | `cargo deny check` | Not run |
 | Release (fat LTO) build | Not run this session; failed with LLVM out-of-memory on 2026-11-11 |
 | `review` profile build | Pass (3m56s clean build; capture verified) |
@@ -38,7 +38,7 @@ unreviewed — each needs a decision: is the test stale, or is the code wrong?
 | # | Item | State |
 |---|---|---|
 | F1 | App tests compile | **Done** 2026-11-12 |
-| F2 | Whole suite green | Open — six failures above |
+| F2 | Whole suite green | **Done** 2026-11-12 (`f1b581d`; re-verified after OF-1) |
 | F3 | Clippy on all targets | **Done** 2026-11-12 |
 | F4 | Baseline commit of 220+ uncommitted paths | **Done** 2026-11-12 on `rebuild/work` |
 | F5 | Release link reliability | Open |
@@ -70,6 +70,12 @@ D5 `emboss_text` metadata.
 - 2026-11-12: the app "looks kind of home made" — first finish pass landed
   (captures in `evidence/rebuild/captures/2026-11-12-finish-pass/`); remaining
   work is S1 tasks 1–9. **Not yet reviewed by the owner.**
+- 2026-11-12 (second batch): nine items OF-1 to OF-9 in
+  [`owner-feedback-2026-11-12.md`](owner-feedback-2026-11-12.md). OF-1
+  (floor numbers out, 3D Builder-style dimension tags) implemented and gated,
+  captures in `evidence/rebuild/captures/2026-11-12-of1-dimension-tags/`;
+  awaiting owner review. Removing the floor labels is an approved deviation
+  from Python.
 
 ## Last recovery point
 
