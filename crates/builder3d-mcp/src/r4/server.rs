@@ -3599,10 +3599,9 @@ mod tests {
             .call_value("scene_summary", json!({}))
             .expect("summary");
         assert_eq!(summary["objects"].as_array().map(Vec::len), Some(1));
-        assert_eq!(
-            summary["objects"][0]["position_mm"],
-            json!([2.0, 20.0, 0.0])
-        );
+        // A 10 mm cube rests on the floor at Y=5. Owner-approved deviation
+        // (2026-11-12): the Python MCP leaves primitives at identity (Y=0).
+        assert_eq!(summary["objects"][0]["position_mm"], json!([2.0, 5.0, 0.0]));
     }
 
     #[test]

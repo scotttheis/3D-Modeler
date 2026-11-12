@@ -607,12 +607,12 @@ mod tests {
         assert!(
             scene
                 .object(0)
-                .is_ok_and(|object| object.position() == [10.0, 2.0, -4.0])
+                .is_ok_and(|object| object.position() == [10.0, 22.0, -4.0])
         );
         assert!(
             scene
                 .object(1)
-                .is_ok_and(|object| object.position() == [10.0, 2.0, -4.0])
+                .is_ok_and(|object| object.position() == [10.0, 22.0, -4.0])
         );
         assert!(
             scene

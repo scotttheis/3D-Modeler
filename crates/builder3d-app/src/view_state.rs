@@ -207,7 +207,9 @@ mod tests {
     fn state_updates_and_presets_keep_camera_bounds() {
         let mut controller = ViewStateController::default();
         let initial = controller.state();
-        assert_eq!(initial.yaw_deg, 45.0);
+        // Yaw 0 since 2026-11-09 (floor axes match the 3D Builder reference);
+        // the Python build opens at 45 degrees.
+        assert_eq!(initial.yaw_deg, 0.0);
         assert_eq!(initial.pitch_deg, 35.0);
         assert_eq!(initial.distance_mm, 5.0);
         let updated = controller.set_state(ViewState {

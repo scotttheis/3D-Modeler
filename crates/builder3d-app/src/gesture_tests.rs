@@ -174,6 +174,7 @@ fn cancelled_noop_stale_and_replaced_document_keep_scene_safe() {
     ));
     assert_eq!(history, state.scene.history_state_id());
     state.scene.clear_selection();
+    let rest = state.scene.objects()[0].position();
     let delta = Transform::identity()
         .translated([5., 0., 0.])
         .expect("delta");
@@ -181,7 +182,10 @@ fn cancelled_noop_stale_and_replaced_document_keep_scene_safe() {
         state.commit_transform_snapshot(&snapshot, delta),
         Ok(CommandOutcome::Applied(_))
     ));
-    assert_eq!(state.scene.objects()[0].position(), [5., 0., 0.]);
+    assert_eq!(
+        state.scene.objects()[0].position(),
+        [rest[0] + 5., rest[1], rest[2]]
+    );
     assert!(state.commit_transform_snapshot(&snapshot, delta).is_err());
     let before = state.scene.objects()[0].transform().rows();
     assert_eq!(before, state.scene.objects()[0].transform().rows());

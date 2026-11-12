@@ -8376,6 +8376,11 @@ mod tests {
         app.refresh_preview();
         assert!(app.camera.set_viewport_size(800, 600).is_ok());
         let start_position = app.commands.scene().objects()[0].position();
+        let moved_position = [
+            start_position[0] + 10.0,
+            start_position[1],
+            start_position[2],
+        ];
         let rect = egui::Rect::from_min_size(egui::Pos2::ZERO, Vec2::new(800.0, 600.0));
         let neutral = ViewportInput {
             pointer_position: None,
@@ -8431,10 +8436,7 @@ mod tests {
         app.route_viewport_input(rect, 1.0, release, true);
         let after_commit = app.commands.scene().history_state_id();
         assert_ne!(after_commit, history_before);
-        assert_eq!(
-            app.commands.scene().objects()[0].position(),
-            [10.0, 0.0, 0.0]
-        );
+        assert_eq!(app.commands.scene().objects()[0].position(), moved_position);
         assert!(matches!(
             app.commands.dispatch(CommandId::Undo),
             Ok(CommandOutcome::Applied(_))
@@ -8444,10 +8446,7 @@ mod tests {
             app.commands.dispatch(CommandId::Redo),
             Ok(CommandOutcome::Applied(_))
         ));
-        assert_eq!(
-            app.commands.scene().objects()[0].position(),
-            [10.0, 0.0, 0.0]
-        );
+        assert_eq!(app.commands.scene().objects()[0].position(), moved_position);
     }
 
     #[test]
@@ -8943,7 +8942,11 @@ mod tests {
         for _ in 0..3 {
             frame(&mut app, &ctx, Vec::new());
         }
-        app.open_dialog(DialogKind::Settings);
+        // Settings is deliberately non-modal (see
+        // `settings_stays_non_modal_until_about_is_opened`), so block with a
+        // modal dialog instead.
+        app.open_dialog(DialogKind::SaveProject);
+        assert!(app.modal_active());
         let blocked = frame(&mut app, &ctx, Vec::new());
         app.position_fields[0] = "12 mm".into();
         app.numeric_edited_axes[0] = true;
