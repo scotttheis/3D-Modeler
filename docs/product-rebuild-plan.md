@@ -16,7 +16,13 @@ Done means: every row of the feature ledger has the evidence its tier requires
 (section 6), the owner has accepted the look and the ten task walkthroughs, the
 engineering gates pass on the shipping build, and the package meets its size
 and performance budgets. The contracts in `AGENTS.md` (`.3dp` format, 60-tool
-MCP catalog, millimetres, one undo entry per operation, layering) do not move.
+MCP catalog, millimetres, one undo entry per operation, layering) do not move,
+except that the MCP catalog may grow (never change) to reach full desktop
+parity (section 3.7, decision D6).
+
+**MCP is 100%.** Anything a person can do to the model or the document in the
+desktop app, an AI client can do through MCP, and the two produce the same
+result. This is a completion requirement, not a nice-to-have.
 
 ## 2. Why v1 was replaced
 
@@ -92,8 +98,10 @@ Rules that keep this cheap:
 - `WORK_LOG.md` is frozen as an archive. New history is commit messages.
 - Per-slice handoff documents are retired. A slice has a task list in
   `STATUS.md` and evidence under `evidence/rebuild/<slice>/`.
-- No UI source file over 1,500 lines. `shell.rs` is split as it is touched
-  (section 5, S1), never in one rewrite.
+- `shell.rs` may be split as it is touched, when that makes the task at hand
+  easier. Module size is not a gate and splitting is not scheduled work
+  (owner, 2026-11-12). Likewise, workspace lint enforcement and comment
+  density are not work items; the current commenting level is accepted.
 
 ### 3.4 Task card
 
@@ -154,7 +162,36 @@ D1 approved by the owner on 2026-11-12. In force:
   That snapshot is what preserves the ignored binary evidence.
 - Existing `G:\` snapshots stay untouched.
 
-### 3.7 Evidence, sized to risk
+### 3.7 MCP parity (owner requirement, 2026-11-12)
+
+- **One implementation.** A desktop action and its MCP tool call the same
+  core function. Product rules (for example "Merge takes the top-most
+  object's color", OF-9) live in `builder3d-core`, never in the app or the
+  MCP adapter alone.
+- **Same commit.** A task that changes what a desktop action does to the
+  model also changes the MCP side and adds an MCP test proving the same
+  result. A desktop-only behaviour change is incomplete and fails review.
+- **Purely visual work is exempt** (floor labels, hover, shadows, captures),
+  because it does not change the model or the document. View toggles that
+  MCP already exposes (`set_view`, `view_preset`, `frame_view`) must keep
+  matching the desktop.
+- **Catalog growth.** The 60 tools captured from the Python build keep their
+  names, schemas and behaviour except where the owner has changed the product
+  (OF-9). New desktop capabilities that have no tool get a new tool, added
+  to the catalog, its schema contract and its tests (D6).
+- **Parity check.** The ledger lists, for every desktop action, its MCP tool
+  or "visual only". The Full gate's catalog parity check reads that list; an
+  action with no tool and no exemption fails it.
+
+Known gaps on 2026-11-12, worked as F12:
+
+| Desktop action | MCP today | Fix |
+|---|---|---|
+| Merge result color (OF-9) | Kept per-face colors | **Done** 2026-11-12: both use `Scene::apply_product_boolean` |
+| Rename an object | No tool | New tool, e.g. `rename_object` |
+| Show / hide an object | No tool | New tool, e.g. `set_visibility` |
+
+### 3.8 Evidence, sized to risk
 
 Evidence exists to let someone trust a claim without redoing the work. Keep
 what does that and stop producing the rest.
@@ -187,6 +224,8 @@ Status of each item is tracked in `STATUS.md`.
 | F9 | Mesh rims and the floor fight for depth where primitives rest on Y=0 (serrated lower edge on cylinder, cone, sphere) | Depth bias on the floor/shadow pass or a small epsilon | `multi` capture, both themes |
 | F10 | `emboss_text` long-running metadata differs from the reference | Match it or record the owner's decision | Catalog parity check |
 | F11 | Status narrative duplicated in `AGENTS.md` | Replaced by a pointer to `STATUS.md` | Done in this revision |
+| F12 | MCP is not at full desktop parity (section 3.7) | Merge color shared in core (done); add rename and show/hide tools; ledger column mapping each desktop action to its tool | Parity check passes; an MCP test per closed gap |
+| F13 | `cargo deny` and `cargo audit` had not been run | Run both; `cargo-audit` installed 2026-11-12; both now part of the Full gate and of any task that changes `Cargo.lock` | Clean runs recorded in `STATUS.md` |
 
 ## 5. Work order
 
@@ -195,8 +234,8 @@ Slices keep their RB ledger ids; the order and grouping change.
 | Stage | Contents | Exit |
 |---|---|---|
 | **S0 Stabilise** | Section 4 | All gates green on a committed (or snapshotted) baseline |
-| **S1 Product finish** | The design system and its application across the shell (section 7); `shell.rs` split into `ribbon`, `welcome`, `items_panel`, `transform_strip`, `status_bar`, `viewport_panel`, `dialogs`; capture harness extended to every state on the v1 capture list | Full capture board in both themes; **owner review session 1** |
-| **S2 Close parity** | Remaining ledger gaps from RB-03 to RB-09 in ledger order; RB-08 native interaction matrix; scripted versions of the ten walkthroughs wherever they can be scripted | Every ledger row implemented and machine-verified; **owner review session 2** (the ten walkthroughs, by hand) |
+| **S1 Product finish** | The design system and its application across the shell (section 7); capture harness extended to every state on the v1 capture list | Full capture board in both themes; **owner review session 1** |
+| **S2 Close parity** | Remaining ledger gaps from RB-03 to RB-09 in ledger order; RB-08 native interaction matrix; scripted versions of the ten walkthroughs wherever they can be scripted, each also driven through MCP | Every ledger row implemented and machine-verified, desktop and MCP; **owner review session 2** (the ten walkthroughs, by hand) |
 | **S3 Performance and package** (RB-10) | 30-million-face control and owner model corpus on the Quadro RTX 4000; resource routing on the hardware actually available; clean-machine install; 40 MB installed / 15 MB installer / 120 MB idle | Measured numbers against each budget, simulated profiles labelled as simulated |
 | **S4 Acceptance** (RB-11) | Fix what sessions 1–2 and S3 found | **Owner review session 3**: final sign-off on a named build |
 
@@ -213,8 +252,8 @@ owner's answers are recorded verbatim in the ledger's acceptance fields.
 
 | Tier | When | Commands | Budget |
 |---|---|---|---|
-| **Fast** | Every task | `cargo fmt --all -- --check`; `cargo clippy -p <changed crates> --all-targets --locked -- -D warnings`; `cargo test -p <changed crates> --locked`; review captures if visible | Minutes |
-| **Full** | End of each day of work and before any owner session | Fast across `--workspace`; `cargo deny check`; `--smoke`; full capture board | Tens of minutes |
+| **Fast** | Every task | `cargo fmt --all -- --check`; `cargo clippy -p <changed crates> --all-targets --locked -- -D warnings`; `cargo test -p <changed crates> --locked`; review captures if visible; MCP test if the task changes model behaviour (3.7); `cargo deny check` and `cargo audit` if the task changes `Cargo.toml` or `Cargo.lock` | Minutes |
+| **Full** | End of each day of work and before any owner session | Fast across `--workspace`; `cargo deny check`; `cargo audit`; MCP catalog parity check; `--smoke`; full capture board | Tens of minutes |
 | **Ship** | S3, S4 | Full; `cargo build --release --locked`; `cargo bloat`; package staging and measurement; performance run | As long as it takes |
 
 Evidence required per ledger row, by what the feature is:
@@ -224,7 +263,7 @@ Evidence required per ledger row, by what the feature is:
 | Geometry, formats, commands, undo | Golden-file or behavioural test against the Python output | None |
 | Layout, styling, artwork, states | Capture pair in both themes | Owner, in a batched session |
 | Pointer and keyboard interaction | State-machine test of the gesture logic | One hand check per gesture family, recorded once |
-| MCP | Catalog parity check and a live client round trip | None |
+| MCP | Catalog parity check, a live client round trip, and for every desktop action a test that the MCP tool gives the same result | None |
 | Performance, package | Measurement on the named host | Owner sees the numbers |
 
 A gate that cannot run is reported as not run, with the reason. It is never
@@ -254,8 +293,8 @@ everywhere, inside the owner's existing palette and artwork.
 1. `chrome.rs` becomes the single source for type scale (11 / 12.5 / 13 / 15 /
    20), spacing (4 / 8 / 12 / 16 / 24), radii (6 / 10) and control heights
    (26 / 28). Replace every literal in the shell with a token. Mechanic tier.
-2. Split `shell.rs` by surface, one module per task, no behaviour change,
-   captures identical before and after. Mechanic tier, Architect review.
+2. (Optional, owner 2026-11-12) Split part of `shell.rs` only where a task
+   needs it; no behaviour change, captures identical before and after.
 3. Inspector: replace the default collapsing header and stacked "Apply …"
    buttons with labelled sections and one consistent field grid; fill or
    remove the empty lower half of the right panel.
@@ -287,6 +326,8 @@ decided by an agent.
 | D3 | Delete the ad hoc build directories under `target/` | **Approved and done 2026-11-12** | — |
 | D4 | Viewport background stays light in the dark theme | Keep (it is the current accepted choice); revisit in session 1 with a side-by-side | Unchanged |
 | D5 | `emboss_text` long-running metadata | Match the reference | Recorded as a known difference |
+| D6 | MCP at 100% desktop parity, growing the catalog beyond the Python 60 where needed | **Approved 2026-11-12** | — |
+| D7 | Merge color: one color from the top-most object, desktop and MCP alike | **Approved 2026-11-12** (differs from the Python MCP, which kept per-face colors) | — |
 
 ## 9. What does not change
 

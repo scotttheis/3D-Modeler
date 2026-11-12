@@ -143,7 +143,10 @@ Standing boundaries:
 
 The `.3dp` project format, the 60-tool MCP catalog and its schemas, the
 imported and exported file formats, the millimetre contract, and undo
-semantics do not change. Each needs a golden-file test compared against the
+semantics do not change. Exception (owner decisions D6/D7, 2026-11-12): MCP
+must reach 100% desktop parity, so the catalog may gain tools for desktop
+actions it lacks, and an MCP result changes when the owner changes the
+product behaviour it mirrors. See plan section 3.7. Each needs a golden-file test compared against the
 Python build's current output. Shared contracts live as test fixtures, never
 as shared source.
 

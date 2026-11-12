@@ -1836,34 +1836,25 @@ impl CommandState {
         operation: BooleanOperation,
         clear_selection: bool,
     ) -> Result<CommandOutcome, CommandError> {
-        // OF-9: a Merge result takes one color, that of whichever operand
-        // sits higher in the Items list (list order is scene order).
-        let uniform_color = if operation == BooleanOperation::Union {
-            Some(self.scene.object(target_index.min(tool_index))?.color())
-        } else {
-            None
-        };
-        let outcome =
-            self.apply_boolean_pair_with_color(target_index, tool_index, operation, uniform_color)?;
+        let outcome = self.apply_product_boolean_pair(target_index, tool_index, operation)?;
         if clear_selection && matches!(outcome, CommandOutcome::Applied(_)) {
             self.scene.set_selection(std::iter::empty::<usize>());
         }
         Ok(outcome)
     }
 
-    fn apply_boolean_pair_with_color(
+    fn apply_product_boolean_pair(
         &mut self,
         target_index: usize,
         tool_index: usize,
         operation: BooleanOperation,
-        uniform_color: Option<[f32; 4]>,
     ) -> Result<CommandOutcome, CommandError> {
-        let (_, command_result, report) = self.scene.apply_boolean_with_color(
+        // The core owns the OF-9 Merge color rule so MCP gets the same result.
+        let (_, command_result, report) = self.scene.apply_product_boolean(
             target_index,
             tool_index,
             operation,
             BooleanOptions::default(),
-            uniform_color,
         )?;
         if !command_result.changed {
             return Ok(CommandOutcome::Noop(String::from(

@@ -16,22 +16,12 @@ closed. Stop before RB-10 work (S3) as before.
 |---|---|
 | `cargo fmt --all -- --check` | Pass |
 | `cargo clippy --workspace --all-targets --locked -- -D warnings` | Pass |
-| `cargo test --workspace --locked --no-fail-fast` | Pass (re-run 2026-11-12 after each OF commit; F2 commit `f1b581d` fixed the six below) |
-| `cargo deny check` | Not run |
+| `cargo test --workspace --locked --no-fail-fast` | Pass (2026-11-12, after the shadow follow-up and the MCP Merge color change) |
+| `cargo deny check` | Pass 2026-11-12 (advisories, bans, licenses, sources ok; warning: `async-executor 1.14.0` yanked, Linux accessibility path only) |
+| `cargo audit` | Pass 2026-11-12 — 0 vulnerabilities in 493 crates; 5 allowed warnings (4 unmaintained already accepted in `deny.toml`, 1 yanked as above). Tool installed 2026-11-12 |
+| MCP catalog parity check | Not run — needs the ledger action→tool column (F12) |
 | Release (fat LTO) build | `cargo build --release -p builder3d-app` passed twice on 2026-11-12 (4m50s, 3m43s); failed with LLVM out-of-memory on 2026-11-11 |
 | `review` profile build | Pass (3m56s clean build; capture verified) |
-
-Failing tests, all present before the 2026-11-12 finish pass and all
-unreviewed — each needs a decision: is the test stale, or is the code wrong?
-
-| Test | Symptom | Likely cause |
-|---|---|---|
-| `builder3d-app` `commands::rb04_gesture_tests::cancelled_noop_stale_and_replaced_document_keep_scene_safe` | Y is 20, expected 0 | Primitives now rest on the floor; test predates it |
-| `builder3d-app` `transforms::tests::group_translation_is_atomic_and_undoable` | Position mismatch | Same |
-| `builder3d-mcp` `r4::server::tests::core_calls_are_structured_and_replay_is_idempotent` | Y is 5, expected 20 | Same change, seen from the MCP side — **check the catalog contract before editing the test** |
-| `builder3d-app` `view_state::tests::state_updates_and_presets_keep_camera_bounds` | Yaw 0, expected 45 | Default view changed on 2026-11-09 |
-| `builder3d-app` `shell::tests::gizmo_release_commits_once_and_cancel_or_noop_keeps_history` | Assertion mismatch | Gizmo rework 2026-11-10/11; may be a real one-undo-per-gesture regression |
-| `builder3d-app` `shell::tests::modal_pointer_input_cannot_duplicate_or_apply_background_transform` | Count 2, expected 1 | Same rework; may be real |
 
 ## Fix-first list (plan section 4)
 
@@ -48,6 +38,8 @@ unreviewed — each needs a decision: is the test stale, or is the code wrong?
 | F9 | Depth fight where meshes meet the floor | Open |
 | F10 | `emboss_text` long-running metadata | Blocked on decision D5 |
 | F11 | Status narrative out of `AGENTS.md` | **Done** 2026-11-12 |
+| F12 | MCP 100% desktop parity (plan 3.7) | Open — Merge color now shared in core, desktop and MCP tested (done); still to add: rename-object tool, show/hide tool, ledger action→tool column |
+| F13 | Run `cargo deny` and `cargo audit` | **Done** 2026-11-12 — both pass; now in the Full gate |
 
 ## Ledger (`evidence/rebuild/parity-matrix.toml`, 147 features, not yet reconciled)
 
@@ -58,8 +50,9 @@ parity complete, full acceptance open.
 
 ## Owner decisions waiting (plan section 8)
 
-D1, D2, D3 approved 2026-11-12. Still open: D4 light viewport in dark theme ·
-D5 `emboss_text` metadata.
+D1, D2, D3, D6 (MCP 100% parity, catalog may grow) and D7 (Merge takes the
+top-most color, desktop and MCP) approved 2026-11-12. Still open: D4 light
+viewport in dark theme · D5 `emboss_text` metadata.
 
 ## Owner feedback queue
 
@@ -84,15 +77,18 @@ D5 `emboss_text` metadata.
   comparison with Blender's brushes, the shadow and reflection on the CPU
   fallback, and Merge of more than two objects. Shots still owed by the
   owner: X-ray with two objects, Paint/Color/Material, Merge.
-- 2026-11-12 (shadow follow-up, **uncommitted** in the working tree): floor
+- 2026-11-12 (shadow follow-up, committed `43f0fd0`): floor
   shadow now follows the object's convex outline instead of its bounding
   box; shadows and floor text hide with the floor when the camera is below
   it; a dragged object's shadow hides during the gesture and returns once
   it lands (owner: "way better"; ideal would be a shadow that follows the
   object). Details and open points at the end of
-  [`owner-feedback-2026-11-12.md`](owner-feedback-2026-11-12.md). Viewport
-  tests, clippy and fmt pass for the crate; full workspace gate not run.
-- Suggested next: commit the shadow follow-up, then F9.
+  [`owner-feedback-2026-11-12.md`](owner-feedback-2026-11-12.md). Full
+  workspace gate passed before commit.
+- 2026-11-12: owner wants MCP at 100% (F12, D6, D7); `cargo deny` and
+  `cargo audit` now run (F13). Not stressed about module size, lint
+  enforcement or more comments; those are not work items.
+- Suggested next: F12 rename and show/hide tools, then F9.
 - Review harness: `BUILDER3D_REVIEW_CAMERA=yaw,pitch,distance` poses the
   camera after auto-framing; state `resize-drag` holds the +X handle mid-drag;
   `BUILDER3D_REVIEW_POINTER=x,y` rests the pointer to show hover states;
@@ -103,8 +99,7 @@ D5 `emboss_text` metadata.
 
 ## Last recovery point
 
-Git: branch `rebuild/work` at the OF-7/OF-8 commit (`89c1e6f`), plus
-uncommitted shadow follow-up changes in `crates/builder3d-viewport/src/`
-(`cpu.rs`, `floor.rs`, `renderer.rs`). Tree snapshot:
+Git: branch `rebuild/work` at the MCP Merge color commit (after the shadow
+follow-up `43f0fd0`); see `git log`. Tree snapshot:
 `G:\Builder3D-Rust_snapshot_20261112-104713_OF-batch2` (5,603 files,
 827,512,382 bytes, counts verified; excludes `target\`).

@@ -1164,11 +1164,31 @@ impl Scene {
         self.apply_boolean_with_color(target_index, tool_index, operation, options, None)
     }
 
+    /// Applies the product's boolean color rule: a Merge result takes one
+    /// color, that of whichever operand sits higher in the Items list (the
+    /// lower scene index), regardless of which one is the target. Subtract
+    /// and Intersect keep their per-face source colors. The desktop and MCP
+    /// both call this so the two adapters produce the same object (OF-9).
+    pub fn apply_product_boolean(
+        &mut self,
+        target_index: usize,
+        tool_index: usize,
+        operation: crate::BooleanOperation,
+        options: crate::BooleanOptions,
+    ) -> Result<(usize, CommandResult, crate::BooleanReport), CoreError> {
+        let uniform_color = if operation == crate::BooleanOperation::Union {
+            Some(self.object(target_index.min(tool_index))?.color())
+        } else {
+            None
+        };
+        self.apply_boolean_with_color(target_index, tool_index, operation, options, uniform_color)
+    }
+
     /// [`Self::apply_boolean`] with an optional single result color. With
     /// `Some(color)` the result drops the per-face source colors and is
-    /// painted `color` in the same grouped history entry (the desktop Merge
-    /// uses the color of the top-most selected object); with `None` the
-    /// faces keep their source colors.
+    /// painted `color` in the same grouped history entry; with `None` the
+    /// faces keep their source colors. Adapters normally go through
+    /// [`Self::apply_product_boolean`] instead.
     pub fn apply_boolean_with_color(
         &mut self,
         target_index: usize,

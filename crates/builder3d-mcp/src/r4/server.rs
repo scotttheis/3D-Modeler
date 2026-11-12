@@ -2296,7 +2296,8 @@ impl R4Server {
         let tool_id = schema::required_string(args, "tool_object_id")?;
         let target_index = state.scene.object_index(&target_id)?;
         let tool_index = state.scene.object_index(&tool_id)?;
-        let (new_index, result, report) = state.scene.apply_boolean(
+        // Same core rule as the desktop: a Merge takes the top-most color.
+        let (new_index, result, report) = state.scene.apply_product_boolean(
             target_index,
             tool_index,
             operation,
@@ -3485,6 +3486,72 @@ mod tests {
         assert_eq!(document.scene.objects()[0].object_id(), object_id);
         assert!(document.scene.undo().expect("shared undo").is_some());
         assert_eq!(document.scene.history_state_id(), initial_history);
+    }
+
+    #[test]
+    fn boolean_merge_takes_the_top_most_color_like_the_desktop() {
+        let server = server(Profile::Full);
+        let mut scene = Scene::new();
+        let (top_id, _) = scene
+            .add_primitive(PrimitiveKind::Cube, Some([10.0; 3]), None)
+            .expect("add top cube");
+        let (lower_id, _) = scene
+            .add_primitive(PrimitiveKind::Cube, Some([10.0; 3]), None)
+            .expect("add lower cube");
+        let red = [0.9, 0.1, 0.1, 1.0];
+        let blue = [0.1, 0.2, 0.9, 1.0];
+        scene.set_color(0, red).expect("color top cube");
+        scene.set_color(1, blue).expect("color lower cube");
+        let offset = builder3d_core::Transform::identity()
+            .translated([5.0, 0.0, 0.0])
+            .expect("offset");
+        scene.set_transform(1, offset).expect("overlap the cubes");
+        let before = scene.history_state_id();
+        let mut document = Some(R4Document::new(scene));
+        server
+            .replace_document(&mut document)
+            .expect("attach desktop document");
+
+        // The lower row is the target; the color must still come from the top row.
+        let started = server
+            .call_value(
+                "boolean_merge",
+                json!({"target_object_id":lower_id,"tool_object_id":top_id}),
+            )
+            .expect("start merge");
+        let operation_id = started["operation_id"]
+            .as_str()
+            .expect("operation ID")
+            .to_owned();
+        let mut terminal = None;
+        for _ in 0..200 {
+            let status = server
+                .call_value("operation_status", json!({"operation_id":operation_id}))
+                .expect("operation status");
+            if matches!(
+                status["state"].as_str(),
+                Some("completed" | "failed" | "cancelled")
+            ) {
+                terminal = Some(status);
+                break;
+            }
+            thread::sleep(Duration::from_millis(10));
+        }
+        let status = terminal.expect("merge must reach a terminal state");
+        assert_eq!(status["state"], json!("completed"), "{status}");
+
+        let mut document = server.take_document().expect("return desktop document");
+        assert_eq!(document.scene.objects().len(), 1);
+        let merged = &document.scene.objects()[0];
+        assert_eq!(merged.color(), red);
+        assert!(
+            builder3d_core::boolean_color_provenance(merged.metadata(), merged.mesh().faces.len())
+                .is_none(),
+            "no per-face source colors remain"
+        );
+        assert!(document.scene.undo().expect("undo merge").is_some());
+        assert_eq!(document.scene.history_state_id(), before);
+        assert_eq!(document.scene.objects().len(), 2);
     }
 
     #[test]
