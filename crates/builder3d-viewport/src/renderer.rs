@@ -37,6 +37,12 @@ const BYTES_PER_PIXEL: u64 = 4;
 const COPY_BYTES_PER_ROW_ALIGNMENT: u64 = 256;
 const MESH_UNIFORM_BYTES: usize = 240;
 const FLOOR_TEXT_VERTEX_STRIDE: usize = 36;
+/// Position plus barycentric coordinate per wireframe vertex.
+const WIRE_VERTEX_STRIDE: usize = 24;
+/// Largest display mesh, in faces, that gets a GPU wireframe copy (72 bytes
+/// per face). Larger meshes read as solid black edges anyway; the frame
+/// still renders, only without edges, and the ledger records nothing.
+const MAX_WIREFRAME_FACES: usize = 2_000_000;
 /// Most floor-text vertices drawn in one frame.
 const MAX_FLOOR_TEXT_VERTICES: usize = 65_536;
 
@@ -158,9 +164,17 @@ struct GpuGeometry {
     vertex: wgpu::Buffer,
     batches: Vec<GpuMaterialBatch>,
     ledger_id: AllocationId,
+    /// Barycentric triangle copy for the wireframe pass, built on demand.
+    wire: Option<GpuWire>,
     face_count: u64,
     geometry_identity: usize,
     face_color_identity: u64,
+}
+
+struct GpuWire {
+    vertex: wgpu::Buffer,
+    vertex_count: u32,
+    ledger_id: AllocationId,
 }
 
 struct GpuMaterialBatch {
@@ -213,6 +227,7 @@ pub struct ViewportRenderer {
     overlay_line_pipeline: wgpu::RenderPipeline,
     overlay_triangle_pipeline: wgpu::RenderPipeline,
     floor_text_pipeline: wgpu::RenderPipeline,
+    wireframe_pipeline: wgpu::RenderPipeline,
     text_atlas_layout: wgpu::BindGroupLayout,
     text_atlas_sampler: wgpu::Sampler,
     text_atlas: Option<wgpu::BindGroup>,
@@ -371,6 +386,7 @@ impl ViewportRenderer {
         });
         let floor_text_pipeline =
             create_floor_text_pipeline(&device, &uniform_layout, &text_atlas_layout);
+        let wireframe_pipeline = create_wireframe_pipeline(&device, &uniform_layout);
         Ok(Self {
             instance,
             device,
@@ -399,6 +415,7 @@ impl ViewportRenderer {
             overlay_line_pipeline,
             overlay_triangle_pipeline,
             floor_text_pipeline,
+            wireframe_pipeline,
             text_atlas_layout,
             text_atlas_sampler,
             text_atlas: None,
@@ -701,6 +718,12 @@ impl ViewportRenderer {
                 upload_failed = true;
                 break;
             }
+            if options.wireframe {
+                self.ensure_gpu_wire(object.object_id(), geometry);
+            }
+        }
+        if !options.wireframe {
+            self.release_gpu_wires();
         }
         if upload_failed {
             return self.render_cpu_report(
@@ -721,7 +744,7 @@ impl ViewportRenderer {
             .collect::<Vec<_>>();
         for stale_id in stale_ids {
             if let Some(stale) = self.gpu_objects.remove(&stale_id) {
-                let _ = self.ledger.release(stale.ledger_id);
+                release_gpu_geometry(&mut self.ledger, stale);
             }
         }
         let floor = build_floor(camera, DEFAULT_FLOOR_SIZE, options.grid_visible, true)?;
@@ -919,6 +942,22 @@ impl ViewportRenderer {
                     pass.draw_indexed(0..batch.index_count, 0, 0..1);
                 }
             }
+            // Wireframe: anti-aliased triangle edges over the shaded model,
+            // depth-tested against it so only visible edges show.
+            if options.wireframe {
+                pass.set_pipeline(&self.wireframe_pipeline);
+                for object in scene.objects() {
+                    let Some(gpu) = self.gpu_objects.get(object.object_id()) else {
+                        continue;
+                    };
+                    let (Some(wire), Some(batch)) = (&gpu.wire, gpu.batches.first()) else {
+                        continue;
+                    };
+                    pass.set_bind_group(0, &batch.bind_group, &[]);
+                    pass.set_vertex_buffer(0, wire.vertex.slice(..));
+                    pass.draw(0..wire.vertex_count, 0..1);
+                }
+            }
             if let Some(triangle_buffer) = &triangle_buffer {
                 pass.set_pipeline(&self.overlay_triangle_pipeline);
                 pass.set_bind_group(0, &overlay_bind_group, &[]);
@@ -1048,7 +1087,7 @@ impl ViewportRenderer {
         match result {
             Ok(gpu) => {
                 if let Some(old) = old {
-                    let _ = self.ledger.release(old.ledger_id);
+                    release_gpu_geometry(&mut self.ledger, old);
                 }
                 self.gpu_objects.insert(object.object_id().to_owned(), gpu);
                 Ok(())
@@ -1058,6 +1097,55 @@ impl ViewportRenderer {
                     self.gpu_objects.insert(object.object_id().to_owned(), old);
                 }
                 Err(error)
+            }
+        }
+    }
+
+    /// Builds the object's barycentric wireframe copy once per uploaded
+    /// geometry. Over-budget or oversized meshes simply get no edges.
+    fn ensure_gpu_wire(&mut self, object_id: &str, geometry: &MeshGeometry) {
+        let Some(gpu) = self.gpu_objects.get(object_id) else {
+            return;
+        };
+        if gpu.wire.is_some() || geometry.face_count() > MAX_WIREFRAME_FACES {
+            return;
+        }
+        let bytes = wire_vertex_bytes(geometry);
+        let Ok(vertex_count) = u32::try_from(bytes.len() / WIRE_VERTEX_STRIDE) else {
+            return;
+        };
+        if vertex_count == 0 {
+            return;
+        }
+        let Ok(ledger_id) = self.ledger.reserve(
+            AllocationKind::Cache,
+            MemoryDomain::Adapter(self.adapter_index),
+            bytes.len() as u64,
+        ) else {
+            return;
+        };
+        let vertex = self
+            .device
+            .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("builder3d-wireframe-vertices"),
+                contents: &bytes,
+                usage: wgpu::BufferUsages::VERTEX,
+            });
+        if let Some(gpu) = self.gpu_objects.get_mut(object_id) {
+            gpu.wire = Some(GpuWire {
+                vertex,
+                vertex_count,
+                ledger_id,
+            });
+        } else {
+            let _ = self.ledger.release(ledger_id);
+        }
+    }
+
+    fn release_gpu_wires(&mut self) {
+        for gpu in self.gpu_objects.values_mut() {
+            if let Some(wire) = gpu.wire.take() {
+                let _ = self.ledger.release(wire.ledger_id);
             }
         }
     }
@@ -1153,6 +1241,7 @@ impl ViewportRenderer {
             vertex,
             batches,
             ledger_id,
+            wire: None,
             face_count: geometry.face_count() as u64,
             geometry_identity: geometry.geometry_identity(),
             face_color_identity: object.face_color_identity(),
@@ -1718,6 +1807,105 @@ fn create_floor_text_pipeline(
     })
 }
 
+fn release_gpu_geometry(ledger: &mut ResourceLedger, gpu: GpuGeometry) {
+    let _ = ledger.release(gpu.ledger_id);
+    if let Some(wire) = gpu.wire {
+        let _ = ledger.release(wire.ledger_id);
+    }
+}
+
+/// Unindexed triangles with a barycentric corner per vertex, for the
+/// wireframe pass. Positions are bit-identical to the shaded mesh so the
+/// edges pass the depth test exactly on the surface.
+fn wire_vertex_bytes(geometry: &MeshGeometry) -> Vec<u8> {
+    const CORNERS: [[f32; 3]; 3] = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]];
+    let mut bytes =
+        Vec::with_capacity(geometry.face_count().saturating_mul(3 * WIRE_VERTEX_STRIDE));
+    for face in 0..geometry.face_count() {
+        let Some(triangle) = geometry.triangle(face) else {
+            break;
+        };
+        let Some(positions) = triangle
+            .iter()
+            .map(|index| geometry.position(*index))
+            .collect::<Option<Vec<_>>>()
+        else {
+            continue;
+        };
+        for (position, corner) in positions.iter().zip(CORNERS) {
+            for value in position.iter().chain(corner.iter()) {
+                bytes.extend_from_slice(&value.to_le_bytes());
+            }
+        }
+    }
+    bytes
+}
+
+fn create_wireframe_pipeline(
+    device: &wgpu::Device,
+    uniform_layout: &wgpu::BindGroupLayout,
+) -> wgpu::RenderPipeline {
+    let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
+        label: Some("builder3d-wireframe-shader"),
+        source: wgpu::ShaderSource::Wgsl(WIREFRAME_SHADER.into()),
+    });
+    let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+        label: Some("builder3d-wireframe-pipeline-layout"),
+        bind_group_layouts: &[Some(uniform_layout)],
+        immediate_size: 0,
+    });
+    let targets = [Some(wgpu::ColorTargetState {
+        format: wgpu::TextureFormat::Rgba8Unorm,
+        blend: Some(wgpu::BlendState::ALPHA_BLENDING),
+        write_mask: wgpu::ColorWrites::ALL,
+    })];
+    device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+        label: Some("builder3d-wireframe-pipeline"),
+        layout: Some(&pipeline_layout),
+        vertex: wgpu::VertexState {
+            module: &shader,
+            entry_point: Some("vertex_main"),
+            compilation_options: Default::default(),
+            buffers: &[Some(wgpu::VertexBufferLayout {
+                array_stride: WIRE_VERTEX_STRIDE as u64,
+                step_mode: wgpu::VertexStepMode::Vertex,
+                attributes: &[
+                    wgpu::VertexAttribute {
+                        format: wgpu::VertexFormat::Float32x3,
+                        offset: 0,
+                        shader_location: 0,
+                    },
+                    wgpu::VertexAttribute {
+                        format: wgpu::VertexFormat::Float32x3,
+                        offset: 12,
+                        shader_location: 1,
+                    },
+                ],
+            })],
+        },
+        primitive: wgpu::PrimitiveState::default(),
+        depth_stencil: Some(wgpu::DepthStencilState {
+            format: wgpu::TextureFormat::Depth24Plus,
+            depth_write_enabled: Some(false),
+            depth_compare: Some(wgpu::CompareFunction::LessEqual),
+            stencil: Default::default(),
+            bias: Default::default(),
+        }),
+        multisample: wgpu::MultisampleState {
+            count: VIEWPORT_SAMPLE_COUNT,
+            ..Default::default()
+        },
+        fragment: Some(wgpu::FragmentState {
+            module: &shader,
+            entry_point: Some("fragment_main"),
+            compilation_options: Default::default(),
+            targets: &targets,
+        }),
+        multiview_mask: None,
+        cache: None,
+    })
+}
+
 fn pack_floor_text(mesh: &FloorTextMesh) -> Vec<u8> {
     let mut bytes =
         Vec::with_capacity(mesh.vertices.len().saturating_mul(FLOOR_TEXT_VERTEX_STRIDE));
@@ -1875,29 +2063,6 @@ fn build_overlay_vertices(
             }
         }
     }
-    if options.wireframe {
-        for object in scene.objects() {
-            for (first, second) in object
-                .full_geometry()
-                .wireframe_segments(object.transform())?
-            {
-                lines.extend([
-                    OverlayVertex {
-                        ..OverlayVertex::new(first, [0.0, 0.0, 0.0, 1.0])
-                    },
-                    OverlayVertex {
-                        ..OverlayVertex::new(second, [0.0, 0.0, 0.0, 1.0])
-                    },
-                ]);
-                if lines.len().saturating_add(triangles.len()) >= MAX_OVERLAY_VERTICES {
-                    break;
-                }
-            }
-            if lines.len().saturating_add(triangles.len()) >= MAX_OVERLAY_VERTICES {
-                break;
-            }
-        }
-    }
     if let Some(center) = gizmo_center {
         let geometry = build_gizmo(camera, center, gizmo_mode)?;
         for line in geometry.lines {
@@ -1927,7 +2092,7 @@ fn build_overlay_vertices(
             "viewport overlay vertex budget reached",
         )));
     }
-    let _ = (scene_radius, width, height);
+    let _ = (scene_radius, width, height, scene);
     Ok(OverlayBuffers { lines, triangles })
 }
 
@@ -2077,7 +2242,7 @@ struct Uniforms {
 };
 @group(0) @binding(0) var<uniform> uniforms: Uniforms;
 struct VertexOutput {
-    @builtin(position) position: vec4<f32>,
+    @invariant @builtin(position) position: vec4<f32>,
     @location(0) normal: vec3<f32>,
     @location(1) view_position: vec3<f32>,
 };
@@ -2173,6 +2338,41 @@ fn fragment_main(input: VertexOutput) -> @location(0) vec4<f32> {
 }
 "#;
 
+const WIREFRAME_SHADER: &str = r#"
+struct Uniforms {
+    view_projection: mat4x4<f32>,
+};
+@group(0) @binding(0) var<uniform> uniforms: Uniforms;
+struct VertexOutput {
+    @invariant @builtin(position) position: vec4<f32>,
+    @location(0) barycentric: vec3<f32>,
+};
+@vertex
+fn vertex_main(
+    @location(0) position: vec3<f32>,
+    @location(1) barycentric: vec3<f32>,
+) -> VertexOutput {
+    return VertexOutput(uniforms.view_projection * vec4<f32>(position, 1.0), barycentric);
+}
+@fragment
+fn fragment_main(input: VertexOutput) -> @location(0) vec4<f32> {
+    // Screen-space distance to the nearest edge, so every edge is the same
+    // thin width at any zoom, smoothed over about one pixel.
+    let width = fwidth(input.barycentric);
+    let edge = smoothstep(vec3<f32>(0.0), width * 1.15, input.barycentric);
+    let coverage = 1.0 - min(min(edge.x, edge.y), edge.z);
+    // Fade edges of triangles only a few pixels across, so dense meshes
+    // stay readable instead of turning solid black (as in Blender).
+    let triangle_pixels = 1.0 / max(max(width.x, width.y), max(width.z, 1.0e-4));
+    let density = smoothstep(2.5, 14.0, triangle_pixels);
+    let alpha = coverage * mix(0.18, 0.85, density);
+    if alpha <= 0.004 {
+        discard;
+    }
+    return vec4<f32>(0.07, 0.08, 0.10, alpha);
+}
+"#;
+
 const FLOOR_TEXT_SHADER: &str = r#"
 struct Uniforms {
     view_projection: mat4x4<f32>,
@@ -2235,6 +2435,28 @@ mod tests {
             cpu_clear_color(ViewportTheme::Dark),
             cpu_clear_color(ViewportTheme::Light)
         );
+    }
+
+    #[test]
+    fn wireframe_vertices_repeat_mesh_positions_with_barycentric_corners() {
+        let mesh = builder3d_core::make_box([2.0, 2.0, 2.0]).expect("box");
+        let geometry = MeshGeometry::from_mesh(&mesh).expect("geometry");
+        let bytes = wire_vertex_bytes(&geometry);
+        assert_eq!(bytes.len(), geometry.face_count() * 3 * WIRE_VERTEX_STRIDE);
+        let floats = bytes
+            .as_chunks::<4>()
+            .0
+            .iter()
+            .map(|chunk| f32::from_le_bytes(*chunk))
+            .collect::<Vec<_>>();
+        let first = geometry.triangle(0).expect("triangle");
+        for (corner, index) in first.into_iter().enumerate() {
+            let vertex = &floats[corner * 6..corner * 6 + 6];
+            assert_eq!(vertex[..3], geometry.position(index).expect("position"));
+            let mut expected = [0.0; 3];
+            expected[corner] = 1.0;
+            assert_eq!(vertex[3..], expected);
+        }
     }
 
     #[test]

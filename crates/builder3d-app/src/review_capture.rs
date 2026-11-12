@@ -15,6 +15,7 @@
 //! | `BUILDER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `resize`, `resize-drag`, `multi` | `move` |
 //! | `BUILDER3D_REVIEW_THEME` | `light`, `dark` | `dark` |
 //! | `BUILDER3D_REVIEW_TAB` | a ribbon tab label such as `Object` | `Insert` |
+//! | `BUILDER3D_REVIEW_VIEW` | comma list of view toggles to turn on: `wireframe`, `xray` | none |
 //! | `BUILDER3D_REVIEW_POINTER` | `x,y` in window points: rests the pointer there to show a hover state (no button is pressed) | pointer outside |
 //! | `BUILDER3D_REVIEW_CAMERA` | `yaw,pitch,distance` in degrees and mm, applied after auto-framing; distance `0` keeps the framed distance | framed view |
 //!
@@ -94,6 +95,7 @@ pub(crate) struct ReviewCapture {
     tab: Option<String>,
     camera: Option<[f32; 3]>,
     pointer: Option<[f32; 2]>,
+    view: Vec<String>,
     frames: u32,
     requested: bool,
     finished: Arc<AtomicBool>,
@@ -147,6 +149,15 @@ impl ReviewCapture {
             },
             _ => None,
         };
+        let view = env::var("BUILDER3D_REVIEW_VIEW")
+            .map(|value| {
+                value
+                    .split(',')
+                    .map(|part| part.trim().to_ascii_lowercase())
+                    .filter(|part| !part.is_empty())
+                    .collect()
+            })
+            .unwrap_or_default();
         Some(Self {
             output,
             state,
@@ -154,6 +165,7 @@ impl ReviewCapture {
             tab,
             camera,
             pointer,
+            view,
             frames: 0,
             requested: false,
             finished: Arc::new(AtomicBool::new(false)),
@@ -170,6 +182,11 @@ impl ReviewCapture {
 
     pub(crate) fn tab(&self) -> Option<&str> {
         self.tab.as_deref()
+    }
+
+    /// View toggles (`wireframe`, `xray`) to switch on.
+    pub(crate) fn view_toggles(&self) -> &[String] {
+        &self.view
     }
 
     /// Where the pointer rests, in window points, to reveal a hover state.

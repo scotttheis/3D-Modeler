@@ -539,6 +539,13 @@ impl Builder3dApp {
         if review.state() != ReviewState::Welcome {
             self.surface = WorkspaceSurface::Scene;
         }
+        for toggle in review.view_toggles() {
+            match toggle.as_str() {
+                "wireframe" => self.dispatch(CommandId::ToggleWireframe),
+                "xray" => self.dispatch(CommandId::ToggleXray),
+                other => eprintln!("review capture: unknown view toggle `{other}`"),
+            }
+        }
         self.camera_auto_frame_pending = true;
         self.invalidate_presentation();
         self.review = Some(review);
