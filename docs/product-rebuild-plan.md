@@ -117,9 +117,14 @@ writes user settings, so it is safe while the machine is in use.
 
 ```powershell
 $env:BUILDER3D_REVIEW_CAPTURE = "evidence\rebuild\captures\multi-dark.png"
-$env:BUILDER3D_REVIEW_STATE   = "multi"    # welcome | empty | move | rotate | resize | multi
+$env:BUILDER3D_REVIEW_STATE   = "multi"    # welcome | empty | move | rotate | resize | resize-drag | multi | merge | unselected | material
 $env:BUILDER3D_REVIEW_THEME   = "dark"     # light | dark
 $env:BUILDER3D_REVIEW_TAB     = "Insert"   # any ribbon tab
+# Optional:
+$env:BUILDER3D_REVIEW_CAMERA  = "45,30,0"  # yaw,pitch (deg),distance (mm; 0 = framed)
+$env:BUILDER3D_REVIEW_POINTER = "640,40"   # rest the pointer here to show a hover state
+$env:BUILDER3D_REVIEW_VIEW    = "wireframe" # comma list: wireframe, xray
+$env:BUILDER3D_REVIEW_INTERACTIVE = "1"    # stay open with isolated settings instead of capturing
 cargo run --profile review -p builder3d-app
 ```
 
@@ -130,7 +135,10 @@ cargo run --profile review -p builder3d-app
   brush popover, import units, print prep, error and progress states). S1
   extends it to the full v1 capture list so one command regenerates the board.
 - A capture proves what was painted. It does not prove pointer behaviour and
-  it is never owner approval.
+  it is never owner approval. `POINTER` shows a hover state only, with no
+  button pressed. `resize-drag` holds a handle by setting the shell's state
+  directly, not through real input. The full variable table is in the
+  module doc of `review_capture.rs`.
 
 ### 3.6 Recovery
 

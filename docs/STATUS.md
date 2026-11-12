@@ -74,12 +74,16 @@ D5 `emboss_text` metadata.
   [`owner-feedback-2026-11-12.md`](owner-feedback-2026-11-12.md), worked in
   the owner's order (OF-1 floor, OF-1 resize + OF-3, OF-4, OF-6, OF-9, OF-2,
   OF-7/8; OF-5 waits for shots), one commit each, **none owner-reviewed
-  yet**. Done so far: OF-1 floor numbers (flat on the floor plane, depth-
-  tested); OF-1 resize view + OF-3 (3D Builder box, dots, chevrons, size
-  label, drag band); OF-4 top-bar hover; OF-6 wireframe; OF-9 Merge color; OF-2 contact
-  shadow and floor reflection; OF-7/OF-8 (Paint tab and sculpt tools were
-  disabled without a selection; invisible sliders). OF-5 waits for shots. Shots still owed by the owner: X-ray with two objects,
-  Paint/Color/Material, Merge.
+  yet**. All committed: OF-1 floor numbers `6fbb5b7`; OF-1 resize view and
+  OF-3 `53a45f1`; OF-4 hover `8797405`; OF-6 wireframe `fc70679`; OF-9 Merge
+  color `38d6437`; OF-2 shadow and reflection `f7e19aa`; OF-7/OF-8
+  `89c1e6f`. Cause of OF-7/OF-8: the Paint tab and the sculpt tools were
+  disabled whenever nothing was selected, and every slider was invisible.
+  Details, known limits and lessons are in the batch summary at the end of
+  the feedback file. Open: OF-5 (waits for shots), face/region painting, a
+  comparison with Blender's brushes, the shadow and reflection on the CPU
+  fallback, and Merge of more than two objects. Shots still owed by the
+  owner: X-ray with two objects, Paint/Color/Material, Merge.
 - Review harness: `BUILDER3D_REVIEW_CAMERA=yaw,pitch,distance` poses the
   camera after auto-framing; state `resize-drag` holds the +X handle mid-drag;
   `BUILDER3D_REVIEW_POINTER=x,y` rests the pointer to show hover states;
