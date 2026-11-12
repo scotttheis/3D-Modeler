@@ -1,0 +1,76 @@
+﻿[
+    {
+        "value":  [
+                      {
+                          "value":  [
+                                        {
+                                            "Handle":  63899796,
+                                            "Title":  "Builder3D - settle-1-before.3dp",
+                                            "ClientWidth":  1280,
+                                            "ClientHeight":  840,
+                                            "ScreenX":  320,
+                                            "ScreenY":  343,
+                                            "Dpi":  96,
+                                            "Path":  "E:\\Builder3D-Rust\\evidence\\rebuild\\rb-04-scene-and-precise-transforms\\captures\\rust-dark-settle-1-before.png",
+                                            "Sha256":  "c0b44b906118ae2abced137f7183ed8309a2e3bdca54a6592a77483b661804fd",
+                                            "Theme":  "dark",
+                                            "Action":  "settle-1-before",
+                                            "Fixture":  "E:/Builder3D-Rust/evidence/rebuild/rb-04-scene-and-precise-transforms/settle-1-before.3dp",
+                                            "CapturedAt":  "2026-10-31T21:35:46.0853987-06:00",
+                                            "BuildSha256":  "3f84eb8c288f6db21107763ad289c4b9874bed5312f339ad679a18bd0df705cf"
+                                        },
+                                        {
+                                            "Handle":  63899796,
+                                            "Title":  "Builder3D - settle-1-before.3dp *",
+                                            "ClientWidth":  1280,
+                                            "ClientHeight":  840,
+                                            "ScreenX":  320,
+                                            "ScreenY":  343,
+                                            "Dpi":  96,
+                                            "Path":  "E:\\Builder3D-Rust\\evidence\\rebuild\\rb-04-scene-and-precise-transforms\\captures\\rust-dark-settle-1-after.png",
+                                            "Sha256":  "17cd6b0eefe1b2f8550287a1e032498eb8f322a99e16daa7b6e231092e734ec2",
+                                            "Theme":  "dark",
+                                            "Action":  "settle-1-after",
+                                            "Fixture":  "E:/Builder3D-Rust/evidence/rebuild/rb-04-scene-and-precise-transforms/settle-1-before.3dp",
+                                            "CapturedAt":  "2026-10-31T21:35:47.3819243-06:00",
+                                            "BuildSha256":  "3f84eb8c288f6db21107763ad289c4b9874bed5312f339ad679a18bd0df705cf"
+                                        }
+                                    ],
+                          "Count":  2
+                      },
+                      {
+                          "Handle":  63899796,
+                          "Title":  "Builder3D - settle-1-before.3dp",
+                          "ClientWidth":  1280,
+                          "ClientHeight":  840,
+                          "ScreenX":  320,
+                          "ScreenY":  343,
+                          "Dpi":  96,
+                          "Path":  "E:\\Builder3D-Rust\\evidence\\rebuild\\rb-04-scene-and-precise-transforms\\captures\\rust-dark-settle-1-undo.png",
+                          "Sha256":  "9bff7b0525acfa08039ec8767f694a2bb3d5446213e26245478b04f31ccf0e24",
+                          "Theme":  "dark",
+                          "Action":  "settle-1-undo",
+                          "Fixture":  "E:/Builder3D-Rust/evidence/rebuild/rb-04-scene-and-precise-transforms/settle-1-before.3dp",
+                          "CapturedAt":  "2026-10-31T21:35:48.3794787-06:00",
+                          "BuildSha256":  "3f84eb8c288f6db21107763ad289c4b9874bed5312f339ad679a18bd0df705cf"
+                      }
+                  ],
+        "Count":  2
+    },
+    {
+        "Handle":  63899796,
+        "Title":  "Builder3D - settle-1-before.3dp *",
+        "ClientWidth":  1280,
+        "ClientHeight":  840,
+        "ScreenX":  320,
+        "ScreenY":  343,
+        "Dpi":  96,
+        "Path":  "E:\\Builder3D-Rust\\evidence\\rebuild\\rb-04-scene-and-precise-transforms\\captures\\rust-dark-settle-1-redo.png",
+        "Sha256":  "ab01125e1ad4708d7219344066e8ef7c93ab7099a9c7fc6593dd4aed0ed18010",
+        "Theme":  "dark",
+        "Action":  "settle-1-redo",
+        "Fixture":  "E:/Builder3D-Rust/evidence/rebuild/rb-04-scene-and-precise-transforms/settle-1-before.3dp",
+        "CapturedAt":  "2026-10-31T21:35:49.3284822-06:00",
+        "BuildSha256":  "3f84eb8c288f6db21107763ad289c4b9874bed5312f339ad679a18bd0df705cf"
+    }
+]

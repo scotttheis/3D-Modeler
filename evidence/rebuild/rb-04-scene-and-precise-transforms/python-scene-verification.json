@@ -1,0 +1,608 @@
+{
+  "complete": true,
+  "frames": 238,
+  "cases": 74,
+  "verified": [
+    {
+      "theme": "light",
+      "case": "row-toggle",
+      "history_delta": 0,
+      "selected_after": [
+        0,
+        1
+      ]
+    },
+    {
+      "theme": "light",
+      "case": "ctrl-toggle",
+      "history_delta": 0,
+      "selected_after": []
+    },
+    {
+      "theme": "light",
+      "case": "shift-range",
+      "history_delta": 0,
+      "selected_after": [
+        0,
+        2
+      ]
+    },
+    {
+      "theme": "light",
+      "case": "select-all",
+      "history_delta": 0,
+      "selected_after": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "theme": "light",
+      "case": "deselect-all",
+      "history_delta": 0,
+      "selected_after": []
+    },
+    {
+      "theme": "light",
+      "case": "invert",
+      "history_delta": 0,
+      "selected_after": [
+        1,
+        2
+      ]
+    },
+    {
+      "theme": "light",
+      "case": "sticky-empty",
+      "history_delta": 0,
+      "selected_after": [
+        0
+      ]
+    },
+    {
+      "theme": "light",
+      "case": "empty-clear",
+      "history_delta": 0,
+      "selected_after": []
+    },
+    {
+      "theme": "light",
+      "case": "ctrl-empty",
+      "history_delta": 0,
+      "selected_after": [
+        0
+      ]
+    },
+    {
+      "theme": "light",
+      "case": "duplicate",
+      "history_delta": 1,
+      "selected_after": [
+        3
+      ]
+    },
+    {
+      "theme": "light",
+      "case": "copy",
+      "history_delta": 0,
+      "selected_after": [
+        0
+      ]
+    },
+    {
+      "theme": "light",
+      "case": "paste-other-selection",
+      "history_delta": 1,
+      "selected_after": [
+        3
+      ]
+    },
+    {
+      "theme": "light",
+      "case": "cut",
+      "history_delta": 1,
+      "selected_after": []
+    },
+    {
+      "theme": "light",
+      "case": "delete",
+      "history_delta": 1,
+      "selected_after": []
+    },
+    {
+      "theme": "light",
+      "case": "group",
+      "history_delta": 1,
+      "selected_after": [
+        1
+      ]
+    },
+    {
+      "theme": "light",
+      "case": "ungroup",
+      "history_delta": 1,
+      "selected_after": []
+    },
+    {
+      "theme": "light",
+      "case": "move-mm",
+      "history_delta": 1,
+      "selected_after": [
+        0
+      ]
+    },
+    {
+      "theme": "light",
+      "case": "move-inch",
+      "history_delta": 1,
+      "selected_after": [
+        0
+      ]
+    },
+    {
+      "theme": "light",
+      "case": "rotate-degree",
+      "history_delta": 1,
+      "selected_after": [
+        0
+      ]
+    },
+    {
+      "theme": "light",
+      "case": "resize-inch",
+      "history_delta": 1,
+      "selected_after": [
+        0
+      ]
+    },
+    {
+      "theme": "light",
+      "case": "resize-locked-inch",
+      "history_delta": 1,
+      "selected_after": [
+        0
+      ]
+    },
+    {
+      "theme": "light",
+      "case": "multi-move-inch",
+      "history_delta": 1,
+      "selected_after": [
+        0,
+        1
+      ]
+    },
+    {
+      "theme": "light",
+      "case": "multi-rotate",
+      "history_delta": 1,
+      "selected_after": [
+        0,
+        1
+      ]
+    },
+    {
+      "theme": "light",
+      "case": "multi-resize-locked",
+      "history_delta": 1,
+      "selected_after": [
+        0,
+        1
+      ]
+    },
+    {
+      "theme": "light",
+      "case": "delete-text-focus",
+      "history_delta": 0,
+      "selected_after": [
+        0
+      ]
+    },
+    {
+      "theme": "light",
+      "case": "numeric-invalid",
+      "history_delta": 0,
+      "selected_after": [
+        0
+      ]
+    },
+    {
+      "theme": "light",
+      "case": "units-only",
+      "history_delta": 0,
+      "selected_after": [
+        0
+      ]
+    },
+    {
+      "theme": "light",
+      "case": "rename-reference",
+      "history_delta": 0,
+      "selected_after": [
+        0
+      ]
+    },
+    {
+      "theme": "light",
+      "case": "visibility-reference",
+      "history_delta": 0,
+      "selected_after": [
+        0,
+        1
+      ]
+    },
+    {
+      "theme": "light",
+      "case": "mirror-y",
+      "history_delta": 1,
+      "selected_after": [
+        0,
+        1
+      ]
+    },
+    {
+      "theme": "light",
+      "case": "align-z-max",
+      "history_delta": 1,
+      "selected_after": [
+        0,
+        1
+      ]
+    },
+    {
+      "theme": "light",
+      "case": "arrange-z-gap5",
+      "history_delta": 1,
+      "selected_after": [
+        0,
+        1
+      ]
+    },
+    {
+      "theme": "light",
+      "case": "mirror-cancel",
+      "history_delta": 0,
+      "selected_after": [
+        0,
+        1
+      ]
+    },
+    {
+      "theme": "light",
+      "case": "arrange-invalid-cancel",
+      "history_delta": 0,
+      "selected_after": [
+        0,
+        1
+      ]
+    },
+    {
+      "theme": "light",
+      "case": "measure",
+      "history_delta": 0,
+      "selected_after": [
+        0,
+        1
+      ]
+    },
+    {
+      "theme": "light",
+      "case": "health-warning",
+      "history_delta": 0,
+      "selected_after": [
+        0
+      ]
+    },
+    {
+      "theme": "light",
+      "case": "health-repair",
+      "history_delta": 1,
+      "selected_after": [
+        0
+      ]
+    },
+    {
+      "theme": "dark",
+      "case": "row-toggle",
+      "history_delta": 0,
+      "selected_after": [
+        0,
+        1
+      ]
+    },
+    {
+      "theme": "dark",
+      "case": "ctrl-toggle",
+      "history_delta": 0,
+      "selected_after": []
+    },
+    {
+      "theme": "dark",
+      "case": "shift-range",
+      "history_delta": 0,
+      "selected_after": [
+        0,
+        2
+      ]
+    },
+    {
+      "theme": "dark",
+      "case": "select-all",
+      "history_delta": 0,
+      "selected_after": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "theme": "dark",
+      "case": "deselect-all",
+      "history_delta": 0,
+      "selected_after": []
+    },
+    {
+      "theme": "dark",
+      "case": "invert",
+      "history_delta": 0,
+      "selected_after": [
+        1,
+        2
+      ]
+    },
+    {
+      "theme": "dark",
+      "case": "sticky-empty",
+      "history_delta": 0,
+      "selected_after": [
+        0
+      ]
+    },
+    {
+      "theme": "dark",
+      "case": "empty-clear",
+      "history_delta": 0,
+      "selected_after": []
+    },
+    {
+      "theme": "dark",
+      "case": "ctrl-empty",
+      "history_delta": 0,
+      "selected_after": [
+        0
+      ]
+    },
+    {
+      "theme": "dark",
+      "case": "duplicate",
+      "history_delta": 1,
+      "selected_after": [
+        3
+      ]
+    },
+    {
+      "theme": "dark",
+      "case": "copy",
+      "history_delta": 0,
+      "selected_after": [
+        0
+      ]
+    },
+    {
+      "theme": "dark",
+      "case": "paste-other-selection",
+      "history_delta": 1,
+      "selected_after": [
+        3
+      ]
+    },
+    {
+      "theme": "dark",
+      "case": "cut",
+      "history_delta": 1,
+      "selected_after": []
+    },
+    {
+      "theme": "dark",
+      "case": "delete",
+      "history_delta": 1,
+      "selected_after": []
+    },
+    {
+      "theme": "dark",
+      "case": "group",
+      "history_delta": 1,
+      "selected_after": [
+        1
+      ]
+    },
+    {
+      "theme": "dark",
+      "case": "ungroup",
+      "history_delta": 1,
+      "selected_after": []
+    },
+    {
+      "theme": "dark",
+      "case": "move-mm",
+      "history_delta": 1,
+      "selected_after": [
+        0
+      ]
+    },
+    {
+      "theme": "dark",
+      "case": "move-inch",
+      "history_delta": 1,
+      "selected_after": [
+        0
+      ]
+    },
+    {
+      "theme": "dark",
+      "case": "rotate-degree",
+      "history_delta": 1,
+      "selected_after": [
+        0
+      ]
+    },
+    {
+      "theme": "dark",
+      "case": "resize-inch",
+      "history_delta": 1,
+      "selected_after": [
+        0
+      ]
+    },
+    {
+      "theme": "dark",
+      "case": "resize-locked-inch",
+      "history_delta": 1,
+      "selected_after": [
+        0
+      ]
+    },
+    {
+      "theme": "dark",
+      "case": "multi-move-inch",
+      "history_delta": 1,
+      "selected_after": [
+        0,
+        1
+      ]
+    },
+    {
+      "theme": "dark",
+      "case": "multi-rotate",
+      "history_delta": 1,
+      "selected_after": [
+        0,
+        1
+      ]
+    },
+    {
+      "theme": "dark",
+      "case": "multi-resize-locked",
+      "history_delta": 1,
+      "selected_after": [
+        0,
+        1
+      ]
+    },
+    {
+      "theme": "dark",
+      "case": "delete-text-focus",
+      "history_delta": 0,
+      "selected_after": [
+        0
+      ]
+    },
+    {
+      "theme": "dark",
+      "case": "numeric-invalid",
+      "history_delta": 0,
+      "selected_after": [
+        0
+      ]
+    },
+    {
+      "theme": "dark",
+      "case": "units-only",
+      "history_delta": 0,
+      "selected_after": [
+        0
+      ]
+    },
+    {
+      "theme": "dark",
+      "case": "rename-reference",
+      "history_delta": 0,
+      "selected_after": [
+        0
+      ]
+    },
+    {
+      "theme": "dark",
+      "case": "visibility-reference",
+      "history_delta": 0,
+      "selected_after": [
+        0,
+        1
+      ]
+    },
+    {
+      "theme": "dark",
+      "case": "mirror-y",
+      "history_delta": 1,
+      "selected_after": [
+        0,
+        1
+      ]
+    },
+    {
+      "theme": "dark",
+      "case": "align-z-max",
+      "history_delta": 1,
+      "selected_after": [
+        0,
+        1
+      ]
+    },
+    {
+      "theme": "dark",
+      "case": "arrange-z-gap5",
+      "history_delta": 1,
+      "selected_after": [
+        0,
+        1
+      ]
+    },
+    {
+      "theme": "dark",
+      "case": "mirror-cancel",
+      "history_delta": 0,
+      "selected_after": [
+        0,
+        1
+      ]
+    },
+    {
+      "theme": "dark",
+      "case": "arrange-invalid-cancel",
+      "history_delta": 0,
+      "selected_after": [
+        0,
+        1
+      ]
+    },
+    {
+      "theme": "dark",
+      "case": "measure",
+      "history_delta": 0,
+      "selected_after": [
+        0,
+        1
+      ]
+    },
+    {
+      "theme": "dark",
+      "case": "health-warning",
+      "history_delta": 0,
+      "selected_after": [
+        0
+      ]
+    },
+    {
+      "theme": "dark",
+      "case": "health-repair",
+      "history_delta": 1,
+      "selected_after": [
+        0
+      ]
+    }
+  ],
+  "python_tree_read_only": true,
+  "route": "Visible Qt/OpenGL; actual widget/handler routes and Qt input. All native source dialogs and repair reports captured. Naming/visibility prepared directly; hidden multi-lock widget state is explicit.",
+  "source_shift_observation": "MultiSelection Shift-click toggles endpoint [0,2]; Rust explicit handoff range is [0,1,2]."
+}

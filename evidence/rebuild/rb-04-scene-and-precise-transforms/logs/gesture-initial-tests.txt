@@ -1,0 +1,128 @@
+   Compiling builder3d-core v0.1.0 (E:\Builder3D-Rust\crates\builder3d-core)
+   Compiling builder3d-viewport v0.1.0 (E:\Builder3D-Rust\crates\builder3d-viewport)
+   Compiling builder3d-mcp v0.1.0 (E:\Builder3D-Rust\crates\builder3d-mcp)
+   Compiling builder3d-app v0.1.0 (E:\Builder3D-Rust\crates\builder3d-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 46.27s
+     Running unittests src\lib.rs (target\debug\deps\builder3d_app-289afea2fa319164.exe)
+
+running 104 tests
+test artwork::tests::theme_artwork_is_scoped_and_not_shared_raster_data ... ok
+test artwork::tests::both_theme_catalogs_validate_every_compact_asset ... ok
+test commands::rb04_gesture_tests::parallel_and_zero_radius_rotation_rays_preserve_preview ... ok
+test commands::tests::empty_selection_is_a_typed_error ... ok
+test commands::rb04_names::rename_preserves_identity_mesh_and_history_on_invalid_or_unchanged_names ... ok
+test commands::rb04_regressions::placement_uses_user_anchor_order_and_all_axes_without_selection_history ... ok
+test commands::rb04_measure_mirror::measure_reports_each_objects_width_depth_height_without_history ... ok
+test commands::rb04_measure_mirror::mirror_changes_local_column_and_matching_translation_component_after_rotation ... ok
+test commands::rb04_regressions::absolute_rotation_is_repeatable_and_resize_preserves_translation ... ok
+test commands::rb04_regressions::clipboard_offsets_ids_hidden_state_and_one_step_history_match_reference ... ok
+test commands::rb04_gesture_tests::cancelled_noop_stale_and_replaced_document_keep_scene_safe ... ok
+test commands::tests::core_backed_object_commands_change_state_without_shell_access ... ok
+test commands::rb04_scene_order::settle_and_measure_use_scene_order_after_reverse_click_selection ... ok
+test commands::tests::durable_id_move_survives_scene_reordering_and_has_one_undo_entry ... ok
+test commands::tests::authoritative_multimesh_imports_ignore_unit_override_and_undo_as_one_action ... ok
+test commands::rb04_gesture_tests::all_python_handles_axes_bases_groups_and_hidden_targets_match_122_oracles ... ok
+test commands::tests::dirty_marker_tracks_saved_checkpoint_through_undo_redo_and_branches ... ok
+test commands::tests::file_menu_keeps_shell_contract_and_no_removed_actions ... ok
+test commands::tests::import_unit_choices_match_reference_order_and_scale_factors ... ok
+test commands::tests::paste_enablement_follows_clipboard_not_selection ... ok
+test commands::tests::model_import_is_atomic_selected_and_undoable ... ok
+test commands::tests::primitive_command_changes_scene_and_selection ... ok
+test commands::tests::ribbon_matches_reference_tab_and_command_order ... ok
+test commands::tests::unit_override_scales_import_before_reference_placement ... ok
+test commands::tests::unsupported_import_does_not_change_scene ... ok
+test commands::tests::python_stl_obj_and_ply_imports_keep_names_geometry_and_vertex_colors ... ok
+test commands::tests::view_commands_are_typed_state_changes ... ok
+test dialogs::tests::cancelling_native_import_browse_preserves_the_typed_path ... ok
+test dialogs::tests::dialog_defaults_are_bounded_and_typed ... ok
+test dialogs::tests::export_path_keeps_explicit_format_and_defaults_extensionless_names_to_stl ... ok
+test dialogs::tests::native_file_picker_selection_updates_path_without_changing_cancellation ... ok
+test export::tests::unsupported_export_extension_is_typed_before_writing ... ok
+test image_color::tests::unsupported_or_missing_paths_return_typed_errors ... ok
+test launchers::tests::fixed_launchers_are_native_and_bounded ... ok
+test commands::tests::unitless_stl_import_uses_each_reference_scale_once ... ok
+test launchers::tests::launcher_sources_keep_arguments_as_vectors ... ok
+test commands::tests::selection_modifiers_and_visibility_are_presentation_and_model_seams ... ok
+test numeric_controls::tests::angle_and_scale_parsers_keep_units_explicit ... ok
+test numeric_controls::tests::distance_parser_accepts_suffixes_and_rejects_bad_values ... ok
+test image_color::tests::sample_step_and_encoded_size_are_bounded ... ok
+test image_color::tests::average_color_matches_reference_ppm_sampling ... ok
+test numeric_controls::tests::selection_excludes_numeric_suffix ... ok
+test operations::tests::busy_and_cancellation_are_cooperative_and_idempotent ... ok
+test operations::tests::failure_and_history_are_bounded ... ok
+test operations::tests::lifecycle_reports_progress_and_terminal_result ... ok
+test packaging::tests::archive_and_installed_limits_are_explicit ... ok
+test packaging::tests::installer_templates_are_bounded_and_native ... ok
+test preferences::tests::import_unit_policy_preserves_authoritative_formats ... ok
+test commands::tests::project_paths_enforce_format_and_save_as_adds_the_default_extension ... ok
+test commands::tests::millimetre_import_move_and_project_reopen_preserve_identity_and_geometry ... ok
+test preferences::tests::persisted_micrometre_spellings_deserialize_without_changing_the_schema ... FAILED
+test preferences::tests::recent_files_are_newest_first_deduplicated_and_bounded ... ok
+test preferences::tests::ribbon_preferences_remove_duplicates_and_keep_display_units_separate ... ok
+test preferences::tests::malformed_preferences_are_typed_errors ... ok
+test print_prep::tests::bed_fit_reports_world_bounds_and_surface_warning ... ok
+test commands::tests::selection_commands_cover_group_cut_and_non_history_selection ... ok
+test print_prep::tests::invalid_bed_size_is_rejected_before_checks ... ok
+test print_prep::tests::clean_cube_has_no_print_findings ... ok
+test print_prep::tests::scale_and_hidden_checks_match_reference_severity ... ok
+test preferences::tests::preferences_round_trip_and_normalize_persisted_bounds ... ok
+test shell::tests::clipboard_enables_paste_without_requiring_a_current_selection ... ok
+test shell::tests::default_shell_starts_on_a_safe_welcome_surface ... ok
+test rotation::tests::absolute_rotation_matches_python_scale_shear_reflection_and_gimbal_oracles ... ok
+test shell::tests::disabled_command_policy_requires_the_relevant_selection ... ok
+test shell::tests::dirty_exit_guard_cancel_and_discard_match_file_menu_and_window_close ... ok
+test commands::tests::failed_supported_and_unsupported_imports_preserve_live_state ... ok
+test recent_preview::tests::missing_corrupt_and_unsupported_recents_keep_the_icon_fallback ... ok
+test print_handoff::tests::prepare_print_rejects_empty_visible_scene ... ok
+test shell::tests::dispatch_moves_to_scene_without_putting_model_logic_in_the_shell ... ok
+test shell::tests::physical_viewport_mapping_tracks_scale_and_client_coordinates ... ok
+test shell::tests::recent_grid_allocates_a_visible_width_for_every_column ... ok
+test shell::tests::dirty_new_guard_covers_cancel_discard_and_save_as ... ok
+test shell::tests::gizmo_release_commits_once_and_cancel_or_noop_keeps_history ... ok
+test shell::tests::opening_a_missing_recent_removes_and_persists_it_without_scene_changes ... ok
+test shell::tests::failed_recent_project_and_wrl_import_preserve_scene_and_recent_state ... ok
+test recent_preview::tests::raster_recent_and_embedded_image_payloads_are_bounded_and_padded ... ok
+test signals::tests::typed_signal_emits_in_connection_order_and_disconnects_by_handle ... ok
+test shell::tests::recent_project_and_model_dispatch_persist_across_app_restart ... ok
+test shell::tests::failed_save_keeps_the_confirmation_and_dirty_scene_open ... ok
+test theme::tests::style_guide_light_palette_is_stable ... ok
+test transforms::tests::align_and_arrange_use_world_bounds ... ok
+test transforms::rb04_placement_oracle::settle_single_and_group_match_python_convex_hull_cases ... ok
+test transforms::tests::group_translation_is_atomic_and_undoable ... ok
+test transforms::tests::combined_position_and_size_is_one_history_entry ... ok
+test print_handoff::tests::prepare_print_uses_individual_stl_for_bambu ... ok
+test transforms::tests::numeric_position_and_size_updates_are_undoable ... ok
+test ui_state::tests::favorites_drop_stale_duplicates_and_support_reordering ... ok
+test transforms::tests::settle_uses_y_as_the_build_axis_and_mirror_is_one_history_entry ... ok
+test ui_state::tests::tab_order_fills_missing_commands_without_stale_entries ... ok
+test view_state::tests::empty_scene_frame_is_a_stable_noop ... ok
+test view_state::tests::frame_selected_and_empty_selection_fallback_use_world_bounds ... ok
+test view_state::tests::state_updates_and_presets_keep_camera_bounds ... ok
+test commands::tests::torus_and_shell_dialog_actions_have_real_core_paths ... ok
+test commands::tests::failed_project_open_and_save_preserve_scene_path_dirty_state_and_history ... ok
+test print_handoff::tests::prepare_print_stages_visible_objects_as_one_3mf ... ok
+test ui_state::tests::recent_paths_have_bounded_missing_and_unsupported_fallbacks ... ok
+test shell::tests::typed_export_overwrite_cancel_preserves_destination_and_scene_state ... ok
+test shell::tests::viewport_router_applies_camera_gestures_and_honors_capture ... ok
+test recent_preview::tests::project_and_all_importable_model_formats_produce_mesh_previews ... ok
+test shell::tests::dirty_project_open_supports_cancel_discard_and_save_as ... ok
+test export::tests::export_selection_and_visibility_matrix_matches_reference ... ok
+test commands::tests::export_success_and_failure_preserve_scene_project_dirty_selection_history_and_recents ... ok
+test shell::tests::typed_save_as_overwrite_cancel_keeps_the_existing_project_and_live_scene ... ok
+test export::tests::each_reference_export_reopens_with_world_geometry_and_supported_colors ... ok
+
+failures:
+
+---- preferences::tests::persisted_micrometre_spellings_deserialize_without_changing_the_schema stdout ----
+
+thread 'preferences::tests::persisted_micrometre_spellings_deserialize_without_changing_the_schema' (30904) panicked at crates\builder3d-app\src\preferences.rs:502:47:
+micrometre alias should deserialize: Error("unknown variant `µm`, expected one of `Micrometre`, `um`, `Âµm`, `Î¼m`, `Millimetre`, `Centimetre`, `Metre`, `Inch`, `Foot`", line: 0, column: 0)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    preferences::tests::persisted_micrometre_spellings_deserialize_without_changing_the_schema
+
+test result: FAILED. 103 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.95s
+
+error: test failed, to rerun pass `-p builder3d-app --lib`

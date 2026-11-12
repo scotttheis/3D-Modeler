@@ -2,7 +2,7 @@
 
 | ID | Requirement | Live outcome | Evidence |
 |---|---|---|---|
-| RB09-CAT-01 | Preserve the fixed 60-tool catalog, order, profiles, schemas, and structured results. | Partial. Current Rust Release and saved Python catalogs have the same ordered names/counts in all four profiles; exact input and output schema matches are 0 in every profile. Schema differences are recorded and remain unresolved. The Python product was not launched for this current run. | currpair-20261106-072716/current-run-manifest.json; currpair-20261106-072716/schema-comparison.json; current client JSONL |
+| RB09-CAT-01 | Preserve the fixed 60-tool catalog, order, profiles, schemas, and structured results. | Schema criterion passes. The verified current Python reference and Rust Release match ordered names, every input/output JSON Schema, and official MCP annotations recursively in all four profiles (7/52/59/60). Python root extras are dropped and nested apply_actions.args extras rejected; Rust matches. Twenty-five successful live Release result envelopes passed full output-schema validation, including new_project and completed operation_status. One nested-extra apply_actions call returned the expected invalid_input. A custom emboss_text _meta.com.builder3d/longRunning flag still differs and is disclosed; full RB-09 acceptance remains open. | reference-current-20261107-084248/; currpair-20261107-093804-schema-parity/schema-property-diff-current.json; currpair-20261107-100537-schema-parity-final/logs/rust-release-schema-result-client-final.jsonl; currpair-20261107-100537-schema-parity-final/logs/rust-release-schema-result-validation-final.log; schema-parity-run-manifest.json |
 | RB09-DOC-02 | Read/edit the desktop’s current document and revision through the shared command/history owner. | Pass. Both clients observed project e5d81c5226e64f58b838d55d9395afa9, stable Cube/Sphere IDs, transforms, and geometry. Rust edit updated viewport and Items immediately after the presentation-sync repair. | logs/rb09-python-client.jsonl; logs/rb09-rust-client-2.jsonl; captures/rust-post-fix-mcp-edit.png |
 | RB09-HIST-03 | Preserve stable IDs; make edits one shared undo/redo step; no-op creates none. | Pass. Python no-op remained revision 4. Final Rust object 42b03db2996a4e79bdac9fba29af4033 survived GUI undo/redo at revisions 36/37 and MCP undo/redo at 38/39. | logs/rb09-rust-client-final-pair.jsonl; captures/rust-post-fix-final-history-*.png |
 | RB09-REV-04 | Reject stale project/revision commits and preserve replay under competing requests. | Pass. Same-key replay returned same object ID; changed arguments returned idempotency_conflict. Stale revisions and losing two-client race requests returned revision_conflict in both apps. | Python/Rust client logs; captures/python-light-mcp-race-edit.png |
@@ -19,13 +19,12 @@
 
 The post-repair full workspace suite passed 329/329. The app-focused MCP filter passed 7/7; focused MCP library and core external-commit tests passed 19/19 and 3/3; focused Python reference tests passed 12/12. Exact commands, logs, and tool caveats are in verification.md.
 
-The 2026-11-06 continuation did not change Rust application source. It exercised
-the current Rust Release desktop/MCP workflow and optional-MCP startup failure.
-The official Python MCP SDK was used only as a client to the Rust gateway; the
-Python product and its saved catalog snapshots were not refreshed. A separate
-schema comparison found no exact input/output schema matches for the saved
-Python reference snapshots, so the MCP catalog contract remains partially
-verified. The updated evidence validator was rerun and passed; Rust test suites
-were not rerun because no Rust source changed.
+The 2026-11-06 continuation exercised the current Rust Release desktop/MCP
+workflow and optional-MCP startup failure. The 2026-11-07 schema-parity repair
+used the official Python MCP SDK only for read-only current-reference catalog
+capture and as a client to Rust; it did not launch the Python product. Recursive
+schema/official-annotation parity and live successful result validation now
+pass. The exact current-reference evidence and full validation commands are in
+verification.md and schema-parity-run-manifest.json.
 
 The owner-reported interface and floor gaps remain open. Visual review, owner acceptance, and RB-08’s native matrix/completion snapshot remain pending. RB-10 has not started.

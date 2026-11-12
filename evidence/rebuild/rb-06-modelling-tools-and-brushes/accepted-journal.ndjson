@@ -1,0 +1,4 @@
+{"kind":"python-reference","slice":"RB-06","records":6,"light_records":3,"dark_records":3,"source":"python-native-results.json","status":"accepted"}
+{"kind":"rust-native","slice":"RB-06","theme":"light","records":36,"source":"rust-native-results.json","journal":"rust-native-captures.ndjson","build_sha256":"82284b6fd85221df3a804790cafb1171c469c5cb614460cb73199068ac551d14","status":"accepted"}
+{"kind":"rust-native","slice":"RB-06","theme":"dark","records":36,"source":"rust-native-results.json","journal":"rust-native-captures.ndjson","build_sha256":"82284b6fd85221df3a804790cafb1171c469c5cb614460cb73199068ac551d14","status":"accepted"}
+{"kind":"image-integrity","slice":"RB-06","accepted_pngs":78,"client_size":[1280,840],"dpi":96,"themes":["light","dark"],"status":"accepted"}

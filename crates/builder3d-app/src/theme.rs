@@ -162,7 +162,9 @@ impl ThemePalette {
             pressed: Color32::from_rgb(0x1A, 0x4B, 0x82),
             navigation: Color32::from_rgb(0x15, 0x31, 0x55),
             navigation_hover: Color32::from_rgb(0x12, 0x31, 0x5C),
-            viewport: Color32::from_rgb(0x07, 0x10, 0x24),
+            // Keep the modelling canvas neutral in both shell themes so the
+            // checkered build floor can fade into one consistent background.
+            viewport: Color32::from_rgb(0xF0, 0xF0, 0xF0),
             grid: Color32::from_rgba_unmultiplied(0x40, 0xB8, 0xDB, 0x1F),
         }
     }
@@ -215,7 +217,42 @@ pub fn apply(ctx: &Context, mode: ThemeMode) {
     visuals.widgets.active.fg_stroke.color = palette.accent_dark;
     visuals.widgets.open.bg_fill = palette.surface_raised;
     visuals.widgets.open.fg_stroke.color = palette.text;
+    // One control language: every state shares a radius, and resting controls
+    // carry a hairline outline so fields and buttons read as controls instead
+    // of loose text on the panel.
+    let control_radius = eframe::egui::CornerRadius::same(6);
+    for widget in [
+        &mut visuals.widgets.noninteractive,
+        &mut visuals.widgets.inactive,
+        &mut visuals.widgets.hovered,
+        &mut visuals.widgets.active,
+        &mut visuals.widgets.open,
+    ] {
+        widget.corner_radius = control_radius;
+    }
+    visuals.widgets.inactive.bg_stroke = eframe::egui::Stroke::new(1.0, palette.border);
+    visuals.widgets.hovered.bg_stroke = eframe::egui::Stroke::new(1.0, palette.accent_border);
+    visuals.widgets.active.bg_stroke = eframe::egui::Stroke::new(1.0, palette.accent);
+    visuals.widgets.open.bg_stroke = eframe::egui::Stroke::new(1.0, palette.accent_border);
+    visuals.selection.stroke.width = 1.0;
+    visuals.popup_shadow = floating_shadow(mode);
+    visuals.window_shadow = floating_shadow(mode);
     ctx.set_visuals(visuals);
+}
+
+/// Elevation for surfaces that float above the workspace: menus, dialogs,
+/// and the transform strip. Dark surfaces need a denser shadow to separate.
+#[must_use]
+pub fn floating_shadow(mode: ThemeMode) -> eframe::egui::Shadow {
+    eframe::egui::Shadow {
+        offset: [0, 6],
+        blur: 22,
+        spread: 0,
+        color: match mode {
+            ThemeMode::Light => Color32::from_black_alpha(46),
+            ThemeMode::Dark => Color32::from_black_alpha(120),
+        },
+    }
 }
 
 /// Configures the native platform UI font and reference control typography.

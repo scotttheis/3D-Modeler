@@ -220,11 +220,21 @@ impl ServerHandler for R4Gateway {
                 )
                 .into());
             }
+            let output_name = name.clone();
             let result =
                 tokio::task::spawn_blocking(move || gateway.call_desktop(&name, &arguments)).await;
             match result {
                 Ok(Ok(reply)) if reply.ok => match reply.result {
-                    Some(value) => Ok(CallToolResult::structured(value).into()),
+                    Some(value) => match schema::validate_result(&output_name, &value) {
+                        Ok(()) => Ok(CallToolResult::structured(value).into()),
+                        Err(message) => Ok(CallToolResult::structured_error(
+                            AdapterError::Internal(format!(
+                                "desktop tool {output_name} returned a value outside its declared output schema: {message}"
+                            ))
+                            .to_value(),
+                        )
+                        .into()),
+                    },
                     None => {
                         Ok(CallToolResult::structured_error(unavailable_error().to_value()).into())
                     }

@@ -1,0 +1,13 @@
+{
+  "recorded_at": "2026-10-31T21:30:05.447036-06:00",
+  "foreground_handle": 55378636,
+  "desktop_available": true,
+  "input_sent": false,
+  "capture_taken": false,
+  "outstanding": [
+    "Settle single/group before/after/undo/redo in both themes",
+    "Final-code Move/Rotate/Resize pointer paths, opposite-face anchor, both bases and grouped/hidden cases",
+    "Final-code matched numeric/units/lock, selection modifiers/sticky, text focus, invalid/cancel, health and visibility appearance",
+    "Full-size matched visual review; owner acceptance remains pending"
+  ]
+}

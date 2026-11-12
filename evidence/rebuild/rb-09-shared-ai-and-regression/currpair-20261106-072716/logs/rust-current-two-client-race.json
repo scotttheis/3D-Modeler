@@ -1,0 +1,47 @@
+{
+  "client": "official Python MCP SDK",
+  "expected_scene_revision": 29,
+  "object_id": "e29cf0b003a04e398b1940be51744045",
+  "project_id": "e5d81c5226e64f58b838d55d9395afa9",
+  "results": [
+    {
+      "client": "A",
+      "content": [
+        {
+          "text": "{\"code\":\"revision_conflict\",\"details\":{},\"message\":\"revision conflict: expected scene revision 29, current revision is 30\",\"retryable\":true}",
+          "type": "text"
+        }
+      ],
+      "is_error": true,
+      "structured_content": {
+        "code": "revision_conflict",
+        "details": {},
+        "message": "revision conflict: expected scene revision 29, current revision is 30",
+        "retryable": true
+      }
+    },
+    {
+      "client": "B",
+      "content": [
+        {
+          "text": "{\"action\":\"set_color\",\"affected_object_ids\":[\"e29cf0b003a04e398b1940be51744045\"],\"changed\":true,\"history_state_id\":3,\"index\":2,\"object_id\":\"e29cf0b003a04e398b1940be51744045\",\"scene_revision\":30}",
+          "type": "text"
+        }
+      ],
+      "is_error": false,
+      "structured_content": {
+        "action": "set_color",
+        "affected_object_ids": [
+          "e29cf0b003a04e398b1940be51744045"
+        ],
+        "changed": true,
+        "history_state_id": 3,
+        "index": 2,
+        "object_id": "e29cf0b003a04e398b1940be51744045",
+        "scene_revision": 30
+      }
+    }
+  ],
+  "timestamp_utc": "2026-11-06T14:48:31.329663+00:00",
+  "tool_count": 60
+}

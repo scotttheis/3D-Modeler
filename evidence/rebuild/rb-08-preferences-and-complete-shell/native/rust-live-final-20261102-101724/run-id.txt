@@ -1,0 +1,8 @@
+﻿run=rust-live-final-20261102-101724
+launch_local=2026-11-02T10:26:02-07:00
+pid=27176
+exe=target/release/builder3d-app.exe
+exe_sha256=db406708cf19efe9ed62c3c53d02684dc49c4458d44c59bd940e6bc45ca81f75
+local_app_data=E:\Builder3D-Rust\evidence\rebuild\rb-08-preferences-and-complete-shell\native\rust-live-final-20261102-101724\runtime
+first_foreground_owner=LockApp:9808
+first_capture=diagnostic-only; lock-screen-occluded

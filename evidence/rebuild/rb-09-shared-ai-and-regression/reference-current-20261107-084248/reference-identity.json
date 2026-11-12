@@ -1,0 +1,169 @@
+{
+    "captured_local":  "2026-11-07T08:44:28.9386810-07:00",
+    "designated_reference":  "L:\\Builder3D",
+    "designated_by":  "E:\\AGENTS.md and E:\\Builder3D-Rust\\AGENTS.md",
+    "git_branch":  "main",
+    "git_head":  "3a0160a95c55f68ce9f1e89d17c792816ac001df",
+    "git_worktree_dirty":  true,
+    "git_status_record_count":  223,
+    "git_status_sha256":  "042d4cc00e5192968895f203eb12b96ab565cf9f46492899efc8c523a475ca22",
+    "runtime_python":  "3.12.10",
+    "runtime_environment":  "L:\\Builder3D\\venv",
+    "mcp_sdk_dist_info":  "mcp-2.2.0.dist-info",
+    "current_mcp_processes":  [
+                                  {
+                                      "pid":  32156,
+                                      "parent_pid":  11832,
+                                      "name":  "cmd.exe",
+                                      "command":  "L:\\Builder3D\\run_mcp_windows.bat",
+                                      "created_local":  "2026-11-07T08:35:00",
+                                      "role":  "OpenCode-launched MCP gateway wrapper"
+                                  },
+                                  {
+                                      "pid":  22300,
+                                      "parent_pid":  32156,
+                                      "name":  "python.exe",
+                                      "executable":  "L:\\Builder3D\\venv\\Scripts\\python.exe",
+                                      "command":  "L:\\Builder3D\\scripts\\builder3d_mcp.py",
+                                      "created_local":  "2026-11-07T08:35:00",
+                                      "role":  "project venv MCP gateway"
+                                  },
+                                  {
+                                      "pid":  13460,
+                                      "parent_pid":  22300,
+                                      "name":  "python.exe",
+                                      "executable":  "C:\\Users\\josiph\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+                                      "command":  "L:\\Builder3D\\scripts\\builder3d_mcp.py",
+                                      "created_local":  "2026-11-07T08:35:00",
+                                      "role":  "Python 3.12 runtime process"
+                                  }
+                              ],
+    "source_hashes":  [
+                          {
+                              "path":  "AGENTS.md",
+                              "bytes":  8578,
+                              "last_write":  "2026-10-28T22:32:28.0000000-06:00",
+                              "sha256":  "dc54be359e9df2ba7c7e3012dedf64385815e7ce60c7361251bef9d9a2609e68"
+                          },
+                          {
+                              "path":  "docs/ai-mcp.md",
+                              "bytes":  17769,
+                              "last_write":  "2026-10-20T11:47:28.0000000-06:00",
+                              "sha256":  "50d81df647368b569481253da35a0ff5b59162b149854b7cc93af3b001d3506b"
+                          },
+                          {
+                              "path":  "docs/mcp-modern-design.md",
+                              "bytes":  42235,
+                              "last_write":  "2026-10-20T11:48:16.0000000-06:00",
+                              "sha256":  "ba6b5ea91581bca1463b71b163a9b8b51c97e260dd90400319b275a2d8ad9889"
+                          },
+                          {
+                              "path":  "docs/architecture.md",
+                              "bytes":  5528,
+                              "last_write":  "2026-10-28T22:44:12.0000000-06:00",
+                              "sha256":  "895450c70f3c7cff4b1286100427117d23d3d116cae8008e7b59295ed98d4f70"
+                          },
+                          {
+                              "path":  "docs/testing.md",
+                              "bytes":  61161,
+                              "last_write":  "2026-10-28T22:33:34.0000000-06:00",
+                              "sha256":  "975dcf58c1968d442fdd213122d6d1aa6c58bc98cfaca4b40a48703bc5deb1aa"
+                          },
+                          {
+                              "path":  "docs/rust-rewrite.md",
+                              "bytes":  21711,
+                              "last_write":  "2026-10-30T09:49:02.0000000-06:00",
+                              "sha256":  "9fffe5b238947efc72f7221d4080b7e56c18b7f9651745dbd6aea86b8ac01834"
+                          },
+                          {
+                              "path":  "docs/project-format.md",
+                              "bytes":  2465,
+                              "last_write":  "2026-09-19T16:57:42.0000000-06:00",
+                              "sha256":  "2611721323a3ab57f957415f3340fa51f8d5cdc809aacb1f880f3d7482b9bb36"
+                          },
+                          {
+                              "path":  "scripts/builder3d_mcp.py",
+                              "bytes":  53080,
+                              "last_write":  "2026-09-28T08:02:52.0000000-06:00",
+                              "sha256":  "7dd9b935ee4ee7b498ee3e7e994067ba0dbbad6804d75fe0d7dae64d01923489"
+                          },
+                          {
+                              "path":  "scripts/mcp_catalog.py",
+                              "bytes":  14961,
+                              "last_write":  "2026-09-25T17:30:32.0000000-06:00",
+                              "sha256":  "a373a33b1d2640128d2b6ba05c75b5f4cfa7fad40a8e9e29067b9de8cfa6893a"
+                          },
+                          {
+                              "path":  "scripts/mcp_models.py",
+                              "bytes":  12873,
+                              "last_write":  "2026-09-28T13:03:04.0000000-06:00",
+                              "sha256":  "251a06d264434c872251156315155aefd6ebd4d4332952fcd7119a14616ef807"
+                          },
+                          {
+                              "path":  "src/ai_control.py",
+                              "bytes":  13810,
+                              "last_write":  "2026-09-15T17:42:46.0000000-06:00",
+                              "sha256":  "726b25260608836ebff84bb75b94d1c057a9a10c81c273590d1c95db22a76a0d"
+                          },
+                          {
+                              "path":  "src/ai_commands.py",
+                              "bytes":  64491,
+                              "last_write":  "2026-09-28T09:02:10.0000000-06:00",
+                              "sha256":  "33b337c11ef717b4f06f34b39572c0a0a15bde40493ce082dec523367b3d50b2"
+                          },
+                          {
+                              "path":  "src/ai_bridge.py",
+                              "bytes":  861,
+                              "last_write":  "2026-09-03T08:54:10.0000000-06:00",
+                              "sha256":  "20bbea8cd5b5d76831045b7b0b5d7cccbfed6ac6065f8fd07ace26a72c570715"
+                          },
+                          {
+                              "path":  "src/ai_qt_bridge.py",
+                              "bytes":  21200,
+                              "last_write":  "2026-09-19T20:39:52.0000000-06:00",
+                              "sha256":  "a75c17deff7cc1025be306a154901b78335e18e55c8cd29af8f1353584e1d261"
+                          },
+                          {
+                              "path":  "src/application_services.py",
+                              "bytes":  66858,
+                              "last_write":  "2026-09-28T09:02:56.0000000-06:00",
+                              "sha256":  "1c9724616ad20924a44a720176967c264fecd942622e04d37b548b9c332684d8"
+                          },
+                          {
+                              "path":  "src/operation_manager.py",
+                              "bytes":  8816,
+                              "last_write":  "2026-09-17T16:40:50.0000000-06:00",
+                              "sha256":  "c9c2316b6c3a2005a35f96262316f9be9867a0cf6a2162a0468d42de81ae7244"
+                          },
+                          {
+                              "path":  "src/project_io.py",
+                              "bytes":  21620,
+                              "last_write":  "2026-09-17T23:21:22.0000000-06:00",
+                              "sha256":  "bc14c4aff413372966a11e19b80e1c06d26c0fa45010310965c92797e395e9b7"
+                          },
+                          {
+                              "path":  "src/model_actions.py",
+                              "bytes":  5398,
+                              "last_write":  "2026-09-15T18:18:42.0000000-06:00",
+                              "sha256":  "c2f1d1f6dd702655c0a4292626257e005d100feed6be3898cc8d50eda0a028fc"
+                          },
+                          {
+                              "path":  "tests/test_mcp_catalog.py",
+                              "bytes":  4255,
+                              "last_write":  "2026-09-28T13:03:34.0000000-06:00",
+                              "sha256":  "b570d76524d4b0948bed7b0542e164842f9aec7c3138e15e1fdcccaef1d58193"
+                          },
+                          {
+                              "path":  "tests/test_mcp_sdk.py",
+                              "bytes":  19644,
+                              "last_write":  "2026-09-25T17:31:34.0000000-06:00",
+                              "sha256":  "f31a90a2179468ff010f7d68faa5ea67a21d79ad3081e5ce54dda4c41180a485"
+                          },
+                          {
+                              "path":  "requirements-lock.txt",
+                              "bytes":  1055,
+                              "last_write":  "2026-09-15T17:34:12.0000000-06:00",
+                              "sha256":  "9f7b5bc27943e2560dd3fb5887b099971fa4ea3c101bec6f461f381791898970"
+                          }
+                      ]
+}

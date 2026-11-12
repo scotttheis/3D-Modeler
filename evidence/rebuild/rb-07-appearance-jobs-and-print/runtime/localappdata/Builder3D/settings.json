@@ -1,0 +1,21 @@
+{
+  "default_import_unit": "Millimetre",
+  "recent_files": {
+    "paths": [
+      "E:\\Builder3D-Rust\\evidence\\rebuild\\rb-07-appearance-jobs-and-print\\fixtures\\slow-job-closed-cube.ply",
+      "E:\\Builder3D-Rust\\evidence\\rebuild\\rb-07-appearance-jobs-and-print\\fixtures\\authored-red-roundtrip.3mf"
+    ]
+  },
+  "ribbon_favorites": [
+    "Insert:Cube",
+    "Object:Duplicate",
+    "Object:Delete",
+    "View:Reset View"
+  ],
+  "ribbon_pinned": false,
+  "edit_ribbon_order": [],
+  "display_unit": "Millimetre",
+  "theme_mode": "Light",
+  "ribbon_orders": {},
+  "object_snapping_enabled": true
+}

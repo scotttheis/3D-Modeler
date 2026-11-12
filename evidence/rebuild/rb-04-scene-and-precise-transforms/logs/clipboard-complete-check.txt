@@ -1,0 +1,6 @@
+COMMAND: cargo check --workspace --locked
+    Checking builder3d-core v0.1.0 (E:\Builder3D-Rust\crates\builder3d-core)
+    Checking builder3d-viewport v0.1.0 (E:\Builder3D-Rust\crates\builder3d-viewport)
+    Checking builder3d-mcp v0.1.0 (E:\Builder3D-Rust\crates\builder3d-mcp)
+    Checking builder3d-app v0.1.0 (E:\Builder3D-Rust\crates\builder3d-app)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 5.49s

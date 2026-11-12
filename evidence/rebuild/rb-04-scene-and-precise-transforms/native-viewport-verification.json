@@ -1,0 +1,228 @@
+{
+  "verified": [
+    {
+      "theme": "light",
+      "case": "move-single",
+      "committed": true,
+      "stable_ids": true,
+      "exact_undo_redo": true,
+      "revision_before": 2,
+      "revision_after": 3,
+      "after_sha256": "b8552abaff35fac7238b4abed41c63852b51ad5e7fc61f32acab0f3fddd949b9"
+    },
+    {
+      "theme": "light",
+      "case": "move-hidden",
+      "committed": true,
+      "stable_ids": true,
+      "exact_undo_redo": true,
+      "revision_before": 8,
+      "revision_after": 9,
+      "after_sha256": "180629fe53bbf587b1be37221f536f8c601b15b033d9a53bd6a90211d08d5b2b"
+    },
+    {
+      "theme": "light",
+      "case": "move-group",
+      "committed": true,
+      "stable_ids": true,
+      "exact_undo_redo": true,
+      "revision_before": 15,
+      "revision_after": 16,
+      "after_sha256": "0c5e0a916af155b9737cd390344d106a73b4238302516603c7b711f1d529622c"
+    },
+    {
+      "theme": "light",
+      "case": "rotate-single",
+      "committed": true,
+      "stable_ids": true,
+      "exact_undo_redo": true,
+      "revision_before": 21,
+      "revision_after": 22,
+      "after_sha256": "36a854280f3dfab8f6aa6d2e78aa5866c6bef4434a3e5020657aea24585c97f8"
+    },
+    {
+      "theme": "light",
+      "case": "rotate-group",
+      "committed": true,
+      "stable_ids": true,
+      "exact_undo_redo": true,
+      "revision_before": 28,
+      "revision_after": 29,
+      "after_sha256": "9c0c31682c5fd42ee138e6e36153f8e9aa08af4783676a50898c906cfba11556"
+    },
+    {
+      "theme": "light",
+      "case": "resize-grid-face",
+      "committed": true,
+      "stable_ids": true,
+      "exact_undo_redo": true,
+      "revision_before": 34,
+      "revision_after": 35,
+      "after_sha256": "a613406d4b19eab07466d22f67d8bf29a08a43d6ad984d182631578e2bd5edbc"
+    },
+    {
+      "theme": "light",
+      "case": "resize-object-face",
+      "committed": true,
+      "stable_ids": true,
+      "exact_undo_redo": true,
+      "revision_before": 40,
+      "revision_after": 41,
+      "after_sha256": "2b740e59588c26dd202e4a9bee056fe3debaa8a7c0d3348adbace63da2300e41"
+    },
+    {
+      "theme": "light",
+      "case": "resize-corner",
+      "committed": true,
+      "stable_ids": true,
+      "exact_undo_redo": true,
+      "revision_before": 46,
+      "revision_after": 47,
+      "after_sha256": "1915bfa54b8de366f70752f16d493bf3287a80f51899c04cdd90047e4debf9c6"
+    },
+    {
+      "theme": "light",
+      "case": "move-noop",
+      "committed": false,
+      "stable_ids": true,
+      "exact_undo_redo": false,
+      "revision_before": 2,
+      "revision_after": 2,
+      "after_sha256": "d47646804966e16f731829e69997840c64c7c7a83329a91597a4f4887edca5ee"
+    },
+    {
+      "theme": "light",
+      "case": "move-cancel",
+      "committed": false,
+      "stable_ids": true,
+      "exact_undo_redo": false,
+      "revision_before": 5,
+      "revision_after": 5,
+      "after_sha256": "86e689e9031640f67a392f1c66dccc8fd234d8d9795259f258b618e5e0c2a01b"
+    },
+    {
+      "theme": "light",
+      "case": "move-focus",
+      "committed": false,
+      "stable_ids": true,
+      "exact_undo_redo": false,
+      "revision_before": 8,
+      "revision_after": 8,
+      "after_sha256": "32d59f746d673a6ee53a8044be8fb62227844fa6ef6254445846e0bc944e3f62"
+    },
+    {
+      "theme": "dark",
+      "case": "move-single",
+      "committed": true,
+      "stable_ids": true,
+      "exact_undo_redo": true,
+      "revision_before": 2,
+      "revision_after": 3,
+      "after_sha256": "b8552abaff35fac7238b4abed41c63852b51ad5e7fc61f32acab0f3fddd949b9"
+    },
+    {
+      "theme": "dark",
+      "case": "move-hidden",
+      "committed": true,
+      "stable_ids": true,
+      "exact_undo_redo": true,
+      "revision_before": 8,
+      "revision_after": 9,
+      "after_sha256": "180629fe53bbf587b1be37221f536f8c601b15b033d9a53bd6a90211d08d5b2b"
+    },
+    {
+      "theme": "dark",
+      "case": "move-group",
+      "committed": true,
+      "stable_ids": true,
+      "exact_undo_redo": true,
+      "revision_before": 15,
+      "revision_after": 16,
+      "after_sha256": "0c5e0a916af155b9737cd390344d106a73b4238302516603c7b711f1d529622c"
+    },
+    {
+      "theme": "dark",
+      "case": "rotate-single",
+      "committed": true,
+      "stable_ids": true,
+      "exact_undo_redo": true,
+      "revision_before": 21,
+      "revision_after": 22,
+      "after_sha256": "36a854280f3dfab8f6aa6d2e78aa5866c6bef4434a3e5020657aea24585c97f8"
+    },
+    {
+      "theme": "dark",
+      "case": "rotate-group",
+      "committed": true,
+      "stable_ids": true,
+      "exact_undo_redo": true,
+      "revision_before": 28,
+      "revision_after": 29,
+      "after_sha256": "9c0c31682c5fd42ee138e6e36153f8e9aa08af4783676a50898c906cfba11556"
+    },
+    {
+      "theme": "dark",
+      "case": "resize-grid-face",
+      "committed": true,
+      "stable_ids": true,
+      "exact_undo_redo": true,
+      "revision_before": 34,
+      "revision_after": 35,
+      "after_sha256": "a613406d4b19eab07466d22f67d8bf29a08a43d6ad984d182631578e2bd5edbc"
+    },
+    {
+      "theme": "dark",
+      "case": "resize-object-face",
+      "committed": true,
+      "stable_ids": true,
+      "exact_undo_redo": true,
+      "revision_before": 40,
+      "revision_after": 41,
+      "after_sha256": "2b740e59588c26dd202e4a9bee056fe3debaa8a7c0d3348adbace63da2300e41"
+    },
+    {
+      "theme": "dark",
+      "case": "resize-corner",
+      "committed": true,
+      "stable_ids": true,
+      "exact_undo_redo": true,
+      "revision_before": 46,
+      "revision_after": 47,
+      "after_sha256": "1915bfa54b8de366f70752f16d493bf3287a80f51899c04cdd90047e4debf9c6"
+    },
+    {
+      "theme": "dark",
+      "case": "move-noop",
+      "committed": false,
+      "stable_ids": true,
+      "exact_undo_redo": false,
+      "revision_before": 2,
+      "revision_after": 2,
+      "after_sha256": "d47646804966e16f731829e69997840c64c7c7a83329a91597a4f4887edca5ee"
+    },
+    {
+      "theme": "dark",
+      "case": "move-cancel",
+      "committed": false,
+      "stable_ids": true,
+      "exact_undo_redo": false,
+      "revision_before": 5,
+      "revision_after": 5,
+      "after_sha256": "86e689e9031640f67a392f1c66dccc8fd234d8d9795259f258b618e5e0c2a01b"
+    },
+    {
+      "theme": "dark",
+      "case": "move-focus",
+      "committed": false,
+      "stable_ids": true,
+      "exact_undo_redo": false,
+      "revision_before": 8,
+      "revision_after": 8,
+      "after_sha256": "32d59f746d673a6ee53a8044be8fb62227844fa6ef6254445846e0bc944e3f62"
+    }
+  ],
+  "missing": [],
+  "complete": true,
+  "source_escape_difference": "Python leaves a changed pose without history; Rust cancels unchanged",
+  "source_focus_difference": "Python completes the drag; Rust cancels unchanged"
+}

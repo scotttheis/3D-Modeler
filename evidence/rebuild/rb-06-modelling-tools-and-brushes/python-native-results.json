@@ -1,0 +1,314 @@
+[
+  {
+    "action": "empty-rest",
+    "theme": "light",
+    "fixture": "empty",
+    "input_route": "native reference window capture",
+    "logical_window_size": [
+      1280,
+      840
+    ],
+    "captured_size": [
+      1280,
+      840
+    ],
+    "device_pixel_ratio": 1.0,
+    "screen_dpi": 96.0,
+    "objects": [],
+    "selection": [],
+    "image": "captures/python-light-empty-rest.png",
+    "overlay_capture": false
+  },
+  {
+    "action": "primitive-cube",
+    "theme": "light",
+    "fixture": "primitive-cube",
+    "input_route": "actual OS Insert/Cube click",
+    "logical_window_size": [
+      1280,
+      840
+    ],
+    "captured_size": [
+      1280,
+      840
+    ],
+    "device_pixel_ratio": 1.0,
+    "screen_dpi": 96.0,
+    "objects": [
+      {
+        "name": "Cube",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            20.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "selection": [
+      0
+    ],
+    "image": "captures/python-light-primitive-cube.png",
+    "overlay_capture": false
+  },
+  {
+    "action": "modelling-fixture",
+    "theme": "light",
+    "fixture": "fixtures/python-single.3dp",
+    "input_route": "reference fixture setup",
+    "logical_window_size": [
+      1280,
+      840
+    ],
+    "captured_size": [
+      1280,
+      840
+    ],
+    "device_pixel_ratio": 1.0,
+    "screen_dpi": 96.0,
+    "objects": [
+      {
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            15.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            40.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "selection": [
+      0
+    ],
+    "image": "captures/python-light-modelling-fixture.png",
+    "overlay_capture": false
+  },
+  {
+    "action": "empty-rest",
+    "theme": "dark",
+    "fixture": "empty",
+    "input_route": "native reference window capture",
+    "logical_window_size": [
+      1280,
+      840
+    ],
+    "captured_size": [
+      1280,
+      840
+    ],
+    "device_pixel_ratio": 1.0,
+    "screen_dpi": 96.0,
+    "objects": [],
+    "selection": [],
+    "image": "captures/python-dark-empty-rest.png",
+    "overlay_capture": false
+  },
+  {
+    "action": "primitive-cube",
+    "theme": "dark",
+    "fixture": "primitive-cube",
+    "input_route": "actual OS Insert/Cube click",
+    "logical_window_size": [
+      1280,
+      840
+    ],
+    "captured_size": [
+      1280,
+      840
+    ],
+    "device_pixel_ratio": 1.0,
+    "screen_dpi": 96.0,
+    "objects": [
+      {
+        "name": "Cube",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            20.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "selection": [
+      0
+    ],
+    "image": "captures/python-dark-primitive-cube.png",
+    "overlay_capture": false
+  },
+  {
+    "action": "modelling-fixture",
+    "theme": "dark",
+    "fixture": "fixtures/python-single.3dp",
+    "input_route": "reference fixture setup",
+    "logical_window_size": [
+      1280,
+      840
+    ],
+    "captured_size": [
+      1280,
+      840
+    ],
+    "device_pixel_ratio": 1.0,
+    "screen_dpi": 96.0,
+    "objects": [
+      {
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            15.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            40.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "selection": [
+      0
+    ],
+    "image": "captures/python-dark-modelling-fixture.png",
+    "overlay_capture": false
+  }
+]

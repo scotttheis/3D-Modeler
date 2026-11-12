@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "E:\Builder3D-Rust\evidence\rebuild\rb-04-scene-and-precise-transforms\python-settle-walkthrough.py", line 66, in capture_then_next
+    try: capture(name,theme); index+=1; QTimer.singleShot(150,tick)
+         ^^^^^^^^^^^^^^^^^^^
+  File "E:\Builder3D-Rust\evidence\rebuild\rb-04-scene-and-precise-transforms\python-settle-walkthrough.py", line 33, in capture
+    if user.GetForegroundWindow()!=int(w.winId()): raise RuntimeError('Target is not foreground; no input or capture sent')
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Target is not foreground; no input or capture sent

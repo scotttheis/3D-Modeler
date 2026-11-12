@@ -1,1012 +1,289 @@
-# Builder3D product rebuild and parity plan
+# Builder3D Rust — delivery plan (v2)
 
-Date: 2026-11-06. Status: active replacement plan; RB-02 is complete and
-owner-accepted. RB-03 through RB-07 implementation and engineering evidence are
-recorded; their visual review and owner acceptance remain pending. RB-08
-implementation and automated checks are recorded, but its paired Rust native
-matrix and completion snapshot remain pending. The historical RB-09 Python/Rust
-live gate passed on its recorded build after the scoped Rust presentation-sync
-repair. On 2026-11-06, the current Rust Release app/gateway completed a live
-desktop/MCP workflow and optional-MCP failure check, including GUI reopen of a
-saved project. The official Python MCP SDK was used only as a client to the Rust
-gateway; the Python Builder3D application was not launched and its saved catalog
-snapshots were not refreshed. The current Rust profile counts and ordered tool
-names match those snapshots, but the input/output schemas differ and remain an
-open RB-09 contract gap pending disposition. Stop before RB-10. This does not
-close RB-08, resolve the owner?s interface/floor gaps, grant visual approval,
-or accept the product.
+Adopted 2026-11-12. Replaces the v1 plan, which is preserved unchanged at
+[`archive/product-rebuild-plan-v1-2026-11-10.md`](archive/product-rebuild-plan-v1-2026-11-10.md).
+Live status is in [`STATUS.md`](STATUS.md) and nowhere else. This file changes
+only when the plan itself changes.
 
-The active Rust source/build/run workspace is `E:\Builder3D-Rust`. Use `G:\`
-as the primary additive backup destination. Removable USB copies are occasional
-one-offs unless the owner requests otherwise. `L:\Builder3D` remains the
-separate Python reference/shipping build and is not the Rust working copy.
+## 1. Goal
 
-Owner direction: reproduce the original functionality and aesthetic, reuse the
-existing Rust application wherever that is the fastest dependable route.
+Ship the owner's Builder3D as a dependable native Rust application: the same
+layout, artwork, interaction habits, modelling tools, file behaviour and AI
+control as the Python original at `L:\Builder3D`, with a finish that reads as
+a professional product rather than a port in progress.
 
-## 1. Authority and intended result
+Done means: every row of the feature ledger has the evidence its tier requires
+(section 6), the owner has accepted the look and the ten task walkthroughs, the
+engineering gates pass on the shipping build, and the package meets its size
+and performance budgets. The contracts in `AGENTS.md` (`.3dp` format, 60-tool
+MCP catalog, millimetres, one undo entry per operation, layering) do not move.
 
-This is the execution authority for repairing and completing the Rust product.
-It supersedes `docs/r8-execution-brief.md` and the R8 product-completion claims.
-Use the slice names RB-00 through RB-11 below; do not invent another numbered
-R stage or treat R1-R7 conversion coverage as proof of desktop readiness.
+## 2. Why v1 was replaced
 
-The result is the owner's Builder3D: the recognizable layout, supplied artwork,
-interaction habits, modelling capabilities, file behavior, and AI control of
-the original Python app, implemented as a dependable native Rust application.
-Visual fidelity and working behavior are equally mandatory. Improvements follow
-an accepted baseline and must preserve the owner's design unless approved.
-An aspiration to exceptional quality is not a measurable completion claim.
+v1 got the product direction right and the operating model wrong. Measured on
+2026-11-11:
 
-The owner's 2026-10-31 condition to complete matched live RB-01 Light/Dark
-captures at 1280 x 840 logical pixels and receive explicit approval was
-satisfied before RB-02. RB-02 has since been completed, and the owner accepted
-its current Light/Dark visual baseline, with fine-tuning deferred. RB-03's
-implementation and engineering work are recorded in
-[`evidence/rebuild/rb-03-lifecycle-and-file-completion/checkpoint.md`](../evidence/rebuild/rb-03-lifecycle-and-file-completion/checkpoint.md);
-owner visual acceptance remains pending. RB-04 implementation/native evidence is
-complete; see its report/checkpoint under `evidence/rebuild/rb-04-scene-and-precise-transforms/`.
-The original RB-04 scope and historical RB-05 through RB-11 route are in
-[`rb-04-through-rb-11-completion-handoff.md`](rb-04-through-rb-11-completion-handoff.md).
-
-Read `E:\AGENTS.md`, `E:\RustDeveloper.md`, this workspace's `AGENTS.md`,
-and the relevant reference instructions before implementation. The original
-rewrite's file, unit, undo, architecture, resource, size, and portability
-contracts still apply. This plan replaces its inadequate product acceptance
-process; it does not waive those contracts.
-
-## 2. What failed, and what is actually reusable
-
-The original rewrite correctly called for a gradual replacement and identified
-UI fidelity as a decision gate. Conversion-first work was later mistaken for
-an integrated product. The R8 brief allowed behavior to be described as bounded
-and owner visual acceptance to be deferred past completion. Its final report
-called the app complete while acknowledging that interactive checks were
-blocked. That conclusion is withdrawn.
-
-Concrete findings from the current code and records:
-
-- `crates/builder3d-app/src/shell.rs::draw_preview_objects` paints object-bound
-  rectangles and picks through `preview_object_rects`. This is not an integrated
-  3D editing viewport. `builder3d-viewport::ViewportRenderer` exists separately.
-- `artwork.rs` paints simplified symbols instead of reproducing the original
-  supplied artwork. The Python reference has eight Insert icons and 44 action
-  files per theme, plus `Builder3D.png`, `Builder3D.ico`, `pin.jpg`, and `snap.png`.
-- Rust command, format, operation, platform, and viewport modules contain useful
-  implementations and tests. Their individual validation does not establish
-  correct live integration, complete desktop reachability, or visual parity.
-- `evidence/r8/00-baseline/python-reference.png` shows a blank client area.
-  It cannot establish the original visual baseline. Captures must be inspected.
-- Prior snapshots excluded evidence and the work log. New recovery points must
-  include the material needed to understand and verify the recovered source.
-
-Do not throw away the Rust workspace or automatically rewrite the whole shell.
-The previous recommendation to rebuild the front end wholesale was too broad.
-Use this disposition, then revise it only with evidence from RB-00/RB-02:
-
-| Existing area | Default disposition | Required proof before relying on it |
+| Symptom | Measurement | Cost |
 |---|---|---|
-| Core scene, geometry, formats, fixtures | Keep; repair specific demonstrated defects | Original result, units, identity, undo, round trips |
-| Commands, transforms, preferences, jobs, print services | Reuse and connect; audit semantics | UI result and error/cancel paths match service contracts |
-| R5 renderer, camera, picking, gizmos, snapping, resource planner | Reuse behind a real native viewport adapter | Onscreen geometry, exact picking, real drag, telemetry |
-| eframe app startup and useful UI-state helpers | Keep initially | Native window, scale, fonts, persistence, clean shutdown |
-| Ribbon, welcome, panel, dialog code | Repair or replace component by component | Same appearance, placement, gestures, and successful workflow |
-| Painted rectangle viewport and substitute artwork | Retire from accepted product paths | Real renderer and original visual resources take their place |
-| Existing tests and catalog | Keep as regression evidence with scoped claims | Each test's scope distinguished from product acceptance |
+| Recovery by full-tree copy | 155 snapshots on `G:\`; recent ones ~774 MB / 4,100 files each, with a full SHA-256 pass and a written receipt | Minutes of agent time and tokens per patch, for something Git does in a second |
+| Git not used | 224 uncommitted paths (184 untracked); last commit 2026-11-06 | No diff, no bisect, no cheap rollback; every review re-reads the tree |
+| Status written as prose in three places | `AGENTS.md` 14 KB, plan 100 KB, `WORK_LOG.md` 376 KB | Every session pays to read them, and they disagree |
+| Tests abandoned | `builder3d-app` tests did not compile; ten consecutive log entries end "Automated tests were not run" | Regressions found by the owner instead of by the machine |
+| No way to see the UI | Each visual change needed a 3m42s fat-LTO build, a desktop screenshot, and the owner's eyes; temporary preview hooks were written and deleted repeatedly | The slowest, most expensive loop in the project sat on the most-iterated work |
+| Release link runs out of memory | Fat LTO failed with LLVM OOM on 2026-11-11 | Review builds made with hand-typed overrides |
+| One 8,900-line UI file | `shell.rs`, hand-painted with literal sizes | Every UI task loads the whole file; no shared control language, hence the home-made look |
+| Acceptance never batched | Ledger: 147 features, 81 implemented, 3 owner-accepted, visual review pending on all but 2 | Six slices "done pending review" at once; rework lands late |
+| One model at one setting | All work run on the top model at maximum effort | Mechanical edits billed like architecture |
 
-## 3. Reference hierarchy and historical requirements
+v2 keeps the scope, contracts, ledger and slice history. It changes how work
+is executed, verified, reviewed and recovered.
 
-The reference product is `L:\Builder3D`, not Microsoft's 3D Builder, a newly
-invented design, or the rejected Rust screenshots. Keep that entire tree
-read-only. Preserve existing snapshots and all unrelated user work. No commits
-or pull requests are authorized.
+## 3. Operating model
 
-Resolve requirements in this order: current owner direction; accepted original
-Builder3D visuals and behavior; its current contracts and tests; historical
-notes that explain those choices. Where records disagree, record the conflict
-and use a concrete comparison; do not silently select the easier behavior.
-Do not reproduce a known defect as a requirement or implement an old wishlist
-as though it were an accepted feature. Owner decisions are needed only for
-material unresolved design or scope choices, not routine repairs.
+### 3.1 The loop
 
-| Reference in `L:\Builder3D` | Use |
-|---|---|
-| `docs/ui-style-guide.md`, `src/style.py` | Visual contract, exact theme tokens, scale, states, gestures |
-| `src/icon_assets.py`, `src/branding.py`, `assets/` | Owner artwork mappings, theme selection, brand, transparency |
-| `src/main_window.py`, `src/toolbar.py`, `src/numeric_controls.py` | Full ribbon/menu/panel/dialog/transform behavior |
-| `src/viewport.py`, `src/gl_renderer.py`, `src/gizmo.py`, `src/snapping.py` | Rendering, camera, input, drag, floor, snap behavior |
-| `src/application_services.py`, `src/model_actions.py`, `src/scene.py` | Shared workflows, command boundaries, history |
-| `docs/project-format.md`, format implementations and tests | Project and model compatibility |
-| `docs/architecture.md`, `docs/ai-mcp.md`, `docs/mcp-modern-design.md` | Shared desktop/AI state and public contracts |
-| `TODO.md`, `issues.md`, `COMPLETED.md`, `WORK_LOG.md`, `docs/testing.md` | Accepted decisions, open limitations, dated evidence |
-| `docs/rust-rewrite.md`, Rust catalog, R1-R8 evidence and log | Reuse candidates, original gates, historical implementation claims |
-| `docs/3d_builder_reference/README.md` | Historical layout/behavior research only; not a source of proprietary art |
+Every task is one small, verifiable change:
 
-RB-00 must reconcile dated owner decisions in the Python notes with current
-source and captures, including theme artwork, 2026-10-02 floor acceptance,
-navigation modifiers, brush popovers, gizmo sizes, numeric units, snapping,
-high-poly behavior, and file/AI workflows. Store requirement-to-evidence links;
-do not copy years of notes into another diary. Missing records stay unknown.
+1. **Brief** — a task card (section 3.4) of at most 25 lines. The executor
+   reads the card, the files it names, and nothing else.
+2. **Change** — the narrowest edit that satisfies the card, with its test.
+3. **Verify** — the tier-appropriate gate from section 6, run by script.
+4. **Show** — for anything visible, review captures (section 3.5) before and
+   after, attached to the card.
+5. **Record** — one commit (or one snapshot, see 3.6), one line in
+   `STATUS.md`, ledger fields updated. No narrative log entry.
 
-## 4. Required evidence and truthful status
+A task that cannot be verified by the machine or shown in a capture is not
+ready to start; split it or write the missing check first.
 
-Maintain `evidence/rebuild/parity-matrix.toml` during execution. It is a feature
-ledger, separate from the module-level `docs/component-catalog.toml`. Create one
-stable requirement ID per distinct behavior, including context menu entries,
-shortcuts, drag effects, settings, and error states; a module name is too broad.
+### 3.2 Model routing
 
-Each requirement records: owner/source reference; Python symbol/test; Rust
-component ID/symbol; UI entry points; expected result and tolerances; fixture;
-automated test; actual interactive steps/result; visual capture pair when
-applicable; host/build/DPI/theme; open defects; and acceptance evidence.
-Use separate fields for implementation, automated verification, interactive
-verification, visual review, and owner acceptance. Allowed field states include
-pending, pass, fail, and not-applicable with a reason. The current plan creates
-no passing feature records by inference.
+Route by the kind of thinking the task needs, not by habit. The names below
+are the models available on this machine on 2026-11-12; check current rates
+before relying on any cost assumption, and re-route if they change.
 
-Catalog `validated` means the named component contracts have evidence; it is
-not a product seal. UI surfaces awaiting parity remain `polish` or `ported`.
-Never require a ledger to contain no incomplete statuses as a substitute for
-finishing the work. Missing, blocked, or untested rows remain visible and keep
-the applicable gate open. A scope exclusion requires explicit owner agreement.
+| Role | Work | Model | Effort |
+|---|---|---|---|
+| Architect / reviewer | Plan changes, task cards, design-system decisions, review of every diff before it is recorded, anything touching a contract | Claude Fable 5.2 or Opus 5.5 | High |
+| Implementer | A task card against named files: features, refactors, bug fixes with a failing test | Codex GPT-6 Luna, or Claude Sonnet 5.5 | Medium; raise only when a task fails review twice |
+| Mechanic | Renames, moving code between modules, applying a decided pattern across call sites, ledger and catalog updates, formatting fallout | Claude Haiku 5.5, or Luna at its lowest effort | Low |
+| Second opinion | Independent review of risky changes (renderer, file formats, MCP gateway, undo) by a model that did not write them | Whichever family did not implement it | High, diff only |
 
-Store new evidence under `evidence/rebuild/<slice>/`: report, verification,
-checkpoint, captures, and bounded diagnostics. Preserve historical R1-R8
-artifacts; attach supersession notices to misleading current completion records.
-Record actual commands and exit results, failures, skipped work, source hashes,
-and build identity. Headless tests, a startup smoke, and screenshots prove
-different things; none can silently substitute for another.
+Rules that keep this cheap:
 
-## 5. Original visual system and asset requirements
+- **Maximum effort is the exception.** It is for architecture, a failing
+  investigation, or a second failed review — not the default session setting.
+- **Reviewers read diffs, not trees.** A review prompt contains the task card,
+  the diff, and the gate output.
+- **No model self-certifies.** The implementer never marks its own task
+  verified; the gate script and the reviewer do.
+- **Escalate, do not grind.** Two failed attempts at one tier moves the task
+  up a tier with the failure evidence attached; it does not get a third try.
+- **Cross-family review on contracts.** If Luna wrote a change to formats, the
+  MCP catalog, or undo, Claude reviews it, and the reverse.
 
-Use the original assets directly where practical. The owner explicitly wants
-their artwork reproduced. Copy approved product resources into the Rust tree
-with a manifest containing source path, SHA-256, theme, logical action,
-dimensions, format, alpha treatment, and packaged destination. No runtime
-dependency on `L:\Builder3D` is permitted. Never alter source assets.
+### 3.3 Context diet
 
-Required sets: `insert_icons/`, `insert_icons_light/`, `action_icons/`,
-`action_icons_light/`, and the original branding/pin/snap resources actually
-used by the reference. Preserve the real mapping, including `ExRay.png`,
-`Subtract.png`, and the existing Subdivide/Simplify mapping. Do not generate
-replacement art or silently fall back to a generic icon when a supplied asset
-exists. Preserve the original generated icons where those are intentional,
-including filled curved undo/redo arrows; the manifest alone does not dictate
-which art the running reference chooses.
+- `AGENTS.md` holds standing rules only. Status lives in `STATUS.md` (one
+  screen). History lives in Git and the archived work log.
+- A session reads: `AGENTS.md`, `STATUS.md`, its task card, the named files.
+  It does not read this plan, old handoffs, or `WORK_LOG.md` unless the card
+  says so.
+- `WORK_LOG.md` is frozen as an archive. New history is commit messages.
+- Per-slice handoff documents are retired. A slice has a task list in
+  `STATUS.md` and evidence under `evidence/rebuild/<slice>/`.
+- No UI source file over 1,500 lines. `shell.rs` is split as it is touched
+  (section 5, S1), never in one rewrite.
 
-Preserve transparent edges and antialiased fringes, optical size, aspect ratio,
-theme variants, and pin matte removal. No icon-sized background rectangles.
-Test missing resources, theme switching, alpha, scaling, and packaging. The
-existing Rust 4 KiB artwork limit must not exclude valid owner artwork.
-Deduplicate or resize derived packaging resources only with visual evidence;
-retain originals and provenance. Report any conflict with size targets instead
-of saving space by substituting different designs.
+### 3.4 Task card
 
-The design contract includes:
-
-- Calm neutral cards, restrained indigo accent, original light and dark
-  palettes. Light tokens include accent `#5B6FEA`, background `#F4F6FA`, panel
-  `#FFFFFF`, text `#1D2433`, muted text `#667085`, divider `#DDE2EA`.
-  Read dark tokens from `style.py`; do not invent a dark palette.
-- A dominant viewport, original top navigation/ribbon, right Items/actions
-  panel, and contextual bottom Move/Rotate/Resize strip. Match measured
-  proportions rather than retaining the current Rust layout by convenience.
-- Hamburger alone at the left, tabs Insert/Object/Edit/Paint/View, compact
-  favorites with overflow, and top-right Save/Save As/Undo/Redo utilities plus
-  the original 3D Print placement. About stays in Settings.
-- Original labels, groups, tooltips, icon sizing (46 logical px ribbon),
-  spacing, typography, radii, pinning/collapse, drag ordering and reset.
-  Use the platform font contract rather than the default developer UI font.
-- Original welcome cards and up to ten recent entries, responsive columns,
-  thumbnails and documented fallback states. Match actual panel thumbnails
-  and health/visibility/selection indicators.
-- Visible hover, press, selected, focus, disabled, error and loading states.
-  No clipped text, overlapping controls, duplicate controls, or unreadable art.
-- Native drag/resize/snap/minimize/maximize/close and appropriate title/icon
-  treatment; platform behavior belongs in platform adapters.
-
-### Capture protocol
-
-Before implementation, capture the functioning original in light and dark
-themes: welcome with/without recent files; each ribbon tab; menu/settings;
-empty/selected/multiple/grouped/hidden objects; each transform mode; brush
-popover; import units; operation progress/error; and print-prep/handoff.
-
-Capture Rust with identical fixture, camera, selection, theme, client size,
-display scale, font setup, and UI state. Record logical and physical dimensions.
-Use 1280x840 logical px as the initial comparison size; audit the existing
-980x640 minimum against the original before confirming it. Check 100%, 125%,
-150%, and 200% scaling plus ordinary/maximized window layouts and monitor moves.
-Record unavailable display configurations as untested, never passed.
-
-Open every capture. Reject blank, occluded, lock-screen, stale, partial-paint,
-or wrong-window images. If the reference cannot be observed, use provenance-
-checked historical captures temporarily and keep live acceptance pending.
-Compare side by side and with overlays/difference images. Mask only justified
-OS decoration/font rasterization differences; never mask product regions.
-Define geometric/color/image tolerances per region before verification using
-repeatability measurements. The owner judges visual fidelity; a global image
-similarity score cannot excuse the wrong layout, icons, or viewport.
-
-## 6. Functional parity inventory
-
-RB-00 expands every row below into specific requirements by enumerating the
-original ribbon specification, file menu, context menus, handlers, toolbar,
-viewport input bindings, settings, and tests. Cross-check against Rust dispatch
-and all 60 current MCP tools. This table is a minimum, not a coverage shortcut.
-
-| Area | Required workflows and observable result |
-|---|---|
-| Lifecycle | Launch; welcome; New/Open/Save/Save As; dirty title; save/discard/cancel before replace/exit; failed save retains state |
-| Recent files | Ten-entry ordering/deduplication/persistence; project/model dispatch; valid thumbnail; missing/unsupported/corrupt fallback without mutation |
-| Import | Add/Open; native file selection; all supported import formats; unitless unit choice and scaling once; authoritative 3MF/glTF units; names/colors/transforms/multiple objects |
-| Export | Supported STL/OBJ/PLY/3MF/glTF/GLB/WRL outputs; selection/visible rules; transforms/colors; overwrite decisions; reopen independent outputs |
-| Primitives | Cube/Cylinder/Pyramid/Cone/Sphere/Torus/Hexagon/Wedge; original dimensions/palette; torus creation/edit/role, bounds and undo |
-| Selection | Viewport and Items sync; empty click; sticky and modifier selection; all/none/invert; visibility; naming; stable identity after history |
-| Organization | Group/ungroup; copy/cut/paste/duplicate/delete; context menus; selection order and one grouped history entry |
-| Numeric transforms | Move/Rotate/Resize modes; absolute vs delta semantics; mm/in and degree display; finite input, suffix selection, tab/enter/escape, no-op history |
-| Gizmo transforms | Real axis/plane/rotation/resize handles; hover/cursor; world/object resize basis; opposite anchor; proportional corners; drag cancel; one undo per gesture |
-| Placement | Settle, Mirror, Measure, Align, Arrange; group-relative layout, anchors and gap bounds |
-| Snapping | Shared object/floor landmark solver, drag-start snapshot, view-scaled tolerance, capture/release feedback, Shift bypass and persistent setting |
-| Camera/input | Actual orbit/pan/zoom/pinch and high-resolution wheel; Reset/Frame all/selected/Center/Top/Front/Side; smooth view transitions as reference |
-| View modes | Actual shaded meshes, Y=0 floor, metric grid labels, authored colors, readable selection; opaque wireframe with black depth-tested edges; separate X-Ray |
-| Repair/mesh tools | Repair, Simplify, Subdivide, Smooth; correct selected targets, controls, progress, mesh-health reports, identities and one-step undo |
-| Boolean tools | Merge/Subtract/Intersect; operand order/pick/cancel; correct solid result and cut-surface color provenance |
-| Emboss/Hollow | All original parameters/previews/limits, font behavior, raised/engraved placement; bounded concave limitation and safe failure |
-| Persistent editing | Grab/Crease/Smooth Brush/Blob/Normalize; defaults, remembered non-modal popovers, real surface stroke/picking, region preview/cancel/commit and undo |
-| Appearance | Material/Paint/Color/Quick Color and image average sampling as actually implemented; solid-color semantics; persistence/export and undo |
-| Background work | Responsive shell; queued/running/progress/cancelling/completed/failed; revision conflict; isolated compute and one commit; no mutation on failure/cancel |
-| Print | Actionable prep findings, bed settings, known slicer selection/discovery, staging 3MF or Bambu STL fallback, validated launch and clear unavailable state |
-| Preferences | Theme/units/ribbon/favorites/pin/order/snap/slicer/recent/window state where original supports it; restart, malformed-settings recovery, safe migration |
-| Keyboard/accessibility | Original shortcuts, text/modal precedence, keyboard focus/order, accessible labels, contrast, cursor feedback; platform modifier normalization |
-| AI integration | Same live scene as GUI; all public tools/schemas/profiles; IDs/revisions/replay/root policy; visible camera/model/file changes and clean shutdown |
-| Reliability/distribution | Offline use and MCP-disabled startup; malformed inputs, device failure, large models, repeated project replacement, package launch without Python |
-
-Original navigation remains left-drag orbit and middle/right-drag pan.
-Persistent editing uses Shift-left-drag; camera navigation stays available.
-Modifier precedence with snapping must be verified in each interaction mode.
-Preserve exact full-resolution model/picking/export authority; interaction LOD
-is a temporary render choice. Default floor has no reflection-like colored
-footprint, following the accepted 2026-10-02 treatment.
-
-Do not add speculative UV texturing, unimplemented historical commands, new
-geometry tools, or protocol features as part of parity. If an original action
-has a documented limitation, reproduce its honest messaging and record that
-boundary rather than turning the control into a false success.
-
-## 7. Architecture and reuse gate
-
-Keep the existing Cargo workspace. Use one authoritative live document with
-shared commands, selection, history, view state, and operation scheduler.
-The desktop and MCP are adapters to it, not independent scenes kept in
-approximate sync. Widgets never mutate meshes or authoritative collections.
-Stable object IDs cross adapters; a filtered render-list index must never be
-treated as a scene index. Explicitly test hidden/reordered objects.
-
-Split presentation responsibilities as they change: shell composition,
-ribbon/menu, welcome/recent, Items, transform strip, dialogs/popovers,
-viewport adapter, input router, artwork/theme, and feedback. Reuse existing
-helpers and avoid a giant `shell.rs` rewrite merely to reorganize files.
-Keep domain contracts free of eframe, GPU, platform, or MCP dependencies.
-
-The first approach is eframe with original resources and custom styling, plus
-the existing R5 renderer adapted to native presentation. RB-02 must prove an
-actual shaded object, orbit, exact pick, gizmo edit, original ribbon art, theme,
-and persistent project state in the same window. Check graphics device/context
-ownership, surface/texture presentation, resize, DPI/input coordinates, event
-capture, GPU lifetime, and shared budgets. An offscreen renderer alone is not
-the proof. Avoid a permanent CPU readback per displayed GPU frame.
-
-If eframe cannot meet the reference design or renderer integration within a
-bounded representative implementation, document the specific limitation,
-completed experiment, repair cost, alternative cost, size/runtime constraints,
-and recommendation. Prototype only the affected frontend seam. Recheck current
-official toolkit documentation and licenses at that point. A materially
-different toolkit needs an owner decision after a concrete comparison, not
-speculative migration. No Qt/Python/WebView runtime is introduced by default.
-
-## 8. Ordered slices and exit gates
-
-Each slice can contain smaller independently tested and snapshotted patches.
-The order below is the default; independent contract repairs may proceed while
-owner review is pending, but dependent visual work cannot assume approval.
-
-| Slice | Deliverable | Exit evidence |
-|---|---|---|
-| RB-00 Reference and reuse audit | Complete feature ledger, dated design decisions, known limitations, real capture baseline, asset manifest, UI-to-service map and reuse decision | Every exposed original action inventoried; unknowns explicit; valid reference captures; risk-ranked backlog and baseline snapshot |
-| RB-01 Visual foundations | Original artwork/branding, tokens/fonts/states, ribbon and panel proportions, welcome and transform-strip component designs in light/dark | Matched capture board and live original-art rendering; owner approves representative design direction; no placeholder art |
-| RB-02 First working application slice | In the existing app: New, add Cube, native import, real shaded viewport, orbit/pan/zoom, exact pick, numeric/gizmo move, undo, save/reopen | One real unassisted task changes geometry and survives reopen; original-looking shell and real renderer together; owner review; toolkit decision recorded |
-| RB-03 Lifecycle and file completion | All file formats/units/export, save prompts, recents/thumbnails, failure/cancel handling | Round trips plus live multi-object import/edit/export; failed operations preserve project/path/dirty state |
-| RB-04 Scene and precise transforms | Items/thumbnails, selection/sticky/visibility/naming/groups/clipboard, Move/Rotate/Resize, settle/mirror/measure/align/arrange | Live grouped and hidden-object cases, stable IDs, exact values and one history entry per action/drag |
-| RB-05 Viewport and input completion | Full camera gestures/presets, gizmo styles, snapping, floor/grid, lighting/colors/wireframe/X-Ray, scale/resize | Matched rest/interaction captures; real pick/drag/cancel tests; hidden/grouped scenes; no rectangle preview in product path |
-| RB-06 Modelling tools | All primitives/torus controls; repair/simplify/subdivide/smooth; booleans, emboss/hollow; persistent brush/density workflows | Each tool demonstrated on meaningful geometry, valid undo/export, real surface stroke and bounded failure/cancellation |
-| RB-07 Appearance, jobs and print | Original color/material/image workflows; background progress/errors/cancel; print checks/slicer staging/handoff | Live success/failure/cancel paths; no frozen UI; independently checked export/staging; actual installed slicer opens test scene |
-| RB-08 Preferences and complete shell | Favorites/overflow/order/pin/reset, all menus/dialogs/settings, persistence/migration, shortcuts/accessibility, welcome fallbacks | Restart/keyboard/text-field/modal matrix and both themes across sizes/scales; all functional ledger rows integrated |
-| RB-09 Shared AI and regression | Desktop/MCP same live document, existing public catalog, revisions/replay/files/cancel and optional-MCP reliability | Real client edits appear immediately in GUI; GUI edits inspectable by client; matching saved geometry and history; no parallel dummy scene |
-| RB-10 Performance and packaging | Representative large models, live resource routing, memory/cache lifetime, clean install/launch, size and host matrix | Actual app measurements and complete package totals; platform/profile results explicitly distinguished from simulations |
-| RB-11 Acceptance and release readiness | Repair remaining parity defects; complete side-by-side review and task walkthrough; final gates and recovery | Owner aesthetic/workflow acceptance, full required evidence, no unresolved required parity gaps, verified complete snapshot |
-
-Early owner checkpoints are RB-01 (appearance direction) and RB-02 (real usable
-slice). RB-11 is final approval. Subsequent changes receive focused review
-when they materially affect accepted appearance or interaction. Keep pending
-reviews pending; silence, successful launch, or a model-generated judgment is
-not owner approval. Do not build the entire shell before discovering whether
-the owner accepts its first representative screen and real interaction.
-
-## 9. Verification strategy and mandatory walkthroughs
-
-Use three independent gates: behavior, visual fidelity, and integration/runtime.
-Add meaningful contract and regression tests for changed behavior. Keep pure
-tests for geometry/commands/input state, and real native checks for rendering,
-dialogs, pointer capture, focus, scale and presentation. Tests must assert user
-outcomes rather than only matching implementation structures.
-
-Minimum acceptance journeys, using identical reference/Rust fixtures:
-
-1. Fresh launch, New, create several distinct primitives, orbit and select,
-   move/rotate/resize by mouse and fields, undo/redo, save/reopen. Verify IDs,
-   dimensions, colors, transforms, groups, selection and documented view state.
-2. Import a unitless model in mm and inches; import a multi-object colored 3MF
-   and glTF/GLB. Check dimensions, Y=0 placement, names, colors and framing.
-   Export each supported output and independently reopen/check results.
-3. Multi-select, group, hide, reorder where supported, rename, copy/cut/paste,
-   duplicate, align/arrange, settle and delete. Verify correct object targets
-   and history after each step, including a hidden first scene object.
-4. Repair a damaged mesh; simplify/subdivide/smooth; perform each boolean with
-   distinct operand colors; emboss and hollow. Check geometric results,
-   limitations, progress and one-step undo. Fail/cancel without mutation.
-5. Use each persistent editing tool with a genuine surface stroke. Navigate
-   while active, edit settings, toggle off/on, preview/cancel density work,
-   and verify remembered settings and history boundaries.
-6. Set color/material, sample an image, save/export/reopen. Distinguish average
-   solid-color application from texture mapping. Preserve authored color during
-   selection and through boolean cut surfaces.
-7. Check print readiness, fix a reported issue, select a known slicer, stage
-   and open the visible scene; verify Bambu fallback separately when available.
-   Missing executable and failed staging must explain the problem safely.
-8. Switch themes and window sizes, customize ribbon/favorites/pinning, change
-   units/preferences, restart, and verify every restored state. Exercise
-   keyboard-only routes, focused numeric/text edits and modal cancellation.
-9. Use a real MCP client to inspect the running GUI, create/transform a model,
-   observe it on screen, undo in GUI, inspect through MCP, save/export, and
-   cancel a long operation. Repeat with MCP unavailable and after restart.
-10. Open representative dense controls, orbit/select/edit/save, replace with
-    an empty/new scene repeatedly, and measure memory/cache release. Exercise
-    device/budget pressure through supported fault injection and real-host
-    tests where available; identify which evidence is simulated.
-
-For each journey record expected and observed state before/after, actual test
-steps, native window/build identity, artifacts and defects. A scripted semantic
-journey complements real input testing; it cannot prove pointer behavior.
-If Windows is locked or capture/input is intercepted, mark the native check
-unverified, diagnose it, and continue independent work. Never close that gate
-with headless tests. Run foreground targets serially. Honor the reference's
-Windows reliability containment; do not launch broad Python desktop suites or
-use `QT_QPA_PLATFORM=offscreen` with its OpenGL widget.
-
-Before any MCP interface change, reread `E:\MCP_DESIGN_GUIDE.md` and the
-project MCP/architecture/testing documents, verify assumptions against current
-official protocol/SDK sources, and retain the current catalog wire contracts.
-This plan does not select a new protocol version, transport, or tool schema.
-
-### Engineering gates
-
-For each implementation patch: format, focused checks/tests, changed-crate
-Clippy, native exercise of the affected workflow, catalog and evidence update.
-At integrated milestones and RB-11 run from `E:\Builder3D-Rust`:
-
-```powershell
-cargo fmt --all -- --check
-cargo check --workspace --locked
-cargo test --workspace --locked
-cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
-cargo deny check
-cargo metadata --locked --format-version 1 --no-deps
-cargo run -p builder3d-app --bin builder3d-app -- --smoke
-cargo build --release --locked -p builder3d-app --bin builder3d-app
-cargo bloat --release --workspace
-cargo bloat --release -p builder3d-app --bin builder3d-app
+```
+ID:        S1-07
+Goal:      one sentence, observable
+Ledger:    feature ids this moves
+Files:     the files to read and edit (and any not to touch)
+Do:        3-6 bullets
+Verify:    gate tier + the specific test/capture that proves it
+Out:       what is explicitly not part of this task
+Tier:      Mechanic | Implementer | Architect
 ```
 
-Run `cargo audit --locked` when installed; record unavailable tools and their
-effect on verification. Keep the workspace bloat invocation required by local
-rules, but use the explicit package result if the tool ignores `--workspace`.
-Validate catalog/ledger TOML, unique IDs, referenced paths, stable symbols,
-asset hashes, feature coverage and evidence freshness. Launch the real app;
-`--smoke` reports semantic startup checks, not interactive success.
+### 3.5 Seeing the UI: review captures
 
-### Performance, packaging and platform gates
+`crates/builder3d-app/src/review_capture.rs` starts the real application in a
+named state, saves the window's own framebuffer to a PNG, and exits. It
+simulates no input, does not photograph the desktop, and neither reads nor
+writes user settings, so it is safe while the machine is in use.
 
-Measure the integrated release application on the actual Quadro RTX 4000,
-including the 30-million-face control and available owner model corpus. Record
-parse/commit/first useful frame, orbit paint p50/p95 and total input-to-display
-latency, source/display face counts, upload count/bytes, CPU/RAM/VRAM peaks,
-cache release, adapter/backend and fallback reason. Preserve the original
-2-9 ms orbit-paint target and full resolution at rest; name the statistic and
-workload rather than hiding outliers behind a mean or measuring a separate
-renderer executable. Resolve unmet budgets with measured repairs, not claims.
+```powershell
+$env:BUILDER3D_REVIEW_CAPTURE = "evidence\rebuild\captures\multi-dark.png"
+$env:BUILDER3D_REVIEW_STATE   = "multi"    # welcome | empty | move | rotate | resize | multi
+$env:BUILDER3D_REVIEW_THEME   = "dark"     # light | dark
+$env:BUILDER3D_REVIEW_TAB     = "Insert"   # any ribbon tab
+cargo run --profile review -p builder3d-app
+```
 
-Maintain a single system/GPU resource ledger, bounded granular fallback and
-hardware-based routing. Test Intel integrated, AMD unified memory, dedicated
-GPU and no-accelerator profiles, budget pressure and adapter failure. Simulated
-profiles establish policy only; real hardware results have separate status.
+- Use the `review` Cargo profile for iteration (optimised, no fat LTO). Use
+  `release` only for shipping builds and measurements.
+- Every visible change attaches before/after captures in both themes.
+- Add a state to the harness when a task needs one (dialogs, each ribbon tab,
+  brush popover, import units, print prep, error and progress states). S1
+  extends it to the full v1 capture list so one command regenerates the board.
+- A capture proves what was painted. It does not prove pointer behaviour and
+  it is never owner approval.
 
-Measure the entire installed package (artwork/fonts/libraries included) against
-40 MB and the compressed installer against 15 MB; measure idle working set
-against the original 120 MB target. Use a clean staging directory, package
-manifest, hashes, and an ordinary launch independent of the workspace/reference.
-No Python/Qt/WebView runtime dependency. Never use a small executable size as
-proof of total installed size. A target conflict remains open for repair or
-an explicit owner decision; it cannot justify discarding the original look.
+### 3.6 Recovery
 
-Windows product acceptance and all-platform acceptance are separate records.
-Keep portability in every seam now. Before claiming Windows/Linux/macOS support
-complete, run native launch, desktop workflows, real rendering/input, package,
-and live MCP checks on each real host. Missing hosts keep those gates pending;
-Windows unit tests and simulated platform values cannot close them.
+D1 approved by the owner on 2026-11-12. In force:
 
-## 10. Slice workflow, recovery and handoff
+- Work happens on the local branch `rebuild/work`. One local commit per
+  verified task. No push, no pull request, no rewriting of `main`.
+- Git tracks source, manifests, docs, scripts and text evidence. Binary
+  captures and mesh fixtures under `evidence/`, `logs/` and `erros/` are
+  ignored (see `.gitignore`); files already tracked stay tracked.
+- `G:\` receives, per completed slice, a timestamped tree snapshot excluding
+  `target\` (count-and-bytes check, no per-file hash pass, no receipt essay).
+  That snapshot is what preserves the ignored binary evidence.
+- Existing `G:\` snapshots stay untouched.
 
-Before the first implementation slice, inspect current Git/process state and
-create a new verified baseline snapshot. Preserve existing user changes;
-do not reset the all-untracked working tree or remove the rejected app code
-until a tested replacement for that path exists. Inspect running test instances
-before controlled launch; never terminate an unrelated process.
+### 3.7 Evidence, sized to risk
 
-For every bounded patch:
+Evidence exists to let someone trust a claim without redoing the work. Keep
+what does that and stop producing the rest.
 
-1. State the objective and requirement/component IDs. Read the relevant original
-   source/tests and inspect the matching appearance and behavior.
-2. Identify the preceding verified recovery point and define the expected
-   observable result, test, capture and acceptance check before implementation.
-3. Repair/reuse the narrowest useful seam; add focused behavioral regressions.
-4. Run appropriate engineering checks and real native workflow checks. Review
-   new captures; update separate ledger dimensions honestly.
-5. Update catalog paths/symbols/contracts and the slice evidence/checkpoint;
-   append concise history to `WORK_LOG.md` with exact next work and open risks.
-6. Create and verify the post-slice snapshot before another slice or compaction.
-   A failed check means the slice remains open; record failures and recovery.
+- Keep: gate output, capture pairs, fixture files, the ledger row, the commit.
+- Stop: per-patch reports, verification narratives, checkpoint essays,
+  snapshot receipts, supersession notices.
+- Captures referenced by the ledger live under `evidence/rebuild/captures/`.
+  Scratch captures go to `target/` and are never cited.
+- Cargo builds only into `target/debug`, `target/review` and
+  `target/release`. Never pass `--target-dir` to a new folder; never write
+  scratch files into `target/`. Scratch captures go to the session scratchpad.
+- `E:` is shared with other large projects. If `target/` exceeds 60 GB, delete
+  `target/debug/incremental` (it rebuilds automatically).
 
-Snapshots use new `G:\Builder3D-Rust_snapshot_<timestamp>_RB-<slice>-<purpose>`
-directories. Never overwrite or modify an existing snapshot. Include source,
-assets, manifests/lockfiles, tests/fixtures, docs, catalog, parity ledger,
-evidence, work log and hidden Git metadata. Exclude `target`, caches and only
-reproducible outputs not needed as acceptance evidence. Do not exclude the
-entire evidence tree or work log. Avoid junction traversal. Verify copy result,
-relative path set, file count, byte count, and recovery-critical file hashes;
-record exclusions, absolute path, timestamp and results. A receipt appended
-after copying must say the snapshot predates that receipt. Recovery materials
-must make both the source and its verification understandable.
+## 4. Fix-first list (S0 — nothing else starts until these are closed)
 
-On context resume, read the latest checkpoint, instructions, plan and Git
-status. Continue the exact next unfinished slice; do not restart conversion.
-Do not compress unknowns into a statement that the product is finished.
+Status of each item is tracked in `STATUS.md`.
 
-## 11. Final definition of done
+| # | Problem | Fix | Proof |
+|---|---|---|---|
+| F1 | `builder3d-app` tests did not compile (three calls to the removed `Builder3dApp::project_handle`) | Helper restored as test-only | `cargo test --workspace --locked` runs |
+| F2 | Tests not run since the gizmo rework | Run the whole suite; fix or quarantine-with-reason every failure | Green suite, or a named list in `STATUS.md` |
+| F3 | `cargo clippy --all-targets -- -D warnings` blocked | Follows from F1; clear what it then reports | Clean run |
+| F4 | 224 uncommitted paths, 184 untracked | Decide D1; then one baseline commit of the current tree | `git status` clean |
+| F5 | Fat-LTO release link runs out of memory | Reproduce with the pinned toolchain; set `codegen-units`/`lto = "thin"` for release if fat cannot link reliably, and re-measure the size budget | Two consecutive clean release links |
+| F6 | Feature ledger is stale against the code (e.g. still records a text menu button) | One pass reconciling the 147 rows with the running app | Ledger row count by state in `STATUS.md` |
+| F7 | `E:` has 40 GB free and `target/` holds ~60 ad hoc build directories | Delete everything except `debug`, `review`, `release`, `build-tools` after confirming nothing cites them | Free-space figure in `STATUS.md` |
+| F8 | No scripted gate | `scripts/Invoke-Gate.ps1 -Tier fast|full|ship` wrapping section 6, including libclang setup | Script used by every task |
+| F9 | Mesh rims and the floor fight for depth where primitives rest on Y=0 (serrated lower edge on cylinder, cone, sphere) | Depth bias on the floor/shadow pass or a small epsilon | `multi` capture, both themes |
+| F10 | `emboss_text` long-running metadata differs from the reference | Match it or record the owner's decision | Catalog parity check |
+| F11 | Status narrative duplicated in `AGENTS.md` | Replaced by a pointer to `STATUS.md` | Done in this revision |
 
-RB-11 can close only when every required feature ledger row has automated and
-interactive evidence appropriate to its contract, every required visual state
-has a valid matched comparison, the owner has explicitly accepted the look and
-task walkthrough, and all applicable engineering/runtime/resource/package
-gates pass. No broken/inert controls, substitute artwork, fake viewport,
-separate AI scene, lost edits, or required untested workflows remain.
+## 5. Work order
 
-The final handoff names the exact accepted build, completed and pending platform
-gates, measured budgets, remaining original limitations, approval evidence,
-verification commands/results and the verified final recovery snapshot. A
-Windows-only milestone may be named honestly while broader host work remains;
-it must not be described as whole-project completion. No promotion of the Rust
-app over the Python fallback occurs before the owner replacement gate passes.
+Slices keep their RB ledger ids; the order and grouping change.
 
-## 12. Next execution session
-
-- [x] Independent review R1 (SHOULD FIX): In `evidence/rebuild/rb-09-shared-ai-and-regression/validate_rb09_evidence.py`, compare the identity probe's complete ordered tool-name list with the established 60-tool catalog (or the recorded paired-gate ready list), rather than only checking count and uniqueness at lines 308-311. Add a focused negative check proving a renamed/substituted tool fails while the unchanged evidence passes. This verifies catalog names only, not schema compatibility. Preserve the existing scope; do not change application code or start RB-10 for this repair.
-  Resolved by comparing against the ordered `TOOL_CATALOG` in `crates/builder3d-mcp/src/r4/catalog.rs`; both the evidence validator and its focused renamed-tool check pass.
-
-RB-07 Appearance, Jobs and Print is complete. Its report, verification,
-checkpoint, native evidence and snapshot receipt are under
-`evidence/rebuild/rb-07-appearance-jobs-and-print/`. The verified immutable
-completion snapshot is
-`G:\Builder3D-Rust_snapshot_20261101-162515_RB-07-complete`.
-
-RB-08 implementation and automated verification are recorded in
-`evidence/rebuild/rb-08-preferences-and-complete-shell/`; its native Rust
-interaction matrix and completion snapshot are still pending. The owner
-directed on 2026-11-02 to continue to RB-09. Use
-[`rb-09-shared-ai-and-regression-handoff.md`](rb-09-shared-ai-and-regression-handoff.md)
-for the current slice. Do not represent RB-08 as closed or treat RB-09 as
-resolving its open evidence. The owner reports that the interface and floor are
-still missing; retain them as open product parity gaps. Visual review and owner
-acceptance remain pending across the earlier slices. Keep `L:\Builder3D`
-read-only. The later wrap-up instruction explicitly authorized one task-scoped
-commit; it does not change the standing no-commit boundary for other work.
-## Review notes - RB-09 wrap-up (2026-11-04)
-
-Scope: RB-09 only. Re-read the plan's RB-09 acceptance row, this project's AGENTS.md hard rules, and the five completion checks in the RB-09 handoff. No RB-10 work was started.
-
-### Check/test commands and real results
-
-| Command | Result |
-|---|---|
-| cargo fmt --all -- --check | PASS, exit 0 |
-| cargo check --workspace --locked | PASS, exit 0 |
-| cargo test --workspace --locked | PASS; sum of 28 test-result lines: 329 passed, 0 failed, 0 ignored |
-| cargo clippy --all-targets -- -D warnings | PASS, exit 0 |
-| cargo deny check | PASS, exit 0; 28 duplicate-version warnings and no policy errors |
-| cargo metadata --locked --format-version 1 --no-deps | PASS, exit 0 |
-| cargo test -p builder3d-mcp --locked | PASS; 19 passed, 0 failed, 0 ignored |
-| cargo run -p builder3d-app --bin builder3d-app -- --smoke | PASS; output: Builder3D shell smoke: objects=2 selected=1 tabs=5 |
-
-The eight results above are from the wrap-up rerun after initializing the documented BuildClang helper in the same PowerShell session. The full stdout/stderr is in ignored target/rb09-wrapup-gates. The locked Release app/MCP builds passed earlier in the gate run and are retained in evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-release-*. The workspace bloat invocation is not a workspace result; see Shortcuts.
-
-### 3. Acceptance criteria checked one by one
-
-| Criterion from RB-09 handoff section 9 | Command run | Result |
+| Stage | Contents | Exit |
 |---|---|---|
-| Real MCP client and native desktop use one live document; MCP edits appear in the GUI. | host_desktop.ps1 preflight, official Python MCP SDK live sessions using live_mcp_client.py, and the inline Python log/capture assertion (python -). | PASS on the recorded live app/gateway hashes. Both client logs identify project e5d81c5226e64f58b838d55d9395afa9 and the stable Cube/Sphere IDs; accepted interactive MCP-edit capture is present. Current hash recheck caveat is recorded under criterion 5. |
-| Cross-adapter reads/edits/history/save/reopen/revisions/replay/conflicts/files/cancel/failure atomicity. | cargo test --workspace --locked plus live Python/Rust SDK sessions and the inline Python JSONL assertion (python -). | PASS in the live records and 329-test suite. GUI/MCP history, no-op, lifecycle, failure preservation, replay/races, real cancellation, bounded failures and stale-result rejection are recorded in the walkthrough and client logs. |
-| Existing 60-tool catalog, profile and schema remain compatible. | cargo test -p builder3d-mcp --locked and compare the Python/Rust ready-event tool arrays (inline Python, python -). | PASS: 19 focused tests passed; both live SDK logs expose the same ordered 60-tool list. |
-| MCP can fail to start or the desktop can close without blocking ordinary GUI use; errors and cleanup are bounded. | rust_stdio_client_probe.py and the Python/Rust optional-client logs; inline Python record assertion (python -). | PASS: optional MCP leaves the GUI usable, closed Rust clients get retryable desktop_unavailable, and cleanup records show the owned descriptor/listener and processes gone. |
-| Evidence/ledgers/gates have exact outcomes and an additive snapshot is independently verified. | python evidence/rebuild/rb-09-shared-ai-and-regression/validate_rb09_evidence.py; verify_rb09_snapshot.ps1. | PASS for the evidence identity checks. The gate-time validator passed on the historical full-gate hashes. A later run failed because the validator compared current target outputs to those historical hashes; build logs show later cargo-bloat and app-restore recompiles. The current app 0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a and gateway aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e then passed a separate identity-only launch and read-only SDK probe, and the updated validator exited 0. The follow-up G: snapshot is a review snapshot, not a completion snapshot. |
+| **S0 Stabilise** | Section 4 | All gates green on a committed (or snapshotted) baseline |
+| **S1 Product finish** | The design system and its application across the shell (section 7); `shell.rs` split into `ribbon`, `welcome`, `items_panel`, `transform_strip`, `status_bar`, `viewport_panel`, `dialogs`; capture harness extended to every state on the v1 capture list | Full capture board in both themes; **owner review session 1** |
+| **S2 Close parity** | Remaining ledger gaps from RB-03 to RB-09 in ledger order; RB-08 native interaction matrix; scripted versions of the ten walkthroughs wherever they can be scripted | Every ledger row implemented and machine-verified; **owner review session 2** (the ten walkthroughs, by hand) |
+| **S3 Performance and package** (RB-10) | 30-million-face control and owner model corpus on the Quadro RTX 4000; resource routing on the hardware actually available; clean-machine install; 40 MB installed / 15 MB installer / 120 MB idle | Measured numbers against each budget, simulated profiles labelled as simulated |
+| **S4 Acceptance** (RB-11) | Fix what sessions 1–2 and S3 found | **Owner review session 3**: final sign-off on a named build |
 
-The inline Python assertions read only the saved SDK JSONL and capture metadata. They printed PASS for criteria 1-4; they do not replace the earlier live GUI observations. The original evidence-validator pass remains in logs/evidence-ledger-validation.log/.exit. The stale-path failure and the later successful identity-only recheck are both retained in the updated RB-09 report and verification.
+Three owner sessions replace the open-ended stream of single-screenshot
+reviews. Between sessions the owner's standing feedback list in `STATUS.md`
+is the queue; a note there does not interrupt the current task unless it is
+marked blocking.
 
-### 4. Shortcuts, warnings, hard-coded limits and untested work
+Each owner session gets a prepared packet: the capture board (reference beside
+Rust, both themes), a short list of decisions needed, and the build to try. The
+owner's answers are recorded verbatim in the ledger's acceptance fields.
 
-- No application stubs, todo!/unimplemented!/dbg! markers, TODO/FIXME/HACK markers, or ignored Rust tests were found; no new lint allowances were added.
-- Existing code has 17 #[allow(clippy::too_many_arguments)] and 2 #[allow(unsafe_code)] attributes. The strict Clippy command passed.
-- Existing replay/operation limits remain constants: 600 seconds / 256 replay entries and 3,600 seconds / 128 operation entries. The requested comparison with the Python reference remains open; these limits were not changed.
-- cargo deny emitted 28 duplicate-version warnings; it reported no advisory, ban, license or source-policy failure. cargo audit was unavailable because cargo-audit is not installed.
-- cargo bloat --release --workspace exited 0 but warned that --workspace was unused and analyzed the default r5_viewport.exe; it is not a workspace measurement. The explicit app target reported 12.7 MiB .text and a 15.4 MiB file, not the total installed package.
-- A 600k-face STL import finished too quickly to cancel. Rust cancellation was verified on the 50k normalize operation at progress 90 to 95. The 600k and 250k normalize attempts hit bounded-resource failures.
-- One initial PowerShell wrapper stopped on Cargo's successful Finished stderr line; the same checks were rerun with native stderr handling corrected and all eight exits were 0.
-- Current target Release hashes remain different from the historical full-gate app/gateway hashes. Later rebuild logs explain the changed target paths. The current pair passed only the recorded identity launch and read-only status probe; it is not claimed to have repeated the full paired workflow.
-- Owner visual approval and overall acceptance remain pending. The interface/floor gaps and RB-08 native matrix/completion snapshot remain open. No RB-10 work was started.
+## 6. Gates
 
-### 5. Files created, changed, or deleted
+| Tier | When | Commands | Budget |
+|---|---|---|---|
+| **Fast** | Every task | `cargo fmt --all -- --check`; `cargo clippy -p <changed crates> --all-targets --locked -- -D warnings`; `cargo test -p <changed crates> --locked`; review captures if visible | Minutes |
+| **Full** | End of each day of work and before any owner session | Fast across `--workspace`; `cargo deny check`; `--smoke`; full capture board | Tens of minutes |
+| **Ship** | S3, S4 | Full; `cargo build --release --locked`; `cargo bloat`; package staging and measurement; performance run | As long as it takes |
 
-Compared E:/Builder3D-Rust with the read-only starting snapshot G:/Builder3D-Rust_snapshot_20261104-073919_RB-09-review (excluding root target, .cache and logs), the RB-09 delta contains 92 added files, 22 changed files and 0 deleted files. Each path and reason follows.
+Evidence required per ledger row, by what the feature is:
 
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/python-dark-initial.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/python-dirty-confirmation.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/python-dirty-menu.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/python-light-after-open.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/python-light-alt-1600x900.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/python-light-gui-edit.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/python-light-initial.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/python-light-mcp-race-edit.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/python-light-reopened.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/python-light-settings-dialog.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/python-light-stale-edit.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/python-mcp-startup-failed.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/python-menu.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/python-optional-mcp-unavailable.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/python-settings-dialog-dark.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-dark-initial-confirmed.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-dark-initial.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-dark-pair.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-dirty-confirmation-after-restart.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-dirty-confirmation-hotkey.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-dirty-confirmation.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-dirty-menu.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-dirty-welcome.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-final-paired-dark-alt-1600x900.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-final-paired-dark-initial.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-final-paired-dark-scene.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-final-paired-light-initial.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-final-paired-open-path.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-final-settings-dialog.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-final-settings-menu.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-light-gui-edit.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-light-initial.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-light-mcp-edit.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-light-menu.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-light-pair-alt-1600x900.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-optional-mcp-unavailable.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-post-fix-dirty-new.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-post-fix-final-history-added.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-post-fix-final-history-gui-redo.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-post-fix-final-history-gui-undo.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-post-fix-gui-open-path.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-post-fix-gui-reopen-start.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-post-fix-gui-reopened.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-post-fix-mcp-edit.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-post-fix-new-project.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-post-fix-open-project.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-post-fix-stale-edit.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-post-restart-mcp-dirty.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-post-restart-welcome.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/captures/rust-settings-light.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/fixtures/approved/RB09-Paired-Live.3dp` - paired Python/Rust live project fixture.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/fixtures/approved/RB09-Rust-Live.3dp` - Rust live save/reopen/New/Open fixture.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/fixtures/approved/RB09-long-operation-600k.stl` - large STL fixture used to observe bounded progress/cancel timing.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/fixtures/approved/RB09-malformed.3dp` - malformed project used to verify failure atomicity.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/fixtures/approved/RB09-operation-250k.stl` - bounded-resource operation failure fixture.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/fixtures/approved/RB09-operation-50k.stl` - long-operation progress and cancellation fixture.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/fixtures/approved/RB09-overwrite-refusal.3dp` - overwrite refusal sentinel fixture.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/fixtures/approved/RB09-runtime-parent-blocker.txt` - regular-file parent used to force optional bridge startup failure.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/fixtures/approved/RB09-unsupported.input` - unsupported-format failure fixture.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/fixtures/denied/RB09-denied.3dp` - denied-root path-policy fixture.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/host_desktop.ps1` - host preflight that blocks UI input/capture unless the Default desktop is interactive.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/live_mcp_client.py` - official Python MCP SDK stdio client used for wire-level live requests.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/evidence-ledger-validation.exit` - gate-time evidence-validator exit code.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-cargo-clippy.exit` - post-repair build/test/lint command stdout, stderr, and exit evidence.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-cargo-clippy.stderr.log` - post-repair build/test/lint command stdout, stderr, and exit evidence.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-cargo-clippy.stdout.log` - post-repair build/test/lint command stdout, stderr, and exit evidence.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-cargo-fmt.exit` - post-repair build/test/lint command stdout, stderr, and exit evidence.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-cargo-fmt.stderr.log` - post-repair build/test/lint command stdout, stderr, and exit evidence.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-cargo-fmt.stdout.log` - post-repair build/test/lint command stdout, stderr, and exit evidence.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-focused-app-mcp.exit` - post-repair build/test/lint command stdout, stderr, and exit evidence.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-focused-app-mcp.stderr.log` - post-repair build/test/lint command stdout, stderr, and exit evidence.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-focused-app-mcp.stdout.log` - post-repair build/test/lint command stdout, stderr, and exit evidence.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-release-app.exit` - post-repair build/test/lint command stdout, stderr, and exit evidence.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-release-app.stderr.log` - post-repair build/test/lint command stdout, stderr, and exit evidence.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-release-app.stdout.log` - post-repair build/test/lint command stdout, stderr, and exit evidence.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-release-mcp.exit` - post-repair build/test/lint command stdout, stderr, and exit evidence.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-release-mcp.stderr.log` - post-repair build/test/lint command stdout, stderr, and exit evidence.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-release-mcp.stdout.log` - post-repair build/test/lint command stdout, stderr, and exit evidence.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-workspace-test.exit` - post-repair build/test/lint command stdout, stderr, and exit evidence.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-workspace-test.stderr.log` - post-repair build/test/lint command stdout, stderr, and exit evidence.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-workspace-test.stdout.log` - post-repair build/test/lint command stdout, stderr, and exit evidence.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/python-settings-before.json` - pre-run Python reference settings baseline for exact restoration.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/rb09-client-harness-check.jsonl` - MCP client/desktop preflight harness event log.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/rb09-client-harness-tty-check.jsonl` - MCP client/desktop preflight harness event log.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/rb09-python-client-2.jsonl` - raw official-SDK live MCP request/result log.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/rb09-python-client.jsonl` - raw official-SDK live MCP request/result log.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/rb09-python-optional-client.jsonl` - raw official-SDK live MCP request/result log.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/rb09-rust-client-2.jsonl` - raw official-SDK live MCP request/result log.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/rb09-rust-client-final-pair.jsonl` - raw official-SDK live MCP request/result log.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/rb09-rust-client.jsonl` - raw official-SDK live MCP request/result log.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/rb09-rust-optional-client.jsonl` - raw official-SDK live MCP request/result log.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/rust-stdio-client-probe.exit` - official-SDK stdio/closed-desktop probe exit evidence.
-- `WORK_LOG.md` - RB-09 live run, wrap-up results, and next-boundary session record.
-- `crates/builder3d-app/src/mcp_bridge.rs` - synchronizes shell presentation after MCP scene/document commits; includes focused regressions.
-- `crates/builder3d-app/src/shell.rs` - synchronizes visible shell page after MCP document installation and replacement.
-- `docs/component-catalog.toml` - updates the existing MCP/app bridge component contract and evidence references.
-- `docs/product-rebuild-plan.md` - records RB-09 live status and this review entry.
-- `docs/rb-09-shared-ai-and-regression-handoff.md` - records the live endpoint and current artifact-identity recheck.
-- `evidence/rebuild/parity-matrix.toml` - updates RB-09 requirement and interaction statuses.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/accepted-journal.ndjson` - records accepted live-gate evidence.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/build-manifest.json` - records tested build/source identities and capture provenance.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/capture-metadata.json` - records capture hashes, dimensions, theme, DPI, and interactive provenance.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/checkpoint.md` - records tested state, open limitations, and recovery boundary.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/client-server-log.md` - indexes live client events, startup behavior, and binary identities.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/fixture-manifest.json` - records the live test fixture paths and hashes.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/evidence-ledger-validation.log` - gate-time evidence-validator pass output.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/paired-comparison-board.md` - documents the accepted Python/Rust scene capture pairs.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/rejected-journal.ndjson` - retains rejected first-run Rust visibility evidence.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/report.md` - records live results, repair scope, identity and current recheck failure.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/requirement-test-map.md` - maps RB-09 acceptance requirements to tests, clients, fixtures, and captures.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/snapshot-receipt.md` - records additive recovery snapshots and independent verification.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/validate_rb09_evidence.py` - validates the RB-09 manifest, capture, fixture, source, and journal evidence.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/verification.md` - records engineering gates, live checks, and the wrap-up hash mismatch.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/walkthrough.md` - records paired live desktop/MCP steps and observed semantic state.
-- `target/rb09-wrapup-gates/bloat-app.stderr.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
-- `target/rb09-wrapup-gates/bloat-app.stdout.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
-- `target/rb09-wrapup-gates/bloat-workspace.stderr.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
-- `target/rb09-wrapup-gates/bloat-workspace.stdout.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
-- `target/rb09-wrapup-gates/check.stderr.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
-- `target/rb09-wrapup-gates/check.stdout.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
-- `target/rb09-wrapup-gates/clippy.stderr.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
-- `target/rb09-wrapup-gates/clippy.stdout.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
-- `target/rb09-wrapup-gates/deny.stderr.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
-- `target/rb09-wrapup-gates/deny.stdout.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
-- `target/rb09-wrapup-gates/fmt.stderr.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
-- `target/rb09-wrapup-gates/fmt.stdout.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
-- `target/rb09-wrapup-gates/mcp-tests.stderr.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
-- `target/rb09-wrapup-gates/mcp-tests.stdout.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
-- `target/rb09-wrapup-gates/metadata.stderr.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
-- `target/rb09-wrapup-gates/metadata.stdout.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
-- `target/rb09-wrapup-gates/release-app.stderr.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
-- `target/rb09-wrapup-gates/release-app.stdout.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
-- `target/rb09-wrapup-gates/release-mcp.stderr.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
-- `target/rb09-wrapup-gates/release-mcp.stdout.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
-- `target/rb09-wrapup-gates/restore-release-app.stderr.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
-- `target/rb09-wrapup-gates/restore-release-app.stdout.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
-- `target/rb09-wrapup-gates/review-file-list.md` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
-- `target/rb09-wrapup-gates/smoke.stderr.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
-- `target/rb09-wrapup-gates/smoke.stdout.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
-- `target/rb09-wrapup-gates/test.stderr.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
-- `target/rb09-wrapup-gates/test.stdout.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
-- `target/rb09-wrapup-gates/wrapup-check.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
-- `target/rb09-wrapup-gates/wrapup-clippy.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
-- `target/rb09-wrapup-gates/wrapup-deny.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
-- `target/rb09-wrapup-gates/wrapup-exits.json` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
-- `target/rb09-wrapup-gates/wrapup-fmt.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
-- `target/rb09-wrapup-gates/wrapup-mcp-tests.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
-- `target/rb09-wrapup-gates/wrapup-metadata.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
-- `target/rb09-wrapup-gates/wrapup-smoke.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
-- `target/rb09-wrapup-gates/wrapup-test.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
-- `target/release/builder3d-app.exe` - generated Release output; current hash/size or invalid workspace-bloat target is recorded in verification.md.
-- `target/release/r4_mcp.exe` - generated Release output; current hash/size or invalid workspace-bloat target is recorded in verification.md.
-- `target/release/r5_viewport.exe` - generated Release output; current hash/size or invalid workspace-bloat target is recorded in verification.md.
-- `.git/index.lock` - transient zero-byte lock from an interrupted status scan; removed after confirming no Git process owned it.
-
-
-### 6. Dependency, config and design changes
-
-No dependency, project configuration, or public MCP contract change was made for RB-09. The application presentation-sync repair is within the planned shared-document requirement. For the task-scoped commit only, the pre-existing untracked workspace build baseline (Cargo manifests/lock, crates, packaging, scripts, component catalog/parity ledger, and six compile-time RB-04 oracle JSON files) is included so the commit contains buildable source; these files were already present and are not new RB-09 edits. Unrelated historical evidence remains unstaged. No existing G: snapshot was changed.
-
-### Recovery snapshot
-
-Created the additive review snapshot `G:/Builder3D-Rust_snapshot_20261104-193530_RB-09-wrapup-review` after the review evidence was finalized and before the task-scoped commit. Robocopy exited 1 with no failures. The independent path/size/SHA-256/reparse verifier passed for 3,841 files / 700,634,398 bytes on each side, with no missing, extra, or differing paths and no reparse entries. It includes Git metadata and excludes only repository-root `target`, `.cache`, and `logs`. It is a recovery review copy, not an RB-09 completion snapshot; the plan's Recovery snapshot subsection and the receipt/log updates postdate the verification pass.
-
-## Follow-up - RB-09 artifact identity (2026-11-04)
-
-The mismatch was between historical full-gate binary identities and later
-contents at the same Release output paths. The gate-time evidence validator
-passed with app hash
-`d680cf0ba8e4c8bf7d5ccd1536bf7d5720987d676a1a0946c6c3505b613b0cb9` and
-paired gateway hash
-`a1dba8751c5a15cafbf6e26fac8db0b8a96f8464bf750ac62336f573b729545b`. Later
-build logs show cargo-bloat recompiling the MCP and app crates, followed by an
-app Release restore build. The previous fresh validator failure was exactly
-`release binary hash mismatch: live Rust app`.
-
-The current app
-`0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a` and
-gateway `aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e`
-were separately launched/queried and stayed hash-stable. On the active Default
-desktop, the official Python MCP SDK 2.2.0 listed 60 tools and successfully
-called read-only get_status (ready, clean, revision 0). The current screenshot
-is identity-only; the full paired workflow and 50-capture inventory were not
-repeated. The updated evidence validator now validates historical hashes
-against capture metadata and current hashes against the separate identity
-record, and exits 0.
-
-No Rust application source or MCP interface changed, no regression gates were
-rerun, and no new commit was created. The additive review snapshot
-`G:/Builder3D-Rust_snapshot_20261104-215904_RB-09-artifact-identity-review`
-passed independent verification with 3,904 files / 701,101,053 bytes on each
-side and zero missing, extra, differing, or reparse entries. Its first direct
-path verification hit the Windows PowerShell path-length limit on one nested
-shader-cache item; the same verifier passed through a temporary Q: mapping,
-removed afterward. The snapshot receipt and exact exclusions are recorded in
-`evidence/rebuild/rb-09-shared-ai-and-regression/snapshot-receipt.md`.
-Visual review, owner acceptance, interface/floor gaps, RB-08 native matrix and
-snapshot, and overall product acceptance remain open. RB-10 has not started.
-
-Follow-up files changed: the RB-09 evidence validator, checkpoint, report,
-verification, walkthrough, requirement-test-map, snapshot receipt, and
-WORK_LOG.md; docs/product-rebuild-plan.md,
-docs/rb-09-shared-ai-and-regression-handoff.md, docs/component-catalog.toml,
-and evidence/rebuild/parity-matrix.toml. New evidence consists of
-artifact-identity-recheck.json, the identity-only screenshot and SDK client log,
-copies of the two rebuild logs, and the validator stdout/stderr/exit records.
-Deleted files: none.
-
-
-## Review notes - RB-09 artifact identity wrap-up (2026-11-05)
-
-### 2. Project check/test commands and results
-
-Commands ran from `E:\Builder3D-Rust` after dot-sourcing
-`scripts\Initialize-BuildClang.ps1` in the same PowerShell session.
-
-| Command | Result |
-|---|---|
-| `cargo fmt --all -- --check` | PASS, exit 0 |
-| `cargo check --workspace --locked` | PASS, exit 0; dev profile finished |
-| `cargo test --workspace --locked` | PASS, 28 test-result lines; 329 passed, 0 failed, 0 ignored |
-| `cargo clippy --workspace --all-targets --locked -- -D warnings` | PASS, exit 0 |
-| `cargo deny check` | PASS, exit 0; `advisories ok, bans ok, licenses ok, sources ok`; duplicate-version warnings remain |
-| `cargo metadata --locked --format-version 1 --no-deps` | PASS, exit 0 |
-| `cargo test -p builder3d-mcp --locked` | PASS, 19 passed, 0 failed, 0 ignored |
-| `cargo run -p builder3d-app --bin builder3d-app --locked -- --smoke` | PASS; `Builder3D shell smoke: objects=2 selected=1 tabs=5` |
-| `python evidence/rebuild/rb-09-shared-ai-and-regression/validate_rb09_evidence.py` | PASS, exit 0; historical identities, 50 accepted PNGs, 2 clean scene pairs, current identities, and identity-only SDK probe verified |
-
-The first PowerShell output-filter attempt stopped while merging native stderr; the direct workspace test rerun above passed. One inline snapshot assertion initially expected comma-grouped counts; the receipt uses `3904 / 701101053`, and the corrected assertion passed. Neither was a project test failure. `cargo audit` was unavailable because `cargo-audit` is not installed. `cargo bloat` was not rerun.
-
-### 3. Acceptance criteria checked one by one
-
-| Criterion | Command run | Result |
+| Feature kind | Machine evidence | Human evidence |
 |---|---|---|
-| Plan RB-09 row: desktop and MCP use the same live document; cross-adapter edits, geometry, and history match without a parallel scene. | `python -` inline assertions over `capture-metadata.json` and the saved Python/Rust client JSONL; evidence validator. | PASS in the recorded 2026-11-04 live gate. The assertions found the same project and stable object IDs; the validator verified 50 interactive capture hashes/dimensions and 2 accepted scene pairs. The paired GUI/MCP workflow was not repeated in this wrap-up. |
-| Handoff section 9: queries, edits, undo/redo, save/reopen, revisions, replay/conflicts, file policy, cancellation, and failure atomicity. | `cargo test --workspace --locked`; `python -` assertions over saved Python/Rust client JSONL. | PASS in the recorded gate and current test run: 329 tests passed, 0 failed, 0 ignored; saved logs include the listed operation and conflict paths. No new live transaction run was performed. |
-| Handoff section 9: existing 60-tool catalog/profile/schema compatibility. | `cargo test -p builder3d-mcp --locked`; `python -` comparison of saved official-client ready events. | PASS: 19 MCP tests passed, 0 failed, 0 ignored; saved client records expose the same ordered list of 60 tools. |
-| Handoff section 9: MCP unavailable without blocking normal desktop use. | `python -` assertion over `rust_stdio_client_probe-result.json` and optional-client JSONL; workspace tests. | PASS in saved evidence: closed desktop returns retryable `desktop_unavailable`; Python and Rust optional-client records exist. This was not freshly exercised against a running desktop. |
-| Handoff section 9: exact evidence outcomes and an independently verified RB-09 completion snapshot. | Evidence validator; `python -` assertion over `snapshot-receipt.md` and snapshot path. | INCOMPLETE as a full RB-09 completion criterion. The validator passes and the G: snapshot is independently verified, but its receipt explicitly labels it a review snapshot, not an RB-09 completion snapshot. No completion snapshot was created in this wrap-up. |
-| Artifact identity follow-up: explain the hash mismatch, verify current outputs separately, and pass the validator. | `Get-FileHash` for the current Release app/gateway; evidence validator; saved rebuild-log checks. | PASS: historical hashes match capture metadata, rebuild logs record later Release builds, current hashes match the identity record, and the validator exits 0. Current hashes remained `0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a` (app) and `aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e` (gateway). |
+| Geometry, formats, commands, undo | Golden-file or behavioural test against the Python output | None |
+| Layout, styling, artwork, states | Capture pair in both themes | Owner, in a batched session |
+| Pointer and keyboard interaction | State-machine test of the gesture logic | One hand check per gesture family, recorded once |
+| MCP | Catalog parity check and a live client round trip | None |
+| Performance, package | Measurement on the named host | Owner sees the numbers |
 
-The inline `python -` commands inspected saved records only; they do not replace a fresh native workflow. The full paired workflow remains unrerun, per the handoff boundary.
+A gate that cannot run is reported as not run, with the reason. It is never
+replaced by a weaker one.
 
-### 4. Shortcuts, silenced lints, and untested work
+## 7. Product finish (S1)
 
-- A scan of 96 Rust files found no `todo!`, `unimplemented!`, `dbg!`, TODO/FIXME/HACK markers, or ignored tests. The current test run reports 0 ignored tests. No application source changed.
-- Existing lint allowances remain: 17 `#[allow(clippy::too_many_arguments)]` and 2 `#[allow(unsafe_code)]`; none were added for this identity task. Strict Clippy passed.
-- The evidence validator deliberately checks the recorded historical/current hashes and the fixed 60-tool contract; those are evidence expectations, not new application runtime constants.
-- The full paired desktop/MCP workflow, new captures, owner visual review, and owner acceptance were not repeated. The current identity-only probe was already recorded in this task; the saved evidence checks do not constitute overall acceptance.
-- `cargo audit` was not run because it is not installed. The Release size measurement (`cargo bloat`) was not rerun; this follow-up is not the performance/packaging slice, and the earlier bloat invocation rebuilt Release outputs implicated in the hash mismatch.
-- No Linux/macOS host run was performed. RB-08's native matrix and completion snapshot remain pending.
-- git diff --cached --check reports a trailing blank line in the exact copied bloat stderr log. Its SHA-256 matches the raw source log and is recorded in the identity manifest, so the log was left byte-identical; the tracked text/code diff passed git diff --check before staging.
+The application looked home-made for structural reasons, not for lack of
+effort: every control was painted by hand with its own literal sizes, so
+nothing quite matched anything else. The fix is a small system, applied
+everywhere, inside the owner's existing palette and artwork.
 
-### 5. Files created, changed, or deleted
+**Landed 2026-11-12** (captures in `evidence/rebuild/captures/2026-11-12-finish-pass/`):
 
-- `WORK_LOG.md` - records the RB-09 live run and artifact identity follow-up.
-- `docs/component-catalog.toml` - updates the existing MCP/app bridge evidence references.
-- `docs/product-rebuild-plan.md` - records RB-09 identity status and this review entry.
-- `docs/rb-09-shared-ai-and-regression-handoff.md` - records current hashes, probe, and stop boundary.
-- `evidence/rebuild/parity-matrix.toml` - keeps implementation/interactive status separate from pending visual and owner review.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/checkpoint.md` - records current verification state and open boundaries.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/report.md` - explains the historical/current hash difference and its outcome.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/requirement-test-map.md` - maps identity and validator checks to their records.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/snapshot-receipt.md` - records the additive review snapshot and independent verification.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/validate_rb09_evidence.py` - validates historical capture identities separately from current Release identities.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/verification.md` - records command outcomes, identity checks, and limits.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/walkthrough.md` - records the identity-only live probe scope.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/artifact-identity-recheck.json` - records current hashes, host probe, and cleanup result.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/artifact-identity-recheck/client.jsonl` - records the read-only official SDK session.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/artifact-identity-recheck/current-app.png` - records the identity-only desktop capture.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/identity-recheck-bloat-workspace.stderr.log` - preserves the workspace-bloat rebuild diagnostic.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/identity-recheck-restore-release-app.stderr.log` - preserves the app Release rebuild diagnostic.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/identity-recheck-validator.exit` - records the validator exit code.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/identity-recheck-validator.stderr.log` - records the validator's empty stderr.
-- `evidence/rebuild/rb-09-shared-ai-and-regression/logs/identity-recheck-validator.stdout.log` - records the validator pass output.
-- Deleted files: none.
+- Viewport: 4x multisampling; wrapped key light plus a weak fill so vertical
+  faces have form instead of one flat ambient tone; contact shadows as a
+  12-step falloff instead of five visible bands; more room when framing.
+- Shell: one control radius and hairline outline for every field and button;
+  elevation shadow on floating surfaces; distinct line icons for list
+  utilities instead of one repeated placeholder; a drawn visibility toggle in
+  place of a glyph the font did not have; full-width selectable item rows;
+  axis-coloured, aligned numeric fields; status bar no longer clipped.
+- Tooling: the review-capture harness and the `review` build profile.
 
-Cargo generated or updated ignored build/test outputs under `target\`; they were not staged. The original 2,807 untracked files remain; the task's eight new evidence files bring the untracked count to 2,815.
+**Remaining S1 tasks**, in order:
 
-### 6. Dependency, config, and design changes
+1. `chrome.rs` becomes the single source for type scale (11 / 12.5 / 13 / 15 /
+   20), spacing (4 / 8 / 12 / 16 / 24), radii (6 / 10) and control heights
+   (26 / 28). Replace every literal in the shell with a token. Mechanic tier.
+2. Split `shell.rs` by surface, one module per task, no behaviour change,
+   captures identical before and after. Mechanic tier, Architect review.
+3. Inspector: replace the default collapsing header and stacked "Apply …"
+   buttons with labelled sections and one consistent field grid; fill or
+   remove the empty lower half of the right panel.
+4. Ribbon: consistent group separators and labels, tab typography on the type
+   scale, pin control integrated with the tab row; overflow menu styled as a
+   menu, not a combo box.
+5. Dialogs and popovers: one dialog frame, one button order, one error style.
+6. Welcome: hero, action cards and recent grid on one column grid; designed
+   empty, loading and missing-file states.
+7. Viewport: depth fight at the floor (F9); selection outline; gizmo handles
+   reviewed as a set in one owner pass rather than iteratively; default
+   single-object framing.
+8. States: hover, pressed, focus, disabled, busy and error audited for every
+   control family against the capture board.
+9. Accessibility: contrast test extended to every text/background pair in
+   use; keyboard order and focus ring on every control.
 
-None. No dependency, Cargo configuration, or public MCP catalog/schema changed. The only implementation change for this task was in the evidence validator, to compare historical gate hashes with capture metadata and current Release hashes with the separate identity record.
+Standing constraints: the owner's palette, artwork and layout are the design.
+A token changes spacing and consistency, never the identity. Anything that
+would alter the accepted RB-02 baseline is proposed in the session packet, not
+decided by an agent.
 
-## Current Rust Release recheck (2026-11-06)
+## 8. Decisions for the owner
 
-The current Release app and gateway were identified by SHA-256 before the live
-run: app `0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a`,
-gateway `aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e`.
-The run is `evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261106-072716/`.
+| # | Decision | Recommendation | Until decided |
+|---|---|---|---|
+| D1 | Allow local commits on a work branch (no push, no PR) as the recovery mechanism | **Approved 2026-11-12** | — |
+| D2 | Keep fat LTO for shipping builds if it cannot link reliably | **Approved 2026-11-12:** thin LTO is acceptable if the 40 MB budget holds | — |
+| D3 | Delete the ad hoc build directories under `target/` | **Approved and done 2026-11-12** | — |
+| D4 | Viewport background stays light in the dark theme | Keep (it is the current accepted choice); revisit in session 1 with a side-by-side | Unchanged |
+| D5 | `emboss_text` long-running metadata | Match the reference | Recorded as a known difference |
 
-The live Rust desktop and its MCP gateway read and edited the same saved
-project. The saved `.3dp` is 82,178 bytes with SHA-256
-`e6046a8d3ed7ea949b00a13928311b2fc88e476bda6d4d859af6d866246d9262`, project
-ID `e5d81c5226e64f58b838d55d9395afa9`, revision 25, clean, with the stable Cube
-and Sphere IDs. The GUI reopened that file and showed both objects in the
-viewport and Items panel. Profile counts were observe 7, model 52, files 59,
-and full 60; ordered tool names matched the saved Python catalog snapshots in
-each profile.
+## 9. What does not change
 
-The optional-MCP startup failure case left the Rust GUI usable for New Scene,
-Cube creation, and Undo. An official SDK client still discovered 60 tools and
-received retryable `desktop_unavailable` for `get_status` and `scene_summary`.
-No runtime descriptor or app-owned listener remained after shutdown; both
-Release app runs and the client/gateway ended normally. No unrelated process
-was terminated.
-
-The separate catalog/schema comparison found zero exact Rust/Python input- or
-output-schema matches in each of the four profiles. The Rust catalog adds
-`return_detail` on 19 tools without server-side use; `orbit_view` marks two
-defaulted fields required; all Rust input schemas set `additionalProperties`
-to false while the saved Python schemas omit it and differ in bounds and
-nullability. Rust also publishes one 104-property output-schema superset with
-untyped property schemas, while Python publishes tool-specific output schemas.
-Two annotations differ. Top-level checks of successful current Rust results
-found required-field differences for `get_status`, `scene_summary`,
-`add_primitive`, `undo`, `redo`, `set_transform`, `set_color`, and `new_project`.
-The output check is top-level only, not full nested JSON Schema validation.
-These are recorded findings against saved Python catalogs, not owner-approved
-deviations or a refreshed current-Python comparison.
-
-Evidence is in `current-run-manifest.json`, `schema-comparison.json`, the
-current client logs, captures, and the RB-09 evidence journals. The focused
-validator self-check and full RB-09 evidence validator passed after the records
-were updated. No Rust application source changed, so the Rust test suites were
-not rerun; prior recorded workspace and focused test results remain historical.
-The final short-name snapshot is G:/B3D_R09C_20261106. Its source and
-destination manifests each contain 3991 files / 756841099 bytes after the
-final synchronization, with zero missing, extra, or differing paths and zero
-reparse entries. Critical SHA-256 values match; the full receipt is in
-evidence/rebuild/rb-09-shared-ai-and-regression/snapshot-receipt.md.
-
-RB-09 schema compatibility/disposition remains pending. Keep RB-08 native
-evidence, the interface/floor gaps, visual review, owner acceptance, and
-overall product acceptance open. RB-10 has not started.
-
-## Review notes - RB-09 current Rust Release wrap-up (2026-11-06)
-
-Re-read `E:\AGENTS.md`, `E:\RustDeveloper.md`, this workspace's `AGENTS.md`,
-the RB-09 row and section 12 here, and the RB-09 handoff sections 5, 7, and 9.
-The wrap-up did not change Rust application code.
-
-### 3. Acceptance criteria checked one by one
-
-| Criterion | Command run | Result |
-|---|---|---|
-| Handoff §9: native Rust desktop and MCP client observe/edit one live document; no MCP-only scene. | `node evidence/rebuild/rb-09-shared-ai-and-regression/write_current_run_manifest.mjs evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261106-072716`; full evidence validator. | PASS for the current Rust Release pair. The GUI reopened the MCP-edited saved document (82,178 bytes, project `e5d81c5226e64f58b838d55d9395afa9`, revision 25, stable Cube/Sphere IDs). This did not launch the Python Builder3D product. |
-| Handoff §9: cross-adapter reads/edits/history/save/reopen/revisions/replay/conflicts/files/cancel/failure atomicity. | `cargo test --workspace --locked --quiet`; `cargo test -p builder3d-mcp --locked`; current-run manifest writer. | PARTIAL. Automated workspace tests passed 329/329 and focused MCP tests 19/19. The current Release workflow covered a shared-document edit/save/reopen. The exhaustive live replay/conflict/cancellation/failure sequence remains supported by the historical paired gate, not a current full native rerun. |
-| Handoff §9: 60-tool catalog, profile, and schema contract. | `node evidence/rebuild/rb-09-shared-ai-and-regression/compare_mcp_schemas.mjs evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261106-072716`. | FAIL/PENDING: ordered names/counts match saved catalogs for observe/model/files/full (7/52/59/60), but exact input- and output-schema matches are 0 in all four profiles. No owner-approved deviation exists. |
-| Handoff §9: MCP unavailable without blocking ordinary desktop use; bounded errors and cleanup. | PowerShell assertions over `currpair-20261106-072716/current-run-manifest.json` lifecycle fields. | PASS for the current Rust Release failure run: 60 tools discovered, two client reads returned `desktop_unavailable`, the GUI remained usable, and the owned descriptor/listener/client/gateway were gone at shutdown. |
-| Handoff §9: evidence/ledgers and an independently verified additive RB-09 recovery snapshot. | `py -3.13 evidence/rebuild/rb-09-shared-ai-and-regression/validate_rb09_evidence.py`; `verify_rb09_snapshot.ps1`. | Evidence validator PASS; it verifies current Release identities and nine current capture records while reporting schema parity pending. The prior `G:\B3D_R09C_20261106` comparison returned exit 1 with exactly two regenerated JSON differences and was left untouched. New additive snapshot `G:\B3D_R09W_20261106` then verified PASS: 3991 files / 756853562 bytes each, zero missing/extra/different paths or reparse entries, and 8 critical hashes matched. It is a review/recovery snapshot, not an RB-09 completion snapshot. |
-| Plan §12 SHOULD FIX: compare the identity probe's complete ordered tool list to the Rust catalog and reject a renamed tool. | `py -3.13 evidence/rebuild/rb-09-shared-ai-and-regression/validate_rb09_evidence.py --tool-name-self-test`. | PASS: unchanged ordered list accepted; renamed tool rejected. This checks names and order only, not schemas. |
-
-### Project check/test results
-
-| Command | Result |
-|---|---|
-| `cargo fmt --check` | PASS, exit 0. |
-| `cargo check --workspace --locked` | PASS, exit 0. |
-| `cargo test --workspace --locked --quiet` | PASS, 329 passed, 0 failed, 0 ignored. |
-| `cargo test -p builder3d-mcp --locked` | PASS, 19 passed, 0 failed, 0 ignored. |
-| `cargo clippy --all-targets -- -D warnings` | PASS, exit 0. |
-| `cargo deny check` | PASS, exit 0; 28 duplicate-version warnings; advisories, bans, licenses, and sources all `ok`. |
-| `git diff --check` | PASS, exit 0; line-ending normalization warnings only. |
-| Focused and full RB-09 evidence validators | PASS, exit 0; schema parity remains explicitly pending. |
-
-### 4. Shortcuts, warnings, hard-coded limits, and untested work
-
-- The current app/gateway run is the Rust Release pair. The official Python MCP
-  SDK 2.2.0 was only a client to the Rust stdio gateway; the Python Builder3D
-  product was not launched and saved Python catalogs were not refreshed.
-- The comprehensive paired live workflow is historical. This wrap-up reran
-  current Rust live shared-document and optional-MCP evidence, but did not repeat
-  the full cross-adapter replay/conflict/cancellation/failure matrix.
-- Schema comparison uses saved Python catalogs. It found no exact schema matches;
-  successful output comparison checks top-level required fields only, not full
-  nested JSON Schema validity. The 19 unused Rust `return_detail` fields,
-  `orbit_view` required/default difference, bounds/nullability and
-  `additionalProperties` differences, untyped output superset, two annotation
-  differences, and eight top-level successful-output required-field differences
-  remain open without owner-approved deviations.
-- No Rust source changed. A scan found no `todo!`, `unimplemented!`, `dbg!`,
-  TODO/FIXME/HACK markers, or ignored tests in the current workspace checks.
-  Existing lint suppressions remain: 17 `clippy::too_many_arguments` and 2
-  `unsafe_code` allows; none were added. Clippy passed with `-D warnings`.
-- `cargo deny` emitted 28 duplicate-version warnings but no policy failures.
-  `cargo audit` was not run because `cargo-audit` is not installed. `cargo bloat`
-  was not rerun in this wrap-up; the earlier `--workspace` invocation was not a
-  workspace measurement, and the explicit app binary size does not measure the
-  complete installed package or installer required by plan section 9.
-- Existing replay/operation bounds (600 seconds/256 replay entries and 3,600
-  seconds/128 operation records) were not changed or newly compared with the
-  Python reference. RB-08 native evidence, interface/floor gaps, visual review,
-  owner acceptance, and overall product acceptance remain pending. RB-10 has
-  not started.
-- One initial read-only PowerShell assertion used the wrong JSON nesting and
-  exited 1; the corrected assertion over `lifecycle` passed. The old snapshot
-  verifier also exited 1 after the two evidence JSON files were regenerated;
-  neither failure was hidden or repaired by changing product code.
-
-### 5. Files changed or created by RB-09
-
-| File | Why |
-|---|---|
-| `AGENTS.md` | Records the current Rust Release run and keeps schema/acceptance gaps open. |
-| `WORK_LOG.md` | Records the current run, wrap-up checks, and recovery result. |
-| `docs/component-catalog.toml` | Links the current RB-09 run evidence and records the open parity limits. |
-| `docs/product-rebuild-plan.md` | Records current RB-09 status and these Review notes. |
-| `docs/rb-09-shared-ai-and-regression-handoff.md` | Captures the current endpoint and stop boundary. |
-| `evidence/rebuild/parity-matrix.toml` | Updates RB-09 parity states to match the current evidence. |
-| `evidence/rebuild/rb-09-shared-ai-and-regression/accepted-journal.ndjson` | Records current accepted Rust live-run evidence. |
-| `evidence/rebuild/rb-09-shared-ai-and-regression/checkpoint.md` | Records current identities, tests, and unresolved schema boundary. |
-| `evidence/rebuild/rb-09-shared-ai-and-regression/client-server-log.md` | Indexes the client/gateway identities and shutdown outcomes. |
-| `evidence/rebuild/rb-09-shared-ai-and-regression/paired-comparison-board.md` | Records current profile-name results and schema differences. |
-| `evidence/rebuild/rb-09-shared-ai-and-regression/rejected-journal.ndjson` | Retains rejected current-run capture outcomes. |
-| `evidence/rebuild/rb-09-shared-ai-and-regression/report.md` | Summarizes current Release results and the open schema gap. |
-| `evidence/rebuild/rb-09-shared-ai-and-regression/requirement-test-map.md` | Maps RB-09 requirements to current checks and evidence. |
-| `evidence/rebuild/rb-09-shared-ai-and-regression/snapshot-receipt.md` | Records additive snapshot paths and verification outcomes. |
-| `evidence/rebuild/rb-09-shared-ai-and-regression/validate_rb09_evidence.py` | Validates current/historical identities and ordered 60-tool names. |
-| `evidence/rebuild/rb-09-shared-ai-and-regression/verification.md` | Adds current wrap-up check results and limits. |
-| `evidence/rebuild/rb-09-shared-ai-and-regression/walkthrough.md` | Records the current Rust GUI/MCP shared-document workflow. |
-| `evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261106-072716/current-run-manifest.json` | Generated summary of current Release hashes, profiles, project, and captures. |
-| `evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261106-072716/schema-comparison.json` | Generated current profile/schema comparison against saved Python catalogs. |
-
-Deleted files: none.
-
-### 6. Dependency, configuration, and design changes
-
-None beyond the RB-09 evidence and documentation updates requested by the plan.
-No Cargo dependency/lockfile, project configuration, Rust application source,
-or public MCP interface changed. The required BuildClang helper set
-`LIBCLANG_PATH` only in each verification shell and used the existing ignored
-project-local tool; no global installation or persistent configuration change
-was made.
-
-### Recovery snapshot result
-
-Created `G:\B3D_R09W_20261106` at 11:35:42 local time with Robocopy exit 1
-(3991 files copied; zero failed). The independent verifier passed at 3991 files
-/ 756853562 bytes on both sides, with zero missing, extra, differing, or reparse
-entries; all 8 critical SHA-256 comparisons matched. Full hashes and exclusions
-are in `evidence/rebuild/rb-09-shared-ai-and-regression/snapshot-receipt.md`.
-The receipt and this paragraph postdate the snapshot. Existing snapshots were
-left untouched.
+`L:\Builder3D` stays read-only and remains the reference. The contracts,
+Rust rules, resource-routing requirements and platform seams in `AGENTS.md`
+all stand. Nothing here promotes the Rust build over the Python fallback; that
+still requires the owner's replacement gate. No owner approval is ever
+inferred from silence, a passing gate, or a model's opinion of a screenshot.

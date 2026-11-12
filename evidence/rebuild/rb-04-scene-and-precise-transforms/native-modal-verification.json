@@ -1,0 +1,11 @@
+{
+  "status": "pass",
+  "input_revision": 102,
+  "blocked_revision": 102,
+  "blocked_objects": 3,
+  "positive_revision": 103,
+  "positive_objects": 4,
+  "exact_unchanged_under_dialog": true,
+  "escape_closes_dialog": true,
+  "build": "82fd07e7691d76cb6f348ba6aafd86d91c9f9b94b56ee72e7de398a70477dfa1"
+}

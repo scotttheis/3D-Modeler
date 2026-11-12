@@ -1,0 +1,72 @@
+{
+  "slice": "RB-05",
+  "capture_root": "evidence/rebuild/rb-05-viewport-and-input-completion/captures",
+  "status": {
+    "implementation": "pass",
+    "automated": "pass",
+    "native_interaction": "pass",
+    "visual_review": "pending",
+    "owner_acceptance": "pending"
+  },
+  "environment": {
+    "os": "Windows 11 Enterprise",
+    "client_logical_px": [1280, 840],
+    "client_physical_px": [1280, 840],
+    "dpi": 96,
+    "scale_percent": 100,
+    "gpu": "NVIDIA Quadro RTX 4000",
+    "driver": "581.42",
+    "native_backend_observed": "Vulkan/Dx12 capability report; final eframe target used the discrete display-compatible adapter"
+  },
+  "python_reference": {
+    "executable": "L:/Builder3D/venv/Scripts/python.exe",
+    "version": "3.12.10",
+    "source_root": "L:/Builder3D",
+    "accepted_records": 30,
+    "records_per_theme": 15,
+    "themes": ["light", "dark"],
+    "device_pixel_ratio": 1.0,
+    "input": "visible Qt window with actual Win32 pointer, middle/right, wheel, and ribbon events",
+    "journal": "python-native-results.json"
+  },
+  "rust_native": {
+    "executable": "target/debug/builder3d-app.exe",
+    "rustc": "1.99.1",
+    "accepted_records": 52,
+    "records_per_theme": 26,
+    "themes": ["light", "dark"],
+    "build_sha256": "4a42ec94338baf986806740e7a59c7fc7db2faa9bdf2027af4d8f6160ac69232",
+    "input": "visible eframe window with guarded actual Win32 pointer, wheel, keyboard, menu, and file-dialog events",
+    "journal": "rust-native-results.json"
+  },
+  "accepted_images": {
+    "file_count": 82,
+    "total_bytes": 17163006,
+    "missing_paths": 0,
+    "hashes_recorded_in": ["python-native-results.json", "rust-native-results.json"]
+  },
+  "release_artifact": {
+    "path": "target/release/builder3d-app.exe",
+    "bytes": 15006720,
+    "sha256": "ddd70cb0e6a560d9395db51dc857187b3011e4f895e943e424567be6a65e0908",
+    "smoke": "pass",
+    "cargo_bloat": "pass; 11.6 MiB .text; 14.3 MiB file"
+  },
+  "snapshot": {
+    "staging": "G:/Builder3D-Rust_snapshot_20261101-064700_RB-05-pre-receipt",
+    "final": "G:/Builder3D-Rust_snapshot_20261101-064700_RB-05-complete",
+    "expected_included_file_count": 2639,
+    "excluded": ["repository-root target/", "repository-root .cache/", "reparse-point entries"],
+    "verification": "final receipt in WORK_LOG.md and checkpoint.md"
+  },
+  "rejected_evidence": [
+    "python-native-rejected-run-1.txt",
+    "rust-native-rejected-run-1.ndjson",
+    "rust-native-rejected-run-2.ndjson",
+    "rust-native-rejected-run-3.ndjson",
+    "rust-native-rejected-run-4.ndjson",
+    "rust-display-rejected-grid-run-1.json",
+    "rust-display-rejected-grid-run-2.json",
+    "r5-diagnostic/report.json"
+  ]
+}

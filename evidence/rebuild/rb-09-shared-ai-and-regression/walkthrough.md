@@ -71,6 +71,44 @@ workflow or alter the 50-capture paired inventory.
 
 The YouTube video was only a keep-awake aid. The owner-reported interface/floor gaps remain open; no visual approval or overall acceptance is claimed. RB-08 native matrix/completion snapshot remains open. RB-10 was not started.
 
+## Current-reference schema-parity repair (2026-11-07)
+
+The designated L:\Builder3D identity was verified read-only at Git HEAD
+3a0160a95c55f68ce9f1e89d17c792816ac001df, Python 3.12.10, and MCP SDK 2.2.0.
+The official SDK captured all current catalogs using tools/list only. The
+Python product and handlers were not launched; no reference source/settings
+changed. Captures and identity records are under
+reference-current-20261107-084248/.
+
+The original Rust schema had 20 return_detail fields; the earlier count of 19
+was incorrect. The current reference has five: apply_actions, set_color,
+set_transform, transform_selection, and translate. Current Rust Release
+catalogs match ordered names, complete input/output JSON Schemas, and official
+MCP annotations recursively in observe/model/files/full (7/52/59/60), with
+zero recursive differences. The Python runtime drops extra root fields and
+rejects unknown fields inside apply_actions.args; Rust now matches.
+
+The repaired Rust Release GUI was PID 2640, app SHA-256
+0e874b6fb06d9b6cb5e70517ca35856d3a8304975e2a0842cd971f20df2c45ba; gateway
+SHA-256 was 636171b58800915de87fc8ad26814498279919ea80341076a344c208757da370.
+The official Python MCP SDK returned 25 successful structured results,
+including a successful new_project and completed operation_status. All 25
+passed full output-schema validation. The intentionally invalid nested
+apply_actions.args extra returned invalid_input. After the probe, the app
+closed normally through the verified Discard action and its runtime descriptor
+was removed.
+
+The result log, validator log, GUI launch/shutdown record, and run manifest
+are in currpair-20261107-100537-schema-parity-final/; the all-profile
+recursive comparison is in currpair-20261107-093804-schema-parity/. The custom
+Rust emboss_text _meta.com.builder3d/longRunning value remains true while the
+reference reports false. It is separate from schema and official MCP
+ToolAnnotations, and no owner-approved deviation is claimed.
+
+This closes only the schema-parity criterion. RB-08 native evidence,
+interface/floor gaps, visual review, owner acceptance, and overall product
+acceptance remain pending. RB-10 was not started.
+
 ## Current Rust Release GUI/MCP recheck (2026-11-06)
 
 This is a current Rust app plus Rust gateway run, not a current Python/Rust product pair. The official Python MCP SDK 2.2.0 acted only as the client to `target/release/r4_mcp.exe`; the Python Builder3D application was not launched.

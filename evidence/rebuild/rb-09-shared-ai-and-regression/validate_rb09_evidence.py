@@ -84,27 +84,47 @@ feature = next(
 )
 current_run_directory = EVIDENCE / "currpair-20261106-072716"
 current_run_manifest_path = current_run_directory / "current-run-manifest.json"
-schema_comparison_path = current_run_directory / "schema-comparison.json"
+historical_schema_comparison_path = current_run_directory / "schema-comparison.json"
+schema_parity_directory = EVIDENCE / "currpair-20261107-093804-schema-parity"
+schema_comparison_path = schema_parity_directory / "schema-property-diff-current.json"
+schema_parity_manifest_path = EVIDENCE / "schema-parity-run-manifest.json"
 require(current_run_manifest_path.is_file(), "missing current Rust Release run manifest")
-require(schema_comparison_path.is_file(), "missing current Rust schema comparison")
+require(historical_schema_comparison_path.is_file(), "missing historical Rust schema comparison")
+require(schema_comparison_path.is_file(), "missing current-reference schema comparison")
+require(schema_parity_manifest_path.is_file(), "missing schema-parity run manifest")
 current_run = json.loads(current_run_manifest_path.read_text(encoding="utf-8"))
+historical_schema_comparison = json.loads(
+    historical_schema_comparison_path.read_text(encoding="utf-8")
+)
 schema_comparison = json.loads(schema_comparison_path.read_text(encoding="utf-8"))
+schema_parity_manifest = json.loads(
+    schema_parity_manifest_path.read_text(encoding="utf-8")
+)
 require(current_run["client"]["python_product_launched"] is False,
         "current recheck must not claim the Python product was launched")
-require(schema_comparison["saved_python_catalogs_refreshed_in_this_run"] is False,
-        "current schema comparison must identify saved reference catalogs")
-schema_profiles = {profile["profile"]: profile for profile in schema_comparison["profiles"]}
+require(historical_schema_comparison["saved_python_catalogs_refreshed_in_this_run"] is False,
+        "historical schema comparison must retain its saved-catalog scope")
+schema_profiles = schema_comparison["profiles"]
 run_profiles = {profile["profile"]: profile for profile in current_run["profiles"]}
 require(set(schema_profiles) == set(run_profiles) == {"observe", "model", "files", "full"},
-        "current Rust/Python profile set mismatch")
+        "current-reference Rust profile set mismatch")
+expected_profile_counts = {"observe": 7, "model": 52, "files": 59, "full": 60}
 for profile_name, schema_profile in schema_profiles.items():
     run_profile = run_profiles[profile_name]
-    require(schema_profile["ordered_tool_names_match"] is True
+    expected_count = expected_profile_counts[profile_name]
+    require(schema_profile["expected_tool_count"] == expected_count
+            and schema_profile["reference_tool_count"] == expected_count
+            and schema_profile["rust_tool_count"] == expected_count,
+            f"current-reference tool count mismatch for {profile_name}")
+    require(schema_profile["ordered_names_match"] is True
             and run_profile["ordered_names_equal"] is True,
             f"current ordered tool names differ for {profile_name}")
-    require(schema_profile["python_tool_count"] == run_profile["python_count"]
-            and schema_profile["rust_tool_count"] == run_profile["rust_count"],
-            f"current tool count differs for {profile_name}")
+    require(schema_profile["input_schema_matches"] == expected_count
+            and schema_profile["output_schema_matches"] == expected_count
+            and schema_profile["annotation_matches"] == expected_count
+            and schema_profile["recursive_difference_count"] == 0
+            and schema_profile["exact_schema_and_annotation_parity"] is True,
+            f"current nested schema/annotation parity differs for {profile_name}")
 for capture in current_run["captures"]:
     path = current_run_directory / capture["path"]
     require(path.is_file(), f"missing current-run capture: {capture['path']}")
@@ -118,24 +138,46 @@ for capture in current_run["captures"]:
     require(list(struct.unpack(">II", data[16:24])) == [capture["width"], capture["height"]],
             f"current-run capture dimensions mismatch: {capture['path']}")
 current_schema_matches = all(
-    profile["exact_input_schema_matches"] == profile["rust_tool_count"]
-    and profile["exact_output_schema_matches"] == profile["rust_tool_count"]
+    profile["exact_schema_and_annotation_parity"] is True
+    and profile["recursive_difference_count"] == 0
     for profile in schema_profiles.values()
 )
-if current_schema_matches:
-    require(feature["implementation"] == "pass",
-            "RB-09 implementation status must reflect matching schemas")
-    require(feature["automated"] == "pass",
-            "RB-09 automated status must reflect matching schemas")
-else:
-    require(feature["implementation"] == "partial",
-            "RB-09 implementation status must disclose schema differences")
-    require(feature["automated"] == "partial",
-            "RB-09 automated status must disclose schema differences")
-    require("schema-parity-pending" in component_by_id["builder3d.mcp.stdio-gateway"]["contracts"],
-            "gateway component must disclose pending schema parity")
-    require(str(current_run["acceptance_boundary"]["schema_parity"]).startswith("open"),
-            "current run must keep schema parity open")
+require(current_schema_matches, "latest current-reference schema parity is not complete")
+require(feature["implementation"] == "pass",
+        "RB-09 catalog/schema implementation status must reflect current parity")
+require(feature["automated"] == "pass",
+        "RB-09 catalog/schema automation status must reflect current parity")
+require("schema-parity-current-reference" in component_by_id["builder3d.mcp.stdio-gateway"]["contracts"],
+        "gateway component must record current-reference schema parity")
+require(str(current_run["acceptance_boundary"]["schema_parity"]).startswith("open"),
+        "historical 2026-11-06 run must retain its open schema status")
+require(schema_parity_manifest["completion_state"]["schema_parity"] == "pass",
+        "schema-parity run manifest must report the verified schema criterion")
+require(schema_parity_manifest["completion_state"]["rb09_acceptance"] == "open"
+        and schema_parity_manifest["completion_state"]["rb10_started"] is False,
+        "schema-parity run must keep overall RB-09 open and stop before RB-10")
+require(schema_comparison["custom_metadata_difference_count"] == 3,
+        "custom metadata difference must remain disclosed separately")
+require(schema_parity_manifest["owner_approved_deviation_claimed"] is False,
+        "schema-parity evidence must not claim owner approval")
+result_log_path = ROOT / schema_parity_manifest["result_validation"]["live_result_log"]
+require(result_log_path.is_file(), "missing live Release result log")
+result_events = [
+    json.loads(line)
+    for line in result_log_path.read_text(encoding="utf-8").splitlines()
+    if line.strip()
+]
+successful_results = [
+    event for event in result_events
+    if event.get("event") == "tool_result" and event.get("is_error") is False
+]
+require(len(successful_results)
+        == schema_parity_manifest["result_validation"]["successful_structured_result_count"],
+        "live result success count differs from schema-parity manifest")
+result_validation_log = ROOT / schema_parity_manifest["result_validation"]["validation_test_log"]
+require(result_validation_log.is_file(), "missing captured Release result-validation test log")
+require("test result: ok. 1 passed; 0 failed" in result_validation_log.read_text(encoding="utf-8"),
+        "captured Release result-validation test did not pass")
 require(feature["interactive"] == "pass", "RB-09 live interactive status is not pass")
 require(feature["visual"] == "pending", "visual review must remain pending")
 require(feature["owner_acceptance"] == "pending", "owner acceptance must remain pending")
@@ -150,6 +192,9 @@ for component_id in feature["rust_component_ids"]:
 for raw_path in feature["evidence"]:
     path = raw_path.split("::", 1)[0]
     require((ROOT / path).is_file(), f"missing parity evidence path: {path}")
+for raw_path in feature.get("schema_evidence", []):
+    path = raw_path.split("::", 1)[0]
+    require((ROOT / path).is_file(), f"missing parity schema evidence path: {path}")
 
 for component_id in (
     "builder3d.mcp.desktop-bridge",
@@ -260,18 +305,42 @@ source_hash = hashlib.sha256()
 for path in source_files:
     source_hash.update(path.relative_to(ROOT).as_posix().encode("utf-8") + b"\0")
     source_hash.update(bytes.fromhex(digest(path)) + b"\0")
-require(len(source_files) == manifest["source_tree"]["rust_source_file_count"],
-        "Rust source file count mismatch")
-require(source_hash.hexdigest() == manifest["source_tree"]["rust_source_manifest_sha256"],
-        "Rust source manifest hash mismatch")
+current_source_tree = schema_parity_manifest["rust_source_trees"]["current"]
+require(len(source_files) == current_source_tree["file_count"],
+        "current Rust source file count mismatch")
+require(source_hash.hexdigest() == current_source_tree["manifest_sha256"],
+        "current Rust source manifest hash mismatch")
+
+pre_edit_source_path = ROOT / schema_parity_manifest["rust_source_trees"]["pre_edit"]["manifest_path"]
+require(pre_edit_source_path.is_file(), "missing pre-edit Rust source manifest")
+pre_edit_source_tree = json.loads(pre_edit_source_path.read_text(encoding="utf-8"))
+pre_edit_records = pre_edit_source_tree["files"]
+pre_edit_paths = [record["path"] for record in pre_edit_records]
+require(pre_edit_paths == sorted(pre_edit_paths) and len(pre_edit_paths) == len(set(pre_edit_paths)),
+        "pre-edit Rust source manifest paths are not uniquely sorted")
+pre_edit_hash = hashlib.sha256()
+for record in pre_edit_records:
+    require(re.fullmatch(r"[0-9a-f]{64}", record["sha256"]) is not None,
+            "invalid pre-edit Rust source SHA-256")
+    pre_edit_hash.update(record["path"].encode("utf-8") + b"\0")
+    pre_edit_hash.update(bytes.fromhex(record["sha256"]) + b"\0")
+require(len(pre_edit_records) == pre_edit_source_tree["file_count"],
+        "pre-edit Rust source manifest file count mismatch")
+require(pre_edit_hash.hexdigest() == pre_edit_source_tree["manifest_sha256"],
+        "pre-edit Rust source manifest hash mismatch")
+historical_source_tree = manifest["source_tree"]
+require(pre_edit_source_tree["file_count"] == historical_source_tree["rust_source_file_count"],
+        "pre-edit snapshot source count differs from historical build manifest")
+require(pre_edit_source_tree["manifest_sha256"] == historical_source_tree["rust_source_manifest_sha256"],
+        "pre-edit snapshot source hash differs from historical build manifest")
 
 identity = parsed_json["artifact-identity-recheck.json"]
 require(identity["schema_version"] == 1, "unsupported artifact identity recheck schema")
 require(identity["slice"] == "RB-09", "artifact identity recheck slice mismatch")
-require(identity["source_tree"]["rust_source_file_count"] == len(source_files),
-        "identity recheck Rust source file count mismatch")
-require(identity["source_tree"]["rust_source_manifest_sha256"] == source_hash.hexdigest(),
-        "identity recheck Rust source manifest mismatch")
+require(identity["source_tree"]["rust_source_file_count"] == pre_edit_source_tree["file_count"],
+        "historical identity source count differs from pre-edit snapshot")
+require(identity["source_tree"]["rust_source_manifest_sha256"] == pre_edit_source_tree["manifest_sha256"],
+        "historical identity source manifest differs from pre-edit snapshot")
 require(identity["source_tree"]["rust_application_source_changed"] is False,
         "application source changed during artifact identity recheck")
 require(identity["historical_full_gate"]["live_rust_app_sha256"] == live_app_build["sha256"],
@@ -308,23 +377,30 @@ require("Compiling builder3d-mcp" in bloat_log and "Compiling builder3d-app" in 
 require("Compiling builder3d-app" in restore_log and "Finished" in restore_log,
         "app restore rebuild log does not show a completed app rebuild")
 
+release = schema_parity_manifest["release_validation"]
 expected_release_artifacts = (
-    ("rust_app", "target/release/builder3d-app.exe"),
-    ("rust_mcp_gateway", "target/release/r4_mcp.exe"),
+    ("application", "target/release/builder3d-app.exe", "application_sha256", "application_bytes"),
+    ("gateway", "target/release/r4_mcp.exe", "gateway_sha256", "gateway_bytes"),
 )
-for artifact_name, expected_relative_path in expected_release_artifacts:
-    artifact = identity["release_artifacts"][artifact_name]
+for artifact_name, expected_relative_path, hash_key, bytes_key in expected_release_artifacts:
     expected_path = ROOT / expected_relative_path
-    require(artifact["path"] == expected_relative_path,
-            f"unexpected current release artifact path: {artifact_name}")
     require(expected_path.is_file(), f"missing current release binary: {expected_path}")
-    require(digest(expected_path) == artifact["sha256"],
-            f"current release binary hash mismatch: {artifact_name}")
-    require(expected_path.stat().st_size == artifact["bytes"],
-            f"current release binary size mismatch: {artifact_name}")
-    require(all(value == artifact["sha256"] for value in artifact["hash_observations"].values()),
-            f"current release binary identity changed during probe: {artifact_name}")
+    require(digest(expected_path) == release[hash_key],
+            f"current schema-parity Release binary hash mismatch: {artifact_name}")
+    require(expected_path.stat().st_size == release[bytes_key],
+            f"current schema-parity Release binary size mismatch: {artifact_name}")
 
+launch_path = ROOT / release["gui_launch_record"]
+require(launch_path.is_file(), "missing current schema-parity GUI lifecycle record")
+launch_record = json.loads(launch_path.read_text(encoding="utf-8"))
+require(launch_record["sha256"] == release["application_sha256"],
+        "GUI lifecycle record app hash differs from the tested Release app")
+require(launch_record["pid"] == release["gui_pid"],
+        "GUI lifecycle record PID differs from the schema-parity manifest")
+require(launch_record["responding"] is True and launch_record["gui_closed_normally"] is True,
+        "current schema-parity Release GUI did not respond and close normally")
+require(launch_record["runtime_descriptor_removed"] is True,
+        "current schema-parity runtime descriptor was not removed")
 require(identity["previous_wrap_up_failure"]["app_hash_at_failure"]
         == identity["release_artifacts"]["rust_app"]["sha256"],
         "previous wrap-up failure app hash differs from the current identity recheck")
@@ -450,8 +526,8 @@ for journal_name in ("accepted-journal.ndjson", "rejected-journal.ndjson"):
 print(f"TOML valid: {catalog_path.relative_to(ROOT)}, {parity_path.relative_to(ROOT)}")
 print(f"component IDs unique: {len(component_ids)}; RB-09 evidence references exist")
 print(f"historical paired live-gate build identities match capture metadata; {len(captures)} accepted PNG hashes/dimensions and 2 clean scene pairs verified")
-print(f"fixture hashes verified: {len(fixtures['files'])}; Rust source manifest verified: {len(source_files)} files")
-print(f"current Release identity verified: app {identity['release_artifacts']['rust_app']['sha256']}; gateway {identity['release_artifacts']['rust_mcp_gateway']['sha256']}")
+print(f"historical Rust source manifest verified: {len(pre_edit_records)} files; current source manifest verified: {len(source_files)} files")
+print(f"current schema-parity Release identity verified: app {release['application_sha256']}; gateway {release['gateway_sha256']}")
 print("identity-only official-client probe verified: 60 tools; get_status app_state=ready; 1296x879 interactive screenshot")
-print(f"current Rust Release run verified: {len(current_run['captures'])} capture records; profile names/counts match; schema parity {'pass' if current_schema_matches else 'pending'}")
+print(f"current Rust Release run verified: {len(current_run['captures'])} historical capture records; current-reference schema parity pass for 7/52/59/60 tools; {len(successful_results)} successful live result envelopes validated")
 print("JSON manifests, rebuild logs, official-client results, and accepted/rejected NDJSON journals valid")

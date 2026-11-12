@@ -128,6 +128,24 @@ pub(crate) fn move_favorite(values: &[String], key: &str, delta: isize) -> Optio
     Some(next)
 }
 
+/// Moves a dragged favorite to the position of the favorite it was dropped on.
+#[must_use]
+pub(crate) fn move_favorite_to(
+    values: &[String],
+    dragged: &str,
+    target: &str,
+) -> Option<Vec<String>> {
+    let source_index = values.iter().position(|value| value == dragged)?;
+    let target_index = values.iter().position(|value| value == target)?;
+    if source_index == target_index {
+        return None;
+    }
+    let mut next = values.to_vec();
+    let item = next.remove(source_index);
+    next.insert(target_index, item);
+    Some(next)
+}
+
 /// Produces a complete tab order from a persisted partial order.
 #[must_use]
 pub(crate) fn normalized_tab_order(
@@ -198,6 +216,13 @@ mod tests {
         assert_eq!(values, ["Object:Delete", "Insert:Cube"]);
         assert_eq!(
             move_favorite(&values, "Object:Delete", 1),
+            Some(vec![
+                String::from("Insert:Cube"),
+                String::from("Object:Delete")
+            ])
+        );
+        assert_eq!(
+            move_favorite_to(&values, "Insert:Cube", "Object:Delete"),
             Some(vec![
                 String::from("Insert:Cube"),
                 String::from("Object:Delete")

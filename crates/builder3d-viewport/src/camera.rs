@@ -13,6 +13,17 @@ pub const CAMERA_MIN_DISTANCE: f32 = 0.5;
 pub const CAMERA_MAX_DISTANCE: f32 = 5_000.0;
 /// Pixel tolerance used by viewport snapping and gizmo hit testing.
 pub const VIEW_PICK_TOLERANCE_PIXELS: f32 = 12.0;
+/// Distance multiplier applied when framing bounds, leaving room around the
+/// subject for transform handles and the floating transform strip.
+const FRAME_MARGIN: f32 = 1.45;
+/// Maximum near-plane distance as a fraction of the camera range.
+const CAMERA_NEAR_DISTANCE_RATIO: f32 = 0.02;
+/// Prevents an invalid or nearly-zero camera near plane.
+const CAMERA_MIN_NEAR_DISTANCE: f32 = 0.01;
+/// Minimum camera range needed to show the broad, fading build floor.
+const CAMERA_FLOOR_MIN_FAR_DISTANCE: f32 = 1_000.0;
+/// Scales the camera range so the floor can fade beyond the model bounds.
+const CAMERA_FLOOR_FAR_SCALE: f32 = 12.0;
 
 /// A validated orbit camera matching the Python reference's world-up model.
 #[derive(Clone, Debug)]
@@ -36,15 +47,15 @@ impl Default for Camera {
 }
 
 impl Camera {
-    /// Creates the reference opening view: yaw 45°, pitch 35°, distance 5mm.
+    /// Creates the reference opening view: yaw 0°, pitch 35°, distance 5mm.
     #[must_use]
     pub fn new() -> Self {
         Self {
-            yaw_degrees: 45.0,
+            yaw_degrees: 0.0,
             pitch_degrees: 35.0,
             distance: 5.0,
             center: [0.0; 3],
-            default_yaw_degrees: 45.0,
+            default_yaw_degrees: 0.0,
             default_pitch_degrees: 35.0,
             default_distance: 500.0,
             viewport_width: 1,
@@ -252,7 +263,7 @@ impl Camera {
             * ((self.vertical_fov_degrees.to_radians() * 0.5).tan() * aspect.max(1.0e-3)).atan();
         let limiting_fov = self.vertical_fov_degrees.to_radians().min(horizontal);
         self.center = center;
-        self.distance = (radius / (limiting_fov * 0.5).tan() * 1.15)
+        self.distance = (radius / (limiting_fov * 0.5).tan() * FRAME_MARGIN)
             .max(radius * 2.0)
             .clamp(CAMERA_MIN_DISTANCE, CAMERA_MAX_DISTANCE);
         Ok(())
@@ -270,8 +281,17 @@ impl Camera {
         } else {
             1.0
         };
-        let near = (self.distance - radius * 4.0).max(0.01);
-        let far = (self.distance + radius * 4.0).max(near + 1.0);
+        // Keep the near plane close enough to the camera to show the nearby
+        // half of the build floor even when the scene is empty or very small.
+        // The previous radius-only value could place the near plane almost at
+        // the orbit target and clip everything between the target and camera.
+        let scene_near = (self.distance - radius * 4.0).max(CAMERA_MIN_NEAR_DISTANCE);
+        let floor_near = (self.distance * CAMERA_NEAR_DISTANCE_RATIO).max(CAMERA_MIN_NEAR_DISTANCE);
+        let near = scene_near.min(floor_near);
+        let far = (self.distance + radius * 4.0)
+            .max(self.distance * CAMERA_FLOOR_FAR_SCALE)
+            .max(CAMERA_FLOOR_MIN_FAR_DISTANCE)
+            .max(near + 1.0);
         perspective(
             self.vertical_fov_degrees,
             self.viewport_width as f32 / self.viewport_height.max(1) as f32,
@@ -350,14 +370,14 @@ mod tests {
         assert_eq!(
             camera.position(),
             [
-                5.0 * 35.0_f32.to_radians().cos() * 45.0_f32.to_radians().sin(),
+                5.0 * 35.0_f32.to_radians().cos() * 0.0_f32.to_radians().sin(),
                 5.0 * 35.0_f32.to_radians().sin(),
-                5.0 * 35.0_f32.to_radians().cos() * 45.0_f32.to_radians().cos(),
+                5.0 * 35.0_f32.to_radians().cos() * 0.0_f32.to_radians().cos(),
             ]
         );
         let result = camera.orbit(6.0, 1_000.0);
         assert!(result.is_ok());
-        assert_eq!(camera.yaw_degrees(), 44.0);
+        assert_eq!(camera.yaw_degrees(), -1.0);
         assert_eq!(camera.pitch_degrees(), 89.0);
         let result = camera.zoom(-10_000_000.0);
         assert!(result.is_ok());
@@ -378,5 +398,25 @@ mod tests {
         let ray = camera.screen_ray(400.0, 300.0, 2.0);
         assert!(ray.is_ok());
         assert!(ray.is_ok_and(|value| { value.direction.iter().all(|item| item.is_finite()) }));
+    }
+
+    #[test]
+    fn near_build_floor_stays_inside_projection_for_an_empty_scene() {
+        let mut camera = Camera::new();
+        camera.reset_view();
+        assert!(camera.set_viewport_size(800, 600).is_ok());
+        let view_projection = camera.view_projection(1.0);
+        assert!(view_projection.is_ok());
+        let Some(view_projection) = view_projection.map_err(|_| ()).ok() else {
+            return;
+        };
+        let projected = view_projection.transform_point([50.0, 0.0, 50.0]);
+        assert!(projected.is_ok());
+        let Some(projected) = projected.map_err(|_| ()).ok() else {
+            return;
+        };
+        assert!((-1.0..=1.0).contains(&projected[0]));
+        assert!((-1.0..=1.0).contains(&projected[1]));
+        assert!((0.0..=1.0).contains(&projected[2]));
     }
 }

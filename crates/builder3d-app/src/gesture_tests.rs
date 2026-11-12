@@ -113,7 +113,8 @@ fn all_python_handles_axes_bases_groups_and_hidden_targets_match_122_oracles() {
                     },
                     _ => ResizeHandle::Corner(case.descriptor.sides.expect("sides")),
                 };
-                TransformGesture::resize(snapshot, frame, handle)
+                TransformGesture::resize(snapshot, frame, handle, ray(case.start))
+                    .expect("start resize")
             }
         };
         let revision = state.scene.revision();
@@ -191,7 +192,7 @@ fn cancelled_noop_stale_and_replaced_document_keep_scene_safe() {
         .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
         .expect("cube");
     assert!(state.commit_transform_snapshot(&old, delta).is_err());
-    assert_eq!(state.scene.objects()[0].position(), [0.; 3]);
+    assert_eq!(state.scene.objects()[0].position(), [0., 20., 0.]);
 }
 
 #[test]

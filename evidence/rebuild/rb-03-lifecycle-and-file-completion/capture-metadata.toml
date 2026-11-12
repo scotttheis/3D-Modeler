@@ -1,0 +1,269 @@
+recorded_at_local = "2026-10-31T16:45:25-06:00"
+status = "captures_inspected_owner_visual_review_pending"
+comparison_target_client_logical_px = [1280, 840]
+comparison_target_client_physical_px = [1280, 840]
+window_dpi = 96
+display_scale_percent = 100
+primary_display_physical_px = [2560, 1440]
+capture_method = "GDI CopyFromScreen of the visible application client rectangle"
+capture_sequence = "Python reference captured and closed before Rust capture; no Builder3D windows overlapped"
+python_executable = "L:\\Builder3D\\venv\\Scripts\\pythonw.exe"
+python_module_command = "pythonw.exe -B -m src"
+python_version = "3.12.10"
+python_local_app_data = "E:\\Builder3D-Rust\\target\\rb03-python-profile"
+python_source_read_only = true
+python_reference_status_matches_baseline = true
+python_reference_status_lines = 116
+python_original_qsettings_restored = true
+python_settings_after_restore = "theme_mode=light; recent_files absent; default_import_unit absent"
+rust_debug_executable = "target\\rb03-recents-build\\debug\\builder3d-app.exe"
+rust_debug_sha256 = "dec750d4a6ef65a1a038fd5221f5b941b9799789ec21ec31600becd18d1cd8b1"
+rust_release_executable = "target\\release\\builder3d-app.exe"
+rust_release_sha256 = "de547662b3fca993d631b7ef931aaabd30c28f4f17dbfa629db4adc19949a999"
+rust_release_size_bytes = 14386688
+rust_settings_profile = "target\\rb03-native-profile\\Builder3D\\settings.json"
+python_reference_export_gui_formats_completed = ["3mf"]
+python_reference_export_gui_unreplayed_formats = ["stl", "obj", "ply", "gltf", "glb", "wrl"]
+python_export_replay_limit = "Windows locked the desktop before the extra per-format replay; GetForegroundWindow returned 0, and no locked-desktop input/capture was claimed."
+python_settings_restore_verified = true
+comparison_pair_count = 26
+comparison_capture_file_count = 52
+owner_visual_review = "pending"
+owner_visual_acceptance = "pending"
+light_pairs = ["Light recent cards", "New on a dirty scene: prompt", "Cancel New and keep the scene", "Discard and complete New", "Saved project plus OBJ and PLY imports", "Add/Open model picker", "Unitless STL in millimetres", "Unitless STL in inches", "Two-object 3MF result", "Two-object glTF result", "Two-object GLB result", "Cancel the model picker", "Malformed STL", "Export with no selection: completed 3MF", "Export destination picker/form", "Overwrite confirmation", "Overwrite cancelled", "One object selected for export", "Cancel the export picker", "Open a model from Recents", "Missing recent entry", "Corrupt .3dp recent", "WRL recent import"]
+dark_pairs = ["Dark recent cards", "Exit a dirty scene"]
+mixed_theme_pairs = ["Save As surface"]
+
+[[comparison_pair]]
+category = "Welcome and recents"
+title = "Light recent cards"
+python_theme = "Light"
+python_capture = "captures/python-recent-welcome-light.png"
+rust_theme = "Light"
+rust_capture = "captures/rust-recent-welcome-light.png"
+observed_difference = "The Python reference uses two-column cards with large wireframe model thumbnails and scrolling; this capture shows only the upper portion. Rust uses four compact columns with a status label and Open button, showing more entries at once. The nine paths/order are not identical in these captures, so treat this as a layout/preview comparison, not a pixel-matched ordering check."
+
+[[comparison_pair]]
+category = "Welcome and recents"
+title = "Dark recent cards"
+python_theme = "Dark"
+python_capture = "captures/python-recent-welcome-dark.png"
+rust_theme = "Dark"
+rust_capture = "captures/rust-recent-welcome-dark.png"
+observed_difference = "The same visible difference appears in Dark. The old app retains the wireframe preview style; Rust shows compact shaded preview tiles with file status and Open actions."
+
+[[comparison_pair]]
+category = "Lifecycle"
+title = "New on a dirty scene: prompt"
+python_theme = "Light"
+python_capture = "captures/python-new-dirty-prompt-light.png"
+rust_theme = "Light"
+rust_capture = "captures/rust-new-dirty-guard-before-cancel-light.png"
+observed_difference = "The old app puts a native Save Changes dialog over the current viewport, with Save, Discard, and Cancel. Rust shows its own centered Unsaved changes dialog. Both keep the current scene visible behind the prompt."
+
+[[comparison_pair]]
+category = "Lifecycle"
+title = "Cancel New and keep the scene"
+python_theme = "Light"
+python_capture = "captures/python-new-cancel-preserved-light.png"
+rust_theme = "Light"
+rust_capture = "captures/rust-new-cancel-preserved-light.png"
+observed_difference = "The Python capture was taken after Cancel returned to the same dirty scene. Rust has the same action result; object counts and camera framing differ because the two app sessions used different preceding scene edits."
+
+[[comparison_pair]]
+category = "Lifecycle"
+title = "Discard and complete New"
+python_theme = "Light"
+python_capture = "captures/python-new-discard-complete-light.png"
+rust_theme = "Light"
+rust_capture = "captures/rust-new-discard-complete-light.png"
+observed_difference = "The old app returns to its empty scene after Discard. Rust also completes New and clears the dirty marker."
+
+[[comparison_pair]]
+category = "Lifecycle"
+title = "Save As surface"
+python_theme = "Light"
+python_capture = "captures/python-save-as-dialog-light.png"
+rust_theme = "Dark"
+rust_capture = "captures/rust-save-dialog-dark.png"
+observed_difference = "The old app opens the Windows Save Project file picker, with the .3dp filter and standard filename controls. Rust opens an in-app Save Project form with a path field and Browse button. Themes differ in these existing captures."
+
+[[comparison_pair]]
+category = "Lifecycle"
+title = "Saved project plus OBJ and PLY imports"
+python_theme = "Light"
+python_capture = "captures/python-project-plus-obj-ply-light.png"
+rust_theme = "Light"
+rust_capture = "captures/rust-project-plus-obj-ply-light.png"
+observed_difference = "Both screens show python-current.3dp with two additive model imports; the selected PLY reports 2 × 3 × 4 mm. This is the closest same-project, same-import-state scene pair."
+
+[[comparison_pair]]
+category = "Import"
+title = "Add/Open model picker"
+python_theme = "Light"
+python_capture = "captures/python-add-open-picker-light.png"
+rust_theme = "Light"
+rust_capture = "captures/rust-import-model-dialog-light.png"
+observed_difference = "The old app presents the Windows Add 3D Model picker and its supported-format filter. Rust presents an in-app Import Model form with a unit selector and Browse action. This is a direct visible workflow difference."
+
+[[comparison_pair]]
+category = "Import units"
+title = "Unitless STL in millimetres"
+python_theme = "Light"
+python_capture = "captures/python-unitless-stl-mm-size-light.png"
+rust_theme = "Light"
+rust_capture = "captures/rust-import-mm-resize-fields-light.png"
+observed_difference = "Both show the unitless box as 2 × 3 × 4 mm after the mm import. The Python app places numeric values in its lower Resize strip; Rust shows them in the right Transform panel."
+
+[[comparison_pair]]
+category = "Import units"
+title = "Unitless STL in inches"
+python_theme = "Light"
+python_capture = "captures/python-unitless-stl-inch-light.png"
+rust_theme = "Light"
+rust_capture = "captures/rust-import-python-box-inch-light.png"
+observed_difference = "The old app displays the converted 50.8 × 76.2 × 101.6 mm dimensions after importing with inches. Rust reports the same dimensions; its capture includes an earlier scene object."
+
+[[comparison_pair]]
+category = "Import"
+title = "Two-object 3MF result"
+python_theme = "Light"
+python_capture = "captures/python-multi-object-3mf-light.png"
+rust_theme = "Light"
+rust_capture = "captures/rust-3mf-framed-light.png"
+observed_difference = "The Python screen shows the two named 3MF parts after import. Rust shows the same two names after framing. Selection and starting-scene state differ, so geometry color and framing should be reviewed directly rather than inferred from these images."
+
+[[comparison_pair]]
+category = "Import"
+title = "Two-object glTF result"
+python_theme = "Light"
+python_capture = "captures/python-multi-object-gltf-light.png"
+rust_theme = "Light"
+rust_capture = "captures/rust-gltf-first-part-light.png"
+observed_difference = "The Python screen shows the two glTF parts and their imported scene. Rust shows the imported parts with the first part selected; its capture includes two earlier box objects."
+
+[[comparison_pair]]
+category = "Import"
+title = "Two-object GLB result"
+python_theme = "Light"
+python_capture = "captures/python-multi-object-glb-light.png"
+rust_theme = "Light"
+rust_capture = "captures/rust-glb-second-part-light.png"
+observed_difference = "The Python screen shows the two GLB parts. Rust shows the same two imported parts with the second selected."
+
+[[comparison_pair]]
+category = "Import cancellation and errors"
+title = "Cancel the model picker"
+python_theme = "Light"
+python_capture = "captures/python-import-picker-cancel-preserved-light.png"
+rust_theme = "Light"
+rust_capture = "captures/rust-import-picker-cancel-light.png"
+observed_difference = "Both captures return to the scene after cancel. The Python picker is a Windows dialog; Rust uses its own import flow and returns without adding geometry."
+
+[[comparison_pair]]
+category = "Import cancellation and errors"
+title = "Malformed STL"
+python_theme = "Light"
+python_capture = "captures/python-malformed-import-error-light.png"
+rust_theme = "Light"
+rust_capture = "captures/rust-import-malformed-error-light.png"
+observed_difference = "The old app leaves the existing scene and reports “Import contained no objects” in the status line. Rust keeps the scene and presents a detailed in-form parse error. This is an observed error-message and presentation difference."
+
+[[comparison_pair]]
+category = "Export"
+title = "Export with no selection: completed 3MF"
+python_theme = "Light"
+python_capture = "captures/python-export-no-selection-complete-light.png"
+rust_theme = "Light"
+rust_capture = "captures/rust-export-no-selection-3mf-light.png"
+observed_difference = "Both complete a no-selection 3MF export. The old app reports completion in its status line after the native Save dialog; Rust reports the written path in its status line."
+
+[[comparison_pair]]
+category = "Export"
+title = "Export destination picker/form"
+python_theme = "Light"
+python_capture = "captures/python-export-save-dialog-light.png"
+rust_theme = "Light"
+rust_capture = "captures/rust-export-dialog-light.png"
+observed_difference = "The old app uses the Windows Export Mesh dialog with 3MF as the default filter. Rust uses a centered Export form with a path field and Browse button."
+
+[[comparison_pair]]
+category = "Export"
+title = "Overwrite confirmation"
+python_theme = "Light"
+python_capture = "captures/python-export-overwrite-prompt-light.png"
+rust_theme = "Light"
+rust_capture = "captures/rust-export-overwrite-confirmation-light.png"
+observed_difference = "The old app nests a Confirm Save As Yes/No prompt over the Windows picker. Rust shows a Confirm overwrite form with Overwrite and Cancel. Both offer a non-destructive cancel choice."
+
+[[comparison_pair]]
+category = "Export"
+title = "Overwrite cancelled"
+python_theme = "Light"
+python_capture = "captures/python-export-overwrite-cancelled-light.png"
+rust_theme = "Light"
+rust_capture = "captures/rust-export-overwrite-cancelled-light.png"
+observed_difference = "Both captures show the existing destination preserved after cancellation; the Python output hash was unchanged."
+
+[[comparison_pair]]
+category = "Export"
+title = "One object selected for export"
+python_theme = "Light"
+python_capture = "captures/python-export-one-selected-state-light.png"
+rust_theme = "Light"
+rust_capture = "captures/rust-export-one-selected-state-light.png"
+observed_difference = "Both scenes show one selected object before export. The Python capture reflects its reference selection state; Rust captures the selected-visible export route."
+
+[[comparison_pair]]
+category = "Export"
+title = "Cancel the export picker"
+python_theme = "Light"
+python_capture = "captures/python-export-picker-cancel-preserved-light.png"
+rust_theme = "Light"
+rust_capture = "captures/rust-export-picker-cancel-preserved-light.png"
+observed_difference = "Both return to the same visible scene after cancelling the destination picker, with no output path committed."
+
+[[comparison_pair]]
+category = "Recent dispatch"
+title = "Open a model from Recents"
+python_theme = "Light"
+python_capture = "captures/python-recent-model-open-light.png"
+rust_theme = "Light"
+rust_capture = "captures/rust-recent-model-open-light.png"
+observed_difference = "Each app opens a model recent through the additive model-import path; the Python image shows the resulting imported object."
+
+[[comparison_pair]]
+category = "Recent failures"
+title = "Missing recent entry"
+python_theme = "Light"
+python_capture = "captures/python-missing-recent-warning-light.png"
+rust_theme = "Light"
+rust_capture = "captures/rust-missing-recent-removed-light.png"
+observed_difference = "The old app shows a File Not Found dialog with the path, then removes the row after dismissal. Rust renders a Missing row with a Remove action and does not use a modal warning."
+
+[[comparison_pair]]
+category = "Recent failures"
+title = "Corrupt .3dp recent"
+python_theme = "Light"
+python_capture = "captures/python-corrupt-recent-error-light.png"
+rust_theme = "Light"
+rust_capture = "captures/rust-corrupt-recent-preserved-light.png"
+observed_difference = "The Python app shows an Open Error dialog, then keeps the current scene. Rust leaves the corrupt entry visible and puts the invalid-project reason in the welcome status line; the scene remains unchanged."
+
+[[comparison_pair]]
+category = "Recent failures"
+title = "WRL recent import"
+python_theme = "Light"
+python_capture = "captures/python-wrl-recent-error-light.png"
+rust_theme = "Light"
+rust_capture = "captures/rust-wrl-recent-error-preserved-light.png"
+observed_difference = "The old app shows an Import Error dialog because WRL is not an import format, then reports the reason in the status line. Rust keeps the entry visible and reports the unsupported format in its status line."
+
+[[comparison_pair]]
+category = "Lifecycle"
+title = "Exit a dirty scene"
+python_theme = "Dark"
+python_capture = "captures/python-exit-dirty-prompt-dark.png"
+rust_theme = "Dark"
+rust_capture = "captures/rust-close-guard-fixed-dark.png"
+observed_difference = "Both show a Save/Discard/Cancel guard before exit. The Python app uses the native Save Changes dialog; Rust uses its custom Unsaved changes panel."

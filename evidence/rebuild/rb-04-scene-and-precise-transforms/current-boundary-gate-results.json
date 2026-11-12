@@ -1,0 +1,149 @@
+[
+  {
+    "name": "deny",
+    "command": [
+      "cargo",
+      "deny",
+      "check"
+    ],
+    "exit_code": 0,
+    "seconds": 2.459,
+    "log_path": "logs/boundary-deny.txt",
+    "reuse_reason": "Dependency manifests unchanged; size commands completed after the app-only correction (explicit app chronology verified)."
+  },
+  {
+    "name": "metadata",
+    "command": [
+      "cargo",
+      "metadata",
+      "--locked",
+      "--format-version",
+      "1",
+      "--no-deps"
+    ],
+    "exit_code": 0,
+    "seconds": 0.123,
+    "log_path": "logs/boundary-metadata.txt",
+    "reuse_reason": "Dependency manifests unchanged; size commands completed after the app-only correction (explicit app chronology verified)."
+  },
+  {
+    "name": "bloat-workspace",
+    "command": [
+      "cargo",
+      "bloat",
+      "--release",
+      "--workspace"
+    ],
+    "exit_code": 0,
+    "seconds": 560.371,
+    "log_path": "logs/boundary-bloat-workspace.txt",
+    "reuse_reason": "Dependency manifests unchanged; size commands completed after the app-only correction (explicit app chronology verified)."
+  },
+  {
+    "name": "bloat-app",
+    "command": [
+      "cargo",
+      "bloat",
+      "--release",
+      "-p",
+      "builder3d-app",
+      "--bin",
+      "builder3d-app"
+    ],
+    "exit_code": 0,
+    "seconds": 288.692,
+    "log_path": "logs/boundary-bloat-app.txt",
+    "reuse_reason": "Dependency manifests unchanged; size commands completed after the app-only correction (explicit app chronology verified)."
+  },
+  {
+    "name": "audit",
+    "command": [
+      "cargo",
+      "audit",
+      "--locked"
+    ],
+    "exit_code": 101,
+    "seconds": 0.127,
+    "log_path": "logs/boundary-audit.txt",
+    "reuse_reason": "Dependency manifests unchanged; size commands completed after the app-only correction (explicit app chronology verified)."
+  },
+  {
+    "name": "tests",
+    "exit_code": 0,
+    "log_path": "logs/identity-final-tests.txt",
+    "scope": "Current-source full workspace; Clippy all targets/all features"
+  },
+  {
+    "name": "clippy",
+    "exit_code": 0,
+    "log_path": "logs/identity-final-clippy.txt",
+    "scope": "Current-source full workspace; Clippy all targets/all features"
+  },
+  {
+    "name": "fmt",
+    "command": [
+      "cargo",
+      "fmt",
+      "--all",
+      "--",
+      "--check"
+    ],
+    "exit_code": 0,
+    "seconds": 0.988,
+    "log_path": "logs/current-fmt.txt"
+  },
+  {
+    "name": "check",
+    "command": [
+      "cargo",
+      "check",
+      "--workspace",
+      "--locked"
+    ],
+    "exit_code": 0,
+    "seconds": 2.115,
+    "log_path": "logs/current-check.txt"
+  },
+  {
+    "name": "smoke",
+    "command": [
+      "cargo",
+      "run",
+      "-p",
+      "builder3d-app",
+      "--bin",
+      "builder3d-app",
+      "--",
+      "--smoke"
+    ],
+    "exit_code": 0,
+    "seconds": 10.549,
+    "log_path": "logs/current-smoke.txt"
+  },
+  {
+    "name": "release",
+    "command": [
+      "cargo",
+      "build",
+      "--release",
+      "--locked",
+      "-p",
+      "builder3d-app",
+      "--bin",
+      "builder3d-app"
+    ],
+    "exit_code": 0,
+    "seconds": 165.251,
+    "log_path": "logs/current-release.txt"
+  },
+  {
+    "name": "release-smoke",
+    "command": [
+      "E:\\Builder3D-Rust\\target\\rb04-verified-build-20261031-212336\\builder3d-app.exe",
+      "--smoke"
+    ],
+    "exit_code": 0,
+    "seconds": 0.484,
+    "log_path": "logs/current-release-smoke.txt"
+  }
+]

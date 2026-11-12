@@ -1,0 +1,324 @@
+{
+  "slice": "RB-07",
+  "implementation": "Reused OperationRegistry and connected native shell worker, progress polling, cancel, stale guards, and terminal handling. Print prep/staging also run as desktop jobs.",
+  "python_native_job_records": [
+    {
+      "source": "python-job-heavy-native-results.json",
+      "app": "Python reference",
+      "theme": "light",
+      "action": "job-heavy-scene-ready",
+      "input_route": "native Edit tab with one selected 1,920,000-face mesh",
+      "logical_window_size": [
+        1280,
+        840
+      ],
+      "captured_size": [
+        1280,
+        840
+      ],
+      "screen_dpi": 96.0,
+      "scene_objects": 1,
+      "selection": [
+        0
+      ],
+      "status": "Selected: RB-07 Slow Job Cube",
+      "progress": null,
+      "image": "captures/python-light-job-heavy-scene-ready.png"
+    },
+    {
+      "source": "python-job-heavy-native-results.json",
+      "app": "Python reference",
+      "theme": "light",
+      "action": "job-heavy-smooth-progress",
+      "input_route": "native Edit tab -> Smooth; visible QProgressDialog",
+      "logical_window_size": [
+        1280,
+        840
+      ],
+      "captured_size": [
+        1280,
+        840
+      ],
+      "screen_dpi": 96.0,
+      "scene_objects": 1,
+      "selection": [
+        0
+      ],
+      "status": "Smoothing",
+      "progress": {
+        "title": "Smoothing",
+        "state": "running",
+        "visible": true,
+        "label": "Smoothing",
+        "value": -1,
+        "minimum": 0,
+        "maximum": 100,
+        "cancel_enabled": true
+      },
+      "image": "captures/python-light-job-heavy-smooth-progress.png"
+    },
+    {
+      "source": "python-job-heavy-native-results.json",
+      "app": "Python reference",
+      "theme": "light",
+      "action": "job-heavy-smooth-cancel-requested",
+      "input_route": "native QProgressDialog -> Cancel",
+      "logical_window_size": [
+        1280,
+        840
+      ],
+      "captured_size": [
+        1280,
+        840
+      ],
+      "screen_dpi": 96.0,
+      "scene_objects": 1,
+      "selection": [
+        0
+      ],
+      "status": "Cancelling smoothing...",
+      "progress": {
+        "title": "Smoothing",
+        "state": "cancelling",
+        "visible": false,
+        "label": "Smoothing (cancelling...)",
+        "value": -1,
+        "minimum": 0,
+        "maximum": 100,
+        "cancel_enabled": false
+      },
+      "image": "captures/python-light-job-heavy-smooth-cancel-requested.png"
+    },
+    {
+      "source": "python-job-heavy-native-results.json",
+      "app": "Python reference",
+      "theme": "light",
+      "action": "job-heavy-smooth-cancelled",
+      "input_route": "terminal native cancellation; scene/history unchanged",
+      "logical_window_size": [
+        1280,
+        840
+      ],
+      "captured_size": [
+        1280,
+        840
+      ],
+      "screen_dpi": 96.0,
+      "scene_objects": 1,
+      "selection": [
+        0
+      ],
+      "status": "Smoothing cancelled",
+      "progress": null,
+      "image": "captures/python-light-job-heavy-smooth-cancelled.png"
+    },
+    {
+      "source": "python-job-heavy-native-results.json",
+      "app": "Python reference",
+      "theme": "light",
+      "action": "job-heavy-smooth-retry-complete",
+      "input_route": "native Edit tab -> Smooth after cancelled run",
+      "logical_window_size": [
+        1280,
+        840
+      ],
+      "captured_size": [
+        1280,
+        840
+      ],
+      "screen_dpi": 96.0,
+      "scene_objects": 1,
+      "selection": [
+        0
+      ],
+      "status": "Smoothed 1 object(s)",
+      "progress": null,
+      "image": "captures/python-light-job-heavy-smooth-retry-complete.png"
+    },
+    {
+      "source": "python-job-heavy-native-results.json",
+      "app": "Python reference",
+      "theme": "dark",
+      "action": "job-heavy-scene-ready",
+      "input_route": "native Edit tab with one selected 1,920,000-face mesh",
+      "logical_window_size": [
+        1280,
+        840
+      ],
+      "captured_size": [
+        1280,
+        840
+      ],
+      "screen_dpi": 96.0,
+      "scene_objects": 1,
+      "selection": [
+        0
+      ],
+      "status": "Selected: RB-07 Slow Job Cube",
+      "progress": null,
+      "image": "captures/python-dark-job-heavy-scene-ready.png"
+    },
+    {
+      "source": "python-job-heavy-native-results.json",
+      "app": "Python reference",
+      "theme": "dark",
+      "action": "job-heavy-smooth-progress",
+      "input_route": "native Edit tab -> Smooth; visible QProgressDialog",
+      "logical_window_size": [
+        1280,
+        840
+      ],
+      "captured_size": [
+        1280,
+        840
+      ],
+      "screen_dpi": 96.0,
+      "scene_objects": 1,
+      "selection": [
+        0
+      ],
+      "status": "Smoothing",
+      "progress": {
+        "title": "Smoothing",
+        "state": "running",
+        "visible": true,
+        "label": "Smoothing",
+        "value": -1,
+        "minimum": 0,
+        "maximum": 100,
+        "cancel_enabled": true
+      },
+      "image": "captures/python-dark-job-heavy-smooth-progress.png"
+    },
+    {
+      "source": "python-job-heavy-native-results.json",
+      "app": "Python reference",
+      "theme": "dark",
+      "action": "job-heavy-smooth-cancel-requested",
+      "input_route": "native QProgressDialog -> Cancel",
+      "logical_window_size": [
+        1280,
+        840
+      ],
+      "captured_size": [
+        1280,
+        840
+      ],
+      "screen_dpi": 96.0,
+      "scene_objects": 1,
+      "selection": [
+        0
+      ],
+      "status": "Cancelling smoothing...",
+      "progress": {
+        "title": "Smoothing",
+        "state": "cancelling",
+        "visible": false,
+        "label": "Smoothing (cancelling...)",
+        "value": -1,
+        "minimum": 0,
+        "maximum": 100,
+        "cancel_enabled": false
+      },
+      "image": "captures/python-dark-job-heavy-smooth-cancel-requested.png"
+    },
+    {
+      "source": "python-job-heavy-native-results.json",
+      "app": "Python reference",
+      "theme": "dark",
+      "action": "job-heavy-smooth-cancelled",
+      "input_route": "terminal native cancellation; scene/history unchanged",
+      "logical_window_size": [
+        1280,
+        840
+      ],
+      "captured_size": [
+        1280,
+        840
+      ],
+      "screen_dpi": 96.0,
+      "scene_objects": 1,
+      "selection": [
+        0
+      ],
+      "status": "Smoothing cancelled",
+      "progress": null,
+      "image": "captures/python-dark-job-heavy-smooth-cancelled.png"
+    },
+    {
+      "source": "python-job-heavy-native-results.json",
+      "app": "Python reference",
+      "theme": "dark",
+      "action": "job-heavy-smooth-retry-complete",
+      "input_route": "native Edit tab -> Smooth after cancelled run",
+      "logical_window_size": [
+        1280,
+        840
+      ],
+      "captured_size": [
+        1280,
+        840
+      ],
+      "screen_dpi": 96.0,
+      "scene_objects": 1,
+      "selection": [
+        0
+      ],
+      "status": "Smoothed 1 object(s)",
+      "progress": null,
+      "image": "captures/python-dark-job-heavy-smooth-retry-complete.png"
+    }
+  ],
+  "rust_native_scenarios": [
+    {
+      "theme": "dark",
+      "operation": "Smooth on 1,920,000-face mesh",
+      "result": "Progress and Cancel visible; cancelled terminal confirmed without scene/history commit; Smooth retry completed.",
+      "captures": [
+        "captures/rust-final-dark-job-fixture-imported.png",
+        "captures/rust-final-dark-job-smooth-running.png",
+        "captures/rust-final-dark-job-cancel-requested.png",
+        "captures/rust-final-dark-job-cancelled.png",
+        "captures/rust-final-dark-job-retry-complete.png"
+      ]
+    },
+    {
+      "theme": "dark",
+      "operation": "Resource-limit failure and retry",
+      "result": "Subdivide failure shown, followed by a successful Smooth retry.",
+      "captures": [
+        "captures/rust-final-dark-job-failure.png",
+        "captures/rust-final-dark-job-retry-after-failure.png"
+      ]
+    },
+    {
+      "theme": "light",
+      "operation": "Smooth on 1,920,000-face mesh",
+      "result": "Progress visible and later Smooth retry succeeds; Cancel did not reach a confirmed cancelled terminal frame.",
+      "captures": [
+        "captures/rust-rb07-light-job-heavy-smooth-progress.png",
+        "captures/rust-rb07-light-job-heavy-smooth-retry-complete.png"
+      ]
+    },
+    {
+      "theme": "light",
+      "operation": "Subdivide limits",
+      "result": "3,840,000-face completion; next run reports 7,680,000 above 4,000,000-face limit.",
+      "captures": [
+        "captures/rust-final-light-job-subdivide-first-complete.png",
+        "captures/rust-final-light-job-subdivide-limit-failure.png"
+      ]
+    }
+  ],
+  "automated_shell_tests": [
+    "shell_mesh_job_runs_off_thread_and_commits_one_undoable_result",
+    "duplicate_job_request_is_rejected_with_a_visible_busy_status",
+    "shell_mesh_job_keeps_its_target_when_selection_changes",
+    "cancelled_shell_mesh_job_does_not_commit_and_a_retry_succeeds",
+    "print_check_failure_is_visible_retryable_and_scene_preserving",
+    "background_print_staging_reopens_output_and_dialog_close_cleans_it",
+    "stale_background_print_staging_removes_its_partial_handoff",
+    "reopening_dialog_during_a_job_keeps_the_new_dialog_in_place"
+  ],
+  "limits": "Rust Light cancellation was attempted but not confirmed; screenshots showing completion before cancel, wrong operation, or unverified state were rejected. Rust Dark cancellation and Python Light/Dark cancellation are confirmed."
+}

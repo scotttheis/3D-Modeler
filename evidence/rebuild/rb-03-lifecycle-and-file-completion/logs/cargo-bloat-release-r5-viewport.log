@@ -1,0 +1,35 @@
+﻿COMMAND=cargo bloat --release -p builder3d-app --bin r5_viewport
+cargo :    Compiling builder3d-app v0.1.0 (E:\Builder3D-Rust\crates\builder3d-app)
+At line:2 char:245
++ ... oatOutput = cargo bloat --release -p builder3d-app --bin r5_viewport  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (   Compiling bu...\builder3d-app):String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+    Finished `release` profile [optimized + debuginfo] target(s) in 1m 27s
+    Analyzing target\release\r5_viewport.exe
+
+ File  .text    Size       Crate Name
+ 1.0%   1.2% 48.3KiB    wgpu_hal wgpu_hal::vulkan::Instance::expose_adapter
+ 0.9%   1.0% 41.4KiB        naga naga::back::spv::Writer::write_function
+ 0.8%   1.0% 40.1KiB   wgpu_core wgpu_core::command::render::encode_render_pass
+ 0.8%   1.0% 39.8KiB        naga naga::valid::Validator::validate_impl
+ 0.8%   0.9% 37.4KiB   wgpu_core wgpu_core::device::queue::Queue::submit
+ 0.7%   0.9% 35.6KiB        naga naga::back::spv::BlockContext::write_ray_query_function
+ 0.7%   0.8% 33.3KiB        naga naga::front::wgsl::lower::Lowerer::call_builtin
+ 0.6%   0.8% 31.3KiB        naga naga::back::spv::Writer::write_logical_layout
+ 0.6%   0.7% 30.7KiB    wgpu_hal wgpu_hal::vulkan::Adapter::open_with_callback
+ 0.6%   0.7% 28.7KiB r5_viewport r5_viewport::main::async_block$0
+ 0.6%   0.7% 27.1KiB   wgpu_core wgpu_core::command::CommandEncoder::encode_commands
+ 0.5%   0.6% 25.7KiB        naga naga::back::glsl::writer::Writer<ref_mut$<alloc::string::String> >::write_expr<ref_mut$<alloc::string::String> >
+ 0.5%   0.6% 25.6KiB        naga naga::back::spv::BlockContext::write_block
+ 0.5%   0.6% 24.8KiB enum2$<naga enum2$<naga::front::wgsl::error::Error>::as_parse_error
+ 0.5%   0.6% 24.7KiB        naga naga::back::pipeline_constants::process_overrides
+ 0.5%   0.6% 24.3KiB        naga naga::valid::Validator::validate_function
+ 0.5%   0.6% 24.1KiB        naga naga::front::wgsl::lower::Lowerer::lower
+ 0.5%   0.5% 22.0KiB        naga naga::back::hlsl::Writer<ref_mut$<alloc::string::String> >::write_stmt<ref_mut$<alloc::string::String> >
+ 0.5%   0.5% 21.9KiB         ash ash::vk::const_debugs::impl$255::fmt
+ 0.4%   0.5% 21.1KiB        naga naga::valid::Validator::validate_block_impl
+71.2%  83.8%  3.4MiB             And 4669 smaller methods. Use -n N to show more.
+85.0% 100.0%  4.0MiB             .text section size, the file size is 4.7MiB
+EXIT_CODE=0

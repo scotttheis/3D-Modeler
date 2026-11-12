@@ -1,7 +1,7 @@
 # RB-09 Handoff Checkpoint
 
-**Date:** 2026-11-06
-**Status:** the historical Python/Rust paired live gate passed on its recorded build. A current Rust Release GUI/MCP workflow and optional-MCP failure check ran on 2026-11-06. Schema compatibility against saved Python catalogs remains unresolved. Keep RB-09 acceptance, visual review, owner acceptance, and overall product acceptance pending. Stop before RB-10.
+**Date:** 2026-11-07
+**Status:** the historical Python/Rust paired live gate passed on its recorded build. The 2026-11-06 current Rust Release GUI/MCP workflow and optional-MCP failure check remain recorded. The 2026-11-07 RB-09 schema-parity repair passed against a verified read-only current `L:\Builder3D` catalog capture. Keep full RB-09 acceptance, RB-08 native evidence, interface/floor gaps, visual review, owner acceptance, and overall product acceptance pending. Stop before RB-10.
 
 ## Current state
 
@@ -40,3 +40,50 @@ The owner-reported interface and floor gaps remain open. Visual review, owner ac
 - Final validator self-check/full-validator outcomes and the short-name G: snapshot verification are recorded in `WORK_LOG.md` and `snapshot-receipt.md`.
 
 - Final additive snapshot: G:/B3D_R09C_20261106; independent verification reports 3991 files / 756841099 bytes on both sides, with zero path/hash/reparse differences. Root target, .cache, and logs are excluded; nested RB-09 evidence logs and Git metadata are included. Full receipt and critical hashes are in snapshot-receipt.md.
+
+## Schema-parity repair continuation (2026-11-07)
+
+- The current L:\Builder3D identity was confirmed read-only at Git HEAD
+  3a0160a95c55f68ce9f1e89d17c792816ac001df, Python 3.12.10, MCP SDK 2.2.0.
+  The official SDK captured tools/list only; no Python product or handler was
+  launched and no reference source/settings were touched.
+- The pre-edit Rust return_detail count is 20, not 19. Current Python and
+  repaired Rust both expose exactly five (apply_actions, set_color,
+  set_transform, transform_selection, translate) in model/files/full and zero
+  in observe.
+- Current Rust Release schemas and official annotations match the current
+  reference recursively in all four profiles (7/52/59/60); all recursive
+  difference counts are zero. Root extras are accepted then dropped and nested
+  apply_actions.args extras are rejected in Python; Rust matches.
+- jsonschema 0.60.2 compiles and validates full nested Draft 2020-12 input and
+  output schemas across all profiles. The focused MCP suite passed 26 tests;
+  the live Release result validator passed 1 test on 25 successful structured
+  outputs. Results include new_project from a clean session and completed
+  operation_status. One intentional invalid nested action was rejected with
+  invalid_input.
+- Current Release app/gateway hashes:
+  0e874b6fb06d9b6cb5e70517ca35856d3a8304975e2a0842cd971f20df2c45ba /
+  636171b58800915de87fc8ad26814498279919ea80341076a344c208757da370.
+  The responding GUI exited normally and its runtime descriptor was removed.
+- Workspace tests passed 336/336; current-reference MCP tests passed 9/9.
+  Format, workspace check, all-target/all-feature Clippy with warnings denied,
+  Cargo metadata, Cargo Deny, and explicit app Release bloat passed. App text
+  was 16.0 MiB and executable size was 19.6 MiB. cargo-audit was unavailable.
+- Current catalog comparison is in
+  currpair-20261107-093804-schema-parity/; the final app/MCP run, result log,
+  validation log, and GUI lifecycle record are in
+  currpair-20261107-100537-schema-parity-final/. The run manifest summarizes
+  identities, schemas, results, and the acceptance boundary.
+- One custom _meta.com.builder3d/longRunning difference remains for
+  emboss_text (Python false, Rust true); it is separate from schemas and
+  official ToolAnnotations, and no owner approval is claimed.
+- Additional G: recovery copy: G:\B3D_R09S_20261107. After final
+  synchronization, independent verification passed at 4,079 files /
+  766,761,893 bytes on both sides, with zero missing, extra, different, or
+  reparse entries and no SHA-256 differences. The initial copy also had 23
+  matching critical hashes. The receipt records the required verified pre-edit
+  snapshot. G:\B3D_R09W_20261106 and older snapshots remain untouched.
+- The schema criterion is complete. Full RB-09 acceptance remains open. RB-08
+  native evidence, interface/floor gaps, visual review, owner acceptance, and
+  overall product acceptance remain pending. RB-10 has not started. No stage,
+  commit, push, reset, or restore occurred.

@@ -1,0 +1,248 @@
+{
+  "baseline": "G:\\Builder3D-Rust_snapshot_20261031-194408_RB-04-baseline\\evidence\\rebuild\\parity-matrix.toml",
+  "unchanged_rows": 32,
+  "counts": {
+    "implementation": {
+      "pass": 32
+    },
+    "automated": {
+      "pass": 32
+    },
+    "interactive": {
+      "partial": 2,
+      "pass": 30
+    },
+    "visual": {
+      "pending": 32
+    },
+    "owner_acceptance": {
+      "pending": 32
+    }
+  },
+  "statuses": {
+    "builder3d.ui.scene.new_dirty_guard": {
+      "implementation": "pass",
+      "automated": "pass",
+      "interactive": "pass",
+      "visual": "pending",
+      "owner_acceptance": "pending"
+    },
+    "builder3d.ui.project.open": {
+      "implementation": "pass",
+      "automated": "pass",
+      "interactive": "pass",
+      "visual": "pending",
+      "owner_acceptance": "pending"
+    },
+    "builder3d.ui.project.save": {
+      "implementation": "pass",
+      "automated": "pass",
+      "interactive": "pass",
+      "visual": "pending",
+      "owner_acceptance": "pending"
+    },
+    "builder3d.ui.project.save_as": {
+      "implementation": "pass",
+      "automated": "pass",
+      "interactive": "pass",
+      "visual": "pending",
+      "owner_acceptance": "pending"
+    },
+    "builder3d.ui.project.format_contract": {
+      "implementation": "pass",
+      "automated": "pass",
+      "interactive": "pass",
+      "visual": "pending",
+      "owner_acceptance": "pending"
+    },
+    "builder3d.ui.file.export": {
+      "implementation": "pass",
+      "automated": "pass",
+      "interactive": "pass",
+      "visual": "pending",
+      "owner_acceptance": "pending"
+    },
+    "builder3d.ui.export.selection_visibility": {
+      "implementation": "pass",
+      "automated": "pass",
+      "interactive": "pass",
+      "visual": "pending",
+      "owner_acceptance": "pending"
+    },
+    "builder3d.ui.export.format.stl": {
+      "implementation": "pass",
+      "automated": "pass",
+      "interactive": "pass",
+      "visual": "pending",
+      "owner_acceptance": "pending"
+    },
+    "builder3d.ui.export.format.obj": {
+      "implementation": "pass",
+      "automated": "pass",
+      "interactive": "pass",
+      "visual": "pending",
+      "owner_acceptance": "pending"
+    },
+    "builder3d.ui.export.format.ply": {
+      "implementation": "pass",
+      "automated": "pass",
+      "interactive": "pass",
+      "visual": "pending",
+      "owner_acceptance": "pending"
+    },
+    "builder3d.ui.export.format.3mf": {
+      "implementation": "pass",
+      "automated": "pass",
+      "interactive": "pass",
+      "visual": "pending",
+      "owner_acceptance": "pending"
+    },
+    "builder3d.ui.export.format.gltf": {
+      "implementation": "pass",
+      "automated": "pass",
+      "interactive": "pass",
+      "visual": "pending",
+      "owner_acceptance": "pending"
+    },
+    "builder3d.ui.export.format.glb": {
+      "implementation": "pass",
+      "automated": "pass",
+      "interactive": "pass",
+      "visual": "pending",
+      "owner_acceptance": "pending"
+    },
+    "builder3d.ui.export.format.wrl": {
+      "implementation": "pass",
+      "automated": "pass",
+      "interactive": "pass",
+      "visual": "pending",
+      "owner_acceptance": "pending"
+    },
+    "builder3d.ui.app.exit_dirty_guard": {
+      "implementation": "pass",
+      "automated": "pass",
+      "interactive": "pass",
+      "visual": "pending",
+      "owner_acceptance": "pending"
+    },
+    "builder3d.ui.import.add_open": {
+      "implementation": "pass",
+      "automated": "pass",
+      "interactive": "pass",
+      "visual": "pending",
+      "owner_acceptance": "pending"
+    },
+    "builder3d.ui.import.ambiguous_units": {
+      "implementation": "pass",
+      "automated": "pass",
+      "interactive": "pass",
+      "visual": "pending",
+      "owner_acceptance": "pending"
+    },
+    "builder3d.ui.import.authoritative_units": {
+      "implementation": "pass",
+      "automated": "pass",
+      "interactive": "pass",
+      "visual": "pending",
+      "owner_acceptance": "pending"
+    },
+    "builder3d.ui.import.multi_object_placement": {
+      "implementation": "pass",
+      "automated": "pass",
+      "interactive": "pass",
+      "visual": "pending",
+      "owner_acceptance": "pending"
+    },
+    "builder3d.ui.import.format.stl": {
+      "implementation": "pass",
+      "automated": "pass",
+      "interactive": "pass",
+      "visual": "pending",
+      "owner_acceptance": "pending"
+    },
+    "builder3d.ui.import.format.obj": {
+      "implementation": "pass",
+      "automated": "pass",
+      "interactive": "pass",
+      "visual": "pending",
+      "owner_acceptance": "pending"
+    },
+    "builder3d.ui.import.format.ply": {
+      "implementation": "pass",
+      "automated": "pass",
+      "interactive": "pass",
+      "visual": "pending",
+      "owner_acceptance": "pending"
+    },
+    "builder3d.ui.import.format.3mf": {
+      "implementation": "pass",
+      "automated": "pass",
+      "interactive": "pass",
+      "visual": "pending",
+      "owner_acceptance": "pending"
+    },
+    "builder3d.ui.import.format.gltf": {
+      "implementation": "pass",
+      "automated": "pass",
+      "interactive": "pass",
+      "visual": "pending",
+      "owner_acceptance": "pending"
+    },
+    "builder3d.ui.import.format.glb": {
+      "implementation": "pass",
+      "automated": "pass",
+      "interactive": "pass",
+      "visual": "pending",
+      "owner_acceptance": "pending"
+    },
+    "builder3d.ui.file.native_pickers": {
+      "implementation": "pass",
+      "automated": "pass",
+      "interactive": "pass",
+      "visual": "pending",
+      "owner_acceptance": "pending"
+    },
+    "builder3d.ui.file.failure_preservation": {
+      "implementation": "pass",
+      "automated": "pass",
+      "interactive": "pass",
+      "visual": "pending",
+      "owner_acceptance": "pending"
+    },
+    "builder3d.ui.welcome.recent_files": {
+      "implementation": "pass",
+      "automated": "pass",
+      "interactive": "pass",
+      "visual": "pending",
+      "owner_acceptance": "pending"
+    },
+    "builder3d.ui.welcome.recent_dispatch": {
+      "implementation": "pass",
+      "automated": "pass",
+      "interactive": "pass",
+      "visual": "pending",
+      "owner_acceptance": "pending"
+    },
+    "builder3d.ui.welcome.recent_previews": {
+      "implementation": "pass",
+      "automated": "pass",
+      "interactive": "pass",
+      "visual": "pending",
+      "owner_acceptance": "pending"
+    },
+    "builder3d.ui.history.dirty_marker": {
+      "implementation": "pass",
+      "automated": "pass",
+      "interactive": "partial",
+      "visual": "pending",
+      "owner_acceptance": "pending"
+    },
+    "builder3d.audit.failure_preserves_state": {
+      "implementation": "pass",
+      "automated": "pass",
+      "interactive": "partial",
+      "visual": "pending",
+      "owner_acceptance": "pending"
+    }
+  }
+}

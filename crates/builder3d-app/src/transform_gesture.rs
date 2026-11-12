@@ -156,6 +156,7 @@ enum GestureKind {
     Resize {
         frame: ResizeFrame,
         handle: ResizeHandle,
+        start_parameter: Option<f32>,
     },
 }
 
@@ -229,8 +230,27 @@ impl TransformGesture {
         snapshot: TransformSelectionSnapshot,
         frame: ResizeFrame,
         handle: ResizeHandle,
-    ) -> Self {
-        Self {
+        start_ray: Ray,
+    ) -> Option<Self> {
+        let start_parameter = match handle {
+            ResizeHandle::Face { axis, .. } => {
+                Some(axis_parameter(start_ray, frame.center, frame.axes[axis])?)
+            }
+            ResizeHandle::Corner(sides) => {
+                let vector = subtract(frame.point(sides), frame.center);
+                let length = dot(vector, vector).sqrt();
+                if length <= 1e-8 {
+                    return None;
+                }
+                Some(axis_parameter(
+                    start_ray,
+                    frame.center,
+                    scale(vector, 1.0 / length),
+                )?)
+            }
+            ResizeHandle::Edge { .. } => None,
+        };
+        Some(Self {
             snapshot,
             center: frame.center,
             delta: Transform::identity(),
@@ -241,8 +261,12 @@ impl TransformGesture {
             snap_enabled: false,
             last_move_delta: 0.0,
             previous_move_delta: 0.0,
-            kind: GestureKind::Resize { frame, handle },
-        }
+            kind: GestureKind::Resize {
+                frame,
+                handle,
+                start_parameter,
+            },
+        })
     }
 
     /// Enables landmark/floor snapping for a Move gesture using immutable
@@ -261,6 +285,35 @@ impl TransformGesture {
         self.last_move_delta = 0.0;
         self.previous_move_delta = 0.0;
     }
+
+    pub(crate) fn active_axis_index(&self) -> Option<usize> {
+        match &self.kind {
+            GestureKind::Move { axis, .. } | GestureKind::Rotate { axis, .. } => {
+                let (index, magnitude) = axis
+                    .iter()
+                    .copied()
+                    .enumerate()
+                    .max_by(|(_, first), (_, second)| first.abs().total_cmp(&second.abs()))?;
+                (magnitude.abs() > 0.999).then_some(index)
+            }
+            GestureKind::Resize {
+                handle: ResizeHandle::Face { axis, .. } | ResizeHandle::Edge { axis, .. },
+                ..
+            } => Some(*axis),
+            GestureKind::Resize {
+                handle: ResizeHandle::Corner(_),
+                ..
+            } => None,
+        }
+    }
+
+    pub(crate) fn active_resize_handle(&self) -> Option<ResizeHandle> {
+        match &self.kind {
+            GestureKind::Resize { handle, .. } => Some(*handle),
+            GestureKind::Move { .. } | GestureKind::Rotate { .. } => None,
+        }
+    }
+
     pub(crate) fn update(&mut self, ray: Ray) -> Result<(), TransformError> {
         let matrix = match &mut self.kind {
             GestureKind::Move { axis, start } => {
@@ -285,7 +338,11 @@ impl TransformGesture {
                 let rotation = Transform::identity().rotated(accumulated.to_degrees(), *axis)?;
                 around_center(rotation, self.center, [0.; 3])?
             }
-            GestureKind::Resize { frame, handle } => {
+            GestureKind::Resize {
+                frame,
+                handle,
+                start_parameter,
+            } => {
                 let (axis, side) = match *handle {
                     ResizeHandle::Face { axis, side } => (Some(axis), Some(side)),
                     ResizeHandle::Edge { axis, .. } => (Some(axis), None),
@@ -303,7 +360,12 @@ impl TransformGesture {
                         return Ok(());
                     };
                     let new_extent = side
-                        .map_or(parameter.abs(), |s| s * (parameter + s * extent * 0.5))
+                        .map_or(parameter.abs(), |s| {
+                            start_parameter.map_or_else(
+                                || s * (parameter + s * extent * 0.5),
+                                |start| extent + s * (parameter - start),
+                            )
+                        })
                         .max(0.01);
                     factors[axis] = new_extent / extent;
                     if let Some(side) = side {
@@ -320,7 +382,9 @@ impl TransformGesture {
                     else {
                         return Ok(());
                     };
-                    factors = [parameter.abs().max(0.01) / length; 3];
+                    let new_extent =
+                        length + start_parameter.map_or(0.0, |start| parameter - start);
+                    factors = [new_extent.max(0.01) / length; 3];
                 }
                 let mut rows = Transform::identity().rows();
                 for (i, row) in rows.iter_mut().take(3).enumerate() {

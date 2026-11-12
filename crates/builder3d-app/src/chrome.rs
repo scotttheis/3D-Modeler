@@ -1,0 +1,186 @@
+//! Small shell-chrome glyphs and shared control metrics.
+//!
+//! The owner's artwork covers ribbon commands. Panel utilities that have no
+//! supplied artwork (list selection helpers, the visibility toggle) are drawn
+//! here as one consistent line-icon family, so the shell never repeats a
+//! generic placeholder icon or depends on a font carrying a symbol glyph.
+
+use eframe::egui::{self, Color32, Painter, Pos2, Rect, Stroke, StrokeKind, Vec2};
+
+/// Corner radius for inline controls: buttons, fields, list rows.
+pub(crate) const RADIUS_CONTROL: f32 = 6.0;
+/// Corner radius for cards and floating surfaces.
+pub(crate) const RADIUS_SURFACE: f32 = 10.0;
+/// Height of a single-line field or compact button.
+pub(crate) const CONTROL_HEIGHT: f32 = 26.0;
+/// Height of a list row.
+pub(crate) const ROW_HEIGHT: f32 = 28.0;
+
+/// Axis colours shared by numeric fields and the viewport handles.
+pub(crate) const AXIS_COLORS: [Color32; 3] = [
+    Color32::from_rgb(0xE5, 0x5C, 0x5C),
+    Color32::from_rgb(0x4C, 0xB8, 0x5C),
+    Color32::from_rgb(0x5B, 0x7C, 0xF0),
+];
+
+/// A line icon drawn on a 16-point grid.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) enum Glyph {
+    /// Two shapes inside one outline.
+    Group,
+    /// Two separate shapes.
+    Ungroup,
+    /// A filled selection frame.
+    SelectAll,
+    /// An empty dashed selection frame.
+    DeselectAll,
+    /// A half-filled selection frame.
+    InvertSelection,
+    /// Object is shown.
+    Visible,
+    /// Object is hidden.
+    Hidden,
+    /// Mesh needs attention.
+    Warning,
+}
+
+/// Paints `glyph` centred in `rect` with a stroke weight matched to its size.
+pub(crate) fn paint_glyph(painter: &Painter, rect: Rect, glyph: Glyph, color: Color32) {
+    let unit = rect.width().min(rect.height()) / 16.0;
+    let origin = rect.center() - Vec2::splat(8.0 * unit);
+    let at = |x: f32, y: f32| Pos2::new(origin.x + x * unit, origin.y + y * unit);
+    let boxed = |x0: f32, y0: f32, x1: f32, y1: f32| Rect::from_min_max(at(x0, y0), at(x1, y1));
+    let stroke = Stroke::new((1.4 * unit).max(1.0), color);
+    let radius = 1.5 * unit;
+    match glyph {
+        Glyph::Group => {
+            painter.rect_stroke(
+                boxed(1.5, 1.5, 14.5, 14.5),
+                2.0 * unit,
+                stroke,
+                StrokeKind::Middle,
+            );
+            painter.rect_filled(boxed(4.0, 4.0, 8.5, 8.5), 1.0 * unit, color);
+            painter.rect_filled(
+                boxed(7.5, 7.5, 12.0, 12.0),
+                1.0 * unit,
+                color.gamma_multiply(0.55),
+            );
+        }
+        Glyph::Ungroup => {
+            painter.rect_stroke(
+                boxed(1.5, 1.5, 8.0, 8.0),
+                radius,
+                stroke,
+                StrokeKind::Middle,
+            );
+            painter.rect_stroke(
+                boxed(8.0, 8.0, 14.5, 14.5),
+                radius,
+                stroke,
+                StrokeKind::Middle,
+            );
+        }
+        Glyph::SelectAll => {
+            painter.rect_stroke(
+                boxed(1.5, 1.5, 14.5, 14.5),
+                2.0 * unit,
+                stroke,
+                StrokeKind::Middle,
+            );
+            painter.rect_filled(boxed(4.5, 4.5, 11.5, 11.5), 1.0 * unit, color);
+        }
+        Glyph::DeselectAll => {
+            for (start, end) in dashed_frame() {
+                painter.line_segment([at(start.0, start.1), at(end.0, end.1)], stroke);
+            }
+        }
+        Glyph::InvertSelection => {
+            painter.rect_stroke(
+                boxed(1.5, 1.5, 14.5, 14.5),
+                2.0 * unit,
+                stroke,
+                StrokeKind::Middle,
+            );
+            painter.add(egui::Shape::convex_polygon(
+                vec![at(4.0, 4.0), at(12.0, 4.0), at(4.0, 12.0)],
+                color,
+                Stroke::NONE,
+            ));
+        }
+        Glyph::Visible | Glyph::Hidden => {
+            let lid = |sign: f32| {
+                (0..=12)
+                    .map(|step| {
+                        let t = step as f32 / 12.0;
+                        let x = 1.5 + 13.0 * t;
+                        let y = 8.0 - sign * 4.2 * (std::f32::consts::PI * t).sin();
+                        at(x, y)
+                    })
+                    .collect::<Vec<_>>()
+            };
+            painter.add(egui::Shape::line(lid(1.0), stroke));
+            painter.add(egui::Shape::line(lid(-1.0), stroke));
+            if glyph == Glyph::Visible {
+                painter.circle_filled(at(8.0, 8.0), 2.0 * unit, color);
+            } else {
+                painter.line_segment([at(3.0, 13.5), at(13.0, 2.5)], stroke);
+            }
+        }
+        Glyph::Warning => {
+            painter.add(egui::Shape::closed_line(
+                vec![at(8.0, 2.0), at(14.5, 13.5), at(1.5, 13.5)],
+                stroke,
+            ));
+            painter.line_segment([at(8.0, 6.5), at(8.0, 9.8)], stroke);
+            painter.circle_filled(at(8.0, 11.7), 0.8 * unit, color);
+        }
+    }
+}
+
+type Segment = ((f32, f32), (f32, f32));
+
+fn dashed_frame() -> [Segment; 8] {
+    [
+        ((2.0, 2.0), (6.0, 2.0)),
+        ((10.0, 2.0), (14.0, 2.0)),
+        ((14.0, 2.0), (14.0, 6.0)),
+        ((14.0, 10.0), (14.0, 14.0)),
+        ((14.0, 14.0), (10.0, 14.0)),
+        ((6.0, 14.0), (2.0, 14.0)),
+        ((2.0, 14.0), (2.0, 10.0)),
+        ((2.0, 6.0), (2.0, 2.0)),
+    ]
+}
+
+/// A square icon button with hover, focus, and accessible-name handling.
+/// Returns the response so callers can attach a tooltip.
+pub(crate) fn glyph_button(
+    ui: &mut egui::Ui,
+    glyph: Glyph,
+    color: Color32,
+    hover_fill: Color32,
+    focus_stroke: Color32,
+    accessible_label: &str,
+) -> egui::Response {
+    let (rect, response) = ui.allocate_exact_size(Vec2::splat(24.0), egui::Sense::click());
+    response.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, true, accessible_label));
+    if response.hovered() || response.has_focus() {
+        ui.painter().rect_filled(rect, RADIUS_CONTROL, hover_fill);
+    }
+    if response.has_focus() {
+        ui.painter().rect_stroke(
+            rect,
+            RADIUS_CONTROL,
+            Stroke::new(1.5, focus_stroke),
+            StrokeKind::Inside,
+        );
+    }
+    paint_glyph(
+        ui.painter(),
+        Rect::from_center_size(rect.center(), Vec2::splat(16.0)),
+        glyph,
+        color,
+    );
+    response.on_hover_cursor(egui::CursorIcon::PointingHand)
+}

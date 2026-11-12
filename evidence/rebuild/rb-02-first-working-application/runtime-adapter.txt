@@ -1,0 +1,3 @@
+RB02_RUNTIME_ADAPTER=RendererAdapterInfo { name: "Quadro RTX 4000", backend: "Vulkan", device_type: "DiscreteGpu", driver: "NVIDIA", driver_info: "581.42" }
+
+Observed during startup of the native eframe app through its shared wgpu renderer initialization. The final walkthrough executable used for the captures has SHA-256 4b197161771239c8943fb8fc2f73d6739245145769c301c32931b01e5480da87. The captured scenes show rendered geometry without the CPU-fallback status. Host display: 2560 x 1440 physical pixels; client captures: 1280 x 840 logical/physical pixels at 96 DPI / 100% scale.

@@ -1,0 +1,25 @@
+{"name":"get_status","arguments":{"__rb09_unknown_probe__":"discarded"}}
+{"name":"scene_summary","arguments":{}}
+{"name":"print_check","arguments":{}}
+{"name":"scene_changes","arguments":{"since_revision":0}}
+{"name":"view_state","arguments":{}}
+{"name":"set_snapping","arguments":{"enabled":true}}
+{"name":"discover_slicers","arguments":{}}
+{"name":"new_project","arguments":{}}
+{"name":"add_primitive","arguments":{"primitive":"cube","name":"RB-09 schema parity probe cube"}}
+{"name":"add_primitive","arguments":{"primitive":"torus","name":"RB-09 schema parity probe torus"}}
+{"name":"set_torus_parameters","arguments":{"index":1,"mode":"solid","radius_mm":15,"tube_mm":3,"sides":12,"steps":32}}
+{"name":"select","arguments":{"indices":[0,1]}}
+{"name":"copy_selected","arguments":{}}
+{"name":"mesh_health","arguments":{"index":0}}
+{"name":"translate","arguments":{"index":0,"offset_mm":[1,2,3],"return_detail":"summary"}}
+{"name":"set_color","arguments":{"index":0,"color":[255,128,0],"return_detail":"summary"}}
+{"name":"set_transform","arguments":{"index":0,"position_mm":[5,0,0],"return_detail":"summary"}}
+{"name":"transform_selection","arguments":{"indices":[0],"translation_mm":[0,1,0],"return_detail":"summary"}}
+{"name":"apply_actions","arguments":{"actions":[{"action":"translate","args":{"index":0,"offset_mm":[0,0,1]}}],"return_detail":"summary"}}
+{"name":"snap_translate","arguments":{"axis":"x","proposed_delta_mm":0,"indices":[0],"targets":"objects"}}
+{"name":"scene_summary","arguments":{}}
+{"name":"scene_changes","arguments":{"since_revision":0}}
+{"name":"print_check","arguments":{}}
+{"name":"apply_actions","arguments":{"actions":[{"action":"translate","args":{"index":0,"offset_mm":[1,0,0],"unexpected":true}}]}}
+{"name":"normalize_face_density","arguments":{"index":0,"face_indices":[0],"max_iterations":1}}

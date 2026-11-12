@@ -788,7 +788,7 @@ impl Scene {
         self.execute(crate::commands::AddObjectCommand::new(object))
     }
 
-    /// Creates and inserts a catalog primitive with its shared default color.
+    /// Creates and inserts a catalog primitive centered over the Y=0 build bed.
     pub fn add_primitive(
         &mut self,
         kind: crate::PrimitiveKind,
@@ -802,13 +802,26 @@ impl Scene {
         } else {
             (crate::make_primitive(kind, dimensions_mm)?, None)
         };
-        let object = SceneObject::with_details(
+        let Some((minimum, maximum)) = mesh.bounds() else {
+            return Err(CoreError::InvalidMesh(
+                "primitive has no vertex bounds".to_owned(),
+            ));
+        };
+        let center_x = (f64::from(minimum[0]) + f64::from(maximum[0])) * 0.5;
+        let center_z = (f64::from(minimum[2]) + f64::from(maximum[2])) * 0.5;
+        let placement = Transform::identity().translated([
+            -(center_x as f32),
+            -minimum[1],
+            -(center_z as f32),
+        ])?;
+        let mut object = SceneObject::with_details(
             mesh,
             None,
             name,
             Some(crate::primitive_default_color(kind)),
             metadata,
         )?;
+        object.set_transform_raw(placement);
         let object_id = object.object_id().to_owned();
         let result = self.add_object(object)?;
         Ok((object_id, result))

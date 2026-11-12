@@ -1,0 +1,858 @@
+[
+  {
+    "theme": "light",
+    "action": "pick-before",
+    "selection": [],
+    "objects": [
+      {
+        "id": "c8d73bb4ef784652b00825dbf77aebb8",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            15.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "d38e26a4feb44c72b963023523992993",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            40.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "4ee073cc30a649d68515dc45e5e6dbdd",
+        "name": "Box C",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            -30.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            6.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 0,
+    "width": 1280,
+    "height": 840,
+    "dpi": 96,
+    "fixture": "native-scene-fixtures/row-toggle.3dp",
+    "route": "Guarded OS mouse/key events in visible Qt/OpenGL viewport; ray search chooses an interior face point, no direct selection mutation after setup"
+  },
+  {
+    "theme": "light",
+    "action": "pick-after",
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "c8d73bb4ef784652b00825dbf77aebb8",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            15.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "d38e26a4feb44c72b963023523992993",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            40.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "4ee073cc30a649d68515dc45e5e6dbdd",
+        "name": "Box C",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            -30.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            6.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 0,
+    "width": 1280,
+    "height": 840,
+    "dpi": 96,
+    "fixture": "native-scene-fixtures/row-toggle.3dp",
+    "route": "Guarded OS mouse/key events in visible Qt/OpenGL viewport; ray search chooses an interior face point, no direct selection mutation after setup"
+  },
+  {
+    "theme": "light",
+    "action": "pick-ctrl-empty",
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "c8d73bb4ef784652b00825dbf77aebb8",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            15.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "d38e26a4feb44c72b963023523992993",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            40.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "4ee073cc30a649d68515dc45e5e6dbdd",
+        "name": "Box C",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            -30.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            6.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 0,
+    "width": 1280,
+    "height": 840,
+    "dpi": 96,
+    "fixture": "native-scene-fixtures/row-toggle.3dp",
+    "route": "Guarded OS mouse/key events in visible Qt/OpenGL viewport; ray search chooses an interior face point, no direct selection mutation after setup"
+  },
+  {
+    "theme": "light",
+    "action": "pick-clear",
+    "selection": [],
+    "objects": [
+      {
+        "id": "c8d73bb4ef784652b00825dbf77aebb8",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            15.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "d38e26a4feb44c72b963023523992993",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            40.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "4ee073cc30a649d68515dc45e5e6dbdd",
+        "name": "Box C",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            -30.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            6.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 0,
+    "width": 1280,
+    "height": 840,
+    "dpi": 96,
+    "fixture": "native-scene-fixtures/row-toggle.3dp",
+    "route": "Guarded OS mouse/key events in visible Qt/OpenGL viewport; ray search chooses an interior face point, no direct selection mutation after setup"
+  },
+  {
+    "theme": "dark",
+    "action": "pick-before",
+    "selection": [],
+    "objects": [
+      {
+        "id": "c8d73bb4ef784652b00825dbf77aebb8",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            15.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "d38e26a4feb44c72b963023523992993",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            40.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "4ee073cc30a649d68515dc45e5e6dbdd",
+        "name": "Box C",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            -30.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            6.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 0,
+    "width": 1280,
+    "height": 840,
+    "dpi": 96,
+    "fixture": "native-scene-fixtures/row-toggle.3dp",
+    "route": "Guarded OS mouse/key events in visible Qt/OpenGL viewport; ray search chooses an interior face point, no direct selection mutation after setup"
+  },
+  {
+    "theme": "dark",
+    "action": "pick-after",
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "c8d73bb4ef784652b00825dbf77aebb8",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            15.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "d38e26a4feb44c72b963023523992993",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            40.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "4ee073cc30a649d68515dc45e5e6dbdd",
+        "name": "Box C",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            -30.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            6.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 0,
+    "width": 1280,
+    "height": 840,
+    "dpi": 96,
+    "fixture": "native-scene-fixtures/row-toggle.3dp",
+    "route": "Guarded OS mouse/key events in visible Qt/OpenGL viewport; ray search chooses an interior face point, no direct selection mutation after setup"
+  },
+  {
+    "theme": "dark",
+    "action": "pick-ctrl-empty",
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "c8d73bb4ef784652b00825dbf77aebb8",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            15.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "d38e26a4feb44c72b963023523992993",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            40.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "4ee073cc30a649d68515dc45e5e6dbdd",
+        "name": "Box C",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            -30.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            6.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 0,
+    "width": 1280,
+    "height": 840,
+    "dpi": 96,
+    "fixture": "native-scene-fixtures/row-toggle.3dp",
+    "route": "Guarded OS mouse/key events in visible Qt/OpenGL viewport; ray search chooses an interior face point, no direct selection mutation after setup"
+  },
+  {
+    "theme": "dark",
+    "action": "pick-clear",
+    "selection": [],
+    "objects": [
+      {
+        "id": "c8d73bb4ef784652b00825dbf77aebb8",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            15.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "d38e26a4feb44c72b963023523992993",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            40.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "4ee073cc30a649d68515dc45e5e6dbdd",
+        "name": "Box C",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            -30.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            6.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 0,
+    "width": 1280,
+    "height": 840,
+    "dpi": 96,
+    "fixture": "native-scene-fixtures/row-toggle.3dp",
+    "route": "Guarded OS mouse/key events in visible Qt/OpenGL viewport; ray search chooses an interior face point, no direct selection mutation after setup"
+  }
+]

@@ -1,0 +1,541 @@
+﻿{
+    "status":  "diagnostic_pending_unlock",
+    "process_id":  27176,
+    "window_title":  "Builder3D - Untitled",
+    "foreground":  "Windows Default Lock Screen",
+    "descendant_count":  38,
+    "elements":  [
+                     {
+                         "name":  "",
+                         "control_type":  "ControlType.Pane",
+                         "automation_id":  "",
+                         "enabled":  true,
+                         "keyboard_focusable":  false,
+                         "has_keyboard_focus":  false,
+                         "bounds":  [
+                                        Infinity,
+                                        Infinity,
+                                        -Infinity,
+                                        -Infinity
+                                    ]
+                     },
+                     {
+                         "name":  "Application menu",
+                         "control_type":  "ControlType.Button",
+                         "automation_id":  "",
+                         "enabled":  true,
+                         "keyboard_focusable":  true,
+                         "has_keyboard_focus":  false,
+                         "bounds":  [
+                                        255,
+                                        273,
+                                        36,
+                                        37
+                                    ]
+                     },
+                     {
+                         "name":  "Insert",
+                         "control_type":  "ControlType.Button",
+                         "automation_id":  "",
+                         "enabled":  true,
+                         "keyboard_focusable":  true,
+                         "has_keyboard_focus":  false,
+                         "bounds":  [
+                                        292,
+                                        281,
+                                        62,
+                                        35
+                                    ]
+                     },
+                     {
+                         "name":  "Object",
+                         "control_type":  "ControlType.Button",
+                         "automation_id":  "",
+                         "enabled":  true,
+                         "keyboard_focusable":  true,
+                         "has_keyboard_focus":  false,
+                         "bounds":  [
+                                        355,
+                                        282,
+                                        65,
+                                        35
+                                    ]
+                     },
+                     {
+                         "name":  "Edit",
+                         "control_type":  "ControlType.Button",
+                         "automation_id":  "",
+                         "enabled":  true,
+                         "keyboard_focusable":  true,
+                         "has_keyboard_focus":  false,
+                         "bounds":  [
+                                        421,
+                                        282,
+                                        62,
+                                        35
+                                    ]
+                     },
+                     {
+                         "name":  "Paint",
+                         "control_type":  "ControlType.Button",
+                         "automation_id":  "",
+                         "enabled":  true,
+                         "keyboard_focusable":  true,
+                         "has_keyboard_focus":  false,
+                         "bounds":  [
+                                        484,
+                                        282,
+                                        62,
+                                        35
+                                    ]
+                     },
+                     {
+                         "name":  "View",
+                         "control_type":  "ControlType.Button",
+                         "automation_id":  "",
+                         "enabled":  true,
+                         "keyboard_focusable":  true,
+                         "has_keyboard_focus":  false,
+                         "bounds":  [
+                                        547,
+                                        282,
+                                        62,
+                                        35
+                                    ]
+                     },
+                     {
+                         "name":  "Cube favorite",
+                         "control_type":  "ControlType.Button",
+                         "automation_id":  "",
+                         "enabled":  true,
+                         "keyboard_focusable":  true,
+                         "has_keyboard_focus":  false,
+                         "bounds":  [
+                                        614,
+                                        285,
+                                        40,
+                                        40
+                                    ]
+                     },
+                     {
+                         "name":  "Duplicate favorite",
+                         "control_type":  "ControlType.Button",
+                         "automation_id":  "",
+                         "enabled":  false,
+                         "keyboard_focusable":  false,
+                         "has_keyboard_focus":  false,
+                         "bounds":  [
+                                        655,
+                                        285,
+                                        40,
+                                        40
+                                    ]
+                     },
+                     {
+                         "name":  "Delete favorite",
+                         "control_type":  "ControlType.Button",
+                         "automation_id":  "",
+                         "enabled":  false,
+                         "keyboard_focusable":  false,
+                         "has_keyboard_focus":  false,
+                         "bounds":  [
+                                        696,
+                                        285,
+                                        40,
+                                        40
+                                    ]
+                     },
+                     {
+                         "name":  "Reset View favorite",
+                         "control_type":  "ControlType.Button",
+                         "automation_id":  "",
+                         "enabled":  true,
+                         "keyboard_focusable":  true,
+                         "has_keyboard_focus":  false,
+                         "bounds":  [
+                                        737,
+                                        285,
+                                        40,
+                                        40
+                                    ]
+                     },
+                     {
+                         "name":  "Redo",
+                         "control_type":  "ControlType.Button",
+                         "automation_id":  "",
+                         "enabled":  true,
+                         "keyboard_focusable":  true,
+                         "has_keyboard_focus":  false,
+                         "bounds":  [
+                                        1473,
+                                        281,
+                                        36,
+                                        36
+                                    ]
+                     },
+                     {
+                         "name":  "Undo",
+                         "control_type":  "ControlType.Button",
+                         "automation_id":  "",
+                         "enabled":  true,
+                         "keyboard_focusable":  true,
+                         "has_keyboard_focus":  false,
+                         "bounds":  [
+                                        1436,
+                                        281,
+                                        36,
+                                        36
+                                    ]
+                     },
+                     {
+                         "name":  "Save project as",
+                         "control_type":  "ControlType.Button",
+                         "automation_id":  "",
+                         "enabled":  true,
+                         "keyboard_focusable":  true,
+                         "has_keyboard_focus":  false,
+                         "bounds":  [
+                                        1399,
+                                        281,
+                                        36,
+                                        36
+                                    ]
+                     },
+                     {
+                         "name":  "Save project",
+                         "control_type":  "ControlType.Button",
+                         "automation_id":  "",
+                         "enabled":  true,
+                         "keyboard_focusable":  true,
+                         "has_keyboard_focus":  false,
+                         "bounds":  [
+                                        1362,
+                                        281,
+                                        36,
+                                        36
+                                    ]
+                     },
+                     {
+                         "name":  "3D Print",
+                         "control_type":  "ControlType.Button",
+                         "automation_id":  "",
+                         "enabled":  true,
+                         "keyboard_focusable":  true,
+                         "has_keyboard_focus":  false,
+                         "bounds":  [
+                                        1269,
+                                        284,
+                                        92,
+                                        30
+                                    ]
+                     },
+                     {
+                         "name":  "Add/Open",
+                         "control_type":  "ControlType.Button",
+                         "automation_id":  "",
+                         "enabled":  true,
+                         "keyboard_focusable":  true,
+                         "has_keyboard_focus":  false,
+                         "bounds":  [
+                                        247,
+                                        372,
+                                        74,
+                                        91
+                                    ]
+                     },
+                     {
+                         "name":  "Cube",
+                         "control_type":  "ControlType.Button",
+                         "automation_id":  "",
+                         "enabled":  true,
+                         "keyboard_focusable":  true,
+                         "has_keyboard_focus":  false,
+                         "bounds":  [
+                                        330,
+                                        372,
+                                        66,
+                                        91
+                                    ]
+                     },
+                     {
+                         "name":  "Cylinder",
+                         "control_type":  "ControlType.Button",
+                         "automation_id":  "",
+                         "enabled":  true,
+                         "keyboard_focusable":  true,
+                         "has_keyboard_focus":  false,
+                         "bounds":  [
+                                        399,
+                                        372,
+                                        66,
+                                        91
+                                    ]
+                     },
+                     {
+                         "name":  "Pyramid",
+                         "control_type":  "ControlType.Button",
+                         "automation_id":  "",
+                         "enabled":  true,
+                         "keyboard_focusable":  true,
+                         "has_keyboard_focus":  false,
+                         "bounds":  [
+                                        468,
+                                        372,
+                                        66,
+                                        91
+                                    ]
+                     },
+                     {
+                         "name":  "Cone",
+                         "control_type":  "ControlType.Button",
+                         "automation_id":  "",
+                         "enabled":  true,
+                         "keyboard_focusable":  true,
+                         "has_keyboard_focus":  false,
+                         "bounds":  [
+                                        537,
+                                        372,
+                                        66,
+                                        91
+                                    ]
+                     },
+                     {
+                         "name":  "Sphere",
+                         "control_type":  "ControlType.Button",
+                         "automation_id":  "",
+                         "enabled":  true,
+                         "keyboard_focusable":  true,
+                         "has_keyboard_focus":  false,
+                         "bounds":  [
+                                        606,
+                                        372,
+                                        66,
+                                        91
+                                    ]
+                     },
+                     {
+                         "name":  "Torus",
+                         "control_type":  "ControlType.Button",
+                         "automation_id":  "",
+                         "enabled":  true,
+                         "keyboard_focusable":  true,
+                         "has_keyboard_focus":  false,
+                         "bounds":  [
+                                        675,
+                                        372,
+                                        66,
+                                        91
+                                    ]
+                     },
+                     {
+                         "name":  "Hexagon",
+                         "control_type":  "ControlType.Button",
+                         "automation_id":  "",
+                         "enabled":  true,
+                         "keyboard_focusable":  true,
+                         "has_keyboard_focus":  false,
+                         "bounds":  [
+                                        744,
+                                        372,
+                                        66,
+                                        91
+                                    ]
+                     },
+                     {
+                         "name":  "Wedge",
+                         "control_type":  "ControlType.Button",
+                         "automation_id":  "",
+                         "enabled":  true,
+                         "keyboard_focusable":  true,
+                         "has_keyboard_focus":  false,
+                         "bounds":  [
+                                        814,
+                                        372,
+                                        66,
+                                        91
+                                    ]
+                     },
+                     {
+                         "name":  "Pin command ribbon",
+                         "control_type":  "ControlType.Button",
+                         "automation_id":  "",
+                         "enabled":  true,
+                         "keyboard_focusable":  true,
+                         "has_keyboard_focus":  false,
+                         "bounds":  [
+                                        1478,
+                                        337,
+                                        30,
+                                        91
+                                    ]
+                     },
+                     {
+                         "name":  "",
+                         "control_type":  "ControlType.Pane",
+                         "automation_id":  "",
+                         "enabled":  true,
+                         "keyboard_focusable":  false,
+                         "has_keyboard_focus":  false,
+                         "bounds":  [
+                                        Infinity,
+                                        Infinity,
+                                        -Infinity,
+                                        -Infinity
+                                    ]
+                     },
+                     {
+                         "name":  "CREATE  •  REPAIR  •  PREPARE",
+                         "control_type":  "ControlType.Text",
+                         "automation_id":  "",
+                         "enabled":  true,
+                         "keyboard_focusable":  false,
+                         "has_keyboard_focus":  false,
+                         "bounds":  [
+                                        598,
+                                        480,
+                                        149,
+                                        15
+                                    ]
+                     },
+                     {
+                         "name":  "Builder3D",
+                         "control_type":  "ControlType.Text",
+                         "automation_id":  "",
+                         "enabled":  true,
+                         "keyboard_focusable":  false,
+                         "has_keyboard_focus":  false,
+                         "bounds":  [
+                                        598,
+                                        502,
+                                        129,
+                                        40
+                                    ]
+                     },
+                     {
+                         "name":  "Start a scene, open a model, or return to a recent project.",
+                         "control_type":  "ControlType.Text",
+                         "automation_id":  "",
+                         "enabled":  true,
+                         "keyboard_focusable":  false,
+                         "has_keyboard_focus":  false,
+                         "bounds":  [
+                                        598,
+                                        547,
+                                        327,
+                                        17
+                                    ]
+                     },
+                     {
+                         "name":  "New Scene",
+                         "control_type":  "ControlType.Button",
+                         "automation_id":  "",
+                         "enabled":  true,
+                         "keyboard_focusable":  true,
+                         "has_keyboard_focus":  false,
+                         "bounds":  [
+                                        502,
+                                        599,
+                                        280,
+                                        96
+                                    ]
+                     },
+                     {
+                         "name":  "Open Project",
+                         "control_type":  "ControlType.Button",
+                         "automation_id":  "",
+                         "enabled":  true,
+                         "keyboard_focusable":  true,
+                         "has_keyboard_focus":  false,
+                         "bounds":  [
+                                        806,
+                                        599,
+                                        280,
+                                        96
+                                    ]
+                     },
+                     {
+                         "name":  "RECENT",
+                         "control_type":  "ControlType.Text",
+                         "automation_id":  "",
+                         "enabled":  true,
+                         "keyboard_focusable":  false,
+                         "has_keyboard_focus":  false,
+                         "bounds":  [
+                                        262,
+                                        736,
+                                        42,
+                                        16
+                                    ]
+                     },
+                     {
+                         "name":  "Recent projects and models appear here.",
+                         "control_type":  "ControlType.Text",
+                         "automation_id":  "",
+                         "enabled":  true,
+                         "keyboard_focusable":  false,
+                         "has_keyboard_focus":  false,
+                         "bounds":  [
+                                        261,
+                                        788,
+                                        233,
+                                        17
+                                    ]
+                     },
+                     {
+                         "name":  "Saved",
+                         "control_type":  "ControlType.Text",
+                         "automation_id":  "",
+                         "enabled":  true,
+                         "keyboard_focusable":  false,
+                         "has_keyboard_focus":  false,
+                         "bounds":  [
+                                        255,
+                                        1069,
+                                        34,
+                                        17
+                                    ]
+                     },
+                     {
+                         "name":  "Selected: 0  |  Python preferences migrated to Rust settings",
+                         "control_type":  "ControlType.Text",
+                         "automation_id":  "",
+                         "enabled":  true,
+                         "keyboard_focusable":  false,
+                         "has_keyboard_focus":  false,
+                         "bounds":  [
+                                        307,
+                                        1069,
+                                        338,
+                                        17
+                                    ]
+                     },
+                     {
+                         "name":  "Transform 0.000 mm / 0.000 mm / 0.000 mm",
+                         "control_type":  "ControlType.Text",
+                         "automation_id":  "",
+                         "enabled":  true,
+                         "keyboard_focusable":  false,
+                         "has_keyboard_focus":  false,
+                         "bounds":  [
+                                        1315,
+                                        1070,
+                                        220,
+                                        15
+                                    ]
+                     },
+                     {
+                         "name":  "Imported supported Python settings; the Rust JSON settings file will be the writable copy.",
+                         "control_type":  "ControlType.Text",
+                         "automation_id":  "",
+                         "enabled":  true,
+                         "keyboard_focusable":  false,
+                         "has_keyboard_focus":  false,
+                         "bounds":  [
+                                        258,
+                                        357,
+                                        511,
+                                        17
+                                    ]
+                     }
+                 ]
+}

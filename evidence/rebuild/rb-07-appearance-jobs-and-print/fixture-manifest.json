@@ -1,0 +1,84 @@
+{
+  "slice": "RB-07",
+  "fixture_root": "evidence/rebuild/rb-07-appearance-jobs-and-print/fixtures",
+  "generator": "generate-job-fixture.py",
+  "fixtures": [
+    {
+      "path": "fixtures/authored-red-roundtrip.3mf",
+      "bytes": 1133,
+      "sha256": "6D34612B93A098A5B197B4C8050819EC022669CEE8075FBF4F1AC63C8F3EF307",
+      "purpose": "Authored red material 3MF roundtrip."
+    },
+    {
+      "path": "fixtures/color-sample.png",
+      "bytes": 106,
+      "sha256": "92E922CA02D6F86A4A197992B78B9E10F2B4B6AF6F337A80190BE96E216CD8D8",
+      "purpose": "Valid 20x20 average-color image.",
+      "dimensions_px": [
+        20,
+        20
+      ]
+    },
+    {
+      "path": "fixtures/corrupt-image.png",
+      "bytes": 29,
+      "sha256": "DA6030CB3707A3F5653061FB0503283FD99C4201C2BCAB4BB1454C265F090864",
+      "purpose": "Corrupt image decode error."
+    },
+    {
+      "path": "fixtures/oversized-bytes.bin",
+      "bytes": 67108865,
+      "sha256": "91990977345985AAF03AF1358F4F989D7EAF985B58529EFB72F613C588F6599A",
+      "purpose": "64 MiB plus 1 byte size-limit input."
+    },
+    {
+      "path": "fixtures/oversized-pixels.png",
+      "bytes": 56225,
+      "sha256": "8D06216DC2D649BD033398EA54A085B8D9753FB663C44675FF81A47BE751053F",
+      "purpose": "4097x4097 pixel-limit input.",
+      "dimensions_px": [
+        4097,
+        4097
+      ]
+    },
+    {
+      "path": "fixtures/slow-job-closed-cube-heavy.ply",
+      "bytes": 36480205,
+      "sha256": "4ABE4057CC2488C451860410E593E9620B42DE12FFAA7571E53CAA890D91E964",
+      "purpose": "Closed 1,920,000-face long-job fixture.",
+      "vertices": 960002,
+      "faces": 1920000
+    },
+    {
+      "path": "fixtures/slow-job-closed-cube.ply",
+      "bytes": 19042993,
+      "sha256": "188D2DFABB7DD3AFBEA55F33C33654E33BCEEFAA1AF80055B7950143B3185C2B",
+      "purpose": "Closed 1,002,252-face job and resource test fixture.",
+      "vertices": 501128,
+      "faces": 1002252
+    },
+    {
+      "path": "fixtures/staged-bambu-handoff.stl",
+      "bytes": 684,
+      "sha256": "EC1B527705B8045D5748A532519BF9EAE4AD3B7DDAD6081B85C3386669A8C15C",
+      "purpose": "Real Rust Bambu handoff output, independently checked.",
+      "binary_stl_triangles": 12
+    },
+    {
+      "path": "fixtures/unsupported-image.xyz",
+      "bytes": 38,
+      "sha256": "4EB931D5F8C4AE3D2E57567E9F3568F8AED8D60EBBFEA18E4442024B566C0FA8",
+      "purpose": "Unsupported image input."
+    }
+  ],
+  "virtual_cases": [
+    {
+      "case": "missing image",
+      "expected": "visible not-found error; scene and authored color unchanged"
+    },
+    {
+      "case": "unreadable image",
+      "expected": "visible safe input error; scene and authored color unchanged"
+    }
+  ]
+}

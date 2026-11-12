@@ -1,0 +1,11 @@
+﻿gate	status	log
+cargo-fmt	PASS	cargo-fmt.txt
+cargo-check-workspace	PASS	cargo-check-workspace.txt
+cargo-test-workspace	PASS	cargo-test-workspace.txt
+cargo-clippy	PASS	cargo-clippy.txt
+cargo-deny	PASS	cargo-deny.txt
+cargo-metadata	PASS	cargo-metadata.txt
+cargo-smoke	PASS	cargo-smoke.txt
+cargo-build-release	PASS	cargo-build-release.txt
+cargo-bloat-workspace	PASS	cargo-bloat-workspace.txt
+cargo-bloat-app	PASS	cargo-bloat-app.txt

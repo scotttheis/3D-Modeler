@@ -1,0 +1,312 @@
+[
+  {
+    "name": "row-toggle",
+    "selection": [
+      0
+    ],
+    "kind": "base",
+    "fixture": "native-scene-fixtures/row-toggle.3dp"
+  },
+  {
+    "name": "ctrl-toggle",
+    "selection": [
+      0
+    ],
+    "kind": "base",
+    "fixture": "native-scene-fixtures/ctrl-toggle.3dp"
+  },
+  {
+    "name": "shift-range",
+    "selection": [
+      0
+    ],
+    "kind": "base",
+    "fixture": "native-scene-fixtures/shift-range.3dp"
+  },
+  {
+    "name": "select-all",
+    "selection": [
+      0
+    ],
+    "kind": "base",
+    "fixture": "native-scene-fixtures/select-all.3dp"
+  },
+  {
+    "name": "deselect-all",
+    "selection": [
+      0,
+      1
+    ],
+    "kind": "base",
+    "fixture": "native-scene-fixtures/deselect-all.3dp"
+  },
+  {
+    "name": "invert",
+    "selection": [
+      0
+    ],
+    "kind": "base",
+    "fixture": "native-scene-fixtures/invert.3dp"
+  },
+  {
+    "name": "sticky-empty",
+    "selection": [
+      0
+    ],
+    "kind": "base",
+    "fixture": "native-scene-fixtures/sticky-empty.3dp"
+  },
+  {
+    "name": "empty-clear",
+    "selection": [
+      0
+    ],
+    "kind": "base",
+    "fixture": "native-scene-fixtures/empty-clear.3dp"
+  },
+  {
+    "name": "ctrl-empty",
+    "selection": [
+      0
+    ],
+    "kind": "base",
+    "fixture": "native-scene-fixtures/ctrl-empty.3dp"
+  },
+  {
+    "name": "duplicate",
+    "selection": [
+      0
+    ],
+    "kind": "base",
+    "fixture": "native-scene-fixtures/duplicate.3dp"
+  },
+  {
+    "name": "copy",
+    "selection": [
+      0
+    ],
+    "kind": "base",
+    "fixture": "native-scene-fixtures/copy.3dp"
+  },
+  {
+    "name": "paste-other-selection",
+    "selection": [
+      0
+    ],
+    "kind": "base",
+    "fixture": "native-scene-fixtures/paste-other-selection.3dp"
+  },
+  {
+    "name": "cut",
+    "selection": [
+      0,
+      1
+    ],
+    "kind": "base",
+    "fixture": "native-scene-fixtures/cut.3dp"
+  },
+  {
+    "name": "delete",
+    "selection": [
+      0,
+      1
+    ],
+    "kind": "base",
+    "fixture": "native-scene-fixtures/delete.3dp"
+  },
+  {
+    "name": "group",
+    "selection": [
+      0,
+      1
+    ],
+    "kind": "hidden",
+    "fixture": "native-scene-fixtures/group.3dp"
+  },
+  {
+    "name": "ungroup",
+    "selection": [
+      1
+    ],
+    "kind": "group",
+    "fixture": "native-scene-fixtures/ungroup.3dp"
+  },
+  {
+    "name": "move-mm",
+    "selection": [
+      0
+    ],
+    "kind": "base",
+    "fixture": "native-scene-fixtures/move-mm.3dp"
+  },
+  {
+    "name": "move-inch",
+    "selection": [
+      0
+    ],
+    "kind": "base",
+    "fixture": "native-scene-fixtures/move-inch.3dp"
+  },
+  {
+    "name": "rotate-degree",
+    "selection": [
+      0
+    ],
+    "kind": "base",
+    "fixture": "native-scene-fixtures/rotate-degree.3dp"
+  },
+  {
+    "name": "resize-inch",
+    "selection": [
+      0
+    ],
+    "kind": "base",
+    "fixture": "native-scene-fixtures/resize-inch.3dp"
+  },
+  {
+    "name": "resize-locked-inch",
+    "selection": [
+      0
+    ],
+    "kind": "base",
+    "fixture": "native-scene-fixtures/resize-locked-inch.3dp"
+  },
+  {
+    "name": "multi-move-inch",
+    "selection": [
+      0,
+      1
+    ],
+    "kind": "hidden",
+    "fixture": "native-scene-fixtures/multi-move-inch.3dp"
+  },
+  {
+    "name": "multi-rotate",
+    "selection": [
+      0,
+      1
+    ],
+    "kind": "base",
+    "fixture": "native-scene-fixtures/multi-rotate.3dp"
+  },
+  {
+    "name": "multi-resize-locked",
+    "selection": [
+      0,
+      1
+    ],
+    "kind": "base",
+    "fixture": "native-scene-fixtures/multi-resize-locked.3dp"
+  },
+  {
+    "name": "delete-text-focus",
+    "selection": [
+      0
+    ],
+    "kind": "base",
+    "fixture": "native-scene-fixtures/delete-text-focus.3dp"
+  },
+  {
+    "name": "numeric-invalid",
+    "selection": [
+      0
+    ],
+    "kind": "base",
+    "fixture": "native-scene-fixtures/numeric-invalid.3dp"
+  },
+  {
+    "name": "units-only",
+    "selection": [
+      0
+    ],
+    "kind": "base",
+    "fixture": "native-scene-fixtures/units-only.3dp"
+  },
+  {
+    "name": "rename-reference",
+    "selection": [
+      0
+    ],
+    "kind": "base",
+    "fixture": "native-scene-fixtures/rename-reference.3dp"
+  },
+  {
+    "name": "visibility-reference",
+    "selection": [
+      0,
+      1
+    ],
+    "kind": "base",
+    "fixture": "native-scene-fixtures/visibility-reference.3dp"
+  },
+  {
+    "name": "mirror-y",
+    "selection": [
+      0,
+      1
+    ],
+    "kind": "hidden",
+    "fixture": "native-scene-fixtures/mirror-y.3dp"
+  },
+  {
+    "name": "align-z-max",
+    "selection": [
+      1,
+      0
+    ],
+    "kind": "base",
+    "fixture": "native-scene-fixtures/align-z-max.3dp"
+  },
+  {
+    "name": "arrange-z-gap5",
+    "selection": [
+      1,
+      0
+    ],
+    "kind": "base",
+    "fixture": "native-scene-fixtures/arrange-z-gap5.3dp"
+  },
+  {
+    "name": "mirror-cancel",
+    "selection": [
+      0,
+      1
+    ],
+    "kind": "base",
+    "fixture": "native-scene-fixtures/mirror-cancel.3dp"
+  },
+  {
+    "name": "arrange-invalid-cancel",
+    "selection": [
+      0,
+      1
+    ],
+    "kind": "base",
+    "fixture": "native-scene-fixtures/arrange-invalid-cancel.3dp"
+  },
+  {
+    "name": "measure",
+    "selection": [
+      0,
+      1
+    ],
+    "kind": "hidden",
+    "fixture": "native-scene-fixtures/measure.3dp"
+  },
+  {
+    "name": "health-warning",
+    "selection": [
+      0
+    ],
+    "kind": "unhealthy",
+    "fixture": "native-scene-fixtures/health-warning.3dp"
+  },
+  {
+    "name": "health-repair",
+    "selection": [
+      0
+    ],
+    "kind": "unhealthy",
+    "fixture": "native-scene-fixtures/health-repair.3dp"
+  }
+]

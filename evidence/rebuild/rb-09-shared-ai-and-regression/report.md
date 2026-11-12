@@ -1,7 +1,7 @@
 # RB-09 Shared AI and Regression Report
 
-**Date:** 2026-11-06
-**Status:** The historical Python/Rust paired gate passed on its recorded build. A current Rust Release GUI/MCP recheck and optional-MCP failure check also passed on 2026-11-06. The current schema comparison found unresolved catalog differences against saved Python catalogs, so RB-09 schema compatibility and overall acceptance remain pending. Stop before RB-10.
+**Date:** 2026-11-07
+**Status:** The historical Python/Rust paired gate passed on its recorded build. A current Rust Release GUI/MCP recheck and optional-MCP failure check also passed on 2026-11-06. The RB-09 schema-parity repair passed on 2026-11-07 against the verified current `L:\Builder3D` reference catalog. Full RB-09 acceptance and overall product acceptance remain pending. Stop before RB-10.
 
 ## Historical paired gate evidence
 
@@ -88,3 +88,37 @@ Schema details are in `currpair-20261106-072716/schema-comparison.json`. They ar
 ## Current additive recovery snapshot
 
 The final snapshot is G:/B3D_R09C_20261106, a new short-name directory on G:. After the final synchronization, the independent verifier reports 3991 files / 756841099 bytes on both sides, zero missing/extra/differing paths, zero reparse entries, and matching critical SHA-256 values. Repository-root target, .cache, and logs are excluded; nested RB-09 evidence logs and Git metadata are included. Full receipt: snapshot-receipt.md.
+
+## Current-reference schema-parity repair (2026-11-07)
+
+The designated L:\Builder3D identity was verified read-only (Git HEAD
+3a0160a95c55f68ce9f1e89d17c792816ac001df, Python 3.12.10, MCP SDK 2.2.0).
+The official SDK used tools/list only; no Python product handler was invoked
+and the reference tree was not modified. Current captures are in
+reference-current-20261107-084248/.
+
+Rust had return_detail on 20 tools before repair; the earlier summary's 19
+was incorrect. The current reference exposes the property on five tools.
+Rust Release now matches ordered names, every input/output JSON Schema, and
+official MCP annotations recursively in all four profiles (7/52/59/60), with
+zero recursive differences. Python root extras are accepted and dropped;
+nested apply_actions.args extras are rejected, and Rust follows both rules.
+
+jsonschema 0.60.2 validates complete nested Draft 2020-12 schemas for all four
+profiles. The exact final Release app/gateway hashes are
+0e874b6fb06d9b6cb5e70517ca35856d3a8304975e2a0842cd971f20df2c45ba and
+636171b58800915de87fc8ad26814498279919ea80341076a344c208757da370. The live
+GUI/MCP run returned 25 successful structured results. The focused Rust test
+validated every successful output, including new_project and completed
+operation_status. The deliberately invalid nested action returned
+invalid_input. The GUI exited normally and its runtime descriptor was removed.
+
+The comparison and run artifacts are listed in schema-parity-run-manifest.json.
+A custom _meta.com.builder3d/longRunning value for emboss_text differs
+(Python false, Rust true) in model/files/full. It is separate from official
+ToolAnnotations, disclosed without owner approval.
+
+The schema criterion is complete, but full RB-09 acceptance remains open.
+RB-08 native evidence, the owner-reported interface/floor gaps, visual review,
+owner acceptance, and overall product acceptance remain pending. RB-10 has not
+started.

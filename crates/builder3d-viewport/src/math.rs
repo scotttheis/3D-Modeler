@@ -39,6 +39,18 @@ impl Mat4 {
         self.rows
     }
 
+    /// Returns this matrix with rows and columns exchanged.
+    #[must_use]
+    pub fn transpose(self) -> Self {
+        let mut rows = [[0.0_f32; 4]; 4];
+        for (row_index, row) in rows.iter_mut().enumerate() {
+            for (column_index, value) in row.iter_mut().enumerate() {
+                *value = self.rows[column_index][row_index];
+            }
+        }
+        Self { rows }
+    }
+
     /// Returns the transposed column-major bytes expected by WGSL mat4x4.
     #[must_use]
     pub fn column_major_bytes(self) -> Vec<u8> {

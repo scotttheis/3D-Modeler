@@ -1,0 +1,31 @@
+{
+  "complete": true,
+  "physical_input": true,
+  "paired_capture_states": 8,
+  "verified": [
+    {
+      "theme": "light",
+      "state": "after",
+      "geometry_history_unchanged": true,
+      "sha256": "f9bd4bdbd73bea4f930df15e9616a14fec145fb5563c8492fbd6b4ad077b25c0"
+    },
+    {
+      "theme": "light",
+      "state": "clear",
+      "geometry_history_unchanged": true,
+      "sha256": "f9bd4bdbd73bea4f930df15e9616a14fec145fb5563c8492fbd6b4ad077b25c0"
+    },
+    {
+      "theme": "dark",
+      "state": "after",
+      "geometry_history_unchanged": true,
+      "sha256": "f9bd4bdbd73bea4f930df15e9616a14fec145fb5563c8492fbd6b4ad077b25c0"
+    },
+    {
+      "theme": "dark",
+      "state": "clear",
+      "geometry_history_unchanged": true,
+      "sha256": "f9bd4bdbd73bea4f930df15e9616a14fec145fb5563c8492fbd6b4ad077b25c0"
+    }
+  ]
+}

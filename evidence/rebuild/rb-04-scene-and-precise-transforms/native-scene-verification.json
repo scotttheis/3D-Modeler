@@ -1,0 +1,899 @@
+{
+  "verified": [
+    {
+      "theme": "light",
+      "case": "row-toggle",
+      "history_delta": 0,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": false,
+      "repair_tessellation_variance": null,
+      "after_sha256": "f9bd4bdbd73bea4f930df15e9616a14fec145fb5563c8492fbd6b4ad077b25c0"
+    },
+    {
+      "theme": "light",
+      "case": "ctrl-toggle",
+      "history_delta": 0,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": false,
+      "repair_tessellation_variance": null,
+      "after_sha256": "33310de82213cd0729367c1081c3fbc82ff6090ebe027d31b1515dbd3cd5697f"
+    },
+    {
+      "theme": "light",
+      "case": "shift-range",
+      "history_delta": 0,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": false,
+      "repair_tessellation_variance": null,
+      "after_sha256": "00ef8591dd795cfda3ef69295050477fe8276bd707b3cd465f7b6a0b62d8704b"
+    },
+    {
+      "theme": "light",
+      "case": "select-all",
+      "history_delta": 0,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": false,
+      "repair_tessellation_variance": null,
+      "after_sha256": "f6d834252fe0e2d7a1342b1b101cdfff7de83a4a248a03bab7b9607990cdcd6c"
+    },
+    {
+      "theme": "light",
+      "case": "deselect-all",
+      "history_delta": 0,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": false,
+      "repair_tessellation_variance": null,
+      "after_sha256": "bfd19b5af0b9a714680af139cc16a56d6da3905df809c03e6efb08e848d5c3df"
+    },
+    {
+      "theme": "light",
+      "case": "invert",
+      "history_delta": 0,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": false,
+      "repair_tessellation_variance": null,
+      "after_sha256": "0e0024b70660f59fe2a5fb0c8cf23c64d79a19c998c5b43bbc8e85704907886c"
+    },
+    {
+      "theme": "light",
+      "case": "sticky-empty",
+      "history_delta": 0,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": false,
+      "repair_tessellation_variance": null,
+      "after_sha256": "40defdb0ef9fa448f071d956aa534c485740eea869f52d16dd6498cbf93b8264"
+    },
+    {
+      "theme": "light",
+      "case": "empty-clear",
+      "history_delta": 0,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": false,
+      "repair_tessellation_variance": null,
+      "after_sha256": "de0f69aa59002c694d6234897e4ca89ea22039852963b59cf322c4551f89a426"
+    },
+    {
+      "theme": "light",
+      "case": "ctrl-empty",
+      "history_delta": 0,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": false,
+      "repair_tessellation_variance": null,
+      "after_sha256": "990d744f0391b3f7a849bb7038fe9b089beafe519b394b46092c489170ac0480"
+    },
+    {
+      "theme": "light",
+      "case": "duplicate",
+      "history_delta": 1,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": null,
+      "after_sha256": "750d4cb03b31e89dc1727def3802676c8273a92ecacd9ed3bfb4081cbb9a710f"
+    },
+    {
+      "theme": "light",
+      "case": "copy",
+      "history_delta": 0,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": false,
+      "repair_tessellation_variance": null,
+      "after_sha256": "07dbd5c3a0af77599f3175b32c7f14cd3be22fb698dfac5f4bf7c2b7eab40a6c"
+    },
+    {
+      "theme": "light",
+      "case": "paste-other-selection",
+      "history_delta": 1,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": null,
+      "after_sha256": "a64ddd66f71f01ac0446513f4e6dab2f258f63563643bd13917133f55744f623"
+    },
+    {
+      "theme": "light",
+      "case": "cut",
+      "history_delta": 1,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": null,
+      "after_sha256": "83130fd3fde26d30227a6b9cd8611573a46d6caade1a0584628ce2e448936883"
+    },
+    {
+      "theme": "light",
+      "case": "delete",
+      "history_delta": 1,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": null,
+      "after_sha256": "25eb888655a5f4a4ba771bdc2f86b9d06fc50d220178988eaebb46abb590efa3"
+    },
+    {
+      "theme": "light",
+      "case": "group",
+      "history_delta": 1,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": null,
+      "after_sha256": "d56d75aa75e0e69be59e51638b4ce51586aea038339b095f1be8e48d316eb4c4"
+    },
+    {
+      "theme": "light",
+      "case": "ungroup",
+      "history_delta": 1,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": null,
+      "after_sha256": "00115cca1f0d55ce574ae001a92d2211397bf00dc1a4b930e0c7715b504dd01c"
+    },
+    {
+      "theme": "light",
+      "case": "move-mm",
+      "history_delta": 1,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": null,
+      "after_sha256": "68517dcea1e6e73bb5136a3d0b10bdfc460bcd736ec50e544ebc61f5760bbbbc"
+    },
+    {
+      "theme": "light",
+      "case": "move-inch",
+      "history_delta": 1,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": null,
+      "after_sha256": "eeb1837275b8109f5b0ac801ffb1364c3af8bf262b341bd1e54f0474078094f0"
+    },
+    {
+      "theme": "light",
+      "case": "rotate-degree",
+      "history_delta": 1,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": null,
+      "after_sha256": "d43f720e316b9a15be35ce81cffcf499a9389ad61ee85353245aa37dce49cbc4"
+    },
+    {
+      "theme": "light",
+      "case": "resize-inch",
+      "history_delta": 1,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": null,
+      "after_sha256": "568f4bfe7a9b5cedd39c635c61235b9b47f52951d09509c1b5ce0b9a5fc496e2"
+    },
+    {
+      "theme": "light",
+      "case": "resize-locked-inch",
+      "history_delta": 1,
+      "max_matrix_error": 1.1920928955078125e-07,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": null,
+      "after_sha256": "27472c4d68ef918da41fd374fe66636cc5323e7115c55f9d87f7f431ded2b710"
+    },
+    {
+      "theme": "light",
+      "case": "multi-move-inch",
+      "history_delta": 1,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": null,
+      "after_sha256": "a23f844cb6cd16f7abaae627eca8f9f7de80079e12d62709f4fdc7703e550c84"
+    },
+    {
+      "theme": "light",
+      "case": "multi-rotate",
+      "history_delta": 1,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": null,
+      "after_sha256": "361c00510ddd0756d88e61e2bf4c2c2f3d2a3fcb1dc7a4e65cd6df49a430c328"
+    },
+    {
+      "theme": "light",
+      "case": "multi-resize-locked",
+      "history_delta": 1,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": null,
+      "after_sha256": "830e00a2da480c062da7f3d0501432e341399d38fc4c3e892df3e42741d7339c"
+    },
+    {
+      "theme": "light",
+      "case": "delete-text-focus",
+      "history_delta": 0,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": false,
+      "repair_tessellation_variance": null,
+      "after_sha256": "c3c5d13bf66a9085bb9bbcfdf49dd604e4ec337c69f5b645e72da4baa24bffca"
+    },
+    {
+      "theme": "light",
+      "case": "numeric-invalid",
+      "history_delta": 0,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": false,
+      "repair_tessellation_variance": null,
+      "after_sha256": "352cfe0676fe7b0dc029f2e7987e367bbd19495de5efd3363f6d50a89d0c54eb"
+    },
+    {
+      "theme": "light",
+      "case": "units-only",
+      "history_delta": 0,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": false,
+      "repair_tessellation_variance": null,
+      "after_sha256": "6ad1f6cf39af36584d16dbb980c0ec2d17c3765720c54eb19d7116fd2ce37131"
+    },
+    {
+      "theme": "light",
+      "case": "rename-reference",
+      "history_delta": 1,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": null,
+      "after_sha256": "a3165baf2e72be0716ea73c67128946451d4e7160ecebaaa5c4f9a560c085229"
+    },
+    {
+      "theme": "light",
+      "case": "visibility-reference",
+      "history_delta": 1,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": null,
+      "after_sha256": "e513671a5c2a80cd47169b06ed2d21c608fdca48142ba955507ec340124261a1"
+    },
+    {
+      "theme": "light",
+      "case": "mirror-y",
+      "history_delta": 1,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": null,
+      "after_sha256": "b03c473ce5c80d230f7c6404d60f627d641b89a1e45004e4fbea6ccbf4f9bc47"
+    },
+    {
+      "theme": "light",
+      "case": "align-z-max",
+      "history_delta": 1,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": null,
+      "after_sha256": "4071bd1ec338a8971cba86c45f699c3d3fb34486fe76111e1f38bbb584a6af2e"
+    },
+    {
+      "theme": "light",
+      "case": "arrange-z-gap5",
+      "history_delta": 1,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": null,
+      "after_sha256": "bd3caba0427f8769409ae09bc193603dfdd143c4736d4ee24bb9a1c969c79aae"
+    },
+    {
+      "theme": "light",
+      "case": "mirror-cancel",
+      "history_delta": 0,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": false,
+      "repair_tessellation_variance": null,
+      "after_sha256": "d33bdbdba3ac67be7f95a63ea96f41dd8f3d14e40727d8478394c8b2d88c592c"
+    },
+    {
+      "theme": "light",
+      "case": "arrange-invalid-cancel",
+      "history_delta": 0,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": false,
+      "repair_tessellation_variance": null,
+      "after_sha256": "19d1ecbd14ecd02528a4797cfb899901c50ebd91b638fec0b14464f196250b69"
+    },
+    {
+      "theme": "light",
+      "case": "measure",
+      "history_delta": 0,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": false,
+      "repair_tessellation_variance": null,
+      "after_sha256": "819bc8f77634f0f65c82543a7347619c0044eac6e51015f74c86a813e72c24d8"
+    },
+    {
+      "theme": "light",
+      "case": "health-warning",
+      "history_delta": 0,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": false,
+      "repair_tessellation_variance": null,
+      "after_sha256": "779dec28e2fc5c0338a0e351a8187511d89df24d1aaeac3cce70539b0dfd20eb"
+    },
+    {
+      "theme": "light",
+      "case": "health-repair",
+      "history_delta": 1,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": {
+        "source": {
+          "faces": 4,
+          "minimum": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "maximum": [
+            20.0,
+            20.0,
+            0.0
+          ],
+          "surface_area": 400.0,
+          "vertices": [
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              20.0,
+              0.0
+            ],
+            [
+              5.0,
+              5.0,
+              0.0
+            ],
+            [
+              20.0,
+              0.0,
+              0.0
+            ]
+          ]
+        },
+        "rust": {
+          "faces": 4,
+          "minimum": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "maximum": [
+            20.0,
+            20.0,
+            0.0
+          ],
+          "surface_area": 400.0,
+          "vertices": [
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              20.0,
+              0.0
+            ],
+            [
+              6.6667,
+              6.6667,
+              0.0
+            ],
+            [
+              20.0,
+              0.0,
+              0.0
+            ]
+          ]
+        },
+        "exact_tessellation_match": false,
+        "scope": "RB-04 verifies warning/Repair reachability, identity, history and surface bounds/area. Fan point differs: Python5,5; Rust6.6667,6.6667. Detailed mesh-operation parity remains RB-06; no acceptance is inferred."
+      },
+      "after_sha256": "d77091a641da7d054b6aad3b3dea3cc6929209a3e2e610fcd924471d2b20af9b"
+    },
+    {
+      "theme": "dark",
+      "case": "row-toggle",
+      "history_delta": 0,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": false,
+      "repair_tessellation_variance": null,
+      "after_sha256": "f9bd4bdbd73bea4f930df15e9616a14fec145fb5563c8492fbd6b4ad077b25c0"
+    },
+    {
+      "theme": "dark",
+      "case": "ctrl-toggle",
+      "history_delta": 0,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": false,
+      "repair_tessellation_variance": null,
+      "after_sha256": "33310de82213cd0729367c1081c3fbc82ff6090ebe027d31b1515dbd3cd5697f"
+    },
+    {
+      "theme": "dark",
+      "case": "shift-range",
+      "history_delta": 0,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": false,
+      "repair_tessellation_variance": null,
+      "after_sha256": "00ef8591dd795cfda3ef69295050477fe8276bd707b3cd465f7b6a0b62d8704b"
+    },
+    {
+      "theme": "dark",
+      "case": "select-all",
+      "history_delta": 0,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": false,
+      "repair_tessellation_variance": null,
+      "after_sha256": "f6d834252fe0e2d7a1342b1b101cdfff7de83a4a248a03bab7b9607990cdcd6c"
+    },
+    {
+      "theme": "dark",
+      "case": "deselect-all",
+      "history_delta": 0,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": false,
+      "repair_tessellation_variance": null,
+      "after_sha256": "bfd19b5af0b9a714680af139cc16a56d6da3905df809c03e6efb08e848d5c3df"
+    },
+    {
+      "theme": "dark",
+      "case": "invert",
+      "history_delta": 0,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": false,
+      "repair_tessellation_variance": null,
+      "after_sha256": "0e0024b70660f59fe2a5fb0c8cf23c64d79a19c998c5b43bbc8e85704907886c"
+    },
+    {
+      "theme": "dark",
+      "case": "sticky-empty",
+      "history_delta": 0,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": false,
+      "repair_tessellation_variance": null,
+      "after_sha256": "40defdb0ef9fa448f071d956aa534c485740eea869f52d16dd6498cbf93b8264"
+    },
+    {
+      "theme": "dark",
+      "case": "empty-clear",
+      "history_delta": 0,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": false,
+      "repair_tessellation_variance": null,
+      "after_sha256": "de0f69aa59002c694d6234897e4ca89ea22039852963b59cf322c4551f89a426"
+    },
+    {
+      "theme": "dark",
+      "case": "ctrl-empty",
+      "history_delta": 0,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": false,
+      "repair_tessellation_variance": null,
+      "after_sha256": "990d744f0391b3f7a849bb7038fe9b089beafe519b394b46092c489170ac0480"
+    },
+    {
+      "theme": "dark",
+      "case": "duplicate",
+      "history_delta": 1,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": null,
+      "after_sha256": "03c0525c10a119fa2d121863651daf6b92f61070987fbaf23924a3d2694a87ad"
+    },
+    {
+      "theme": "dark",
+      "case": "copy",
+      "history_delta": 0,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": false,
+      "repair_tessellation_variance": null,
+      "after_sha256": "07dbd5c3a0af77599f3175b32c7f14cd3be22fb698dfac5f4bf7c2b7eab40a6c"
+    },
+    {
+      "theme": "dark",
+      "case": "paste-other-selection",
+      "history_delta": 1,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": null,
+      "after_sha256": "568f93b454a6b2e17801c5755998533929737853d0966b47eb14bd2a22e1a563"
+    },
+    {
+      "theme": "dark",
+      "case": "cut",
+      "history_delta": 1,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": null,
+      "after_sha256": "83130fd3fde26d30227a6b9cd8611573a46d6caade1a0584628ce2e448936883"
+    },
+    {
+      "theme": "dark",
+      "case": "delete",
+      "history_delta": 1,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": null,
+      "after_sha256": "25eb888655a5f4a4ba771bdc2f86b9d06fc50d220178988eaebb46abb590efa3"
+    },
+    {
+      "theme": "dark",
+      "case": "group",
+      "history_delta": 1,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": null,
+      "after_sha256": "9ed6e1ddf73196b7518732695ce4be7f8a1959a68982f29d25d011b03fac74c6"
+    },
+    {
+      "theme": "dark",
+      "case": "ungroup",
+      "history_delta": 1,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": null,
+      "after_sha256": "00115cca1f0d55ce574ae001a92d2211397bf00dc1a4b930e0c7715b504dd01c"
+    },
+    {
+      "theme": "dark",
+      "case": "move-mm",
+      "history_delta": 1,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": null,
+      "after_sha256": "68517dcea1e6e73bb5136a3d0b10bdfc460bcd736ec50e544ebc61f5760bbbbc"
+    },
+    {
+      "theme": "dark",
+      "case": "move-inch",
+      "history_delta": 1,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": null,
+      "after_sha256": "eeb1837275b8109f5b0ac801ffb1364c3af8bf262b341bd1e54f0474078094f0"
+    },
+    {
+      "theme": "dark",
+      "case": "rotate-degree",
+      "history_delta": 1,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": null,
+      "after_sha256": "d43f720e316b9a15be35ce81cffcf499a9389ad61ee85353245aa37dce49cbc4"
+    },
+    {
+      "theme": "dark",
+      "case": "resize-inch",
+      "history_delta": 1,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": null,
+      "after_sha256": "568f4bfe7a9b5cedd39c635c61235b9b47f52951d09509c1b5ce0b9a5fc496e2"
+    },
+    {
+      "theme": "dark",
+      "case": "resize-locked-inch",
+      "history_delta": 1,
+      "max_matrix_error": 1.1920928955078125e-07,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": null,
+      "after_sha256": "27472c4d68ef918da41fd374fe66636cc5323e7115c55f9d87f7f431ded2b710"
+    },
+    {
+      "theme": "dark",
+      "case": "multi-move-inch",
+      "history_delta": 1,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": null,
+      "after_sha256": "a23f844cb6cd16f7abaae627eca8f9f7de80079e12d62709f4fdc7703e550c84"
+    },
+    {
+      "theme": "dark",
+      "case": "multi-rotate",
+      "history_delta": 1,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": null,
+      "after_sha256": "361c00510ddd0756d88e61e2bf4c2c2f3d2a3fcb1dc7a4e65cd6df49a430c328"
+    },
+    {
+      "theme": "dark",
+      "case": "multi-resize-locked",
+      "history_delta": 1,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": null,
+      "after_sha256": "830e00a2da480c062da7f3d0501432e341399d38fc4c3e892df3e42741d7339c"
+    },
+    {
+      "theme": "dark",
+      "case": "delete-text-focus",
+      "history_delta": 0,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": false,
+      "repair_tessellation_variance": null,
+      "after_sha256": "c3c5d13bf66a9085bb9bbcfdf49dd604e4ec337c69f5b645e72da4baa24bffca"
+    },
+    {
+      "theme": "dark",
+      "case": "numeric-invalid",
+      "history_delta": 0,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": false,
+      "repair_tessellation_variance": null,
+      "after_sha256": "352cfe0676fe7b0dc029f2e7987e367bbd19495de5efd3363f6d50a89d0c54eb"
+    },
+    {
+      "theme": "dark",
+      "case": "units-only",
+      "history_delta": 0,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": false,
+      "repair_tessellation_variance": null,
+      "after_sha256": "6ad1f6cf39af36584d16dbb980c0ec2d17c3765720c54eb19d7116fd2ce37131"
+    },
+    {
+      "theme": "dark",
+      "case": "rename-reference",
+      "history_delta": 1,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": null,
+      "after_sha256": "a3165baf2e72be0716ea73c67128946451d4e7160ecebaaa5c4f9a560c085229"
+    },
+    {
+      "theme": "dark",
+      "case": "visibility-reference",
+      "history_delta": 1,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": null,
+      "after_sha256": "e513671a5c2a80cd47169b06ed2d21c608fdca48142ba955507ec340124261a1"
+    },
+    {
+      "theme": "dark",
+      "case": "mirror-y",
+      "history_delta": 1,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": null,
+      "after_sha256": "b03c473ce5c80d230f7c6404d60f627d641b89a1e45004e4fbea6ccbf4f9bc47"
+    },
+    {
+      "theme": "dark",
+      "case": "align-z-max",
+      "history_delta": 1,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": null,
+      "after_sha256": "4071bd1ec338a8971cba86c45f699c3d3fb34486fe76111e1f38bbb584a6af2e"
+    },
+    {
+      "theme": "dark",
+      "case": "arrange-z-gap5",
+      "history_delta": 1,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": null,
+      "after_sha256": "bd3caba0427f8769409ae09bc193603dfdd143c4736d4ee24bb9a1c969c79aae"
+    },
+    {
+      "theme": "dark",
+      "case": "mirror-cancel",
+      "history_delta": 0,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": false,
+      "repair_tessellation_variance": null,
+      "after_sha256": "d33bdbdba3ac67be7f95a63ea96f41dd8f3d14e40727d8478394c8b2d88c592c"
+    },
+    {
+      "theme": "dark",
+      "case": "arrange-invalid-cancel",
+      "history_delta": 0,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": false,
+      "repair_tessellation_variance": null,
+      "after_sha256": "19d1ecbd14ecd02528a4797cfb899901c50ebd91b638fec0b14464f196250b69"
+    },
+    {
+      "theme": "dark",
+      "case": "measure",
+      "history_delta": 0,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": false,
+      "repair_tessellation_variance": null,
+      "after_sha256": "819bc8f77634f0f65c82543a7347619c0044eac6e51015f74c86a813e72c24d8"
+    },
+    {
+      "theme": "dark",
+      "case": "health-warning",
+      "history_delta": 0,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": false,
+      "repair_tessellation_variance": null,
+      "after_sha256": "779dec28e2fc5c0338a0e351a8187511d89df24d1aaeac3cce70539b0dfd20eb"
+    },
+    {
+      "theme": "dark",
+      "case": "health-repair",
+      "history_delta": 1,
+      "max_matrix_error": 0.0,
+      "stable_identity": true,
+      "exact_undo_redo": true,
+      "repair_tessellation_variance": {
+        "source": {
+          "faces": 4,
+          "minimum": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "maximum": [
+            20.0,
+            20.0,
+            0.0
+          ],
+          "surface_area": 400.0,
+          "vertices": [
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              20.0,
+              0.0
+            ],
+            [
+              5.0,
+              5.0,
+              0.0
+            ],
+            [
+              20.0,
+              0.0,
+              0.0
+            ]
+          ]
+        },
+        "rust": {
+          "faces": 4,
+          "minimum": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "maximum": [
+            20.0,
+            20.0,
+            0.0
+          ],
+          "surface_area": 400.0,
+          "vertices": [
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              20.0,
+              0.0
+            ],
+            [
+              6.6667,
+              6.6667,
+              0.0
+            ],
+            [
+              20.0,
+              0.0,
+              0.0
+            ]
+          ]
+        },
+        "exact_tessellation_match": false,
+        "scope": "RB-04 verifies warning/Repair reachability, identity, history and surface bounds/area. Fan point differs: Python5,5; Rust6.6667,6.6667. Detailed mesh-operation parity remains RB-06; no acceptance is inferred."
+      },
+      "after_sha256": "d77091a641da7d054b6aad3b3dea3cc6929209a3e2e610fcd924471d2b20af9b"
+    }
+  ],
+  "missing": [],
+  "complete": true,
+  "naming_visibility": "Source prepared attributes have no interactive controls/history; Rust explicit requested controls each create one undoable command",
+  "source_selection_records": "python-scene-results.json; compare visible selected rows/counts against paired Rust captures",
+  "shift_variance": "Observed Python MultiSelection Shift-click toggles endpoint: [0,2]. Rust implements the explicit handoff contiguous anchor range [0,1,2]. Owner/visual acceptance remains pending."
+}

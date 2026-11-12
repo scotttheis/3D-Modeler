@@ -174,3 +174,36 @@ Profile counts and ordered names matched (7/52/59/60), while exact input- and
 output-schema matches remained zero in every profile. The focused 60-name
 self-test and full evidence validator passed; the latter reports schema parity
 pending. The Rust application source was not changed.
+## Current-reference schema-parity repair (2026-11-07)
+
+The current read-only Python reference identity and tools/list captures are in
+reference-current-20261107-084248/. Rust matches all input/output JSON Schemas
+and official annotations recursively across four profiles. The schema
+contract performs complete Draft 2020-12 validation for every tool.
+
+Focused MCP tests passed 26/26; the captured current Release result-validation
+test passed on 25 successful structured results. Workspace tests passed
+336/336 and current-reference MCP tests passed 9/9. Format, workspace check,
+Clippy with warnings denied, Cargo metadata, Cargo Deny, and explicit app
+Release bloat passed. The app text section measured 16.0 MiB and the executable
+19.6 MiB. cargo-audit was unavailable because it is not installed. Exact
+commands and logs are indexed in schema-parity-run-manifest.json.
+
+The rebuilt Release app served GUI/MCP calls, including new_project and
+completed operation_status; the nested unknown-action probe returned
+invalid_input. The app closed normally and its runtime descriptor was removed.
+One custom emboss_text _meta.com.builder3d/longRunning difference remains
+disclosed without owner approval. Full RB-09 acceptance, RB-08 native evidence,
+interface/floor gaps, visual review, owner acceptance, and overall product
+acceptance remain pending. RB-10 has not started.
+## Recovery snapshots for the schema-parity repair
+
+The pre-edit G: snapshot was independently verified before Rust source changes
+at 3,743 files / 755,179,156 bytes, with zero path/hash/reparse differences and
+17 critical SHA-256 matches. After its final synchronization, the additional
+G:\B3D_R09S_20261107 copy passed independent full-tree verification at 4,079
+files / 766,761,893 bytes on both sides, with zero missing/extra/different
+paths, zero reparse entries, and no SHA-256 differences. The initial copy had
+23 separately recorded critical SHA-256 matches. The full receipt and hash
+records are under snapshot-receipt.md.
+G:\B3D_R09W_20261106 and all older snapshots were left untouched.

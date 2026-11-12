@@ -1,0 +1,116 @@
+ M AGENTS.md
+ M COMPLETED.md
+ M README.md
+ M TODO.md
+ M docs/README.md
+ M docs/ai-mcp.md
+ M docs/architecture.md
+ M docs/project-format.md
+ M docs/recovery-policy.md
+ M docs/reversing_notes/05-function-map.md
+ M docs/reversing_notes/06-stl-import-trace.md
+ M docs/reversing_notes/08-repair-trace.md
+ M docs/reversing_notes/README.md
+ M docs/testing.md
+ M docs/ui-style-guide.md
+ M issues.md
+ M requirements-lock-posix.txt
+ M requirements-lock.txt
+ M requirements.txt
+ M run_windows.bat
+ M scripts/builder3d_mcp.py
+ M scripts/check_posix_wheels.py
+ M scripts/run_pure_tests.ps1
+ M scripts/verify_setup.py
+ M setup.sh
+ M setup_windows.bat
+ M src/adapter_ports.py
+ M src/ai_commands.py
+ M src/ai_control.py
+ M src/ai_qt_bridge.py
+ M src/application_services.py
+ M src/constants.py
+ M src/desktop_adapters.py
+ M src/gizmo.py
+ M src/hardware.py
+ M src/main.py
+ M src/main_window.py
+ M src/mesh_ops.py
+ M src/model_actions.py
+ M src/operation_manager.py
+ M src/project_io.py
+ M src/repair.py
+ M src/runtime_paths.py
+ M src/scene.py
+ M src/style.py
+ M src/three_mf.py
+ M src/toolbar.py
+ M src/tools.py
+ M src/viewport.py
+ M tests/test_adapter_boundaries.py
+ M tests/test_adapter_ports.py
+ M tests/test_ai_bridge.py
+ M tests/test_ai_commands.py
+ M tests/test_ai_qt_bridge.py
+ M tests/test_application_services.py
+ M tests/test_chunk7.py
+ M tests/test_core_workflow.py
+ M tests/test_desktop_actions.py
+ M tests/test_gizmo.py
+ M tests/test_mesh_ops.py
+ M tests/test_model_actions.py
+ M tests/test_paint.py
+ M tests/test_project_files.py
+ M tests/test_release_hardening.py
+ M tests/test_scene.py
+ M tests/test_setup_contract.py
+ M tests/test_three_mf.py
+ M tests/test_transform_bar.py
+ M tests/test_viewport.py
+?? WORK_LOG.md
+?? assets/
+?? docs/artcraft-study.md
+?? docs/macos-validation.md
+?? docs/mcp-modern-design.md
+?? docs/private-use.md
+?? docs/reversing_notes/09-snapping-research.md
+?? docs/rust-rewrite.md
+?? docs/snapping-implementation-plan.md
+?? result.json
+?? run_mcp_windows.bat
+?? run_windows.vbs
+?? run_windows_debug.bat
+?? scripts/floor_label_depth_smoke.py
+?? scripts/gizmo_closeup_smoke.py
+?? scripts/high_poly_import_smoke.py
+?? scripts/high_poly_viewport_smoke.py
+?? scripts/mcp_catalog.py
+?? scripts/mcp_models.py
+?? scripts/performance_audit.py
+?? scripts/prepare_icon_asset.py
+?? scripts/profile_high_poly.py
+?? scripts/renderer_cache_lifecycle_smoke.py
+?? scripts/renderer_smoke.py
+?? scripts/run_pure_tests.sh
+?? scripts/theme_icon_smoke.py
+?? scripts/under_floor_visibility_smoke.py
+?? src/branding.py
+?? src/gl_renderer.py
+?? src/gltf_io.py
+?? src/icon_assets.py
+?? src/numeric_controls.py
+?? src/qt_compat.py
+?? src/slicer_launcher.py
+?? src/snapping.py
+?? src/wrl_io.py
+?? tests/test_gltf_io.py
+?? tests/test_icon_assets.py
+?? tests/test_live_viewport_input.py
+?? tests/test_mcp_catalog.py
+?? tests/test_mcp_sdk.py
+?? tests/test_numeric_controls.py
+?? tests/test_project_format.py
+?? tests/test_renderer_math.py
+?? tests/test_slicer_launcher.py
+?? tests/test_snapping.py
+?? tests/test_wrl_io.py

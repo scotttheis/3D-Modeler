@@ -342,7 +342,8 @@ impl R4Server {
                 state::MAX_ARGUMENT_BYTES
             )));
         }
-        schema::validate_arguments(name, &arguments).map_err(AdapterError::Validation)?;
+        let arguments =
+            schema::normalize_arguments(name, &arguments).map_err(AdapterError::Validation)?;
         let canonical_arguments = without_idempotency_key(&arguments);
         let replay_key = arguments
             .as_object()
@@ -364,7 +365,13 @@ impl R4Server {
             }
         }
 
-        let result = self.dispatch(spec, arguments)?;
+        let result = self.dispatch(spec, arguments.clone())?;
+        let result = self.shape_result(name, &arguments, result)?;
+        schema::validate_result(name, &result).map_err(|message| {
+            AdapterError::Internal(format!(
+                "tool {name} returned a value outside its declared output schema: {message}"
+            ))
+        })?;
         let result_bytes = serde_json::to_vec(&result)
             .map_err(|error| AdapterError::Internal(error.to_string()))?;
         if result_bytes.len() > state::MAX_RESULT_BYTES {
@@ -404,7 +411,8 @@ impl R4Server {
                 state::MAX_ARGUMENT_BYTES
             )));
         }
-        schema::validate_arguments(name, arguments).map_err(AdapterError::Validation)?;
+        let arguments =
+            schema::normalize_arguments(name, arguments).map_err(AdapterError::Validation)?;
         let Some(key) = arguments
             .as_object()
             .and_then(|object| object.get("idempotency_key"))
@@ -412,7 +420,7 @@ impl R4Server {
         else {
             return Ok(None);
         };
-        let canonical_arguments = without_idempotency_key(arguments);
+        let canonical_arguments = without_idempotency_key(&arguments);
         let fingerprint = state::fingerprint(name, &canonical_arguments)
             .map_err(|error| AdapterError::Internal(error.to_string()))?;
         let mut state = self.lock_state()?;
@@ -486,6 +494,301 @@ impl R4Server {
         }
     }
 
+    fn shape_result(&self, name: &str, args: &Value, raw: Value) -> Result<Value, AdapterError> {
+        let arguments = args
+            .as_object()
+            .ok_or_else(|| AdapterError::Validation("arguments must be an object".to_owned()))?;
+        let result = match name {
+            "translate"
+            | "set_transform"
+            | "set_color"
+            | "transform_selection"
+            | "apply_actions" => self.wrapped_detail_result(name, arguments, &raw)?,
+            "scene_summary" => self.scene_summary(arguments.get("fields"))?,
+            "select" | "settle" | "mirror" | "align" | "arrange" | "undo" | "redo"
+            | "delete_selected" | "cut_selected" | "paste" | "duplicate_selected"
+            | "group_selected" | "ungroup_selected" | "sample_image_color" => {
+                self.scene_summary_with_changes(None, changed_object_ids(&raw))?
+            }
+            "snap_translate" => self.snap_translation_result(arguments, &raw)?,
+            "view_state" | "set_view" | "frame_view" | "orbit_view" | "pan_view" | "zoom_view"
+            | "view_preset" => self.view_state_result()?,
+            "new_project" => self.project_result()?,
+            "set_snapping" => self.snapping_result()?,
+            "add_primitive"
+            | "set_torus_parameters"
+            | "elastic_grab"
+            | "crease_polish"
+            | "smooth_brush"
+            | "blob" => self.object_mutation_result(name, arguments, &raw)?,
+            _ => raw,
+        };
+        self.retain_declared_output_fields(name, result)
+    }
+
+    fn retain_declared_output_fields(
+        &self,
+        name: &str,
+        result: Value,
+    ) -> Result<Value, AdapterError> {
+        let properties = schema::output_schema(name)
+            .remove("properties")
+            .and_then(|value| value.as_object().cloned())
+            .ok_or_else(|| {
+                AdapterError::Internal(format!("the output schema for {name} has no properties"))
+            })?;
+        let mut result = result.as_object().cloned().ok_or_else(|| {
+            AdapterError::Internal(format!("tool {name} returned a non-object output"))
+        })?;
+        if !result.contains_key("changed_object_ids")
+            && let Some(affected) = result.remove("affected_object_ids")
+            && properties.contains_key("changed_object_ids")
+        {
+            result.insert("changed_object_ids".to_owned(), affected);
+        }
+        result.retain(|key, _| properties.contains_key(key));
+        Ok(Value::Object(result))
+    }
+
+    fn wrapped_detail_result(
+        &self,
+        name: &str,
+        args: &Map<String, Value>,
+        raw: &Value,
+    ) -> Result<Value, AdapterError> {
+        let detail = schema::string_or(args, "return_detail", "summary")?;
+        let result = match detail.as_str() {
+            "none" => Value::Null,
+            "changes" => self.change_result(raw)?,
+            "summary" if name == "transform_selection" || name == "apply_actions" => {
+                self.scene_summary_with_changes(None, changed_object_ids(raw))?
+            }
+            "summary" => self.object_mutation_result(name, args, raw)?,
+            _ => {
+                return Err(AdapterError::Validation(
+                    "return_detail must be none, changes, or summary".to_owned(),
+                ));
+            }
+        };
+        Ok(json!({"result":result}))
+    }
+
+    fn change_result(&self, raw: &Value) -> Result<Value, AdapterError> {
+        let state = self.lock_state()?;
+        let revision = raw
+            .get("scene_revision")
+            .and_then(Value::as_u64)
+            .unwrap_or_else(|| state.scene.revision());
+        let project_id = state.scene.project_id();
+        let changed_ids = changed_object_ids(raw).unwrap_or_default();
+        let changes = raw
+            .get("changes")
+            .filter(|value| value.is_object())
+            .cloned()
+            .unwrap_or_else(|| json!({"changes":[],"reset_required":false}));
+        Ok(json!({
+            "project_id": project_id,
+            "scene_revision": revision,
+            "changed_object_ids": changed_ids,
+            "changes": changes,
+        }))
+    }
+
+    fn scene_summary_with_changes(
+        &self,
+        fields: Option<&Value>,
+        changed_ids: Option<Vec<String>>,
+    ) -> Result<Value, AdapterError> {
+        let mut summary = self.scene_summary(fields)?;
+        if let Some(mut changed_ids) = changed_ids {
+            changed_ids.sort();
+            changed_ids.dedup();
+            summary["changed_object_ids"] = json!(changed_ids);
+        }
+        Ok(summary)
+    }
+
+    fn object_mutation_result(
+        &self,
+        name: &str,
+        args: &Map<String, Value>,
+        raw: &Value,
+    ) -> Result<Value, AdapterError> {
+        let raw_object = raw.as_object().ok_or_else(|| {
+            AdapterError::Internal(format!("tool {name} returned a non-object mutation result"))
+        })?;
+        let index = raw_object
+            .get("index")
+            .and_then(Value::as_u64)
+            .and_then(|value| usize::try_from(value).ok())
+            .ok_or_else(|| {
+                AdapterError::Internal(format!("tool {name} omitted its object index"))
+            })?;
+        let state = self.lock_state()?;
+        let object = state.scene.object(index)?;
+        if raw_object
+            .get("object_id")
+            .and_then(Value::as_str)
+            .is_some_and(|object_id| object_id != object.object_id())
+        {
+            return Err(AdapterError::Internal(format!(
+                "tool {name} returned an object ID that does not match index {index}"
+            )));
+        }
+        let mut output = object_summary(index, object, None)?
+            .as_object()
+            .cloned()
+            .ok_or_else(|| AdapterError::Internal("object summary was not an object".to_owned()))?;
+        let mut changed_ids = changed_object_ids(raw).unwrap_or_default();
+        if changed_ids.is_empty()
+            && raw_object.get("changed").and_then(Value::as_bool) == Some(true)
+        {
+            changed_ids.push(object.object_id().to_owned());
+        }
+        if !changed_ids.is_empty() {
+            changed_ids.sort();
+            changed_ids.dedup();
+            output.insert("changed_object_ids".to_owned(), json!(changed_ids));
+        }
+        output.insert("project_id".to_owned(), json!(state.scene.project_id()));
+        output.insert("scene_revision".to_owned(), json!(state.scene.revision()));
+        match name {
+            "set_torus_parameters" => {
+                if let Some(parameters) = raw_object.get("torus") {
+                    output.insert("torus_parameters".to_owned(), parameters.clone());
+                }
+            }
+            "elastic_grab" => {
+                output.insert(
+                    "elastic_grab".to_owned(),
+                    json!({
+                        "radius_mm":schema::number_or(args, "radius_mm", 10.0)?,
+                        "strength":schema::number_or(args, "strength", 0.75)?,
+                        "falloff":schema::string_or(args, "falloff", "smooth")?,
+                        "symmetry":schema::string_or(args, "symmetry", "none")?,
+                    }),
+                );
+            }
+            "crease_polish" => {
+                output.insert(
+                    "crease_polish".to_owned(),
+                    json!({
+                        "radius_mm":schema::number_or(args, "radius_mm", 5.0)?,
+                        "strength":schema::number_or(args, "strength", 0.5)?,
+                        "direction":schema::string_or(args, "direction", "inward")?,
+                        "falloff":schema::string_or(args, "falloff", "smooth")?,
+                    }),
+                );
+            }
+            "smooth_brush" => {
+                output.insert(
+                    "smooth_brush".to_owned(),
+                    json!({
+                        "radius_mm":schema::number_or(args, "radius_mm", 8.0)?,
+                        "strength":schema::number_or(args, "strength", 0.5)?,
+                        "shrinkage":schema::number_or(args, "shrinkage", 0.25)?,
+                        "falloff":schema::string_or(args, "falloff", "smooth")?,
+                    }),
+                );
+            }
+            "blob" => {
+                output.insert(
+                    "blob".to_owned(),
+                    json!({
+                        "radius_mm":schema::number_or(args, "radius_mm", 8.0)?,
+                        "strength":schema::number_or(args, "strength", 0.5)?,
+                        "direction":schema::string_or(args, "direction", "outward")?,
+                        "falloff":schema::string_or(args, "falloff", "smooth")?,
+                    }),
+                );
+            }
+            _ => {}
+        }
+        Ok(Value::Object(output))
+    }
+
+    fn snap_translation_result(
+        &self,
+        args: &Map<String, Value>,
+        raw: &Value,
+    ) -> Result<Value, AdapterError> {
+        let details = raw
+            .get("snap_translation")
+            .and_then(Value::as_object)
+            .ok_or_else(|| {
+                AdapterError::Internal("snap_translate omitted its details".to_owned())
+            })?;
+        let axis = details
+            .get("axis")
+            .cloned()
+            .ok_or_else(|| AdapterError::Internal("snap_translate omitted its axis".to_owned()))?;
+        let requested = details.get("proposed_delta_mm").cloned().ok_or_else(|| {
+            AdapterError::Internal("snap_translate omitted its requested delta".to_owned())
+        })?;
+        let applied = details.get("applied_delta_mm").cloned().ok_or_else(|| {
+            AdapterError::Internal("snap_translate omitted its applied delta".to_owned())
+        })?;
+        let snapped = details.get("snapped").cloned().ok_or_else(|| {
+            AdapterError::Internal("snap_translate omitted its snapped flag".to_owned())
+        })?;
+        let tolerance = details.get("tolerance_mm").cloned().ok_or_else(|| {
+            AdapterError::Internal("snap_translate omitted its tolerance".to_owned())
+        })?;
+        let tolerance_mode = schema::string_or(args, "tolerance_mode", "fixed_mm")?;
+        let snap_translation = json!({
+            "axis":axis,
+            "requested_delta_mm":requested,
+            "applied_delta_mm":applied,
+            "snapped":snapped,
+            "tolerance_mm":tolerance,
+            "tolerance_mode":tolerance_mode,
+        });
+        let mut output = self
+            .scene_summary_with_changes(None, changed_object_ids(raw))?
+            .as_object()
+            .cloned()
+            .ok_or_else(|| AdapterError::Internal("scene summary was not an object".to_owned()))?;
+        output.insert("snap_translation".to_owned(), snap_translation);
+        Ok(Value::Object(output))
+    }
+
+    fn view_state_result(&self) -> Result<Value, AdapterError> {
+        let state = self.lock_state()?;
+        let mut output = state
+            .view
+            .to_value()
+            .as_object()
+            .cloned()
+            .ok_or_else(|| AdapterError::Internal("view state was not an object".to_owned()))?;
+        output.insert("project_id".to_owned(), json!(state.scene.project_id()));
+        output.insert("scene_revision".to_owned(), json!(state.scene.revision()));
+        Ok(Value::Object(output))
+    }
+
+    fn project_result(&self) -> Result<Value, AdapterError> {
+        let state = self.lock_state()?;
+        Ok(json!({
+            "project_id": state.scene.project_id(),
+            "scene_revision": state.scene.revision(),
+            "dirty": state.dirty,
+            "object_count": state.scene.objects().len(),
+            "path": state.project_path.as_ref().map(|path| path.display().to_string()),
+        }))
+    }
+
+    fn snapping_result(&self) -> Result<Value, AdapterError> {
+        let state = self.lock_state()?;
+        Ok(json!({
+            "object_snapping_enabled": state.snapping,
+            "tolerance_mm": 4.0,
+            "tolerance_mode": "view_scaled",
+            "movement_only": true,
+            "shift_bypass": true,
+            "project_id": state.scene.project_id(),
+            "scene_revision": state.scene.revision(),
+        }))
+    }
+
     fn dispatch_sync(&self, name: &str, arguments: Value) -> Result<Value, AdapterError> {
         let args = arguments
             .as_object()
@@ -494,7 +797,7 @@ impl R4Server {
             "get_status" => self.get_status(),
             "operation_status" => self.operation_status(args),
             "cancel_operation" => self.cancel_operation(args),
-            "scene_summary" => self.scene_summary(),
+            "scene_summary" => self.scene_summary(args.get("fields")),
             "print_check" => self.print_check(args),
             "scene_changes" => self.scene_changes(args),
             "apply_actions" => self.apply_actions(args),
@@ -562,14 +865,14 @@ impl R4Server {
             .iter()
             .find(|record| !record.phase.is_terminal());
         Ok(json!({
-            "app_state": "ready",
+            "app_state": if active.is_some() { "busy" } else { "ready" },
             "busy": active.is_some(),
+            "active_operation": active.map(OperationRecord::status_value),
             "project_id": state.scene.project_id(),
             "scene_revision": state.scene.revision(),
-            "operation_id": active.map(|record| record.id.clone()),
             "dirty": state.dirty,
-            "approved_roots": self.config.approved_roots.roots().iter().map(|path| path.display().to_string()).collect::<Vec<_>>(),
-            "profile": self.config.profile.as_str(),
+            "project_path": state.project_path.as_ref().map(|path| path.display().to_string()),
+            "view": state.view.to_value(),
         }))
     }
 
@@ -602,22 +905,28 @@ impl R4Server {
         Ok(record.status_value())
     }
 
-    fn scene_summary(&self) -> Result<Value, AdapterError> {
+    fn scene_summary(&self, fields: Option<&Value>) -> Result<Value, AdapterError> {
+        let fields = parse_summary_fields(fields)?;
         let state = self.lock_state()?;
         let objects = state
             .scene
             .objects()
             .iter()
             .enumerate()
-            .map(|(index, object)| object_summary(index, object))
+            .map(|(index, object)| object_summary(index, object, fields.as_ref()))
             .collect::<Result<Vec<_>, _>>()?;
+        let selected_indices = state.scene.selection().iter().copied().collect::<Vec<_>>();
+        let selected_object_ids = selected_indices
+            .iter()
+            .filter_map(|index| state.scene.object(*index).ok())
+            .map(|object| object.object_id().to_owned())
+            .collect::<Vec<_>>();
         Ok(json!({
             "project_id": state.scene.project_id(),
             "scene_revision": state.scene.revision(),
-            "history_state_id": state.scene.history_state_id(),
             "objects": objects,
-            "selection": state.scene.selection().iter().copied().collect::<Vec<_>>(),
-            "dirty": state.dirty,
+            "selected_indices": selected_indices,
+            "selected_object_ids": selected_object_ids,
         }))
     }
 
@@ -625,7 +934,6 @@ impl R4Server {
         let bed = bed_size(args)?;
         let state = self.lock_state()?;
         let mut issues = Vec::new();
-        let mut objects = Vec::new();
         for (index, object) in state.scene.objects().iter().enumerate() {
             let mesh = object.transformed_mesh()?;
             let Some((minimum, maximum)) = mesh.bounds() else {
@@ -636,25 +944,52 @@ impl R4Server {
             if !fits {
                 issues.push(format!("object {index} exceeds the print bed"));
             }
-            objects.push(json!({"index":index,"object_id":object.object_id(),"fits":fits,"bounds_min_mm":minimum,"bounds_max_mm":maximum}));
         }
-        Ok(
-            json!({"printable":issues.is_empty(),"issues":issues,"bed_size_mm":bed,"objects":objects}),
-        )
+        Ok(json!({
+            "ok": issues.is_empty(),
+            "errors": issues,
+            "warnings": [],
+            "project_id": state.scene.project_id(),
+            "scene_revision": state.scene.revision(),
+        }))
     }
 
     fn scene_changes(&self, args: &Map<String, Value>) -> Result<Value, AdapterError> {
         let since = schema::integer_or(args, "since_revision", 0)?;
         let state = self.lock_state()?;
         let current = i64::try_from(state.scene.revision()).unwrap_or(i64::MAX);
-        let changes = if since == current {
-            Vec::new()
+        let reset_required = since != current;
+        let fields = parse_summary_fields(args.get("fields"))?;
+        let objects = if reset_required {
+            state
+                .scene
+                .objects()
+                .iter()
+                .enumerate()
+                .map(|(index, object)| object_summary(index, object, fields.as_ref()))
+                .collect::<Result<Vec<_>, _>>()?
         } else {
-            vec![json!({"from_revision":since,"to_revision":current,"kind":"revision_gap"})]
+            Vec::new()
         };
-        Ok(
-            json!({"project_id":state.scene.project_id(),"scene_revision":current,"changes":changes}),
-        )
+        let changed_object_ids = if reset_required {
+            state
+                .scene
+                .objects()
+                .iter()
+                .map(|object| object.object_id().to_owned())
+                .collect::<Vec<_>>()
+        } else {
+            Vec::new()
+        };
+        Ok(json!({
+            "project_id": state.scene.project_id(),
+            "scene_revision": current,
+            "from_scene_revision": since,
+            "reset_required": reset_required,
+            "changes": [],
+            "objects": objects,
+            "changed_object_ids": changed_object_ids,
+        }))
     }
 
     fn apply_actions(&self, args: &Map<String, Value>) -> Result<Value, AdapterError> {
@@ -666,18 +1001,22 @@ impl R4Server {
         check_expected(&state, args)?;
         let mut commands: Vec<Box<dyn builder3d_core::Command>> = Vec::with_capacity(actions.len());
         let mut pending_transforms = std::collections::BTreeMap::new();
-        for action in actions {
-            let action = action.as_object().ok_or_else(|| {
+        for action_entry in actions {
+            let action_entry = action_entry.as_object().ok_or_else(|| {
                 AdapterError::Validation("each action must be an object".to_owned())
             })?;
-            let name = action
+            let name = action_entry
                 .get("action")
                 .and_then(Value::as_str)
                 .ok_or_else(|| AdapterError::Validation("action.action is required".to_owned()))?;
+            let action_args = action_entry
+                .get("args")
+                .and_then(Value::as_object)
+                .ok_or_else(|| AdapterError::Validation("action.args is required".to_owned()))?;
             match name {
                 "translate" => {
-                    let offset = schema::vec3_or(action, "offset_mm", [0.0; 3])?;
-                    let index = target_index(&state.scene, action)?;
+                    let offset = schema::vec3_or(action_args, "offset_mm", [0.0; 3])?;
+                    let index = target_index(&state.scene, action_args)?;
                     let current = pending_transforms
                         .get(&index)
                         .copied()
@@ -687,8 +1026,8 @@ impl R4Server {
                     commands.push(Box::new(TransformObjectCommand::new(index, transform)));
                 }
                 "set_color" => {
-                    let color = color_from(action.get("color"), "color")?;
-                    let index = target_index(&state.scene, action)?;
+                    let color = color_from(action_args.get("color"), "color")?;
+                    let index = target_index(&state.scene, action_args)?;
                     commands.push(Box::new(SetColorCommand::new(index, color)));
                 }
                 other => {
@@ -1219,7 +1558,14 @@ impl R4Server {
         };
         let object = state.scene.object(index)?;
         let health = inspect_mesh(object.mesh())?;
-        Ok(json!({"index":index,"object_id":object.object_id(),"health":health_value(&health)}))
+        Ok(json!({
+            "index": index,
+            "object_id": object.object_id(),
+            "name": object.name(),
+            "health": health_value(&health),
+            "project_id": state.scene.project_id(),
+            "scene_revision": state.scene.revision(),
+        }))
     }
 
     fn history(&self, redo: bool, args: &Map<String, Value>) -> Result<Value, AdapterError> {
@@ -1272,9 +1618,11 @@ impl R4Server {
         let clipboard = state.scene.copy_selected()?;
         validate_clipboard(&clipboard)?;
         state.clipboard = Some(clipboard);
-        Ok(
-            json!({"action":"copy_selected","changed":false,"scene_revision":state.scene.revision(),"selection":selection}),
-        )
+        Ok(json!({
+            "copied": selection.len(),
+            "project_id": state.scene.project_id(),
+            "scene_revision": state.scene.revision(),
+        }))
     }
 
     fn cut_selected(&self, args: &Map<String, Value>) -> Result<Value, AdapterError> {
@@ -1517,7 +1865,7 @@ impl R4Server {
         let result = state.scene.execute(GroupedCommand::new(commands))?;
         state.dirty |= result.changed;
         drop(state);
-        self.scene_summary()
+        self.scene_summary(None)
     }
 
     fn discover_slicers(&self) -> Result<Value, AdapterError> {
@@ -2506,20 +2854,174 @@ fn resolve_indices(
     Ok(result.into_iter().collect())
 }
 
-fn object_summary(index: usize, object: &SceneObject) -> Result<Value, AdapterError> {
+fn parse_summary_fields(fields: Option<&Value>) -> Result<Option<BTreeSet<String>>, AdapterError> {
+    let Some(fields) = fields.filter(|value| !value.is_null()) else {
+        return Ok(None);
+    };
+    let values = fields.as_array().ok_or_else(|| {
+        AdapterError::Validation("fields must be a list of field names".to_owned())
+    })?;
+    let fields = values
+        .iter()
+        .map(|value| {
+            value
+                .as_str()
+                .map(ToOwned::to_owned)
+                .ok_or_else(|| AdapterError::Validation("fields must contain strings".to_owned()))
+        })
+        .collect::<Result<BTreeSet<_>, _>>()?;
+    let allowed = [
+        "index",
+        "object_id",
+        "name",
+        "visible",
+        "vertices",
+        "triangles",
+        "position_mm",
+        "rotation_deg",
+        "size_mm",
+        "color",
+        "children",
+        "torus_parameters",
+        "mesh_health",
+    ];
+    let unknown = fields
+        .iter()
+        .filter(|field| !allowed.contains(&field.as_str()))
+        .cloned()
+        .collect::<Vec<_>>();
+    if !unknown.is_empty() {
+        return Err(AdapterError::Validation(format!(
+            "unknown summary fields: {}",
+            unknown.join(", ")
+        )));
+    }
+    Ok(Some(fields))
+}
+
+fn object_summary(
+    index: usize,
+    object: &SceneObject,
+    fields: Option<&BTreeSet<String>>,
+) -> Result<Value, AdapterError> {
     let mesh = object.transformed_mesh()?;
-    Ok(json!({
-        "index":index,
-        "object_id":object.object_id(),
-        "name":object.name(),
-        "position_mm":object.position(),
-        "size_mm":mesh.extents(),
-        "vertices":object.mesh().vertex_count(),
-        "triangles":object.mesh().face_count(),
-        "color":object.color(),
-        "visible":object.is_visible(),
-        "children":object.children().len(),
-    }))
+    let include = |field: &str| fields.is_none_or(|fields| fields.contains(field));
+    let mut summary = Map::new();
+    summary.insert("index".to_owned(), json!(index));
+    summary.insert("object_id".to_owned(), json!(object.object_id()));
+    if include("name") {
+        summary.insert("name".to_owned(), json!(object.name()));
+    }
+    if include("visible") {
+        summary.insert("visible".to_owned(), json!(object.is_visible()));
+    }
+    if include("vertices") {
+        summary.insert("vertices".to_owned(), json!(object.mesh().vertex_count()));
+    }
+    if include("triangles") {
+        summary.insert("triangles".to_owned(), json!(object.mesh().face_count()));
+    }
+    if include("position_mm") {
+        summary.insert("position_mm".to_owned(), json!(object.position()));
+    }
+    if include("rotation_deg") {
+        summary.insert(
+            "rotation_deg".to_owned(),
+            json!(rotation_degrees(object.transform())),
+        );
+    }
+    if include("size_mm") {
+        summary.insert("size_mm".to_owned(), json!(mesh.extents()));
+    }
+    if include("color") {
+        summary.insert("color".to_owned(), json!(object.color()));
+    }
+    if include("mesh_health") {
+        summary.insert(
+            "mesh_health".to_owned(),
+            health_value(&inspect_mesh(object.mesh())?),
+        );
+    }
+    if include("children") && !object.children().is_empty() {
+        summary.insert(
+            "children".to_owned(),
+            Value::Array(object.children().iter().map(child_summary).collect()),
+        );
+    }
+    if include("torus_parameters")
+        && let Some(parameters) = builder3d_core::torus_parameters_from_metadata(object.metadata())?
+    {
+        summary.insert(
+            "torus_parameters".to_owned(),
+            json!({
+                "mode":parameters.mode,
+                "radius_mm":parameters.radius_mm,
+                "tube_mm":parameters.tube_mm,
+                "sides":parameters.sides,
+                "steps":parameters.steps,
+            }),
+        );
+    }
+    Ok(Value::Object(summary))
+}
+
+fn child_summary(child: &SceneChild) -> Value {
+    let mut summary = json!({
+        "object_id": child.object_id(),
+        "name": child.name(),
+        "visible": child.is_visible(),
+        "color": child.color(),
+    });
+    if !child.children().is_empty() {
+        summary["children"] = Value::Array(child.children().iter().map(child_summary).collect());
+    }
+    summary
+}
+
+fn rotation_degrees(transform: &Transform) -> [f32; 3] {
+    let rows = transform.rows();
+    let scales = std::array::from_fn::<_, 3, _>(|column| {
+        (rows[0][column].powi(2) + rows[1][column].powi(2) + rows[2][column].powi(2)).sqrt()
+    });
+    let mut rotation = [[0.0; 3]; 3];
+    for row in 0..3 {
+        for column in 0..3 {
+            let scale = scales[column];
+            rotation[row][column] = if scale > f32::EPSILON {
+                rows[row][column] / scale
+            } else {
+                0.0
+            };
+        }
+    }
+    let pitch = rotation[0][2].clamp(-1.0, 1.0).asin();
+    let cosine_pitch = pitch.cos();
+    let (roll, yaw) = if cosine_pitch.abs() > 1.0e-6 {
+        (
+            (-rotation[1][2]).atan2(rotation[2][2]),
+            (-rotation[0][1]).atan2(rotation[0][0]),
+        )
+    } else {
+        (rotation[1][0].atan2(rotation[1][1]), 0.0)
+    };
+    [roll, pitch, yaw].map(|value| {
+        let degrees = value.to_degrees();
+        (degrees * 10_000.0).round() / 10_000.0
+    })
+}
+
+fn changed_object_ids(value: &Value) -> Option<Vec<String>> {
+    value
+        .get("changed_object_ids")
+        .or_else(|| value.get("affected_object_ids"))
+        .and_then(Value::as_array)
+        .map(|values| {
+            values
+                .iter()
+                .filter_map(Value::as_str)
+                .map(ToOwned::to_owned)
+                .collect()
+        })
 }
 
 fn command_output(
@@ -2646,10 +3148,25 @@ fn color_from(value: Option<&Value>, key: &str) -> Result<[f32; 4], AdapterError
             .as_f64()
             .filter(|number| number.is_finite())
             .map(|number| number as f32)
-            .filter(|number| (0.0..=1.0).contains(number))
-            .ok_or_else(|| {
-                AdapterError::Validation(format!("{key}[{index}] must be between 0 and 1"))
-            })?;
+            .ok_or_else(|| AdapterError::Validation(format!("{key}[{index}] must be finite")))?;
+    }
+    if color[..values.len()]
+        .iter()
+        .copied()
+        .fold(0.0_f32, f32::max)
+        > 1.0
+    {
+        for channel in &mut color[..values.len()] {
+            *channel /= 255.0;
+        }
+    }
+    if color[..values.len()]
+        .iter()
+        .any(|channel| !(0.0..=1.0).contains(channel))
+    {
+        return Err(AdapterError::Validation(format!(
+            "{key} values must be between 0 and 1, or between 0 and 255"
+        )));
     }
     Ok(color)
 }
@@ -3032,8 +3549,28 @@ mod tests {
             tools
                 .iter()
                 .find(|tool| tool.name == "get_status")
-                .map(|tool| tool.input_schema["additionalProperties"].clone()),
-            Some(Value::Bool(false))
+                .map(|tool| tool.input_schema["type"].clone()),
+            Some(json!("object"))
+        );
+        assert!(
+            tools
+                .iter()
+                .find(|tool| tool.name == "get_status")
+                .is_some_and(|tool| !tool.input_schema.contains_key("additionalProperties"))
+        );
+        assert_eq!(
+            tools
+                .iter()
+                .find(|tool| tool.name == "emboss_text")
+                .and_then(|tool| tool.annotations.as_ref())
+                .and_then(|annotations| annotations.destructive_hint),
+            Some(false)
+        );
+        assert_eq!(
+            launch
+                .and_then(|tool| tool.annotations.as_ref())
+                .and_then(|annotations| annotations.open_world_hint),
+            Some(false)
         );
     }
 
@@ -3062,7 +3599,10 @@ mod tests {
             .call_value("scene_summary", json!({}))
             .expect("summary");
         assert_eq!(summary["objects"].as_array().map(Vec::len), Some(1));
-        assert_eq!(summary["objects"][0]["position_mm"], json!([2.0, 0.0, 0.0]));
+        assert_eq!(
+            summary["objects"][0]["position_mm"],
+            json!([2.0, 20.0, 0.0])
+        );
     }
 
     #[test]
@@ -3113,7 +3653,10 @@ mod tests {
         let summary = server
             .call_value("scene_summary", json!({}))
             .expect("summary after undo");
-        assert_eq!(summary["objects"][0]["position_mm"], json!([0.0, 0.0, 0.0]));
+        assert_eq!(
+            summary["objects"][0]["position_mm"],
+            json!([0.0, 20.0, 0.0])
+        );
     }
 
     #[test]
@@ -3195,7 +3738,7 @@ mod tests {
             .expect("mesh health");
         assert_eq!(health["health"]["valid"], json!(true));
         let brush = full.call_value("elastic_grab", json!({"index":0,"center_mm":[0,0,0],"offset_mm":[1,0,0],"radius_mm":8,"strength":0.5,"falloff":"smooth","symmetry":"x"})).expect("elastic grab");
-        assert_eq!(brush["elastic_grab"]["operation"], json!("elastic_grab"));
+        assert_eq!(brush["elastic_grab"]["symmetry"], json!("x"));
         let invalid = full.call_value("mirror", json!({"axis":"bad","index":0}));
         assert!(matches!(invalid, Err(AdapterError::Validation(_))));
         let observe = server(Profile::Observe);
@@ -3203,6 +3746,30 @@ mod tests {
         assert!(
             observe
                 .call_value("translate", json!({"index":0,"offset_mm":[1,0,0]}))
+                .is_err()
+        );
+    }
+
+    #[test]
+    fn color_inputs_match_reference_rgb_255_normalization() {
+        let server = server(Profile::Full);
+        server
+            .call_value("add_primitive", json!({"primitive":"cube"}))
+            .expect("add primitive");
+        let output = server
+            .call_value("set_color", json!({"index":0,"color":[255,128,0]}))
+            .expect("set RGB color using 0-to-255 channels");
+        let color = output["result"]["color"]
+            .as_array()
+            .expect("color output array");
+        assert_eq!(color.len(), 4);
+        assert_eq!(color[0].as_f64(), Some(1.0));
+        assert!((color[1].as_f64().expect("green channel") - 128.0 / 255.0).abs() < 1.0e-6);
+        assert_eq!(color[2].as_f64(), Some(0.0));
+        assert_eq!(color[3].as_f64(), Some(1.0));
+        assert!(
+            server
+                .call_value("set_color", json!({"index":0,"color":[256,0,0]}))
                 .is_err()
         );
     }
@@ -3344,7 +3911,7 @@ mod tests {
         let undone = hollow_server
             .call_value("undo", json!({}))
             .expect("undo hollow");
-        assert_eq!(undone["changed"], json!(true));
+        assert!(!undone["changed_object_ids"].as_array().unwrap().is_empty());
         let summary = hollow_server
             .call_value("scene_summary", json!({}))
             .expect("summary");
@@ -3364,13 +3931,13 @@ mod tests {
                 "apply_actions",
                 json!({
                     "actions":[
-                        {"action":"translate","object_id":object_id,"offset_mm":[2,0,0]},
-                        {"action":"set_color","object_id":object_id,"color":[0.2,0.4,0.6,1.0]}
+                        {"action":"translate","args":{"object_id":object_id,"offset_mm":[2,0,0]}},
+                        {"action":"set_color","args":{"object_id":object_id,"color":[0.2,0.4,0.6,1.0]}}
                     ]
                 }),
             )
             .expect("grouped actions");
-        assert_eq!(batch["scene_revision"], json!(revision + 1));
+        assert_eq!(batch["result"]["scene_revision"], json!(revision + 1));
         server
             .call_value("select", json!({"indices":[0]}))
             .expect("select object");
@@ -3378,7 +3945,7 @@ mod tests {
         let copied = server
             .call_value("copy_selected", json!({}))
             .expect("copy selected");
-        assert_eq!(copied["changed"], json!(false));
+        assert_eq!(copied["copied"], json!(1));
         server
             .call_value("cut_selected", json!({}))
             .expect("cut selected");

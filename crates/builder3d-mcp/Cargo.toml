@@ -8,7 +8,8 @@ publish.workspace = true
 [dependencies]
 builder3d-core.workspace = true
 builder3d-platform.workspace = true
-rmcp = { version = "=3.8.0", default-features = false, features = ["macros", "server", "transport-io"] }
+jsonschema = { version = "=0.60.2", default-features = false }
+rmcp = { version = "=3.9.0", default-features = false, features = ["macros", "server", "transport-io"] }
 schemars = "=1.0.4"
 serde.workspace = true
 serde_json.workspace = true

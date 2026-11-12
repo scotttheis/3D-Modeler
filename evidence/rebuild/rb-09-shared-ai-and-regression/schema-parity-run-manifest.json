@@ -1,0 +1,407 @@
+{
+    "manifest_version":  1,
+    "generated_utc":  "2026-11-07T17:25:43Z",
+    "objective":  "Complete only the RB-09 schema-parity repair and stop before RB-10.",
+    "completion_state":  {
+                             "schema_parity":  "pass",
+                             "rb09_acceptance":  "open",
+                             "rb10_started":  false
+                         },
+    "owner_approved_deviation_claimed":  false,
+    "reference":  {
+                      "path":  "L:/Builder3D",
+                      "designated_by":  [
+                                            "E:/AGENTS.md",
+                                            "E:/Builder3D-Rust/AGENTS.md"
+                                        ],
+                      "git_branch":  "main",
+                      "git_head":  "3a0160a95c55f68ce9f1e89d17c792816ac001df",
+                      "git_status_entry_count":  223,
+                      "git_status_sha256":  "042d4cc00e5192968895f203eb12b96ab565cf9f46492899efc8c523a475ca22",
+                      "python_version":  "3.12.10",
+                      "python_environment":  "L:/Builder3D/venv",
+                      "mcp_sdk_version":  "2.2.0",
+                      "current_catalog_capture_directory":  "evidence/rebuild/rb-09-shared-ai-and-regression/reference-current-20261107-084248",
+                      "catalog_method":  "Official Python MCP SDK tools/list only; no Python Builder3D application or tool handler was launched.",
+                      "post_capture_identity_check":  {
+                                                          "git_status_entry_count":  223,
+                                                          "git_status_sha256_unchanged":  true,
+                                                          "behavior_critical_source_hashes_unchanged":  21,
+                                                          "reference_tree_modified":  false,
+                                                          "originally_observed_mcp_processes_modified":  false,
+                                                          "later_process_check":  "The originally observed L:/Builder3D MCP PIDs were absent; no process was stopped or relaunched by the schema capture."
+                                                      },
+                      "unknown_input_field_behavior":  {
+                                                           "top_level_extra_field":  "Accepted and dropped by the current Python runtime, including on get_status.",
+                                                           "nested_apply_actions_args_extra_field":  "Rejected by the current Python runtime."
+                                                       }
+                  },
+    "pre_edit_snapshot":  {
+                              "path":  "G:/Builder3D-Rust_snapshot_20261107-154700_RB-09-schema-parity-pre-edit",
+                              "created_before_rust_source_edits":  true,
+                              "source_files":  3743,
+                              "snapshot_files":  3743,
+                              "source_bytes":  755179156,
+                              "snapshot_bytes":  755179156,
+                              "missing_paths":  0,
+                              "extra_paths":  0,
+                              "size_or_sha256_differences":  0,
+                              "source_reparse_entries":  0,
+                              "snapshot_reparse_entries":  0,
+                              "critical_sha256_matches":  17,
+                              "verification":  "pass",
+                              "critical_hashes":  [
+                                                      {
+                                                          "path":  "Cargo.toml",
+                                                          "bytes":  2089,
+                                                          "sha256":  "0fd8515cd7b344ba0b9202c50096a1168bcee7ca443cbad0fcfa18918df35554"
+                                                      },
+                                                      {
+                                                          "path":  "Cargo.lock",
+                                                          "bytes":  118317,
+                                                          "sha256":  "ff30b6ac1ce8a8f44f335c107e3fdbcc97450ce311d8b5e8a7f8857d4f8053f0"
+                                                      },
+                                                      {
+                                                          "path":  "deny.toml",
+                                                          "bytes":  1690,
+                                                          "sha256":  "9d6c7364c978e1b890b22a6c1d28bd2bf0f9c0f473c3e325072fdd14c4087da8"
+                                                      },
+                                                      {
+                                                          "path":  "crates/builder3d-mcp/Cargo.toml",
+                                                          "bytes":  450,
+                                                          "sha256":  "32705f01ef21ecec459915f013426f5f8f4ee89be3d7eb857f36a9dc84235a3f"
+                                                      },
+                                                      {
+                                                          "path":  "crates/builder3d-mcp/src/r4/catalog.rs",
+                                                          "bytes":  19449,
+                                                          "sha256":  "116d6f1ec940c8c8b3f2fca7d2365bb1293e978f1460a39e6d0ab821a745cb62"
+                                                      },
+                                                      {
+                                                          "path":  "crates/builder3d-mcp/src/r4/schema.rs",
+                                                          "bytes":  40065,
+                                                          "sha256":  "3616778a846f54e0960458a00e0ee640c9e255ba6693ed63c061dd2b87011fb7"
+                                                      },
+                                                      {
+                                                          "path":  "crates/builder3d-mcp/src/r4/server.rs",
+                                                          "bytes":  136180,
+                                                          "sha256":  "371f878ebfce5b02cf20ed089e998d1441e0fde2e68bd66b2ad339146f6e76bc"
+                                                      },
+                                                      {
+                                                          "path":  "crates/builder3d-mcp/src/r4/gateway.rs",
+                                                          "bytes":  13163,
+                                                          "sha256":  "9b76a9ffc3e0d44615fe373b39c7d2a5119e2ca1dcad026fe7a70fdfcacce933"
+                                                      },
+                                                      {
+                                                          "path":  "crates/builder3d-app/src/mcp_bridge.rs",
+                                                          "bytes":  38501,
+                                                          "sha256":  "8da97ae29fc5fef3875eb28070c97dec05af3bc1258a3d4eb36b00da7f23a176"
+                                                      },
+                                                      {
+                                                          "path":  "AGENTS.md",
+                                                          "bytes":  13514,
+                                                          "sha256":  "cebdc104ce0830a607bf55c9c04519d0700ee1f46c681463e6fe91be205fcfee"
+                                                      },
+                                                      {
+                                                          "path":  "docs/product-rebuild-plan.md",
+                                                          "bytes":  95215,
+                                                          "sha256":  "e9f664642b6fdd9926d03467634994b5b13345b476f7aee22660a448f8f7ea56"
+                                                      },
+                                                      {
+                                                          "path":  "docs/rb-09-shared-ai-and-regression-handoff.md",
+                                                          "bytes":  28984,
+                                                          "sha256":  "200f84250f87cde2d2cc66f0d4039b7200d6dc9ad8319a052c5fa797d3971f39"
+                                                      },
+                                                      {
+                                                          "path":  "docs/component-catalog.toml",
+                                                          "bytes":  53138,
+                                                          "sha256":  "b65168aef87a5f3ec3367dc140be7bf63bd6bef1d7af71ed7f8f4731a0cc8aae"
+                                                      },
+                                                      {
+                                                          "path":  "evidence/rebuild/parity-matrix.toml",
+                                                          "bytes":  399580,
+                                                          "sha256":  "fc65b6cdae6e8a9b0ca3359b5c3697d9788f28fa5c87471dda67a7cffaa8bbb1"
+                                                      },
+                                                      {
+                                                          "path":  "evidence/rebuild/rb-09-shared-ai-and-regression/checkpoint.md",
+                                                          "bytes":  7176,
+                                                          "sha256":  "1eddee4e376b8800ae607bd978c8bcd2169977fe4c82102d3b3e3b807753ce4d"
+                                                      },
+                                                      {
+                                                          "path":  "evidence/rebuild/rb-09-shared-ai-and-regression/reference-current-20261107-084248/reference-identity.json",
+                                                          "bytes":  10049,
+                                                          "sha256":  "172b9ff65bd0a7afa709c2a20a8f64097120615fc50be94f27502225f50d3efe"
+                                                      },
+                                                      {
+                                                          "path":  "evidence/rebuild/rb-09-shared-ai-and-regression/reference-current-20261107-084248/python-full.json",
+                                                          "bytes":  695457,
+                                                          "sha256":  "ad72e60355262b9cd8c26c70a51a1adb263d380b5dd60b0b060c664d59ed3b6f"
+                                                      }
+                                                  ]
+                          },
+    "schema_parity":  {
+                          "schema_contract":  "crates/builder3d-mcp/src/r4/schema_contract.json",
+                          "schema_contract_generator":  "evidence/rebuild/rb-09-shared-ai-and-regression/generate_schema_contract.mjs",
+                          "schema_dialect":  "https://json-schema.org/draft/2020-12/schema",
+                          "validator":  {
+                                            "crate":  "jsonschema",
+                                            "version":  "0.60.2",
+                                            "supports":  "Draft 2020-12",
+                                            "nested_input_validation":  true,
+                                            "nested_output_validation":  true
+                                        },
+                          "profile_comparison":  "evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261107-093804-schema-parity/schema-property-diff-current.json",
+                          "profiles":  {
+                                           "observe":  {
+                                                           "tool_count":  7,
+                                                           "ordered_names_match":  true,
+                                                           "input_schemas_match":  7,
+                                                           "output_schemas_match":  7,
+                                                           "official_annotations_match":  7,
+                                                           "recursive_difference_count":  0,
+                                                           "return_detail_count":  0
+                                                       },
+                                           "model":  {
+                                                         "tool_count":  52,
+                                                         "ordered_names_match":  true,
+                                                         "input_schemas_match":  52,
+                                                         "output_schemas_match":  52,
+                                                         "official_annotations_match":  52,
+                                                         "recursive_difference_count":  0,
+                                                         "return_detail_count":  5
+                                                     },
+                                           "files":  {
+                                                         "tool_count":  59,
+                                                         "ordered_names_match":  true,
+                                                         "input_schemas_match":  59,
+                                                         "output_schemas_match":  59,
+                                                         "official_annotations_match":  59,
+                                                         "recursive_difference_count":  0,
+                                                         "return_detail_count":  5
+                                                     },
+                                           "full":  {
+                                                        "tool_count":  60,
+                                                        "ordered_names_match":  true,
+                                                        "input_schemas_match":  60,
+                                                        "output_schemas_match":  60,
+                                                        "official_annotations_match":  60,
+                                                        "recursive_difference_count":  0,
+                                                        "return_detail_count":  5
+                                                    }
+                                       },
+                          "return_detail_reconciliation":  {
+                                                               "earlier_summary_claimed_rust_only_fields":  19,
+                                                               "actual_pre_edit_rust_tool_count":  20,
+                                                               "pre_edit_rust_tool_names":  [
+                                                                                                "set_torus_parameters",
+                                                                                                "elastic_grab",
+                                                                                                "crease_polish",
+                                                                                                "smooth_brush",
+                                                                                                "blob",
+                                                                                                "normalize_face_density",
+                                                                                                "snap_translate",
+                                                                                                "settle",
+                                                                                                "mirror",
+                                                                                                "align",
+                                                                                                "arrange",
+                                                                                                "repair",
+                                                                                                "simplify",
+                                                                                                "subdivide",
+                                                                                                "smooth",
+                                                                                                "boolean_merge",
+                                                                                                "boolean_subtract",
+                                                                                                "boolean_intersect",
+                                                                                                "emboss_text",
+                                                                                                "hollow"
+                                                                                            ],
+                                                               "current_reference_and_repaired_rust_tool_count":  5,
+                                                               "current_tool_names":  [
+                                                                                          "apply_actions",
+                                                                                          "translate",
+                                                                                          "set_transform",
+                                                                                          "transform_selection",
+                                                                                          "set_color"
+                                                                                      ]
+                                                           },
+                          "unknown_input_field_compatibility":  {
+                                                                    "root_extra_fields":  "Dropped to match Python.",
+                                                                    "nested_closed_fields":  "Rejected to match Python apply_actions.args behavior."
+                                                                },
+                          "custom_metadata_difference_count":  3,
+                          "custom_metadata_difference":  {
+                                                             "tool":  "emboss_text",
+                                                             "pointer":  "/_meta/com.builder3d~1longRunning",
+                                                             "reference":  false,
+                                                             "rust":  true,
+                                                             "profiles":  [
+                                                                              "model",
+                                                                              "files",
+                                                                              "full"
+                                                                          ],
+                                                             "official_tool_annotations_match":  true,
+                                                             "owner_approval_claimed":  false
+                                                         }
+                      },
+    "release_validation":  {
+                               "application_binary":  "target/release/builder3d-app.exe",
+                               "application_sha256":  "0e874b6fb06d9b6cb5e70517ca35856d3a8304975e2a0842cd971f20df2c45ba",
+                               "gateway_binary":  "target/release/r4_mcp.exe",
+                               "gateway_sha256":  "636171b58800915de87fc8ad26814498279919ea80341076a344c208757da370",
+                               "gui_launch_record":  "evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261107-100537-schema-parity-final/rust-release-gui-launch.json",
+                               "gui_pid":  2640,
+                               "gui_title":  "Builder3D - Untitled",
+                               "gui_responding":  true,
+                               "gui_closed_normally":  true,
+                               "runtime_descriptor_removed":  true,
+                               "sdk_client":  "Official Python MCP SDK 2.2.0",
+                               "application_bytes":  20544512,
+                               "gateway_bytes":  6101504
+                           },
+    "result_validation":  {
+                              "live_result_log":  "evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261107-100537-schema-parity-final/logs/rust-release-schema-result-client-final.jsonl",
+                              "successful_structured_result_count":  25,
+                              "result_error_count":  1,
+                              "expected_error":  {
+                                                     "tool":  "apply_actions",
+                                                     "code":  "invalid_input",
+                                                     "reason":  "An unknown field inside nested args was rejected."
+                                                 },
+                              "new_project_success":  true,
+                              "async_operation_status_completed":  true,
+                              "validation_test":  "cargo test --locked -p builder3d-mcp captured_release_success_results_match_reference_output_schemas_when_supplied -- --nocapture",
+                              "validation_test_log":  "evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261107-100537-schema-parity-final/logs/rust-release-schema-result-validation-final.log",
+                              "validation_test_outcome":  "test result: ok. 1 passed; 0 failed"
+                          },
+    "engineering_checks":  {
+                               "focused_mcp_tests":  {
+                                                         "command":  "cargo test --locked -p builder3d-mcp",
+                                                         "passed":  26,
+                                                         "failed":  0,
+                                                         "log":  "evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261107-100537-schema-parity-final/logs/cargo-test-mcp-final.log"
+                                                     },
+                               "workspace_tests":  {
+                                                       "command":  "cargo test --workspace --locked",
+                                                       "passed":  336,
+                                                       "failed":  0,
+                                                       "ignored":  0,
+                                                       "log":  "evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261107-093804-schema-parity/logs/cargo-test-workspace.log"
+                                                   },
+                               "format":  {
+                                              "command":  "cargo fmt --all -- --check",
+                                              "result":  "pass",
+                                              "log":  "evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261107-093804-schema-parity/logs/cargo-fmt-check.log"
+                                          },
+                               "workspace_check":  {
+                                                       "command":  "cargo check --workspace --locked",
+                                                       "result":  "pass",
+                                                       "log":  "evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261107-093804-schema-parity/logs/cargo-check-workspace.log"
+                                                   },
+                               "clippy":  {
+                                              "command":  "cargo clippy --workspace --all-targets --all-features --locked -- -D warnings",
+                                              "result":  "pass",
+                                              "log":  "evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261107-093804-schema-parity/logs/cargo-clippy-workspace.log"
+                                          },
+                               "metadata":  {
+                                                "command":  "cargo metadata --locked --format-version 1 --no-deps",
+                                                "result":  "pass",
+                                                "log":  "evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261107-093804-schema-parity/logs/cargo-metadata.log"
+                                            },
+                               "dependency_policy":  {
+                                                         "command":  "cargo deny check",
+                                                         "result":  "pass",
+                                                         "note":  "jsonschema\u0027s borrow-or-share 0.2.4 MIT-0 license is covered by an exact-version exception in deny.toml.",
+                                                         "log":  "evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261107-093804-schema-parity/logs/cargo-deny-check.log"
+                                                     },
+                               "release_size":  {
+                                                    "command":  "cargo bloat --release -p builder3d-app --bin builder3d-app",
+                                                    "result":  "pass",
+                                                    "text_section":  "16.0 MiB",
+                                                    "executable_file":  "19.6 MiB",
+                                                    "log":  "evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261107-093804-schema-parity/logs/cargo-bloat-app.log"
+                                                },
+                               "python_reference_mcp_tests":  {
+                                                                  "command":  "L:/Builder3D/venv/Scripts/python.exe -B -m pytest -p no:cacheprovider tests/test_mcp_catalog.py tests/test_mcp_sdk.py",
+                                                                  "passed":  9,
+                                                                  "failed":  0,
+                                                                  "log":  "evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261107-093804-schema-parity/logs/python-current-reference-mcp-tests.log"
+                                                              },
+                               "cargo_audit":  {
+                                                   "result":  "unavailable",
+                                                   "reason":  "cargo-audit is not installed."
+                                               }
+                           },
+    "official_sources":  [
+                             {
+                                 "url":  "https://modelcontextprotocol.io/specification/2026-07-28/server/tools",
+                                 "purpose":  "Tools contract, JSON Schema 2020-12, and structured-output requirements."
+                             },
+                             {
+                                 "url":  "https://github.com/modelcontextprotocol/rust-sdk",
+                                 "purpose":  "Official Rust MCP SDK and protocol support."
+                             },
+                             {
+                                 "url":  "https://docs.rs/jsonschema/0.60.2/jsonschema/",
+                                 "purpose":  "Pinned JSON Schema validator version and Draft 2020-12 support."
+                             },
+                             {
+                                 "url":  "https://github.com/yescallop/borrow-or-share/blob/main/LICENSE",
+                                 "purpose":  "MIT-0 dependency license checked for cargo deny."
+                             }
+                         ],
+    "pending_acceptance":  [
+                               "RB-08 native matrix and completion snapshot.",
+                               "Owner-reported interface and floor gaps.",
+                               "Visual review.",
+                               "Owner acceptance.",
+                               "Overall product acceptance."
+                           ],
+    "rb10_started":  false,
+    "rust_source_trees":  {
+                              "pre_edit":  {
+                                               "manifest_path":  "evidence/rebuild/rb-09-shared-ai-and-regression/pre-edit-rust-source-manifest.json",
+                                               "workspace_root":  "G:\\Builder3D-Rust_snapshot_20261107-154700_RB-09-schema-parity-pre-edit",
+                                               "file_count":  96,
+                                               "manifest_sha256":  "9846a4a6dee484186283e169a9b7cdbbf74007bdca772efa5981f438ce78b457",
+                                               "matches_historical_build_manifest":  true
+                                           },
+                              "current":  {
+                                              "manifest_path":  "evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261107-100537-schema-parity-final/current-rust-source-manifest.json",
+                                              "workspace_root":  "E:\\Builder3D-Rust",
+                                              "file_count":  96,
+                                              "manifest_sha256":  "2d5f502eb7150975be368d2f126ddd69cbd5493c3ffe6eb0324acb3d6ecf7f18"
+                                          }
+                          },
+    "final_snapshot":  {
+                           "path":  "G:/B3D_R09S_20261107",
+                           "copy_command":  "robocopy E:/Builder3D-Rust G:/B3D_R09S_20261107 /E /COPY:DAT /DCOPY:DAT /XJ /XD E:/Builder3D-Rust/target E:/Builder3D-Rust/.cache E:/Builder3D-Rust/logs /R:1 /W:1 /NP /NFL /NDL",
+                           "robocopy_exit_code":  1,
+                           "first_verification":  {
+                                                      "source_files":  4078,
+                                                      "snapshot_files":  4078,
+                                                      "source_bytes":  766744485,
+                                                      "snapshot_bytes":  766744485,
+                                                      "missing_paths":  0,
+                                                      "extra_paths":  0,
+                                                      "size_or_sha256_differences":  0,
+                                                      "source_reparse_entries":  0,
+                                                      "snapshot_reparse_entries":  0,
+                                                      "verification_pass":  true
+                                                  },
+                           "final_synchronization_robocopy_exit_code":  1,
+                           "final_verification":  {
+                                                       "source_files":  4079,
+                                                       "snapshot_files":  4079,
+                                                       "source_bytes":  766761893,
+                                                       "snapshot_bytes":  766761893,
+                                                       "missing_paths":  0,
+                                                       "extra_paths":  0,
+                                                       "different_paths":  0,
+                                                       "source_reparse_entries":  0,
+                                                       "snapshot_reparse_entries":  0,
+                                                       "verification_pass":  true,
+                                                       "verification_log":  "target/rb09-final-snapshot-verification-final.log"
+                                                   },
+                           "critical_sha256_match_count":  23,
+                           "critical_hashes_path":  "evidence/rebuild/rb-09-shared-ai-and-regression/final-snapshot-critical-hashes.json",
+                           "preexisting_g_snapshots_modified":  false
+                       }
+}

@@ -1,0 +1,58 @@
+﻿COMMAND=cargo bloat --release --workspace
+cargo : Warning: unused arguments left: ["--workspace"].
+At line:2 char:220
++ ... g utf8; $bloatOutput = cargo bloat --release --workspace 2>&1; $gateE ...
++                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Warning: unused..."--workspace"].:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   Compiling windows-sys v0.61.2
+   Compiling windows v0.62.2
+   Compiling socket2 v0.6.5
+   Compiling mio v1.2.4
+   Compiling zip v9.1.3
+   Compiling egui-winit v0.37.0
+   Compiling rfd v0.17.2
+   Compiling tokio v1.51.6
+   Compiling tokio-util v0.7.19
+   Compiling rmcp v3.8.0
+   Compiling gpu-allocator v0.28.0
+   Compiling sysinfo v0.40.0
+   Compiling builder3d-core v0.1.0 (E:\Builder3D-Rust\crates\builder3d-core)
+   Compiling wgpu-hal v30.0.1
+   Compiling wgpu-core-deps-windows-linux-android v30.0.1
+   Compiling wgpu-core v30.0.1
+   Compiling wgpu v30.0.1
+   Compiling builder3d-platform v0.1.0 (E:\Builder3D-Rust\crates\builder3d-platform)
+   Compiling egui-wgpu v0.37.0
+   Compiling eframe v0.37.0
+   Compiling builder3d-viewport v0.1.0 (E:\Builder3D-Rust\crates\builder3d-viewport)
+   Compiling builder3d-mcp v0.1.0 (E:\Builder3D-Rust\crates\builder3d-mcp)
+   Compiling builder3d-app v0.1.0 (E:\Builder3D-Rust\crates\builder3d-app)
+    Finished `release` profile [optimized + debuginfo] target(s) in 5m 48s
+    Analyzing target\release\r0b_mcp.exe
+
+ File  .text    Size      Crate Name
+ 1.1%   1.3% 48.3KiB   wgpu_hal wgpu_hal::vulkan::Instance::expose_adapter
+ 1.0%   1.1% 41.4KiB       naga naga::back::spv::Writer::write_function
+ 0.9%   1.1% 39.8KiB       naga naga::valid::Validator::validate_impl
+ 0.8%   1.0% 35.6KiB       naga naga::back::spv::BlockContext::write_ray_query_function
+ 0.8%   0.9% 32.4KiB    r0b_mcp r0b_mcp::main::async_block$0
+ 0.7%   0.9% 31.6KiB       rmcp rmcp::service::serve_inner::async_block$0<rmcp::service::server::RoleServer,builder3d_mcp::R0bServer,rmcp::transport::async_rw::AsyncRwTransport<rmcp::service::server::RoleServer,tokio::io::stdin::Stdin,tokio::io::stdout::Stdout> >
+ 0.7%   0.9% 31.3KiB       naga naga::back::spv::Writer::write_logical_layout
+ 0.7%   0.8% 30.7KiB   wgpu_hal wgpu_hal::vulkan::Adapter::open_with_callback
+ 0.7%   0.8% 30.4KiB serde_json serde_json::de::from_trait<serde_json::read::SliceRead,enum2$<rmcp::model::JsonRpcMessage<enum2$<rmcp::model::ClientRequest>,enum2$<rmcp::model::ClientResult>,enum2$<rmcp::model::ClientNotification> > > >
+ 0.6%   0.7% 27.0KiB       rmcp rmcp::model::_::impl$0::serialize<serde::private::ser::FlatMapSerializer<enum2$<serde_json::ser::Compound<bytes::buf::writer::Writer<ref_mut$<bytes::bytes_mut::BytesMut> >,serde_json::ser::CompactFormatter> > > >
+ 0.6%   0.7% 25.7KiB       naga naga::back::glsl::writer::Writer<ref_mut$<alloc::string::String> >::write_expr<ref_mut$<alloc::string::String> >
+ 0.6%   0.7% 25.6KiB       naga naga::back::spv::BlockContext::write_block
+ 0.6%   0.7% 24.7KiB       naga naga::back::pipeline_constants::process_overrides
+ 0.6%   0.7% 24.3KiB       naga naga::valid::Validator::validate_function
+ 0.6%   0.6% 23.6KiB       naga naga::compact::compact
+ 0.5%   0.6% 23.2KiB       rmcp rmcp::handler::server::impl$0::handle_request::async_fn$0<builder3d_mcp::R0bServer>
+ 0.5%   0.6% 22.0KiB       naga naga::back::hlsl::Writer<ref_mut$<alloc::string::String> >::write_stmt<ref_mut$<alloc::string::String> >
+ 0.5%   0.6% 21.9KiB        ash ash::vk::const_debugs::impl$255::fmt
+ 0.5%   0.6% 21.1KiB       naga naga::valid::Validator::validate_block_impl
+ 0.5%   0.6% 20.5KiB   wgpu_hal wgpu_hal::dx12::Device::load_shader
+71.7%  82.7%  3.0MiB            And 4383 smaller methods. Use -n N to show more.
+86.6% 100.0%  3.6MiB            .text section size, the file size is 4.1MiB
+EXIT_CODE=0

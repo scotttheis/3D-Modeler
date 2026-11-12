@@ -1,0 +1,63 @@
+{
+  "captured_utc": "2026-11-07T15:45:12.920979+00:00",
+  "probe": {
+    "handler_invoked": false,
+    "method": "Tool.fn_metadata.validate_arguments, which Tool.run calls before invoking the handler",
+    "nested_strict_model_extra": {
+      "accepted": false,
+      "exception_type": "ValidationError",
+      "input": {
+        "__rb09_unknown_probe__": "ignored-at-tool-root",
+        "actions": [
+          {
+            "action": "translate",
+            "args": {
+              "__rb09_unknown_probe__": "rejected",
+              "object_id": "schema-probe",
+              "offset_mm": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            }
+          }
+        ]
+      },
+      "message": "1 validation error for apply_actionsArguments\nactions.0.translate.args.__rb09_unknown_probe__\n  Extra inputs are not permitted [type=extra_forbidden, input_value='rejected', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden",
+      "tool": "apply_actions"
+    },
+    "no_argument_tool_extra": {
+      "accepted": true,
+      "input": {
+        "__rb09_unknown_probe__": "ignored"
+      },
+      "tool": "get_status",
+      "validated_arguments": {}
+    },
+    "top_level_extra": {
+      "accepted": true,
+      "extra_property_retained": false,
+      "input": {
+        "__rb09_unknown_probe__": "ignored",
+        "axis": "x"
+      },
+      "tool": "mirror",
+      "validated_arguments": {
+        "axis": "x",
+        "expected_project_id": null,
+        "expected_scene_revision": null,
+        "idempotency_key": null,
+        "index": null,
+        "object_id": ""
+      }
+    }
+  },
+  "python_version": "3.12.10",
+  "reference_identity": {
+    "git_head": "3a0160a95c55f68ce9f1e89d17c792816ac001df",
+    "git_status_sha256": "042d4cc00e5192968895f203eb12b96ab565cf9f46492899efc8c523a475ca22",
+    "path": "L:\\Builder3D"
+  },
+  "schema_version": 1,
+  "sdk_version": "2.2.0"
+}

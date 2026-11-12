@@ -1,0 +1,6 @@
+COMMAND: cargo build --release --locked -p builder3d-app --bin builder3d-app
+    Blocking waiting for file lock on build directory
+   Compiling builder3d-core v0.1.0 (E:\Builder3D-Rust\crates\builder3d-core)
+   Compiling builder3d-viewport v0.1.0 (E:\Builder3D-Rust\crates\builder3d-viewport)
+   Compiling builder3d-app v0.1.0 (E:\Builder3D-Rust\crates\builder3d-app)
+    Finished `release` profile [optimized] target(s) in 3m 02s

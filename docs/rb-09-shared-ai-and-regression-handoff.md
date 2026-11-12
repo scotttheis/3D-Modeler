@@ -1,7 +1,7 @@
 # RB-09 Shared AI and Regression Handoff
 
-**Status:** the historical Python/Rust paired gate passed on its recorded build. The current Rust Release GUI/MCP workflow and optional-MCP failure check ran on 2026-11-06. Current schema comparison against saved Python catalogs found unresolved differences; schema compatibility and RB-09 acceptance remain open.
-**Written:** 2026-11-06; owner path/backup direction updated 2026-11-03; current Rust Release recheck added 2026-11-06
+**Status:** the historical Python/Rust paired gate passed on its recorded build. The current Rust Release GUI/MCP workflow and optional-MCP failure check ran on 2026-11-06. The RB-09 schema-parity repair completed on 2026-11-07 against a verified read-only current `L:\Builder3D` catalog capture. The schema criterion passes; full RB-09 acceptance remains open.
+**Written:** 2026-11-07; owner path/backup direction updated 2026-11-03; current Rust Release recheck added 2026-11-06; schema-parity repair checklist added 2026-11-07
 **Boundary:** keep schema disposition, visual review, owner acceptance, and overall acceptance pending; stop before RB-10
 
 ## Current continuation (2026-11-06)
@@ -31,6 +31,116 @@ recorded in
 `evidence/rebuild/rb-09-shared-ai-and-regression/usb-backup-receipt.md` and is
 not a working tree. `L:\Builder3D` remains the separate read-only Python
 reference/shipping build.
+
+## Current schema-parity repair checklist (2026-11-07)
+
+At the start of this repair, RB-09 schema compatibility was open. The
+2026-11-06 comparison in
+`currpair-20261106-072716/schema-comparison.json` compared current Rust catalogs
+with saved Python catalog snapshots; it did not refresh those snapshots or
+launch the Python product. Treat those saved catalogs as evidence, not as proof
+of the current Python reference contract. Before changing Rust schemas, verify
+the identity of the currently designated `L:\Builder3D` reference and capture
+its current schemas read-only. Do not launch or test an older Python build. If
+the current reference identity cannot be confirmed, stop before schema changes
+and report the missing evidence.
+
+The ordered tool names already match in all profiles: observe 7, model 52,
+files 59, and full 60. Exact input- and output-schema matches are zero in all
+four profiles. Resolve these items against the refreshed current reference:
+
+1. Reconcile the count in the evidence: the summary says Rust adds
+   `return_detail` to 19 tools, while the detailed full-profile list contains
+   20. The listed Rust-only fields are on `set_torus_parameters`,
+   `elastic_grab`, `crease_polish`, `smooth_brush`, `blob`,
+   `normalize_face_density`, `snap_translate`, `settle`, `mirror`, `align`,
+   `arrange`, `repair`, `simplify`, `subdivide`, `smooth`, `boolean_merge`,
+   `boolean_subtract`, `boolean_intersect`, `emboss_text`, and `hollow`. The
+   current Rust handler does not consume this field; remove it if the refreshed
+   current reference still omits it.
+2. Make `orbit_view` requiredness match the reference. Rust currently requires
+   `yaw_delta_deg` and `pitch_delta_deg`, although its handler supplies defaults
+   when they are omitted.
+3. Resolve the input-schema strictness and constraint differences. Rust
+   currently sets `additionalProperties: false` on every tool; the saved
+   Python schemas declare no such restriction. The MCP design guide says input
+   schemas should reject unexpected fields unless a deliberate extension point
+   is documented, so do not remove Rust's strict validation silently. First
+   capture the current Python runtime's behavior for unknown fields; then make
+   an explicit, owner-approved compatibility decision: match that behavior, or
+   preserve strict Rust validation as a documented and tested deviation. The
+   comparison also reports field-bound and nullability differences. Generate a
+   property-by-property diff from the refreshed current reference before
+   editing those constraints.
+4. Replace the single Rust output-schema superset (104 properties, all
+   unconstrained) with the tool-specific typed output schemas from the current
+   reference. The saved full profile has 18 distinct Python output schemas.
+5. Match observed top-level results to their output schemas. The saved
+   comparison reports extra Rust fields: `add_primitive`, `undo`, and `redo`
+   add `action`, `affected_object_ids`, `changed`, and `history_state_id`;
+   `get_status` adds `approved_roots`, `operation_id`, and `profile`;
+   `new_project` adds `action` and `changed`; `scene_summary` adds `dirty`,
+   `history_state_id`, and `selection`. `set_color` and `set_transform` are
+   missing the Python schema's required `result` field. Recheck these against
+   current-reference schemas and live Rust responses.
+6. Match the tool annotations: saved Python has
+   `emboss_text.destructiveHint: false` and
+   `launch_slicer.openWorldHint: false`, while Rust currently reports `true`
+   for both.
+7. Extend parity verification to validate full nested JSON Schemas, including
+   required fields, types, bounds, nullability, and additional properties. Run
+   it across every profile and against real successful result envelopes, not
+   only names, exact top-level equality, or top-level output keys.
+
+No schema deviation has owner approval. Do not mark the schema criterion or
+RB-09 complete until the refreshed reference comparison and tests pass, or an
+intentional deviation is explicitly approved, documented, and tested.
+
+### Repair results (2026-11-07)
+
+The designated L:\Builder3D identity was confirmed read-only: Git HEAD
+3a0160a95c55f68ce9f1e89d17c792816ac001df, Python 3.12.10, MCP SDK 2.2.0.
+The official SDK captured all four catalogs with tools/list only. The Python
+product was not launched, no handler was invoked, and the reference tree was
+not modified. Current catalog captures are under
+evidence/rebuild/rb-09-shared-ai-and-regression/reference-current-20261107-084248/.
+
+The mismatch was 20 Rust return_detail fields before repair, not 19 as the
+prior summary stated. The refreshed current reference has five:
+apply_actions, set_color, set_transform, transform_selection, and translate.
+Rust now exposes exactly those five in model/files/full, and none in observe.
+Rust Release tool names/order, every input/output JSON Schema, and official MCP
+annotations match recursively in observe/model/files/full (7/52/59/60 tools),
+with zero recursive differences. The current Python runtime accepts and drops
+unknown root fields, while rejecting unknown fields inside apply_actions.args;
+Rust matches both behaviors.
+
+jsonschema 0.60.2 validates complete Draft 2020-12 schemas, including nested
+inputs and outputs, in all four profiles. Automated examples compile and
+validate each tool schema. The rebuilt current Release app (SHA-256
+0e874b6fb06d9b6cb5e70517ca35856d3a8304975e2a0842cd971f20df2c45ba) was
+opened with the matching Release gateway (SHA-256
+636171b58800915de87fc8ad26814498279919ea80341076a344c208757da370). The
+official Python MCP SDK received 25 successful structured results; all 25
+passed the focused Rust output-schema validation test. This includes a
+successful new_project from a clean empty document and a completed
+operation_status. The deliberately invalid nested apply_actions.args field
+returned invalid_input. The app closed normally and its runtime descriptor
+was removed.
+
+The full recursive comparison and final Release result evidence are indexed in
+schema-parity-run-manifest.json. The official Tools specification and Rust SDK
+were checked; the protocol uses Draft 2020-12. One Rust custom
+_meta.com.builder3d/longRunning value for emboss_text remains true while the
+reference reports false. The comparator records this in three profiles,
+separately from schemas and official ToolAnnotations; no owner approval is
+claimed.
+
+The schema criterion is complete, but this scoped repair does not close overall
+RB-09 acceptance. RB-08 native evidence, the interface/floor gaps, visual
+review, owner acceptance, and overall product acceptance remain pending. No
+RB-10 work was started. The only Git changes here are the preserved working-tree
+changes; nothing was staged, committed, pushed, reset, or restored.
 
 ## Current RB-09 endpoint (2026-11-04)
 
@@ -362,14 +472,44 @@ slice or RB-11 acceptance closure.
 
 ## 10. Fresh-session prompt
 
-    The current Rust Release GUI/MCP workflow and additive G: recovery snapshot
-    are recorded. Do not start RB-10. Read the current instructions and RB-09
-    checkpoint, keep E:/Builder3D-Rust as the working tree and L:/Builder3D
-    read-only, and preserve all uncommitted files. RB-09 schema compatibility
-    remains open: compare against the current reference contract only when that
-    evidence is authorized and available, then resolve or document and test any
-    deviations. Keep the interface/floor gaps, visual review, owner acceptance,
-    overall product acceptance, and RB-08 native matrix/completion snapshot
-    pending.
+    Continue only the RB-09 schema-parity repair in E:\Builder3D-Rust; stop
+    before RB-10. Read E:\AGENTS.md, E:\RustDeveloper.md,
+    E:\MCP_DESIGN_GUIDE.md, this workspace's AGENTS.md,
+    docs/product-rebuild-plan.md, and this handoff before changing an MCP
+    interface or schema. Read the project's MCP contract, architecture, and
+    testing documents listed in handoff section 2, and verify protocol/SDK
+    assumptions against current official MCP sources. Inspect Git status and
+    Builder3D processes first, and preserve all existing changes and untracked
+    files. Do not stage, commit,
+    push, reset, or restore from a snapshot unless I explicitly ask.
 
-The final short-name additive recovery snapshot is `G:/B3D_R09C_20261106`; its independent path/count/byte/SHA-256/reparse verification is recorded in `evidence/rebuild/rb-09-shared-ai-and-regression/snapshot-receipt.md`. It does not close the schema contract or any visual/owner acceptance gate.
+    First verify the identity of the currently designated L:\Builder3D
+    read-only reference and capture its current catalog schemas without
+    modifying it. Do not launch or test an older Python build, and do not use
+    saved catalog snapshots as the final oracle. If the current reference
+    identity cannot be confirmed, stop before schema edits and report that
+    blocker. Then follow the “Current schema-parity repair checklist” above:
+    reconcile the 19-versus-20 return_detail count, align input and output
+    schemas, requiredness, bounds, nullability, annotations, and actual result
+    shapes, and add full nested JSON Schema validation across all four profiles.
+    Do not remove Rust's additionalProperties rejection without first checking
+    current Python behavior and making an explicit, documented compatibility
+    decision consistent with the MCP design guide.
+
+    Before Rust source edits, create a new additive G:\ recovery snapshot of
+    the current E:\ worktree; keep G:\B3D_R09W_20261106 and all older snapshots
+    read-only. Verify paths, file/byte counts, and critical SHA-256 hashes.
+    Run focused and workspace tests, the documented engineering checks, and
+    the current Rust Release GUI/MCP checks needed to prove schema parity.
+    Do not treat name/order parity as schema parity or claim an intentional
+    deviation without owner approval. Update the plan, WORK_LOG, and evidence
+    only for work actually completed. Keep RB-08 native evidence, the
+    interface/floor gaps, visual review, owner acceptance, and overall product
+    acceptance pending. Do not begin RB-10.
+
+The latest additive recovery snapshot is `G:/B3D_R09W_20261106`; its
+independent verification and critical hashes are in
+`evidence/rebuild/rb-09-shared-ai-and-regression/snapshot-receipt.md`. It is a
+review/recovery copy, not a completion snapshot, and its receipt postdates the
+copy. The older `G:/B3D_R09C_20261106` copy now differs in the two regenerated
+current-run JSON files; it was left untouched.

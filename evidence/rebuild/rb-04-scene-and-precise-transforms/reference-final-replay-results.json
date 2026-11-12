@@ -1,0 +1,14 @@
+[
+  {
+    "script": "python-modal-repaint-walkthrough.py",
+    "exit_code": 0
+  },
+  {
+    "script": "verify-python-scene-run.py",
+    "exit_code": 0
+  },
+  {
+    "script": "python-pick-walkthrough.py",
+    "exit_code": 0
+  }
+]

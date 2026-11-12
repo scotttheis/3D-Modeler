@@ -1,0 +1,5 @@
+QThreadStorage: entry 4 destroyed before end of thread 0x1f6f35973e0
+QThreadStorage: entry 3 destroyed before end of thread 0x1f6f35973e0
+QThreadStorage: entry 2 destroyed before end of thread 0x1f6f35973e0
+QThreadStorage: entry 1 destroyed before end of thread 0x1f6f35973e0
+QThreadStorage: entry 0 destroyed before end of thread 0x1f6f35973e0

@@ -1,0 +1,158 @@
+[
+  {
+    "action": "measure",
+    "theme": "light",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-light-measure.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [
+      0,
+      1
+    ],
+    "objects": [
+      {
+        "id": "53608d2da6aa44bca5c32c2c0ba1f95e",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "149fdf34580841b281093c618cc6a0e5",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 2
+  },
+  {
+    "action": "measure",
+    "theme": "dark",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-dark-measure.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [
+      0,
+      1
+    ],
+    "objects": [
+      {
+        "id": "4b762df4a48542b0ac098b79d477c0b9",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "531f2e88d9c94957b5e64ad70d107f06",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 2
+  }
+]

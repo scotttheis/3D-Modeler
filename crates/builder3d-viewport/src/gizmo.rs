@@ -6,12 +6,20 @@ use crate::{
 
 /// Pixel target for camera-readable gizmo handles.
 pub const GIZMO_TARGET_PIXELS: f32 = 96.0;
-/// Fraction of the screen-sized gizmo length used to offset move arrows from
-/// the selected object's center toward the camera-facing face.
-pub const MOVE_ARROW_OFFSET_FACTOR: f32 = 0.25;
-/// Fraction of the screen-sized gizmo length occupied by each side of a move
-/// arrow's displaced center.
-pub const MOVE_ARROW_HALF_LENGTH_FACTOR: f32 = 0.60;
+/// Size multiplier for Move handles in both drawing and hit testing.
+pub const MOVE_GIZMO_SCALE: f32 = 3.0;
+/// Fraction of the screen-sized gizmo length used to clear the camera-facing
+/// object face before a move shaft begins.
+pub const MOVE_ARROW_OFFSET_FACTOR: f32 = 0.07;
+/// Fraction of the screen-sized gizmo length from the camera-facing object
+/// face to a move arrow tip.
+pub const MOVE_ARROW_HALF_LENGTH_FACTOR: f32 = 0.425;
+const MOVE_ARROW_HEAD_LENGTH_FACTOR: f32 = 0.17;
+const MOVE_ARROW_HEAD_WIDTH_FACTOR: f32 = 0.10;
+const MOVE_ARROW_OUTLINE_GROWTH_FACTOR: f32 = 0.018;
+const MOVE_ARROW_HEAD_SEGMENTS: u32 = 12;
+const MOVE_GIZMO_OUTLINE: [f32; 4] = [0.10, 0.12, 0.17, 0.88];
+const ROTATE_ARROW_PICK_RADIUS_PIXELS: f32 = 26.0;
 /// Fraction of the screen-sized gizmo length used for rotate-ring clearance.
 pub const ROTATE_RING_GAP_FACTOR: f32 = 0.18;
 /// Segment count for the analytic rotate ring.
@@ -123,14 +131,14 @@ pub fn build_gizmo(
 }
 
 /// Builds gizmo geometry using the selected object's bounds for camera-facing
-/// placement and rotate-ring sizing.
+/// Move placement and Rotate-ring sizing.
 pub fn build_gizmo_with_bounds(
     camera: &Camera,
     center: Vec3,
     mode: GizmoMode,
     bounds: Option<Aabb>,
 ) -> Result<GizmoGeometry, ViewportError> {
-    let length = camera.world_tolerance(GIZMO_TARGET_PIXELS).max(0.01);
+    let length = camera.world_tolerance(gizmo_target_pixels(mode)).max(0.01);
     let head_length = length * 0.24;
     let head_width = length * 0.20;
     let mut geometry = GizmoGeometry::default();
@@ -138,43 +146,18 @@ pub fn build_gizmo_with_bounds(
         let direction = axis.vector();
         match mode {
             GizmoMode::Move => {
-                let near_side = camera_facing_side(camera, center, direction);
-                let extent = bounds
-                    .map(|value| axis_extent(value, center, axis))
-                    .unwrap_or(0.0);
-                let arrow_center = add(
-                    center,
-                    scale(
-                        direction,
-                        near_side * (extent + MOVE_ARROW_OFFSET_FACTOR * length),
-                    ),
-                );
-                let half_length = MOVE_ARROW_HALF_LENGTH_FACTOR * length;
-                let negative_end = add(arrow_center, scale(direction, -half_length));
-                let positive_end = add(arrow_center, scale(direction, half_length));
+                let (start, tip, near_side) =
+                    move_arrow_segment(camera, center, axis, length, bounds);
+                let outward = scale(direction, near_side);
+                let head_length = length * MOVE_ARROW_HEAD_LENGTH_FACTOR;
+                let shaft_end = add(tip, scale(outward, -head_length));
                 geometry.lines.push(GizmoLine {
-                    start: negative_end,
-                    end: positive_end,
+                    start,
+                    end: shaft_end,
                     color: axis.color(),
-                    width_pixels: 3.0,
+                    width_pixels: 3.25,
                 });
-                let perpendicular = perpendicular(direction)?;
-                let side = cross(direction, perpendicular);
-                for (tip, sign) in [(negative_end, -1.0_f32), (positive_end, 1.0_f32)] {
-                    let base = add(tip, scale(direction, -sign * head_length));
-                    geometry.triangles.push(GizmoTriangle {
-                        first: tip,
-                        second: add(base, scale(perpendicular, head_width)),
-                        third: add(base, scale(perpendicular, -head_width)),
-                        color: axis.color(),
-                    });
-                    geometry.triangles.push(GizmoTriangle {
-                        first: tip,
-                        second: add(base, scale(side, head_width)),
-                        third: add(base, scale(side, -head_width)),
-                        color: axis.color(),
-                    });
-                }
+                append_move_arrowhead(&mut geometry, tip, axis, near_side, length)?;
             }
             GizmoMode::Resize => {
                 let perpendicular = perpendicular(direction)?;
@@ -279,10 +262,12 @@ pub fn hit_test_with_bounds(
     bounds: Option<Aabb>,
 ) -> Result<Option<GizmoHit>, ViewportError> {
     let ray = camera.screen_ray(screen_x, screen_y, scene_radius)?;
-    let length = camera.world_tolerance(GIZMO_TARGET_PIXELS).max(0.01);
-    let tolerance = camera
-        .world_tolerance(VIEW_PICK_TOLERANCE_PIXELS)
-        .max(0.001);
+    let length = camera.world_tolerance(gizmo_target_pixels(mode)).max(0.01);
+    let tolerance_pixels = match mode {
+        GizmoMode::Rotate => VIEW_PICK_TOLERANCE_PIXELS.max(ROTATE_ARROW_PICK_RADIUS_PIXELS),
+        GizmoMode::Move | GizmoMode::Resize => VIEW_PICK_TOLERANCE_PIXELS,
+    };
+    let tolerance = camera.world_tolerance(tolerance_pixels).max(0.001);
     let mut nearest = None;
     for axis in [GizmoAxis::X, GizmoAxis::Y, GizmoAxis::Z] {
         let candidate = match mode {
@@ -295,20 +280,7 @@ pub fn hit_test_with_bounds(
                 hit_ring(ray, center, axis, radius, tolerance)?
             }
             GizmoMode::Move => {
-                let near_side = camera_facing_side(camera, center, axis.vector());
-                let extent = bounds
-                    .map(|value| axis_extent(value, center, axis))
-                    .unwrap_or(0.0);
-                let arrow_center = add(
-                    center,
-                    scale(
-                        axis.vector(),
-                        near_side * (extent + MOVE_ARROW_OFFSET_FACTOR * length),
-                    ),
-                );
-                let half_length = MOVE_ARROW_HALF_LENGTH_FACTOR * length;
-                let start = add(arrow_center, scale(axis.vector(), -half_length));
-                let end = add(arrow_center, scale(axis.vector(), half_length));
+                let (start, end, _) = move_arrow_segment(camera, center, axis, length, bounds);
                 hit_segment(ray, start, end, tolerance).map(|(distance, parameter)| GizmoHit {
                     axis,
                     distance,
@@ -349,6 +321,13 @@ pub fn hit_test_with_bounds(
     Ok(nearest)
 }
 
+fn gizmo_target_pixels(mode: GizmoMode) -> f32 {
+    match mode {
+        GizmoMode::Move => GIZMO_TARGET_PIXELS * MOVE_GIZMO_SCALE,
+        GizmoMode::Rotate | GizmoMode::Resize => GIZMO_TARGET_PIXELS,
+    }
+}
+
 fn axis_extent(bounds: Aabb, center: Vec3, axis: GizmoAxis) -> f32 {
     let component = match axis {
         GizmoAxis::X => 0,
@@ -375,9 +354,82 @@ fn projected_extent(bounds: Aabb, center: Vec3, axis: GizmoAxis) -> f32 {
     first.hypot(second)
 }
 
+fn move_arrow_segment(
+    camera: &Camera,
+    center: Vec3,
+    axis: GizmoAxis,
+    length: f32,
+    bounds: Option<Aabb>,
+) -> (Vec3, Vec3, f32) {
+    let direction = axis.vector();
+    let near_side = camera_facing_side(camera, center, direction);
+    let extent = bounds
+        .map(|value| axis_extent(value, center, axis))
+        .unwrap_or(0.0);
+    let face_center = add(center, scale(direction, near_side * extent));
+    let start = add(
+        face_center,
+        scale(direction, near_side * MOVE_ARROW_OFFSET_FACTOR * length),
+    );
+    let tip = add(
+        face_center,
+        scale(
+            direction,
+            near_side * MOVE_ARROW_HALF_LENGTH_FACTOR * length,
+        ),
+    );
+    (start, tip, near_side)
+}
+
 fn camera_facing_side(camera: &Camera, center: Vec3, axis: Vec3) -> f32 {
     let view = subtract(camera.position(), center);
     if dot(axis, view) >= 0.0 { 1.0 } else { -1.0 }
+}
+
+fn append_move_arrowhead(
+    geometry: &mut GizmoGeometry,
+    tip: Vec3,
+    axis: GizmoAxis,
+    near_side: f32,
+    length: f32,
+) -> Result<(), ViewportError> {
+    let direction = axis.vector();
+    let head_length = length * MOVE_ARROW_HEAD_LENGTH_FACTOR;
+    let head_width = length * MOVE_ARROW_HEAD_WIDTH_FACTOR;
+    let outline_growth = length * MOVE_ARROW_OUTLINE_GROWTH_FACTOR;
+    let side = perpendicular(direction)?;
+    let depth = normalize(cross(direction, side), "move arrowhead basis")?;
+    let outward = scale(direction, near_side);
+    let outline_base = add(tip, scale(outward, -(head_length + outline_growth)));
+    let outline_width = head_width + outline_growth;
+    let base = add(tip, scale(outward, -head_length));
+
+    for segment in 0..MOVE_ARROW_HEAD_SEGMENTS {
+        let first_angle = std::f32::consts::TAU * segment as f32 / MOVE_ARROW_HEAD_SEGMENTS as f32;
+        let second_angle =
+            std::f32::consts::TAU * (segment + 1) as f32 / MOVE_ARROW_HEAD_SEGMENTS as f32;
+        let first_ring_direction = add(
+            scale(side, first_angle.cos()),
+            scale(depth, first_angle.sin()),
+        );
+        let second_ring_direction = add(
+            scale(side, second_angle.cos()),
+            scale(depth, second_angle.sin()),
+        );
+        geometry.triangles.push(GizmoTriangle {
+            first: tip,
+            second: add(outline_base, scale(first_ring_direction, outline_width)),
+            third: add(outline_base, scale(second_ring_direction, outline_width)),
+            color: MOVE_GIZMO_OUTLINE,
+        });
+        geometry.triangles.push(GizmoTriangle {
+            first: tip,
+            second: add(base, scale(first_ring_direction, head_width)),
+            third: add(base, scale(second_ring_direction, head_width)),
+            color: axis.color(),
+        });
+    }
+    Ok(())
 }
 
 fn perpendicular(axis: Vec3) -> Result<Vec3, ViewportError> {
@@ -478,12 +530,15 @@ mod tests {
     fn move_handle_hit_returns_axis_and_parameter() {
         let mut camera = Camera::new();
         assert!(camera.set_viewport_size(800, 600).is_ok());
-        let length = camera.world_tolerance(GIZMO_TARGET_PIXELS);
+        let length = camera.world_tolerance(gizmo_target_pixels(GizmoMode::Move));
         let projected = camera.view_projection(2.0).ok();
         let Some(projected) = projected else {
             return;
         };
-        let point = projected.transform_point([length * 0.5, 0.0, 0.0]).ok();
+        let (start, end, _) =
+            move_arrow_segment(&camera, [0.0, 0.0, 0.0], GizmoAxis::X, length, None);
+        let point_world = scale(add(start, end), 0.5);
+        let point = projected.transform_point(point_world).ok();
         let Some(point) = point else {
             return;
         };
@@ -499,7 +554,7 @@ mod tests {
     }
 
     #[test]
-    fn move_arrows_are_displaced_to_the_camera_facing_face() {
+    fn move_arrows_point_outward_from_the_camera_facing_faces() {
         let mut camera = Camera::new();
         assert!(camera.set_viewport_size(800, 600).is_ok());
         let bounds = Aabb::new([-2.0, -1.0, -3.0], [2.0, 1.0, 3.0]);
@@ -514,11 +569,16 @@ mod tests {
             return;
         };
         let x_line = geometry.lines[0];
-        assert!((x_line.start[0] + x_line.end[0]) * 0.5 > bounds.maximum[0]);
+        let near_side = camera_facing_side(&camera, [0.0, 0.0, 0.0], GizmoAxis::X.vector());
+        let extent = axis_extent(bounds, [0.0, 0.0, 0.0], GizmoAxis::X);
+        assert!(x_line.start[0] * near_side > extent);
+        assert!(x_line.end[0] * near_side > x_line.start[0] * near_side);
         assert!(x_line.start[1].abs() < 1.0e-4);
         assert!(x_line.start[2].abs() < 1.0e-4);
-        assert!(x_line.end[0] - x_line.start[0] > 0.0);
-        assert!(geometry.triangles.len() >= 6);
+        assert_eq!(
+            geometry.triangles.len(),
+            MOVE_ARROW_HEAD_SEGMENTS as usize * 6
+        );
     }
 
     #[test]

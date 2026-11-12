@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "slice": "RB-06",
+  "materialized_fixtures": [
+    {
+      "id": "python-single",
+      "path": "fixtures/python-single.3dp",
+      "sha256": "af76cee3847d4367e650551e9b5f0a2faf7dac78c1d56de0683464df01729ce3",
+      "bytes": 919,
+      "owner": "RB-06 evidence"
+    }
+  ],
+  "native_descriptors": [
+    {
+      "id": "native-sphere-brush-fixture",
+      "materialized": false,
+      "construction": "native Insert/Sphere route followed by actual OS modelling-tool input",
+      "coverage": ["brushes", "simplify", "subdivide", "smooth", "booleans", "repair", "paint", "view", "items"]
+    },
+    {
+      "id": "primitive-torus",
+      "materialized": false,
+      "construction": "native Insert/Torus dialog with Solid/Hole preview and Apply",
+      "coverage": ["torus-dialog", "torus-hole-preview", "torus-applied"]
+    }
+  ],
+  "automated_fixture_contracts": [
+    "crates/builder3d-core/tests/mesh_ops_booleans.rs",
+    "crates/builder3d-core/tests/mesh_ops_brushes.rs",
+    "crates/builder3d-core/tests/mesh_ops_density.rs",
+    "crates/builder3d-core/tests/mesh_ops_repair.rs",
+    "crates/builder3d-core/tests/mesh_ops_shell.rs",
+    "crates/builder3d-core/tests/mesh_ops_simplify.rs",
+    "crates/builder3d-core/tests/mesh_ops_smooth.rs",
+    "crates/builder3d-core/tests/mesh_ops_subdivide.rs"
+  ]
+}

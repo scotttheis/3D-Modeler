@@ -622,7 +622,7 @@ mod tests {
         assert!(
             scene
                 .object(0)
-                .is_ok_and(|object| object.position() == [0.0, 0.0, 0.0])
+                .is_ok_and(|object| object.position() == [0.0, 20.0, 0.0])
         );
     }
 

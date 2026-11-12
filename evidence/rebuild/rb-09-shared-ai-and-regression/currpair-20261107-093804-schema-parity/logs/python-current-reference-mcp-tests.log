@@ -1,0 +1,11 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-8.4.2, pluggy-1.6.0
+rootdir: L:\Builder3D
+configfile: pytest.ini
+plugins: anyio-4.15.0
+collected 9 items
+
+tests\test_mcp_catalog.py .......                                        [ 77%]
+tests\test_mcp_sdk.py ..                                                 [100%]
+
+============================== 9 passed in 5.77s ==============================

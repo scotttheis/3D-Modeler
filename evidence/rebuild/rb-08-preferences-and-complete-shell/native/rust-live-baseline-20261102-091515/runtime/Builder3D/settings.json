@@ -1,0 +1,18 @@
+{
+  "default_import_unit": "Millimetre",
+  "recent_files": {
+    "paths": []
+  },
+  "ribbon_favorites": [
+    "Insert:Cube",
+    "Object:Duplicate",
+    "Object:Delete",
+    "View:Reset View"
+  ],
+  "ribbon_pinned": false,
+  "edit_ribbon_order": [],
+  "display_unit": "Millimetre",
+  "theme_mode": "Light",
+  "ribbon_orders": {},
+  "object_snapping_enabled": true
+}

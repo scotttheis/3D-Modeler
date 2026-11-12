@@ -1,0 +1,52 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.60s
+     Running unittests src\lib.rs (target\debug\deps\builder3d_mcp-ab9bddde4abe851a.exe)
+
+running 26 tests
+test r4::catalog::tests::catalog_is_exactly_ordered_and_profile_monotonic ... ok
+test r4::schema::tests::captured_release_success_results_match_reference_output_schemas_when_supplied ... ok
+test r4::security::tests::policy_allows_a_child_and_denies_a_sibling ... ok
+test r4::schema::tests::return_detail_is_limited_to_the_five_reference_tools ... ok
+test r4::security::tests::path_policy_resolves_reads_and_requires_explicit_overwrite ... ok
+test r4::server::tests::full_profile_publishes_the_fixed_catalog_with_strict_metadata ... ok
+test r4::gateway::tests::gateway_publishes_the_fixed_catalog_without_owning_a_scene ... ok
+test r4::server::tests::attached_desktop_scene_keeps_the_same_core_undo_history ... ok
+test r4::state::tests::canonical_fingerprint_ignores_object_key_order ... ok
+test r4::schema::tests::top_level_unknown_fields_are_dropped_and_nested_models_remain_closed ... ok
+test r4::state::tests::operation_registry_has_bounded_lifecycle ... ok
+test tests::summary_is_compact_and_detail_is_explicit ... ok
+test r4::schema::tests::reference_requiredness_nullability_and_bounds_are_enforced_recursively ... ok
+test r4::schema::tests::typed_output_schemas_reject_missing_nested_fields_and_extra_properties ... ok
+test r4::server::tests::project_replacement_tools_reject_an_unsaved_document ... ok
+test r4::server::tests::color_inputs_match_reference_rgb_255_normalization ... ok
+test r4::server::tests::long_operation_reports_bounded_status_and_commits_once ... ok
+test r4::server::tests::reference_mesh_tools_and_profile_filter_are_live ... ok
+test r4::server::tests::sample_image_color_applies_a_bounded_ppm_to_selection ... ok
+test r4::server::tests::core_calls_are_structured_and_replay_is_idempotent ... ok
+test r4::server::tests::concurrent_expected_revision_race_commits_once ... ok
+test r4::server::tests::concurrent_same_key_requests_replay_one_mutation ... ok
+test r4::schema::tests::captured_contract_compiles_for_every_tool_in_every_profile ... ok
+test r4::schema::tests::recursive_input_and_output_examples_validate_for_every_profile ... ok
+test r4::server::tests::shell_long_operations_commit_reports_and_are_undoable ... ok
+test r4::server::tests::grouped_actions_clipboard_and_discovery_are_live ... ok
+
+test result: ok. 26 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.14s
+
+     Running unittests src\bin\r0b_mcp.rs (target\debug\deps\r0b_mcp-707a864a2653189a.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src\bin\r4_mcp.rs (target\debug\deps\r4_mcp-c7c5a373cbc1d69a.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests builder3d_mcp
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+test_exit_code=0

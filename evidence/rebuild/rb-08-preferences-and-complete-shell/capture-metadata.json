@@ -1,0 +1,37 @@
+{
+  "schema": "builder3d.native-capture-metadata/v1",
+  "slice": "RB-08",
+  "reference": {
+    "executable": "L:\\Builder3D\\venv\\Scripts\\python.exe",
+    "source": "L:\\Builder3D\\src\\main_window.py",
+    "source_sha256": "3fc2b1c25a53f6f7d040d3321d331a22d7b8a462f8cb4fcd18a9631b960a7c41",
+    "settings_and_runtime_isolated": true
+  },
+  "baseline_rust_release_sha256": "e26c37de652b6434727ae7f6396012cdf4aa911299857b621d336afb4da38448",
+  "capture_context": {
+    "os": "Windows 11 Enterprise 10.0.26200",
+    "client_width": 1280,
+    "client_height": 840,
+    "dpi": 96,
+    "scale_percent": 100,
+    "sequential_python_then_rust": true,
+    "input_desktop": "Default",
+    "window_process_verified": true
+  },
+  "accepted_baseline_captures": [
+    {"path":"captures/python-dark-welcome-empty.png","sha256":"1d91a9d4664442834d4dd6aea1a9c6dfadc8bee8dc29d908b4f1e63323fe2509","theme":"dark","state":"empty welcome","app":"Python reference"},
+    {"path":"captures/python-dark-file-menu.png","sha256":"d7ae9248e09bb7f2d00d5ef190dc1f2b3d6ec9ebdad13275f118fed2b9d74830","theme":"dark","state":"file menu","app":"Python reference"},
+    {"path":"captures/python-dark-settings-dialog.png","sha256":"f8c1869ff88103c2e55e152319d9c4e91afe50c0371d687675149d23681ca0ba","theme":"dark","state":"settings","app":"Python reference"},
+    {"path":"captures/python-dark-about-dialog.png","sha256":"76b30fc32bb44686da1152f87577eeead3d68921bae30d4912fbf26241fea038","theme":"dark","state":"about dialog","app":"Python reference"},
+    {"path":"captures/python-dark-slicer-picker.png","sha256":"e9bc958a33ad05f9495f99b61e6477177de8467a6af0b9ab5c9ac71cba8bd1ba","theme":"dark","state":"slicer picker","app":"Python reference"},
+    {"path":"captures/python-light-settings.png","sha256":"f2de341d7ac92cd4d6109047e8e79bde289bef63b238804d3ec51f5a34889db2","theme":"light","state":"settings","app":"Python reference"},
+    {"path":"captures/python-light-welcome-empty.png","sha256":"a02c4af5a15efa4b19f2e4fd75e817818c4d1440f5eebdd1e6fc4d988315d529","theme":"light","state":"empty welcome","app":"Python reference"},
+    {"path":"captures/rust-dark-welcome-empty.png","sha256":"979e0ff11b5d001b80c550b0a8725055f2bbbf06997bfefadfe7635033beb441","theme":"dark","state":"empty welcome","app":"Rust pre-edit"},
+    {"path":"captures/rust-dark-file-menu.png","sha256":"bb303ce9e2842da2d3b935c4a228354cd7562a1a8ffb16c5bd302ae0fe586e6d","theme":"dark","state":"file menu","app":"Rust pre-edit"},
+    {"path":"captures/rust-dark-settings.png","sha256":"1273529e87ec0454ece97a79e75b6a41e74e67fdfbb9556de03aaf8f0899dd04","theme":"dark","state":"settings","app":"Rust pre-edit"},
+    {"path":"captures/rust-light-settings.png","sha256":"c14d79357246644e4f834089c656d6c05530a10ed56e822ed3e369d7375fde0d","theme":"light","state":"settings","app":"Rust pre-edit"},
+    {"path":"captures/rust-light-welcome-empty.png","sha256":"2c43626f91fb7c7752499e47e133a1d09b966e8ca8479f9b7c45d31766cc2e3e","theme":"light","state":"empty welcome","app":"Rust pre-edit"}
+  ],
+  "pending": true,
+  "owner_visual_acceptance": "pending"
+}

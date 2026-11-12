@@ -1,0 +1,4730 @@
+[
+  {
+    "action": "items",
+    "theme": "light",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-light-items.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "3385c3d3a53a4f9d8dea08fb449c675e",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "5d91d803cc5b46208fda88a4b2982351",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 2
+  },
+  {
+    "action": "select-all",
+    "theme": "light",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-light-select-all.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [
+      0,
+      1
+    ],
+    "objects": [
+      {
+        "id": "3385c3d3a53a4f9d8dea08fb449c675e",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "5d91d803cc5b46208fda88a4b2982351",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 2
+  },
+  {
+    "action": "invert",
+    "theme": "light",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-light-invert.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [],
+    "objects": [
+      {
+        "id": "3385c3d3a53a4f9d8dea08fb449c675e",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "5d91d803cc5b46208fda88a4b2982351",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 2
+  },
+  {
+    "action": "sticky",
+    "theme": "light",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-light-sticky.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [],
+    "objects": [
+      {
+        "id": "3385c3d3a53a4f9d8dea08fb449c675e",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "5d91d803cc5b46208fda88a4b2982351",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 2
+  },
+  {
+    "action": "selected",
+    "theme": "light",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-light-selected.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "3385c3d3a53a4f9d8dea08fb449c675e",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "5d91d803cc5b46208fda88a4b2982351",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 2
+  },
+  {
+    "action": "copy",
+    "theme": "light",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-light-copy.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "3385c3d3a53a4f9d8dea08fb449c675e",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "5d91d803cc5b46208fda88a4b2982351",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 2
+  },
+  {
+    "action": "paste",
+    "theme": "light",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-light-paste.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [
+      2
+    ],
+    "objects": [
+      {
+        "id": "3385c3d3a53a4f9d8dea08fb449c675e",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "5d91d803cc5b46208fda88a4b2982351",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "4746eb9f6a014a52b9ea3a73635cad90",
+        "name": "Box A (copy)",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 3
+  },
+  {
+    "action": "duplicate",
+    "theme": "light",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-light-duplicate.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [
+      3
+    ],
+    "objects": [
+      {
+        "id": "3385c3d3a53a4f9d8dea08fb449c675e",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "5d91d803cc5b46208fda88a4b2982351",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "4746eb9f6a014a52b9ea3a73635cad90",
+        "name": "Box A (copy)",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "c66290f01adb47f088d6539847e0316b",
+        "name": "Box A (copy) (copy)",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            1.5
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 4
+  },
+  {
+    "action": "cut",
+    "theme": "light",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-light-cut.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [],
+    "objects": [
+      {
+        "id": "3385c3d3a53a4f9d8dea08fb449c675e",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "5d91d803cc5b46208fda88a4b2982351",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "4746eb9f6a014a52b9ea3a73635cad90",
+        "name": "Box A (copy)",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 5
+  },
+  {
+    "action": "undo",
+    "theme": "light",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-light-undo.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [
+      3
+    ],
+    "objects": [
+      {
+        "id": "3385c3d3a53a4f9d8dea08fb449c675e",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "5d91d803cc5b46208fda88a4b2982351",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "4746eb9f6a014a52b9ea3a73635cad90",
+        "name": "Box A (copy)",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "c66290f01adb47f088d6539847e0316b",
+        "name": "Box A (copy) (copy)",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            1.5
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 4
+  },
+  {
+    "action": "redo",
+    "theme": "light",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-light-redo.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [],
+    "objects": [
+      {
+        "id": "3385c3d3a53a4f9d8dea08fb449c675e",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "5d91d803cc5b46208fda88a4b2982351",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "4746eb9f6a014a52b9ea3a73635cad90",
+        "name": "Box A (copy)",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 5
+  },
+  {
+    "action": "select-all-group",
+    "theme": "light",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-light-select-all-group.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [
+      0,
+      1,
+      2
+    ],
+    "objects": [
+      {
+        "id": "3385c3d3a53a4f9d8dea08fb449c675e",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "5d91d803cc5b46208fda88a4b2982351",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "4746eb9f6a014a52b9ea3a73635cad90",
+        "name": "Box A (copy)",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 5
+  },
+  {
+    "action": "group",
+    "theme": "light",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-light-group.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "2d9985abb96741e3b8b429b01f809123",
+        "name": "Group",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 6
+  },
+  {
+    "action": "ungroup",
+    "theme": "light",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-light-ungroup.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [],
+    "objects": [
+      {
+        "id": "3385c3d3a53a4f9d8dea08fb449c675e",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "5d91d803cc5b46208fda88a4b2982351",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "4746eb9f6a014a52b9ea3a73635cad90",
+        "name": "Box A (copy)",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 7
+  },
+  {
+    "action": "move",
+    "theme": "light",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-light-move.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [],
+    "objects": [
+      {
+        "id": "3385c3d3a53a4f9d8dea08fb449c675e",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            12.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            24.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            36.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "5d91d803cc5b46208fda88a4b2982351",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "4746eb9f6a014a52b9ea3a73635cad90",
+        "name": "Box A (copy)",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 8
+  },
+  {
+    "action": "rotate",
+    "theme": "light",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-light-rotate.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "3385c3d3a53a4f9d8dea08fb449c675e",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            0.8660253882408142,
+            -0.5,
+            0.0,
+            12.0
+          ],
+          [
+            0.5,
+            0.8660253882408142,
+            0.0,
+            24.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            36.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "5d91d803cc5b46208fda88a4b2982351",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "4746eb9f6a014a52b9ea3a73635cad90",
+        "name": "Box A (copy)",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 9
+  },
+  {
+    "action": "resize",
+    "theme": "light",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-light-resize.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "3385c3d3a53a4f9d8dea08fb449c675e",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.3397459983825684,
+            -0.7735027074813843,
+            0.0,
+            12.0
+          ],
+          [
+            0.7735027074813843,
+            1.3397459983825684,
+            0.0,
+            24.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.5470054149627686,
+            36.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "5d91d803cc5b46208fda88a4b2982351",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "4746eb9f6a014a52b9ea3a73635cad90",
+        "name": "Box A (copy)",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 10
+  },
+  {
+    "action": "settle",
+    "theme": "light",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-light-settle.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "3385c3d3a53a4f9d8dea08fb449c675e",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.5470054149627686,
+            1.6639397415474377e-08,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.5470054149627686,
+            0.0,
+            23.205081939697266
+          ],
+          [
+            0.0,
+            0.0,
+            1.5470054149627686,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "5d91d803cc5b46208fda88a4b2982351",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "4746eb9f6a014a52b9ea3a73635cad90",
+        "name": "Box A (copy)",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 11
+  },
+  {
+    "action": "mirror-y",
+    "theme": "light",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-light-mirror-y.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "3385c3d3a53a4f9d8dea08fb449c675e",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.5470054149627686,
+            -1.6639397415474377e-08,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -1.5470054149627686,
+            0.0,
+            -23.205081939697266
+          ],
+          [
+            0.0,
+            -0.0,
+            1.5470054149627686,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "5d91d803cc5b46208fda88a4b2982351",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "4746eb9f6a014a52b9ea3a73635cad90",
+        "name": "Box A (copy)",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 12
+  },
+  {
+    "action": "align-z-max",
+    "theme": "light",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-light-align-z-max.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "3385c3d3a53a4f9d8dea08fb449c675e",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.5470054149627686,
+            -1.6639397415474377e-08,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -1.5470054149627686,
+            0.0,
+            -23.205081939697266
+          ],
+          [
+            0.0,
+            -0.0,
+            1.5470054149627686,
+            -15.940108299255371
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "5d91d803cc5b46208fda88a4b2982351",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "4746eb9f6a014a52b9ea3a73635cad90",
+        "name": "Box A (copy)",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 13
+  },
+  {
+    "action": "arrange-z-gap5",
+    "theme": "light",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-light-arrange-z-gap5.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "3385c3d3a53a4f9d8dea08fb449c675e",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.5470054149627686,
+            -1.6639397415474377e-08,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -1.5470054149627686,
+            0.0,
+            -23.205081939697266
+          ],
+          [
+            0.0,
+            -0.0,
+            1.5470054149627686,
+            50.94010925292969
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "5d91d803cc5b46208fda88a4b2982351",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "4746eb9f6a014a52b9ea3a73635cad90",
+        "name": "Box A (copy)",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 14
+  },
+  {
+    "action": "hidden-first",
+    "theme": "light",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-light-hidden-first.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "3385c3d3a53a4f9d8dea08fb449c675e",
+        "name": "Box A",
+        "visible": false,
+        "transform": [
+          [
+            1.5470054149627686,
+            -1.6639397415474377e-08,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -1.5470054149627686,
+            0.0,
+            -23.205081939697266
+          ],
+          [
+            0.0,
+            -0.0,
+            1.5470054149627686,
+            50.94010925292969
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "5d91d803cc5b46208fda88a4b2982351",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "4746eb9f6a014a52b9ea3a73635cad90",
+        "name": "Box A (copy)",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 14
+  },
+  {
+    "action": "delete",
+    "theme": "light",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-light-delete.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [],
+    "objects": [
+      {
+        "id": "5d91d803cc5b46208fda88a4b2982351",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "4746eb9f6a014a52b9ea3a73635cad90",
+        "name": "Box A (copy)",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 15
+  },
+  {
+    "action": "delete-undo",
+    "theme": "light",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-light-delete-undo.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "3385c3d3a53a4f9d8dea08fb449c675e",
+        "name": "Box A",
+        "visible": false,
+        "transform": [
+          [
+            1.5470054149627686,
+            -1.6639397415474377e-08,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -1.5470054149627686,
+            0.0,
+            -23.205081939697266
+          ],
+          [
+            0.0,
+            -0.0,
+            1.5470054149627686,
+            50.94010925292969
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "5d91d803cc5b46208fda88a4b2982351",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "4746eb9f6a014a52b9ea3a73635cad90",
+        "name": "Box A (copy)",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 14
+  },
+  {
+    "action": "items",
+    "theme": "dark",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-dark-items.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "dd5cc00b60984be28b336a37c984184a",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "8c9c49f42f6842e98ce12144268a282e",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 2
+  },
+  {
+    "action": "select-all",
+    "theme": "dark",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-dark-select-all.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [
+      0,
+      1
+    ],
+    "objects": [
+      {
+        "id": "dd5cc00b60984be28b336a37c984184a",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "8c9c49f42f6842e98ce12144268a282e",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 2
+  },
+  {
+    "action": "invert",
+    "theme": "dark",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-dark-invert.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [],
+    "objects": [
+      {
+        "id": "dd5cc00b60984be28b336a37c984184a",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "8c9c49f42f6842e98ce12144268a282e",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 2
+  },
+  {
+    "action": "sticky",
+    "theme": "dark",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-dark-sticky.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [],
+    "objects": [
+      {
+        "id": "dd5cc00b60984be28b336a37c984184a",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "8c9c49f42f6842e98ce12144268a282e",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 2
+  },
+  {
+    "action": "selected",
+    "theme": "dark",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-dark-selected.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "dd5cc00b60984be28b336a37c984184a",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "8c9c49f42f6842e98ce12144268a282e",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 2
+  },
+  {
+    "action": "copy",
+    "theme": "dark",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-dark-copy.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "dd5cc00b60984be28b336a37c984184a",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "8c9c49f42f6842e98ce12144268a282e",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 2
+  },
+  {
+    "action": "paste",
+    "theme": "dark",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-dark-paste.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [
+      2
+    ],
+    "objects": [
+      {
+        "id": "dd5cc00b60984be28b336a37c984184a",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "8c9c49f42f6842e98ce12144268a282e",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "ebf4d2718f0b4fc9845cd3b1fe688297",
+        "name": "Box A (copy)",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 3
+  },
+  {
+    "action": "duplicate",
+    "theme": "dark",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-dark-duplicate.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [
+      3
+    ],
+    "objects": [
+      {
+        "id": "dd5cc00b60984be28b336a37c984184a",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "8c9c49f42f6842e98ce12144268a282e",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "ebf4d2718f0b4fc9845cd3b1fe688297",
+        "name": "Box A (copy)",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "762d17f74c2a4fa9a625ad0eeb339ef3",
+        "name": "Box A (copy) (copy)",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            1.5
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 4
+  },
+  {
+    "action": "cut",
+    "theme": "dark",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-dark-cut.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [],
+    "objects": [
+      {
+        "id": "dd5cc00b60984be28b336a37c984184a",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "8c9c49f42f6842e98ce12144268a282e",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "ebf4d2718f0b4fc9845cd3b1fe688297",
+        "name": "Box A (copy)",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 5
+  },
+  {
+    "action": "undo",
+    "theme": "dark",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-dark-undo.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [
+      3
+    ],
+    "objects": [
+      {
+        "id": "dd5cc00b60984be28b336a37c984184a",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "8c9c49f42f6842e98ce12144268a282e",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "ebf4d2718f0b4fc9845cd3b1fe688297",
+        "name": "Box A (copy)",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "762d17f74c2a4fa9a625ad0eeb339ef3",
+        "name": "Box A (copy) (copy)",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            1.5
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 4
+  },
+  {
+    "action": "redo",
+    "theme": "dark",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-dark-redo.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [],
+    "objects": [
+      {
+        "id": "dd5cc00b60984be28b336a37c984184a",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "8c9c49f42f6842e98ce12144268a282e",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "ebf4d2718f0b4fc9845cd3b1fe688297",
+        "name": "Box A (copy)",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 5
+  },
+  {
+    "action": "select-all-group",
+    "theme": "dark",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-dark-select-all-group.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [
+      0,
+      1,
+      2
+    ],
+    "objects": [
+      {
+        "id": "dd5cc00b60984be28b336a37c984184a",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "8c9c49f42f6842e98ce12144268a282e",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "ebf4d2718f0b4fc9845cd3b1fe688297",
+        "name": "Box A (copy)",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 5
+  },
+  {
+    "action": "group",
+    "theme": "dark",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-dark-group.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "ba0a2084270b4630a77b07840745f879",
+        "name": "Group",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 6
+  },
+  {
+    "action": "ungroup",
+    "theme": "dark",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-dark-ungroup.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [],
+    "objects": [
+      {
+        "id": "dd5cc00b60984be28b336a37c984184a",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "8c9c49f42f6842e98ce12144268a282e",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "ebf4d2718f0b4fc9845cd3b1fe688297",
+        "name": "Box A (copy)",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 7
+  },
+  {
+    "action": "move",
+    "theme": "dark",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-dark-move.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [],
+    "objects": [
+      {
+        "id": "dd5cc00b60984be28b336a37c984184a",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            12.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            24.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            36.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "8c9c49f42f6842e98ce12144268a282e",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "ebf4d2718f0b4fc9845cd3b1fe688297",
+        "name": "Box A (copy)",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 8
+  },
+  {
+    "action": "rotate",
+    "theme": "dark",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-dark-rotate.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "dd5cc00b60984be28b336a37c984184a",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            0.8660253882408142,
+            -0.5,
+            0.0,
+            12.0
+          ],
+          [
+            0.5,
+            0.8660253882408142,
+            0.0,
+            24.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            36.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "8c9c49f42f6842e98ce12144268a282e",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "ebf4d2718f0b4fc9845cd3b1fe688297",
+        "name": "Box A (copy)",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 9
+  },
+  {
+    "action": "resize",
+    "theme": "dark",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-dark-resize.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "dd5cc00b60984be28b336a37c984184a",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.3397459983825684,
+            -0.7735027074813843,
+            0.0,
+            12.0
+          ],
+          [
+            0.7735027074813843,
+            1.3397459983825684,
+            0.0,
+            24.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.5470054149627686,
+            36.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "8c9c49f42f6842e98ce12144268a282e",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "ebf4d2718f0b4fc9845cd3b1fe688297",
+        "name": "Box A (copy)",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 10
+  },
+  {
+    "action": "settle",
+    "theme": "dark",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-dark-settle.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "dd5cc00b60984be28b336a37c984184a",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.5470054149627686,
+            1.6639397415474377e-08,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.5470054149627686,
+            0.0,
+            23.205081939697266
+          ],
+          [
+            0.0,
+            0.0,
+            1.5470054149627686,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "8c9c49f42f6842e98ce12144268a282e",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "ebf4d2718f0b4fc9845cd3b1fe688297",
+        "name": "Box A (copy)",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 11
+  },
+  {
+    "action": "mirror-y",
+    "theme": "dark",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-dark-mirror-y.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "dd5cc00b60984be28b336a37c984184a",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.5470054149627686,
+            -1.6639397415474377e-08,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -1.5470054149627686,
+            0.0,
+            -23.205081939697266
+          ],
+          [
+            0.0,
+            -0.0,
+            1.5470054149627686,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "8c9c49f42f6842e98ce12144268a282e",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "ebf4d2718f0b4fc9845cd3b1fe688297",
+        "name": "Box A (copy)",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 12
+  },
+  {
+    "action": "align-z-max",
+    "theme": "dark",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-dark-align-z-max.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "dd5cc00b60984be28b336a37c984184a",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.5470054149627686,
+            -1.6639397415474377e-08,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -1.5470054149627686,
+            0.0,
+            -23.205081939697266
+          ],
+          [
+            0.0,
+            -0.0,
+            1.5470054149627686,
+            -15.940108299255371
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "8c9c49f42f6842e98ce12144268a282e",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "ebf4d2718f0b4fc9845cd3b1fe688297",
+        "name": "Box A (copy)",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 13
+  },
+  {
+    "action": "arrange-z-gap5",
+    "theme": "dark",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-dark-arrange-z-gap5.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "dd5cc00b60984be28b336a37c984184a",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.5470054149627686,
+            -1.6639397415474377e-08,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -1.5470054149627686,
+            0.0,
+            -23.205081939697266
+          ],
+          [
+            0.0,
+            -0.0,
+            1.5470054149627686,
+            50.94010925292969
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "8c9c49f42f6842e98ce12144268a282e",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "ebf4d2718f0b4fc9845cd3b1fe688297",
+        "name": "Box A (copy)",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 14
+  },
+  {
+    "action": "hidden-first",
+    "theme": "dark",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-dark-hidden-first.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "dd5cc00b60984be28b336a37c984184a",
+        "name": "Box A",
+        "visible": false,
+        "transform": [
+          [
+            1.5470054149627686,
+            -1.6639397415474377e-08,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -1.5470054149627686,
+            0.0,
+            -23.205081939697266
+          ],
+          [
+            0.0,
+            -0.0,
+            1.5470054149627686,
+            50.94010925292969
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "8c9c49f42f6842e98ce12144268a282e",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "ebf4d2718f0b4fc9845cd3b1fe688297",
+        "name": "Box A (copy)",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 14
+  },
+  {
+    "action": "delete",
+    "theme": "dark",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-dark-delete.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [],
+    "objects": [
+      {
+        "id": "8c9c49f42f6842e98ce12144268a282e",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "ebf4d2718f0b4fc9845cd3b1fe688297",
+        "name": "Box A (copy)",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 15
+  },
+  {
+    "action": "delete-undo",
+    "theme": "dark",
+    "width": 1280,
+    "height": 840,
+    "device_pixel_ratio": 1.0,
+    "image": "captures\\python-dark-delete-undo.png",
+    "route": "visible Qt widget / semantic handler; no pointer evidence claimed",
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "dd5cc00b60984be28b336a37c984184a",
+        "name": "Box A",
+        "visible": false,
+        "transform": [
+          [
+            1.5470054149627686,
+            -1.6639397415474377e-08,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -1.5470054149627686,
+            0.0,
+            -23.205081939697266
+          ],
+          [
+            0.0,
+            -0.0,
+            1.5470054149627686,
+            50.94010925292969
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "8c9c49f42f6842e98ce12144268a282e",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            35.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "ebf4d2718f0b4fc9845cd3b1fe688297",
+        "name": "Box A (copy)",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "undo": 14
+  }
+]

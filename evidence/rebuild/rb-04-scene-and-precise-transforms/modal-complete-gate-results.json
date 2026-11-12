@@ -1,0 +1,11 @@
+{
+  "fmt": 0,
+  "check": 0,
+  "tests": 0,
+  "clippy": 0,
+  "deny": 0,
+  "metadata": 0,
+  "build": 0,
+  "source": "db3dab8be4efd8dfda71b616bbc146e30b90f4ed98b38ba916b997188db9652c",
+  "debug": "82fd07e7691d76cb6f348ba6aafd86d91c9f9b94b56ee72e7de398a70477dfa1"
+}

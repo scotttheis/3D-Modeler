@@ -13,6 +13,7 @@ use std::{
 use crate::ImportUnit;
 use crate::theme::ThemeMode;
 use builder3d_platform::LegacySettings;
+use builder3d_viewport::ViewportLighting;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 use thiserror::Error;
@@ -168,6 +169,9 @@ pub struct Preferences {
     display_unit: DisplayUnit,
     #[serde(default)]
     theme_mode: ThemeMode,
+    /// User's durable mesh light, highlight, and floor contact shadow controls.
+    #[serde(default)]
+    viewport_lighting: ViewportLighting,
     #[serde(default)]
     ribbon_orders: BTreeMap<String, Vec<String>>,
     /// Persistent landmark/floor snapping preference used by Move gestures.
@@ -200,6 +204,7 @@ impl Default for Preferences {
             edit_ribbon_order: Vec::new(),
             display_unit: DisplayUnit::Millimetre,
             theme_mode: ThemeMode::Dark,
+            viewport_lighting: ViewportLighting::default(),
             ribbon_orders: BTreeMap::new(),
             object_snapping_enabled: true,
             preferred_slicer_path: None,
@@ -287,6 +292,15 @@ impl Preferences {
         json_field!("theme_mode", parse_theme_mode, |p: &mut Self, v| p
             .theme_mode =
             v);
+        if let Some(value) = object.remove("viewport_lighting") {
+            match parse_viewport_lighting(&value) {
+                Some(parsed) => preferences.viewport_lighting = parsed,
+                None => push_warning(
+                    &mut warnings,
+                    "Ignored unsupported setting 'viewport_lighting'.".to_owned(),
+                ),
+            }
+        }
         json_field!("display_unit", parse_display_unit, |p: &mut Self, v| p
             .display_unit =
             v);
@@ -530,6 +544,17 @@ impl Preferences {
         self.theme_mode = mode;
     }
 
+    /// Returns the persisted viewport lighting controls.
+    #[must_use]
+    pub const fn viewport_lighting(&self) -> ViewportLighting {
+        self.viewport_lighting
+    }
+
+    /// Sets viewport lighting after enforcing the renderer's supported ranges.
+    pub fn set_viewport_lighting(&mut self, lighting: ViewportLighting) {
+        self.viewport_lighting = lighting.normalized();
+    }
+
     /// Returns whether landmark and build-floor snapping is enabled.
     #[must_use]
     pub const fn object_snapping_enabled(&self) -> bool {
@@ -600,6 +625,7 @@ impl Preferences {
         for (tab, order) in ribbon_orders {
             self.set_ribbon_order(tab, order);
         }
+        self.viewport_lighting = self.viewport_lighting.normalized();
     }
 }
 
@@ -634,6 +660,12 @@ fn parse_theme_mode(value: &Value) -> Option<ThemeMode> {
         "light" | "light mode" | "false" | "0" | "off" => Some(ThemeMode::Light),
         _ => None,
     }
+}
+
+fn parse_viewport_lighting(value: &Value) -> Option<ViewportLighting> {
+    serde_json::from_value(value.clone())
+        .ok()
+        .map(ViewportLighting::normalized)
 }
 
 fn parse_display_unit(value: &Value) -> Option<DisplayUnit> {

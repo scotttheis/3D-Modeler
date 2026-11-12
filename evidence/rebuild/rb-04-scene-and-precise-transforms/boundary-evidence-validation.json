@@ -1,0 +1,29 @@
+{
+  "assets_verified": 108,
+  "unique_feature_ids": 142,
+  "catalog_ids": 33,
+  "validated_requirement_rows": 32,
+  "paired_actions": 386,
+  "capture_sha256_verified": 812,
+  "workspace_tests_passed": 261,
+  "workspace_tests_failed": 0,
+  "workspace_tests_ignored": 0,
+  "python_oracle_cases": {
+    "gesture": 122,
+    "numeric-selection": 32,
+    "placement": 42,
+    "rotation": 9
+  },
+  "python_tree_status_unchanged": true,
+  "rb03_status_rows_unchanged": 32,
+  "native_viewport_cases": 22,
+  "native_settle_cases": 4,
+  "native_scene_cases": 74,
+  "native_pick_capture_states": 8,
+  "visual_owner_acceptance": "pending",
+  "engineering_build_sha256": {
+    "debug": "82fd07e7691d76cb6f348ba6aafd86d91c9f9b94b56ee72e7de398a70477dfa1",
+    "release": "fb5c4d3427b73607378af8c74ccd83dc6428d01d1e6b934765971aaa855d1c87",
+    "bloat_app": "db4e0651f5ffd37071695b48ddc56839e7237de95c445a729c1faa5cdc6a9347"
+  }
+}

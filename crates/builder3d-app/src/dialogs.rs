@@ -11,6 +11,7 @@ use builder3d_core::{
     TextEmbossOptions, TorusParameters,
 };
 use builder3d_platform::{SlicerInfo, slicer_info_from_path};
+use builder3d_viewport::ViewportLighting;
 use eframe::egui::{self, Align2, Color32, Context, RichText};
 
 use crate::commands::{CommandState, DialogKind, ImportUnit};
@@ -68,6 +69,8 @@ pub(crate) enum DialogAction {
     Hollow(HollowOptions),
     /// Select a theme mode.
     Theme(ThemeMode),
+    /// Update the mesh light, highlights, and floor contact shadows.
+    ViewportLighting(ViewportLighting),
 }
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
@@ -100,6 +103,7 @@ pub(crate) struct DialogState {
     emboss_offset_z_mm: f32,
     hollow_wall_thickness_mm: f32,
     theme_mode: ThemeMode,
+    viewport_lighting: ViewportLighting,
     print_bed_size: String,
     print_slicers: Vec<SlicerInfo>,
     selected_slicer_key: String,
@@ -152,6 +156,7 @@ impl DialogState {
             emboss_offset_z_mm: 0.0,
             hollow_wall_thickness_mm: 1.0,
             theme_mode,
+            viewport_lighting: ViewportLighting::default(),
             print_bed_size: format!("{DEFAULT_BED_SIZE_MM:.1} mm"),
             print_slicers,
             selected_slicer_key,
@@ -202,6 +207,11 @@ impl DialogState {
     /// Applies the persisted display unit to settings-aware dialog state.
     pub(crate) fn set_display_unit(&mut self, unit: DisplayUnit) {
         self.display_unit = unit;
+    }
+
+    /// Applies the persisted viewport light and shadow controls to Settings.
+    pub(crate) fn set_viewport_lighting(&mut self, lighting: ViewportLighting) {
+        self.viewport_lighting = lighting.normalized();
     }
 
     /// Supplies the stored slicer path and adds it to the print chooser only
@@ -310,6 +320,11 @@ impl DialogState {
         self.kind
     }
 
+    /// Settings stays alongside the viewport; its About popup remains modal.
+    pub(crate) fn is_modal(&self) -> bool {
+        self.kind != DialogKind::Settings || self.about_open
+    }
+
     #[cfg(test)]
     pub(crate) fn message(&self) -> &str {
         &self.message
@@ -327,54 +342,72 @@ impl DialogState {
         }
     }
 
-    /// Draws the dialog and returns at most one typed action per frame.
-    pub(crate) fn show(&mut self, ctx: &Context) -> Option<DialogAction> {
+    /// Draws the dialog, docking Settings into the space between shell bars.
+    pub(crate) fn show_with_settings_area(
+        &mut self,
+        ctx: &Context,
+        settings_work_area: Option<egui::Rect>,
+    ) -> Option<DialogAction> {
         let mut action = None;
         let title = self.title();
-        egui::Window::new(title)
-            .collapsible(false)
-            .resizable(false)
-            .anchor(Align2::CENTER_CENTER, [0.0, 0.0])
-            .show(ctx, |ui| {
-                ui.set_min_width(360.0);
-                match self.kind {
-                    DialogKind::OpenProject => self.path_dialog(ui, "Open", &mut action),
-                    DialogKind::ImportModel => self.import_dialog(ui, &mut action),
-                    DialogKind::SaveProject => self.path_dialog(ui, "Save", &mut action),
-                    DialogKind::Export => self.path_dialog(ui, "Export", &mut action),
-                    DialogKind::Settings => {
-                        let max_height = (ctx.content_rect().height() - 160.0).max(280.0);
-                        egui::ScrollArea::vertical()
-                            .max_height(max_height)
-                            .show(ui, |ui| self.settings_dialog(ui, &mut action));
-                    }
-                    DialogKind::Repair => self.repair_dialog(ui, &mut action),
-                    DialogKind::PrintPrep => self.print_prep_dialog(ui, &mut action),
-                    DialogKind::Material => self.material_dialog(ui, &mut action),
-                    DialogKind::Torus => self.torus_dialog(ui, &mut action),
-                    DialogKind::Emboss => self.emboss_dialog(ui, &mut action),
-                    DialogKind::Hollow => self.hollow_dialog(ui, &mut action),
-                }
-                if !self.message.is_empty() {
-                    ui.separator();
-                    let color = match self.message_tone {
-                        MessageTone::Info => Color32::from_rgb(0x40, 0x52, 0xB5),
-                        MessageTone::Warning => Color32::from_rgb(0x9A, 0x62, 0x00),
-                        MessageTone::Error => Color32::from_rgb(0xB4, 0x23, 0x18),
-                    };
+        let window = egui::Window::new(title).collapsible(false).resizable(false);
+        let window = if self.kind == DialogKind::Settings {
+            if let Some(rect) = settings_work_area {
+                window.fixed_rect(rect)
+            } else {
+                window.anchor(Align2::CENTER_CENTER, [0.0, 0.0])
+            }
+        } else {
+            window.anchor(Align2::CENTER_CENTER, [0.0, 0.0])
+        };
+        window.show(ctx, |ui| {
+            let min_width = if self.kind == DialogKind::Settings {
+                settings_work_area.map_or(360.0, |rect| (rect.width() - 24.0).max(240.0))
+            } else {
+                360.0
+            };
+            ui.set_min_width(min_width);
+            match self.kind {
+                DialogKind::OpenProject => self.path_dialog(ui, "Open", &mut action),
+                DialogKind::ImportModel => self.import_dialog(ui, &mut action),
+                DialogKind::SaveProject => self.path_dialog(ui, "Save", &mut action),
+                DialogKind::Export => self.path_dialog(ui, "Export", &mut action),
+                DialogKind::Settings => {
+                    let max_height = settings_work_area.map_or_else(
+                        || (ctx.content_rect().height() - 160.0).max(280.0),
+                        |rect| (rect.height() - 76.0).max(120.0),
+                    );
                     egui::ScrollArea::vertical()
-                        .max_height(180.0)
-                        .show(ui, |ui| ui.label(RichText::new(&self.message).color(color)));
+                        .max_height(max_height)
+                        .show(ui, |ui| self.settings_dialog(ui, &mut action));
                 }
-                let close_label = if self.kind == DialogKind::Settings {
-                    "Close"
-                } else {
-                    "Cancel"
+                DialogKind::Repair => self.repair_dialog(ui, &mut action),
+                DialogKind::PrintPrep => self.print_prep_dialog(ui, &mut action),
+                DialogKind::Material => self.material_dialog(ui, &mut action),
+                DialogKind::Torus => self.torus_dialog(ui, &mut action),
+                DialogKind::Emboss => self.emboss_dialog(ui, &mut action),
+                DialogKind::Hollow => self.hollow_dialog(ui, &mut action),
+            }
+            if !self.message.is_empty() {
+                ui.separator();
+                let color = match self.message_tone {
+                    MessageTone::Info => Color32::from_rgb(0x40, 0x52, 0xB5),
+                    MessageTone::Warning => Color32::from_rgb(0x9A, 0x62, 0x00),
+                    MessageTone::Error => Color32::from_rgb(0xB4, 0x23, 0x18),
                 };
-                if ui.button(close_label).clicked() {
-                    action = Some(DialogAction::Close);
-                }
-            });
+                egui::ScrollArea::vertical()
+                    .max_height(180.0)
+                    .show(ui, |ui| ui.label(RichText::new(&self.message).color(color)));
+            }
+            let close_label = if self.kind == DialogKind::Settings {
+                "Close"
+            } else {
+                "Cancel"
+            };
+            if ui.button(close_label).clicked() {
+                action = Some(DialogAction::Close);
+            }
+        });
         if self.about_open {
             let mut close_about = false;
             egui::Modal::new(egui::Id::unique("builder3d-settings-about")).show(ctx, |ui| {
@@ -547,6 +580,60 @@ impl DialogState {
         display_unit_combo.response.widget_info(|| {
             egui::WidgetInfo::labeled(egui::Role::ComboBox, true, "Transform display unit")
         });
+        ui.separator();
+        ui.heading("Viewport lighting");
+        ui.label(
+            RichText::new(
+                "Keep the key light on the same side of the screen as you orbit, or turn this off to keep it fixed in the scene.",
+            )
+            .weak(),
+        );
+        let mut lighting = self.viewport_lighting;
+        let mut lighting_changed = false;
+        if ui.button("Restore 3D Builder defaults").clicked() {
+            lighting = ViewportLighting::default();
+            lighting_changed = true;
+        }
+        lighting_changed |= ui
+            .checkbox(&mut lighting.screen_aligned, "Screen-aligned light")
+            .changed();
+        lighting_changed |= ui
+            .add(
+                egui::Slider::new(&mut lighting.azimuth_degrees, -80..=80)
+                    .text("Light left / right"),
+            )
+            .changed();
+        lighting_changed |= ui
+            .add(egui::Slider::new(&mut lighting.elevation_degrees, 10..=85).text("Light height"))
+            .changed();
+        lighting_changed |= ui
+            .add(egui::Slider::new(&mut lighting.intensity_percent, 0..=150).text("Light strength"))
+            .changed();
+        lighting_changed |= ui
+            .add(egui::Slider::new(&mut lighting.ambient_percent, 0..=80).text("Ambient fill"))
+            .changed();
+        lighting_changed |= ui
+            .add(
+                egui::Slider::new(&mut lighting.specular_percent, 0..=100)
+                    .text("Highlight strength"),
+            )
+            .changed();
+        lighting_changed |= ui
+            .add(
+                egui::Slider::new(&mut lighting.highlight_sharpness, 0..=100)
+                    .text("Highlight sharpness"),
+            )
+            .changed();
+        lighting_changed |= ui
+            .add(
+                egui::Slider::new(&mut lighting.contact_shadow_percent, 0..=200)
+                    .text("Floor shadow strength"),
+            )
+            .changed();
+        if lighting_changed {
+            self.viewport_lighting = lighting.normalized();
+            *action = Some(DialogAction::ViewportLighting(self.viewport_lighting));
+        }
         ui.separator();
         ui.label("Preferred 3D slicer");
         match &self.preferred_slicer_path {
@@ -1039,6 +1126,14 @@ mod tests {
     }
 
     #[test]
+    fn settings_stays_non_modal_until_about_is_opened() {
+        let mut settings = DialogState::new(DialogKind::Settings, ThemeMode::Dark);
+        assert!(!settings.is_modal());
+        settings.about_open = true;
+        assert!(settings.is_modal());
+    }
+
+    #[test]
     fn export_path_keeps_explicit_format_and_defaults_extensionless_names_to_stl() {
         assert_eq!(
             export_path_with_default_extension(PathBuf::from("model")),
@@ -1093,7 +1188,7 @@ mod tests {
         };
         let mut action = None;
         let mut output = context.run_ui(input, |ui| {
-            action = dialog.show(ui.ctx());
+            action = dialog.show_with_settings_area(ui.ctx(), None);
         });
         output.textures_delta.clear();
         assert!(!dialog.about_open);
@@ -1110,7 +1205,7 @@ mod tests {
             ..Default::default()
         };
         let mut output = context.run_ui(second_escape, |ui| {
-            action = dialog.show(ui.ctx());
+            action = dialog.show_with_settings_area(ui.ctx(), None);
         });
         output.textures_delta.clear();
         assert_eq!(action, Some(DialogAction::Close));

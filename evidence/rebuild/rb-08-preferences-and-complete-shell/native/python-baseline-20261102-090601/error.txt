@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "E:\Builder3D-Rust\evidence\rebuild\rb-08-preferences-and-complete-shell\native\python-reference-baseline.py", line 152, in <module>
+    activate()
+  File "E:\Builder3D-Rust\evidence\rebuild\rb-08-preferences-and-complete-shell\native\python-reference-baseline.py", line 85, in activate
+    current_thread = KERNEL.GetCurrentThreadId()
+                     ^^^^^^
+NameError: name 'KERNEL' is not defined

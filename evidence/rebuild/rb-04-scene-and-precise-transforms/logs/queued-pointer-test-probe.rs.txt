@@ -1,0 +1,57 @@
+    #[test]
+    fn queued_ui_click_then_viewport_motion_does_not_orbit_or_change_selection() {
+        fn frame(app: &mut Builder3dApp, ctx: &egui::Context, events: Vec<egui::Event>) {
+            let mut output = ctx.run_ui(
+                egui::RawInput {
+                    screen_rect: Some(egui::Rect::from_min_size(
+                        egui::Pos2::ZERO,
+                        Vec2::new(1280., 840.),
+                    )),
+                    events,
+                    ..Default::default()
+                },
+                |ui| app.render_background(ui),
+            );
+            output.textures_delta.clear();
+        }
+        let mut app = Builder3dApp {
+            settings_path: repository_test_directory("rb04-queued-pointer").join("settings.json"),
+            surface: WorkspaceSurface::Scene,
+            ..Default::default()
+        };
+        app.commands
+            .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
+            .expect("cube");
+        let ctx = egui::Context::default();
+        let outside = egui::pos2(145., 35.);
+        for _ in 0..3 {
+            frame(&mut app, &ctx, vec![egui::Event::PointerMoved(outside)]);
+        }
+        let before = app.camera.state();
+        let selection = app.commands.scene().selection().clone();
+        let history = app.commands.scene().history_state_id();
+        frame(
+            &mut app,
+            &ctx,
+            vec![
+                egui::Event::PointerButton {
+                    pos: outside,
+                    button: egui::PointerButton::Primary,
+                    pressed: true,
+                    modifiers: egui::Modifiers::default(),
+                },
+                egui::Event::PointerButton {
+                    pos: outside,
+                    button: egui::PointerButton::Primary,
+                    pressed: false,
+                    modifiers: egui::Modifiers::default(),
+                },
+                egui::Event::PointerMoved(egui::pos2(740., 180.)),
+            ],
+        );
+        assert_eq!(app.camera.state(), before, "UI press must not orbit");
+        assert_eq!(app.commands.scene().selection(), &selection);
+        assert_eq!(app.commands.scene().history_state_id(), history);
+        assert!(app.viewport_drag.is_none());
+    }
+

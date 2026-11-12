@@ -1,0 +1,17 @@
+COMMAND: cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+    Checking builder3d-core v0.1.0 (E:\Builder3D-Rust\crates\builder3d-core)
+    Checking builder3d-viewport v0.1.0 (E:\Builder3D-Rust\crates\builder3d-viewport)
+    Checking builder3d-mcp v0.1.0 (E:\Builder3D-Rust\crates\builder3d-mcp)
+    Checking builder3d-app v0.1.0 (E:\Builder3D-Rust\crates\builder3d-app)
+error: use of deprecated associated function `eframe::egui::Id::new`: Use `Id::unique` (for a globally unique id) or `IdSalt::new` (for a locally unique salt) instead
+    --> crates\builder3d-app\src\shell.rs:2708:40
+     |
+2708 |             egui::Modal::new(egui::Id::new("placement-dialog")).show(ctx, |ui| {
+     |                                        ^^^
+     |
+     = note: `-D deprecated` implied by `-D warnings`
+     = help: to override `-D warnings` add `#[allow(deprecated)]`
+
+error: could not compile `builder3d-app` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `builder3d-app` (lib test) due to 1 previous error

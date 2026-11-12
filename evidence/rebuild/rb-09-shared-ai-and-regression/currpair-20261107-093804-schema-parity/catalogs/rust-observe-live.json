@@ -1,0 +1,2197 @@
+{
+  "capture_label": "current-rust-release-mcp-tools-list",
+  "captured_utc": "2026-11-07T16:38:05.637585+00:00",
+  "client": {
+    "method": "official Python MCP SDK 2.2.0 over stdio; tools/list only",
+    "python_version": "3.12.10",
+    "rust_binary": "E:\\Builder3D-Rust\\target\\release\\r4_mcp.exe",
+    "rust_binary_sha256": "636171b58800915de87fc8ad26814498279919ea80341076a344c208757da370",
+    "sdk_package": "mcp",
+    "sdk_version": "2.2.0",
+    "tool_handlers_invoked": false
+  },
+  "profile": "observe",
+  "schema_version": 1,
+  "tool_count": 7,
+  "tools": [
+    {
+      "_meta": {
+        "com.builder3d/catalogVersion": "2026-09-25.1",
+        "com.builder3d/category": "inspection",
+        "com.builder3d/launchProfile": "observe",
+        "com.builder3d/longRunning": false,
+        "com.builder3d/profile": "observe"
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      },
+      "description": "Builder3D get_status command",
+      "inputSchema": {
+        "properties": {},
+        "title": "get_statusArguments",
+        "type": "object"
+      },
+      "name": "get_status",
+      "outputSchema": {
+        "$defs": {
+          "ViewStateOutput": {
+            "additionalProperties": false,
+            "properties": {
+              "center_mm": {
+                "items": {
+                  "type": "number"
+                },
+                "maxItems": 3,
+                "minItems": 3,
+                "title": "Center Mm",
+                "type": "array"
+              },
+              "changed_object_ids": {
+                "anyOf": [
+                  {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Changed Object Ids"
+              },
+              "distance_mm": {
+                "title": "Distance Mm",
+                "type": "number"
+              },
+              "pitch_deg": {
+                "title": "Pitch Deg",
+                "type": "number"
+              },
+              "project_id": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Project Id"
+              },
+              "request_id": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Request Id"
+              },
+              "scene_revision": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Scene Revision"
+              },
+              "show_grid": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Show Grid"
+              },
+              "wireframe": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Wireframe"
+              },
+              "xray": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Xray"
+              },
+              "yaw_deg": {
+                "title": "Yaw Deg",
+                "type": "number"
+              }
+            },
+            "required": [
+              "yaw_deg",
+              "pitch_deg",
+              "distance_mm",
+              "center_mm"
+            ],
+            "title": "ViewStateOutput",
+            "type": "object"
+          }
+        },
+        "additionalProperties": false,
+        "properties": {
+          "active_operation": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Active Operation"
+          },
+          "app_state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "App State"
+          },
+          "busy": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Busy"
+          },
+          "capabilities": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Capabilities"
+          },
+          "changed_object_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Changed Object Ids"
+          },
+          "control": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Control"
+          },
+          "dirty": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Dirty"
+          },
+          "file_write_policy": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "File Write Policy"
+          },
+          "project_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Project Id"
+          },
+          "project_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Project Path"
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Request Id"
+          },
+          "scene_revision": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Scene Revision"
+          },
+          "view": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ViewStateOutput"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "title": "StatusOutput",
+        "type": "object"
+      },
+      "title": "get status"
+    },
+    {
+      "_meta": {
+        "com.builder3d/catalogVersion": "2026-09-25.1",
+        "com.builder3d/category": "inspection",
+        "com.builder3d/launchProfile": "observe",
+        "com.builder3d/longRunning": false,
+        "com.builder3d/profile": "observe"
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      },
+      "description": "Builder3D operation_status command",
+      "inputSchema": {
+        "properties": {
+          "operation_id": {
+            "minLength": 1,
+            "title": "Operation Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "operation_id"
+        ],
+        "title": "operation_statusArguments",
+        "type": "object"
+      },
+      "name": "operation_status",
+      "outputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Action"
+          },
+          "changed_object_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Changed Object Ids"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Created At"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Error"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Finished At"
+          },
+          "kind": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Kind"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Message"
+          },
+          "operation_id": {
+            "title": "Operation Id",
+            "type": "string"
+          },
+          "progress": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Progress"
+          },
+          "project_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Project Id"
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Request Id"
+          },
+          "result": {
+            "default": null,
+            "title": "Result"
+          },
+          "scene_revision": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Scene Revision"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Started At"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Title"
+          }
+        },
+        "required": [
+          "operation_id",
+          "state"
+        ],
+        "title": "OperationOutput",
+        "type": "object"
+      },
+      "title": "operation status"
+    },
+    {
+      "_meta": {
+        "com.builder3d/catalogVersion": "2026-09-25.1",
+        "com.builder3d/category": "inspection",
+        "com.builder3d/launchProfile": "observe",
+        "com.builder3d/longRunning": false,
+        "com.builder3d/profile": "observe"
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      },
+      "description": "Builder3D scene_summary command",
+      "inputSchema": {
+        "properties": {
+          "fields": {
+            "anyOf": [
+              {
+                "items": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Fields"
+          }
+        },
+        "title": "scene_summaryArguments",
+        "type": "object"
+      },
+      "name": "scene_summary",
+      "outputSchema": {
+        "$defs": {
+          "ChildSummary": {
+            "additionalProperties": false,
+            "properties": {
+              "children": {
+                "anyOf": [
+                  {
+                    "items": {
+                      "$ref": "#/$defs/ChildSummary"
+                    },
+                    "type": "array"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Children"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "items": {
+                      "type": "number"
+                    },
+                    "maxItems": 4,
+                    "minItems": 3,
+                    "type": "array"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Color"
+              },
+              "name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Name"
+              },
+              "object_id": {
+                "title": "Object Id",
+                "type": "string"
+              },
+              "visible": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Visible"
+              }
+            },
+            "required": [
+              "object_id"
+            ],
+            "title": "ChildSummary",
+            "type": "object"
+          },
+          "MeshHealthDetailsOutput": {
+            "additionalProperties": false,
+            "properties": {
+              "body_count": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Body Count"
+              },
+              "boundary_edge_loops": {
+                "default": 0,
+                "title": "Boundary Edge Loops",
+                "type": "integer"
+              },
+              "boundary_edges": {
+                "default": 0,
+                "title": "Boundary Edges",
+                "type": "integer"
+              },
+              "degenerate_faces": {
+                "default": 0,
+                "title": "Degenerate Faces",
+                "type": "integer"
+              },
+              "duplicate_faces": {
+                "default": 0,
+                "title": "Duplicate Faces",
+                "type": "integer"
+              },
+              "is_volume": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Is Volume"
+              },
+              "issues": {
+                "default": [],
+                "items": {
+                  "type": "string"
+                },
+                "title": "Issues",
+                "type": "array"
+              },
+              "non_manifold_edges": {
+                "default": 0,
+                "title": "Non Manifold Edges",
+                "type": "integer"
+              },
+              "self_intersection_status": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Self Intersection Status"
+              },
+              "self_intersections": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Self Intersections"
+              },
+              "tiny_shells": {
+                "default": 0,
+                "title": "Tiny Shells",
+                "type": "integer"
+              },
+              "triangles": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Triangles"
+              },
+              "valid": {
+                "title": "Valid",
+                "type": "boolean"
+              },
+              "vertices": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Vertices"
+              },
+              "watertight": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Watertight"
+              },
+              "winding_consistent": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Winding Consistent"
+              }
+            },
+            "required": [
+              "valid"
+            ],
+            "title": "MeshHealthDetailsOutput",
+            "type": "object"
+          },
+          "ObjectSummary": {
+            "additionalProperties": false,
+            "properties": {
+              "children": {
+                "anyOf": [
+                  {
+                    "items": {
+                      "$ref": "#/$defs/ChildSummary"
+                    },
+                    "type": "array"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Children"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "items": {
+                      "type": "number"
+                    },
+                    "maxItems": 4,
+                    "minItems": 3,
+                    "type": "array"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Color"
+              },
+              "index": {
+                "title": "Index",
+                "type": "integer"
+              },
+              "mesh_health": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/MeshHealthDetailsOutput"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Name"
+              },
+              "object_id": {
+                "title": "Object Id",
+                "type": "string"
+              },
+              "position_mm": {
+                "anyOf": [
+                  {
+                    "items": {
+                      "type": "number"
+                    },
+                    "maxItems": 3,
+                    "minItems": 3,
+                    "type": "array"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Position Mm"
+              },
+              "rotation_deg": {
+                "anyOf": [
+                  {
+                    "items": {
+                      "type": "number"
+                    },
+                    "maxItems": 3,
+                    "minItems": 3,
+                    "type": "array"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Rotation Deg"
+              },
+              "size_mm": {
+                "anyOf": [
+                  {
+                    "items": {
+                      "type": "number"
+                    },
+                    "maxItems": 3,
+                    "minItems": 3,
+                    "type": "array"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Size Mm"
+              },
+              "torus_parameters": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/TorusParametersOutput"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "triangles": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Triangles"
+              },
+              "vertices": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Vertices"
+              },
+              "visible": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Visible"
+              }
+            },
+            "required": [
+              "object_id",
+              "index"
+            ],
+            "title": "ObjectSummary",
+            "type": "object"
+          },
+          "TorusParametersOutput": {
+            "additionalProperties": false,
+            "properties": {
+              "mode": {
+                "enum": [
+                  "solid",
+                  "hole"
+                ],
+                "title": "Mode",
+                "type": "string"
+              },
+              "radius_mm": {
+                "title": "Radius Mm",
+                "type": "number"
+              },
+              "sides": {
+                "title": "Sides",
+                "type": "integer"
+              },
+              "steps": {
+                "title": "Steps",
+                "type": "integer"
+              },
+              "tube_mm": {
+                "title": "Tube Mm",
+                "type": "number"
+              }
+            },
+            "required": [
+              "mode",
+              "radius_mm",
+              "tube_mm",
+              "sides",
+              "steps"
+            ],
+            "title": "TorusParametersOutput",
+            "type": "object"
+          }
+        },
+        "additionalProperties": false,
+        "properties": {
+          "changed_object_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Changed Object Ids"
+          },
+          "objects": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/ObjectSummary"
+            },
+            "title": "Objects",
+            "type": "array"
+          },
+          "project_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Project Id"
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Request Id"
+          },
+          "scene_revision": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Scene Revision"
+          },
+          "selected_indices": {
+            "default": [],
+            "items": {
+              "type": "integer"
+            },
+            "title": "Selected Indices",
+            "type": "array"
+          },
+          "selected_object_ids": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Selected Object Ids",
+            "type": "array"
+          }
+        },
+        "title": "SceneSummaryOutput",
+        "type": "object"
+      },
+      "title": "scene summary"
+    },
+    {
+      "_meta": {
+        "com.builder3d/catalogVersion": "2026-09-25.1",
+        "com.builder3d/category": "inspection",
+        "com.builder3d/launchProfile": "observe",
+        "com.builder3d/longRunning": false,
+        "com.builder3d/profile": "observe"
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      },
+      "description": "Builder3D print_check command",
+      "inputSchema": {
+        "properties": {
+          "bed_size_mm": {
+            "default": 200,
+            "exclusiveMinimum": 0,
+            "maximum": 10000,
+            "title": "Bed Size Mm",
+            "type": "number"
+          }
+        },
+        "title": "print_checkArguments",
+        "type": "object"
+      },
+      "name": "print_check",
+      "outputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "changed_object_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Changed Object Ids"
+          },
+          "errors": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Errors",
+            "type": "array"
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "project_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Project Id"
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Request Id"
+          },
+          "scene_revision": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Scene Revision"
+          },
+          "warnings": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Warnings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "title": "PrintCheckOutput",
+        "type": "object"
+      },
+      "title": "print check"
+    },
+    {
+      "_meta": {
+        "com.builder3d/catalogVersion": "2026-09-25.1",
+        "com.builder3d/category": "inspection",
+        "com.builder3d/launchProfile": "observe",
+        "com.builder3d/longRunning": false,
+        "com.builder3d/profile": "observe"
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      },
+      "description": "Builder3D scene_changes command",
+      "inputSchema": {
+        "properties": {
+          "fields": {
+            "anyOf": [
+              {
+                "items": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Fields"
+          },
+          "since_revision": {
+            "minimum": 0,
+            "title": "Since Revision",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "since_revision"
+        ],
+        "title": "scene_changesArguments",
+        "type": "object"
+      },
+      "name": "scene_changes",
+      "outputSchema": {
+        "$defs": {
+          "ChildSummary": {
+            "additionalProperties": false,
+            "properties": {
+              "children": {
+                "anyOf": [
+                  {
+                    "items": {
+                      "$ref": "#/$defs/ChildSummary"
+                    },
+                    "type": "array"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Children"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "items": {
+                      "type": "number"
+                    },
+                    "maxItems": 4,
+                    "minItems": 3,
+                    "type": "array"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Color"
+              },
+              "name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Name"
+              },
+              "object_id": {
+                "title": "Object Id",
+                "type": "string"
+              },
+              "visible": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Visible"
+              }
+            },
+            "required": [
+              "object_id"
+            ],
+            "title": "ChildSummary",
+            "type": "object"
+          },
+          "MeshHealthDetailsOutput": {
+            "additionalProperties": false,
+            "properties": {
+              "body_count": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Body Count"
+              },
+              "boundary_edge_loops": {
+                "default": 0,
+                "title": "Boundary Edge Loops",
+                "type": "integer"
+              },
+              "boundary_edges": {
+                "default": 0,
+                "title": "Boundary Edges",
+                "type": "integer"
+              },
+              "degenerate_faces": {
+                "default": 0,
+                "title": "Degenerate Faces",
+                "type": "integer"
+              },
+              "duplicate_faces": {
+                "default": 0,
+                "title": "Duplicate Faces",
+                "type": "integer"
+              },
+              "is_volume": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Is Volume"
+              },
+              "issues": {
+                "default": [],
+                "items": {
+                  "type": "string"
+                },
+                "title": "Issues",
+                "type": "array"
+              },
+              "non_manifold_edges": {
+                "default": 0,
+                "title": "Non Manifold Edges",
+                "type": "integer"
+              },
+              "self_intersection_status": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Self Intersection Status"
+              },
+              "self_intersections": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Self Intersections"
+              },
+              "tiny_shells": {
+                "default": 0,
+                "title": "Tiny Shells",
+                "type": "integer"
+              },
+              "triangles": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Triangles"
+              },
+              "valid": {
+                "title": "Valid",
+                "type": "boolean"
+              },
+              "vertices": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Vertices"
+              },
+              "watertight": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Watertight"
+              },
+              "winding_consistent": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Winding Consistent"
+              }
+            },
+            "required": [
+              "valid"
+            ],
+            "title": "MeshHealthDetailsOutput",
+            "type": "object"
+          },
+          "ObjectSummary": {
+            "additionalProperties": false,
+            "properties": {
+              "children": {
+                "anyOf": [
+                  {
+                    "items": {
+                      "$ref": "#/$defs/ChildSummary"
+                    },
+                    "type": "array"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Children"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "items": {
+                      "type": "number"
+                    },
+                    "maxItems": 4,
+                    "minItems": 3,
+                    "type": "array"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Color"
+              },
+              "index": {
+                "title": "Index",
+                "type": "integer"
+              },
+              "mesh_health": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/MeshHealthDetailsOutput"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Name"
+              },
+              "object_id": {
+                "title": "Object Id",
+                "type": "string"
+              },
+              "position_mm": {
+                "anyOf": [
+                  {
+                    "items": {
+                      "type": "number"
+                    },
+                    "maxItems": 3,
+                    "minItems": 3,
+                    "type": "array"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Position Mm"
+              },
+              "rotation_deg": {
+                "anyOf": [
+                  {
+                    "items": {
+                      "type": "number"
+                    },
+                    "maxItems": 3,
+                    "minItems": 3,
+                    "type": "array"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Rotation Deg"
+              },
+              "size_mm": {
+                "anyOf": [
+                  {
+                    "items": {
+                      "type": "number"
+                    },
+                    "maxItems": 3,
+                    "minItems": 3,
+                    "type": "array"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Size Mm"
+              },
+              "torus_parameters": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/TorusParametersOutput"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "triangles": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Triangles"
+              },
+              "vertices": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Vertices"
+              },
+              "visible": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Visible"
+              }
+            },
+            "required": [
+              "object_id",
+              "index"
+            ],
+            "title": "ObjectSummary",
+            "type": "object"
+          },
+          "TorusParametersOutput": {
+            "additionalProperties": false,
+            "properties": {
+              "mode": {
+                "enum": [
+                  "solid",
+                  "hole"
+                ],
+                "title": "Mode",
+                "type": "string"
+              },
+              "radius_mm": {
+                "title": "Radius Mm",
+                "type": "number"
+              },
+              "sides": {
+                "title": "Sides",
+                "type": "integer"
+              },
+              "steps": {
+                "title": "Steps",
+                "type": "integer"
+              },
+              "tube_mm": {
+                "title": "Tube Mm",
+                "type": "number"
+              }
+            },
+            "required": [
+              "mode",
+              "radius_mm",
+              "tube_mm",
+              "sides",
+              "steps"
+            ],
+            "title": "TorusParametersOutput",
+            "type": "object"
+          }
+        },
+        "additionalProperties": false,
+        "properties": {
+          "changed_object_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Changed Object Ids"
+          },
+          "changes": {
+            "default": [],
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Changes",
+            "type": "array"
+          },
+          "from_scene_revision": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "From Scene Revision"
+          },
+          "objects": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/ObjectSummary"
+            },
+            "title": "Objects",
+            "type": "array"
+          },
+          "project_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Project Id"
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Request Id"
+          },
+          "reset_required": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Reset Required"
+          },
+          "scene_revision": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Scene Revision"
+          }
+        },
+        "title": "SceneChangesOutput",
+        "type": "object"
+      },
+      "title": "scene changes"
+    },
+    {
+      "_meta": {
+        "com.builder3d/catalogVersion": "2026-09-25.1",
+        "com.builder3d/category": "inspection",
+        "com.builder3d/launchProfile": "observe",
+        "com.builder3d/longRunning": false,
+        "com.builder3d/profile": "observe"
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      },
+      "description": "Builder3D mesh_health command",
+      "inputSchema": {
+        "properties": {
+          "index": {
+            "default": -1,
+            "minimum": -1,
+            "title": "Index",
+            "type": "integer"
+          },
+          "object_id": {
+            "default": "",
+            "title": "Object Id",
+            "type": "string"
+          }
+        },
+        "title": "mesh_healthArguments",
+        "type": "object"
+      },
+      "name": "mesh_health",
+      "outputSchema": {
+        "$defs": {
+          "MeshHealthDetailsOutput": {
+            "additionalProperties": false,
+            "properties": {
+              "body_count": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Body Count"
+              },
+              "boundary_edge_loops": {
+                "default": 0,
+                "title": "Boundary Edge Loops",
+                "type": "integer"
+              },
+              "boundary_edges": {
+                "default": 0,
+                "title": "Boundary Edges",
+                "type": "integer"
+              },
+              "degenerate_faces": {
+                "default": 0,
+                "title": "Degenerate Faces",
+                "type": "integer"
+              },
+              "duplicate_faces": {
+                "default": 0,
+                "title": "Duplicate Faces",
+                "type": "integer"
+              },
+              "is_volume": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Is Volume"
+              },
+              "issues": {
+                "default": [],
+                "items": {
+                  "type": "string"
+                },
+                "title": "Issues",
+                "type": "array"
+              },
+              "non_manifold_edges": {
+                "default": 0,
+                "title": "Non Manifold Edges",
+                "type": "integer"
+              },
+              "self_intersection_status": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Self Intersection Status"
+              },
+              "self_intersections": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Self Intersections"
+              },
+              "tiny_shells": {
+                "default": 0,
+                "title": "Tiny Shells",
+                "type": "integer"
+              },
+              "triangles": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Triangles"
+              },
+              "valid": {
+                "title": "Valid",
+                "type": "boolean"
+              },
+              "vertices": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Vertices"
+              },
+              "watertight": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Watertight"
+              },
+              "winding_consistent": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Winding Consistent"
+              }
+            },
+            "required": [
+              "valid"
+            ],
+            "title": "MeshHealthDetailsOutput",
+            "type": "object"
+          }
+        },
+        "additionalProperties": false,
+        "properties": {
+          "changed_object_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Changed Object Ids"
+          },
+          "health": {
+            "$ref": "#/$defs/MeshHealthDetailsOutput"
+          },
+          "index": {
+            "title": "Index",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "object_id": {
+            "title": "Object Id",
+            "type": "string"
+          },
+          "project_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Project Id"
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Request Id"
+          },
+          "scene_revision": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Scene Revision"
+          }
+        },
+        "required": [
+          "object_id",
+          "index",
+          "name",
+          "health"
+        ],
+        "title": "MeshHealthOutput",
+        "type": "object"
+      },
+      "title": "mesh health"
+    },
+    {
+      "_meta": {
+        "com.builder3d/catalogVersion": "2026-09-25.1",
+        "com.builder3d/category": "view",
+        "com.builder3d/launchProfile": "observe",
+        "com.builder3d/longRunning": false,
+        "com.builder3d/profile": "observe"
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      },
+      "description": "Builder3D view_state command",
+      "inputSchema": {
+        "properties": {},
+        "title": "view_stateArguments",
+        "type": "object"
+      },
+      "name": "view_state",
+      "outputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "center_mm": {
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 3,
+            "minItems": 3,
+            "title": "Center Mm",
+            "type": "array"
+          },
+          "changed_object_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Changed Object Ids"
+          },
+          "distance_mm": {
+            "title": "Distance Mm",
+            "type": "number"
+          },
+          "pitch_deg": {
+            "title": "Pitch Deg",
+            "type": "number"
+          },
+          "project_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Project Id"
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Request Id"
+          },
+          "scene_revision": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Scene Revision"
+          },
+          "show_grid": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Show Grid"
+          },
+          "wireframe": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Wireframe"
+          },
+          "xray": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Xray"
+          },
+          "yaw_deg": {
+            "title": "Yaw Deg",
+            "type": "number"
+          }
+        },
+        "required": [
+          "yaw_deg",
+          "pitch_deg",
+          "distance_mm",
+          "center_mm"
+        ],
+        "title": "ViewStateOutput",
+        "type": "object"
+      },
+      "title": "view state"
+    }
+  ]
+}

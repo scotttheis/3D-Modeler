@@ -1,0 +1,230 @@
+schema_version = 1
+slice = "RB-01"
+record_updated_local = "2026-10-31T08:10:30-06:00"
+comparison_target_logical_px = [1280, 840]
+primary_display_physical_px = [2560, 1440]
+primary_display_work_area_physical_px = [2560, 1392]
+system_dpi = 96
+system_scale_percent = 100
+actual_original_client_px = [1280, 840]
+actual_rust_client_px = [1280, 840]
+physical_original_client_px = [1280, 840]
+physical_rust_client_px = [1280, 840]
+visual_tolerance_status = "Matched client geometry and DPI recorded for the empty Welcome/Insert state; regional tolerance and owner review pending."
+owner_acceptance = "pending_explicit_owner_review"
+capture_board = "capture-board.md"
+comparison_dark = "captures/comparison-dark-python-left-rust-right.png"
+comparison_light = "captures/comparison-light-python-left-rust-right.png"
+
+[original_live]
+status = "captured_dark_and_light; owner review pending"
+startup_outer_size_request_logical_px = [1280, 820]
+client_px = [1280, 840]
+physical_client_px = [1280, 840]
+window_dpi = 96
+display_scale_percent = 100
+runtime = "Python 3.12.10; L:\\Builder3D\\venv"
+process_image = "pythonw.exe"
+source_root = "L:\\Builder3D (read-only)"
+source_hashes = { main_py = "C304F92C1B56B3FD501CAB50EEBDC2D5094718AB30C22BC44A9678C64755203F", main_window_py = "3FC2B1C25A53F6F7D040D3321D331A22D7B8A462F8CB4FCD18A9631B960A7C41", style_py = "9B2E4D0D9761B5EE04784D5ED967BFCA2C97492497E5F4E1EAFF2BC9BD962056", toolbar_py = "5806C1C08DD33D749B6277B652E3C73727C24B73A69992E090C8A5764E5BED88", icon_assets_py = "F060EAE04B0D92076A6459589FD81EEE27C410F45C6EE06A76779C70B1E9E791" }
+isolation = "Temporary QSettings INI and app-data/runtime paths; Light state configured in the isolated profile. No theme persistence test."
+
+[rust_live]
+status = "captured_dark_and_light; owner review pending"
+startup_inner_size_request_logical_px = [1280, 840]
+client_px = [1280, 840]
+physical_client_px = [1280, 840]
+window_dpi = 96
+display_scale_percent = 100
+executable = "target\\debug\\builder3d-app.exe"
+executable_bytes = 58634752
+executable_sha256 = "D1639A6561A3E73A0C3D5F85D4076BAA51DA760A9800E866D2B9613BE759719B"
+source_hashes = { app_lib_rs = "3E6471E163A06D58FD49D9E1B34C5390087C0E74BAF7D7CAE4A601B264265E33", shell_rs = "2ABE463AA64094E1833EE54AD06C24FB41B2139D43F9F480B56833F2FC36F74E", theme_rs = "4796AF22855C673BEFA1FFB746DDD52FA72447281F1AD5E5C760E0EF204790C2", cargo_toml = "E6D742EB4FE2D7B0A1E227C229F6EF13261369C0D3747F87DD891D2C5FACD98B", cargo_lock = "910BBE012C44A8B13195081831BF8AB581E09116284BFB229F21DA03A2F0960D" }
+isolation = "App data under a task-local target directory; Rust Light selected from Settings and not checked across restart."
+
+[capture_session]
+sequence = ["Python Dark", "Python Light", "Rust Dark", "Rust Light"]
+serial_no_overlapping_target_windows = true
+background_mcp_gateway_left_running = true
+gateway_stopped = false
+capture_surface = "Empty Welcome, no recent projects, Insert tab active"
+client_capture = "Direct client-area screenshot, no resize, no crop"
+window_state = "Normal/restored; temporarily topmost only during capture"
+outer_window_origin_screen_px = [80, 40]
+outer_window_size_screen_px = [1296, 879]
+client_origin_screen_px = [88, 71]
+logical_px_equals_physical_px = true
+apps_closed_after_capture = true
+owner_review = "pending"
+rb_02_started = false
+
+[[live_capture]]
+application = "Python Builder3D"
+theme = "Dark"
+captured_at_local = "2026-10-31T07:55:58.4859383-06:00"
+pid = 7388
+window_handle = "0xA90C3C"
+window_title = "Builder3D - Untitled"
+window_dpi = 96
+display_scale_percent = 100
+client_logical_px = [1280, 840]
+client_physical_px = [1280, 840]
+window_state = "normal/restored; temporarily topmost during capture"
+capture_surface = "Empty Welcome, no recent projects, Insert tab active"
+file = "captures/python-dark-client-1280x840.png"
+image_px = [1280, 840]
+bytes = 59120
+sha256 = "2846C63CDC73D8B711B93A0F41832BD6451A0A2239328AB7C481FA7A041ABE01"
+
+[[live_capture]]
+application = "Python Builder3D"
+theme = "Light"
+captured_at_local = "2026-10-31T07:58:52.8850201-06:00"
+pid = 40168
+window_handle = "0x16D0F68"
+window_title = "Builder3D - Untitled"
+window_dpi = 96
+display_scale_percent = 100
+client_logical_px = [1280, 840]
+client_physical_px = [1280, 840]
+window_state = "normal/restored; temporarily topmost during capture"
+capture_surface = "Empty Welcome, no recent projects, Insert tab active"
+theme_setup = "Isolated QSettings INI; the profile was prepared for the Light capture"
+file = "captures/python-light-client-1280x840.png"
+image_px = [1280, 840]
+bytes = 65774
+sha256 = "7DCFA0BD6E20C385D503B8EF9BA93E06DD658E5AD9C4FBD0D75C4D2E56610A84"
+
+[[live_capture]]
+application = "Rust eframe"
+theme = "Dark"
+captured_at_local = "2026-10-31T08:00:13.3893002-06:00"
+pid = 28528
+window_handle = "0xF40C9E"
+window_title = "Builder3D"
+window_dpi = 96
+display_scale_percent = 100
+client_logical_px = [1280, 840]
+client_physical_px = [1280, 840]
+window_state = "normal/restored; temporarily topmost during capture"
+capture_surface = "Empty Welcome, no recent projects, Insert tab active"
+file = "captures/rust-dark-client-1280x840.png"
+image_px = [1280, 840]
+bytes = 129568
+sha256 = "8ED1A388C5DA8A5A64970F8EE76BE424665706637555227CDEAED9CF3B51DE51"
+
+[[live_capture]]
+application = "Rust eframe"
+theme = "Light"
+captured_at_local = "2026-10-31T08:02:11.9380739-06:00"
+pid = 28528
+window_handle = "0xF40C9E"
+window_title = "Builder3D"
+window_dpi = 96
+display_scale_percent = 100
+client_logical_px = [1280, 840]
+client_physical_px = [1280, 840]
+window_state = "normal/restored; temporarily topmost during capture"
+capture_surface = "Empty Welcome, no recent projects, Insert tab active"
+theme_setup = "Selected through the Settings dialog; persistence across restart not checked"
+file = "captures/rust-light-client-1280x840.png"
+image_px = [1280, 840]
+bytes = 131301
+sha256 = "3EA77D9A4CDA2DDE18E680BC729BB36A21A916F758B4D7A9FDB9A455E7DA5E0B"
+
+[[comparison_image]]
+file = "captures/comparison-dark-python-left-rust-right.png"
+image_px = [2560, 840]
+bytes = 195159
+sha256 = "DF25EFB7CFFF99C99DC3096E56414AF8BA9C8FC0979C97347A4A61BCF2920C8E"
+layout = "Python left, Rust right; 1:1 pixels; no scaling"
+
+[[comparison_image]]
+file = "captures/comparison-light-python-left-rust-right.png"
+image_px = [2560, 840]
+bytes = 203396
+sha256 = "88AC994881DB445E76F8B4AC24E934F140DB679F072EF9C8B7CCFD77337252A8"
+layout = "Python left, Rust right; 1:1 pixels; no scaling"
+
+[capture_gate]
+record_status = "historical record; 2026-10-30"
+observed_date = "2026-10-30"
+initial_wrapper_pid = 6488
+initial_server_pid = 20336
+wrapper_pid = 11432
+wrapper_command = "L:\\Builder3D\\run_mcp_windows.bat"
+server_pid = 29252
+server_child_pid = 24544
+server_command = "L:\\Builder3D\\venv\\Scripts\\python.exe ... L:\\Builder3D\\scripts\\builder3d_mcp.py"
+processes_stopped = false
+final_recheck_local_time = "2026-10-30 15:44 MDT"
+builder3d_windows_launched = false
+
+[[historical_capture]]
+file = "../rb-00-reference-audit/reference/original-insert-dark-1440x138-2026-10-20.png"
+source = "L:\\Builder3D\\logs\\ribbon-icons-dark.png"
+theme = "dark"
+content = "Insert ribbon crop only"
+capture_date = "2026-10-20"
+dimensions_px = [1440, 138]
+bytes = 32943
+sha256 = "305ecf4af1ee2ed13d481cf7bb3f58801a3f91022962464c94af87b342ed2127"
+inspection = "Historical reference; not a current matched full-window baseline"
+
+[[historical_capture]]
+file = "../rb-00-reference-audit/reference/original-insert-light-1440x138-2026-10-20.png"
+source = "L:\\Builder3D\\logs\\ribbon-icons-light.png"
+theme = "light"
+content = "Insert ribbon crop only"
+capture_date = "2026-10-20"
+dimensions_px = [1440, 138]
+bytes = 35367
+sha256 = "8269debce177d7ccba9a64b4c2e81a7b4199705417a1a20c965d9662b52b1b74"
+inspection = "Historical reference; not a current matched full-window baseline"
+
+[[gate_recheck]]
+record_status = "historical record; 2026-10-30"
+observed_local_datetime = "2026-10-30 18:58:27 -06:00"
+status = "blocked_active_original_mcp_gateway"
+wrapper_pid = 30064
+server_pid = 25284
+server_child_pid = 9440
+wrapper_command = "L:\\Builder3D\\run_mcp_windows.bat"
+server_executable = "L:\\Builder3D\\venv\\Scripts\\python.exe"
+processes_stopped = false
+builder3d_windows_launched = false
+rust_target_processes = []
+target_window_handles = []
+host_primary_display_physical_px = [2560, 1440]
+host_system_dpi = 96
+host_system_scale_percent = 100
+owner_acceptance = "pending"
+reason = "At that dated recheck the gateway was treated as blocking. The current capture session instead followed the documented serial app workflow and left the gateway untouched."
+
+[[historical_capture]]
+file = "reference/python-theme-light-live-20260919.png"
+source = "L:\\Builder3D\\logs\\theme-toggle-light-fixed.png"
+theme = "light"
+content = "Live Python theme-toggle UI preview"
+capture_date = "2026-09-19"
+dimensions_px = [1280, 820]
+logical_client_px = []
+display_scale_percent = "unknown"
+window_state = "unknown"
+bytes = 55240
+sha256 = "9f80268a821b23730fa8aaf8be873a47d2b08969382c1b1e703d0815ac271de5"
+inspection = "Historical live preview; not a matched RB-01 baseline"
+
+[[historical_capture]]
+file = "reference/python-theme-dark-live-20260919.png"
+source = "L:\\Builder3D\\logs\\theme-toggle-dark-fixed.png"
+theme = "dark"
+content = "Live Python theme-toggle UI preview"
+capture_date = "2026-09-19"
+dimensions_px = [1280, 820]
+logical_client_px = []
+display_scale_percent = "unknown"
+window_state = "unknown"
+bytes = 53508
+sha256 = "32a3270d0de263b848f6255664088fabb8274e462d608676dfc0ffac321b129f"
+inspection = "Historical live preview; not a matched RB-01 baseline"

@@ -1,0 +1,1967 @@
+# Read-only provenance inventory of the original Builder3D asset tree.
+# Generated from L:\Builder3D and the recorded owner-supplied L:\Icons\LightMode inputs.
+# RB-00 inventories assets only; no original artwork was copied into the Rust product.
+
+schema_version = 1
+reference_checkout = "L:\\Builder3D"
+asset_root = "L:\\Builder3D\\assets"
+logical_mapping_source = "L:\\Builder3D\\src\\icon_assets.py"
+owner_light_input_root = "L:\\Icons\\LightMode"
+asset_tree_read_only = true
+asset_file_count = 108
+theme_icon_file_count = 104
+shared_branding_and_legacy_file_count = 4
+light_owner_input_file_count = 51
+prepared_light_output_file_count = 52
+rust_copy_status = "not copied during RB-00"
+
+[provenance_notes]
+dark_set = "Existing RGBA assets in the read-only original checkout; individual upstream artist/source transfer was not identified in the inspected tree."
+light_set = "The 51 opaque owner-supplied PNGs at L:\\Icons\\LightMode were prepared by scripts/prepare_icon_asset.py for transparent button use on 2026-10-20, as recorded in WORK_LOG.md; one combined UndoRedo asset was composed from the supplied Undo and Redo inputs."
+mapping = "The source map includes exact ExRay.png and Subtract.png spellings; simplify and subdivide both resolve to Simplify.png."
+legacy_pin_snap = "Root pin.jpg and snap.png are fallback assets in style.py, but action_icon_path is checked first and currently resolves themed Pin.png and Snap.png; the root fallbacks are shadowed by those mapped files."
+live_use = "reference_use distinguishes source-mapped art from source-shadowed fallback files; RB-00 did not capture a current live window, so no runtime display is claimed."
+
+[[asset]]
+path = "action_icons/Align.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Align.png"
+sha256 = "c1a0e619042f834eebcf217c070dbb5ed0fba35d93fc71e789b40e94326c7db3"
+bytes = 425515
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=false"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["align"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Arrange.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Arrange.png"
+sha256 = "806c69ead1aae64054f653fa3d902ebc416cf9b9be919170830e45db49902bf5"
+bytes = 607452
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=false"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["arrange"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Blob.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Blob.png"
+sha256 = "45cd2a1dfa7b05bf2ec6bb1ff1cefbf12864d8f05f637e4883c5ef004c2c10d3"
+bytes = 1153233
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=false"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["blob"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Center View.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Center View.png"
+sha256 = "da0e91286261c2248d6e7413746d15364d527147f31312e911c3dd7084d3b9ef"
+bytes = 657344
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=false"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["center_view"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Color.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Color.png"
+sha256 = "4ef4a9f0f92341440bab65a9d08b34511f94dfcbe83a860a68e4b2c5e0188df4"
+bytes = 1218936
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=false"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["color"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Copy.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Copy.png"
+sha256 = "78c7c19b7031898fdecfe2ee69b7c77b623db55afb6ab56951c6a889c3d15ea9"
+bytes = 590351
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=false"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["copy"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Crease.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Crease.png"
+sha256 = "a005b95aac338dddbcd4e22961c01e9c5990c4b86cf9f7e07f9a66d831649991"
+bytes = 733553
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=false"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["crease"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Cut.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Cut.png"
+sha256 = "29f457116357252faa0755c5528b2fb216d85e7261cc29fdb59e95a7defb525d"
+bytes = 752817
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["cut"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Delete.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Delete.png"
+sha256 = "93c3d674e0d35b7cd7f255ba384cfd83dac3abff4ffc90aa2003a94613f2c5e6"
+bytes = 696924
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=false"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["delete"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Duplicate.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Duplicate.png"
+sha256 = "58bb9264e8655109f3736b73f4326f740e077bf35efd5b615dbe4da51b44213a"
+bytes = 684634
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=false"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["duplicate"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Edit Torus.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Edit Torus.png"
+sha256 = "0b01cd485cc047f53aeefab6e2e20fc6165993bf9bb46439c96ca87f2b4c81b1"
+bytes = 846352
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["edit_torus"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Elastic Grab.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Elastic Grab.png"
+sha256 = "b52cbc8624023d3e751f4b29c92ef8827cd73605d1439ab29012150a07087303"
+bytes = 679083
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=false"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["elastic_grab"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Emboss.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Emboss.png"
+sha256 = "836e0cfa1057aa73abfc68a085724895c377063631d5ba295a1dc3a76af09f59"
+bytes = 926437
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["emboss"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/ExRay.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\ExRay.png"
+sha256 = "3d9f1e00dba8a53d40510a8238595e3587ee29ce06db9090603a7594e1926fce"
+bytes = 1148880
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["xray"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Folder and Open.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Folder and Open.png"
+sha256 = "5be1eb00e7f87fed16b03de691bf2dd79ef786889fb8e9a6d08c97ab3d0ce4ca"
+bytes = 650165
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=false"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["folder"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Frame.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Frame.png"
+sha256 = "b4f3553519d1f47ca83efd87ba9ca5170aa41cdb22d62e18f1607316186b2bdd"
+bytes = 491157
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=false"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["frame"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Front.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Front.png"
+sha256 = "9c54338f614f928c8e35d049dae6195bdf7049dcb3d7dbf187067a939e8c7a6c"
+bytes = 947609
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=false"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["front"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Grid.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Grid.png"
+sha256 = "2501d42fdd0acfdd35555ef211d4c24654ab52cde932c40a5083b477686d8aaa"
+bytes = 553419
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["grid"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Hollow.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Hollow.png"
+sha256 = "8ae56038745d4eb39f00bb2723e822369fbbdf0c701c8c6909a82f285d654e6a"
+bytes = 1053086
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=false"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["hollow"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Intersect.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Intersect.png"
+sha256 = "4bcc2574f36b7316394b0b308e01587483922e56d5a453b38e02e982f74a41f8"
+bytes = 828381
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=false"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["intersect"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Material.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Material.png"
+sha256 = "924b9482233ca92d5af8dedc1f12b88cd8b7de6b07cce6bf0fb3691149ba4684"
+bytes = 1123239
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=false"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["material"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Measure.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Measure.png"
+sha256 = "12e147a6d8d209a55e7a5f1d2d3fd9849111deb92e815a75935f8ec6d843774a"
+bytes = 639232
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=false"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["measure"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Merge.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Merge.png"
+sha256 = "240f295dab3b8323ae68e81ef9be3cd174ae1d00464e6bd03bedd99ee074b05f"
+bytes = 681639
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=false"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["merge"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Mirror.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Mirror.png"
+sha256 = "1a8b7d6e8a967c2646adaa3623559a041bed7703a340edd13e6f5a8fde5e88a9"
+bytes = 525238
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=false"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["mirror"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/New Scene.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\New Scene.png"
+sha256 = "d89ac0dac2faa111bd96d7a2f3ba991f4642a3d76744aabc4ca46f83817f9825"
+bytes = 751814
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=false"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["new_scene"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Normalize.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Normalize.png"
+sha256 = "a097ee7e965ee4ebc86a79866b82d765e0dc9b864df1bef12d58f560333df29f"
+bytes = 713453
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["normalize_density"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Paint.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Paint.png"
+sha256 = "deb39494f78496396371488fd4f4053ea5ff8357b9b5fc0b51d3e65d4f6bbef8"
+bytes = 603714
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["paint"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Paste.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Paste.png"
+sha256 = "ea4316401cf261c173c92fd990438c89370703b25ef6e29602e23da5ceabdcf9"
+bytes = 709232
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=false"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["paste"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Pin.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Pin.png"
+sha256 = "9bb0e8267f1fa23f7cadbeaf324bfa0eee16b3d5efdee8ee55600c43050296b6"
+bytes = 660658
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["pin"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Quick Color.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Quick Color.png"
+sha256 = "4779a5c22e66c358f3ca0a7d0f3cc5d203caa1a4eb94b69f514d7d98b54792dc"
+bytes = 824240
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=false"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["quick_color"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Redo.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Redo.png"
+sha256 = "3884051adf82a760279fd4467cce0c267b5b8f140fc9bf23240aed19e39c86cd"
+bytes = 322813
+format = "PNG"
+dimensions = [925, 873]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=false"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["redo"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Repair.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Repair.png"
+sha256 = "09491c0f238c440db999d0873405f481fa9e57c54e3ad4c30d2e853505c25c11"
+bytes = 607486
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["repair"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Reset View.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Reset View.png"
+sha256 = "5c9265a0f9f156fe67a737b7fbf450d7b90fdcc561491cc864cca6225067777b"
+bytes = 1026312
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=false"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["reset_view"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Settle.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Settle.png"
+sha256 = "b2e925f9cc991278f150cf12eb0c24a61c63a4330feaa037ea327eeb7e68629e"
+bytes = 401240
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["settle"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Side.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Side.png"
+sha256 = "706a0b09450163e8fe089ddc62c00e1789e0ea969a2b50462d108b297086662f"
+bytes = 933837
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["side"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Simplify.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Simplify.png"
+sha256 = "f4298e3d8287061697f5a8e050da849627dca811f64229a39b45916ef119627e"
+bytes = 1029382
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=false"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["simplify", "subdivide"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Smooth Brush.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Smooth Brush.png"
+sha256 = "405818adc867a1c55b7ff0ab6cd218d29f65e8ca363e8737bd69a5061aed6ebf"
+bytes = 842816
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=false"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["smooth_brush"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Smooth.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Smooth.png"
+sha256 = "663d0ca0a39615351a1baf098ed0c849903a2775636a15a22e828031546b1bd6"
+bytes = 716711
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["smooth"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Snap.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Snap.png"
+sha256 = "961d502cb487c685a49786421f68143d03f19c470e755e7b6c572834088ca25d"
+bytes = 878304
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=false"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["snap"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Subtract.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Subtract.png"
+sha256 = "cece2dcb3d7a509b42597eb01023f4ace053e1361fda5c56620bf9710cfaf4b3"
+bytes = 673424
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=false"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["subtract"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Top.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Top.png"
+sha256 = "458b9ba18f96134359d1875ab49576c9c53f7be768c7c3ae887f36bfb1e18b43"
+bytes = 971960
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["top"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Undo.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Undo.png"
+sha256 = "00995265a79d71917fdcbc89d3d7cc8ffe85bbaf1f2f81a385b97548ec372caf"
+bytes = 311906
+format = "PNG"
+dimensions = [924, 873]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["undo"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/UndoRedo.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\UndoRedo.png"
+sha256 = "090a28f9d69d6cb1814d9d8721f3bb4ddee74b9e7eb03759bb54ec2782db09e9"
+bytes = 642801
+format = "PNG"
+dimensions = [1802, 873]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=false"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["undo_redo"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons/Wireframe.png"
+source_path = "L:\\Builder3D\\assets\\action_icons\\Wireframe.png"
+sha256 = "75c52ff9dd8e24d8db47b36385fd5913c6a6618411b1a3a56c79eed6b2989434"
+bytes = 1036872
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=false"
+theme = "dark"
+role = "action-icon"
+logical_actions = ["wireframe"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Align.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Align.png"
+sha256 = "05b7c4058882e8ee2b1b49d7a99ce5422f277aadb0504ad401c8e7160cb943d3"
+bytes = 42671
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["align"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Align.png", sha256 = "3fc1a02637b69e46095132d937fda2f0ef2c6df615e1e05e9e415f121d90373e", dimensions = [121, 118], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Arrange.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Arrange.png"
+sha256 = "b23dd8a7f092dfd2c53187a9d6c034703352f0d76fa996e7c9bf8b5078c8c246"
+bytes = 54700
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["arrange"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Arrange.png", sha256 = "42ead76cd47a45a3187a4c411bf9e525a3bc5df5a469db7b755c584f22296755", dimensions = [117, 108], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Blob.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Blob.png"
+sha256 = "d729d889c1cbdcf40613b04e88c8d6f4849fc52836c948dabb5008650c2446f2"
+bytes = 69466
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["blob"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Blob.png", sha256 = "baea7100fc46d6a8eb5017c55236d1a1219c1f29a0964fd46e492192c0d6c298", dimensions = [120, 119], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Center View.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Center View.png"
+sha256 = "00985f55d3f384522b0ccc1c48ea1c50da9712b111ca59454e340d0e674b2393"
+bytes = 71182
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["center_view"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Center View.png", sha256 = "56d1aae5f224d1282a50d5ff545ee2cddb740463115986d7143a51d45611cd2d", dimensions = [116, 110], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Color.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Color.png"
+sha256 = "d43b87fc41bd8cf338b213a314a79f9c775a9d7b60166cdea4778cc496e765d9"
+bytes = 72553
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["color"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Color.png", sha256 = "7251bca6eb204294e2cfff849623b0a5e2e1e57a9446db2aefb9babfae4c9e9a", dimensions = [121, 117], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Copy.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Copy.png"
+sha256 = "3baca20284759f7742a0d7792357ebc099e660d9362c2317b65a649168dcab45"
+bytes = 47067
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["copy"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Copy.png", sha256 = "ca58d81f01aa01ca3b18cba4c5a16a48f0902855fbffd2dbe2191aed56f65f8a", dimensions = [106, 111], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Crease.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Crease.png"
+sha256 = "56e701b0abc5e10faf69d3fb1e0ef4a619da6a57399a2e08ffecf14ed5172a35"
+bytes = 61554
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["crease"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Crease.png", sha256 = "90078bb433274b8878437ce26d4b60d3ce1ec9d725340366b99f69da81cc742b", dimensions = [118, 117], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Cut.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Cut.png"
+sha256 = "cc5d3425df4e4517b1a7e9e933c17f1071b3c77561ba25d91664e87b4d41e10a"
+bytes = 80115
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["cut"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Cut.png", sha256 = "a0d7513307b72ddc85f57471e0f428ce291a579bfec1120a611e0140a1b02edb", dimensions = [329, 314], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Delete.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Delete.png"
+sha256 = "7a8c50e39eafb2d40cbe4dea2e782045bca627b190a11727be609655864abc40"
+bytes = 48674
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["delete"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Delete.png", sha256 = "4fbc92e4e8cd1764ef7202a1c599203ed8259290809c85263acfd6f9f9546e73", dimensions = [115, 112], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Duplicate.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Duplicate.png"
+sha256 = "4950f0b415113e0f8f7338adec2775147311d2f6d5b8a5a609779eda6830a9e9"
+bytes = 57253
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["duplicate"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Duplicate.png", sha256 = "cfdb19c93ff57a15bbb12062fee6ccc1244c7f22f2e944cf6c48e2b7dc33e6a2", dimensions = [116, 112], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Edit Torus.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Edit Torus.png"
+sha256 = "fbca30d31729b509778616be64022be2c1f65c626f1f83e6c22ad34ea62ffa51"
+bytes = 56656
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["edit_torus"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Edit Torus.png", sha256 = "01abd5274f039895b662b1f732091a100d53afae0da7f9c3249fe3ef054ff2a4", dimensions = [120, 110], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Elastic Grab.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Elastic Grab.png"
+sha256 = "33d8e66cc99e6c2b013b056f4b556ccc8496849b179c3213296d268954da5826"
+bytes = 64645
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["elastic_grab"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Elastic Grab.png", sha256 = "78efe69f2f02cfcbf08b8b3535e68264e77390ff5ffaa82a277775824f6c8aac", dimensions = [333, 304], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Emboss.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Emboss.png"
+sha256 = "d6a4a0a378dc58e9e6b2a75c0469b31eea64d9f7fdbee732cd53b73d5de6cf6d"
+bytes = 74387
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["emboss"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Emboss.png", sha256 = "912619780de172e9dfc9c1be3656647387be5bc3c43b8b7baeb6c42b269c5ab9", dimensions = [339, 312], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/ExRay.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\ExRay.png"
+sha256 = "b1e369b9bffd102a118ebd1ff2010f1051a88ba5269d105632b5ed8cf3d094cb"
+bytes = 67827
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["xray"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\ExRay.png", sha256 = "14128498267175fe2ecc0fe6169037319811663d78676925f90092e01d29089b", dimensions = [116, 115], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Folder and Open.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Folder and Open.png"
+sha256 = "3bc5b81f7015d6676acb4e4210e0c16ca34c6224fed017434d6fbce97ceed494"
+bytes = 42458
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["folder"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Folder and Open.png", sha256 = "3bbc3c5da1550873fd9422168e6db2bd8cd16a5ee31e862f851c2a733987a206", dimensions = [114, 106], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Frame.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Frame.png"
+sha256 = "25fb4af1d0b7129ebd86e7a66bc5717bf501f7f4c70d460adf2519c6ca89bf18"
+bytes = 58838
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["frame"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Frame.png", sha256 = "4cb34ce5d27f457ccc521e9c377584bd4b94b43e27abcd79898b08815bfc52f2", dimensions = [115, 111], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Front.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Front.png"
+sha256 = "c3d0196a034c3d98cea7a9f5996d2045d53cb0e51deca060467c134291479fe0"
+bytes = 61164
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["front"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Front.png", sha256 = "6a43362d38b7003a83e979ec521ccba815c703c0a5597b8eb588cb825436b22a", dimensions = [112, 114], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Grid.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Grid.png"
+sha256 = "caa5b4e43dbf37bd67c5ecdf76c94444a0491b8598ec03b8233dc9935c29997d"
+bytes = 58139
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["grid"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Grid.png", sha256 = "a81a9e623798acd5df5a085c3aeace867ad39603221bfe14257b676afb7b53da", dimensions = [333, 213], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Hollow.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Hollow.png"
+sha256 = "11deea1424c49496f78679d04bad6d508944c856e5a179ea9c0311d860e527c5"
+bytes = 72612
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["hollow"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Hollow.png", sha256 = "16ed2dd20c6ddd6459629309cb3ae64782ebebe745ea38b2a9be83bf98283622", dimensions = [117, 116], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Intersect.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Intersect.png"
+sha256 = "12e7b9d4f706f729bb71c2c8227c0838eadbf60733e641c110e56a25ad479ad1"
+bytes = 56854
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["intersect"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Intersect.png", sha256 = "702d58ffe04565e5ba5c13a05b93ceb4a1b0bf4540fd1f49b57bfab9c1fdd582", dimensions = [117, 109], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Material.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Material.png"
+sha256 = "1b0eed91ecb3c582d3fb276aacca0697f59456e2ca7bb4073623979758a749b8"
+bytes = 71684
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["material"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Material.png", sha256 = "dad05688dbf38ff3aad757787df1067e0dbd20e1bfa7ec0a049cb93232df4ccf", dimensions = [113, 116], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Measure.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Measure.png"
+sha256 = "5a5547b54b7160ddd7146f147e842041ba3588208e0deadc17c99476ac509e01"
+bytes = 57717
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["measure"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Measure.png", sha256 = "9343e95e4b515cfc481b1ce3a8d005b2cc1a0b40898c4f99e9ec9f0eef27a13e", dimensions = [116, 112], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Merge.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Merge.png"
+sha256 = "c1f69c06601a275e562d2c054748f1bdec988500a1bf13c6f7bd4d49b1f0ffce"
+bytes = 51829
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["merge"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Merge.png", sha256 = "ce8474e4a323454ca475daa52357de2a5cebd6fab8f359df8c8640401dc2d05d", dimensions = [113, 107], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Mirror.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Mirror.png"
+sha256 = "f45b41403a113f637099a2436b69814b780d106105b3ac64f0af82daf628bf5d"
+bytes = 49723
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["mirror"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Mirror.png", sha256 = "a9db7b41dac2c5d6fd693b4c31ec13c9ee7dda42b5360c2fe9820f1f8abe892f", dimensions = [108, 101], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/New Scene.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\New Scene.png"
+sha256 = "f660b2e8760e3c86bcad324a7fe3d6c5685c581552999f750dd0390c02fe5207"
+bytes = 57697
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["new_scene"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\New Scene.png", sha256 = "8eb7a4ad6d686d62bdbeea35a32587fb40e1631e993e217eb47dea8ed3d46390", dimensions = [117, 100], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Normalize.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Normalize.png"
+sha256 = "e8f8c643a884e25456388c7380b2463672a8a1d1272cac74c7b917f57f883d33"
+bytes = 56251
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["normalize_density"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Normalize.png", sha256 = "bdfc86dd49065aab9d5433589a1240231d73795fa5b095893921e13d67df2014", dimensions = [336, 270], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Paint.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Paint.png"
+sha256 = "f6e2742841098bf2deeedace9edfccd03f2cb8c5286f107ff4d78f95c07914ef"
+bytes = 54608
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["paint"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Paint.png", sha256 = "ae4d8de865cb6915e05c4527135056abe2026069454b943d1719b564a1c775b4", dimensions = [116, 116], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Paste.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Paste.png"
+sha256 = "ae47762177b86bb690469f182c3bf59cde521f9171219bcfe0066352ce6cb3e7"
+bytes = 50071
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["paste"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Paste.png", sha256 = "7bf73ed63d3a28cb40b58cb1aeebf3a92e6e4f04f71c581f79a43ce11ca11055", dimensions = [94, 105], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Pin.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Pin.png"
+sha256 = "3178896d9b2caa19c1663ce4963d28236ab0602707cf389b1ee52c15ad0b2d32"
+bytes = 58865
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["pin"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Pin.png", sha256 = "4a6a83b61cb94c3894b6e431e032ade083e2ff82c238505c1429745fcb39df2c", dimensions = [113, 113], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Quick Color.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Quick Color.png"
+sha256 = "a04b86989c09444604dd593cc639087b433f84c18f5587ac4a4f03ace8470b27"
+bytes = 67476
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["quick_color"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Quick Color.png", sha256 = "4e8149eb081b1ab81f52f428876a2d2b3c332701a51822d350114c66d51a37ec", dimensions = [111, 113], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Redo.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Redo.png"
+sha256 = "52020c0ce4185325ce6c78cc2770c2abe6fdbc81d33212b6f4279c466812173e"
+bytes = 48956
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["redo"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Redo.png", sha256 = "7ff3ea9cd6fa8632b8ee336b5fb2f35c547877514067441072a1b7456ebd2a00", dimensions = [120, 113], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Repair.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Repair.png"
+sha256 = "0ca9d1ce1e4188223d9bb8d122b93b5d0acf20142b49ab85dc3ea51e04ddc45d"
+bytes = 55711
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["repair"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Repair.png", sha256 = "847043ab8c610fe8f4621c9f265532c403f4f95041f8da1c594dcffca125e90b", dimensions = [118, 115], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Reset View.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Reset View.png"
+sha256 = "37c849df1bc6be1096a4ecdb7a20bf5cd4e9b70d90892c14f49b16df4b16ef3c"
+bytes = 89817
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["reset_view"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Reset View.png", sha256 = "ab8caa4e99ad94aac5169a73220220e28c601019bc588b4747d86eb3d1b752e7", dimensions = [330, 317], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Settle.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Settle.png"
+sha256 = "710d452c2d4f616b8a4fded3ad6f5bceb2fffb743f094afff5cb7bb4d8628126"
+bytes = 41151
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["settle"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Settle.png", sha256 = "2c17732744e531925546bcb07db6cbab9269bd33271b5ba84b76d01043f24d58", dimensions = [101, 78], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Side.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Side.png"
+sha256 = "e1ef05463c6d5680e9bc635938ce2fbb3ed960b38804ce01205e214de6a05ac0"
+bytes = 62650
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["side"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Side.png", sha256 = "30c3dec1bd9909256c061875c6833c6e1743def342447cd091b30d19c958df0d", dimensions = [116, 115], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Simplify.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Simplify.png"
+sha256 = "3f2b29033cd54589df511b8a2051f5dfe8a9955c96dabec33ff1ac3b582682d6"
+bytes = 72461
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["simplify", "subdivide"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Simplify.png", sha256 = "80cbbbc2363e2bd4dcc58a331afa2d9d98a40a375658aeeec1d217ba641afa6a", dimensions = [115, 113], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Smooth Brush.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Smooth Brush.png"
+sha256 = "8cc0a7c43a6aca700539c166c36fc509c5d3be6e4e941685384be83808f1b7b3"
+bytes = 64250
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["smooth_brush"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Smooth Brush.png", sha256 = "9e3fc7e76ba9bb57d3be872ffbf2c1348a0da5f4e8a6293b5402f6e6b3d31a1c", dimensions = [115, 114], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Smooth.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Smooth.png"
+sha256 = "1bd1b773deb1ef8f482bdf105b87de4d7325e5a3c7933aff6231fab4033a48c0"
+bytes = 50344
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["smooth"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Smooth.png", sha256 = "86cf50443fe2353a1d57969f8ea688fc939de11de8d2c60dbdc66ee8446c836f", dimensions = [112, 106], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Snap.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Snap.png"
+sha256 = "9fe213cfc2a7723aa9217357599af54c54f68914dc86c7ffb3aed772d0f76f47"
+bytes = 81040
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["snap"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Snap.png", sha256 = "678a06923035c5724dadd972636afc5eb67c9df352154e0db5a9db129cd47c11", dimensions = [117, 109], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Subtract.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Subtract.png"
+sha256 = "e7419d14a02a2cc1023e434185d75b347a2a3d191a27eb559e6abb8d38ea6c40"
+bytes = 57874
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["subtract"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Subtract.png", sha256 = "465cfd1b3b5594e11928ff094dcd97319f3593bd5bbad20383d587c76be6af9d", dimensions = [112, 112], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Top.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Top.png"
+sha256 = "ee83027bf7e070b2c9799a11aa6a9e615e9560f52729988e90aa59061856230c"
+bytes = 61825
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["top"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Top.png", sha256 = "1e0c6a7022381a401c1d5aa04f5e15fdf6642ff93185d898900d217fa2d913e1", dimensions = [118, 121], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Undo.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Undo.png"
+sha256 = "a488d7e356b3ba57909ba9fa772125780fc5166581753c6bb06a57656ce3b6a1"
+bytes = 47747
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["undo"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Undo.png", sha256 = "822f251da763e2c4b9b224b4d735d78212932b68dfed8597fd297bac4da1bc7d", dimensions = [119, 114], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/UndoRedo.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\UndoRedo.png"
+sha256 = "fe21ad3fe53541015c075de9955aa1182a214e3c4dbb84a520c27dbb436199d6"
+bytes = 28628
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["undo_redo"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "composed from owner-supplied Undo.png and Redo.png per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Undo.png", sha256 = "822f251da763e2c4b9b224b4d735d78212932b68dfed8597fd297bac4da1bc7d", dimensions = [119, 114], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }, { path = "L:\\Icons\\LightMode\\Redo.png", sha256 = "7ff3ea9cd6fa8632b8ee336b5fb2f35c547877514067441072a1b7456ebd2a00", dimensions = [120, 113], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "action_icons_light/Wireframe.png"
+source_path = "L:\\Builder3D\\assets\\action_icons_light\\Wireframe.png"
+sha256 = "7802349bfe4b6b3bf03d03eefdfd949f93cbc21c4040c7dfb0ceb382c1b4c108"
+bytes = 80436
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "action-icon"
+logical_actions = ["wireframe"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Wireframe.png", sha256 = "2ec236874377f1b2c6e8a71a9d4315358d58ab71da53d722ebfa3e317f92c2a9", dimensions = [122, 126], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "Builder3D.ico"
+source_path = "L:\\Builder3D\\assets\\Builder3D.ico"
+sha256 = "85b4c3841dc4ca8bd57525728dbd9554bc6b9918f0f1705ef39587334d6c12ed"
+bytes = 122638
+format = "ICO"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=false"
+theme = "shared"
+role = "application-window-icon"
+logical_actions = ["application-window-icon"]
+reference_use = "branding source route recorded; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = ["128x128", "16x16", "24x24", "256x256", "32x32", "48x48", "64x64"]
+
+[[asset]]
+path = "Builder3D.png"
+source_path = "L:\\Builder3D\\assets\\Builder3D.png"
+sha256 = "44bcc68aab7a4b7c78e92eab2dd2a1609dda18bb51e28b8e0d80cfd41d69162b"
+bytes = 1516309
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=false"
+theme = "shared"
+role = "application-splash"
+logical_actions = ["application-splash"]
+reference_use = "branding source route recorded; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "insert_icons/Cone.png"
+source_path = "L:\\Builder3D\\assets\\insert_icons\\Cone.png"
+sha256 = "0784b2d414ca10662789045a7f597ced056037e03e9315f668bd5424aefd5ded"
+bytes = 557746
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "dark"
+role = "insert-primitive-icon"
+logical_actions = ["insert.cone"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "insert_icons/Cube.png"
+source_path = "L:\\Builder3D\\assets\\insert_icons\\Cube.png"
+sha256 = "ed829d55780fc9b7855b7a3491e012c1e13c8d87dfb6470ab9c7e40560aa0a94"
+bytes = 785291
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=false"
+theme = "dark"
+role = "insert-primitive-icon"
+logical_actions = ["insert.cube"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "insert_icons/Cylinder.png"
+source_path = "L:\\Builder3D\\assets\\insert_icons\\Cylinder.png"
+sha256 = "19f277450778c4f0bf1f7135352971a310e5a7771c681beb1ab03818602897c7"
+bytes = 665530
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=false"
+theme = "dark"
+role = "insert-primitive-icon"
+logical_actions = ["insert.cylinder"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "insert_icons/Hexagon.png"
+source_path = "L:\\Builder3D\\assets\\insert_icons\\Hexagon.png"
+sha256 = "ceea23f2f4a2dfb833eeb6e242c2c615cd06ee5ed8199814fb6722ebdf639847"
+bytes = 445139
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=false"
+theme = "dark"
+role = "insert-primitive-icon"
+logical_actions = ["insert.hexagon"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "insert_icons/Pyramid.png"
+source_path = "L:\\Builder3D\\assets\\insert_icons\\Pyramid.png"
+sha256 = "101628b7fecef189d6a46dcd2005fce5a761ee73c898ca9d5166fb2fc2e1a8fc"
+bytes = 595554
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "dark"
+role = "insert-primitive-icon"
+logical_actions = ["insert.pyramid"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "insert_icons/Sphere.png"
+source_path = "L:\\Builder3D\\assets\\insert_icons\\Sphere.png"
+sha256 = "cdfcb8914548debdc3f8c174388f4b4aa15091634276595e91dd95120c84893c"
+bytes = 849034
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=false"
+theme = "dark"
+role = "insert-primitive-icon"
+logical_actions = ["insert.sphere"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "insert_icons/Torus.png"
+source_path = "L:\\Builder3D\\assets\\insert_icons\\Torus.png"
+sha256 = "dc1dcc75b9224f16fb7849f41a7c8ef18babac2d7e38b0047a2eefdc8439f9f5"
+bytes = 869668
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=false"
+theme = "dark"
+role = "insert-primitive-icon"
+logical_actions = ["insert.torus"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "insert_icons/Wedge.png"
+source_path = "L:\\Builder3D\\assets\\insert_icons\\Wedge.png"
+sha256 = "00f3e2d4bd11689f38e3a48f89c2fa29c85e49104451256284deaf1d88c678c7"
+bytes = 547530
+format = "PNG"
+dimensions = [1254, 1254]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=false"
+theme = "dark"
+role = "insert-primitive-icon"
+logical_actions = ["insert.wedge"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "insert_icons_light/Cone.png"
+source_path = "L:\\Builder3D\\assets\\insert_icons_light\\Cone.png"
+sha256 = "376a39d6da9429b40ca4b015f0c74cc709b810e6a0ced5592e96521ac38c3950"
+bytes = 52236
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "insert-primitive-icon"
+logical_actions = ["insert.cone"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Cone.png", sha256 = "a700b194258b58ba33925a0fd505db26f7137b655cb65395a271f019006900a0", dimensions = [115, 110], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "insert_icons_light/Cube.png"
+source_path = "L:\\Builder3D\\assets\\insert_icons_light\\Cube.png"
+sha256 = "1a4eea16e86d99b3faaa77d05cc135ad2df465d561b49357a3e9942fb6e7fa43"
+bytes = 85867
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "insert-primitive-icon"
+logical_actions = ["insert.cube"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Cube.png", sha256 = "a29d78eaee16c49cc31b0b71188751b9e84f7065e73124bb013029c6bc54c9d5", dimensions = [306, 308], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "insert_icons_light/Cylinder.png"
+source_path = "L:\\Builder3D\\assets\\insert_icons_light\\Cylinder.png"
+sha256 = "b885575c2550d9521a49814496d54e98ca07acc6a5e12a5b00039b6bb6344a2c"
+bytes = 43926
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "insert-primitive-icon"
+logical_actions = ["insert.cylinder"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Cylinder.png", sha256 = "52bb6c41089dec6d320da8996d6cc3cecfc661511dca795a365b0cee09210fd5", dimensions = [108, 111], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "insert_icons_light/Hexagon.png"
+source_path = "L:\\Builder3D\\assets\\insert_icons_light\\Hexagon.png"
+sha256 = "418d0eed91d14161bb5cc9b74401d47539ae9de0cd316da3a7d37b0ff0660009"
+bytes = 38866
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "insert-primitive-icon"
+logical_actions = ["insert.hexagon"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Hexagon.png", sha256 = "377a6b0697c6b44af551894057bdce4dd9f7d8df8d9d266f4294d0c9acb0b5ab", dimensions = [115, 99], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "insert_icons_light/Pyramid.png"
+source_path = "L:\\Builder3D\\assets\\insert_icons_light\\Pyramid.png"
+sha256 = "b30c0be60a0df3f85078bec74aaf18bf08e87a5412cee1acb1a0f3257742b380"
+bytes = 48963
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "insert-primitive-icon"
+logical_actions = ["insert.pyramid"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Pyramid.png", sha256 = "d88784b6f2650ab98d6a68d567f03179e3cab458827f7b680301ce60ab6069a9", dimensions = [119, 110], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "insert_icons_light/Sphere.png"
+source_path = "L:\\Builder3D\\assets\\insert_icons_light\\Sphere.png"
+sha256 = "4ae4f0562f8fbacfe3ea71f1012d8defe48d0d3cd4b7ebf79405fc15290f1509"
+bytes = 59025
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "insert-primitive-icon"
+logical_actions = ["insert.sphere"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Sphere.png", sha256 = "c8a3b0e0244d0cff0546af683fa52261e8d11daa78447a36f4f0185f2222258b", dimensions = [114, 111], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "insert_icons_light/Torus.png"
+source_path = "L:\\Builder3D\\assets\\insert_icons_light\\Torus.png"
+sha256 = "953e5194f8e241433710960566f14ac65f00374e7c413d56a9bea2052f92d9f3"
+bytes = 78944
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "insert-primitive-icon"
+logical_actions = ["insert.torus"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Torus.png", sha256 = "e2cfe48c01852b10805818a0921a38fd029e890be8f61608b8c805c500c19d7e", dimensions = [325, 290], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "insert_icons_light/Wedge.png"
+source_path = "L:\\Builder3D\\assets\\insert_icons_light\\Wedge.png"
+sha256 = "fb7b04a1f89632e89b8a0c51ac17be5485eb9e416bbabf877da818710943b6a2"
+bytes = 42206
+format = "PNG"
+dimensions = [256, 256]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=true"
+theme = "light"
+role = "insert-primitive-icon"
+logical_actions = ["insert.wedge"]
+reference_use = "themed asset is mapped by src/icon_assets.py; live display not captured in RB-00"
+provenance = "owner-supplied opaque image; prepared per WORK_LOG.md 2026-10-20"
+rust_destination = "not copied during RB-00"
+source_inputs = [{ path = "L:\\Icons\\LightMode\\Wedge.png", sha256 = "d77182986cf40cbd338f0c23f195939714ed81e252d1046f7400c7a15eb5f8df", dimensions = [118, 96], format = "PNG", pixel_mode = "RGBA", alpha_min = 255, alpha_max = 255 }]
+embedded_sizes = []
+
+[[asset]]
+path = "pin.jpg"
+source_path = "L:\\Builder3D\\assets\\pin.jpg"
+sha256 = "a4bc719f098fd6d621635b1963ad0bd3d276da9a0cacc36d34fcb0207ef87b60"
+bytes = 12231
+format = "JPEG"
+dimensions = [980, 980]
+pixel_mode = "L"
+alpha_treatment = "no alpha channel; opaque grayscale JPEG"
+theme = "shared"
+role = "legacy-pin-fallback"
+logical_actions = ["legacy-pin-fallback"]
+reference_use = "source fallback is shadowed by action_icons/Pin.png; live use not observed"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []
+
+[[asset]]
+path = "snap.png"
+source_path = "L:\\Builder3D\\assets\\snap.png"
+sha256 = "086ecfa29fa369abd8e9d6032a7c2f59c419e9e2cd19f378beb1f5b07b040a53"
+bytes = 12985
+format = "PNG"
+dimensions = [512, 512]
+pixel_mode = "RGBA"
+alpha_treatment = "RGBA alpha=0..255; transparent_corners=true; fully_transparent_outer_edge=false"
+theme = "shared"
+role = "legacy-snap-fallback"
+logical_actions = ["legacy-snap-fallback"]
+reference_use = "source fallback is shadowed by action_icons/Snap.png; live use not observed"
+provenance = "present in original read-only asset tree; individual upstream origin not recorded in inspected files"
+rust_destination = "not copied during RB-00"
+source_inputs = []
+embedded_sizes = []

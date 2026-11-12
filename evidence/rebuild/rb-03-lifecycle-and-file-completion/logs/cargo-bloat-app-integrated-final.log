@@ -1,0 +1,30 @@
+COMMAND: cargo bloat --release -p builder3d-app --bin builder3d-app
+   Compiling builder3d-app v0.1.0 (E:\Builder3D-Rust\crates\builder3d-app)
+ 
+    Finished `release` profile [optimized + debuginfo] target(s) in 3m 59s
+    Analyzing target\release\builder3d-app.exe
+
+ File  .text    Size         Crate Name
+ 0.3%   0.4% 48.3KiB      wgpu_hal wgpu_hal::vulkan::Instance::expose_adapter
+ 0.3%   0.4% 47.6KiB        epaint epaint::text::text_layout::layout
+ 0.3%   0.4% 46.7KiB builder3d_app builder3d_app::shell::Builder3dApp::new
+ 0.3%   0.4% 44.7KiB          egui egui::context::ContextImpl::begin_pass
+ 0.3%   0.4% 43.8KiB           std core::ops::function::FnOnce::call_once<zip::write::impl$14::prepare_next_writer::closure_env$3<core::io::cursor::Cursor<alloc::vec::Vec<u8,alloc::alloc::Global> > >,tuple$<enum2$<zip::write::MaybeEncrypted<core::io::cursor::Cursor<alloc::vec::Vec<u8,alloc::alloc::Global> > > >,ref_mut$<zip::write::DeflateCache<core::io::cursor::Cursor<alloc::vec::Vec<u8,alloc::alloc::Global> > > > > >
+ 0.3%   0.4% 42.3KiB        skrifa skrifa::outline::glyf::hint::engine::Engine::run
+ 0.3%   0.4% 41.4KiB          naga naga::back::spv::Writer::write_function
+ 0.3%   0.4% 41.0KiB  enum2$<image enum2$<image::images::dynimage::DynamicImage>::thumbnail_exact
+ 0.3%   0.3% 40.1KiB     wgpu_core wgpu_core::command::render::encode_render_pass
+ 0.3%   0.3% 39.8KiB          naga naga::valid::Validator::validate_impl
+ 0.3%   0.3% 35.6KiB          naga naga::back::spv::BlockContext::write_ray_query_function
+ 0.2%   0.3% 34.7KiB     egui_wgpu egui_wgpu::winit::Painter::paint_and_update_textures
+ 0.2%   0.3% 33.3KiB          naga naga::front::wgsl::lower::Lowerer::call_builtin
+ 0.2%   0.3% 32.0KiB          egui egui::context::ContextImpl::end_pass
+ 0.2%   0.3% 31.3KiB          naga naga::back::spv::Writer::write_logical_layout
+ 0.2%   0.3% 30.7KiB      wgpu_hal wgpu_hal::vulkan::Adapter::open_with_callback
+ 0.2%   0.3% 30.3KiB         image image::io::image_reader_type::ImageReader<alloc::io::buffered::bufreader::BufReader<std::fs::File> >::make_decoder<alloc::io::buffered::bufreader::BufReader<std::fs::File> >
+ 0.2%   0.3% 30.0KiB     wgpu_core wgpu_core::device::queue::Queue::submit
+ 0.2%   0.3% 29.0KiB         image image::io::image_reader_type::ImageReader<core::io::cursor::Cursor<ref$<slice2$<u8> > > >::make_decoder<core::io::cursor::Cursor<ref$<slice2$<u8> > > >
+ 0.2%   0.3% 28.7KiB builder3d_app builder3d_app::shell::impl$3::ui
+69.3%  85.0%  9.5MiB               And 9770 smaller methods. Use -n N to show more.
+81.6% 100.0% 11.2MiB               .text section size, the file size is 13.7MiB
+EXIT_CODE=0

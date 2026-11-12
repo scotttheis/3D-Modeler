@@ -8,8 +8,10 @@
 //! `builder3d-platform`.
 
 mod artwork;
+mod chrome;
 mod commands;
 mod desktop_jobs;
+mod diagnostics;
 mod dialogs;
 mod export;
 mod image_color;
@@ -22,6 +24,7 @@ mod preferences;
 mod print_handoff;
 mod print_prep;
 mod recent_preview;
+mod review_capture;
 mod rotation;
 mod shell;
 mod signals;
@@ -105,6 +108,16 @@ pub enum AppError {
 
 /// Runs the native Builder3D shell, or the bounded command smoke check.
 pub fn run() -> Result<(), AppError> {
+    diagnostics::initialize();
+    diagnostics::install_panic_hook();
+    let result = run_inner();
+    if let Err(error) = &result {
+        diagnostics::record_error("application startup or shutdown", error);
+    }
+    result
+}
+
+fn run_inner() -> Result<(), AppError> {
     ThemeArtwork::new(ThemeMode::Light).validate()?;
     ThemeArtwork::new(ThemeMode::Dark).validate()?;
     let artwork_root = artwork::original_asset_root();
@@ -142,11 +155,14 @@ pub fn run() -> Result<(), AppError> {
             .with_min_inner_size([980.0, 640.0]),
         ..Default::default()
     };
-    eframe::run_native(
+    let watchdog = diagnostics::UiWatchdog::start();
+    let native_result = eframe::run_native(
         "Builder3D",
         native_options,
         Box::new(|creation_context| Ok(Box::new(Builder3dApp::new(creation_context)))),
-    )?;
+    );
+    drop(watchdog);
+    native_result?;
     Ok(())
 }
 

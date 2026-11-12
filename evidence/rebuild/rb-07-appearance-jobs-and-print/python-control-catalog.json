@@ -1,0 +1,347 @@
+{
+  "active_tab": "Paint",
+  "command_row_visible": true,
+  "buttons": [
+    {
+      "text": "",
+      "tooltip": "Move selected object",
+      "object_name": "TransformModeButton",
+      "visible": true,
+      "enabled": true
+    },
+    {
+      "text": "",
+      "tooltip": "Rotate selected object",
+      "object_name": "TransformModeButton",
+      "visible": true,
+      "enabled": true
+    },
+    {
+      "text": "",
+      "tooltip": "Resize selected object",
+      "object_name": "TransformModeButton",
+      "visible": true,
+      "enabled": true
+    },
+    {
+      "text": "mm",
+      "tooltip": "Display Move and Resize values in millimetres or inches",
+      "object_name": "TransformUnitButton",
+      "visible": true,
+      "enabled": true
+    },
+    {
+      "text": "\u2630",
+      "tooltip": "",
+      "object_name": "RibbonHamburger",
+      "visible": true,
+      "enabled": true
+    },
+    {
+      "text": "Insert",
+      "tooltip": "",
+      "object_name": "RibbonTab",
+      "visible": true,
+      "enabled": true
+    },
+    {
+      "text": "Object",
+      "tooltip": "",
+      "object_name": "RibbonTab",
+      "visible": true,
+      "enabled": true
+    },
+    {
+      "text": "Edit",
+      "tooltip": "",
+      "object_name": "RibbonTab",
+      "visible": true,
+      "enabled": true
+    },
+    {
+      "text": "Paint",
+      "tooltip": "",
+      "object_name": "RibbonTab",
+      "visible": true,
+      "enabled": true
+    },
+    {
+      "text": "View",
+      "tooltip": "",
+      "object_name": "RibbonTab",
+      "visible": true,
+      "enabled": true
+    },
+    {
+      "text": "3D Print",
+      "tooltip": "Open the current scene in a 3D slicer",
+      "object_name": "PrintPrepButton",
+      "visible": true,
+      "enabled": true
+    },
+    {
+      "text": "",
+      "tooltip": "Save",
+      "object_name": "RibbonUtilityButton",
+      "visible": true,
+      "enabled": true
+    },
+    {
+      "text": "",
+      "tooltip": "Save As",
+      "object_name": "RibbonUtilityButton",
+      "visible": true,
+      "enabled": true
+    },
+    {
+      "text": "",
+      "tooltip": "Undo",
+      "object_name": "RibbonUtilityButton",
+      "visible": true,
+      "enabled": true
+    },
+    {
+      "text": "",
+      "tooltip": "Redo",
+      "object_name": "RibbonUtilityButton",
+      "visible": true,
+      "enabled": true
+    },
+    {
+      "text": "Group",
+      "tooltip": "Group",
+      "object_name": "PanelCommandButton",
+      "visible": true,
+      "enabled": true
+    },
+    {
+      "text": "Ungroup",
+      "tooltip": "Ungroup",
+      "object_name": "PanelCommandButton",
+      "visible": true,
+      "enabled": true
+    },
+    {
+      "text": "Select all",
+      "tooltip": "Select all",
+      "object_name": "PanelCommandButton",
+      "visible": true,
+      "enabled": true
+    },
+    {
+      "text": "Deselect all",
+      "tooltip": "Deselect all",
+      "object_name": "PanelCommandButton",
+      "visible": true,
+      "enabled": true
+    },
+    {
+      "text": "Invert selection",
+      "tooltip": "Invert selection",
+      "object_name": "PanelCommandButton",
+      "visible": true,
+      "enabled": true
+    },
+    {
+      "text": "Sticky Selection",
+      "tooltip": "Keep the current selection when clicking empty space.",
+      "object_name": "PanelCheck",
+      "visible": true,
+      "enabled": true
+    }
+  ],
+  "command_row_children": [
+    {
+      "type": "RibbonCommandButton",
+      "object_name": "RibbonCommandButton",
+      "text": "Add/Open",
+      "visible": false
+    },
+    {
+      "type": "QFrame",
+      "object_name": "RibbonSeparator",
+      "text": "",
+      "visible": false
+    },
+    {
+      "type": "RibbonCommandButton",
+      "object_name": "RibbonCommandButton",
+      "text": "Cube",
+      "visible": false
+    },
+    {
+      "type": "RibbonCommandButton",
+      "object_name": "RibbonCommandButton",
+      "text": "Cylinder",
+      "visible": false
+    },
+    {
+      "type": "RibbonCommandButton",
+      "object_name": "RibbonCommandButton",
+      "text": "Pyramid",
+      "visible": false
+    },
+    {
+      "type": "RibbonCommandButton",
+      "object_name": "RibbonCommandButton",
+      "text": "Cone",
+      "visible": false
+    },
+    {
+      "type": "RibbonCommandButton",
+      "object_name": "RibbonCommandButton",
+      "text": "Sphere",
+      "visible": false
+    },
+    {
+      "type": "RibbonCommandButton",
+      "object_name": "RibbonCommandButton",
+      "text": "Torus",
+      "visible": false
+    },
+    {
+      "type": "RibbonCommandButton",
+      "object_name": "RibbonCommandButton",
+      "text": "Hexagon",
+      "visible": false
+    },
+    {
+      "type": "RibbonCommandButton",
+      "object_name": "RibbonCommandButton",
+      "text": "Wedge",
+      "visible": false
+    },
+    {
+      "type": "QFrame",
+      "object_name": "RibbonSeparator",
+      "text": "",
+      "visible": false
+    },
+    {
+      "type": "QToolButton",
+      "object_name": "RibbonSnapButton",
+      "text": "Snap",
+      "visible": false
+    },
+    {
+      "type": "QToolButton",
+      "object_name": "RibbonPinButton",
+      "text": "Pin",
+      "visible": false
+    },
+    {
+      "type": "RibbonCommandButton",
+      "object_name": "RibbonCommandButton",
+      "text": "Add/Open",
+      "visible": false
+    },
+    {
+      "type": "QFrame",
+      "object_name": "RibbonSeparator",
+      "text": "",
+      "visible": false
+    },
+    {
+      "type": "RibbonCommandButton",
+      "object_name": "RibbonCommandButton",
+      "text": "Cube",
+      "visible": false
+    },
+    {
+      "type": "RibbonCommandButton",
+      "object_name": "RibbonCommandButton",
+      "text": "Cylinder",
+      "visible": false
+    },
+    {
+      "type": "RibbonCommandButton",
+      "object_name": "RibbonCommandButton",
+      "text": "Pyramid",
+      "visible": false
+    },
+    {
+      "type": "RibbonCommandButton",
+      "object_name": "RibbonCommandButton",
+      "text": "Cone",
+      "visible": false
+    },
+    {
+      "type": "RibbonCommandButton",
+      "object_name": "RibbonCommandButton",
+      "text": "Sphere",
+      "visible": false
+    },
+    {
+      "type": "RibbonCommandButton",
+      "object_name": "RibbonCommandButton",
+      "text": "Torus",
+      "visible": false
+    },
+    {
+      "type": "RibbonCommandButton",
+      "object_name": "RibbonCommandButton",
+      "text": "Hexagon",
+      "visible": false
+    },
+    {
+      "type": "RibbonCommandButton",
+      "object_name": "RibbonCommandButton",
+      "text": "Wedge",
+      "visible": false
+    },
+    {
+      "type": "QFrame",
+      "object_name": "RibbonSeparator",
+      "text": "",
+      "visible": false
+    },
+    {
+      "type": "QToolButton",
+      "object_name": "RibbonSnapButton",
+      "text": "Snap",
+      "visible": false
+    },
+    {
+      "type": "QToolButton",
+      "object_name": "RibbonPinButton",
+      "text": "Pin",
+      "visible": false
+    },
+    {
+      "type": "RibbonCommandButton",
+      "object_name": "RibbonCommandButton",
+      "text": "Material",
+      "visible": false
+    },
+    {
+      "type": "RibbonCommandButton",
+      "object_name": "RibbonCommandButton",
+      "text": "Paint",
+      "visible": false
+    },
+    {
+      "type": "RibbonCommandButton",
+      "object_name": "RibbonCommandButton",
+      "text": "Color",
+      "visible": false
+    },
+    {
+      "type": "QFrame",
+      "object_name": "RibbonSeparator",
+      "text": "",
+      "visible": false
+    },
+    {
+      "type": "QToolButton",
+      "object_name": "RibbonSnapButton",
+      "text": "Snap",
+      "visible": false
+    },
+    {
+      "type": "QToolButton",
+      "object_name": "RibbonPinButton",
+      "text": "Pin",
+      "visible": false
+    }
+  ]
+}

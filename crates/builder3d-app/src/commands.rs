@@ -2768,7 +2768,7 @@ mod tests {
         ));
         assert_eq!(state.scene().history_state_id(), after_move);
         assert!(matches!(state.scene.undo(), Ok(Some(result)) if result.changed));
-        assert_eq!(state.scene().objects()[0].position(), [0.0, 0.0, 0.0]);
+        assert_eq!(state.scene().objects()[0].position(), [0.0, 20.0, 0.0]);
         assert!(matches!(state.scene.redo(), Ok(Some(result)) if result.changed));
         assert_eq!(state.scene().objects()[0].position(), [12.0, 3.0, -4.0]);
     }
@@ -3774,7 +3774,7 @@ mod rb04_regressions {
         assert_eq!(*state.scene.objects()[2].transform(), anchor);
         assert_eq!(state.scene.objects()[0].position()[2], 60.);
         state.dispatch(CommandId::Undo).expect("undo");
-        assert_eq!(state.scene.objects()[0].position(), [0.; 3]);
+        assert_eq!(state.scene.objects()[0].position(), [0., 20., 0.]);
         let history = state.scene.history_state_id();
         assert!(
             state

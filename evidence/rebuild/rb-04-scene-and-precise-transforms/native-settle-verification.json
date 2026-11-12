@@ -1,0 +1,86 @@
+[
+  {
+    "theme": "light",
+    "count": 1,
+    "reference_route": "Real visible Qt/OpenGL window and semantic Settle/Undo/Redo handlers",
+    "rust_route": "Guarded physical native pointer and keyboard",
+    "client": [
+      1280,
+      840
+    ],
+    "dpi": 96,
+    "fixture": "settle-1-before.3dp",
+    "saved": "native-scene-states\\rust-light-settle-1-redo-v2.3dp",
+    "saved_sha256": "b2dec74792b001940d9ef21c617bf925c6c91cad8a4cf525c1727a64eadfca40",
+    "max_matrix_error": 9.313225746154785e-09,
+    "rust_revision_before": 2,
+    "rust_revision_after": 5,
+    "rust_ids_preserved": true,
+    "python_ids_preserved": true,
+    "reference_history_delta": 1,
+    "status": "pass"
+  },
+  {
+    "theme": "light",
+    "count": 2,
+    "reference_route": "Real visible Qt/OpenGL window and semantic Settle/Undo/Redo handlers",
+    "rust_route": "Guarded physical native pointer and keyboard",
+    "client": [
+      1280,
+      840
+    ],
+    "dpi": 96,
+    "fixture": "settle-2-before.3dp",
+    "saved": "native-scene-states\\rust-light-settle-2-redo-v2.3dp",
+    "saved_sha256": "f1032383e376b1004148b62db096a95a899b91e421ef5f6a238e2683f61faf42",
+    "max_matrix_error": 9.119477656217468e-18,
+    "rust_revision_before": 4,
+    "rust_revision_after": 7,
+    "rust_ids_preserved": true,
+    "python_ids_preserved": true,
+    "reference_history_delta": 1,
+    "status": "pass"
+  },
+  {
+    "theme": "dark",
+    "count": 1,
+    "reference_route": "Real visible Qt/OpenGL window and semantic Settle/Undo/Redo handlers",
+    "rust_route": "Guarded physical native pointer and keyboard",
+    "client": [
+      1280,
+      840
+    ],
+    "dpi": 96,
+    "fixture": "settle-1-before.3dp",
+    "saved": "native-scene-states\\rust-dark-settle-1-redo-v2.3dp",
+    "saved_sha256": "b2dec74792b001940d9ef21c617bf925c6c91cad8a4cf525c1727a64eadfca40",
+    "max_matrix_error": 9.313225746154785e-09,
+    "rust_revision_before": 2,
+    "rust_revision_after": 5,
+    "rust_ids_preserved": true,
+    "python_ids_preserved": true,
+    "reference_history_delta": 1,
+    "status": "pass"
+  },
+  {
+    "theme": "dark",
+    "count": 2,
+    "reference_route": "Real visible Qt/OpenGL window and semantic Settle/Undo/Redo handlers",
+    "rust_route": "Guarded physical native pointer and keyboard",
+    "client": [
+      1280,
+      840
+    ],
+    "dpi": 96,
+    "fixture": "settle-2-before.3dp",
+    "saved": "native-scene-states\\rust-dark-settle-2-redo-v2.3dp",
+    "saved_sha256": "f1032383e376b1004148b62db096a95a899b91e421ef5f6a238e2683f61faf42",
+    "max_matrix_error": 9.119477656217468e-18,
+    "rust_revision_before": 4,
+    "rust_revision_after": 7,
+    "rust_ids_preserved": true,
+    "python_ids_preserved": true,
+    "reference_history_delta": 1,
+    "status": "pass"
+  }
+]

@@ -3,8 +3,13 @@ use std::path::Path;
 use crate::{
     ViewportError,
     camera::Camera,
-    floor::{DEFAULT_FLOOR_SIZE, FloorGeometry, build_floor},
-    math::{Mat4, Vec3},
+    floor::{
+        CONTACT_SHADOW_LAYERS, ContactCueCache, DEFAULT_FLOOR_SIZE, FLOOR_SURFACE_SUBDIVISIONS,
+        FloorGeometry, FloorSurface, build_floor, expand_shadow_polygon,
+        shadow_light_direction_world,
+    },
+    lighting::ViewportLighting,
+    math::{Mat4, Vec3, normalize},
     scene::{MeshGeometry, RenderObject, RenderScene},
 };
 
@@ -41,6 +46,8 @@ pub struct CpuRenderOptions {
     pub selected_object_ids: Vec<String>,
     /// RGBA tint mixed into selected authored colors.
     pub selected_tint: [f32; 4],
+    /// View aligned key light, material highlights, and contact shadow strength.
+    pub lighting: ViewportLighting,
     /// Whether the build-plane surface is drawn.
     pub floor_enabled: bool,
     /// Whether the metric floor grid is drawn.
@@ -51,6 +58,8 @@ pub struct CpuRenderOptions {
     pub grid_major_color: [f32; 4],
     /// RGBA minor grid color.
     pub grid_minor_color: [f32; 4],
+    /// RGBA contact shadow tint and its unscaled alpha.
+    pub contact_shadow_color: [f32; 4],
 }
 
 impl Default for CpuRenderOptions {
@@ -61,11 +70,13 @@ impl Default for CpuRenderOptions {
             xray: false,
             selected_object_ids: Vec::new(),
             selected_tint: [0.0, 0.55, 1.0, 1.0],
+            lighting: ViewportLighting::default(),
             floor_enabled: false,
             grid_visible: false,
             floor_color: [0.025, 0.04, 0.075, 1.0],
             grid_major_color: [0.20, 0.26, 0.34, 0.55],
             grid_minor_color: [0.16, 0.20, 0.27, 0.30],
+            contact_shadow_color: [0.05, 0.08, 0.12, 0.28],
         }
     }
 }
@@ -130,7 +141,10 @@ pub fn render_cpu_with_options(
             (extent[0] * extent[0] + extent[1] * extent[1] + extent[2] * extent[2]).sqrt() * 0.5
         })
         .unwrap_or(1.0);
+    let view_matrix = camera.view_matrix()?;
     let view_projection = camera.view_projection(scene_radius)?;
+    let light_direction = options.lighting.direction_in_view(view_matrix);
+    let material_parameters = options.lighting.shader_parameters();
     let mut rgba = vec![0_u8; byte_count];
     for pixel in rgba.as_chunks_mut::<4>().0 {
         pixel.copy_from_slice(&options.clear_color);
@@ -138,7 +152,7 @@ pub fn render_cpu_with_options(
     let mut depth = vec![f32::INFINITY; pixel_count];
     let mut triangles = 0_u64;
     let mut shaded_pixels = 0_u64;
-    let floor = if options.floor_enabled {
+    let mut floor = if options.floor_enabled {
         Some(build_floor(
             camera,
             DEFAULT_FLOOR_SIZE,
@@ -148,6 +162,13 @@ pub fn render_cpu_with_options(
     } else {
         None
     };
+    if options.lighting.normalized().contact_shadow_percent > 0
+        && let Some(floor) = floor.as_mut()
+    {
+        let mut cache = ContactCueCache::new();
+        cache.settle(scene, 0)?;
+        floor.contact_cues = cache.cues_for_frame(camera, scene, interaction, 0)?;
+    }
     if let Some(floor) = floor.as_ref() {
         rasterize_floor_surface(
             floor,
@@ -159,6 +180,18 @@ pub fn render_cpu_with_options(
             &mut depth,
             &mut shaded_pixels,
         );
+        rasterize_contact_cues(
+            floor,
+            camera,
+            view_projection,
+            width,
+            height,
+            options.contact_shadow_color,
+            options.lighting,
+            &mut rgba,
+            &mut depth,
+            &mut shaded_pixels,
+        );
     }
     for object in scene.objects() {
         let geometry = if interaction {
@@ -166,7 +199,10 @@ pub fn render_cpu_with_options(
         } else {
             object.full_geometry()
         };
-        let transform = view_projection.multiply(object.transform());
+        let object_transform = object.transform();
+        let transform = view_projection.multiply(object_transform);
+        let model_view = view_matrix.multiply(object_transform);
+        let normal_transform = model_view.inverse()?.transpose();
         let selected = options
             .selected_object_ids
             .iter()
@@ -183,11 +219,15 @@ pub fn render_cpu_with_options(
         rasterize_geometry(
             geometry,
             transform,
+            model_view,
+            normal_transform,
+            light_direction,
             color,
             object,
             selected,
             options.selected_tint,
             options.xray,
+            material_parameters,
             width,
             height,
             &mut rgba,
@@ -259,39 +299,95 @@ fn rasterize_floor_surface(
     };
     let [minimum_x, y, minimum_z] = surface.minimum;
     let [maximum_x, _, maximum_z] = surface.maximum;
-    let points = [
-        [minimum_x, y, minimum_z],
-        [maximum_x, y, minimum_z],
-        [maximum_x, y, maximum_z],
-        [minimum_x, y, maximum_z],
-    ];
-    let Some(projected) = points
-        .map(|point| project(view_projection, point, width, height))
-        .into_iter()
-        .collect::<Option<Vec<_>>>()
-    else {
+    let subdivisions = FLOOR_SURFACE_SUBDIVISIONS as f32;
+    for z_index in 0..FLOOR_SURFACE_SUBDIVISIONS {
+        let z0 = minimum_z + (maximum_z - minimum_z) * z_index as f32 / subdivisions;
+        let z1 = minimum_z + (maximum_z - minimum_z) * (z_index + 1) as f32 / subdivisions;
+        for x_index in 0..FLOOR_SURFACE_SUBDIVISIONS {
+            let x0 = minimum_x + (maximum_x - minimum_x) * x_index as f32 / subdivisions;
+            let x1 = minimum_x + (maximum_x - minimum_x) * (x_index + 1) as f32 / subdivisions;
+            let points = [[x0, y, z0], [x1, y, z0], [x1, y, z1], [x0, y, z1]];
+            let Some(projected) = points
+                .map(|point| project(view_projection, point, width, height))
+                .into_iter()
+                .collect::<Option<Vec<_>>>()
+            else {
+                continue;
+            };
+            rasterize_floor_triangle(
+                [projected[0], projected[1], projected[2]],
+                [points[0], points[1], points[2]],
+                color,
+                surface,
+                width,
+                height,
+                rgba,
+                depth,
+                shaded_pixels,
+            );
+            rasterize_floor_triangle(
+                [projected[0], projected[2], projected[3]],
+                [points[0], points[2], points[3]],
+                color,
+                surface,
+                width,
+                height,
+                rgba,
+                depth,
+                shaded_pixels,
+            );
+        }
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
+fn rasterize_contact_cues(
+    floor: &FloorGeometry,
+    camera: &Camera,
+    view_projection: Mat4,
+    width: u32,
+    height: u32,
+    color: [f32; 4],
+    lighting: ViewportLighting,
+    rgba: &mut [u8],
+    depth: &mut [f32],
+    shaded_pixels: &mut u64,
+) {
+    let strength = f32::from(lighting.normalized().contact_shadow_percent) / 100.0;
+    if strength <= 0.0 {
         return;
-    };
-    rasterize_triangle(
-        [projected[0], projected[1], projected[2]],
-        color,
-        false,
-        width,
-        height,
-        rgba,
-        depth,
-        shaded_pixels,
-    );
-    rasterize_triangle(
-        [projected[0], projected[2], projected[3]],
-        color,
-        false,
-        width,
-        height,
-        rgba,
-        depth,
-        shaded_pixels,
-    );
+    }
+    let light_world = shadow_light_direction_world(camera, lighting);
+    for cue in &floor.contact_cues {
+        let polygon = cue.shadow_polygon(light_world);
+        if polygon.len() < 3 {
+            continue;
+        }
+        for (layer_scale, layer_alpha) in CONTACT_SHADOW_LAYERS {
+            let expanded = expand_shadow_polygon(&polygon, layer_scale);
+            let Some(projected) = expanded
+                .iter()
+                .map(|point| project(view_projection, *point, width, height))
+                .collect::<Option<Vec<_>>>()
+            else {
+                continue;
+            };
+            let mut layer_color = color;
+            layer_color[3] = (color[3] * strength * layer_alpha).clamp(0.0, 1.0);
+            for index in 1..projected.len() - 1 {
+                rasterize_triangle(
+                    [projected[0], projected[index], projected[index + 1]],
+                    layer_color,
+                    true,
+                    width,
+                    height,
+                    rgba,
+                    depth,
+                    shaded_pixels,
+                );
+            }
+        }
+    }
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -313,15 +409,19 @@ fn rasterize_floor_lines(
         let Some(second) = project(view_projection, line.end, width, height) else {
             continue;
         };
-        let color = if line.width_pixels > 1.0 {
-            major_color
-        } else {
-            minor_color
-        };
-        rasterize_line(
+        let is_major = line.width_pixels > 1.0;
+        let base_color = if is_major { major_color } else { minor_color };
+        let authored_alpha = if is_major { 0.55 } else { 0.30 };
+        let alpha_scale = line.color[3] / authored_alpha;
+        let mut start_color = base_color;
+        start_color[3] *= line.start_alpha * alpha_scale;
+        let mut end_color = base_color;
+        end_color[3] *= line.end_alpha * alpha_scale;
+        rasterize_line_with_colors(
             first,
             second,
-            color,
+            start_color,
+            end_color,
             width,
             height,
             rgba,
@@ -350,11 +450,15 @@ pub fn write_ppm(frame: &CpuFrame, path: &Path) -> Result<(), ViewportError> {
 fn rasterize_geometry(
     geometry: &MeshGeometry,
     transform: Mat4,
+    model_view: Mat4,
+    normal_transform: Mat4,
+    light_direction: Vec3,
     color: [f32; 4],
     object: &RenderObject,
     selected: bool,
     selected_tint: [f32; 4],
     xray: bool,
+    material_parameters: [f32; 4],
     width: u32,
     height: u32,
     rgba: &mut [u8],
@@ -368,33 +472,33 @@ fn rasterize_geometry(
                 "CPU fallback triangle budget reached",
             )));
         }
-        let Some([first, second, third]) = geometry.triangle(face_index) else {
+        let Some([first_index, second_index, third_index]) = geometry.triangle(face_index) else {
             return Err(ViewportError::InvalidInput(String::from(
                 "CPU geometry triangle is truncated",
             )));
         };
-        let Some(first) = geometry.position(first) else {
+        let Some(first_position) = geometry.position(first_index) else {
             return Err(ViewportError::InvalidInput(String::from(
                 "CPU vertex is unavailable",
             )));
         };
-        let Some(second) = geometry.position(second) else {
+        let Some(second_position) = geometry.position(second_index) else {
             return Err(ViewportError::InvalidInput(String::from(
                 "CPU vertex is unavailable",
             )));
         };
-        let Some(third) = geometry.position(third) else {
+        let Some(third_position) = geometry.position(third_index) else {
             return Err(ViewportError::InvalidInput(String::from(
                 "CPU vertex is unavailable",
             )));
         };
-        let Some(first) = project(transform, first, width, height) else {
+        let Some(first) = project(transform, first_position, width, height) else {
             continue;
         };
-        let Some(second) = project(transform, second, width, height) else {
+        let Some(second) = project(transform, second_position, width, height) else {
             continue;
         };
-        let Some(third) = project(transform, third, width, height) else {
+        let Some(third) = project(transform, third_position, width, height) else {
             continue;
         };
         let authored_face_color = object.face_color_for_geometry(geometry, face_index);
@@ -411,16 +515,42 @@ fn rasterize_geometry(
                 face_color[3] = (face_color[3] * 0.30).clamp(0.05, 0.45);
             }
         }
+        let first_normal = geometry.normal(first_index).ok_or_else(|| {
+            ViewportError::InvalidInput(String::from("CPU vertex normal is unavailable"))
+        })?;
+        let second_normal = geometry.normal(second_index).ok_or_else(|| {
+            ViewportError::InvalidInput(String::from("CPU vertex normal is unavailable"))
+        })?;
+        let third_normal = geometry.normal(third_index).ok_or_else(|| {
+            ViewportError::InvalidInput(String::from("CPU vertex normal is unavailable"))
+        })?;
+        let view_positions = [
+            model_view.transform_point(first_position)?,
+            model_view.transform_point(second_position)?,
+            model_view.transform_point(third_position)?,
+        ];
+        let view_normals = [
+            transform_normal(normal_transform, first_normal)?,
+            transform_normal(normal_transform, second_normal)?,
+            transform_normal(normal_transform, third_normal)?,
+        ];
         *triangles = triangles.saturating_add(1);
-        rasterize_triangle(
+        rasterize_triangle_internal(
             [first, second, third],
-            face_color,
+            [face_color; 3],
             xray,
             width,
             height,
             rgba,
             depth,
             shaded_pixels,
+            None,
+            Some(TriangleLighting {
+                normals: view_normals,
+                view_positions,
+                light_direction,
+                material_parameters,
+            }),
         );
     }
     Ok(())
@@ -446,6 +576,22 @@ fn project(matrix: Mat4, point: Vec3, width: u32, height: u32) -> Option<[f32; 3
     ])
 }
 
+fn transform_normal(matrix: Mat4, normal: Vec3) -> Result<Vec3, ViewportError> {
+    let transformed = matrix.transform4([normal[0], normal[1], normal[2], 0.0]);
+    normalize(
+        [transformed[0], transformed[1], transformed[2]],
+        "CPU view normal",
+    )
+}
+
+fn interpolate_vector(vertices: [Vec3; 3], weights: [f32; 3]) -> Vec3 {
+    [
+        vertices[0][0] * weights[0] + vertices[1][0] * weights[1] + vertices[2][0] * weights[2],
+        vertices[0][1] * weights[0] + vertices[1][1] * weights[1] + vertices[2][1] * weights[2],
+        vertices[0][2] * weights[0] + vertices[1][2] * weights[1] + vertices[2][2] * weights[2],
+    ]
+}
+
 #[allow(clippy::too_many_arguments)]
 fn rasterize_triangle(
     vertices: [[f32; 3]; 3],
@@ -456,6 +602,90 @@ fn rasterize_triangle(
     rgba: &mut [u8],
     depth: &mut [f32],
     shaded_pixels: &mut u64,
+) {
+    rasterize_triangle_with_colors(
+        vertices,
+        [color; 3],
+        xray,
+        width,
+        height,
+        rgba,
+        depth,
+        shaded_pixels,
+    );
+}
+
+#[allow(clippy::too_many_arguments)]
+fn rasterize_triangle_with_colors(
+    vertices: [[f32; 3]; 3],
+    colors: [[f32; 4]; 3],
+    xray: bool,
+    width: u32,
+    height: u32,
+    rgba: &mut [u8],
+    depth: &mut [f32],
+    shaded_pixels: &mut u64,
+) {
+    rasterize_triangle_internal(
+        vertices,
+        colors,
+        xray,
+        width,
+        height,
+        rgba,
+        depth,
+        shaded_pixels,
+        None,
+        None,
+    );
+}
+
+#[allow(clippy::too_many_arguments)]
+fn rasterize_floor_triangle(
+    vertices: [[f32; 3]; 3],
+    world_positions: [Vec3; 3],
+    base_color: [f32; 4],
+    surface: FloorSurface,
+    width: u32,
+    height: u32,
+    rgba: &mut [u8],
+    depth: &mut [f32],
+    shaded_pixels: &mut u64,
+) {
+    rasterize_triangle_internal(
+        vertices,
+        [base_color; 3],
+        false,
+        width,
+        height,
+        rgba,
+        depth,
+        shaded_pixels,
+        Some((world_positions, surface)),
+        None,
+    );
+}
+
+#[derive(Clone, Copy)]
+struct TriangleLighting {
+    normals: [Vec3; 3],
+    view_positions: [Vec3; 3],
+    light_direction: Vec3,
+    material_parameters: [f32; 4],
+}
+
+#[allow(clippy::too_many_arguments)]
+fn rasterize_triangle_internal(
+    vertices: [[f32; 3]; 3],
+    colors: [[f32; 4]; 3],
+    xray: bool,
+    width: u32,
+    height: u32,
+    rgba: &mut [u8],
+    depth: &mut [f32],
+    shaded_pixels: &mut u64,
+    floor: Option<([Vec3; 3], FloorSurface)>,
+    mesh_lighting: Option<TriangleLighting>,
 ) {
     let minimum_x = vertices
         .iter()
@@ -521,6 +751,46 @@ fn rasterize_triangle(
             if !xray {
                 depth[index] = z;
             }
+            let mut color = [0.0; 4];
+            for channel in 0..4 {
+                color[channel] =
+                    w0 * colors[0][channel] + w1 * colors[1][channel] + w2 * colors[2][channel];
+            }
+            if let Some((world_positions, surface)) = floor {
+                let world = [
+                    w0 * world_positions[0][0]
+                        + w1 * world_positions[1][0]
+                        + w2 * world_positions[2][0],
+                    w0 * world_positions[0][1]
+                        + w1 * world_positions[1][1]
+                        + w2 * world_positions[2][1],
+                    w0 * world_positions[0][2]
+                        + w1 * world_positions[1][2]
+                        + w2 * world_positions[2][2],
+                ];
+                let cell_x = (world[0] / surface.checker_cell_size).floor() as i64;
+                let cell_z = (world[2] / surface.checker_cell_size).floor() as i64;
+                let shade = if (cell_x + cell_z) & 1 == 0 {
+                    -0.021
+                } else {
+                    0.021
+                };
+                for channel in &mut color[..3] {
+                    *channel = (*channel + shade).clamp(0.0, 1.0);
+                }
+                color[3] *= surface.fade_alpha_at(world);
+            }
+            if let Some(lighting) = mesh_lighting {
+                let normal = interpolate_vector(lighting.normals, [w0, w1, w2]);
+                let view_position = interpolate_vector(lighting.view_positions, [w0, w1, w2]);
+                color = ViewportLighting::shade_sample(
+                    color,
+                    normal,
+                    view_position,
+                    lighting.light_direction,
+                    lighting.material_parameters,
+                );
+            }
             let offset = index * 4;
             blend_pixel(&mut rgba[offset..offset + 4], color);
             *shaded_pixels = shaded_pixels.saturating_add(1);
@@ -533,6 +803,31 @@ fn rasterize_line(
     first: [f32; 3],
     second: [f32; 3],
     color: [f32; 4],
+    width: u32,
+    height: u32,
+    rgba: &mut [u8],
+    depth: &[f32],
+    shaded_pixels: &mut u64,
+) {
+    rasterize_line_with_colors(
+        first,
+        second,
+        color,
+        color,
+        width,
+        height,
+        rgba,
+        depth,
+        shaded_pixels,
+    );
+}
+
+#[allow(clippy::too_many_arguments)]
+fn rasterize_line_with_colors(
+    first: [f32; 3],
+    second: [f32; 3],
+    start_color: [f32; 4],
+    end_color: [f32; 4],
     width: u32,
     height: u32,
     rgba: &mut [u8],
@@ -556,6 +851,11 @@ fn rasterize_line(
         let index = y as usize * width as usize + x as usize;
         if point[2] > depth[index] {
             continue;
+        }
+        let mut color = [0.0; 4];
+        for channel in 0..4 {
+            color[channel] =
+                start_color[channel] + (end_color[channel] - start_color[channel]) * factor;
         }
         let offset = index * 4;
         blend_pixel(&mut rgba[offset..offset + 4], color);

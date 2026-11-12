@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "slice": "RB-06",
+  "reference_root": "L:\\Builder3D",
+  "rust_root": "E:\\Builder3D-Rust",
+  "themes": ["light", "dark"],
+  "logical_client_size": [1280, 840],
+  "physical_capture_size": [1280, 840],
+  "window_dpi": 96,
+  "display_scale_percent": 100,
+  "capture_method": "GDI CopyFromScreen of the foreground native client rectangle",
+  "input_method": "visible application window with actual Windows pointer, keyboard, mouse, and Shift-drag input",
+  "python_reference": {
+    "results": "python-native-results.json",
+    "records": 6,
+    "records_by_theme": {"light": 3, "dark": 3},
+    "accepted_pngs": 6,
+    "test_output": "python-reference-tests.txt",
+    "test_count": 272,
+    "warnings": 2
+  },
+  "rust_native": {
+    "results": "rust-native-results.json",
+    "journal": "rust-native-captures.ndjson",
+    "records": 72,
+    "records_by_theme": {"light": 36, "dark": 36},
+    "accepted_pngs": 72,
+    "debug_executable": "target/debug/builder3d-app.exe",
+    "debug_executable_bytes": 61454336,
+    "debug_executable_sha256": "82284b6fd85221df3a804790cafb1171c469c5cb614460cb73199068ac551d14"
+  },
+  "accepted_pngs_total": 78,
+  "visual_review": "pending",
+  "owner_acceptance": "pending",
+  "known_limits": [
+    "Python native coverage is baseline-only; the full reference operation contract is automated.",
+    "Emboss and Hollow native records prove typed dialog reachability and cancellation; successful geometry applies are covered by Rust core/app tests.",
+    "Repair native evidence proves dialog reachability; corrupted-mesh repair coverage is automated.",
+    "Only Windows 11 at 96 DPI / 100% display scale was captured."
+  ]
+}

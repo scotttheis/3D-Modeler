@@ -1,0 +1,13 @@
+﻿COMMAND=cargo run -p builder3d-app --bin builder3d-app -- --smoke
+cargo :    Compiling builder3d-app v0.1.0 (E:\Builder3D-Rust\crates\builder3d-app)
+At line:2 char:230
++ ... okeOutput = cargo run -p builder3d-app --bin builder3d-app -- --smoke ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (   Compiling bu...\builder3d-app):String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+error: failed to remove file `E:\Builder3D-Rust\target\debug\builder3d-app.exe`
+
+Caused by:
+  Access is denied. (os error 5)
+EXIT_CODE=101

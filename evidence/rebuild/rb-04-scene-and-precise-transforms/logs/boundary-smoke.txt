@@ -1,0 +1,5 @@
+COMMAND: cargo run -p builder3d-app --bin builder3d-app -- --smoke
+   Compiling builder3d-app v0.1.0 (E:\Builder3D-Rust\crates\builder3d-app)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 4.47s
+     Running `target\debug\builder3d-app.exe --smoke`
+Builder3D shell smoke: objects=2 selected=1 tabs=5

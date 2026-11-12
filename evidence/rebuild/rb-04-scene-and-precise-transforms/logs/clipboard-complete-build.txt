@@ -1,0 +1,3 @@
+COMMAND: cargo build --locked -p builder3d-app
+   Compiling builder3d-app v0.1.0 (E:\Builder3D-Rust\crates\builder3d-app)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 8.08s

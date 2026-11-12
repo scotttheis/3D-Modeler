@@ -48,6 +48,14 @@ name = "error-code"
 version = "=3.4.0"
 allow = ["BSL-1.0"]
 
+# jsonschema's Draft 2020-12 `$ref` resolver reaches this exact URI helper.
+# Its bundled license is MIT No Attribution (MIT-0); keep the exception scoped
+# to the locked release instead of allowing MIT-0 across the dependency graph.
+[[licenses.exceptions]]
+name = "borrow-or-share"
+version = "=0.2.4"
+allow = ["MIT-0"]
+
 # qhull-sys declares the wrapper MIT license. The bundled native Qhull
 # notice was reviewed separately and is shipped under packaging/licenses/.
 

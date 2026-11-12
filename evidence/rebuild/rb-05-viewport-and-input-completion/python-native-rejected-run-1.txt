@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "E:\Builder3D-Rust\evidence\rebuild\rb-05-viewport-and-input-completion\rb05_python_native.py", line 314, in <module>
+    transform_gizmo("move", "x", theme, fixture)
+  File "E:\Builder3D-Rust\evidence\rebuild\rb-05-viewport-and-input-completion\rb05_python_native.py", line 263, in transform_gizmo
+    start = find_gizmo_point(mode, handle)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Builder3D-Rust\evidence\rebuild\rb-05-viewport-and-input-completion\rb05_python_native.py", line 244, in find_gizmo_point
+    if not block:
+           ^^^^^
+ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()

@@ -1,0 +1,4 @@
+﻿COMMAND=venv\Scripts\python.exe -B -m pytest -p no:cacheprovider --basetemp E:\Builder3D-Rust\target\rb03-reference-pytest-temp -q tests\test_project_format.py tests\test_three_mf.py tests\test_gltf_io.py tests\test_wrl_io.py
+...................................                                      [100%]
+35 passed in 9.34s
+EXIT_CODE=0

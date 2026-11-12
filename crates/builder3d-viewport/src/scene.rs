@@ -1,5 +1,5 @@
 use std::{
-    collections::{HashSet, hash_map::DefaultHasher},
+    collections::{BTreeSet, HashMap, HashSet, hash_map::DefaultHasher},
     hash::{Hash, Hasher},
     sync::Arc,
 };
@@ -8,7 +8,7 @@ use builder3d_core::{Mesh, Scene, SceneObject, boolean_color_provenance};
 
 use crate::{
     ViewportError,
-    math::{Aabb, Mat4, Vec3, cross, normalize},
+    math::{Aabb, Mat4, Vec3, cross, dot, normalize},
 };
 
 /// Python-compatible face threshold for entering the viewport LOD tier.
@@ -27,6 +27,10 @@ pub const INTERACTIVE_LOD_RATIO: f64 = 0.12;
 pub const MAX_RENDER_OBJECTS: usize = 100_000;
 /// Maximum supported source group depth, enforced by the core scene/project.
 pub const MAX_RENDER_GROUP_DEPTH: usize = builder3d_core::MAX_PROJECT_GROUP_DEPTH;
+/// Bound temporary adjacency data used to preserve hard surface edges.
+const CREASE_AWARE_FACE_LIMIT: usize = 250_000;
+/// Adjacent triangles smoother than 60 degrees share vertex normals.
+const SMOOTH_NORMAL_MINIMUM_DOT: f32 = 0.5;
 
 /// Returns the active interaction target for an authoritative face count.
 #[must_use]
@@ -68,6 +72,9 @@ impl MeshGeometry {
             mesh.faces.len().checked_mul(3).ok_or_else(|| {
                 ViewportError::CapacityExceeded(String::from("index count overflow"))
             })?;
+        if mesh.faces.len() <= CREASE_AWARE_FACE_LIMIT {
+            return Self::from_mesh_crease_aware(mesh, bounds, index_capacity);
+        }
         let mut indices = Vec::with_capacity(index_capacity);
         let mut normals = vec![[0.0_f32; 3]; mesh.vertices.len()];
         for face in &mesh.faces {
@@ -106,6 +113,128 @@ impl MeshGeometry {
         }
         Ok(Self {
             positions: mesh.vertices.clone(),
+            normals,
+            indices,
+            source_face_indices: None,
+            bounds,
+        })
+    }
+
+    fn from_mesh_crease_aware(
+        mesh: &Mesh,
+        bounds: Aabb,
+        index_capacity: usize,
+    ) -> Result<Self, ViewportError> {
+        let corner_count = index_capacity;
+        if corner_count > u32::MAX as usize {
+            return Err(ViewportError::CapacityExceeded(String::from(
+                "mesh face corners exceed indexed GPU address space",
+            )));
+        }
+        let mut face_area_normals = Vec::with_capacity(mesh.faces.len());
+        let mut face_directions = Vec::with_capacity(mesh.faces.len());
+        for face in &mesh.faces {
+            if face.iter().any(|index| {
+                usize::try_from(*index)
+                    .ok()
+                    .is_none_or(|index| index >= mesh.vertices.len())
+            }) {
+                return Err(ViewportError::InvalidInput(String::from(
+                    "mesh face references an unavailable vertex",
+                )));
+            }
+            let first = mesh.vertices[face[0] as usize];
+            let second = mesh.vertices[face[1] as usize];
+            let third = mesh.vertices[face[2] as usize];
+            let area_normal = cross(
+                [
+                    second[0] - first[0],
+                    second[1] - first[1],
+                    second[2] - first[2],
+                ],
+                [
+                    third[0] - first[0],
+                    third[1] - first[1],
+                    third[2] - first[2],
+                ],
+            );
+            face_area_normals.push(area_normal);
+            face_directions.push(normalize(area_normal, "mesh face normal").unwrap_or([0.0; 3]));
+        }
+
+        let mut parents = (0..corner_count).collect::<Vec<_>>();
+        let mut edges = HashMap::<(u32, u32), (usize, u8, u8)>::with_capacity(index_capacity);
+        for (face_index, face) in mesh.faces.iter().enumerate() {
+            for (first_corner, second_corner) in [(0_u8, 1_u8), (1, 2), (2, 0)] {
+                let first_vertex = face[first_corner as usize];
+                let second_vertex = face[second_corner as usize];
+                let (key, low_corner, high_corner) = if first_vertex <= second_vertex {
+                    ((first_vertex, second_vertex), first_corner, second_corner)
+                } else {
+                    ((second_vertex, first_vertex), second_corner, first_corner)
+                };
+                if let Some((other_face, other_low_corner, other_high_corner)) =
+                    edges.get(&key).copied()
+                {
+                    if dot(face_directions[face_index], face_directions[other_face])
+                        >= SMOOTH_NORMAL_MINIMUM_DOT
+                    {
+                        join_corner_groups(
+                            &mut parents,
+                            face_index * 3 + usize::from(low_corner),
+                            other_face * 3 + usize::from(other_low_corner),
+                        );
+                        join_corner_groups(
+                            &mut parents,
+                            face_index * 3 + usize::from(high_corner),
+                            other_face * 3 + usize::from(other_high_corner),
+                        );
+                    }
+                } else {
+                    edges.insert(key, (face_index, low_corner, high_corner));
+                }
+            }
+        }
+
+        let mut accumulated_normals = vec![[0.0_f32; 3]; corner_count];
+        for (face_index, area_normal) in face_area_normals.iter().copied().enumerate() {
+            for local_corner in 0..3 {
+                let root = find_corner_root(&mut parents, face_index * 3 + local_corner);
+                for axis in 0..3 {
+                    accumulated_normals[root][axis] += area_normal[axis];
+                }
+            }
+        }
+
+        let mut group_indices = HashMap::<usize, u32>::with_capacity(mesh.vertices.len());
+        let mut positions = Vec::with_capacity(mesh.vertices.len());
+        let mut normals = Vec::with_capacity(mesh.vertices.len());
+        let mut indices = Vec::with_capacity(index_capacity);
+        for (face_index, face) in mesh.faces.iter().enumerate() {
+            for (local_corner, face_vertex) in face.iter().copied().enumerate() {
+                let root = find_corner_root(&mut parents, face_index * 3 + local_corner);
+                let output_index = if let Some(index) = group_indices.get(&root).copied() {
+                    index
+                } else {
+                    let index = u32::try_from(positions.len()).map_err(|_| {
+                        ViewportError::CapacityExceeded(String::from(
+                            "split mesh vertex count exceeds indexed GPU address space",
+                        ))
+                    })?;
+                    positions.push(mesh.vertices[face_vertex as usize]);
+                    normals.push(
+                        normalize(accumulated_normals[root], "mesh smooth normal")
+                            .unwrap_or(face_directions[face_index]),
+                    );
+                    group_indices.insert(root, index);
+                    index
+                };
+                indices.push(output_index);
+            }
+        }
+
+        Ok(Self {
+            positions,
             normals,
             indices,
             source_face_indices: None,
@@ -263,14 +392,20 @@ impl MeshGeometry {
         self.positions.get(index as usize).copied()
     }
 
+    /// Returns one normalized local vertex normal.
+    #[must_use]
+    pub(crate) fn normal(&self, index: u32) -> Option<Vec3> {
+        self.normals.get(index as usize).copied()
+    }
+
     /// Returns unique world-space triangle edges for the opaque wireframe
-    /// overlay. Edges are deduplicated so shared mesh boundaries are drawn
-    /// once, while the authoritative triangle geometry remains unchanged.
+    /// overlay. Edges are deduplicated by position so hard-edge normal splits
+    /// do not draw the same boundary more than once.
     pub(crate) fn wireframe_segments(
         &self,
         transform: Mat4,
     ) -> Result<Vec<(Vec3, Vec3)>, ViewportError> {
-        let mut edges = std::collections::BTreeSet::new();
+        let mut edges = BTreeSet::new();
         for face_index in 0..self.face_count() {
             let Some([first, second, third]) = self.triangle(face_index) else {
                 return Err(ViewportError::InvalidInput(String::from(
@@ -278,6 +413,14 @@ impl MeshGeometry {
                 )));
             };
             for (left, right) in [(first, second), (second, third), (third, first)] {
+                let left = self.position(left).ok_or_else(|| {
+                    ViewportError::InvalidInput(String::from("wireframe vertex is unavailable"))
+                })?;
+                let right = self.position(right).ok_or_else(|| {
+                    ViewportError::InvalidInput(String::from("wireframe vertex is unavailable"))
+                })?;
+                let left = position_key(left);
+                let right = position_key(right);
                 edges.insert(if left < right {
                     (left, right)
                 } else {
@@ -288,12 +431,8 @@ impl MeshGeometry {
         edges
             .into_iter()
             .map(|(first, second)| {
-                let first = self.position(first).ok_or_else(|| {
-                    ViewportError::InvalidInput(String::from("wireframe vertex is unavailable"))
-                })?;
-                let second = self.position(second).ok_or_else(|| {
-                    ViewportError::InvalidInput(String::from("wireframe vertex is unavailable"))
-                })?;
+                let first = position_from_key(first);
+                let second = position_from_key(second);
                 Ok((
                     transform.transform_point(first)?,
                     transform.transform_point(second)?,
@@ -308,6 +447,36 @@ impl MeshGeometry {
     pub(crate) fn geometry_identity(&self) -> usize {
         self as *const Self as usize
     }
+}
+
+fn find_corner_root(parents: &mut [usize], corner: usize) -> usize {
+    let mut root = corner;
+    while parents[root] != root {
+        root = parents[root];
+    }
+    let mut current = corner;
+    while parents[current] != current {
+        let next = parents[current];
+        parents[current] = root;
+        current = next;
+    }
+    root
+}
+
+fn join_corner_groups(parents: &mut [usize], first: usize, second: usize) {
+    let first_root = find_corner_root(parents, first);
+    let second_root = find_corner_root(parents, second);
+    if first_root != second_root {
+        parents[second_root] = first_root;
+    }
+}
+
+fn position_key(position: Vec3) -> [u32; 3] {
+    position.map(|value| if value == 0.0 { 0.0_f32 } else { value }.to_bits())
+}
+
+fn position_from_key(key: [u32; 3]) -> Vec3 {
+    key.map(f32::from_bits)
 }
 
 /// One visible scene object with its authoritative and display geometry.
@@ -576,7 +745,8 @@ fn flatten_object(object: &SceneObject, scene: &mut RenderScene) -> Result<(), V
 #[cfg(test)]
 mod tests {
     use builder3d_core::{
-        BooleanColorProvenance, Scene, SceneObject, make_box, with_boolean_color_provenance,
+        BooleanColorProvenance, Scene, SceneObject, make_box, make_sphere,
+        with_boolean_color_provenance,
     };
 
     use super::*;
@@ -610,6 +780,42 @@ mod tests {
                 .interaction_geometry()
                 .face_count()
         );
+    }
+
+    #[test]
+    fn box_faces_keep_hard_edges_and_wireframe_boundaries_are_deduplicated() {
+        let mesh = make_box([2.0; 3]).expect("box");
+        let geometry = MeshGeometry::from_mesh(&mesh).expect("geometry");
+        assert_eq!(geometry.vertex_count(), 24);
+        for face_index in 0..geometry.face_count() {
+            let [first, second, third] = geometry.triangle(face_index).expect("triangle");
+            let first = geometry.normal(first).expect("first normal");
+            let second = geometry.normal(second).expect("second normal");
+            let third = geometry.normal(third).expect("third normal");
+            assert!(dot(first, second) > 0.999);
+            assert!(dot(first, third) > 0.999);
+        }
+        assert_eq!(
+            geometry
+                .wireframe_segments(Mat4::identity())
+                .expect("wireframe")
+                .len(),
+            18
+        );
+    }
+
+    #[test]
+    fn curved_sphere_keeps_smooth_vertex_normals() {
+        let mesh = make_sphere(2.0, 2).expect("sphere");
+        let geometry = MeshGeometry::from_mesh(&mesh).expect("geometry");
+        assert_eq!(geometry.vertex_count(), mesh.vertex_count());
+        for index in 0..geometry.vertex_count() {
+            let index = u32::try_from(index).expect("sphere vertex index");
+            let position = geometry.position(index).expect("position");
+            let normal = geometry.normal(index).expect("normal");
+            let radial = normalize(position, "sphere radial direction").expect("radial");
+            assert!(dot(radial, normal) > 0.98);
+        }
     }
 
     #[test]

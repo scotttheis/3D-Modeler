@@ -19,16 +19,22 @@ use crate::{
     },
     camera::Camera,
     cpu::{CpuRenderOptions, render_cpu_with_options, write_ppm},
-    floor::{ContactCueCache, DEFAULT_FLOOR_SIZE, FloorGeometry, build_floor},
+    floor::{
+        CONTACT_SHADOW_LAYERS, ContactCueCache, DEFAULT_FLOOR_SIZE, FLOOR_SURFACE_SUBDIVISIONS,
+        FloorGeometry, build_floor, expand_shadow_polygon, shadow_light_direction_world,
+    },
     gizmo::{GizmoMode, build_gizmo},
+    lighting::ViewportLighting,
     math::{Mat4, subtract},
     scene::{MeshGeometry, RenderObject, RenderScene},
 };
 
 const MAX_RENDER_DIMENSION: u32 = 4_096;
-const MAX_OVERLAY_VERTICES: usize = 20_000;
+const MAX_OVERLAY_VERTICES: usize = 32_768;
+const OVERLAY_VERTEX_STRIDE: usize = 36;
 const BYTES_PER_PIXEL: u64 = 4;
 const COPY_BYTES_PER_ROW_ALIGNMENT: u64 = 256;
+const MESH_UNIFORM_BYTES: usize = 240;
 
 /// Configuration for the real offscreen wgpu viewport.
 #[derive(Clone, Debug)]
@@ -69,6 +75,8 @@ pub struct ViewportRenderOptions {
     pub selected_tint: [f32; 4],
     /// Active shell theme.
     pub theme: ViewportTheme,
+    /// User-adjustable screen-aligned lighting and floor contact shadows.
+    pub lighting: ViewportLighting,
 }
 
 impl Default for ViewportRenderOptions {
@@ -80,6 +88,7 @@ impl Default for ViewportRenderOptions {
             selected_object_ids: Vec::new(),
             selected_tint: [0.0, 0.55, 1.0, 1.0],
             theme: ViewportTheme::Dark,
+            lighting: ViewportLighting::default(),
         }
     }
 }
@@ -157,9 +166,16 @@ struct FaceIndexBatch {
     indices: Vec<u32>,
 }
 
+/// Samples per pixel for the mesh pass. Four-sample MSAA removes stair-stepped
+/// silhouettes; the resolved single-sample colour target is what the shell
+/// presents, reads back, and the CPU fallback writes.
+const VIEWPORT_SAMPLE_COUNT: u32 = 4;
+
 struct RenderTargets {
     color_texture: wgpu::Texture,
     color_view: wgpu::TextureView,
+    multisample_texture: wgpu::Texture,
+    multisample_view: wgpu::TextureView,
     depth_texture: wgpu::Texture,
     depth_view: wgpu::TextureView,
 }
@@ -178,6 +194,8 @@ pub struct ViewportRenderer {
     clear_color: [f64; 4],
     color_texture: wgpu::Texture,
     color_view: wgpu::TextureView,
+    _multisample_texture: wgpu::Texture,
+    multisample_view: wgpu::TextureView,
     _depth_texture: wgpu::Texture,
     depth_view: wgpu::TextureView,
     mesh_pipeline: wgpu::RenderPipeline,
@@ -329,6 +347,8 @@ impl ViewportRenderer {
             clear_color: [0.015, 0.02, 0.035, 1.0],
             color_texture: targets.color_texture,
             color_view: targets.color_view,
+            _multisample_texture: targets.multisample_texture,
+            multisample_view: targets.multisample_view,
             _depth_texture: targets.depth_texture,
             depth_view: targets.depth_view,
             mesh_pipeline,
@@ -393,6 +413,8 @@ impl ViewportRenderer {
         }
         self.color_texture = targets.color_texture;
         self.color_view = targets.color_view;
+        self._multisample_texture = targets.multisample_texture;
+        self.multisample_view = targets.multisample_view;
         self._depth_texture = targets.depth_texture;
         self.depth_view = targets.depth_view;
         self.render_target_ledger_id = next_ledger_id;
@@ -674,7 +696,10 @@ impl ViewportRenderer {
                 triangles: Vec::new(),
             }
         };
+        let view_matrix = camera.view_matrix()?;
         let view_projection = camera.view_projection(scene_radius)?;
+        let light_direction = options.lighting.direction_in_view(view_matrix);
+        let material_parameters = options.lighting.shader_parameters();
         let uniform = make_uniform(view_projection, [1.0, 1.0, 1.0, 1.0]);
         let uniform_buffer = self
             .device
@@ -713,9 +738,9 @@ impl ViewportRenderer {
                 label: Some("builder3d-r5-frame-encoder"),
             });
         let color_attachments = [Some(wgpu::RenderPassColorAttachment {
-            view: &self.color_view,
+            view: &self.multisample_view,
             depth_slice: None,
-            resolve_target: None,
+            resolve_target: Some(&self.color_view),
             ops: wgpu::Operations {
                 load: wgpu::LoadOp::Clear(wgpu::Color {
                     r: self.clear_color[0],
@@ -757,6 +782,8 @@ impl ViewportRenderer {
                     let origin = transform.transform_point([0.0; 3])?;
                     transform = transform.translated_by(subtract(position, origin))?;
                 }
+                let model_view = view_matrix.multiply(transform);
+                let normal_transform = model_view.inverse()?.transpose();
                 let selected = options
                     .selected_object_ids
                     .iter()
@@ -768,7 +795,14 @@ impl ViewportRenderer {
                         .map(color_from_rgba8)
                         .unwrap_or_else(|| object.color());
                     let color = display_color(authored_color, selected, options);
-                    let bytes = make_uniform(view_projection.multiply(transform), color);
+                    let bytes = make_mesh_uniform(
+                        view_projection.multiply(transform),
+                        model_view,
+                        normal_transform,
+                        color,
+                        light_direction,
+                        material_parameters,
+                    );
                     self.queue.write_buffer(&batch.uniform, 0, &bytes);
                     pass.set_bind_group(0, &batch.bind_group, &[]);
                     pass.set_index_buffer(batch.index.slice(..), wgpu::IndexFormat::Uint32);
@@ -839,11 +873,13 @@ impl ViewportRenderer {
                 xray: options.xray,
                 selected_object_ids: options.selected_object_ids.clone(),
                 selected_tint: options.selected_tint,
+                lighting: options.lighting,
                 floor_enabled: true,
                 grid_visible: options.grid_visible,
                 floor_color: cpu_floor_color(options.theme),
                 grid_major_color: cpu_grid_major_color(options.theme),
                 grid_minor_color: cpu_grid_minor_color(options.theme),
+                contact_shadow_color: cpu_contact_shadow_color(options.theme),
             },
         )?;
         let capture_path = if let Some(path) = capture_path {
@@ -928,7 +964,7 @@ impl ViewportRenderer {
                     "GPU material batch count exceeds u64",
                 ))
             })?
-            .checked_mul(80)
+            .checked_mul(MESH_UNIFORM_BYTES as u64)
             .ok_or_else(|| {
                 ViewportError::CapacityExceeded(String::from(
                     "GPU material uniform allocation overflow",
@@ -967,7 +1003,7 @@ impl ViewportRenderer {
                     });
                 let uniform = self.device.create_buffer(&wgpu::BufferDescriptor {
                     label: Some("builder3d-r7-material-uniform"),
-                    size: 80,
+                    size: MESH_UNIFORM_BYTES as u64,
                     usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
                     mapped_at_creation: false,
                 });
@@ -1123,7 +1159,10 @@ fn validate_config(config: &RendererConfig) -> Result<(), ViewportError> {
 fn render_target_size_bytes(width: u32, height: u32) -> Result<u64, ViewportError> {
     u64::from(width)
         .checked_mul(u64::from(height))
-        .and_then(|pixels| pixels.checked_mul(BYTES_PER_PIXEL + BYTES_PER_PIXEL))
+        // One resolved colour target, plus multisampled colour and depth.
+        .and_then(|pixels| {
+            pixels.checked_mul(BYTES_PER_PIXEL * (1 + 2 * u64::from(VIEWPORT_SAMPLE_COUNT)))
+        })
         .ok_or_else(|| ViewportError::CapacityExceeded(String::from("render target size overflow")))
 }
 
@@ -1158,11 +1197,22 @@ fn create_render_targets(device: &wgpu::Device, width: u32, height: u32) -> Rend
         view_formats: &[],
     });
     let color_view = color_texture.create_view(&wgpu::TextureViewDescriptor::default());
+    let multisample_texture = device.create_texture(&wgpu::TextureDescriptor {
+        label: Some("builder3d-r5-color-msaa"),
+        size,
+        mip_level_count: 1,
+        sample_count: VIEWPORT_SAMPLE_COUNT,
+        dimension: wgpu::TextureDimension::D2,
+        format: wgpu::TextureFormat::Rgba8Unorm,
+        usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+        view_formats: &[],
+    });
+    let multisample_view = multisample_texture.create_view(&wgpu::TextureViewDescriptor::default());
     let depth_texture = device.create_texture(&wgpu::TextureDescriptor {
         label: Some("builder3d-r5-depth"),
         size,
         mip_level_count: 1,
-        sample_count: 1,
+        sample_count: VIEWPORT_SAMPLE_COUNT,
         dimension: wgpu::TextureDimension::D2,
         format: wgpu::TextureFormat::Depth24Plus,
         usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
@@ -1172,6 +1222,8 @@ fn create_render_targets(device: &wgpu::Device, width: u32, height: u32) -> Rend
     RenderTargets {
         color_texture,
         color_view,
+        multisample_texture,
+        multisample_view,
         depth_texture,
         depth_view,
     }
@@ -1272,6 +1324,29 @@ fn make_uniform(matrix: Mat4, color: [f32; 4]) -> Vec<u8> {
     bytes
 }
 
+fn make_mesh_uniform(
+    view_projection: Mat4,
+    model_view: Mat4,
+    normal_transform: Mat4,
+    color: [f32; 4],
+    light_direction: [f32; 3],
+    material_parameters: [f32; 4],
+) -> Vec<u8> {
+    let mut bytes = Vec::with_capacity(MESH_UNIFORM_BYTES);
+    bytes.extend_from_slice(&view_projection.column_major_bytes());
+    bytes.extend_from_slice(&model_view.column_major_bytes());
+    bytes.extend_from_slice(&normal_transform.column_major_bytes());
+    for value in color
+        .into_iter()
+        .chain(light_direction)
+        .chain([0.0])
+        .chain(material_parameters)
+    {
+        bytes.extend_from_slice(&value.to_le_bytes());
+    }
+    bytes
+}
+
 fn padded_bytes_per_row(width: u32) -> Result<u64, ViewportError> {
     let row_bytes = u64::from(width)
         .checked_mul(BYTES_PER_PIXEL)
@@ -1343,7 +1418,10 @@ fn create_mesh_pipeline(
             stencil: Default::default(),
             bias: Default::default(),
         }),
-        multisample: wgpu::MultisampleState::default(),
+        multisample: wgpu::MultisampleState {
+            count: VIEWPORT_SAMPLE_COUNT,
+            ..Default::default()
+        },
         fragment: Some(wgpu::FragmentState {
             module: &shader,
             entry_point: Some("fragment_main"),
@@ -1383,7 +1461,7 @@ fn create_overlay_pipeline(
             entry_point: Some("vertex_main"),
             compilation_options: Default::default(),
             buffers: &[Some(wgpu::VertexBufferLayout {
-                array_stride: 28,
+                array_stride: OVERLAY_VERTEX_STRIDE as u64,
                 step_mode: wgpu::VertexStepMode::Vertex,
                 attributes: &[
                     wgpu::VertexAttribute {
@@ -1395,6 +1473,16 @@ fn create_overlay_pipeline(
                         format: wgpu::VertexFormat::Float32x4,
                         offset: 12,
                         shader_location: 1,
+                    },
+                    wgpu::VertexAttribute {
+                        format: wgpu::VertexFormat::Float32,
+                        offset: 28,
+                        shader_location: 2,
+                    },
+                    wgpu::VertexAttribute {
+                        format: wgpu::VertexFormat::Float32,
+                        offset: 32,
+                        shader_location: 3,
                     },
                 ],
             })],
@@ -1415,7 +1503,10 @@ fn create_overlay_pipeline(
             stencil: Default::default(),
             bias: Default::default(),
         }),
-        multisample: wgpu::MultisampleState::default(),
+        multisample: wgpu::MultisampleState {
+            count: VIEWPORT_SAMPLE_COUNT,
+            ..Default::default()
+        },
         fragment: Some(wgpu::FragmentState {
             module: &shader,
             entry_point: Some("fragment_main"),
@@ -1438,7 +1529,7 @@ impl OverlayBuffers {
     }
 
     fn total_bytes(&self) -> Result<u64, ViewportError> {
-        u64::try_from(self.total_vertices().saturating_mul(28)).map_err(|_| {
+        u64::try_from(self.total_vertices().saturating_mul(OVERLAY_VERTEX_STRIDE)).map_err(|_| {
             ViewportError::CapacityExceeded(String::from("overlay byte count overflow"))
         })
     }
@@ -1464,6 +1555,19 @@ impl OverlayBuffers {
 struct OverlayVertex {
     position: [f32; 3],
     color: [f32; 4],
+    surface_fade: f32,
+    floor_pattern: f32,
+}
+
+impl OverlayVertex {
+    fn new(position: [f32; 3], color: [f32; 4]) -> Self {
+        Self {
+            position,
+            color,
+            surface_fade: 0.0,
+            floor_pattern: 0.0,
+        }
+    }
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -1482,62 +1586,77 @@ fn build_overlay_vertices(
     let mut lines = Vec::new();
     let mut triangles = Vec::new();
     for line in floor.lines.iter().chain(&floor.front_cue) {
+        let mut start_color = line.color;
+        start_color[3] *= line.start_alpha;
+        let mut end_color = line.color;
+        end_color[3] *= line.end_alpha;
         lines.push(OverlayVertex {
-            position: line.start,
-            color: floor_line_color(line.color, options.theme),
+            ..OverlayVertex::new(line.start, floor_line_color(start_color, options.theme))
         });
         lines.push(OverlayVertex {
-            position: line.end,
-            color: floor_line_color(line.color, options.theme),
+            ..OverlayVertex::new(line.end, floor_line_color(end_color, options.theme))
         });
     }
     if let Some(surface) = floor.surface {
         let [minimum_x, _, minimum_z] = surface.minimum;
         let [maximum_x, y, maximum_z] = surface.maximum;
         let color = floor_surface_color(options.theme);
-        triangles.extend([
-            OverlayVertex {
-                position: [minimum_x, y, minimum_z],
-                color,
-            },
-            OverlayVertex {
-                position: [maximum_x, y, minimum_z],
-                color,
-            },
-            OverlayVertex {
-                position: [maximum_x, y, maximum_z],
-                color,
-            },
-            OverlayVertex {
-                position: [minimum_x, y, minimum_z],
-                color,
-            },
-            OverlayVertex {
-                position: [maximum_x, y, maximum_z],
-                color,
-            },
-            OverlayVertex {
-                position: [minimum_x, y, maximum_z],
-                color,
-            },
-        ]);
+        let subdivisions = FLOOR_SURFACE_SUBDIVISIONS as f32;
+        for z_index in 0..FLOOR_SURFACE_SUBDIVISIONS {
+            let z0 = minimum_z + (maximum_z - minimum_z) * z_index as f32 / subdivisions;
+            let z1 = minimum_z + (maximum_z - minimum_z) * (z_index + 1) as f32 / subdivisions;
+            for x_index in 0..FLOOR_SURFACE_SUBDIVISIONS {
+                let x0 = minimum_x + (maximum_x - minimum_x) * x_index as f32 / subdivisions;
+                let x1 = minimum_x + (maximum_x - minimum_x) * (x_index + 1) as f32 / subdivisions;
+                let first_position = [x0, y, z0];
+                let second_position = [x1, y, z0];
+                let third_position = [x1, y, z1];
+                let fourth_position = [x0, y, z1];
+                let first = floor_surface_vertex(
+                    first_position,
+                    color,
+                    surface.fade_parameter_at(first_position),
+                );
+                let second = floor_surface_vertex(
+                    second_position,
+                    color,
+                    surface.fade_parameter_at(second_position),
+                );
+                let third = floor_surface_vertex(
+                    third_position,
+                    color,
+                    surface.fade_parameter_at(third_position),
+                );
+                let fourth = floor_surface_vertex(
+                    fourth_position,
+                    color,
+                    surface.fade_parameter_at(fourth_position),
+                );
+                triangles.extend([first, second, third, first, third, fourth]);
+            }
+        }
     }
-    for cue in cues {
-        for pair in cue.polygon.windows(2) {
-            let first = pair[0];
-            let second = pair[1];
-            triangles.push(OverlayVertex {
-                position: cue.polygon[0],
-                color: cue_color(cue.color, options.theme),
-            });
-            triangles.push(OverlayVertex {
-                position: first,
-                color: cue_color(cue.color, options.theme),
-            });
-            triangles.push(OverlayVertex {
-                position: second,
-                color: cue_color(cue.color, options.theme),
-            });
+    let shadow_strength = f32::from(options.lighting.normalized().contact_shadow_percent) / 100.0;
+    if shadow_strength > 0.0 {
+        let light_world = shadow_light_direction_world(camera, options.lighting);
+        for cue in cues {
+            let polygon = cue.shadow_polygon(light_world);
+            for (layer_scale, layer_alpha) in CONTACT_SHADOW_LAYERS {
+                let expanded = expand_shadow_polygon(&polygon, layer_scale);
+                let mut shadow_color = cue_color(cue.color, options.theme);
+                shadow_color[3] = (shadow_color[3] * shadow_strength * layer_alpha).clamp(0.0, 1.0);
+                for pair in expanded.windows(2) {
+                    triangles.push(OverlayVertex {
+                        ..OverlayVertex::new(expanded[0], shadow_color)
+                    });
+                    triangles.push(OverlayVertex {
+                        ..OverlayVertex::new(pair[0], shadow_color)
+                    });
+                    triangles.push(OverlayVertex {
+                        ..OverlayVertex::new(pair[1], shadow_color)
+                    });
+                }
+            }
         }
     }
     if options.wireframe {
@@ -1548,12 +1667,10 @@ fn build_overlay_vertices(
             {
                 lines.extend([
                     OverlayVertex {
-                        position: first,
-                        color: [0.0, 0.0, 0.0, 1.0],
+                        ..OverlayVertex::new(first, [0.0, 0.0, 0.0, 1.0])
                     },
                     OverlayVertex {
-                        position: second,
-                        color: [0.0, 0.0, 0.0, 1.0],
+                        ..OverlayVertex::new(second, [0.0, 0.0, 0.0, 1.0])
                     },
                 ]);
                 if lines.len().saturating_add(triangles.len()) >= MAX_OVERLAY_VERTICES {
@@ -1569,27 +1686,22 @@ fn build_overlay_vertices(
         let geometry = build_gizmo(camera, center, gizmo_mode)?;
         for line in geometry.lines {
             lines.push(OverlayVertex {
-                position: line.start,
-                color: line.color,
+                ..OverlayVertex::new(line.start, line.color)
             });
             lines.push(OverlayVertex {
-                position: line.end,
-                color: line.color,
+                ..OverlayVertex::new(line.end, line.color)
             });
         }
         for triangle in geometry.triangles {
             triangles.extend_from_slice(&[
                 OverlayVertex {
-                    position: triangle.first,
-                    color: triangle.color,
+                    ..OverlayVertex::new(triangle.first, triangle.color)
                 },
                 OverlayVertex {
-                    position: triangle.second,
-                    color: triangle.color,
+                    ..OverlayVertex::new(triangle.second, triangle.color)
                 },
                 OverlayVertex {
-                    position: triangle.third,
-                    color: triangle.color,
+                    ..OverlayVertex::new(triangle.third, triangle.color)
                 },
             ]);
         }
@@ -1673,18 +1785,23 @@ fn display_color(authored: [f32; 4], selected: bool, options: &ViewportRenderOpt
     color
 }
 
-fn floor_line_color(color: [f32; 4], theme: ViewportTheme) -> [f32; 4] {
-    match theme {
-        ViewportTheme::Dark => color,
-        ViewportTheme::Light => [0.35, 0.35, 0.38, color[3].min(0.60)],
+fn floor_surface_vertex(position: [f32; 3], color: [f32; 4], fade_parameter: f32) -> OverlayVertex {
+    OverlayVertex {
+        position,
+        color,
+        surface_fade: fade_parameter,
+        floor_pattern: 1.0,
     }
 }
 
+fn floor_line_color(color: [f32; 4], theme: ViewportTheme) -> [f32; 4] {
+    let _ = theme;
+    [0.35, 0.35, 0.38, (color[3] * 0.22).min(0.13)]
+}
+
 fn floor_surface_color(theme: ViewportTheme) -> [f32; 4] {
-    match theme {
-        ViewportTheme::Dark => [0.025, 0.04, 0.075, 1.0],
-        ViewportTheme::Light => [0.88, 0.88, 0.89, 1.0],
-    }
+    let _ = theme;
+    [0.74, 0.74, 0.74, 1.0]
 }
 
 fn cue_color(color: [f32; 4], theme: ViewportTheme) -> [f32; 4] {
@@ -1694,38 +1811,39 @@ fn cue_color(color: [f32; 4], theme: ViewportTheme) -> [f32; 4] {
     }
 }
 
+fn cpu_contact_shadow_color(theme: ViewportTheme) -> [f32; 4] {
+    cue_color([0.05, 0.08, 0.12, 0.28], theme)
+}
+
 fn cpu_clear_color(theme: ViewportTheme) -> [u8; 4] {
-    match theme {
-        ViewportTheme::Dark => [4, 7, 13, 255],
-        ViewportTheme::Light => [240, 240, 240, 255],
-    }
+    let _ = theme;
+    [240, 240, 240, 255]
 }
 
 fn cpu_floor_color(theme: ViewportTheme) -> [f32; 4] {
-    match theme {
-        ViewportTheme::Dark => [0.025, 0.04, 0.075, 1.0],
-        ViewportTheme::Light => [0.88, 0.88, 0.89, 1.0],
-    }
+    let _ = theme;
+    [0.875, 0.875, 0.875, 1.0]
 }
 
 fn cpu_grid_major_color(theme: ViewportTheme) -> [f32; 4] {
-    match theme {
-        ViewportTheme::Dark => [0.20, 0.26, 0.34, 0.55],
-        ViewportTheme::Light => [0.35, 0.35, 0.38, 0.60],
-    }
+    let _ = theme;
+    [0.35, 0.35, 0.38, 0.13]
 }
 
 fn cpu_grid_minor_color(theme: ViewportTheme) -> [f32; 4] {
-    match theme {
-        ViewportTheme::Dark => [0.16, 0.20, 0.27, 0.30],
-        ViewportTheme::Light => [0.35, 0.35, 0.38, 0.42],
-    }
+    let _ = theme;
+    [0.35, 0.35, 0.38, 0.07]
 }
 
 fn pack_overlay(vertices: &[OverlayVertex]) -> Vec<u8> {
-    let mut bytes = Vec::with_capacity(vertices.len().saturating_mul(28));
+    let mut bytes = Vec::with_capacity(vertices.len().saturating_mul(OVERLAY_VERTEX_STRIDE));
     for vertex in vertices {
-        for value in vertex.position.iter().chain(vertex.color.iter()) {
+        for value in vertex
+            .position
+            .iter()
+            .chain(vertex.color.iter())
+            .chain([&vertex.surface_fade, &vertex.floor_pattern])
+        {
             bytes.extend_from_slice(&value.to_le_bytes());
         }
     }
@@ -1735,22 +1853,54 @@ fn pack_overlay(vertices: &[OverlayVertex]) -> Vec<u8> {
 const MESH_SHADER: &str = r#"
 struct Uniforms {
     view_projection: mat4x4<f32>,
+    model_view: mat4x4<f32>,
+    normal_transform: mat4x4<f32>,
     color: vec4<f32>,
+    light_direction: vec4<f32>,
+    material: vec4<f32>,
 };
 @group(0) @binding(0) var<uniform> uniforms: Uniforms;
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) normal: vec3<f32>,
+    @location(1) view_position: vec3<f32>,
 };
 @vertex
 fn vertex_main(@location(0) position: vec3<f32>, @location(1) normal: vec3<f32>) -> VertexOutput {
-    return VertexOutput(uniforms.view_projection * vec4<f32>(position, 1.0), normal);
+    let local_position = vec4<f32>(position, 1.0);
+    let view_position = uniforms.model_view * local_position;
+    let view_normal = uniforms.normal_transform * vec4<f32>(normal, 0.0);
+    return VertexOutput(
+        uniforms.view_projection * local_position,
+        view_normal.xyz,
+        view_position.xyz,
+    );
 }
 @fragment
 fn fragment_main(input: VertexOutput) -> @location(0) vec4<f32> {
-    let light = normalize(vec3<f32>(0.35, 0.75, 0.55));
-    let intensity = 0.35 + 0.65 * max(dot(normalize(input.normal), light), 0.0);
-    let linear = max(uniforms.color.rgb * intensity, vec3<f32>(0.0));
+    let normal = normalize(input.normal);
+    let light = normalize(uniforms.light_direction.xyz);
+    let toward_viewer = normalize(-input.view_position);
+    let facing = dot(normal, light);
+    let lambert = max(facing, 0.0);
+    let wrapped = (facing * 0.5 + 0.5) * (facing * 0.5 + 0.5);
+    let fill = max(dot(normal, normalize(vec3<f32>(-light.x, 0.0, light.z) + vec3<f32>(0.0, 0.0, 0.35))), 0.0);
+    let diffuse = 0.55 * lambert + 0.33 * wrapped + 0.12 * fill;
+    var specular = 0.0;
+    if lambert > 0.0 {
+        let half_vector = light + toward_viewer;
+        if dot(half_vector, half_vector) > 0.000001 {
+            let halfway = normalize(half_vector);
+            specular = pow(max(dot(normal, halfway), 0.0), uniforms.material.w)
+                * uniforms.material.z
+                * max(uniforms.material.x, 0.25);
+        }
+    }
+    let intensity = uniforms.material.y + uniforms.material.x * diffuse;
+    let linear = max(
+        uniforms.color.rgb * intensity + vec3<f32>(specular),
+        vec3<f32>(0.0),
+    );
     let low = linear * 12.92;
     let high = 1.055 * pow(linear, vec3<f32>(1.0 / 2.4)) - vec3<f32>(0.055);
     return vec4<f32>(select(high, low, linear <= vec3<f32>(0.0031308)), uniforms.color.a);
@@ -1766,17 +1916,44 @@ struct Uniforms {
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) color: vec4<f32>,
+    @location(1) world_position: vec3<f32>,
+    @location(2) surface_fade: f32,
+    @location(3) floor_pattern: f32,
 };
 @vertex
-fn vertex_main(@location(0) position: vec3<f32>, @location(1) color: vec4<f32>) -> VertexOutput {
-    return VertexOutput(uniforms.view_projection * vec4<f32>(position, 1.0), color);
+fn vertex_main(
+    @location(0) position: vec3<f32>,
+    @location(1) color: vec4<f32>,
+    @location(2) surface_fade: f32,
+    @location(3) floor_pattern: f32,
+) -> VertexOutput {
+    return VertexOutput(
+        uniforms.view_projection * vec4<f32>(position, 1.0),
+        color,
+        position,
+        surface_fade,
+        floor_pattern,
+    );
 }
 @fragment
 fn fragment_main(input: VertexOutput) -> @location(0) vec4<f32> {
-    let linear = max(input.color.rgb, vec3<f32>(0.0));
+    var color = input.color;
+    if input.floor_pattern > 0.5 {
+        let checker_cell = vec2<i32>(floor(input.world_position.xz / 50.0));
+        let alternate = ((checker_cell.x + checker_cell.y) & 1) == 1;
+        let cell_position = input.world_position.xz / 50.0;
+        let footprint = max(fwidth(cell_position.x), fwidth(cell_position.y));
+        let contrast = 1.0 - smoothstep(0.55, 1.15, footprint);
+        let shade = select(-0.04, 0.04, alternate) * contrast;
+        color = vec4<f32>(
+            color.rgb + vec3<f32>(shade),
+            color.a * (1.0 - smoothstep(0.0, 1.0, input.surface_fade)),
+        );
+    }
+    let linear = max(color.rgb, vec3<f32>(0.0));
     let low = linear * 12.92;
     let high = 1.055 * pow(linear, vec3<f32>(1.0 / 2.4)) - vec3<f32>(0.055);
-    return vec4<f32>(select(high, low, linear <= vec3<f32>(0.0031308)), input.color.a);
+    return vec4<f32>(select(high, low, linear <= vec3<f32>(0.0031308)), color.a);
 }
 "#;
 
@@ -1806,9 +1983,13 @@ mod tests {
         assert_ne!(selected, plain);
         assert!((0.05..=0.45).contains(&selected[3]));
         assert!((0.05..=0.45).contains(&plain[3]));
-        assert_ne!(
+        assert_eq!(
             floor_surface_color(ViewportTheme::Light),
             floor_surface_color(ViewportTheme::Dark)
+        );
+        assert_eq!(
+            cpu_clear_color(ViewportTheme::Dark),
+            cpu_clear_color(ViewportTheme::Light)
         );
     }
 
@@ -1878,8 +2059,34 @@ mod tests {
 
     #[test]
     fn render_target_budget_counts_color_and_depth_attachments() {
-        assert_eq!(render_target_size_bytes(4, 2).ok(), Some(64));
+        assert_eq!(render_target_size_bytes(4, 2).ok(), Some(288));
         assert!(render_target_size_bytes(u32::MAX, u32::MAX).is_err());
+    }
+
+    #[test]
+    fn default_floor_overlay_fits_the_vertex_budget() {
+        let camera = Camera::new();
+        let floor = build_floor(&camera, DEFAULT_FLOOR_SIZE, true, true).expect("floor");
+        let scene = RenderScene::from_core(&builder3d_core::Scene::new()).expect("empty scene");
+        let overlay = build_overlay_vertices(
+            &floor,
+            &[],
+            &camera,
+            None,
+            GizmoMode::Move,
+            1.0,
+            2_560,
+            1_440,
+            &scene,
+            &ViewportRenderOptions::default(),
+        )
+        .expect("default floor overlay should render");
+
+        assert_eq!(
+            overlay.triangles.len(),
+            FLOOR_SURFACE_SUBDIVISIONS * FLOOR_SURFACE_SUBDIVISIONS * 6
+        );
+        assert!(overlay.total_vertices() <= MAX_OVERLAY_VERTICES);
     }
 
     #[test]

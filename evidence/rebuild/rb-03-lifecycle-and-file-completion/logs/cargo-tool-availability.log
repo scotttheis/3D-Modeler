@@ -1,0 +1,11 @@
+﻿cargo deny --version EXIT_CODE=0
+cargo-deny 0.20.2
+cargo audit --version EXIT_CODE=101
+error: no such command: `audit`
+System.Management.Automation.RemoteException
+help: a command with a similar name exists: `add`
+System.Management.Automation.RemoteException
+help: view all installed commands with `cargo --list`
+help: find a package to install `audit` with `cargo search cargo-audit`
+cargo bloat --version EXIT_CODE=0
+0.12.1

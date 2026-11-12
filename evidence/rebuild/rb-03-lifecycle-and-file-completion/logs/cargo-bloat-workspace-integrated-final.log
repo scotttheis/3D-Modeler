@@ -1,0 +1,32 @@
+COMMAND: cargo bloat --release --workspace
+Warning: unused arguments left: ["--workspace"].
+ 
+   Compiling builder3d-app v0.1.0 (E:\Builder3D-Rust\crates\builder3d-app)
+   Compiling builder3d-mcp v0.1.0 (E:\Builder3D-Rust\crates\builder3d-mcp)
+    Finished `release` profile [optimized + debuginfo] target(s) in 4m 08s
+    Analyzing target\release\r4_mcp.exe
+
+ File  .text    Size          Crate Name
+ 0.9%   1.1% 43.8KiB            std core::ops::function::FnOnce::call_once<zip::write::impl$14::prepare_next_writer::closure_env$3<core::io::cursor::Cursor<alloc::vec::Vec<u8,alloc::alloc::Global> > >,tuple$<enum2$<zip::write::MaybeEncrypted<core::io::cursor::Cursor<alloc::vec::Vec<u8,alloc::alloc::Global> > > >,ref_mut$<zip::write::DeflateCache<core::io::cursor::Cursor<alloc::vec::Vec<u8,alloc::alloc::Global> > > > > >
+ 0.7%   0.9% 34.3KiB  builder3d_mcp builder3d_mcp::r4::server::R4Server::dispatch_sync
+ 0.7%   0.8% 31.6KiB           rmcp rmcp::service::serve_inner::async_block$0<rmcp::service::server::RoleServer,builder3d_mcp::r4::server::R4Server,rmcp::transport::async_rw::AsyncRwTransport<rmcp::service::server::RoleServer,tokio::io::stdin::Stdin,tokio::io::stdout::Stdout> >
+ 0.7%   0.8% 30.4KiB     serde_json serde_json::de::from_trait<serde_json::read::SliceRead,enum2$<rmcp::model::JsonRpcMessage<enum2$<rmcp::model::ClientRequest>,enum2$<rmcp::model::ClientResult>,enum2$<rmcp::model::ClientNotification> > > >
+ 0.6%   0.7% 27.0KiB           rmcp rmcp::model::_::impl$0::serialize<serde::private::ser::FlatMapSerializer<enum2$<serde_json::ser::Compound<bytes::buf::writer::Writer<ref_mut$<bytes::bytes_mut::BytesMut> >,serde_json::ser::CompactFormatter> > > >
+ 0.6%   0.7% 26.3KiB builder3d_core builder3d_core::project::load_project_bytes
+ 0.5%   0.6% 24.5KiB builder3d_core builder3d_core::file_io::load_mesh_asset_bytes
+ 0.5%   0.6% 24.3KiB            std std::sys::process::windows::Command::spawn_with_attributes
+ 0.5%   0.6% 23.9KiB builder3d_core builder3d_core::gltf::build_export
+ 0.5%   0.6% 22.6KiB builder3d_core builder3d_core::three_mf::load_3mf_bytes_with_limits
+ 0.5%   0.6% 21.9KiB  builder3d_mcp builder3d_mcp::r4::server::impl$4::start_operation::closure$0
+ 0.4%   0.5% 20.9KiB  builder3d_mcp builder3d_mcp::r4::schema::input_schema
+ 0.4%   0.5% 20.6KiB           rmcp rmcp::handler::server::impl$0::handle_request::async_fn$0<builder3d_mcp::r4::server::R4Server>
+ 0.4%   0.5% 20.4KiB           rmcp rmcp::model::content::_::impl$0::deserialize<serde::private::de::content::ContentDeserializer<serde_json::error::Error> >
+ 0.4%   0.5% 20.3KiB builder3d_core builder3d_core::shell_ops::text_emboss_with_hooks
+ 0.4%   0.5% 18.1KiB         r4_mcp r4_mcp::main::async_block$0
+ 0.4%   0.5% 17.7KiB           rmcp rmcp::model::_::impl$0::deserialize::impl$2::visit_map<serde::private::de::FlatStructAccess<serde_json::error::Error> >
+ 0.4%   0.4% 16.3KiB           rmcp rmcp::model::_::impl$0::deserialize<serde::private::de::content::ContentRefDeserializer<serde_json::error::Error> >
+ 0.3%   0.4% 16.2KiB builder3d_core builder3d_core::gltf::Decoder::new
+ 0.3%   0.4% 16.2KiB           rmcp rmcp::model::_::impl$0::serialize<serde_json::value::ser::Serializer>
+52.9%  63.8%  2.4MiB                And 3100 smaller methods. Use -n N to show more.
+82.9% 100.0%  3.8MiB                .text section size, the file size is 4.5MiB
+EXIT_CODE=0

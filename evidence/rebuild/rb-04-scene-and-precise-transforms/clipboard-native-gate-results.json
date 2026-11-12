@@ -1,0 +1,9 @@
+{
+    "deny":  4,
+    "build":  0,
+    "source":  "0313536FFAD1613A84A1ED16A2B068CA525F2A5F27E8155E1FDDCBD41936390F",
+    "clippy":  0,
+    "tests":  0,
+    "fmt":  0,
+    "debug":  "4129C115155A187A47AC1520EEEB25A5DE2FE81FBAC47B12FC1DA38B49875063"
+}

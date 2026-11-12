@@ -1,0 +1,214 @@
+//! Deterministic review captures of the real shell.
+//!
+//! Visual work needs a current picture of the application in a known state.
+//! Setting `BUILDER3D_REVIEW_CAPTURE` to a PNG path starts the ordinary native
+//! window in a named state, waits for the viewport to settle, saves the
+//! window's own framebuffer, and exits. No pointer or keyboard input is
+//! simulated, the desktop is never photographed, and user settings are neither
+//! read nor written, so a capture is repeatable and safe to run while the
+//! machine is in use.
+//!
+//! | Variable | Values | Default |
+//! |---|---|---|
+//! | `BUILDER3D_REVIEW_CAPTURE` | output PNG path | harness off |
+//! | `BUILDER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `resize`, `multi` | `move` |
+//! | `BUILDER3D_REVIEW_THEME` | `light`, `dark` | `dark` |
+//! | `BUILDER3D_REVIEW_TAB` | a ribbon tab label such as `Object` | `Insert` |
+//!
+//! A capture shows what was painted. It is engineering evidence for layout and
+//! styling; it does not exercise pointer behaviour and is not owner approval.
+
+use std::{
+    env,
+    path::{Path, PathBuf},
+    sync::{
+        Arc,
+        atomic::{AtomicBool, Ordering},
+    },
+};
+
+use eframe::egui;
+
+use crate::theme::ThemeMode;
+
+/// Frames to wait before requesting the framebuffer, so fonts, artwork
+/// textures, auto-framing, and the first viewport render have all settled.
+const SETTLE_FRAMES: u32 = 45;
+/// Frames after which a capture that never arrived is reported as a failure.
+const TIMEOUT_FRAMES: u32 = 600;
+
+/// The named application state a review capture starts in.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) enum ReviewState {
+    /// The welcome surface with no scene.
+    Welcome,
+    /// The scene surface with no objects.
+    Empty,
+    /// One selected cube with the Move handles.
+    Move,
+    /// One selected cube with the Rotate handles.
+    Rotate,
+    /// One selected cube with the Resize handles.
+    Resize,
+    /// Several primitives with one selected, for list and inspector density.
+    Multi,
+}
+
+impl ReviewState {
+    fn from_key(value: &str) -> Option<Self> {
+        match value.trim().to_ascii_lowercase().as_str() {
+            "welcome" => Some(Self::Welcome),
+            "empty" => Some(Self::Empty),
+            "move" => Some(Self::Move),
+            "rotate" => Some(Self::Rotate),
+            "resize" => Some(Self::Resize),
+            "multi" => Some(Self::Multi),
+            _ => None,
+        }
+    }
+}
+
+/// What the shell should do after a review frame.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) enum ReviewProgress {
+    /// Keep painting.
+    Pending,
+    /// The capture was written, or failed; the process should end.
+    Finished,
+}
+
+/// One requested capture and its progress.
+#[derive(Debug)]
+pub(crate) struct ReviewCapture {
+    output: PathBuf,
+    state: ReviewState,
+    theme: ThemeMode,
+    tab: Option<String>,
+    frames: u32,
+    requested: bool,
+    finished: Arc<AtomicBool>,
+}
+
+impl ReviewCapture {
+    /// Reads the capture request from the environment. Returns `None` in
+    /// ordinary use, and for an unrecognised state so a typo cannot silently
+    /// capture the wrong screen.
+    pub(crate) fn from_environment() -> Option<Self> {
+        let output = PathBuf::from(env::var_os("BUILDER3D_REVIEW_CAPTURE")?);
+        if output.as_os_str().is_empty() {
+            return None;
+        }
+        let state = match env::var("BUILDER3D_REVIEW_STATE") {
+            Ok(value) => match ReviewState::from_key(&value) {
+                Some(state) => state,
+                None => {
+                    eprintln!("review capture: unknown BUILDER3D_REVIEW_STATE `{value}`");
+                    return None;
+                }
+            },
+            Err(_) => ReviewState::Move,
+        };
+        let theme = env::var("BUILDER3D_REVIEW_THEME")
+            .map(|value| ThemeMode::from_key(&value))
+            .unwrap_or_default();
+        let tab = env::var("BUILDER3D_REVIEW_TAB")
+            .ok()
+            .map(|value| value.trim().to_owned())
+            .filter(|value| !value.is_empty());
+        Some(Self {
+            output,
+            state,
+            theme,
+            tab,
+            frames: 0,
+            requested: false,
+            finished: Arc::new(AtomicBool::new(false)),
+        })
+    }
+
+    pub(crate) const fn state(&self) -> ReviewState {
+        self.state
+    }
+
+    pub(crate) const fn theme(&self) -> ThemeMode {
+        self.theme
+    }
+
+    pub(crate) fn tab(&self) -> Option<&str> {
+        self.tab.as_deref()
+    }
+
+    /// A settings path beside the capture, so the harness never reads or
+    /// overwrites the user's real preferences.
+    pub(crate) fn isolated_settings_path(&self) -> PathBuf {
+        self.output.with_extension("review-settings.json")
+    }
+
+    /// Advances one painted frame: requests the framebuffer once the UI has
+    /// settled, and reports completion after the backend has delivered it.
+    pub(crate) fn advance(&mut self, ctx: &egui::Context) -> ReviewProgress {
+        self.frames = self.frames.saturating_add(1);
+        if self.finished.load(Ordering::Acquire) {
+            return ReviewProgress::Finished;
+        }
+        if !self.requested && self.frames >= SETTLE_FRAMES {
+            let output = self.output.clone();
+            let finished = Arc::clone(&self.finished);
+            let description = format!("state={:?}, theme={}", self.state, self.theme.key());
+            ctx.send_viewport_cmd(egui::ViewportCommand::Screenshot(
+                egui::ScreenshotCallback::new(move |image| {
+                    match save_png(&output, &image) {
+                        Ok(()) => println!(
+                            "review capture: wrote {} ({}x{} px, {description})",
+                            output.display(),
+                            image.size[0],
+                            image.size[1],
+                        ),
+                        Err(error) => eprintln!(
+                            "review capture: could not write {}: {error}",
+                            output.display()
+                        ),
+                    }
+                    finished.store(true, Ordering::Release);
+                }),
+            ));
+            self.requested = true;
+        }
+        if self.frames >= TIMEOUT_FRAMES {
+            eprintln!("review capture: the backend never delivered a framebuffer");
+            return ReviewProgress::Finished;
+        }
+        ctx.request_repaint();
+        ReviewProgress::Pending
+    }
+}
+
+fn save_png(path: &Path, image: &egui::ColorImage) -> Result<(), String> {
+    if let Some(parent) = path.parent()
+        && !parent.as_os_str().is_empty()
+    {
+        std::fs::create_dir_all(parent).map_err(|error| error.to_string())?;
+    }
+    let width = u32::try_from(image.size[0]).map_err(|error| error.to_string())?;
+    let height = u32::try_from(image.size[1]).map_err(|error| error.to_string())?;
+    image::save_buffer(
+        path,
+        image.as_raw(),
+        width,
+        height,
+        image::ExtendedColorType::Rgba8,
+    )
+    .map_err(|error| error.to_string())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn state_keys_are_case_insensitive_and_reject_unknown_names() {
+        assert_eq!(ReviewState::from_key(" Move "), Some(ReviewState::Move));
+        assert_eq!(ReviewState::from_key("WELCOME"), Some(ReviewState::Welcome));
+        assert_eq!(ReviewState::from_key("mvoe"), None);
+    }
+}

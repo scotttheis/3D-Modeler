@@ -86,11 +86,12 @@ id = "builder3d.mcp.catalog"
 kind = "surface"
 status = "validated"
 crate = "builder3d-mcp"
-rust_paths = ["crates/builder3d-mcp/src/r4/catalog.rs", "crates/builder3d-mcp/src/r4/schema.rs"]
-symbols = ["ToolSpec", "tool_schema", "Profile"]
+rust_paths = ["crates/builder3d-mcp/src/r4/catalog.rs", "crates/builder3d-mcp/src/r4/schema.rs", "crates/builder3d-mcp/src/r4/schema_contract.json"]
+symbols = ["ToolSpec", "input_schema", "output_schema", "validate_arguments", "validate_result", "normalize_arguments", "Profile"]
 python_paths = ["src/ai_commands.py", "src/ai_control.py"]
 tests = ["crates/builder3d-mcp/src/r4/catalog.rs", "crates/builder3d-mcp/src/r4/schema.rs"]
-contracts = ["60-tool-order", "profile-filtering", "strict-schema"]
+contracts = ["60-tool-order", "profile-filtering", "json-schema-2020-12", "recursive-input-output-validation", "current-reference-schema-parity"]
+evidence = ["evidence/rebuild/rb-09-shared-ai-and-regression/schema-parity-run-manifest.json", "evidence/rebuild/rb-09-shared-ai-and-regression/reference-current-20261107-084248/reference-identity.json", "evidence/rebuild/rb-09-shared-ai-and-regression/reference-current-20261107-084248/python-unknown-field-runtime.json", "evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261107-093804-schema-parity/schema-property-diff-current.json", "evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261107-093804-schema-parity/logs/rust-release-schema-result-client.jsonl", "evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261107-093804-schema-parity/logs/rust-release-schema-result-validation.log"]
 
 [[component]]
 id = "builder3d.mcp.server"
@@ -383,8 +384,8 @@ symbols = ["R4Gateway", "R4Gateway::call_desktop", "R4Gateway::read_descriptor",
 python_paths = ["scripts/builder3d_mcp.py", "src/ai_bridge.py"]
 tests = ["crates/builder3d-mcp/src/r4/gateway.rs", "evidence/rebuild/rb-09-shared-ai-and-regression/rust_stdio_client_probe.py"]
 evidence = ["evidence/rebuild/rb-09-shared-ai-and-regression/report.md", "evidence/rebuild/rb-09-shared-ai-and-regression/verification.md", "evidence/rebuild/rb-09-shared-ai-and-regression/rust_stdio_client_probe-result.json", "evidence/rebuild/rb-09-shared-ai-and-regression/logs/rust-stdio-client-probe.stdout.json", "evidence/rebuild/rb-09-shared-ai-and-regression/client-server-log.md", "evidence/rebuild/rb-09-shared-ai-and-regression/build-manifest.json", "evidence/rebuild/rb-09-shared-ai-and-regression/logs/rb09-rust-client-2.jsonl", "evidence/rebuild/rb-09-shared-ai-and-regression/logs/rb09-rust-client-final-pair.jsonl", "evidence/rebuild/rb-09-shared-ai-and-regression/logs/rb09-rust-optional-client.jsonl", "evidence/rebuild/rb-09-shared-ai-and-regression/artifact-identity-recheck.json", "evidence/rebuild/rb-09-shared-ai-and-regression/artifact-identity-recheck/current-app.png", "evidence/rebuild/rb-09-shared-ai-and-regression/artifact-identity-recheck/client.jsonl", "evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261106-072716/current-run-manifest.json", "evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261106-072716/schema-comparison.json", "evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261106-072716/logs/rust-current-live.jsonl", "evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261106-072716/logs/rust-current-live-reopen-client.jsonl", "evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261106-072716/logs/rust-current-optional-failure-client.jsonl", "evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261106-072716/captures/rust-current-live-gui-reopened-after-restart-final.png", "evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261106-072716/captures/rust-current-optional-startup-unavailable.png"]
-contracts = ["fixed-60-tool-catalog", "schema-parity-pending", "stdio-mcp", "authenticated-runtime-descriptor", "closed-desktop-structured-error", "bounded-loopback-http"]
-conversion_note = "The stdio process publishes the ordered 60-tool catalog and proxies live requests to the optional desktop-owned bridge. Current Rust Release profile names/order and live GUI/MCP forwarding were verified. Current schema comparison against saved Python catalogs found no exact input/output schema matches; the Python product and catalogs were not refreshed in this run. Schema disposition remains open. The official SDK also verified structured closed-desktop errors and cleanup after normal and failed startup."
+contracts = ["fixed-60-tool-catalog", "schema-parity-current-reference", "stdio-mcp", "authenticated-runtime-descriptor", "closed-desktop-structured-error", "bounded-loopback-http"]
+conversion_note = "The stdio process publishes the ordered 60-tool catalog and proxies live requests to the optional desktop-owned bridge. On 2026-11-07 the current Rust Release schemas and official MCP annotations matched a read-only current L reference capture recursively in all four profiles. The Python product was not launched; saved catalogs remain historical evidence. Twenty-five successful Release GUI/MCP result envelopes passed nested output-schema validation. One emboss_text _meta.com.builder3d/longRunning difference remains disclosed without owner approval. Full RB-09, visual, owner, and overall product acceptance remain open."
 
 [[component]]
 id = "builder3d.reference.scripts"

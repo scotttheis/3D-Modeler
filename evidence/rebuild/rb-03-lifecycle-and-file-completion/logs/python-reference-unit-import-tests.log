@@ -1,0 +1,4 @@
+﻿COMMAND=venv\Scripts\python.exe -B -m pytest -p no:cacheprovider --basetemp E:\Builder3D-Rust\target\rb03-reference-mesh-tests -q tests\test_mesh_ops.py -k unitless_format_import_applies_selected_unit_once
+...                                                                      [100%]
+3 passed, 80 deselected in 1.36s
+EXIT_CODE=0

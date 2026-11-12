@@ -1,0 +1,2662 @@
+[
+  {
+    "action": "empty-rest",
+    "theme": "light",
+    "fixture": "empty",
+    "mode": "rest",
+    "input_route": "native window capture",
+    "logical_window_size": [
+      1280,
+      840
+    ],
+    "captured_size": [
+      1280,
+      840
+    ],
+    "device_pixel_ratio": 1.0,
+    "screen_dpi": 96.0,
+    "camera": {
+      "yaw": 45.0,
+      "pitch": 35.0,
+      "distance": 500.0,
+      "center": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "selection": [],
+    "objects": [],
+    "image": "captures/python-light-empty-rest.png"
+  },
+  {
+    "action": "single-rest",
+    "theme": "light",
+    "fixture": "fixtures/python-single.3dp",
+    "mode": "rest",
+    "input_route": "native window capture",
+    "logical_window_size": [
+      1280,
+      840
+    ],
+    "captured_size": [
+      1280,
+      840
+    ],
+    "device_pixel_ratio": 1.0,
+    "screen_dpi": 96.0,
+    "camera": {
+      "yaw": 45.0,
+      "pitch": 35.0,
+      "distance": 103.18335723876953,
+      "center": [
+        17.5,
+        15.0,
+        0.0
+      ]
+    },
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "773eb99e9a4d48b890345b53a07da03f",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            15.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "d32d70a4a0b04b65be8950ca9a309df4",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            40.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "image": "captures/python-light-single-rest.png"
+  },
+  {
+    "action": "double-click-frame",
+    "theme": "light",
+    "fixture": "fixtures/python-single.3dp",
+    "mode": "rest",
+    "input_route": "actual OS double primary click",
+    "logical_window_size": [
+      1280,
+      840
+    ],
+    "captured_size": [
+      1280,
+      840
+    ],
+    "device_pixel_ratio": 1.0,
+    "screen_dpi": 96.0,
+    "camera": {
+      "yaw": 45.0,
+      "pitch": 35.0,
+      "distance": 74.75538635253906,
+      "center": [
+        0.0,
+        15.0,
+        0.0
+      ]
+    },
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "773eb99e9a4d48b890345b53a07da03f",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            15.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "d32d70a4a0b04b65be8950ca9a309df4",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            40.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "image": "captures/python-light-double-click-frame.png"
+  },
+  {
+    "action": "orbit-after",
+    "theme": "light",
+    "fixture": "fixtures/python-single.3dp",
+    "mode": "rest",
+    "input_route": "actual OS primary pointer drag",
+    "logical_window_size": [
+      1280,
+      840
+    ],
+    "captured_size": [
+      1280,
+      840
+    ],
+    "device_pixel_ratio": 1.0,
+    "screen_dpi": 96.0,
+    "camera": {
+      "yaw": 27.33333333333333,
+      "pitch": 48.75,
+      "distance": 74.75538635253906,
+      "center": [
+        0.0,
+        15.0,
+        0.0
+      ]
+    },
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "773eb99e9a4d48b890345b53a07da03f",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            15.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "d32d70a4a0b04b65be8950ca9a309df4",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            40.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "image": "captures/python-light-orbit-after.png"
+  },
+  {
+    "action": "pan-middle-after",
+    "theme": "light",
+    "fixture": "fixtures/python-single.3dp",
+    "mode": "rest",
+    "input_route": "actual OS middle pointer drag",
+    "logical_window_size": [
+      1280,
+      840
+    ],
+    "captured_size": [
+      1280,
+      840
+    ],
+    "device_pixel_ratio": 1.0,
+    "screen_dpi": 96.0,
+    "camera": {
+      "yaw": 27.33333333333333,
+      "pitch": 48.75,
+      "distance": 74.75538635253906,
+      "center": [
+        -3.6741809844970703,
+        16.182952880859375,
+        0.3806639015674591
+      ]
+    },
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "773eb99e9a4d48b890345b53a07da03f",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            15.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "d32d70a4a0b04b65be8950ca9a309df4",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            40.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "image": "captures/python-light-pan-middle-after.png"
+  },
+  {
+    "action": "pan-right-after",
+    "theme": "light",
+    "fixture": "fixtures/python-single.3dp",
+    "mode": "rest",
+    "input_route": "actual OS secondary pointer drag",
+    "logical_window_size": [
+      1280,
+      840
+    ],
+    "captured_size": [
+      1280,
+      840
+    ],
+    "device_pixel_ratio": 1.0,
+    "screen_dpi": 96.0,
+    "camera": {
+      "yaw": 27.33333333333333,
+      "pitch": 48.75,
+      "distance": 74.75538635253906,
+      "center": [
+        -1.6963706016540527,
+        16.971588134765625,
+        -1.6539044380187988
+      ]
+    },
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "773eb99e9a4d48b890345b53a07da03f",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            15.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "d32d70a4a0b04b65be8950ca9a309df4",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            40.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "image": "captures/python-light-pan-right-after.png"
+  },
+  {
+    "action": "wheel-after",
+    "theme": "light",
+    "fixture": "fixtures/python-single.3dp",
+    "mode": "rest",
+    "input_route": "actual OS wheel",
+    "logical_window_size": [
+      1280,
+      840
+    ],
+    "captured_size": [
+      1280,
+      840
+    ],
+    "device_pixel_ratio": 1.0,
+    "screen_dpi": 96.0,
+    "camera": {
+      "yaw": 27.33333333333333,
+      "pitch": 48.75,
+      "distance": 65.78473999023437,
+      "center": [
+        -1.6963706016540527,
+        16.971588134765625,
+        -1.6539044380187988
+      ]
+    },
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "773eb99e9a4d48b890345b53a07da03f",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            15.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "d32d70a4a0b04b65be8950ca9a309df4",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            40.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "image": "captures/python-light-wheel-after.png"
+  },
+  {
+    "action": "grid-off",
+    "theme": "light",
+    "fixture": "fixtures/python-single.3dp",
+    "mode": "rest",
+    "input_route": "actual OS View ribbon button click",
+    "logical_window_size": [
+      1280,
+      840
+    ],
+    "captured_size": [
+      1280,
+      840
+    ],
+    "device_pixel_ratio": 1.0,
+    "screen_dpi": 96.0,
+    "camera": {
+      "yaw": 27.33333333333333,
+      "pitch": 48.75,
+      "distance": 65.78473999023437,
+      "center": [
+        -1.6963706016540527,
+        16.971588134765625,
+        -1.6539044380187988
+      ]
+    },
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "773eb99e9a4d48b890345b53a07da03f",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            15.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "d32d70a4a0b04b65be8950ca9a309df4",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            40.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "image": "captures/python-light-grid-off.png"
+  },
+  {
+    "action": "wireframe-xray",
+    "theme": "light",
+    "fixture": "fixtures/python-single.3dp",
+    "mode": "rest",
+    "input_route": "actual OS ribbon button clicks",
+    "logical_window_size": [
+      1280,
+      840
+    ],
+    "captured_size": [
+      1280,
+      840
+    ],
+    "device_pixel_ratio": 1.0,
+    "screen_dpi": 96.0,
+    "camera": {
+      "yaw": 27.33333333333333,
+      "pitch": 48.75,
+      "distance": 65.78473999023437,
+      "center": [
+        -1.6963706016540527,
+        16.971588134765625,
+        -1.6539044380187988
+      ]
+    },
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "773eb99e9a4d48b890345b53a07da03f",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            15.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "d32d70a4a0b04b65be8950ca9a309df4",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            40.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "image": "captures/python-light-wireframe-xray.png"
+  },
+  {
+    "action": "snap-toggled",
+    "theme": "light",
+    "fixture": "fixtures/python-single.3dp",
+    "mode": "rest",
+    "input_route": "actual OS ribbon button click",
+    "logical_window_size": [
+      1280,
+      840
+    ],
+    "captured_size": [
+      1280,
+      840
+    ],
+    "device_pixel_ratio": 1.0,
+    "screen_dpi": 96.0,
+    "camera": {
+      "yaw": 27.33333333333333,
+      "pitch": 48.75,
+      "distance": 65.78473999023437,
+      "center": [
+        -1.6963706016540527,
+        16.971588134765625,
+        -1.6539044380187988
+      ]
+    },
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "773eb99e9a4d48b890345b53a07da03f",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            15.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "d32d70a4a0b04b65be8950ca9a309df4",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            40.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "image": "captures/python-light-snap-toggled.png"
+  },
+  {
+    "action": "move-rest",
+    "theme": "light",
+    "fixture": "fixtures/python-single.3dp",
+    "mode": "rest",
+    "input_route": "visible Qt/OpenGL window",
+    "logical_window_size": [
+      1280,
+      840
+    ],
+    "captured_size": [
+      1280,
+      840
+    ],
+    "device_pixel_ratio": 1.0,
+    "screen_dpi": 96.0,
+    "camera": {
+      "yaw": 27.33333333333333,
+      "pitch": 48.75,
+      "distance": 65.78473999023437,
+      "center": [
+        -1.6963706016540527,
+        16.971588134765625,
+        -1.6539044380187988
+      ]
+    },
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "773eb99e9a4d48b890345b53a07da03f",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            15.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "d32d70a4a0b04b65be8950ca9a309df4",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            40.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "image": "captures/python-light-move-rest.png"
+  },
+  {
+    "action": "move-interaction",
+    "theme": "light",
+    "fixture": "fixtures/python-single.3dp",
+    "mode": "interaction",
+    "input_route": "actual OS primary pointer drag",
+    "logical_window_size": [
+      1280,
+      840
+    ],
+    "captured_size": [
+      1280,
+      840
+    ],
+    "device_pixel_ratio": 1.0,
+    "screen_dpi": 96.0,
+    "camera": {
+      "yaw": 27.33333333333333,
+      "pitch": 48.75,
+      "distance": 65.78473999023437,
+      "center": [
+        -1.6963706016540527,
+        16.971588134765625,
+        -1.6539044380187988
+      ]
+    },
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "773eb99e9a4d48b890345b53a07da03f",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            3.266200065612793
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            15.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "d32d70a4a0b04b65be8950ca9a309df4",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            40.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "image": "captures/python-light-move-interaction.png"
+  },
+  {
+    "action": "multiple-rest",
+    "theme": "light",
+    "fixture": "fixtures/python-multiple.3dp",
+    "mode": "rest",
+    "input_route": "native window capture",
+    "logical_window_size": [
+      1280,
+      840
+    ],
+    "captured_size": [
+      1280,
+      840
+    ],
+    "device_pixel_ratio": 1.0,
+    "screen_dpi": 96.0,
+    "camera": {
+      "yaw": 45.0,
+      "pitch": 35.0,
+      "distance": 103.18335723876953,
+      "center": [
+        17.5,
+        15.0,
+        0.0
+      ]
+    },
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "069a6c28cb4340c39b5773a7e6f6777d",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            15.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "aad35d8dd06c42028f75af84b4b3ee16",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            40.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "image": "captures/python-light-multiple-rest.png"
+  },
+  {
+    "action": "grouped-rest",
+    "theme": "light",
+    "fixture": "fixtures/python-grouped.3dp",
+    "mode": "rest",
+    "input_route": "native window capture",
+    "logical_window_size": [
+      1280,
+      840
+    ],
+    "captured_size": [
+      1280,
+      840
+    ],
+    "device_pixel_ratio": 1.0,
+    "screen_dpi": 96.0,
+    "camera": {
+      "yaw": 45.0,
+      "pitch": 35.0,
+      "distance": 103.18335723876953,
+      "center": [
+        17.5,
+        15.0,
+        0.0
+      ]
+    },
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "27587dcb67bf4dad8ab2de4daedc63b4",
+        "name": "Group",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "image": "captures/python-light-grouped-rest.png"
+  },
+  {
+    "action": "hidden-rest",
+    "theme": "light",
+    "fixture": "fixtures/python-hidden.3dp",
+    "mode": "rest",
+    "input_route": "native window capture",
+    "logical_window_size": [
+      1280,
+      840
+    ],
+    "captured_size": [
+      1280,
+      840
+    ],
+    "device_pixel_ratio": 1.0,
+    "screen_dpi": 96.0,
+    "camera": {
+      "yaw": 45.0,
+      "pitch": 35.0,
+      "distance": 74.75538635253906,
+      "center": [
+        0.0,
+        15.0,
+        0.0
+      ]
+    },
+    "selection": [
+      0,
+      1
+    ],
+    "objects": [
+      {
+        "id": "19621c1e3c914d96aa6e9d75111c35be",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            15.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "900190e4a94142e3b401f29bd7de9a09",
+        "name": "Box B",
+        "visible": false,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            40.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "image": "captures/python-light-hidden-rest.png"
+  },
+  {
+    "action": "empty-rest",
+    "theme": "dark",
+    "fixture": "empty",
+    "mode": "rest",
+    "input_route": "native window capture",
+    "logical_window_size": [
+      1280,
+      840
+    ],
+    "captured_size": [
+      1280,
+      840
+    ],
+    "device_pixel_ratio": 1.0,
+    "screen_dpi": 96.0,
+    "camera": {
+      "yaw": 45.0,
+      "pitch": 35.0,
+      "distance": 500.0,
+      "center": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "selection": [],
+    "objects": [],
+    "image": "captures/python-dark-empty-rest.png"
+  },
+  {
+    "action": "single-rest",
+    "theme": "dark",
+    "fixture": "fixtures/python-single.3dp",
+    "mode": "rest",
+    "input_route": "native window capture",
+    "logical_window_size": [
+      1280,
+      840
+    ],
+    "captured_size": [
+      1280,
+      840
+    ],
+    "device_pixel_ratio": 1.0,
+    "screen_dpi": 96.0,
+    "camera": {
+      "yaw": 45.0,
+      "pitch": 35.0,
+      "distance": 103.18335723876953,
+      "center": [
+        17.5,
+        15.0,
+        0.0
+      ]
+    },
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "d9682dbb6d1a410fabbdd215d790cfcf",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            15.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "58fd227c7a574a04a0f41c98259d7c8f",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            40.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "image": "captures/python-dark-single-rest.png"
+  },
+  {
+    "action": "double-click-frame",
+    "theme": "dark",
+    "fixture": "fixtures/python-single.3dp",
+    "mode": "rest",
+    "input_route": "actual OS double primary click",
+    "logical_window_size": [
+      1280,
+      840
+    ],
+    "captured_size": [
+      1280,
+      840
+    ],
+    "device_pixel_ratio": 1.0,
+    "screen_dpi": 96.0,
+    "camera": {
+      "yaw": 45.0,
+      "pitch": 35.0,
+      "distance": 74.75538635253906,
+      "center": [
+        0.0,
+        15.0,
+        0.0
+      ]
+    },
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "d9682dbb6d1a410fabbdd215d790cfcf",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            15.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "58fd227c7a574a04a0f41c98259d7c8f",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            40.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "image": "captures/python-dark-double-click-frame.png"
+  },
+  {
+    "action": "orbit-after",
+    "theme": "dark",
+    "fixture": "fixtures/python-single.3dp",
+    "mode": "rest",
+    "input_route": "actual OS primary pointer drag",
+    "logical_window_size": [
+      1280,
+      840
+    ],
+    "captured_size": [
+      1280,
+      840
+    ],
+    "device_pixel_ratio": 1.0,
+    "screen_dpi": 96.0,
+    "camera": {
+      "yaw": 27.33333333333333,
+      "pitch": 48.75,
+      "distance": 74.75538635253906,
+      "center": [
+        0.0,
+        15.0,
+        0.0
+      ]
+    },
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "d9682dbb6d1a410fabbdd215d790cfcf",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            15.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "58fd227c7a574a04a0f41c98259d7c8f",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            40.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "image": "captures/python-dark-orbit-after.png"
+  },
+  {
+    "action": "pan-middle-after",
+    "theme": "dark",
+    "fixture": "fixtures/python-single.3dp",
+    "mode": "rest",
+    "input_route": "actual OS middle pointer drag",
+    "logical_window_size": [
+      1280,
+      840
+    ],
+    "captured_size": [
+      1280,
+      840
+    ],
+    "device_pixel_ratio": 1.0,
+    "screen_dpi": 96.0,
+    "camera": {
+      "yaw": 27.33333333333333,
+      "pitch": 48.75,
+      "distance": 74.75538635253906,
+      "center": [
+        -3.6741809844970703,
+        16.182952880859375,
+        0.3806639015674591
+      ]
+    },
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "d9682dbb6d1a410fabbdd215d790cfcf",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            15.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "58fd227c7a574a04a0f41c98259d7c8f",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            40.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "image": "captures/python-dark-pan-middle-after.png"
+  },
+  {
+    "action": "pan-right-after",
+    "theme": "dark",
+    "fixture": "fixtures/python-single.3dp",
+    "mode": "rest",
+    "input_route": "actual OS secondary pointer drag",
+    "logical_window_size": [
+      1280,
+      840
+    ],
+    "captured_size": [
+      1280,
+      840
+    ],
+    "device_pixel_ratio": 1.0,
+    "screen_dpi": 96.0,
+    "camera": {
+      "yaw": 27.33333333333333,
+      "pitch": 48.75,
+      "distance": 74.75538635253906,
+      "center": [
+        -1.6963706016540527,
+        16.971588134765625,
+        -1.6539044380187988
+      ]
+    },
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "d9682dbb6d1a410fabbdd215d790cfcf",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            15.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "58fd227c7a574a04a0f41c98259d7c8f",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            40.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "image": "captures/python-dark-pan-right-after.png"
+  },
+  {
+    "action": "wheel-after",
+    "theme": "dark",
+    "fixture": "fixtures/python-single.3dp",
+    "mode": "rest",
+    "input_route": "actual OS wheel",
+    "logical_window_size": [
+      1280,
+      840
+    ],
+    "captured_size": [
+      1280,
+      840
+    ],
+    "device_pixel_ratio": 1.0,
+    "screen_dpi": 96.0,
+    "camera": {
+      "yaw": 27.33333333333333,
+      "pitch": 48.75,
+      "distance": 65.78473999023437,
+      "center": [
+        -1.6963706016540527,
+        16.971588134765625,
+        -1.6539044380187988
+      ]
+    },
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "d9682dbb6d1a410fabbdd215d790cfcf",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            15.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "58fd227c7a574a04a0f41c98259d7c8f",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            40.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "image": "captures/python-dark-wheel-after.png"
+  },
+  {
+    "action": "grid-off",
+    "theme": "dark",
+    "fixture": "fixtures/python-single.3dp",
+    "mode": "rest",
+    "input_route": "actual OS View ribbon button click",
+    "logical_window_size": [
+      1280,
+      840
+    ],
+    "captured_size": [
+      1280,
+      840
+    ],
+    "device_pixel_ratio": 1.0,
+    "screen_dpi": 96.0,
+    "camera": {
+      "yaw": 27.33333333333333,
+      "pitch": 48.75,
+      "distance": 103.18335723876953,
+      "center": [
+        17.5,
+        15.0,
+        0.0
+      ]
+    },
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "d9682dbb6d1a410fabbdd215d790cfcf",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            15.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "58fd227c7a574a04a0f41c98259d7c8f",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            40.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "image": "captures/python-dark-grid-off.png"
+  },
+  {
+    "action": "wireframe-xray",
+    "theme": "dark",
+    "fixture": "fixtures/python-single.3dp",
+    "mode": "rest",
+    "input_route": "actual OS ribbon button clicks",
+    "logical_window_size": [
+      1280,
+      840
+    ],
+    "captured_size": [
+      1280,
+      840
+    ],
+    "device_pixel_ratio": 1.0,
+    "screen_dpi": 96.0,
+    "camera": {
+      "yaw": 27.33333333333333,
+      "pitch": 48.75,
+      "distance": 103.18335723876953,
+      "center": [
+        17.5,
+        15.0,
+        0.0
+      ]
+    },
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "d9682dbb6d1a410fabbdd215d790cfcf",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            15.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "58fd227c7a574a04a0f41c98259d7c8f",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            40.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "image": "captures/python-dark-wireframe-xray.png"
+  },
+  {
+    "action": "snap-toggled",
+    "theme": "dark",
+    "fixture": "fixtures/python-single.3dp",
+    "mode": "rest",
+    "input_route": "actual OS ribbon button click",
+    "logical_window_size": [
+      1280,
+      840
+    ],
+    "captured_size": [
+      1280,
+      840
+    ],
+    "device_pixel_ratio": 1.0,
+    "screen_dpi": 96.0,
+    "camera": {
+      "yaw": 27.33333333333333,
+      "pitch": 48.75,
+      "distance": 103.18335723876953,
+      "center": [
+        17.5,
+        15.0,
+        0.0
+      ]
+    },
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "d9682dbb6d1a410fabbdd215d790cfcf",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            15.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "58fd227c7a574a04a0f41c98259d7c8f",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            40.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "image": "captures/python-dark-snap-toggled.png"
+  },
+  {
+    "action": "move-rest",
+    "theme": "dark",
+    "fixture": "fixtures/python-single.3dp",
+    "mode": "rest",
+    "input_route": "visible Qt/OpenGL window",
+    "logical_window_size": [
+      1280,
+      840
+    ],
+    "captured_size": [
+      1280,
+      840
+    ],
+    "device_pixel_ratio": 1.0,
+    "screen_dpi": 96.0,
+    "camera": {
+      "yaw": 27.33333333333333,
+      "pitch": 48.75,
+      "distance": 103.18335723876953,
+      "center": [
+        17.5,
+        15.0,
+        0.0
+      ]
+    },
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "d9682dbb6d1a410fabbdd215d790cfcf",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            15.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "58fd227c7a574a04a0f41c98259d7c8f",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            40.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "image": "captures/python-dark-move-rest.png"
+  },
+  {
+    "action": "move-interaction",
+    "theme": "dark",
+    "fixture": "fixtures/python-single.3dp",
+    "mode": "interaction",
+    "input_route": "actual OS primary pointer drag",
+    "logical_window_size": [
+      1280,
+      840
+    ],
+    "captured_size": [
+      1280,
+      840
+    ],
+    "device_pixel_ratio": 1.0,
+    "screen_dpi": 96.0,
+    "camera": {
+      "yaw": 27.33333333333333,
+      "pitch": 48.75,
+      "distance": 103.18335723876953,
+      "center": [
+        17.5,
+        15.0,
+        0.0
+      ]
+    },
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "d9682dbb6d1a410fabbdd215d790cfcf",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            5.920262336730957
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            15.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "58fd227c7a574a04a0f41c98259d7c8f",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            40.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "image": "captures/python-dark-move-interaction.png"
+  },
+  {
+    "action": "multiple-rest",
+    "theme": "dark",
+    "fixture": "fixtures/python-multiple.3dp",
+    "mode": "rest",
+    "input_route": "native window capture",
+    "logical_window_size": [
+      1280,
+      840
+    ],
+    "captured_size": [
+      1280,
+      840
+    ],
+    "device_pixel_ratio": 1.0,
+    "screen_dpi": 96.0,
+    "camera": {
+      "yaw": 45.0,
+      "pitch": 35.0,
+      "distance": 103.18335723876953,
+      "center": [
+        17.5,
+        15.0,
+        0.0
+      ]
+    },
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "fad3ee81533c4a238baf520ba1683b2f",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            15.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "43710049d8914687a6362d811e2ba383",
+        "name": "Box B",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            40.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "image": "captures/python-dark-multiple-rest.png"
+  },
+  {
+    "action": "grouped-rest",
+    "theme": "dark",
+    "fixture": "fixtures/python-grouped.3dp",
+    "mode": "rest",
+    "input_route": "native window capture",
+    "logical_window_size": [
+      1280,
+      840
+    ],
+    "captured_size": [
+      1280,
+      840
+    ],
+    "device_pixel_ratio": 1.0,
+    "screen_dpi": 96.0,
+    "camera": {
+      "yaw": 45.0,
+      "pitch": 35.0,
+      "distance": 103.18335723876953,
+      "center": [
+        17.5,
+        15.0,
+        0.0
+      ]
+    },
+    "selection": [
+      0
+    ],
+    "objects": [
+      {
+        "id": "3d1fcb5930d4465b8f8f7eaf80dd9966",
+        "name": "Group",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "image": "captures/python-dark-grouped-rest.png"
+  },
+  {
+    "action": "hidden-rest",
+    "theme": "dark",
+    "fixture": "fixtures/python-hidden.3dp",
+    "mode": "rest",
+    "input_route": "native window capture",
+    "logical_window_size": [
+      1280,
+      840
+    ],
+    "captured_size": [
+      1280,
+      840
+    ],
+    "device_pixel_ratio": 1.0,
+    "screen_dpi": 96.0,
+    "camera": {
+      "yaw": 45.0,
+      "pitch": 35.0,
+      "distance": 74.75538635253906,
+      "center": [
+        0.0,
+        15.0,
+        0.0
+      ]
+    },
+    "selection": [
+      0,
+      1
+    ],
+    "objects": [
+      {
+        "id": "fc54d430b68342a68d03486a3ce118d3",
+        "name": "Box A",
+        "visible": true,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            15.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "id": "73c481bda4cb4894995a39001f5021a8",
+        "name": "Box B",
+        "visible": false,
+        "transform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            40.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "image": "captures/python-dark-hidden-rest.png"
+  }
+]

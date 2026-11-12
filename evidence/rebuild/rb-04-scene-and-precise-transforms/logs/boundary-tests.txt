@@ -1,0 +1,422 @@
+COMMAND: cargo test --workspace --locked
+   Compiling builder3d-app v0.1.0 (E:\Builder3D-Rust\crates\builder3d-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 11.92s
+     Running unittests src\lib.rs (target\debug\deps\builder3d_app-289afea2fa319164.exe)
+
+running 115 tests
+test artwork::tests::theme_artwork_is_scoped_and_not_shared_raster_data ... ok
+test artwork::tests::both_theme_catalogs_validate_every_compact_asset ... ok
+test commands::rb04_gesture_tests::parallel_and_zero_radius_rotation_rays_preserve_preview ... ok
+test commands::rb04_measure_mirror::measure_reports_each_objects_width_depth_height_without_history ... ok
+test commands::rb04_regressions::absolute_rotation_is_repeatable_and_resize_preserves_translation ... ok
+test commands::rb04_measure_mirror::mirror_changes_local_column_and_matching_translation_component_after_rotation ... ok
+test commands::rb04_names::rename_preserves_identity_mesh_and_history_on_invalid_or_unchanged_names ... ok
+test commands::rb04_regressions::placement_uses_user_anchor_order_and_all_axes_without_selection_history ... ok
+test commands::rb04_gesture_tests::invalid_multi_numeric_keeps_all_targets_history_identity_and_visibility ... ok
+test commands::rb04_gesture_tests::cancelled_noop_stale_and_replaced_document_keep_scene_safe ... ok
+test commands::rb04_regressions::clipboard_offsets_ids_hidden_state_and_one_step_history_match_reference ... ok
+test commands::rb04_gesture_tests::grouped_hidden_clipboard_duplicate_delete_and_undo_preserve_metadata_and_fresh_ids ... ok
+test commands::rb04_gesture_tests::placement_all_axes_landmarks_gaps_and_anchor_orders_match_42_python_cases ... ok
+test commands::rb04_gesture_tests::multi_numeric_matches_32_python_toolbar_axis_unit_and_lock_cases ... ok
+test commands::tests::empty_selection_is_a_typed_error ... ok
+test commands::tests::core_backed_object_commands_change_state_without_shell_access ... ok
+test commands::rb04_scene_order::settle_and_measure_use_scene_order_after_reverse_click_selection ... ok
+test commands::tests::file_menu_keeps_shell_contract_and_no_removed_actions ... ok
+test commands::tests::import_unit_choices_match_reference_order_and_scale_factors ... ok
+test commands::tests::durable_id_move_survives_scene_reordering_and_has_one_undo_entry ... ok
+test commands::tests::paste_enablement_follows_clipboard_not_selection ... ok
+test commands::tests::primitive_command_changes_scene_and_selection ... ok
+test commands::tests::model_import_is_atomic_selected_and_undoable ... ok
+test commands::tests::ribbon_matches_reference_tab_and_command_order ... ok
+test commands::tests::unit_override_scales_import_before_reference_placement ... ok
+test commands::tests::view_commands_are_typed_state_changes ... ok
+test commands::tests::python_stl_obj_and_ply_imports_keep_names_geometry_and_vertex_colors ... ok
+test commands::tests::unsupported_import_does_not_change_scene ... ok
+test commands::tests::authoritative_multimesh_imports_ignore_unit_override_and_undo_as_one_action ... ok
+test commands::tests::unitless_stl_import_uses_each_reference_scale_once ... ok
+test dialogs::tests::native_file_picker_selection_updates_path_without_changing_cancellation ... ok
+test commands::tests::millimetre_import_move_and_project_reopen_preserve_identity_and_geometry ... ok
+test dialogs::tests::cancelling_native_import_browse_preserves_the_typed_path ... ok
+test dialogs::tests::dialog_defaults_are_bounded_and_typed ... ok
+test dialogs::tests::export_path_keeps_explicit_format_and_defaults_extensionless_names_to_stl ... ok
+test commands::tests::selection_modifiers_and_visibility_are_presentation_and_model_seams ... ok
+test image_color::tests::unsupported_or_missing_paths_return_typed_errors ... ok
+test export::tests::unsupported_export_extension_is_typed_before_writing ... ok
+test commands::tests::project_paths_enforce_format_and_save_as_adds_the_default_extension ... ok
+test commands::rb04_gesture_tests::all_python_handles_axes_bases_groups_and_hidden_targets_match_122_oracles ... ok
+test launchers::tests::fixed_launchers_are_native_and_bounded ... ok
+test launchers::tests::launcher_sources_keep_arguments_as_vectors ... ok
+test numeric_controls::tests::angle_and_scale_parsers_keep_units_explicit ... ok
+test image_color::tests::average_color_matches_reference_ppm_sampling ... ok
+test numeric_controls::tests::distance_parser_accepts_suffixes_and_rejects_bad_values ... ok
+test image_color::tests::sample_step_and_encoded_size_are_bounded ... ok
+test numeric_controls::tests::selection_excludes_numeric_suffix ... ok
+test operations::tests::busy_and_cancellation_are_cooperative_and_idempotent ... ok
+test operations::tests::failure_and_history_are_bounded ... ok
+test operations::tests::lifecycle_reports_progress_and_terminal_result ... ok
+test packaging::tests::archive_and_installed_limits_are_explicit ... ok
+test packaging::tests::installer_templates_are_bounded_and_native ... ok
+test preferences::tests::import_unit_policy_preserves_authoritative_formats ... ok
+test preferences::tests::persisted_micrometre_spellings_deserialize_without_changing_the_schema ... ok
+test commands::tests::selection_commands_cover_group_cut_and_non_history_selection ... ok
+test preferences::tests::recent_files_are_newest_first_deduplicated_and_bounded ... ok
+test preferences::tests::ribbon_preferences_remove_duplicates_and_keep_display_units_separate ... ok
+test preferences::tests::malformed_preferences_are_typed_errors ... ok
+test print_prep::tests::bed_fit_reports_world_bounds_and_surface_warning ... ok
+test preferences::tests::preferences_round_trip_and_normalize_persisted_bounds ... ok
+test print_prep::tests::invalid_bed_size_is_rejected_before_checks ... ok
+test print_prep::tests::clean_cube_has_no_print_findings ... ok
+test commands::tests::failed_supported_and_unsupported_imports_preserve_live_state ... ok
+test print_prep::tests::scale_and_hidden_checks_match_reference_severity ... ok
+test print_handoff::tests::prepare_print_rejects_empty_visible_scene ... ok
+test rotation::tests::absolute_rotation_matches_python_scale_shear_reflection_and_gimbal_oracles ... ok
+test recent_preview::rb04_group_preview::recent_and_items_draw_the_combined_group_once_and_keep_hidden_items_visible_in_rows ... ok
+test shell::tests::clipboard_enables_paste_without_requiring_a_current_selection ... ok
+test shell::tests::default_shell_starts_on_a_safe_welcome_surface ... ok
+test recent_preview::tests::missing_corrupt_and_unsupported_recents_keep_the_icon_fallback ... ok
+test shell::tests::disabled_command_policy_requires_the_relevant_selection ... ok
+test shell::tests::dirty_exit_guard_cancel_and_discard_match_file_menu_and_window_close ... ok
+test shell::tests::dispatch_moves_to_scene_without_putting_model_logic_in_the_shell ... ok
+test commands::tests::dirty_marker_tracks_saved_checkpoint_through_undo_redo_and_branches ... ok
+test recent_preview::tests::raster_recent_and_embedded_image_payloads_are_bounded_and_padded ... ok
+test shell::tests::gizmo_release_commits_once_and_cancel_or_noop_keeps_history ... ok
+test shell::tests::items_anchor_follows_identity_after_an_earlier_row_is_deleted ... ok
+test shell::tests::physical_viewport_mapping_tracks_scale_and_client_coordinates ... ok
+test print_handoff::tests::prepare_print_uses_individual_stl_for_bambu ... ok
+test shell::tests::dirty_new_guard_covers_cancel_discard_and_save_as ... ok
+test commands::tests::torus_and_shell_dialog_actions_have_real_core_paths ... ok
+test shell::tests::recent_grid_allocates_a_visible_width_for_every_column ... ok
+test shell::tests::failed_recent_project_and_wrl_import_preserve_scene_and_recent_state ... ok
+test shell::tests::proportional_numeric_resize_uses_edited_y_in_inches_and_rejects_invalid_input ... ok
+test shell::tests::viewport_motion_cancels_on_escape_focus_modal_or_scene_change ... ok
+test shell::tests::opening_a_missing_recent_removes_and_persists_it_without_scene_changes ... ok
+test shell::tests::viewport_router_applies_camera_gestures_and_honors_capture ... ok
+test shell::tests::viewport_picks_toggle_plain_ctrl_shift_and_empty_sticky_without_history ... ok
+test signals::tests::typed_signal_emits_in_connection_order_and_disconnects_by_handle ... ok
+test theme::tests::style_guide_light_palette_is_stable ... ok
+test transforms::tests::align_and_arrange_use_world_bounds ... ok
+test transforms::tests::combined_position_and_size_is_one_history_entry ... ok
+test recent_preview::tests::project_and_all_importable_model_formats_produce_mesh_previews ... ok
+test transforms::rb04_placement_oracle::settle_single_and_group_match_python_convex_hull_cases ... ok
+test transforms::tests::group_translation_is_atomic_and_undoable ... ok
+test transforms::tests::numeric_position_and_size_updates_are_undoable ... ok
+test ui_state::tests::favorites_drop_stale_duplicates_and_support_reordering ... ok
+test ui_state::tests::recent_paths_have_bounded_missing_and_unsupported_fallbacks ... ok
+test ui_state::tests::tab_order_fills_missing_commands_without_stale_entries ... ok
+test transforms::tests::settle_uses_y_as_the_build_axis_and_mirror_is_one_history_entry ... ok
+test view_state::tests::empty_scene_frame_is_a_stable_noop ... ok
+test view_state::tests::frame_selected_and_empty_selection_fallback_use_world_bounds ... ok
+test view_state::tests::state_updates_and_presets_keep_camera_bounds ... ok
+test shell::tests::failed_save_keeps_the_confirmation_and_dirty_scene_open ... ok
+test commands::tests::failed_project_open_and_save_preserve_scene_path_dirty_state_and_history ... ok
+test print_handoff::tests::prepare_print_stages_visible_objects_as_one_3mf ... ok
+test shell::tests::typed_export_overwrite_cancel_preserves_destination_and_scene_state ... ok
+test shell::tests::recent_project_and_model_dispatch_persist_across_app_restart ... ok
+test shell::tests::editing_shortcuts_respect_text_focus_and_modal_boundaries ... ok
+test export::tests::export_selection_and_visibility_matrix_matches_reference ... ok
+test commands::tests::export_success_and_failure_preserve_scene_project_dirty_selection_history_and_recents ... ok
+test shell::tests::typed_save_as_overwrite_cancel_keeps_the_existing_project_and_live_scene ... ok
+test shell::tests::dirty_project_open_supports_cancel_discard_and_save_as ... ok
+test shell::tests::resize_handles_start_real_adapter_gestures_and_click_without_motion_is_noop ... ok
+test export::tests::each_reference_export_reopens_with_world_geometry_and_supported_colors ... ok
+
+test result: ok. 115 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.46s
+
+     Running unittests src\main.rs (target\debug\deps\builder3d_app-84238215a4305459.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src\bin\r5_viewport.rs (target\debug\deps\r5_viewport-b68aa34c9a88245f.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src\lib.rs (target\debug\deps\builder3d_core-0a8985b84a904532.exe)
+
+running 13 tests
+test placement::tests::invalid_and_over_budget_points_are_rejected_before_native_work ... ok
+test tests::command_registry_dispatches_primitives ... ok
+test tests::commands_are_noop_aware_and_undoable ... ok
+test scene::rb04_selection_order::removing_an_earlier_unselected_row_preserves_anchor_identity_and_undo_order ... ok
+test tests::visibility_command_reports_id_and_round_trips ... ok
+test placement::tests::support_faces_match_both_python_world_clouds ... ok
+test tests::scene_graph_group_duplicate_and_ungroup_are_undoable ... ok
+test tests::project_round_trip_preserves_bytes_after_load ... ok
+test tests::primitive_catalog_keeps_reference_counts_and_extents ... ok
+test project::tests::failed_atomic_replace_keeps_the_previous_valid_project ... ok
+test scene::rb04_group_limits::grouping_beyond_the_project_depth_limit_preserves_scene_and_history ... ok
+test tests::path_save_replaces_existing_archive_atomically ... ok
+test project::tests::successful_save_replaces_an_existing_project_file ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests\file_io_golden.rs (target\debug\deps\file_io_golden-151f92e72eb16c7d.exe)
+
+running 7 tests
+test format_selection_is_case_insensitive_and_rejects_unknown_extensions ... ok
+test mesh_asset_rejects_mismatched_vertex_colors ... ok
+test python_obj_golden_round_trips_byte_for_byte ... ok
+test python_colored_obj_and_ply_fixtures_preserve_display_colors ... ok
+test python_ply_ascii_golden_loads_and_binary_output_reopens ... ok
+test python_stl_ascii_golden_loads_with_reference_triangle_order ... ok
+test python_stl_binary_export_is_byte_compatible ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\gltf_golden.rs (target\debug\deps\gltf_golden-671126f6b7bec768.exe)
+
+running 5 tests
+test malformed_glb_header_and_missing_embedded_resources_are_rejected ... ok
+test export_gltf_and_glb_round_trip_materials_normals_and_transforms ... ok
+test embedded_external_boundary_and_resource_limits_are_typed_errors ... ok
+test python_export_gltf_fixture_resolves_external_buffers_and_scene_transforms ... ok
+test path_export_writes_safe_external_sidecar_and_replaces_existing_files ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests\mesh_ops_booleans.rs (target\debug\deps\mesh_ops_booleans-0ad7a98cacb57d30.exe)
+
+running 5 tests
+test boolean_resource_limit_fails_before_kernel_and_preserves_inputs ... ok
+test boolean_rejects_open_operands_and_reports_health ... ok
+test scene_boolean_preserves_target_identity_transform_and_history_atomically ... ok
+test difference_can_regularize_a_flat_tool_cap_without_changing_volume ... ok
+test boolean_results_match_manifold_volume_and_keep_inputs_unchanged ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\mesh_ops_brushes.rs (target\debug\deps\mesh_ops_brushes-2a7a998d2b5d7600.exe)
+
+running 6 tests
+test brushes_reject_bad_paths_offsets_and_limits_before_scene_mutation ... ok
+test elastic_grab_symmetry_mirrors_center_and_offset ... ok
+test elastic_grab_preserves_topology_and_has_smooth_bounded_displacement ... ok
+test scene_brush_replacement_preserves_identity_and_undo ... ok
+test crease_polish_preserves_topology_and_supports_both_directions ... ok
+test smooth_brush_and_blob_preserve_topology_and_blob_changes_volume_direction ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\mesh_ops_density.rs (target\debug\deps\mesh_ops_density-0366035664e4e2cc.exe)
+
+running 6 tests
+test density_selection_rejects_invalid_center_mesh_inputs ... ok
+test select_face_region_returns_faces_near_each_center ... ok
+test density_normalization_can_cancel_before_scene_commit ... ok
+test density_normalization_reports_progress_and_honors_work_limits ... ok
+test density_normalization_coarsens_a_dense_closed_region ... ok
+test density_normalization_refines_a_partial_region_without_mutating_input ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.48s
+
+     Running tests\mesh_ops_repair.rs (target\debug\deps\mesh_ops_repair-b579c690163120c7.exe)
+
+running 5 tests
+test repair_profiles_and_health_are_typed_and_bounded ... ok
+test repair_fixes_winding_without_mutating_source_and_keeps_stage_contract ... ok
+test extended_repair_closes_a_trivial_open_box_and_reports_exact_stage_names ... ok
+test repair_removes_duplicate_and_tiny_shell_but_keeps_safe_best_effort_multi_shell ... ok
+test planar_cleanup_changes_a_fan_and_leaves_dense_grid_open_and_duplicate_free ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\mesh_ops_shell.rs (target\debug\deps\mesh_ops_shell-e65b81672714aa97.exe)
+
+running 6 tests
+test shell_hooks_cancel_before_geometry_commit ... ok
+test shell_operations_reject_invalid_parameters_before_scene_mutation ... ok
+test hollow_convex_box_uses_exact_offset_and_preserves_solid_contract ... ok
+test text_emboss_changes_topology_through_one_scene_history_entry ... ok
+test named_system_fonts_render_when_installed ... ok
+test hollow_concave_union_uses_bounded_voxel_offset ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.67s
+
+     Running tests\mesh_ops_simplify.rs (target\debug\deps\mesh_ops_simplify-d02c138386429112.exe)
+
+running 5 tests
+test simplify_accepts_a_valid_mesh_contract_with_explicit_faces ... ok
+test simplify_is_a_no_op_for_small_meshes_and_preserves_input ... ok
+test simplify_rejects_limits_before_mutation_and_reports_typed_errors ... ok
+test scene_simplify_is_atomic_and_undoable_without_replacing_object_identity ... ok
+test simplify_reduces_a_sphere_to_the_requested_bounded_target ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.93s
+
+     Running tests\mesh_ops_smooth.rs (target\debug\deps\mesh_ops_smooth-29611a46d2342c24.exe)
+
+running 4 tests
+test smooth_rejects_excess_iterations_and_resource_work_before_commit ... ok
+test smooth_runs_a_bounded_iteration_and_keeps_topology_and_finite_positions ... ok
+test scene_smooth_preserves_identity_and_history ... ok
+test smooth_zero_iterations_is_an_exact_no_op ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\mesh_ops_subdivide.rs (target\debug\deps\mesh_ops_subdivide-d950b746490b5506.exe)
+
+running 4 tests
+test subdivide_checks_result_limits_before_allocating_midpoints ... ok
+test subdivide_rejects_empty_face_sets_with_a_typed_error ... ok
+test subdivide_is_atomic_in_scene_history_and_preserves_object_identity ... ok
+test subdivide_doubles_box_faces_preserves_volume_bounds_and_watertightness ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\project_golden.rs (target\debug\deps\project_golden-db7e98abd2cfb4e1.exe)
+
+running 5 tests
+test malformed_project_inputs_return_project_format_errors ... ok
+test future_project_schema_version_is_rejected ... ok
+test python_legacy_project_uses_schema_zero_defaults ... ok
+test python_current_project_restores_fields_geometry_and_original_archive_bytes ... ok
+test invalid_transform_and_missing_mesh_are_rejected ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\three_mf_golden.rs (target\debug\deps\three_mf_golden-14ecb644932540dc.exe)
+
+running 9 tests
+test namespaced_numeric_attributes_use_the_reference_compatibility_fallback ... ok
+test empty_build_does_not_promote_unbuilt_resources ... ok
+test python_assembly_fixture_preserves_units_graph_materials_metadata_and_thumbnail ... ok
+test export_round_trip_preserves_geometry_transform_color_and_metadata ... ok
+test single_mesh_format_bridge_reads_and_writes_3mf ... ok
+test thumbnail_loading_does_not_parse_model_geometry ... ok
+test production_external_part_is_resolved_only_when_declared_by_relationships ... ok
+test malformed_geometry_entities_and_package_paths_are_rejected ... ok
+test explicit_limits_cover_package_relationship_xml_metadata_and_mesh_boundaries ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\wrl_golden.rs (target\debug\deps\wrl_golden-f550a514c1c52ef3.exe)
+
+running 5 tests
+test python_wrl_fixture_matches_scene_export_byte_for_byte ... ok
+test wrl_rejects_shear_bad_colors_and_resource_limits ... ok
+test wrl_preserves_names_colors_transforms_and_indexed_geometry ... ok
+test wrl_sanitizes_duplicate_names_and_rejects_import ... ok
+test wrl_path_export_is_atomic_when_validation_fails ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src\lib.rs (target\debug\deps\builder3d_mcp-de59133237a0234f.exe)
+
+running 14 tests
+test r4::catalog::tests::catalog_is_exactly_ordered_and_profile_monotonic ... ok
+test r4::schema::tests::selected_reference_schema_fields_are_strict_and_bounded ... ok
+test r4::state::tests::canonical_fingerprint_ignores_object_key_order ... ok
+test r4::state::tests::operation_registry_has_bounded_lifecycle ... ok
+test tests::summary_is_compact_and_detail_is_explicit ... ok
+test r4::server::tests::core_calls_are_structured_and_replay_is_idempotent ... ok
+test r4::security::tests::policy_allows_a_child_and_denies_a_sibling ... ok
+test r4::server::tests::sample_image_color_applies_a_bounded_ppm_to_selection ... ok
+test r4::server::tests::reference_mesh_tools_and_profile_filter_are_live ... ok
+test r4::security::tests::path_policy_resolves_reads_and_requires_explicit_overwrite ... ok
+test r4::server::tests::full_profile_publishes_the_fixed_catalog_with_strict_metadata ... ok
+test r4::server::tests::long_operation_reports_bounded_status_and_commits_once ... ok
+test r4::server::tests::grouped_actions_clipboard_and_discovery_are_live ... ok
+test r4::server::tests::shell_long_operations_commit_reports_and_are_undoable ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running unittests src\bin\r0b_mcp.rs (target\debug\deps\r0b_mcp-87b0ab266f755a28.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src\bin\r4_mcp.rs (target\debug\deps\r4_mcp-5e71be64bf0aa582.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src\lib.rs (target\debug\deps\builder3d_platform-926110473f44fe48.exe)
+
+running 15 tests
+test discovery::tests::unknown_native_memory_keeps_system_budget_visible ... ok
+test ledger::tests::pressure_is_rejected_before_accounting_changes ... ok
+test ledger::tests::releasing_a_reservation_restores_capacity ... ok
+test ledger::tests::unified_adapter_reservation_counts_against_one_system_pool ... ok
+test routing::tests::calibrated_gpu_win_uses_gpu_without_duplicate_unified_transfer ... ok
+test routing::tests::memory_bound_work_without_measurement_uses_cpu_reference ... ok
+test routing::tests::pressure_splits_work_at_batch_boundaries ... ok
+test routing::tests::uncalibrated_integrated_parallel_work_stays_on_cpu_but_discrete_can_use_gpu ... ok
+test runtime::tests::descriptor_resolution_prefers_override_then_injected_bundle ... ok
+test runtime::tests::linux_paths_use_xdg_locations_and_descriptor_override ... ok
+test runtime::tests::offscreen_guard_is_case_insensitive_and_ignores_other_platforms ... ok
+test runtime::tests::windows_paths_use_local_app_data_and_temp ... ok
+test slicer::tests::discovery_uses_path_and_marks_bambu_stl_fallback ... ok
+test slicer::tests::unknown_slicer_and_missing_models_are_typed_errors ... ok
+test runtime::tests::process_liveness_rejects_zero_and_finds_current_process ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.96s
+
+     Running unittests src\lib.rs (target\debug\deps\builder3d_viewport-f6f5f53d9e920eea.exe)
+
+running 28 tests
+test adaptive::tests::controller_switches_only_the_display_tier ... ok
+test adaptive::tests::empty_scene_keeps_adapter_presentation_without_a_cpu_fallback ... ok
+test camera::tests::reference_orbit_and_zoom_clamps_match_python_contract ... ok
+test adaptive::tests::planner_reports_a_cpu_fallback_without_usable_adapters ... ok
+test camera::tests::screen_ray_and_frame_are_finite ... ok
+test floor::tests::contact_cues_are_skipped_during_camera_motion_and_cached_at_rest ... ok
+test floor::tests::floor_spacing_is_adaptive_and_hidden_below_camera ... ok
+test gizmo::tests::gizmo_colors_and_camera_scaling_are_renderer_neutral ... ok
+test gizmo::tests::move_handle_hit_returns_axis_and_parameter ... ok
+test math::tests::inverse_round_trips_projection_and_view ... ok
+test math::tests::ray_box_and_triangle_intersections_are_nearest_and_bounded ... ok
+test picking::tests::exact_pick_uses_full_authoritative_faces ... ok
+test cpu::tests::cpu_fallback_rasterizes_a_real_triangle_scene ... ok
+test renderer::tests::clear_color_accepts_normalized_channels_and_rejects_invalid_values ... ok
+test renderer::tests::padded_rows_are_copy_aligned ... ok
+test picking::tests::occluded_pick_keeps_the_nearest_stable_id_after_reordering_and_hiding ... ok
+test renderer::tests::render_target_budget_counts_color_and_depth_attachments ... ok
+test renderer::tests::shared_device_uses_the_matching_profile_backend_and_identity ... ok
+test renderer::tests::uniform_bytes_match_wgsl_alignment ... ok
+test scene::rb04_render_regressions::group_draws_and_picks_its_combined_mesh_once_with_parent_identity ... ok
+test scene::rb04_render_regressions::matrix_preview_uses_ids_after_hidden_filtering_and_shares_mesh_buffers ... ok
+test scene::tests::interaction_target_matches_reference_bounds ... ok
+test scene::tests::scene_conversion_keeps_full_data_and_builds_interaction_data ... ok
+test snapping::tests::capture_holds_until_release_distance_then_excludes_previous_target ... ok
+test snapping::tests::floor_and_view_scaled_tolerances_are_typed ... ok
+test snapping::tests::snapshot_excludes_moving_objects_and_snaps_nearest_landmark ... ok
+test spike::tests::row_pitch_is_aligned_to_wgpu_copy_requirement ... ok
+test spike::tests::summary_uses_bounded_percentiles ... ok
+
+test result: ok. 28 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests builder3d_app
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests builder3d_core
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests builder3d_mcp
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests builder3d_platform
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests builder3d_viewport
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

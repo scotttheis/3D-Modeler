@@ -1,0 +1,140 @@
+[
+  {
+    "name": "fmt",
+    "command": [
+      "cargo",
+      "fmt",
+      "--all",
+      "--",
+      "--check"
+    ],
+    "exit_code": 0,
+    "seconds": 1.126
+  },
+  {
+    "name": "check",
+    "command": [
+      "cargo",
+      "check",
+      "--workspace",
+      "--locked"
+    ],
+    "exit_code": 0,
+    "seconds": 3.45
+  },
+  {
+    "name": "tests",
+    "command": [
+      "cargo",
+      "test",
+      "--workspace",
+      "--locked"
+    ],
+    "exit_code": 0,
+    "seconds": 23.454
+  },
+  {
+    "name": "clippy",
+    "command": [
+      "cargo",
+      "clippy",
+      "--workspace",
+      "--all-targets",
+      "--all-features",
+      "--locked",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exit_code": 101,
+    "seconds": 4.886
+  },
+  {
+    "name": "deny",
+    "command": [
+      "cargo",
+      "deny",
+      "check"
+    ],
+    "exit_code": 0,
+    "seconds": 2.43
+  },
+  {
+    "name": "metadata",
+    "command": [
+      "cargo",
+      "metadata",
+      "--locked",
+      "--format-version",
+      "1",
+      "--no-deps"
+    ],
+    "exit_code": 0,
+    "seconds": 0.143
+  },
+  {
+    "name": "smoke",
+    "command": [
+      "cargo",
+      "run",
+      "-p",
+      "builder3d-app",
+      "--bin",
+      "builder3d-app",
+      "--",
+      "--smoke"
+    ],
+    "exit_code": 101,
+    "seconds": 11.627
+  },
+  {
+    "name": "release",
+    "command": [
+      "cargo",
+      "build",
+      "--release",
+      "--locked",
+      "-p",
+      "builder3d-app",
+      "--bin",
+      "builder3d-app"
+    ],
+    "exit_code": 0,
+    "seconds": 161.602
+  },
+  {
+    "name": "bloat-workspace",
+    "command": [
+      "cargo",
+      "bloat",
+      "--release",
+      "--workspace"
+    ],
+    "exit_code": 0,
+    "seconds": 694.736
+  },
+  {
+    "name": "bloat-app",
+    "command": [
+      "cargo",
+      "bloat",
+      "--release",
+      "-p",
+      "builder3d-app",
+      "--bin",
+      "builder3d-app"
+    ],
+    "exit_code": 0,
+    "seconds": 259.492
+  },
+  {
+    "name": "audit",
+    "command": [
+      "cargo",
+      "audit",
+      "--locked"
+    ],
+    "exit_code": 101,
+    "seconds": 0.129
+  }
+]

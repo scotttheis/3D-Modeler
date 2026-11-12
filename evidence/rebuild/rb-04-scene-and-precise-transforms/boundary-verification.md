@@ -1,0 +1,13 @@
+# RB-04 completed engineering boundary
+
+Implementation, automated checks and required native evidence are complete. Visual/owner acceptance remains pending; RB-03 review statuses are unchanged. No RB-05 work, staging or commit occurred.
+
+[Verification](verification.md) gives the current 261-test result and gates; [final-native-gate-results.json](final-native-gate-results.json) contains exact commands/logs. [Boundary validation](boundary-evidence-validation.json) checks current source and preserved artifact SHA-256, linked files/symbols/components, every PNG, all 74 scene /22 viewport /4 Settle native cases, 108 asset pairs, unchanged Python status and all 32 RB-03 statuses. [Build identity](boundary-build-identity.json) is produced from current source, not historical captures.
+
+Ordinary release: 14,972,928 bytes, SHA-256 `fb5c4d3427b73607378af8c74ccd83dc6428d01d1e6b934765971aaa855d1c87`. Explicit app bloat artifact: 14,963,712 bytes, SHA-256 `db4e0651f5ffd37071695b48ddc56839e7237de95c445a729c1faa5cdc6a9347`; 11.6 MiB .text. Executable size is below 40 MB; complete installed-package acceptance belongs to RB-10. Workspace bloat's ignored --workspace flag makes its default-binary result unsuitable as a package total. Cargo audit is unavailable.
+
+The one-window native walkthrough uses actual guarded Default-desktop input, 1280 x 840 client pixels, 96 DPI/100%, separate profiles and versioned saved outputs. Source visible handler/widget routes are explicitly labelled; viewport drags use physical input in both apps. Earlier lock failures and intermediate captures remain historical. Current capture identity is per frame; no previous frame is relabelled with the final executable hash. 386 paired action states / 812 capture PNGs are available in the board.
+
+Recorded limitations remain: naming/Eye controls have prepared source states; Shift contiguous range differs from source endpoint selection; Escape/focus cancellation preserves Rust state where source differs; Repair has a different interior fan vertex. RB-05 owns broader camera/gizmo/display parity, RB-06 detailed Repair tessellation. These are not claims of exact visual/behavioral acceptance. Read report.md for action-specific visible differences and safety bounds.
+
+RB-03 still needs checkpoint undo/redo/branch native replay, full filesystem-failure native matrix, extra per-format Python export-picker replay and visual/owner review. Its 30 native pass/two partial rows remain unchanged. The verified additive completed-slice snapshot is recorded in checkpoint.md/WORK_LOG.md. Next implementation slice is RB-05; this task stops before it.

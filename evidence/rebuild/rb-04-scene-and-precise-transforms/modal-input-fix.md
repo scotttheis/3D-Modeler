@@ -1,0 +1,9 @@
+# Modal pointer containment
+
+The f091 native Settings probe allowed background Duplicate: three objects/revision102 became four/revision103. Keyboard focus guards did not cover pointer controls. The failing images and saved output remain evidence, not a pass.
+
+Background panel UI is now disabled while a dialog/measurement/placement/confirmation/customizer is active. Independent transform/status Areas also disable input. Dialogs retain their enabled UI and existing layout; generic Window dialogs close on Escape. The actual egui pointer regression locates rendered Duplicate/Apply labels, checks both blocked with a valid draft behind Settings, then confirms both controls work after close. This avoids a vacuous test based on guessed coordinates.
+
+All261 workspace tests pass, zero failed/ignored; fmt/check/strict workspace all-target all-feature Clippy/deny/metadata/debug build pass (modal-complete-gate-results.json). Current debug82fd07e7691d76cb6f348ba6aafd86d91c9f9b94b56ee72e7de398a70477dfa1 native replay attempts Duplicate, numeric typing/Apply behind Settings, then Escape. The scene remains exactly the input three objects/revision102/project ID/metadata/matrices. After close, Duplicate produces four objects/revision103. native-modal-verification.json records these positive and negative controls. The blocked before/after full-size PNGs have identical SHA256. Disabled background controls are visibly muted; this differs from the earlier undimmed Rust Window presentation and remains part of visual review.
+
+The theme capture guard now uses navy-versus-neutral channel ratios because modal dimming changes absolute brightness. Final current-source release/smoke/bloat evidence must be regenerated after this repair. No transform/core math changed, and earlier C5/f091 native scene results retain their actual build identity.

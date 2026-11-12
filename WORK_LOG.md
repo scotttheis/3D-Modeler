@@ -4009,3 +4009,332 @@ This log entry and the final plan/receipt updates postdate the snapshot, as
 recorded in the receipt. It is a recovery copy, not an RB-09 completion snapshot.
 The previously verified read-only R1 snapshot and incomplete `143410` attempt
 remain untouched; `G:\B3D_R09C_20261106` was also left untouched.
+## 2026-11-07 - RB-09 schema-parity repair
+
+Continued only the schema-parity repair in E:\Builder3D-Rust and stopped before RB-10. Inspected Git status and Builder3D processes first; retained the existing tracked changes and untracked files. No stage, commit, push, reset, restore, or older-snapshot modification occurred.
+
+Confirmed the designated L:\Builder3D reference read-only at Git HEAD 3a0160a95c55f68ce9f1e89d17c792816ac001df, Python 3.12.10, and MCP SDK 2.2.0. Captured current tools/list catalogs with the official SDK; did not launch the Python product or invoke handlers. A post-capture check retained the same 223-entry Git status/hash and 21 behavior-critical source hashes. The Python runtime accepts and drops unknown root input fields and rejects an unknown nested apply_actions.args field; Rust now matches both.
+
+The pre-edit Rust return_detail count is 20, not 19. Rust now exposes the five current reference fields in model/files/full and none in observe. Current Rust Release schemas and official MCP annotations match recursively in all four profiles (7/52/59/60), with zero recursive differences. The pinned jsonschema 0.60.2 validator checks full nested Draft 2020-12 schemas across all four profiles. The official Tools specification and Rust SDK assumptions are recorded in schema-parity-run-manifest.json.
+
+Source changes added the typed contract and generator, full input/output validation, result-shape alignment, Python-compatible root-extra handling, and corrected annotations. jsonschema 0.60.2 is pinned in the MCP crate/lockfile; deny.toml has a version-specific MIT-0 exception for borrow-or-share 0.2.4.
+
+Verification: focused MCP tests passed 26/26; the focused Release-output schema test passed 1/1 on 25 successful structured results. Workspace tests passed 336/336; current-reference MCP tests passed 9/9. cargo fmt --all -- --check, cargo check --workspace --locked, cargo clippy --workspace --all-targets --all-features --locked -- -D warnings, cargo metadata, cargo deny check, and explicit app Release bloat all passed. The app text section measured 16.0 MiB and its executable was 19.6 MiB. cargo-audit was unavailable because the tool is not installed. The full RB-09 evidence validator and ordered-tool-name self-test passed.
+
+The rebuilt Release GUI/app SHA-256 is 0e874b6fb06d9b6cb5e70517ca35856d3a8304975e2a0842cd971f20df2c45ba; gateway SHA-256 is 636171b58800915de87fc8ad26814498279919ea80341076a344c208757da370. The official SDK received 25 successful structured outputs, including new_project and completed operation_status; the nested-extra apply_actions probe returned invalid_input. All 25 successful results passed the full output-schema test. The GUI exited normally and removed its runtime descriptor.
+
+The pre-edit G: snapshot and additional G:\B3D_R09S_20261107 recovery copy are recorded in evidence/rebuild/rb-09-shared-ai-and-regression/snapshot-receipt.md. The pre-edit copy was verified before source edits at 3,743 files / 755,179,156 bytes with 17 critical SHA-256 matches. The additional copy's initial check passed at 4,078 files / 766,744,485 bytes with 23 critical hash matches. After synchronizing its evidence updates, final verification passed at 4,079 files / 766,761,893 bytes on both sides, with zero missing/extra/different paths or reparse entries and no SHA-256 differences across included files. The receipt and summary of this final check postdate the snapshot. G:\B3D_R09W_20261106 and all older snapshots were left untouched.
+
+The schema criterion is complete. One custom emboss_text _meta.com.builder3d/longRunning difference remains disclosed without owner approval. RB-08 native evidence, the interface/floor gaps, visual review, owner acceptance, overall product acceptance, and full RB-09 acceptance remain pending. RB-10 has not started.
+
+## 2026-11-09 - Owner visual feedback follow-up
+
+Continued the owner's visual follow-up in `E:\Builder3D-Rust` and stopped before RB-10. Compared the supplied 3D Builder floor screenshot and saved Python shell captures. The Python reference was not launched or modified.
+
+Before the camera source edit, created the additive recovery snapshot `G:\B3D_RV_20261109_floorfix_pre`. It contains 4,096 files / 771,406,618 bytes (root `target` excluded to match the recovery-copy policy); source and snapshot counts and bytes match, and all 10 critical SHA-256 comparisons match. The receipt is `evidence/rebuild/rb-08-preferences-and-complete-shell/owner-feedback-followup-20261109/recovery-snapshot.json`. The existing `G:\B3D_RV_20261109` and older snapshots remain untouched.
+
+The live empty-scene floor had been clipped between the camera and the scene center because the near plane could sit almost at the target. The camera now caps that plane at 2% of the camera distance while respecting the scene-derived limit. A regression test projects a near-side floor point for the empty-scene view. The existing visual changes retain the compact ribbon, labeled/briefly described shortcut buttons with reorder and pin/unpin controls, useful tooltips, the three-line dropdown menu, and the reference selection actions in the side panel.
+
+The Release window was rebuilt and left open on the Side view. The floor fills the viewport, uses 50 mm checker cells and metric labels, and fades toward the far side. Top and Side captures both show floor coverage. The hamburger opens the dropdown. Captures and checks are in `evidence/rebuild/rb-08-preferences-and-complete-shell/owner-feedback-followup-20261109/`.
+
+Verification: the focused near-floor camera test passed; `cargo test --workspace --locked` passed on retry (the first full run had one loopback connection reset, and its isolated rerun passed); `cargo clippy --workspace --all-targets --all-features --locked -- -D warnings`, `cargo fmt --all -- --check`, `cargo deny check`, and the Release app build all exited 0. Cargo Deny reported existing duplicate-version warnings and a yanked locked crate while advisories, bans, licenses, and sources passed.
+
+This records implementation and current GUI evidence only. It does not claim owner visual acceptance, close the RB-08 native matrix or overall product acceptance, or start RB-10.
+
+The owner then clarified that only the splash screen should stay in front of
+other windows. The main Release window had only been temporarily set to stay in
+front during review. It was reopened normally, verified visible and not
+topmost, and left open for the next review session. No application source
+change was needed; splash-screen behavior was not changed.
+
+## 2026-11-09 - Metric floor labels
+
+The supplied 3D Builder screenshots show 10 mm checker squares, with 50 mm and
+100 mm labels every five and ten squares. Rust used 50 mm checker cells and
+put the labels on one camera-relative diagonal, so the values did not track the
+two visible floor axes. Set the checker size to 10 mm, anchored `0 mm` at the
+axis intersection, placed labels along both axes in 50 mm steps, and changed
+the opening/reset yaw to 0 degrees to align the axes with the reference. The
+product plan summary now records the updated floor treatment.
+
+Verification: `cargo fmt --all -- --check`,
+`cargo check --locked -p builder3d-viewport -p builder3d-app`, and
+`cargo build --release --locked -p builder3d-app` passed. No tests or GUI run
+were performed.
+
+Recovery snapshot: `G:\B3D_RV_20261109-102620_floorlabels`. Robocopy exited 1
+with no failures; the source and snapshot each contain 4,102 files and
+773,047,551 bytes. Root `target`, `.cache`, and `logs` directories were
+excluded. Existing snapshots were left untouched.
+
+## 2026-11-09 - New primitives rest on the build floor
+
+New primitives were inserted at the identity transform, so centered geometry
+extended below the Y=0 floor. `Scene::add_primitive` now centers the primitive's
+X/Z bounds and translates its lowest Y vertex to the floor before adding it in
+one history command. This applies to desktop, core-command, and MCP primitive
+creation. Model-file imports already center their combined bounds onto the
+floor and were left unchanged. Existing position expectations were updated for
+the new primitive placement.
+
+Verification: `cargo fmt --all -- --check`, `git diff --check`,
+`cargo check --workspace --locked`, and
+`cargo clippy --workspace --all-targets --all-features --locked -- -D warnings`
+passed. Tests and GUI review were not run.
+
+Recovery snapshot: `G:\Builder3D-Rust_snapshot_20261109-112236_primitive-floor`.
+Robocopy exited 1 with no failed files. Before this receipt was appended, source
+and snapshot each contained 4,102 files / 773,048,580 bytes; relative-path
+differences: 0; nine critical SHA-256 comparisons matched. The appended receipt
+is the expected post-copy difference. Root `target`, `.cache`, and `logs`
+directories were excluded. Existing snapshots were left untouched. No RB-10
+work started; RB-09 and owner-acceptance statuses remain unchanged.
+
+## 2026-11-09 - Refresh floor cues after viewport moves
+
+A transform can commit during viewport input handling after the initial render
+preview is built. That let the renderer pair the new scene revision with old
+object bounds and cache the old floor contact cue under the new revision.
+Refresh the preview and gizmo after routing input and before rendering, keeping
+the cue cache's scene revision and bounds in sync.
+
+Verification: `cargo fmt --all -- --check`, `git diff --check`,
+`cargo check --workspace --locked`,
+`cargo clippy --workspace --all-targets --all-features --locked -- -D warnings`,
+and `cargo build --release --locked -p builder3d-app` passed. The Release app
+opened as PID 22264 with a responsive `Builder3D - Untitled` window. Tests were
+not run.
+
+Recovery snapshot: `G:\Builder3D-Rust_snapshot_20261109-131628_contact-cue-refresh`.
+Robocopy exited 1 with no failures; source and snapshot each contain 4,102
+files / 773,051,025 bytes, with 0 relative-path differences and matching SHA-256
+hashes for the changed shell source and work log. Root `target`, `.cache`, and
+`logs` directories were excluded. The receipt appended after the copy is the
+expected post-copy difference. Existing snapshots were left untouched.
+
+## 2026-11-09 - Screen-aligned viewport lighting
+
+Reviewed `erros/3Dviewer.png` and `erros/Shadows on objects.png`. Mesh shading
+used a fixed light direction without transforming normals with the object and
+camera, while the CPU fallback drew meshes unlit. Added a screen-aligned key
+light by default, inverse-transpose normal transforms, diffuse shading,
+Blinn-Phong highlights, and a subtle rim light in both renderer paths. The
+Settings panel now persists controls for light alignment, direction, strength,
+ambient fill, highlights, and floor contact shadows, with a one-click restore
+for the reference-style defaults.
+
+Verification: formatted the changed Rust sources with `rustfmt --edition 2024`.
+Tests, build, and live visual review were not run. No G: snapshot was created;
+workspace instructions require explicit authorization before adding to G:.
+This records implementation only and does not claim viewport or product visual
+acceptance.
+
+## 2026-11-10 - Lighting build and runtime check
+
+The first Cargo run found that `viewport_lighting` had been routed through the
+legacy scalar preference parser. It is now loaded directly as a JSON object,
+with an unsupported-value warning and the normal default fallback.
+
+Verification: the Release app build passed and is open as PID 27100 with a
+responsive `Builder3D - Untitled` window. All 36 `builder3d-viewport` tests and
+the app preference round-trip test passed. The full workspace run reached the
+app tests: 162 passed and four failed in existing placement-height and camera
+preset expectations; none exercised lighting. Those unrelated expectations
+were left unchanged. This runtime check is not owner visual acceptance.
+
+## 2026-11-10 - Match 3D Builder shading and dock settings
+
+Used `erros/Shading.png` to adjust the viewport defaults. Mesh normals now split
+at sharp edges while remaining smooth across shallow curved surfaces, so cube
+faces keep even lighting without making spheres faceted. The default light stays
+screen-aligned and diffuse-only; removed the added rim glow. Floor shadows now
+project from bounded object extents opposite the current key light, use layered
+translucent polygons for softer edges, and remain visible during camera orbit
+once their geometry is cached.
+
+Settings now docks on the left between the measured ribbon and lower controls,
+scrolls within that space, and leaves viewport orbit enabled outside the panel.
+Pointer input over the panel is kept out of the viewport gesture handler. The
+restore button now applies the 3D Builder-style defaults.
+
+Verification: `rustfmt --edition 2024 --check` passed; all 39
+`builder3d-viewport` tests and 8 Settings/dialog tests passed; the Release build
+in `target/lighting-review` passed; `builder3d-app.exe --smoke` passed; and
+`git diff --check` passed. The review window is open as PID 23560 and responding.
+No full workspace suite or screenshot-based visual review was run. No G: snapshot
+was created because workspace instructions require explicit authorization for G:
+writes. Owner visual review remains pending.
+
+## 2026-11-10 - Add bounded UI and viewport diagnostics
+
+Added a standard-library logger at the platform log path
+(`%LOCALAPPDATA%\Builder3D\logs\builder3d.log` on Windows). It records startup,
+viewport, scene-preview, and optional MCP errors, CPU fallback transitions,
+slow viewport/UI frames, and unhandled panic backtraces. The current log is
+bounded at 2 MiB and retains one rotated file. Normal frames do not write files;
+slow-frame reports are limited to one per context every 10 seconds. A background
+watchdog records a warning after 15 seconds without a completed UI frame and a
+recovery entry when frames resume. Egui schedules one idle heartbeat repaint per
+10 seconds so an idle window is not mistaken for a hang.
+
+The recent mesh-normal preparation remains tied to scene rebuilds, and floor
+shadow overlays are bounded. No freeze was reproduced during the idle launch;
+the watchdog is intended to capture timing if the problem recurs during use.
+
+Verification: `cargo fmt --all -- --check`, `cargo check --locked -p
+builder3d-app`, `cargo clippy --locked -p builder3d-app --all-targets -- -D
+warnings`, the two `diagnostics::tests`, and all 39 `builder3d-viewport` tests
+passed. The Release app build took 3m39s, `builder3d-app.exe --smoke` passed,
+and the visible Release window (PID 41788) remained responsive through 20 seconds
+of idle. The initial startup log recorded the Quadro RTX 4000 on Vulkan.
+No interactive reproduction of the owner's freeze or full workspace suite was
+run. This does not establish that the freeze is fixed.
+
+Recovery snapshot: `G:\Builder3D-Rust_snapshot_20261110-093445_ui-diagnostics`.
+Robocopy exited 1 with zero failed files. Source and snapshot each contain
+4,104 files / 773,274,097 bytes after excluding root `target`, `.cache`, and
+`logs`; SHA-256 hashes matched for the four changed Rust sources and this work
+log. The snapshot receipt above was appended after the copy.
+
+## 2026-11-10 - Restore mouse orbit in the viewport
+
+Mouse orbit was blocked by global egui keyboard-focus and pointer-over-UI
+checks. Viewport gesture routing now uses the viewport widget's own pointer
+hit-test, while allowing an active drag to continue when it crosses UI panels.
+Modal and other interaction blocking still applies. Added a regression check
+showing that a focused text field does not prevent a mouse gesture over the
+viewport.
+
+Verification: the five `viewport_` app tests, `cargo fmt --all -- --check`,
+Clippy with warnings denied, the optimized app build, and `builder3d-app.exe
+--smoke` passed. In the visible Release app (PID 26192), native left-button
+drags in both empty viewport space and on the model visibly orbited the camera;
+the model's transform fields stayed at zero during the surface drag. Added a
+Cube from the ribbon and left the responsive window open for owner testing.
+Startup diagnostics recorded the Quadro RTX 4000 on Vulkan with no errors.
+This interactive check does not replace owner review.
+
+Recovery snapshot: `G:\Builder3D-Rust_snapshot_20261110-101321_viewport-orbit-fix`.
+Robocopy exited 1 with zero failures. Source and snapshot each contain 4,104
+files / 773,276,725 bytes, with zero missing, extra, size-different, or reparse
+entries. SHA-256 hashes for `shell.rs`, `diagnostics.rs`, `lib.rs`, and this
+work log matched. This snapshot receipt was appended after the copy.
+
+## 2026-11-10 - Keep floor scale labels attached during pan
+
+Fixed floor scale-label placement in `build_floor_scale_labels`. Labels now
+use fixed world-axis coordinates instead of offsets from `camera.center()`,
+so right-button pan moves them across the view with the floor grid. Added the
+`floor_scale_labels_remain_world_anchored_when_camera_pans` regression.
+
+Verification: all 40 `builder3d-viewport` tests passed; formatting and focused
+Clippy passed; the optimized app build and shell smoke passed. A visible
+Release right-drag moved the floor grid and its labels together, and the app
+remained responsive. Before/after captures and SHA-256 values are recorded in
+`evidence/rebuild/rb-05-viewport-and-input-completion/verification.md`. The
+window is left open for owner testing.
+
+Recovery snapshot: `G:\Builder3D-Rust_snapshot_20261110-113031_floor-label-pan-fix`.
+Robocopy exited 1 with zero failed files (4,107 copied). An independent
+full-tree SHA-256 verification found 4,107 files / 773,776,992 bytes on each
+side, zero missing/extra/different paths, and zero reparse entries. Root
+`target`, `.cache`, and `logs` were excluded. Critical hashes matched for the
+floor-label source, product plan, RB-05 map and verification, before/after
+captures, and `WORK_LOG.md` as it existed at copy time. This receipt was
+appended after the snapshot; the snapshot remains untouched.
+
+## 2026-11-10 - Refine move gizmo arrows
+
+Move handles now use one camera-facing arrow per world axis. Each shaft starts just outside the selected object's near face and ends in a compact 12-facet head with a subtle graphite outline. X/Y/Z colors stay unchanged, and drawing and hit-testing share the same axis segment geometry. The focused geometry assertion now covers outward-facing handles.
+
+Verification: `cargo fmt --check -p builder3d-viewport`, `cargo check --locked -p builder3d-app`, and `cargo clippy --locked -p builder3d-viewport --all-targets -- -D warnings` passed. Automated tests were not run.
+
+The existing Release window (PID 20188) still has an unsaved `Untitled *` scene and locks `target/release/builder3d-app.exe`. I left it open; the Release rebuild could not replace the executable (`Access is denied`). The updated source is not live in that process. The pre-change window capture is `target/gizmo-arrow-open-app.png` and is not visual acceptance evidence. No G: snapshot was created because workspace-root instructions require explicit authorization for backup writes.
+
+### Reload follow-up
+
+The standard Release build now succeeds (`cargo build --release --locked -p builder3d-app`, 3m42s), and the refreshed app was launched as PID 12228. It starts as `Builder3D - Untitled`. The Windows foreground is currently `Windows Default Lock Screen`, so no further input or screenshot was sent. The app remains open for review; select a model after unlocking to display its gizmo.
+
+### Arrow-tip clipping follow-up
+
+The egui gizmo overlay now clips line segments and arrowhead triangles against
+the camera frustum before perspective division. This prevents geometry that
+crosses the near plane from stretching into viewport-wide streaks.
+
+Verification: `cargo fmt --check -p builder3d-app`,
+`cargo check --locked -p builder3d-app`, and
+`cargo clippy --locked -p builder3d-app -- -D warnings` passed. The optimized
+Release build succeeded, and the refreshed app is open as PID 19108. It starts
+as `Builder3D - Untitled`; select a model to see the gizmo. Automated tests
+were not run.
+
+## 2026-11-11 - Bound Move gizmos in screen space
+
+A capture of the running Release window confirmed that frustum clipping alone
+did not remove the long strokes. Move mode now draws each shaft at a fixed
+screen length and uses a compact outlined screen-space triangle for its head.
+The projected world-axis segment supplies direction and placement; world-space
+hit testing is unchanged. Rotate and Resize keep their clipped 3D geometry.
+
+Visual check: an isolated debug preview with a temporary sphere showed all
+three arrows without viewport streaks in
+`target/gizmo-preview-after-fixed-v3.png`. The preview-only startup hook was
+removed before the final build.
+
+Verification: `cargo fmt --check -p builder3d-app`,
+`cargo check --locked -p builder3d-app`,
+`cargo clippy --locked -p builder3d-app -- -D warnings`, the Debug build, and
+the optimized Release build passed. Automated tests were not run. The previous
+Release process had exited before the refreshed standard Release app was
+launched as PID 42268 (`Builder3D - Untitled`).
+
+## 2026-11-11 - Enlarge zoom-stable Move arrows
+
+Move arrows now use a 3x size scale in screen-space drawing and their matching
+world-space geometry and hit testing. The shaft, outline, and arrowhead grow
+together, while camera-scaled world lengths keep the target the same size as
+the view zoom changes. Rotate and Resize handles keep their existing size.
+
+Verification: `cargo fmt --check -p builder3d-app -p builder3d-viewport`,
+`cargo check --locked -p builder3d-app`,
+`cargo clippy --locked -p builder3d-app -- -D warnings`, and the optimized
+Release build passed. The pinned `Initialize-BuildClang.ps1` script supplied
+libclang for Cargo. The refreshed Release window is open as PID 27132
+(`Builder3D - Untitled`); add or select a model to view the arrows. Automated
+tests were not run.
+
+Follow-up: shortened the Move shaft to one arrowhead length and adjusted its
+world-space tip and hit geometry to match the new visible endpoint.
+
+Verification: formatting, `cargo check --locked -p builder3d-app`,
+`cargo clippy --locked -p builder3d-app -- -D warnings`, and the optimized
+Release build passed. Automated tests were not run. The refreshed app is open
+as PID 36688 (`Builder3D - Untitled`); add or select a model to view the arrows.
+
+## 2026-11-11 - Add arrow grips to Rotate and Resize
+
+Rotate mode retains its full rings and adds a curved highlighted section ending
+in the shared outlined arrowhead. Resize face grips now use outward arrows with
+two consecutive arrowheads for a barbed look; corner grips remain. Picking
+covers the visible arrow length, and resize starts preserve the pointer offset
+so grabbing an arrow away from its face does not jump the model.
+
+Verification: formatting, `cargo check --locked -p builder3d-app`, and
+`cargo clippy --locked -p builder3d-app -- -D warnings` passed. The optimized
+Release build passed to the isolated output
+`target/gizmo-arrow-review/release/builder3d-app.exe`. The standard Release
+window (PID 36688) has an unsaved `Untitled *` scene and was left open. No
+refreshed window was launched. Automated tests were not run.
+
+A subsequent check confirmed PID 36688 was still using
+`target/release/builder3d-app.exe`, so the standard Release executable remains
+untouched until that unsaved window closes. The isolated review executable is
+the updated build for now.
+
+## 2026-11-11 - Refine transform gizmo appearance and picking
+
+Move, Resize, and Rotate handles now share outlined shafts and faceted arrowheads, with axis-color, hover, and active-drag emphasis. Move and Resize picking follows the painted screen-space geometry with pixels-per-point scaling. Resize face and corner drags preserve the initial pointer offset.
+
+Visual review captures are in `target/gizmo-review-final-move.png`, `target/gizmo-review-final-resize.png`, `target/gizmo-review-final-rotate.png`, and `target/gizmo-review-hover-resize.png`. The updated review app is running as PID 40424 from `target/release/builder3d-app.exe`, with an unsaved Untitled cube, left open for owner review.
+
+Verification: `cargo fmt --all -- --check`, `git diff --check`, `cargo check --locked -p builder3d-app`, and `cargo clippy --locked -p builder3d-app --lib -- -D warnings` passed. The default fat-LTO Release link failed with LLVM out-of-memory; the review build succeeded with LTO disabled and 16 codegen units. `cargo clippy --all-targets` remains blocked by pre-existing test references to the removed `Builder3dApp::project_handle`. Automated tests were not run. Product acceptance status is unchanged.

@@ -1,0 +1,914 @@
+{
+  "captures": [
+    {
+      "app": "Python reference",
+      "theme": "light",
+      "action": "workspace",
+      "input_route": "native reference window; two selected printable objects",
+      "logical_window_size": [
+        1280,
+        840
+      ],
+      "captured_size": [
+        1280,
+        840
+      ],
+      "physical_client_size": [
+        1280,
+        840
+      ],
+      "screen_dpi": 96.0,
+      "scene_objects": 2,
+      "selection": [
+        0,
+        1
+      ],
+      "colors": [
+        [
+          0.12941177189350128,
+          0.7333333492279053,
+          0.2980392277240753,
+          1.0
+        ],
+        [
+          0.12941177189350128,
+          0.7333333492279053,
+          0.2980392277240753,
+          1.0
+        ]
+      ],
+      "status": "Selected: RB-07 Box A, RB-07 Box B",
+      "modal": null,
+      "image": "captures/python-light-workspace.png"
+    },
+    {
+      "app": "Python reference",
+      "theme": "light",
+      "action": "paint-tab-actions",
+      "input_route": "native Paint tab click",
+      "logical_window_size": [
+        1280,
+        840
+      ],
+      "captured_size": [
+        1280,
+        840
+      ],
+      "physical_client_size": [
+        1280,
+        840
+      ],
+      "screen_dpi": 96.0,
+      "scene_objects": 2,
+      "selection": [
+        0,
+        1
+      ],
+      "colors": [
+        [
+          0.12941177189350128,
+          0.7333333492279053,
+          0.2980392277240753,
+          1.0
+        ],
+        [
+          0.12941177189350128,
+          0.7333333492279053,
+          0.2980392277240753,
+          1.0
+        ]
+      ],
+      "status": "Selected: RB-07 Box A, RB-07 Box B",
+      "modal": null,
+      "image": "captures/python-light-paint-tab-actions.png"
+    },
+    {
+      "app": "Python reference",
+      "theme": "light",
+      "action": "material-color-dialog",
+      "input_route": "Paint tab -> Material -> native QColorDialog",
+      "logical_window_size": [
+        1280,
+        840
+      ],
+      "captured_size": [
+        1280,
+        840
+      ],
+      "physical_client_size": [
+        1280,
+        840
+      ],
+      "screen_dpi": 96.0,
+      "scene_objects": 2,
+      "selection": [
+        0,
+        1
+      ],
+      "colors": [
+        [
+          0.12941177189350128,
+          0.7333333492279053,
+          0.2980392277240753,
+          1.0
+        ],
+        [
+          0.12941177189350128,
+          0.7333333492279053,
+          0.2980392277240753,
+          1.0
+        ]
+      ],
+      "status": "Selected: RB-07 Box A, RB-07 Box B",
+      "modal": "QColorDialog",
+      "image": "captures/python-light-material-color-dialog.png"
+    },
+    {
+      "app": "Python reference",
+      "theme": "light",
+      "action": "material-color-applied",
+      "input_route": "Paint tab -> Material -> choose and apply solid color",
+      "logical_window_size": [
+        1280,
+        840
+      ],
+      "captured_size": [
+        1280,
+        840
+      ],
+      "physical_client_size": [
+        1280,
+        840
+      ],
+      "screen_dpi": 96.0,
+      "scene_objects": 2,
+      "selection": [
+        0,
+        1
+      ],
+      "colors": [
+        [
+          0.27450981736183167,
+          0.4901960790157318,
+          0.8627451062202454,
+          1.0
+        ],
+        [
+          0.27450981736183167,
+          0.4901960790157318,
+          0.8627451062202454,
+          1.0
+        ]
+      ],
+      "status": "Applied color to 2 object(s)",
+      "modal": null,
+      "image": "captures/python-light-material-color-applied.png"
+    },
+    {
+      "app": "Python reference",
+      "theme": "light",
+      "action": "material-cancel-dialog",
+      "input_route": "Paint tab -> Material -> native QColorDialog",
+      "logical_window_size": [
+        1280,
+        840
+      ],
+      "captured_size": [
+        1280,
+        840
+      ],
+      "physical_client_size": [
+        1280,
+        840
+      ],
+      "screen_dpi": 96.0,
+      "scene_objects": 2,
+      "selection": [
+        0,
+        1
+      ],
+      "colors": [
+        [
+          0.27450981736183167,
+          0.4901960790157318,
+          0.8627451062202454,
+          1.0
+        ],
+        [
+          0.27450981736183167,
+          0.4901960790157318,
+          0.8627451062202454,
+          1.0
+        ]
+      ],
+      "status": "Applied color to 2 object(s)",
+      "modal": "QColorDialog",
+      "image": "captures/python-light-material-cancel-dialog.png"
+    },
+    {
+      "app": "Python reference",
+      "theme": "light",
+      "action": "material-cancel-kept-color",
+      "input_route": "Paint tab -> Paint -> cancel native QColorDialog",
+      "logical_window_size": [
+        1280,
+        840
+      ],
+      "captured_size": [
+        1280,
+        840
+      ],
+      "physical_client_size": [
+        1280,
+        840
+      ],
+      "screen_dpi": 96.0,
+      "scene_objects": 2,
+      "selection": [
+        0,
+        1
+      ],
+      "colors": [
+        [
+          0.27450981736183167,
+          0.4901960790157318,
+          0.8627451062202454,
+          1.0
+        ],
+        [
+          0.27450981736183167,
+          0.4901960790157318,
+          0.8627451062202454,
+          1.0
+        ]
+      ],
+      "status": "Color change cancelled",
+      "modal": null,
+      "image": "captures/python-light-material-cancel-kept-color.png"
+    },
+    {
+      "app": "Python reference",
+      "theme": "light",
+      "action": "corrupt-image-picker",
+      "input_route": "Paint tab -> Color -> native image file chooser",
+      "logical_window_size": [
+        1280,
+        840
+      ],
+      "captured_size": [
+        1280,
+        840
+      ],
+      "physical_client_size": [
+        1280,
+        840
+      ],
+      "screen_dpi": 96.0,
+      "scene_objects": 2,
+      "selection": [
+        0,
+        1
+      ],
+      "colors": [
+        [
+          0.27450981736183167,
+          0.4901960790157318,
+          0.8627451062202454,
+          1.0
+        ],
+        [
+          0.27450981736183167,
+          0.4901960790157318,
+          0.8627451062202454,
+          1.0
+        ]
+      ],
+      "status": "Color change cancelled",
+      "modal": "QFileDialog",
+      "image": "captures/python-light-corrupt-image-picker.png"
+    },
+    {
+      "app": "Python reference",
+      "theme": "light",
+      "action": "corrupt-image-visible-error",
+      "input_route": "Paint tab -> Color -> choose corrupt image",
+      "logical_window_size": [
+        1280,
+        840
+      ],
+      "captured_size": [
+        1280,
+        840
+      ],
+      "physical_client_size": [
+        1280,
+        840
+      ],
+      "screen_dpi": 96.0,
+      "scene_objects": 2,
+      "selection": [
+        0,
+        1
+      ],
+      "colors": [
+        [
+          0.27450981736183167,
+          0.4901960790157318,
+          0.8627451062202454,
+          1.0
+        ],
+        [
+          0.27450981736183167,
+          0.4901960790157318,
+          0.8627451062202454,
+          1.0
+        ]
+      ],
+      "status": "Could not load image for color sampling: E:\\Builder3D-Rust\\evidence\\rebuild\\rb-07-appearance-jobs-and-print\\fixtures\\corrupt-image.png",
+      "modal": null,
+      "image": "captures/python-light-corrupt-image-visible-error.png"
+    },
+    {
+      "app": "Python reference",
+      "theme": "light",
+      "action": "sample-image-picker",
+      "input_route": "Paint tab -> Color -> native image file chooser",
+      "logical_window_size": [
+        1280,
+        840
+      ],
+      "captured_size": [
+        1280,
+        840
+      ],
+      "physical_client_size": [
+        1280,
+        840
+      ],
+      "screen_dpi": 96.0,
+      "scene_objects": 2,
+      "selection": [
+        0,
+        1
+      ],
+      "colors": [
+        [
+          0.27450981736183167,
+          0.4901960790157318,
+          0.8627451062202454,
+          1.0
+        ],
+        [
+          0.27450981736183167,
+          0.4901960790157318,
+          0.8627451062202454,
+          1.0
+        ]
+      ],
+      "status": "Could not load image for color sampling: E:\\Builder3D-Rust\\evidence\\rebuild\\rb-07-appearance-jobs-and-print\\fixtures\\corrupt-image.png",
+      "modal": "QFileDialog",
+      "image": "captures/python-light-sample-image-picker.png"
+    },
+    {
+      "app": "Python reference",
+      "theme": "light",
+      "action": "sample-image-applied-solid-color",
+      "input_route": "Paint tab -> Color -> choose image and sample average",
+      "logical_window_size": [
+        1280,
+        840
+      ],
+      "captured_size": [
+        1280,
+        840
+      ],
+      "physical_client_size": [
+        1280,
+        840
+      ],
+      "screen_dpi": 96.0,
+      "scene_objects": 2,
+      "selection": [
+        0,
+        1
+      ],
+      "colors": [
+        [
+          0.5490196347236633,
+          0.1882352977991104,
+          0.3921568691730499,
+          1.0
+        ],
+        [
+          0.5490196347236633,
+          0.1882352977991104,
+          0.3921568691730499,
+          1.0
+        ]
+      ],
+      "status": "Applied sampled image color to 2 object(s); no texture was created",
+      "modal": null,
+      "image": "captures/python-light-sample-image-applied-solid-color.png"
+    },
+    {
+      "app": "Python reference",
+      "theme": "light",
+      "action": "file-menu-open",
+      "input_route": "native File menu -> Print Prep Check",
+      "logical_window_size": [
+        1280,
+        840
+      ],
+      "captured_size": [
+        1280,
+        840
+      ],
+      "physical_client_size": [
+        1280,
+        840
+      ],
+      "screen_dpi": 96.0,
+      "scene_objects": 2,
+      "selection": [
+        0,
+        1
+      ],
+      "colors": [
+        [
+          0.5490196347236633,
+          0.1882352977991104,
+          0.3921568691730499,
+          1.0
+        ],
+        [
+          0.5490196347236633,
+          0.1882352977991104,
+          0.3921568691730499,
+          1.0
+        ]
+      ],
+      "status": "Applied sampled image color to 2 object(s); no texture was created",
+      "modal": "QMenu",
+      "image": "captures/python-light-file-menu-open.png"
+    },
+    {
+      "app": "Python reference",
+      "theme": "dark",
+      "action": "workspace",
+      "input_route": "native reference window; two selected printable objects",
+      "logical_window_size": [
+        1280,
+        840
+      ],
+      "captured_size": [
+        1280,
+        840
+      ],
+      "physical_client_size": [
+        1280,
+        840
+      ],
+      "screen_dpi": 96.0,
+      "scene_objects": 2,
+      "selection": [
+        0,
+        1
+      ],
+      "colors": [
+        [
+          0.12941177189350128,
+          0.7333333492279053,
+          0.2980392277240753,
+          1.0
+        ],
+        [
+          0.12941177189350128,
+          0.7333333492279053,
+          0.2980392277240753,
+          1.0
+        ]
+      ],
+      "status": "Selected: RB-07 Box A, RB-07 Box B",
+      "modal": null,
+      "image": "captures/python-dark-workspace.png"
+    },
+    {
+      "app": "Python reference",
+      "theme": "dark",
+      "action": "paint-tab-actions",
+      "input_route": "native Paint tab click",
+      "logical_window_size": [
+        1280,
+        840
+      ],
+      "captured_size": [
+        1280,
+        840
+      ],
+      "physical_client_size": [
+        1280,
+        840
+      ],
+      "screen_dpi": 96.0,
+      "scene_objects": 2,
+      "selection": [
+        0,
+        1
+      ],
+      "colors": [
+        [
+          0.12941177189350128,
+          0.7333333492279053,
+          0.2980392277240753,
+          1.0
+        ],
+        [
+          0.12941177189350128,
+          0.7333333492279053,
+          0.2980392277240753,
+          1.0
+        ]
+      ],
+      "status": "Selected: RB-07 Box A, RB-07 Box B",
+      "modal": null,
+      "image": "captures/python-dark-paint-tab-actions.png"
+    },
+    {
+      "app": "Python reference",
+      "theme": "dark",
+      "action": "material-color-dialog",
+      "input_route": "Paint tab -> Material -> native QColorDialog",
+      "logical_window_size": [
+        1280,
+        840
+      ],
+      "captured_size": [
+        1280,
+        840
+      ],
+      "physical_client_size": [
+        1280,
+        840
+      ],
+      "screen_dpi": 96.0,
+      "scene_objects": 2,
+      "selection": [
+        0,
+        1
+      ],
+      "colors": [
+        [
+          0.12941177189350128,
+          0.7333333492279053,
+          0.2980392277240753,
+          1.0
+        ],
+        [
+          0.12941177189350128,
+          0.7333333492279053,
+          0.2980392277240753,
+          1.0
+        ]
+      ],
+      "status": "Selected: RB-07 Box A, RB-07 Box B",
+      "modal": "QColorDialog",
+      "image": "captures/python-dark-material-color-dialog.png"
+    },
+    {
+      "app": "Python reference",
+      "theme": "dark",
+      "action": "material-color-applied",
+      "input_route": "Paint tab -> Material -> choose and apply solid color",
+      "logical_window_size": [
+        1280,
+        840
+      ],
+      "captured_size": [
+        1280,
+        840
+      ],
+      "physical_client_size": [
+        1280,
+        840
+      ],
+      "screen_dpi": 96.0,
+      "scene_objects": 2,
+      "selection": [
+        0,
+        1
+      ],
+      "colors": [
+        [
+          0.27450981736183167,
+          0.4901960790157318,
+          0.8627451062202454,
+          1.0
+        ],
+        [
+          0.27450981736183167,
+          0.4901960790157318,
+          0.8627451062202454,
+          1.0
+        ]
+      ],
+      "status": "Applied color to 2 object(s)",
+      "modal": null,
+      "image": "captures/python-dark-material-color-applied.png"
+    },
+    {
+      "app": "Python reference",
+      "theme": "dark",
+      "action": "material-cancel-dialog",
+      "input_route": "Paint tab -> Material -> native QColorDialog",
+      "logical_window_size": [
+        1280,
+        840
+      ],
+      "captured_size": [
+        1280,
+        840
+      ],
+      "physical_client_size": [
+        1280,
+        840
+      ],
+      "screen_dpi": 96.0,
+      "scene_objects": 2,
+      "selection": [
+        0,
+        1
+      ],
+      "colors": [
+        [
+          0.27450981736183167,
+          0.4901960790157318,
+          0.8627451062202454,
+          1.0
+        ],
+        [
+          0.27450981736183167,
+          0.4901960790157318,
+          0.8627451062202454,
+          1.0
+        ]
+      ],
+      "status": "Applied color to 2 object(s)",
+      "modal": "QColorDialog",
+      "image": "captures/python-dark-material-cancel-dialog.png"
+    },
+    {
+      "app": "Python reference",
+      "theme": "dark",
+      "action": "material-cancel-kept-color",
+      "input_route": "Paint tab -> Paint -> cancel native QColorDialog",
+      "logical_window_size": [
+        1280,
+        840
+      ],
+      "captured_size": [
+        1280,
+        840
+      ],
+      "physical_client_size": [
+        1280,
+        840
+      ],
+      "screen_dpi": 96.0,
+      "scene_objects": 2,
+      "selection": [
+        0,
+        1
+      ],
+      "colors": [
+        [
+          0.27450981736183167,
+          0.4901960790157318,
+          0.8627451062202454,
+          1.0
+        ],
+        [
+          0.27450981736183167,
+          0.4901960790157318,
+          0.8627451062202454,
+          1.0
+        ]
+      ],
+      "status": "Color change cancelled",
+      "modal": null,
+      "image": "captures/python-dark-material-cancel-kept-color.png"
+    },
+    {
+      "app": "Python reference",
+      "theme": "dark",
+      "action": "corrupt-image-picker",
+      "input_route": "Paint tab -> Color -> native image file chooser",
+      "logical_window_size": [
+        1280,
+        840
+      ],
+      "captured_size": [
+        1280,
+        840
+      ],
+      "physical_client_size": [
+        1280,
+        840
+      ],
+      "screen_dpi": 96.0,
+      "scene_objects": 2,
+      "selection": [
+        0,
+        1
+      ],
+      "colors": [
+        [
+          0.27450981736183167,
+          0.4901960790157318,
+          0.8627451062202454,
+          1.0
+        ],
+        [
+          0.27450981736183167,
+          0.4901960790157318,
+          0.8627451062202454,
+          1.0
+        ]
+      ],
+      "status": "Color change cancelled",
+      "modal": "QFileDialog",
+      "image": "captures/python-dark-corrupt-image-picker.png"
+    },
+    {
+      "app": "Python reference",
+      "theme": "dark",
+      "action": "corrupt-image-visible-error",
+      "input_route": "Paint tab -> Color -> choose corrupt image",
+      "logical_window_size": [
+        1280,
+        840
+      ],
+      "captured_size": [
+        1280,
+        840
+      ],
+      "physical_client_size": [
+        1280,
+        840
+      ],
+      "screen_dpi": 96.0,
+      "scene_objects": 2,
+      "selection": [
+        0,
+        1
+      ],
+      "colors": [
+        [
+          0.27450981736183167,
+          0.4901960790157318,
+          0.8627451062202454,
+          1.0
+        ],
+        [
+          0.27450981736183167,
+          0.4901960790157318,
+          0.8627451062202454,
+          1.0
+        ]
+      ],
+      "status": "Could not load image for color sampling: E:\\Builder3D-Rust\\evidence\\rebuild\\rb-07-appearance-jobs-and-print\\fixtures\\corrupt-image.png",
+      "modal": null,
+      "image": "captures/python-dark-corrupt-image-visible-error.png"
+    },
+    {
+      "app": "Python reference",
+      "theme": "dark",
+      "action": "sample-image-picker",
+      "input_route": "Paint tab -> Color -> native image file chooser",
+      "logical_window_size": [
+        1280,
+        840
+      ],
+      "captured_size": [
+        1280,
+        840
+      ],
+      "physical_client_size": [
+        1280,
+        840
+      ],
+      "screen_dpi": 96.0,
+      "scene_objects": 2,
+      "selection": [
+        0,
+        1
+      ],
+      "colors": [
+        [
+          0.27450981736183167,
+          0.4901960790157318,
+          0.8627451062202454,
+          1.0
+        ],
+        [
+          0.27450981736183167,
+          0.4901960790157318,
+          0.8627451062202454,
+          1.0
+        ]
+      ],
+      "status": "Could not load image for color sampling: E:\\Builder3D-Rust\\evidence\\rebuild\\rb-07-appearance-jobs-and-print\\fixtures\\corrupt-image.png",
+      "modal": "QFileDialog",
+      "image": "captures/python-dark-sample-image-picker.png"
+    },
+    {
+      "app": "Python reference",
+      "theme": "dark",
+      "action": "sample-image-applied-solid-color",
+      "input_route": "Paint tab -> Color -> choose image and sample average",
+      "logical_window_size": [
+        1280,
+        840
+      ],
+      "captured_size": [
+        1280,
+        840
+      ],
+      "physical_client_size": [
+        1280,
+        840
+      ],
+      "screen_dpi": 96.0,
+      "scene_objects": 2,
+      "selection": [
+        0,
+        1
+      ],
+      "colors": [
+        [
+          0.5490196347236633,
+          0.1882352977991104,
+          0.3921568691730499,
+          1.0
+        ],
+        [
+          0.5490196347236633,
+          0.1882352977991104,
+          0.3921568691730499,
+          1.0
+        ]
+      ],
+      "status": "Applied sampled image color to 2 object(s); no texture was created",
+      "modal": null,
+      "image": "captures/python-dark-sample-image-applied-solid-color.png"
+    },
+    {
+      "app": "Python reference",
+      "theme": "dark",
+      "action": "file-menu-open",
+      "input_route": "native File menu -> Print Prep Check",
+      "logical_window_size": [
+        1280,
+        840
+      ],
+      "captured_size": [
+        1280,
+        840
+      ],
+      "physical_client_size": [
+        1280,
+        840
+      ],
+      "screen_dpi": 96.0,
+      "scene_objects": 2,
+      "selection": [
+        0,
+        1
+      ],
+      "colors": [
+        [
+          0.5490196347236633,
+          0.1882352977991104,
+          0.3921568691730499,
+          1.0
+        ],
+        [
+          0.5490196347236633,
+          0.1882352977991104,
+          0.3921568691730499,
+          1.0
+        ]
+      ],
+      "status": "Applied sampled image color to 2 object(s); no texture was created",
+      "modal": "QMenu",
+      "image": "captures/python-dark-file-menu-open.png"
+    }
+  ],
+  "failures": [
+    "light-print-prep-report: message dialog did not appear",
+    "dark-print-prep-report: message dialog did not appear"
+  ],
+  "dispatch_notes": [
+    "light: Print Prep Check QAction dispatched after native menu click did not open its report",
+    "dark: Print Prep Check QAction dispatched after native menu click did not open its report"
+  ]
+}

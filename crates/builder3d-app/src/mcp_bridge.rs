@@ -291,7 +291,7 @@ impl McpDesktopIntegration {
     fn live_status(&self, app: &Builder3dApp, arguments: Value) -> Result<Value, AdapterError> {
         let mut status = self.server.call_value("get_status", arguments)?;
         if let Some(object) = status.as_object_mut() {
-            object.insert("app_state".to_owned(), json!("ready"));
+            object.insert("app_state".to_owned(), json!("busy"));
             object.insert("busy".to_owned(), json!(true));
             object.insert(
                 "project_id".to_owned(),
@@ -303,7 +303,20 @@ impl McpDesktopIntegration {
             );
             object.insert("dirty".to_owned(), json!(app.commands.is_dirty()));
             if let Some(operation) = &self.active_operation {
-                object.insert("operation_id".to_owned(), json!(operation.operation_id));
+                let active_operation = self
+                    .server
+                    .call_value(
+                        "operation_status",
+                        json!({"operation_id": operation.operation_id}),
+                    )
+                    .unwrap_or_else(|_| {
+                        json!({
+                            "operation_id": operation.operation_id,
+                            "action": operation.action,
+                            "state": "running",
+                        })
+                    });
+                object.insert("active_operation".to_owned(), active_operation);
             }
         }
         Ok(status)

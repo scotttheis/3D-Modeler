@@ -1,0 +1,102 @@
+{
+    "snapshot_path":  "G:/Builder3D-Rust_snapshot_20261107-154700_RB-09-schema-parity-pre-edit",
+    "verification_time":  "before Rust source edits on 2026-11-07",
+    "source_files":  3743,
+    "snapshot_files":  3743,
+    "source_bytes":  755179156,
+    "snapshot_bytes":  755179156,
+    "missing_paths":  0,
+    "extra_paths":  0,
+    "size_or_sha256_differences":  0,
+    "source_reparse_entries":  0,
+    "snapshot_reparse_entries":  0,
+    "critical_sha256_matches":  17,
+    "critical_hashes":  [
+                            {
+                                "path":  "Cargo.toml",
+                                "bytes":  2089,
+                                "sha256":  "0fd8515cd7b344ba0b9202c50096a1168bcee7ca443cbad0fcfa18918df35554"
+                            },
+                            {
+                                "path":  "Cargo.lock",
+                                "bytes":  118317,
+                                "sha256":  "ff30b6ac1ce8a8f44f335c107e3fdbcc97450ce311d8b5e8a7f8857d4f8053f0"
+                            },
+                            {
+                                "path":  "deny.toml",
+                                "bytes":  1690,
+                                "sha256":  "9d6c7364c978e1b890b22a6c1d28bd2bf0f9c0f473c3e325072fdd14c4087da8"
+                            },
+                            {
+                                "path":  "crates/builder3d-mcp/Cargo.toml",
+                                "bytes":  450,
+                                "sha256":  "32705f01ef21ecec459915f013426f5f8f4ee89be3d7eb857f36a9dc84235a3f"
+                            },
+                            {
+                                "path":  "crates/builder3d-mcp/src/r4/catalog.rs",
+                                "bytes":  19449,
+                                "sha256":  "116d6f1ec940c8c8b3f2fca7d2365bb1293e978f1460a39e6d0ab821a745cb62"
+                            },
+                            {
+                                "path":  "crates/builder3d-mcp/src/r4/schema.rs",
+                                "bytes":  40065,
+                                "sha256":  "3616778a846f54e0960458a00e0ee640c9e255ba6693ed63c061dd2b87011fb7"
+                            },
+                            {
+                                "path":  "crates/builder3d-mcp/src/r4/server.rs",
+                                "bytes":  136180,
+                                "sha256":  "371f878ebfce5b02cf20ed089e998d1441e0fde2e68bd66b2ad339146f6e76bc"
+                            },
+                            {
+                                "path":  "crates/builder3d-mcp/src/r4/gateway.rs",
+                                "bytes":  13163,
+                                "sha256":  "9b76a9ffc3e0d44615fe373b39c7d2a5119e2ca1dcad026fe7a70fdfcacce933"
+                            },
+                            {
+                                "path":  "crates/builder3d-app/src/mcp_bridge.rs",
+                                "bytes":  38501,
+                                "sha256":  "8da97ae29fc5fef3875eb28070c97dec05af3bc1258a3d4eb36b00da7f23a176"
+                            },
+                            {
+                                "path":  "AGENTS.md",
+                                "bytes":  13514,
+                                "sha256":  "cebdc104ce0830a607bf55c9c04519d0700ee1f46c681463e6fe91be205fcfee"
+                            },
+                            {
+                                "path":  "docs/product-rebuild-plan.md",
+                                "bytes":  95215,
+                                "sha256":  "e9f664642b6fdd9926d03467634994b5b13345b476f7aee22660a448f8f7ea56"
+                            },
+                            {
+                                "path":  "docs/rb-09-shared-ai-and-regression-handoff.md",
+                                "bytes":  28984,
+                                "sha256":  "200f84250f87cde2d2cc66f0d4039b7200d6dc9ad8319a052c5fa797d3971f39"
+                            },
+                            {
+                                "path":  "docs/component-catalog.toml",
+                                "bytes":  53138,
+                                "sha256":  "b65168aef87a5f3ec3367dc140be7bf63bd6bef1d7af71ed7f8f4731a0cc8aae"
+                            },
+                            {
+                                "path":  "evidence/rebuild/parity-matrix.toml",
+                                "bytes":  399580,
+                                "sha256":  "fc65b6cdae6e8a9b0ca3359b5c3697d9788f28fa5c87471dda67a7cffaa8bbb1"
+                            },
+                            {
+                                "path":  "evidence/rebuild/rb-09-shared-ai-and-regression/checkpoint.md",
+                                "bytes":  7176,
+                                "sha256":  "1eddee4e376b8800ae607bd978c8bcd2169977fe4c82102d3b3e3b807753ce4d"
+                            },
+                            {
+                                "path":  "evidence/rebuild/rb-09-shared-ai-and-regression/reference-current-20261107-084248/reference-identity.json",
+                                "bytes":  10049,
+                                "sha256":  "172b9ff65bd0a7afa709c2a20a8f64097120615fc50be94f27502225f50d3efe"
+                            },
+                            {
+                                "path":  "evidence/rebuild/rb-09-shared-ai-and-regression/reference-current-20261107-084248/python-full.json",
+                                "bytes":  695457,
+                                "sha256":  "ad72e60355262b9cd8c26c70a51a1adb263d380b5dd60b0b060c664d59ed3b6f"
+                            }
+                        ],
+    "verification":  "pass"
+}

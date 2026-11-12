@@ -1,0 +1,481 @@
+schema_version = 1
+capture_date = "2026-10-31"
+timezone = "America/Denver, MDT (UTC-06:00)"
+capture_method = "GDI CopyFromScreen of the foreground Builder3D client rectangle"
+application = "Builder3D Rust eframe app"
+executable = "E:\\Builder3D-Rust\\target\\debug\\builder3d-app.exe"
+executable_sha256 = "4b197161771239c8943fb8fc2f73d6739245145769c301c32931b01e5480da87"
+renderer = "R5 renderer initialized from eframe shared instance/adapter/device/queue; egui-wgpu texture presentation"
+runtime_adapter = "Quadro RTX 4000; Vulkan; DiscreteGpu; NVIDIA 581.42"
+primary_display_physical_px = [2560, 1440]
+primary_display_work_area_physical_px = [2560, 1392]
+system_dpi = 96
+system_scale_percent = 100
+client_logical_px = [1280, 840]
+client_physical_px = [1280, 840]
+window_dpi = 96
+window_scale_percent = 100
+window_state = "Restored"
+foreground_window_title = "Builder3D"
+window_visible = true
+source_shell_sha256 = "b3ddba7f867dcbdaef845657e311afe06842a271e0a39958392c9712ab5124e3"
+source_commands_sha256 = "4ab86197cce17cbc44f112e95b4e919303e679400f35859dff9316a794c91a8a"
+source_dialogs_sha256 = "069452058573acff7f3b0bbafdd5dc2a9322893e1589b0a2acf0128f48b9c691"
+source_renderer_sha256 = "a1fe44004737ec1cb9ea37abddaabc2f4a9c2348db64317318c754724b6e1bbc"
+source_picking_sha256 = "e1a84584e3c0ceffc405070f421e15a1673b9de4500041e4da66fbc515fd33b6"
+source_math_sha256 = "d5aefebe5b187c08acc3b00e0023f13a5ab565e00c1e408ec93c7af86f7b76e7"
+source_adaptive_sha256 = "81bef83e402740282de5669d2926b1f44642314d3becf2c608b5f4f5bba1907b"
+fixture = "crates/builder3d-core/tests/fixtures/formats/python_box.stl"
+fixture_size_bytes = 1397
+fixture_sha256 = "f55301ca87cc6a654673dedd0e5265ff1437362e2a8d078c11d1f1ca628aa240"
+
+# Each record describes a direct desktop capture; no PrintWindow image is used as evidence.
+[[capture]]
+file = "captures/rust-dark-camera-orbit-pan-zoom-client-1280x840.png"
+theme = "Dark"
+state = "camera-orbit-pan-zoom"
+captured_at = "2026-10-31T10:53:27.163-06:00"
+process_id = 19052
+window_state = "Restored"
+foreground_window_title = "Builder3D"
+window_visible = true
+client_logical_px = [1280, 840]
+client_physical_px = [1280, 840]
+image_px = [1280, 840]
+window_dpi = 96
+display_scale_percent = 100
+capture_method = "GDI CopyFromScreen of foreground client rectangle"
+size_bytes = 169196
+sha256 = "283850f6eb22d3878652e2a8facbd31725dc57bcabf6353c7aca65a417075761"
+
+[[capture]]
+file = "captures/rust-dark-cube-client-1280x840.png"
+theme = "Dark"
+state = "cube"
+captured_at = "2026-10-31T10:52:25.016-06:00"
+process_id = 19052
+window_state = "Restored"
+foreground_window_title = "Builder3D"
+window_visible = true
+client_logical_px = [1280, 840]
+client_physical_px = [1280, 840]
+image_px = [1280, 840]
+window_dpi = 96
+display_scale_percent = 100
+capture_method = "GDI CopyFromScreen of foreground client rectangle"
+size_bytes = 257593
+sha256 = "9198524d2236276d9353dde25cfd2e67af135fc0ad3954891410b73eb721c9e0"
+
+[[capture]]
+file = "captures/rust-dark-cube-fixture-imported-client-1280x840.png"
+theme = "Dark"
+state = "cube-fixture-imported"
+captured_at = "2026-10-31T10:52:43.499-06:00"
+process_id = 19052
+window_state = "Restored"
+foreground_window_title = "Builder3D"
+window_visible = true
+client_logical_px = [1280, 840]
+client_physical_px = [1280, 840]
+image_px = [1280, 840]
+window_dpi = 96
+display_scale_percent = 100
+capture_method = "GDI CopyFromScreen of foreground client rectangle"
+size_bytes = 259730
+sha256 = "c69c75582e4bd166badb25b971cbc36a94342b7bab435f6d6609336860351a45"
+
+[[capture]]
+file = "captures/rust-dark-exact-pick-client-1280x840.png"
+theme = "Dark"
+state = "exact-pick"
+captured_at = "2026-10-31T10:53:38.589-06:00"
+process_id = 19052
+window_state = "Restored"
+foreground_window_title = "Builder3D"
+window_visible = true
+client_logical_px = [1280, 840]
+client_physical_px = [1280, 840]
+image_px = [1280, 840]
+window_dpi = 96
+display_scale_percent = 100
+capture_method = "GDI CopyFromScreen of foreground client rectangle"
+size_bytes = 169425
+sha256 = "267038479e37a5863f649b8e7826a20a30300deda4c39b78524a434f989830a4"
+
+[[capture]]
+file = "captures/rust-dark-gizmo-after-client-1280x840.png"
+theme = "Dark"
+state = "gizmo-after"
+captured_at = "2026-10-31T10:53:57.147-06:00"
+process_id = 19052
+window_state = "Restored"
+foreground_window_title = "Builder3D"
+window_visible = true
+client_logical_px = [1280, 840]
+client_physical_px = [1280, 840]
+image_px = [1280, 840]
+window_dpi = 96
+display_scale_percent = 100
+capture_method = "GDI CopyFromScreen of foreground client rectangle"
+size_bytes = 172058
+sha256 = "a19a140180b9e9b0efb54e64deed8b28bcbb46bf9f923d94260239f57c1beea3"
+
+[[capture]]
+file = "captures/rust-dark-gizmo-before-client-1280x840.png"
+theme = "Dark"
+state = "gizmo-before"
+captured_at = "2026-10-31T10:53:48.114-06:00"
+process_id = 19052
+window_state = "Restored"
+foreground_window_title = "Builder3D"
+window_visible = true
+client_logical_px = [1280, 840]
+client_physical_px = [1280, 840]
+image_px = [1280, 840]
+window_dpi = 96
+display_scale_percent = 100
+capture_method = "GDI CopyFromScreen of foreground client rectangle"
+size_bytes = 169425
+sha256 = "267038479e37a5863f649b8e7826a20a30300deda4c39b78524a434f989830a4"
+
+[[capture]]
+file = "captures/rust-dark-new-empty-client-1280x840.png"
+theme = "Dark"
+state = "new-empty"
+captured_at = "2026-10-31T10:52:18.457-06:00"
+process_id = 19052
+window_state = "Restored"
+foreground_window_title = "Builder3D"
+window_visible = true
+client_logical_px = [1280, 840]
+client_physical_px = [1280, 840]
+image_px = [1280, 840]
+window_dpi = 96
+display_scale_percent = 100
+capture_method = "GDI CopyFromScreen of foreground client rectangle"
+size_bytes = 129119
+sha256 = "de44e6b7def7f8eeaf4f98aca7f71fe382c22e91ad6461cff76e957e9c33ea79"
+
+[[capture]]
+file = "captures/rust-dark-redo-client-1280x840.png"
+theme = "Dark"
+state = "redo"
+captured_at = "2026-10-31T10:54:16.305-06:00"
+process_id = 19052
+window_state = "Restored"
+foreground_window_title = "Builder3D"
+window_visible = true
+client_logical_px = [1280, 840]
+client_physical_px = [1280, 840]
+image_px = [1280, 840]
+window_dpi = 96
+display_scale_percent = 100
+capture_method = "GDI CopyFromScreen of foreground client rectangle"
+size_bytes = 171675
+sha256 = "b3e6a162800c02b7486d47d4a0230f03e4083d1b2b2eb89119fe938f849b400d"
+
+[[capture]]
+file = "captures/rust-dark-reopened-client-1280x840.png"
+theme = "Dark"
+state = "reopened"
+captured_at = "2026-10-31T10:55:07.296-06:00"
+process_id = 21352
+window_state = "Restored"
+foreground_window_title = "Builder3D"
+window_visible = true
+client_logical_px = [1280, 840]
+client_physical_px = [1280, 840]
+image_px = [1280, 840]
+window_dpi = 96
+display_scale_percent = 100
+capture_method = "GDI CopyFromScreen of foreground client rectangle"
+size_bytes = 203591
+sha256 = "509a75beccba6bb07de79f745014fee3abd668384101b7592557e7739ed9c88c"
+
+[[capture]]
+file = "captures/rust-dark-saved-before-reopen-client-1280x840.png"
+theme = "Dark"
+state = "saved-before-reopen"
+captured_at = "2026-10-31T10:54:33.020-06:00"
+process_id = 19052
+window_state = "Restored"
+foreground_window_title = "Builder3D"
+window_visible = true
+client_logical_px = [1280, 840]
+client_physical_px = [1280, 840]
+image_px = [1280, 840]
+window_dpi = 96
+display_scale_percent = 100
+capture_method = "GDI CopyFromScreen of foreground client rectangle"
+size_bytes = 177377
+sha256 = "58411087a5ab39ea076750bb7fecb2f8b120a329a94b5ea5d9699f368840e64f"
+
+[[capture]]
+file = "captures/rust-dark-undo-client-1280x840.png"
+theme = "Dark"
+state = "undo"
+captured_at = "2026-10-31T10:54:10.383-06:00"
+process_id = 19052
+window_state = "Restored"
+foreground_window_title = "Builder3D"
+window_visible = true
+client_logical_px = [1280, 840]
+client_physical_px = [1280, 840]
+image_px = [1280, 840]
+window_dpi = 96
+display_scale_percent = 100
+capture_method = "GDI CopyFromScreen of foreground client rectangle"
+size_bytes = 168565
+sha256 = "94f2b336a347dc7fc7db8a63dac17240802348463a6259d0a41781c77fc4e71b"
+
+[[capture]]
+file = "captures/rust-dark-welcome-client-1280x840.png"
+theme = "Dark"
+state = "welcome"
+captured_at = "2026-10-31T10:44:08.670-06:00"
+process_id = 32152
+window_state = "Restored"
+foreground_window_title = "Builder3D"
+window_visible = true
+client_logical_px = [1280, 840]
+client_physical_px = [1280, 840]
+image_px = [1280, 840]
+window_dpi = 96
+display_scale_percent = 100
+capture_method = "GDI CopyFromScreen of foreground client rectangle"
+size_bytes = 144134
+sha256 = "979e0ff11b5d001b80c550b0a8725055f2bbbf06997bfefadfe7635033beb441"
+
+[[capture]]
+file = "captures/rust-light-camera-orbit-pan-zoom-client-1280x840.png"
+theme = "Light"
+state = "camera-orbit-pan-zoom"
+captured_at = "2026-10-31T10:48:12.406-06:00"
+process_id = 10940
+window_state = "Restored"
+foreground_window_title = "Builder3D"
+window_visible = true
+client_logical_px = [1280, 840]
+client_physical_px = [1280, 840]
+image_px = [1280, 840]
+window_dpi = 96
+display_scale_percent = 100
+capture_method = "GDI CopyFromScreen of foreground client rectangle"
+size_bytes = 173003
+sha256 = "8e61051cc5c8accca4b67f58b07cdf5cc2c7fef96c6dc976ff906e5358e5c51e"
+
+[[capture]]
+file = "captures/rust-light-cube-client-1280x840.png"
+theme = "Light"
+state = "cube"
+captured_at = "2026-10-31T10:44:52.961-06:00"
+process_id = 10940
+window_state = "Restored"
+foreground_window_title = "Builder3D"
+window_visible = true
+client_logical_px = [1280, 840]
+client_physical_px = [1280, 840]
+image_px = [1280, 840]
+window_dpi = 96
+display_scale_percent = 100
+capture_method = "GDI CopyFromScreen of foreground client rectangle"
+size_bytes = 263677
+sha256 = "3dbd3bc52a7f65a853ece96a0a60655f6827ee2c1825b8aa1c588b6ad992da73"
+
+[[capture]]
+file = "captures/rust-light-cube-fixture-imported-client-1280x840.png"
+theme = "Light"
+state = "cube-fixture-imported"
+captured_at = "2026-10-31T10:45:31.026-06:00"
+process_id = 10940
+window_state = "Restored"
+foreground_window_title = "Builder3D"
+window_visible = true
+client_logical_px = [1280, 840]
+client_physical_px = [1280, 840]
+image_px = [1280, 840]
+window_dpi = 96
+display_scale_percent = 100
+capture_method = "GDI CopyFromScreen of foreground client rectangle"
+size_bytes = 265655
+sha256 = "acd06eb91be6a0369ae7f68b39127e1b761038aaa364fab46c179c5b9d1728b6"
+
+[[capture]]
+file = "captures/rust-light-exact-pick-client-1280x840.png"
+theme = "Light"
+state = "exact-pick"
+captured_at = "2026-10-31T10:48:24.684-06:00"
+process_id = 10940
+window_state = "Restored"
+foreground_window_title = "Builder3D"
+window_visible = true
+client_logical_px = [1280, 840]
+client_physical_px = [1280, 840]
+image_px = [1280, 840]
+window_dpi = 96
+display_scale_percent = 100
+capture_method = "GDI CopyFromScreen of foreground client rectangle"
+size_bytes = 173160
+sha256 = "f142ee5c27f4b390f6a6daaf014fa5f12a6237a956bc3fdba505f4e58a5d4670"
+
+[[capture]]
+file = "captures/rust-light-gizmo-after-client-1280x840.png"
+theme = "Light"
+state = "gizmo-after"
+captured_at = "2026-10-31T10:48:54.190-06:00"
+process_id = 10940
+window_state = "Restored"
+foreground_window_title = "Builder3D"
+window_visible = true
+client_logical_px = [1280, 840]
+client_physical_px = [1280, 840]
+image_px = [1280, 840]
+window_dpi = 96
+display_scale_percent = 100
+capture_method = "GDI CopyFromScreen of foreground client rectangle"
+size_bytes = 175942
+sha256 = "e7051c0e1f722a59a1880fd60f6e47ec95d9fc4c69503314dcaa89d4fa490708"
+
+[[capture]]
+file = "captures/rust-light-gizmo-before-client-1280x840.png"
+theme = "Light"
+state = "gizmo-before"
+captured_at = "2026-10-31T10:48:43.816-06:00"
+process_id = 10940
+window_state = "Restored"
+foreground_window_title = "Builder3D"
+window_visible = true
+client_logical_px = [1280, 840]
+client_physical_px = [1280, 840]
+image_px = [1280, 840]
+window_dpi = 96
+display_scale_percent = 100
+capture_method = "GDI CopyFromScreen of foreground client rectangle"
+size_bytes = 173160
+sha256 = "fd717c0f64f4b4f06ed6768d72a1ca32dce3c663ede077847fdec5b4c6e62b1a"
+
+[[capture]]
+file = "captures/rust-light-native-picker-cancel-client-1280x840.png"
+theme = "Light"
+state = "native-picker-cancel"
+captured_at = "2026-10-31T10:45:05.737-06:00"
+process_id = 10940
+window_state = "Restored"
+foreground_window_title = "Builder3D"
+window_visible = true
+client_logical_px = [1280, 840]
+client_physical_px = [1280, 840]
+image_px = [1280, 840]
+window_dpi = 96
+display_scale_percent = 100
+capture_method = "GDI CopyFromScreen of foreground client rectangle"
+size_bytes = 242855
+sha256 = "b938053e0d33e318a6c0417c85a937120702555fd2b1ad8d9fd177822200e3c3"
+
+[[capture]]
+file = "captures/rust-light-new-empty-client-1280x840.png"
+theme = "Light"
+state = "new-empty"
+captured_at = "2026-10-31T10:44:42.402-06:00"
+process_id = 10940
+window_state = "Restored"
+foreground_window_title = "Builder3D"
+window_visible = true
+client_logical_px = [1280, 840]
+client_physical_px = [1280, 840]
+image_px = [1280, 840]
+window_dpi = 96
+display_scale_percent = 100
+capture_method = "GDI CopyFromScreen of foreground client rectangle"
+size_bytes = 132867
+sha256 = "9f6f94e4fdef852a7594433366e89752c5088585d569cf62b0f1c419b60c20f3"
+
+[[capture]]
+file = "captures/rust-light-redo-client-1280x840.png"
+theme = "Light"
+state = "redo"
+captured_at = "2026-10-31T10:49:26.050-06:00"
+process_id = 10940
+window_state = "Restored"
+foreground_window_title = "Builder3D"
+window_visible = true
+client_logical_px = [1280, 840]
+client_physical_px = [1280, 840]
+image_px = [1280, 840]
+window_dpi = 96
+display_scale_percent = 100
+capture_method = "GDI CopyFromScreen of foreground client rectangle"
+size_bytes = 175592
+sha256 = "bb7fc7d41ec22ad31681b93ec56d5d0ee2e6ebebb94392a7f156fe4c8f20bf9c"
+
+[[capture]]
+file = "captures/rust-light-reopened-client-1280x840.png"
+theme = "Light"
+state = "reopened"
+captured_at = "2026-10-31T10:51:35.690-06:00"
+process_id = 39156
+window_state = "Restored"
+foreground_window_title = "Builder3D"
+window_visible = true
+client_logical_px = [1280, 840]
+client_physical_px = [1280, 840]
+image_px = [1280, 840]
+window_dpi = 96
+display_scale_percent = 100
+capture_method = "GDI CopyFromScreen of foreground client rectangle"
+size_bytes = 207521
+sha256 = "029d4208453db552848d79dd1114c72ebb47b6659341d460d8b9ce3f004bb7f6"
+
+[[capture]]
+file = "captures/rust-light-saved-before-reopen-client-1280x840.png"
+theme = "Light"
+state = "saved-before-reopen"
+captured_at = "2026-10-31T10:50:17.576-06:00"
+process_id = 10940
+window_state = "Restored"
+foreground_window_title = "Builder3D"
+window_visible = true
+client_logical_px = [1280, 840]
+client_physical_px = [1280, 840]
+image_px = [1280, 840]
+window_dpi = 96
+display_scale_percent = 100
+capture_method = "GDI CopyFromScreen of foreground client rectangle"
+size_bytes = 180789
+sha256 = "6cd9a6d6eb7c904698de3c891aeb149a7a5d0a5f615ef6a3030f59187ba4a697"
+
+[[capture]]
+file = "captures/rust-light-undo-client-1280x840.png"
+theme = "Light"
+state = "undo"
+captured_at = "2026-10-31T10:49:15.356-06:00"
+process_id = 10940
+window_state = "Restored"
+foreground_window_title = "Builder3D"
+window_visible = true
+client_logical_px = [1280, 840]
+client_physical_px = [1280, 840]
+image_px = [1280, 840]
+window_dpi = 96
+display_scale_percent = 100
+capture_method = "GDI CopyFromScreen of foreground client rectangle"
+size_bytes = 172307
+sha256 = "5f80f948a465bca9530c6d4b30a71a2ea540683c4f97ac1640dc0683b78428f0"
+
+[[capture]]
+file = "captures/rust-light-welcome-client-1280x840.png"
+theme = "Light"
+state = "welcome"
+captured_at = "2026-10-31T10:44:14.122-06:00"
+process_id = 5900
+window_state = "Restored"
+foreground_window_title = "Builder3D"
+window_visible = true
+client_logical_px = [1280, 840]
+client_physical_px = [1280, 840]
+image_px = [1280, 840]
+window_dpi = 96
+display_scale_percent = 100
+capture_method = "GDI CopyFromScreen of foreground client rectangle"
+size_bytes = 143259
+sha256 = "9b59bbf15fd36e9de68c91fb9d871a880c56c747e7366da312643b0e13fe480d"

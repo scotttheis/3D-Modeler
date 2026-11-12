@@ -4,6 +4,7 @@
 //! [`crate::commands::CommandState`]; the shell owns only layout, focus,
 //! preferences, and renderer-neutral interaction cues.
 
+use crate::chrome::{CONTROL_HEIGHT, Glyph, RADIUS_CONTROL, ROW_HEIGHT};
 use std::{
     collections::{BTreeSet, HashMap, HashSet},
     path::{Path, PathBuf},
@@ -22,9 +23,10 @@ use builder3d_core::{
     build_parametric_torus, crease_polish, elastic_grab, normalize_face_density, smooth_brush,
 };
 use builder3d_viewport::{
-    Aabb, Camera, GizmoMode, InteractionState, Mat4, RenderScene, RendererConfig, SnapViewContext,
-    ViewportRenderOptions, ViewportRenderer, ViewportTheme, build_gizmo_with_bounds, dot,
-    hit_test_with_bounds, pick_scene, subtract,
+    Aabb, Camera, GIZMO_TARGET_PIXELS, GizmoAxis, GizmoLine, GizmoMode, InteractionState,
+    MOVE_GIZMO_SCALE, Mat4, ROTATE_RING_SEGMENTS, RenderScene, RendererConfig, SnapViewContext,
+    ViewportRenderOptions, ViewportRenderer, ViewportTheme, add, build_floor_scale_labels,
+    build_gizmo_with_bounds, dot, hit_test_with_bounds, pick_scene, scale, subtract,
 };
 use eframe::egui::{
     self, Align, Align2, Color32, FontId, Key, Layout, RichText, Sense, Stroke, Ui, Vec2,
@@ -53,18 +55,31 @@ use crate::transform_gesture::{ResizeFrame, ResizeHandle, TransformGesture};
 use crate::transforms::{Alignment, Axis, world_bounds};
 use crate::ui_state::{
     RecentEntry, RecentEntryKind, WorkspaceSurface, command_key, default_favorites, move_favorite,
-    normalize_favorites, normalized_tab_order, recent_entry, tab_commands,
+    move_favorite_to, normalize_favorites, normalized_tab_order, recent_entry, tab_commands,
 };
 use builder3d_platform::{
     CapabilityProfile, SlicerInfo, current_runtime_paths, discover_capability_profile,
     read_legacy_settings, slicer_info_from_path,
 };
 
-const RIBBON_BUTTON_HEIGHT: f32 = 91.0;
-const FAVORITE_ICON_SIZE: f32 = 32.0;
-const FAVORITE_BUTTON_SIZE: f32 = 40.0;
-const FAVORITE_OVERFLOW_WIDTH: f32 = 26.0;
+const RIBBON_BUTTON_HEIGHT: f32 = 68.0;
+const FAVORITE_ICON_SIZE: f32 = 24.0;
+const FAVORITE_BUTTON_WIDTH: f32 = 92.0;
+const FAVORITE_BUTTON_HEIGHT: f32 = 52.0;
+const FAVORITE_OVERFLOW_WIDTH: f32 = 40.0;
 const TOP_ROW_SPACING: f32 = 1.0;
+const MOVE_ARROW_HEAD_LENGTH_PIXELS: f32 = 12.0;
+const MOVE_ARROW_SHAFT_LENGTH_PIXELS: f32 = 22.0;
+const MOVE_ARROW_HEAD_HALF_WIDTH_PIXELS: f32 = 5.0;
+const MOVE_ARROW_LENGTH_PIXELS: f32 =
+    (MOVE_ARROW_SHAFT_LENGTH_PIXELS + MOVE_ARROW_HEAD_LENGTH_PIXELS) * MOVE_GIZMO_SCALE;
+const MOVE_ARROW_PICK_RADIUS_PIXELS: f32 =
+    MOVE_ARROW_HEAD_HALF_WIDTH_PIXELS * MOVE_GIZMO_SCALE + 5.0;
+const RESIZE_ARROW_SHAFT_LENGTH_PIXELS: f32 =
+    MOVE_ARROW_LENGTH_PIXELS * 1.5 - MOVE_ARROW_HEAD_LENGTH_PIXELS * MOVE_GIZMO_SCALE;
+const RESIZE_ARROW_LENGTH_PIXELS: f32 = MOVE_ARROW_LENGTH_PIXELS * 1.5;
+const RESIZE_ARROW_HIT_RADIUS_PIXELS: f32 = 26.0;
+const RESIZE_CORNER_HIT_RADIUS_PIXELS: f32 = 10.0;
 
 #[derive(Clone, Debug)]
 enum ViewportDrag {
@@ -284,6 +299,9 @@ pub struct Builder3dApp {
     menu_open: bool,
     ribbon_pinned: bool,
     ribbon_expanded: bool,
+    ribbon_rect: Option<egui::Rect>,
+    status_bar_rect: Option<egui::Rect>,
+    transform_strip_rect: Option<egui::Rect>,
     dialog: Option<DialogState>,
     theme_mode: ThemeMode,
     close_requested: bool,
@@ -323,6 +341,8 @@ pub struct Builder3dApp {
     viewport_renderer: Option<ViewportRenderer>,
     viewport_texture_id: Option<egui::TextureId>,
     viewport_error: Option<String>,
+    last_cpu_fallback: Option<bool>,
+    last_clear_color_error: Option<String>,
     pub(crate) camera: Camera,
     camera_auto_frame_pending: bool,
     viewport_drag: Option<ViewportDrag>,
@@ -351,6 +371,7 @@ pub struct Builder3dApp {
     desktop_job: Option<RunningDesktopJob>,
     mcp_bridge: Option<crate::mcp_bridge::McpDesktopIntegration>,
     dialog_generation: u64,
+    review: Option<crate::review_capture::ReviewCapture>,
 }
 
 impl Default for Builder3dApp {
@@ -364,6 +385,9 @@ impl Default for Builder3dApp {
             menu_open: false,
             ribbon_pinned: false,
             ribbon_expanded: true,
+            ribbon_rect: None,
+            status_bar_rect: None,
+            transform_strip_rect: None,
             dialog: None,
             theme_mode: ThemeMode::Dark,
             close_requested: false,
@@ -411,6 +435,8 @@ impl Default for Builder3dApp {
             viewport_renderer: None,
             viewport_texture_id: None,
             viewport_error: None,
+            last_cpu_fallback: None,
+            last_clear_color_error: None,
             camera: Camera::new(),
             camera_auto_frame_pending: true,
             viewport_drag: None,
@@ -439,6 +465,7 @@ impl Default for Builder3dApp {
             desktop_job: None,
             mcp_bridge: None,
             dialog_generation: 0,
+            review: None,
         }
     }
 }
@@ -450,13 +477,75 @@ impl Builder3dApp {
     pub fn new(creation_context: &eframe::CreationContext<'_>) -> Self {
         theme::configure_fonts(&creation_context.egui_ctx);
         let mut app = Self::default();
+        if let Some(review) = crate::review_capture::ReviewCapture::from_environment() {
+            // A review capture starts from defaults in an isolated settings
+            // file and without the MCP gateway, so it is repeatable.
+            app.initialize_viewport(creation_context);
+            app.enter_review_state(review);
+            return app;
+        }
         app.load_preferences();
         app.initialize_viewport(creation_context);
         match crate::mcp_bridge::McpDesktopIntegration::start() {
             Ok(bridge) => app.mcp_bridge = Some(bridge),
-            Err(error) => app.commands.set_status(format!("MCP unavailable: {error}")),
+            Err(error) => {
+                crate::diagnostics::record_warning("optional MCP bridge", &error);
+                app.commands.set_status(format!("MCP unavailable: {error}"));
+            }
         }
         app
+    }
+
+    /// Puts the shell into the named state of a review capture. See
+    /// [`crate::review_capture`].
+    fn enter_review_state(&mut self, review: crate::review_capture::ReviewCapture) {
+        use crate::review_capture::ReviewState;
+
+        self.settings_path = review.isolated_settings_path();
+        self.theme_mode = review.theme();
+        if let Some(tab) = review.tab().and_then(|label| {
+            RibbonTab::all()
+                .into_iter()
+                .find(|tab| tab.label() == label)
+        }) {
+            self.active_tab = tab;
+        }
+        let primitives: &[builder3d_core::PrimitiveKind] = match review.state() {
+            ReviewState::Welcome | ReviewState::Empty => &[],
+            ReviewState::Move | ReviewState::Rotate | ReviewState::Resize => {
+                &[builder3d_core::PrimitiveKind::Cube]
+            }
+            ReviewState::Multi => &[
+                builder3d_core::PrimitiveKind::Cube,
+                builder3d_core::PrimitiveKind::Cylinder,
+                builder3d_core::PrimitiveKind::Sphere,
+                builder3d_core::PrimitiveKind::Cone,
+            ],
+        };
+        for (index, kind) in primitives.iter().copied().enumerate() {
+            self.dispatch(CommandId::AddPrimitive(kind));
+            let placement = self.commands.scene().objects().last().map(|object| {
+                let resting = object.position();
+                (
+                    object.object_id().to_owned(),
+                    [index as f32 * 45.0, resting[1], resting[2]],
+                )
+            });
+            if let Some((id, position)) = placement {
+                let _ = self.commands.set_object_position_by_id(&id, position);
+            }
+        }
+        self.transform_panel_mode = match review.state() {
+            ReviewState::Rotate => TransformPanelMode::Rotate,
+            ReviewState::Resize => TransformPanelMode::Resize,
+            _ => TransformPanelMode::Move,
+        };
+        if review.state() != ReviewState::Welcome {
+            self.surface = WorkspaceSurface::Scene;
+        }
+        self.camera_auto_frame_pending = true;
+        self.invalidate_presentation();
+        self.review = Some(review);
     }
 
     fn poll_mcp_bridge(&mut self, context: &egui::Context) {
@@ -468,15 +557,16 @@ impl Builder3dApp {
 
     fn initialize_viewport(&mut self, creation_context: &eframe::CreationContext<'_>) {
         let Some(render_state) = creation_context.wgpu_render_state.clone() else {
-            self.viewport_error = Some(String::from(
-                "eframe did not provide a native wgpu render state",
-            ));
+            self.set_viewport_error(
+                "viewport initialization",
+                String::from("eframe did not provide a native wgpu render state"),
+            );
             return;
         };
         let profile = match discover_capability_profile_blocking() {
             Ok(profile) => profile,
             Err(error) => {
-                self.viewport_error = Some(error);
+                self.set_viewport_error("viewport capability discovery", error);
                 return;
             }
         };
@@ -495,6 +585,18 @@ impl Builder3dApp {
             &render_state.queue,
         ) {
             Ok(renderer) => {
+                let adapter = renderer.adapter_info();
+                crate::diagnostics::record_info(
+                    "viewport initialized",
+                    format!(
+                        "adapter={} / {} / {}; driver={} ({})",
+                        adapter.name,
+                        adapter.backend,
+                        adapter.device_type,
+                        adapter.driver,
+                        adapter.driver_info
+                    ),
+                );
                 let texture_id = render_state.renderer.write().register_native_texture(
                     &render_state.device,
                     renderer.color_view(),
@@ -505,8 +607,15 @@ impl Builder3dApp {
                 self.viewport_texture_id = Some(texture_id);
                 self.wgpu_render_state = Some(render_state);
             }
-            Err(error) => self.viewport_error = Some(error.to_string()),
+            Err(error) => self.set_viewport_error("viewport renderer creation", error.to_string()),
         }
+    }
+
+    fn set_viewport_error(&mut self, context: &str, error: String) {
+        if self.viewport_error.as_deref() != Some(error.as_str()) {
+            crate::diagnostics::record_error(context, &error);
+        }
+        self.viewport_error = Some(error);
     }
 
     fn load_preferences(&mut self) {
@@ -682,10 +791,10 @@ impl Builder3dApp {
                 self.camera_auto_frame_pending = true;
             }
             CommandId::ViewTop => {
-                let _ = self.camera.set_view(0.0, -89.0);
+                let _ = self.camera.set_view(0.0, 89.0);
             }
             CommandId::ViewSide => {
-                let _ = self.camera.set_view(90.0, 0.0);
+                let _ = self.camera.set_view(90.0, 35.0);
             }
             _ => {}
         }
@@ -932,6 +1041,7 @@ impl Builder3dApp {
         let mut dialog = DialogState::new(kind, self.theme_mode);
         dialog.set_import_unit(self.commands.preferences().default_import_unit());
         dialog.set_display_unit(self.commands.preferences().display_unit());
+        dialog.set_viewport_lighting(self.commands.preferences().viewport_lighting());
         dialog.set_preferred_slicer(
             self.commands
                 .preferences()
@@ -1415,7 +1525,11 @@ impl Builder3dApp {
             }
             Err(error) => {
                 self.preview = None;
-                self.preview_error = Some(error.to_string());
+                let error = error.to_string();
+                if self.preview_error.as_deref() != Some(error.as_str()) {
+                    crate::diagnostics::record_error("scene preview construction", &error);
+                }
+                self.preview_error = Some(error);
             }
         }
     }
@@ -1426,46 +1540,69 @@ impl Builder3dApp {
             self.artwork_cache.clear();
             self.artwork_cache_theme = self.theme_mode;
         }
-        egui::Panel::top("builder3d-ribbon")
+        let response = egui::Panel::top("builder3d-ribbon")
             .frame(
                 egui::Frame::new()
                     .fill(palette.panel)
                     .stroke(Stroke::new(1.0, palette.divider))
-                    .inner_margin(egui::Margin::same(4)),
+                    .inner_margin(egui::Margin::same(3)),
             )
             .show(ui, |ui| {
                 self.render_menu_and_utility(ui, palette);
                 if self.ribbon_expanded {
-                    ui.add_space(4.0);
+                    ui.add_space(2.0);
                     self.render_active_tab(ui, palette);
                 }
             });
+        self.ribbon_rect = Some(response.response.rect);
     }
 
     fn render_menu_and_utility(&mut self, ui: &mut Ui, palette: ThemePalette) {
+        let mut menu_response = None;
         egui::Frame::new()
             .fill(palette.navigation)
-            .inner_margin(egui::Margin::symmetric(8, 3))
+            .inner_margin(egui::Margin::symmetric(6, 2))
             .show(ui, |ui| {
                 ui.horizontal(|ui| {
                     ui.spacing_mut().item_spacing.x = TOP_ROW_SPACING;
-                    let menu_response = ui
-                        .add_sized(
-                            [36.0, 34.0],
-                            egui::Button::new(RichText::new("☰").size(19.0).color(palette.text))
-                                .fill(if self.menu_open {
-                                    palette.pressed
-                                } else {
-                                    Color32::TRANSPARENT
-                                }),
-                        )
-                        .on_hover_text("Application menu and project commands");
-                    menu_response.widget_info(|| {
+                    let (menu_rect, response) =
+                        ui.allocate_exact_size(Vec2::new(36.0, 34.0), Sense::click());
+                    response.widget_info(|| {
                         egui::WidgetInfo::labeled(egui::Role::Button, true, "Application menu")
                     });
-                    if menu_response.clicked() {
+                    if response.hovered() || self.menu_open {
+                        ui.painter().rect_filled(
+                            menu_rect,
+                            6.0,
+                            if self.menu_open {
+                                palette.pressed
+                            } else {
+                                palette.hover
+                            },
+                        );
+                    }
+                    let painter = ui.painter_at(menu_rect);
+                    for line_y in [-6.0, 0.0, 6.0] {
+                        painter.line_segment(
+                            [
+                                egui::pos2(
+                                    menu_rect.center().x - 8.0,
+                                    menu_rect.center().y + line_y,
+                                ),
+                                egui::pos2(
+                                    menu_rect.center().x + 8.0,
+                                    menu_rect.center().y + line_y,
+                                ),
+                            ],
+                            Stroke::new(2.0, palette.text),
+                        );
+                    }
+                    let response =
+                        response.on_hover_text("Open project, save, settings, or close Builder3D");
+                    if response.clicked() {
                         self.menu_open = !self.menu_open;
                     }
+                    menu_response = Some(response);
 
                     self.render_tabs(ui, palette);
                     self.render_favorites(ui, palette);
@@ -1510,50 +1647,72 @@ impl Builder3dApp {
                 });
             });
 
-        if self.menu_open {
-            egui::Frame::new()
-                .fill(palette.panel)
-                .stroke(Stroke::new(1.0, palette.divider))
-                .corner_radius(10.0)
-                .inner_margin(egui::Margin::same(8))
-                .show(ui, |ui| {
-                    ui.horizontal_wrapped(|ui| {
-                        let mut clicked = None;
-                        for item in file_menu_spec() {
-                            match item {
-                                RibbonItem::Separator => {
-                                    ui.separator();
-                                }
-                                RibbonItem::Command(command) => {
-                                    if ui
-                                        .button(command.label)
-                                        .on_hover_text(command_help(command.id))
-                                        .clicked()
-                                    {
-                                        clicked = Some(command.id);
-                                    }
+        let mut menu_command = None;
+        let mut customize_ribbon = false;
+        if let Some(response) = menu_response {
+            egui::Popup::from_response(&response)
+                .open_bool(&mut self.menu_open)
+                .close_behavior(egui::PopupCloseBehavior::CloseOnClick)
+                .frame(
+                    egui::Frame::new()
+                        .fill(palette.panel)
+                        .stroke(Stroke::new(1.0, palette.divider))
+                        .corner_radius(crate::chrome::RADIUS_SURFACE)
+                        .shadow(theme::floating_shadow(self.theme_mode))
+                        .inner_margin(egui::Margin::same(6)),
+                )
+                .width(228.0)
+                .show(|ui| {
+                    ui.spacing_mut().item_spacing.y = 2.0;
+                    for item in file_menu_spec() {
+                        match item {
+                            RibbonItem::Separator => {
+                                ui.separator();
+                            }
+                            RibbonItem::Command(command) => {
+                                let response = ui
+                                    .add_sized(
+                                        [ui.available_width(), 28.0],
+                                        egui::Button::new(command.label)
+                                            .stroke(Stroke::NONE)
+                                            .fill(Color32::TRANSPARENT),
+                                    )
+                                    .on_hover_text(command_help(command.id));
+                                if response.clicked() {
+                                    menu_command = Some(command.id);
+                                    ui.close();
                                 }
                             }
                         }
-                        if ui.button("Customize ribbon").clicked() {
-                            self.customize_ribbon = true;
-                            self.menu_open = false;
-                        }
-                        if let Some(command) = clicked {
-                            self.menu_open = false;
-                            if command == CommandId::Builder3dMenu {
-                                self.surface = WorkspaceSurface::Welcome;
-                            } else if command == CommandId::Exit {
-                                self.request_exit();
-                            } else {
-                                self.dispatch(command);
-                            }
-                        }
-                    });
+                    }
+                    ui.separator();
+                    if ui
+                        .add_sized(
+                            [ui.available_width(), 28.0],
+                            egui::Button::new("Customize ribbon")
+                                .stroke(Stroke::NONE)
+                                .fill(Color32::TRANSPARENT),
+                        )
+                        .clicked()
+                    {
+                        customize_ribbon = true;
+                        ui.close();
+                    }
                 });
         }
+        if customize_ribbon {
+            self.customize_ribbon = true;
+        }
+        if let Some(command) = menu_command {
+            if command == CommandId::Builder3dMenu {
+                self.surface = WorkspaceSurface::Welcome;
+            } else if command == CommandId::Exit {
+                self.request_exit();
+            } else {
+                self.dispatch(command);
+            }
+        }
     }
-
     fn utility_button(
         &mut self,
         ui: &mut Ui,
@@ -1654,14 +1813,14 @@ impl Builder3dApp {
         let horizontal_margins = 8.0;
         let spacing = TOP_ROW_SPACING;
         let all_width = horizontal_margins
-            + current.len() as f32 * FAVORITE_BUTTON_SIZE
+            + current.len() as f32 * FAVORITE_BUTTON_WIDTH
             + current.len().saturating_sub(1) as f32 * spacing;
         let visible_count = if available_width >= all_width {
             current.len()
         } else if available_width >= horizontal_margins + FAVORITE_OVERFLOW_WIDTH {
             let button_budget =
                 (available_width - horizontal_margins - FAVORITE_OVERFLOW_WIDTH - spacing).max(0.0);
-            (((button_budget + spacing) / (FAVORITE_BUTTON_SIZE + spacing)).floor() as usize)
+            (((button_budget + spacing) / (FAVORITE_BUTTON_WIDTH + spacing)).floor() as usize)
                 .min(current.len())
         } else {
             0
@@ -1670,6 +1829,8 @@ impl Builder3dApp {
             && available_width >= horizontal_margins + FAVORITE_OVERFLOW_WIDTH;
         let has_favorites_strip = visible_count > 0 || has_overflow;
         let mut clicked = None;
+        let mut unpin = None;
+        let mut dropped = None;
         ui.horizontal(|ui| {
             if has_favorites_strip {
                 ui.add_space(4.0);
@@ -1678,18 +1839,14 @@ impl Builder3dApp {
                 if let Some((tab, command)) = find_command_key(key) {
                     let enabled = command_enabled(command.id, &self.commands);
                     let (rect, response) = ui.allocate_exact_size(
-                        Vec2::splat(FAVORITE_BUTTON_SIZE),
-                        if enabled {
-                            Sense::click()
-                        } else {
-                            Sense::hover()
-                        },
+                        Vec2::new(FAVORITE_BUTTON_WIDTH, FAVORITE_BUTTON_HEIGHT),
+                        Sense::click_and_drag(),
                     );
                     response.widget_info(|| {
                         egui::WidgetInfo::labeled(
                             egui::Role::Button,
                             enabled,
-                            format!("{} favorite", command.label),
+                            format!("{}: {}", command.label, command_summary(command.id)),
                         )
                     });
                     let response = response.on_hover_cursor(if enabled {
@@ -1697,7 +1854,8 @@ impl Builder3dApp {
                     } else {
                         egui::CursorIcon::Default
                     });
-                    if response.hovered() || response.has_focus() {
+                    if response.hovered() || response.has_focus() || response.context_menu_opened()
+                    {
                         ui.painter().rect_filled(rect, 6.0, palette.hover);
                     }
                     if response.has_focus() {
@@ -1708,10 +1866,20 @@ impl Builder3dApp {
                             egui::StrokeKind::Inside,
                         );
                     }
+                    if let Some(payload) = response.dnd_hover_payload::<String>()
+                        && payload.as_str() != key
+                    {
+                        ui.painter().rect_stroke(
+                            rect,
+                            6.0,
+                            Stroke::new(2.0, palette.accent_border),
+                            egui::StrokeKind::Inside,
+                        );
+                    }
                     self.paint_command_icon(
                         ui,
                         egui::Rect::from_center_size(
-                            rect.center(),
+                            egui::pos2(rect.center().x, rect.top() + 14.0),
                             Vec2::splat(FAVORITE_ICON_SIZE),
                         ),
                         command.id,
@@ -1725,7 +1893,52 @@ impl Builder3dApp {
                             }
                         },
                     );
-                    if response.on_hover_text(command.label).clicked() {
+                    let painter = ui.painter_at(rect);
+                    painter.text(
+                        egui::pos2(rect.center().x, rect.top() + 31.0),
+                        Align2::CENTER_CENTER,
+                        command.label,
+                        FontId::proportional(11.0),
+                        if enabled {
+                            palette.text
+                        } else {
+                            palette.disabled_text
+                        },
+                    );
+                    painter.text(
+                        egui::pos2(rect.center().x, rect.top() + 43.0),
+                        Align2::CENTER_CENTER,
+                        command_summary(command.id),
+                        FontId::proportional(9.5),
+                        palette.muted,
+                    );
+                    response.dnd_set_drag_payload(key.clone());
+                    if let Some(payload) = response.dnd_release_payload::<String>()
+                        && payload.as_str() != key
+                    {
+                        dropped = Some((payload.as_str().to_owned(), key.clone()));
+                    }
+                    let mut remove_this = false;
+                    response.context_menu(|ui| {
+                        ui.label(RichText::new(command.label).strong());
+                        ui.label(command_summary(command.id));
+                        ui.separator();
+                        if ui.button("Remove from shortcut bar").clicked() {
+                            remove_this = true;
+                            ui.close();
+                        }
+                    });
+                    if remove_this {
+                        unpin = Some(key.clone());
+                    }
+                    if response
+                        .on_hover_text(format!(
+                            "{}\n\nDrag to reorder. Right-click to remove this shortcut.",
+                            command_help(command.id)
+                        ))
+                        .clicked()
+                        && enabled
+                    {
                         clicked = Some((tab, command.id));
                     }
                 }
@@ -1733,11 +1946,14 @@ impl Builder3dApp {
             if has_overflow {
                 let overflow = egui::ComboBox::from_id_salt("favorite-overflow")
                     .width(FAVORITE_OVERFLOW_WIDTH)
-                    .selected_text("\u{22ef}")
+                    .selected_text("More")
                     .show_ui(ui, |ui| {
                         for key in current.iter().skip(visible_count) {
                             if let Some((tab, command)) = find_command_key(key)
-                                && ui.selectable_label(false, command.label).clicked()
+                                && ui
+                                    .selectable_label(false, command.label)
+                                    .on_hover_text(command_help(command.id))
+                                    .clicked()
                             {
                                 clicked = Some((tab, command.id));
                             }
@@ -1751,6 +1967,17 @@ impl Builder3dApp {
                 ui.add_space(4.0);
             }
         });
+        if let Some((source, target)) = dropped
+            && let Some(next) = move_favorite_to(&current, &source, &target)
+        {
+            self.commands.preferences_mut().set_ribbon_favorites(next);
+            self.persist_preferences();
+        } else if let Some(key) = unpin {
+            let mut next = current.clone();
+            next.retain(|favorite| favorite != &key);
+            self.commands.preferences_mut().set_ribbon_favorites(next);
+            self.persist_preferences();
+        }
         if let Some((tab, command)) = clicked {
             if tab != self.active_tab {
                 self.active_tab = tab;
@@ -1759,6 +1986,21 @@ impl Builder3dApp {
             self.ribbon_expanded = true;
             self.dispatch(command);
         }
+    }
+
+    fn set_favorite(&mut self, key: &str, pinned: bool) {
+        let mut favorites = self.commands.preferences().ribbon_favorites().to_vec();
+        if pinned {
+            if !favorites.iter().any(|favorite| favorite == key) {
+                favorites.push(key.to_owned());
+            }
+        } else {
+            favorites.retain(|favorite| favorite != key);
+        }
+        self.commands
+            .preferences_mut()
+            .set_ribbon_favorites(favorites);
+        self.persist_preferences();
     }
 
     fn render_tabs(&mut self, ui: &mut Ui, palette: ThemePalette) {
@@ -1772,6 +2014,8 @@ impl Builder3dApp {
                     } else {
                         palette.text
                     }))
+                    .stroke(Stroke::NONE)
+                    .corner_radius(RADIUS_CONTROL)
                     .fill(if selected {
                         palette.panel
                     } else {
@@ -1830,11 +2074,11 @@ impl Builder3dApp {
             }
         }
         ui.horizontal(|ui| {
-            ui.spacing_mut().item_spacing.x = 3.0;
-            let command_width = (ui.available_width() - 42.0).max(0.0);
+            ui.spacing_mut().item_spacing.x = 2.0;
+            let command_width = (ui.available_width() - 38.0).max(0.0);
             ui.allocate_ui_with_layout(
                 Vec2::new(command_width, RIBBON_BUTTON_HEIGHT),
-                Layout::left_to_right(Align::Center),
+                Layout::left_to_right(Align::Min),
                 |ui| {
                     egui::ScrollArea::horizontal()
                         .id_salt("ribbon-commands")
@@ -1874,11 +2118,7 @@ impl Builder3dApp {
         } else {
             palette.text
         };
-        let sense = if enabled {
-            Sense::click()
-        } else {
-            Sense::hover()
-        };
+        let sense = Sense::click();
         let label_width = ui
             .painter()
             .layout_no_wrap(
@@ -1888,7 +2128,7 @@ impl Builder3dApp {
             )
             .size()
             .x;
-        let button_width = (label_width + 16.0).clamp(66.0, 104.0);
+        let button_width = (label_width + 14.0).clamp(64.0, 100.0);
         let (rect, response) =
             ui.allocate_exact_size(Vec2::new(button_width, RIBBON_BUTTON_HEIGHT), sense);
         response
@@ -1918,24 +2158,51 @@ impl Builder3dApp {
         self.paint_command_icon(
             ui,
             egui::Rect::from_center_size(
-                egui::pos2(rect.center().x, rect.top() + 25.0),
-                Vec2::splat(46.0),
+                egui::pos2(rect.center().x, rect.top() + 21.0),
+                Vec2::splat(42.0),
             ),
             command.id,
             command.icon,
             palette,
         );
         painter.text(
-            egui::pos2(rect.center().x, rect.top() + 68.0),
+            egui::pos2(rect.center().x, rect.top() + 55.0),
             Align2::CENTER_CENTER,
             command.label,
             FontId::proportional(12.7),
             text_color,
         );
+        let favorite_key = command_key(self.active_tab, command);
+        let is_pinned = self
+            .commands
+            .preferences()
+            .ribbon_favorites()
+            .iter()
+            .any(|key| key == &favorite_key);
+        let mut pin_action = None;
+        response.context_menu(|ui| {
+            ui.label(RichText::new(command.label).strong());
+            ui.label(command_summary(command.id));
+            ui.separator();
+            if ui
+                .button(if is_pinned {
+                    "Remove from shortcut bar"
+                } else {
+                    "Pin to shortcut bar"
+                })
+                .clicked()
+            {
+                pin_action = Some(!is_pinned);
+                ui.close();
+            }
+        });
+        if let Some(pin) = pin_action {
+            self.set_favorite(&favorite_key, pin);
+        }
         let response = response.on_hover_text(if enabled {
             command_help(command.id)
         } else {
-            "Select an object or complete the current workflow first"
+            command_disabled_help(command.id, &self.commands)
         });
         if response.clicked() && enabled {
             self.dispatch(command.id);
@@ -2180,9 +2447,10 @@ impl Builder3dApp {
                                 .fill(palette.surface_alt)
                                 .stroke(Stroke::new(1.0, palette.divider))
                                 .corner_radius(10.0)
+                                .outer_margin(egui::Margin::symmetric(20, 0))
                                 .inner_margin(egui::Margin::same(18))
                                 .show(ui, |ui| {
-                                    ui.set_min_width((ui.available_width() - 40.0).max(220.0));
+                                    ui.set_min_width((ui.available_width() - 4.0).max(220.0));
                                     ui.label(
                                         RichText::new("Recent projects and models appear here.")
                                             .color(palette.muted),
@@ -2488,6 +2756,87 @@ impl Builder3dApp {
         }
     }
 
+    fn render_sidebar_action(
+        &mut self,
+        ui: &mut Ui,
+        label: &str,
+        command: CommandId,
+        palette: ThemePalette,
+        has_objects: bool,
+    ) -> bool {
+        let enabled = has_objects && command_enabled(command, &self.commands);
+        let (rect, response) =
+            ui.allocate_exact_size(Vec2::new(ui.available_width(), ROW_HEIGHT), Sense::click());
+        response.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, enabled, label));
+        if enabled && (response.hovered() || response.has_focus()) {
+            ui.painter()
+                .rect_filled(rect, RADIUS_CONTROL, palette.hover);
+        }
+        if response.has_focus() {
+            ui.painter().rect_stroke(
+                rect,
+                RADIUS_CONTROL,
+                Stroke::new(1.5, palette.accent_border),
+                egui::StrokeKind::Inside,
+            );
+        }
+        let color = if enabled {
+            palette.text
+        } else {
+            palette.disabled_text
+        };
+        let icon_rect = egui::Rect::from_min_size(
+            egui::pos2(rect.left() + 8.0, rect.center().y - 8.0),
+            Vec2::splat(16.0),
+        );
+        let glyph = match command {
+            CommandId::Group => Some(Glyph::Group),
+            CommandId::Ungroup => Some(Glyph::Ungroup),
+            CommandId::SelectAll => Some(Glyph::SelectAll),
+            CommandId::DeselectAll => Some(Glyph::DeselectAll),
+            CommandId::InvertSelection => Some(Glyph::InvertSelection),
+            _ => None,
+        };
+        if let Some(glyph) = glyph {
+            let glyph_color = if enabled {
+                palette.muted
+            } else {
+                palette.disabled_text
+            };
+            crate::chrome::paint_glyph(ui.painter(), icon_rect, glyph, glyph_color);
+        } else {
+            self.paint_command_icon(
+                ui,
+                icon_rect,
+                command,
+                IconKey::Edit,
+                if enabled {
+                    palette
+                } else {
+                    ThemePalette {
+                        accent: palette.disabled_text,
+                        ..palette
+                    }
+                },
+            );
+        }
+        ui.painter().text(
+            egui::pos2(rect.left() + 32.0, rect.center().y),
+            Align2::LEFT_CENTER,
+            label,
+            FontId::proportional(13.0),
+            color,
+        );
+        response
+            .on_hover_text(if enabled {
+                command_help(command)
+            } else {
+                command_disabled_help(command, &self.commands)
+            })
+            .clicked()
+            && enabled
+    }
+
     fn render_objects(&mut self, ui: &mut Ui) {
         let palette = ThemePalette::for_mode(self.theme_mode);
         let rows = self
@@ -2536,72 +2885,55 @@ impl Builder3dApp {
                     .inner_margin(egui::Margin::same(10)),
             )
             .show(ui, |ui| {
-                ui.horizontal(|ui| {
-                    ui.heading(RichText::new("Items").color(palette.text));
-                    ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                        ui.label(
-                            RichText::new(format!("{}", rows.len()))
-                                .small()
-                                .color(palette.muted),
-                        );
-                    });
-                });
-                ui.label(
-                    RichText::new(format!(
-                        "{} selected  |  {} total",
-                        self.commands.selected_count(),
-                        rows.len()
-                    ))
-                    .small()
-                    .color(palette.muted),
-                );
-                ui.add_space(8.0);
                 egui::Frame::new()
                     .fill(palette.surface_alt)
                     .stroke(Stroke::new(1.0, palette.border))
                     .corner_radius(10.0)
                     .inner_margin(egui::Margin::same(8))
                     .show(ui, |ui| {
-                        ui.label(
-                            RichText::new("ACTIONS")
-                                .small()
-                                .strong()
-                                .color(palette.muted),
-                        );
-                        ui.horizontal_wrapped(|ui| {
-                            for (label, command) in [
-                                ("All", CommandId::SelectAll),
-                                ("None", CommandId::DeselectAll),
-                                ("Invert", CommandId::InvertSelection),
-                                ("Group", CommandId::Group),
-                                ("Ungroup", CommandId::Ungroup),
-                                ("Copy", CommandId::Copy),
-                                ("Cut", CommandId::Cut),
-                                ("Paste", CommandId::Paste),
-                                ("Duplicate", CommandId::Duplicate),
-                                ("Delete", CommandId::Delete),
-                            ] {
-                                let enabled = command_enabled(command, &self.commands);
-                                if ui
-                                    .add_enabled(
-                                        enabled,
-                                        egui::Button::new(label).corner_radius(6.0),
-                                    )
-                                    .on_hover_text(if enabled {
-                                        command_help(command)
-                                    } else {
-                                        "Select the required objects before using this action"
-                                    })
-                                    .clicked()
-                                {
-                                    command_click = Some(command);
-                                }
+                        for (label, command) in [
+                            ("Group", CommandId::Group),
+                            ("Ungroup", CommandId::Ungroup),
+                            ("Select all", CommandId::SelectAll),
+                            ("Deselect all", CommandId::DeselectAll),
+                            ("Invert selection", CommandId::InvertSelection),
+                        ] {
+                            if self.render_sidebar_action(
+                                ui,
+                                label,
+                                command,
+                                palette,
+                                !rows.is_empty(),
+                            ) {
+                                command_click = Some(command);
                             }
-                        });
+                            ui.add_space(2.0);
+                        }
+                        ui.separator();
+                        ui.checkbox(&mut self.sticky_selection, "Sticky selection")
+                            .on_hover_text("Keep the current selection when clicking empty space.");
                     });
-                ui.add_space(10.0);
-                ui.checkbox(&mut self.sticky_selection, "Sticky Selection")
-                    .on_hover_text("Keep the current selection when clicking empty space.");
+                ui.add_space(12.0);
+                ui.horizontal(|ui| {
+                    ui.label(
+                        RichText::new("Items")
+                            .size(15.0)
+                            .strong()
+                            .color(palette.text),
+                    );
+                    ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                        ui.label(
+                            RichText::new(format!(
+                                "{} of {} selected",
+                                self.commands.selected_count(),
+                                rows.len()
+                            ))
+                            .small()
+                            .color(palette.muted),
+                        );
+                    });
+                });
+                ui.add_space(6.0);
                 let inspector_reserved = if rows.is_empty() { 0.0 } else { 210.0 };
                 let list_max_height =
                     (ui.available_height() - inspector_reserved).clamp(80.0, 150.0);
@@ -2618,34 +2950,104 @@ impl Builder3dApp {
                                 self.paint_object_icon(ui, icon_slot, *index, palette);
                                 let object_id = self.commands.scene().objects()[*index].object_id();
                                 if self.item_health.get(object_id) == Some(&false)
-                                    && ui
-                                        .small_button("!")
-                                        .on_hover_text(
-                                            "Mesh needs repair; select and repair this object",
-                                        )
-                                        .clicked()
+                                    && crate::chrome::glyph_button(
+                                        ui,
+                                        Glyph::Warning,
+                                        Color32::from_rgb(0xE0, 0x9A, 0x2B),
+                                        palette.hover,
+                                        palette.accent_border,
+                                        &format!("Repair {name}"),
+                                    )
+                                    .on_hover_text(
+                                        "Mesh needs repair; select and repair this object",
+                                    )
+                                    .clicked()
                                 {
                                     repair_click = Some(*index);
                                 }
-                                if ui
-                                    .small_button(if *visible { "◉" } else { "○" })
-                                    .on_hover_text(format!("{visibility_label} {name}"))
-                                    .clicked()
+                                if crate::chrome::glyph_button(
+                                    ui,
+                                    if *visible {
+                                        Glyph::Visible
+                                    } else {
+                                        Glyph::Hidden
+                                    },
+                                    if *visible {
+                                        palette.muted
+                                    } else {
+                                        palette.disabled_text
+                                    },
+                                    palette.hover,
+                                    palette.accent_border,
+                                    &format!("{visibility_label}: {name}"),
+                                )
+                                .on_hover_text(if *visible {
+                                    format!("Hide {name}")
+                                } else {
+                                    format!("Show {name}")
+                                })
+                                .clicked()
                                 {
                                     visibility_toggle = Some((*index, !*visible));
                                 }
-                                let response = ui
-                                    .selectable_label(
+                                let trailing = if *child_count > 0 { 34.0 } else { 0.0 };
+                                let (row_rect, row_response) = ui.allocate_exact_size(
+                                    Vec2::new((ui.available_width() - trailing).max(40.0), 24.0),
+                                    Sense::click(),
+                                );
+                                row_response.widget_info(|| {
+                                    egui::WidgetInfo::selected(
+                                        egui::Role::Button,
+                                        true,
                                         *selected,
-                                        RichText::new(name).color(if *selected {
-                                            palette.accent_dark
-                                        } else {
-                                            palette.text
-                                        }),
+                                        name.as_str(),
                                     )
-                                    .on_hover_text(
-                                        "Click to select; Ctrl/Command adds; Shift selects a range",
+                                });
+                                if *selected {
+                                    ui.painter().rect_filled(
+                                        row_rect,
+                                        RADIUS_CONTROL,
+                                        palette.pressed,
                                     );
+                                } else if row_response.hovered() || row_response.has_focus() {
+                                    ui.painter().rect_filled(
+                                        row_rect,
+                                        RADIUS_CONTROL,
+                                        palette.hover,
+                                    );
+                                }
+                                if row_response.has_focus() {
+                                    ui.painter().rect_stroke(
+                                        row_rect,
+                                        RADIUS_CONTROL,
+                                        Stroke::new(1.5, palette.accent_border),
+                                        egui::StrokeKind::Inside,
+                                    );
+                                }
+                                let name_color = if *selected {
+                                    palette.accent_dark
+                                } else if *visible {
+                                    palette.text
+                                } else {
+                                    palette.disabled_text
+                                };
+                                let name_galley = ui.painter().layout(
+                                    name.clone(),
+                                    FontId::proportional(13.0),
+                                    name_color,
+                                    f32::INFINITY,
+                                );
+                                ui.painter_at(row_rect.shrink2(Vec2::new(8.0, 0.0))).galley(
+                                    egui::pos2(
+                                        row_rect.left() + 8.0,
+                                        row_rect.center().y - name_galley.size().y * 0.5,
+                                    ),
+                                    name_galley,
+                                    name_color,
+                                );
+                                let response = row_response.on_hover_text(
+                                    "Click to select; Ctrl/Command adds; Shift selects a range",
+                                );
                                 if response.clicked() {
                                     selection_click = Some(*index);
                                 }
@@ -2808,11 +3210,20 @@ impl Builder3dApp {
         }
         if selected.len() == 1 {
             ui.horizontal(|ui| {
+                let rename_width = 64.0;
                 ui.add_sized(
-                    [130.0, 22.0],
-                    egui::TextEdit::singleline(&mut self.name_field),
+                    [
+                        (ui.available_width() - rename_width - ui.spacing().item_spacing.x)
+                            .max(80.0),
+                        CONTROL_HEIGHT,
+                    ],
+                    egui::TextEdit::singleline(&mut self.name_field)
+                        .align(egui::Align2::LEFT_CENTER),
                 );
-                if ui.button("Rename").clicked() {
+                if ui
+                    .add_sized([rename_width, CONTROL_HEIGHT], egui::Button::new("Rename"))
+                    .clicked()
+                {
                     match self.commands.rename_selected(self.name_field.clone()) {
                         Ok(_) => self.invalidate_presentation(),
                         Err(error) => self.transform_error = Some(error.to_string()),
@@ -2840,9 +3251,20 @@ impl Builder3dApp {
                         .enumerate()
                     {
                         ui.horizontal(|ui| {
-                            ui.label(axis);
+                            ui.add_sized(
+                                [14.0, CONTROL_HEIGHT],
+                                egui::Label::new(
+                                    RichText::new(axis)
+                                        .strong()
+                                        .color(crate::chrome::AXIS_COLORS[axis_index]),
+                                ),
+                            );
                             if ui
-                                .add_sized([132.0, 22.0], egui::TextEdit::singleline(field))
+                                .add_sized(
+                                    [132.0, CONTROL_HEIGHT],
+                                    egui::TextEdit::singleline(field)
+                                        .align(egui::Align2::LEFT_CENTER),
+                                )
                                 .changed()
                             {
                                 self.last_numeric_axis = Some(axis_index);
@@ -2865,9 +3287,20 @@ impl Builder3dApp {
                         .enumerate()
                     {
                         ui.horizontal(|ui| {
-                            ui.label(axis);
+                            ui.add_sized(
+                                [14.0, CONTROL_HEIGHT],
+                                egui::Label::new(
+                                    RichText::new(axis)
+                                        .strong()
+                                        .color(crate::chrome::AXIS_COLORS[axis_index]),
+                                ),
+                            );
                             if ui
-                                .add_sized([132.0, 22.0], egui::TextEdit::singleline(field))
+                                .add_sized(
+                                    [132.0, CONTROL_HEIGHT],
+                                    egui::TextEdit::singleline(field)
+                                        .align(egui::Align2::LEFT_CENTER),
+                                )
                                 .changed()
                             {
                                 self.last_numeric_axis = Some(axis_index);
@@ -2896,9 +3329,20 @@ impl Builder3dApp {
                         .enumerate()
                     {
                         ui.horizontal(|ui| {
-                            ui.label(axis);
+                            ui.add_sized(
+                                [14.0, CONTROL_HEIGHT],
+                                egui::Label::new(
+                                    RichText::new(axis)
+                                        .strong()
+                                        .color(crate::chrome::AXIS_COLORS[axis_index]),
+                                ),
+                            );
                             if ui
-                                .add_sized([132.0, 22.0], egui::TextEdit::singleline(field))
+                                .add_sized(
+                                    [132.0, CONTROL_HEIGHT],
+                                    egui::TextEdit::singleline(field)
+                                        .align(egui::Align2::LEFT_CENTER),
+                                )
                                 .changed()
                             {
                                 self.last_numeric_axis = Some(axis_index);
@@ -2980,10 +3424,11 @@ impl Builder3dApp {
 
     fn render_transform_strip(&mut self, ctx: &egui::Context) {
         if self.surface != WorkspaceSurface::Scene {
+            self.transform_strip_rect = None;
             return;
         }
         let palette = ThemePalette::for_mode(self.theme_mode);
-        egui::Area::new(egui::Id::unique("builder3d-transform-strip"))
+        let response = egui::Area::new(egui::Id::unique("builder3d-transform-strip"))
             .enabled(!self.interaction_blocked())
             .order(egui::Order::Foreground)
             .anchor(Align2::CENTER_BOTTOM, Vec2::new(0.0, -40.0))
@@ -2991,8 +3436,9 @@ impl Builder3dApp {
                 egui::Frame::new()
                     .fill(palette.panel)
                     .stroke(Stroke::new(1.0, palette.border))
-                    .corner_radius(12.0)
-                    .inner_margin(egui::Margin::symmetric(10, 7))
+                    .corner_radius(crate::chrome::RADIUS_SURFACE)
+                    .shadow(theme::floating_shadow(self.theme_mode))
+                    .inner_margin(egui::Margin::symmetric(10, 8))
                     .show(ui, |ui| {
                         ui.horizontal(|ui| {
                             for mode in [
@@ -3008,12 +3454,14 @@ impl Builder3dApp {
                                         palette.text
                                     },
                                 ))
+                                .stroke(Stroke::NONE)
+                                .corner_radius(RADIUS_CONTROL)
                                 .fill(if selected {
                                     palette.pressed
                                 } else {
                                     Color32::TRANSPARENT
                                 });
-                                if ui.add_sized([82.0, 30.0], button).clicked() {
+                                if ui.add_sized([82.0, 28.0], button).clicked() {
                                     self.transform_panel_mode = mode;
                                 }
                             }
@@ -3044,9 +3492,19 @@ impl Builder3dApp {
                                 for (axis_index, (axis, field)) in
                                     ["X", "Y", "Z"].into_iter().zip(fields).enumerate()
                                 {
-                                    ui.label(axis);
-                                    let response = ui
-                                        .add_sized([90.0, 22.0], egui::TextEdit::singleline(field));
+                                    ui.add_sized(
+                                        [14.0, CONTROL_HEIGHT],
+                                        egui::Label::new(
+                                            RichText::new(axis)
+                                                .strong()
+                                                .color(crate::chrome::AXIS_COLORS[axis_index]),
+                                        ),
+                                    );
+                                    let response = ui.add_sized(
+                                        [92.0, CONTROL_HEIGHT],
+                                        egui::TextEdit::singleline(field)
+                                            .align(egui::Align2::LEFT_CENTER),
+                                    );
                                     if response.changed() {
                                         self.last_numeric_axis = Some(axis_index);
                                         self.numeric_edited_axes[axis_index] = true;
@@ -3062,7 +3520,9 @@ impl Builder3dApp {
                                         self.transform_signature.clear();
                                     }
                                 }
-                                apply |= ui.button("Apply").clicked();
+                                apply |= ui
+                                    .add_sized([60.0, CONTROL_HEIGHT], egui::Button::new("Apply"))
+                                    .clicked();
                             });
                             if apply {
                                 if self.transform_panel_mode == TransformPanelMode::Rotate {
@@ -3079,6 +3539,7 @@ impl Builder3dApp {
                         }
                     });
             });
+        self.transform_strip_rect = Some(response.response.rect);
     }
 
     fn render_arrange_control(&mut self, ui: &mut Ui, palette: ThemePalette) {
@@ -3267,7 +3728,7 @@ impl Builder3dApp {
         let palette = ThemePalette::for_mode(self.theme_mode);
         self.render_transform_strip(ui.ctx());
         let content_rect = ui.ctx().content_rect();
-        egui::Area::new(egui::Id::unique("builder3d-status-area"))
+        let response = egui::Area::new(egui::Id::unique("builder3d-status-area"))
             .enabled(!self.interaction_blocked() || self.desktop_job.is_some())
             .order(egui::Order::Foreground)
             .anchor(Align2::LEFT_BOTTOM, Vec2::ZERO)
@@ -3277,7 +3738,11 @@ impl Builder3dApp {
                     .stroke(Stroke::new(1.0, palette.divider))
                     .inner_margin(egui::Margin::symmetric(12, 6))
                     .show(ui, |ui| {
-                        ui.set_min_size(egui::vec2(content_rect.width(), 30.0));
+                        // The frame margins and stroke sit outside this width;
+                        // filling the full content width clipped the right edge.
+                        let inner_width = (content_rect.width() - 26.0).max(0.0);
+                        ui.set_min_size(egui::vec2(inner_width, 22.0));
+                        ui.set_max_width(inner_width);
                         ui.horizontal(|ui| {
                             let dirty_text = if self.commands.is_dirty() {
                                 "Unsaved"
@@ -3347,18 +3812,19 @@ impl Builder3dApp {
                                     .unwrap_or([0.0; 3]);
                                 ui.label(
                                     RichText::new(format!(
-                                        "Transform {} / {} / {}",
+                                        "X {}   Y {}   Z {}",
                                         format_distance(values[0], unit),
                                         format_distance(values[1], unit),
                                         format_distance(values[2], unit)
                                     ))
                                     .small()
-                                    .color(palette.text),
+                                    .color(palette.muted),
                                 );
                             });
                         });
                     });
             });
+        self.status_bar_rect = Some(response.response.rect);
     }
 
     fn render_viewport(&mut self, ui: &mut Ui) {
@@ -3379,8 +3845,11 @@ impl Builder3dApp {
                 }
                 self.frame_camera_if_pending();
                 let input = viewport_input(ui.ctx());
-                let interactions_allowed =
-                    !self.interaction_blocked() && !ui.ctx().egui_wants_keyboard_input();
+                let interactions_allowed = viewport_pointer_interactions_allowed(
+                    self.interaction_blocked(),
+                    response.contains_pointer(),
+                    self.viewport_drag.is_some(),
+                );
                 self.update_gizmo_frame();
                 self.viewport_gizmo_consumed = false;
                 self.route_viewport_input(rect, pixels_per_point, input, interactions_allowed);
@@ -3391,6 +3860,11 @@ impl Builder3dApp {
                 {
                     self.frame_double_clicked(rect, pointer);
                 }
+                // Pointer release can commit a model command after the frame's
+                // initial preview refresh. Rebuild before rendering with the
+                // committed scene revision so floor cues use matching bounds.
+                self.refresh_preview();
+                self.update_gizmo_frame();
                 let theme_color = palette
                     .viewport
                     .to_srgba_unmultiplied()
@@ -3411,6 +3885,7 @@ impl Builder3dApp {
                     xray: display.xray,
                     selected_object_ids,
                     selected_tint: [0.0, 0.55, 1.0, 1.0],
+                    lighting: self.commands.preferences().viewport_lighting(),
                     theme: match self.theme_mode {
                         ThemeMode::Light => ViewportTheme::Light,
                         ThemeMode::Dark => ViewportTheme::Dark,
@@ -3443,7 +3918,18 @@ impl Builder3dApp {
                         .or(self.preview.as_ref()),
                     self.viewport_texture_id,
                 ) {
-                    let _ = renderer.set_clear_color(theme_color);
+                    let mut clear_color_error = None;
+                    match renderer.set_clear_color(theme_color) {
+                        Ok(()) => self.last_clear_color_error = None,
+                        Err(error) => {
+                            let error = error.to_string();
+                            if self.last_clear_color_error.as_deref() != Some(error.as_str()) {
+                                crate::diagnostics::record_error("viewport clear color", &error);
+                            }
+                            self.last_clear_color_error = Some(error.clone());
+                            clear_color_error = Some(error);
+                        }
+                    }
                     let mut cpu_fallback = false;
                     match renderer.render_with_options(
                         scene,
@@ -3460,10 +3946,32 @@ impl Builder3dApp {
                         &render_options,
                     ) {
                         Ok(report) => {
-                            self.viewport_error = None;
+                            self.viewport_error = clear_color_error;
                             cpu_fallback = report.cpu_fallback;
+                            if report.cpu_fallback && self.last_cpu_fallback != Some(true) {
+                                crate::diagnostics::record_warning(
+                                    "viewport CPU fallback",
+                                    format!(
+                                        "adapter={} / {} / {}; frame={:.0} ms; triangles={}; shaded pixels={}",
+                                        report.adapter.name,
+                                        report.adapter.backend,
+                                        report.adapter.device_type,
+                                        report.frame_time_ms,
+                                        report.cpu_triangles,
+                                        report.cpu_shaded_pixels
+                                    ),
+                                );
+                            }
+                            self.last_cpu_fallback = Some(report.cpu_fallback);
+                            crate::diagnostics::record_viewport_frame(&report);
                         }
-                        Err(error) => self.viewport_error = Some(error.to_string()),
+                        Err(error) => {
+                            let error = error.to_string();
+                            if self.viewport_error.as_deref() != Some(error.as_str()) {
+                                crate::diagnostics::record_error("viewport rendering", &error);
+                            }
+                            self.viewport_error = Some(error);
+                        }
                     }
                     painter.image(
                         texture_id,
@@ -3481,6 +3989,7 @@ impl Builder3dApp {
                         );
                     }
                 }
+                self.paint_floor_scale_labels(&painter, rect);
                 if gizmo_mode == GizmoMode::Resize {
                     self.paint_resize_handles(&painter, rect, palette);
                 } else {
@@ -3494,18 +4003,6 @@ impl Builder3dApp {
                         FontId::proportional(12.0),
                         palette.accent_dark,
                     );
-                } else if self
-                    .preview
-                    .as_ref()
-                    .is_none_or(|scene| scene.objects().is_empty())
-                {
-                    painter.text(
-                        rect.center(),
-                        Align2::CENTER_CENTER,
-                        "Choose a primitive or import a model to begin",
-                        FontId::proportional(18.0),
-                        palette.muted,
-                    );
                 }
                 if response.clicked_by(egui::PointerButton::Primary)
                     && !self.viewport_gizmo_consumed
@@ -3515,6 +4012,38 @@ impl Builder3dApp {
                     self.pick_viewport_object(rect, pointer, input.modifiers);
                 }
             });
+    }
+
+    fn paint_floor_scale_labels(&self, painter: &egui::Painter, rect: egui::Rect) {
+        let Ok(matrix) = self.camera.view_projection(1.0) else {
+            return;
+        };
+        for label in build_floor_scale_labels(&self.camera) {
+            let Some((position, depth)) = project_to_viewport(matrix, rect, label.position) else {
+                continue;
+            };
+            if !(rect.left()..=rect.right()).contains(&position.x)
+                || !(rect.top()..=rect.bottom()).contains(&position.y)
+                || !(0.0..=1.0).contains(&depth)
+            {
+                continue;
+            }
+            if self
+                .preview
+                .as_ref()
+                .is_some_and(|scene| floor_label_is_occluded(scene, matrix, rect, position, depth))
+            {
+                continue;
+            }
+            let alpha = (label.alpha * 220.0).round().clamp(0.0, 255.0) as u8;
+            painter.text(
+                position + egui::vec2(4.0, -3.0),
+                Align2::LEFT_CENTER,
+                format!("{} mm", label.value_mm),
+                FontId::proportional(11.0),
+                Color32::from_rgba_unmultiplied(42, 42, 42, alpha),
+            );
+        }
     }
 
     fn resize_viewport_target(&mut self, size_points: Vec2, pixels_per_point: f32) {
@@ -3657,6 +4186,7 @@ impl Builder3dApp {
         Some(center)
     }
 
+    #[cfg(test)]
     fn project_handle(&self, point: [f32; 3], rect: egui::Rect) -> Option<(egui::Pos2, f32)> {
         let matrix = self
             .camera
@@ -3694,12 +4224,10 @@ impl Builder3dApp {
         else {
             return;
         };
-        let Ok(geometry) = build_gizmo_with_bounds(
-            &self.camera,
-            center,
-            self.gizmo_mode(),
-            self.selected_gizmo_bounds(),
-        ) else {
+        let mode = self.gizmo_mode();
+        let Ok(geometry) =
+            build_gizmo_with_bounds(&self.camera, center, mode, self.selected_gizmo_bounds())
+        else {
             return;
         };
         // The interaction controls remain visible over solid meshes on both
@@ -3709,31 +4237,94 @@ impl Builder3dApp {
                 rgba[0], rgba[1], rgba[2], rgba[3],
             ))
         };
-        for line in geometry.lines {
-            if let (Some((start, _)), Some((end, _))) = (
-                project_to_viewport(matrix, rect, line.start),
-                project_to_viewport(matrix, rect, line.end),
-            ) {
-                painter.line_segment(
-                    [start, end],
-                    Stroke::new(
-                        line.width_pixels / painter.ctx().pixels_per_point(),
-                        color(line.color),
-                    ),
+        let pixels_per_point = painter.ctx().pixels_per_point().max(1.0e-6);
+        let active_axis = self.active_gizmo_axis_index();
+        let hovered_axis = active_axis
+            .is_none()
+            .then(|| {
+                painter
+                    .ctx()
+                    .input(|input| input.pointer.hover_pos())
+                    .filter(|position| rect.contains(*position))
+                    .and_then(|position| {
+                        self.transform_axis_at_pointer(rect, position, pixels_per_point, mode)
+                    })
+            })
+            .flatten();
+        if mode == GizmoMode::Move {
+            for (axis_index, line) in geometry.lines.iter().enumerate() {
+                let Some(anchor) = project_gizmo_point(matrix, rect, line.start) else {
+                    continue;
+                };
+                let Some([axis_start, axis_end]) =
+                    project_gizmo_line(matrix, rect, line.start, line.end)
+                else {
+                    continue;
+                };
+                let axis_direction = axis_end - axis_start;
+                let direction_length = axis_direction.length();
+                if !direction_length.is_finite() || direction_length <= 1.0e-3 {
+                    continue;
+                }
+                let direction = axis_direction / direction_length;
+                let pixel_scale = MOVE_GIZMO_SCALE / pixels_per_point;
+                let shaft_end = anchor + direction * (MOVE_ARROW_SHAFT_LENGTH_PIXELS * pixel_scale);
+                let axis_color = color(line.color);
+                let emphasized =
+                    Some(axis_index) == hovered_axis || Some(axis_index) == active_axis;
+                paint_gizmo_shaft(
+                    painter,
+                    anchor,
+                    shaft_end,
+                    axis_color,
+                    line.width_pixels,
+                    emphasized,
+                );
+                paint_gizmo_arrowhead(
+                    painter,
+                    shaft_end,
+                    direction,
+                    axis_color,
+                    MOVE_GIZMO_SCALE,
+                    emphasized,
                 );
             }
-        }
-        for triangle in geometry.triangles {
-            if let (Some((a, _)), Some((b, _)), Some((c, _))) = (
-                project_to_viewport(matrix, rect, triangle.first),
-                project_to_viewport(matrix, rect, triangle.second),
-                project_to_viewport(matrix, rect, triangle.third),
-            ) {
-                painter.add(egui::Shape::convex_polygon(
-                    vec![a, b, c],
-                    color(triangle.color),
-                    Stroke::NONE,
-                ));
+        } else {
+            for (line_index, line) in geometry.lines.iter().enumerate() {
+                let axis_index = line_index / ROTATE_RING_SEGMENTS as usize;
+                if let Some([start, end]) = project_gizmo_line(matrix, rect, line.start, line.end) {
+                    paint_gizmo_shaft(
+                        painter,
+                        start,
+                        end,
+                        color(line.color),
+                        line.width_pixels,
+                        Some(axis_index) == hovered_axis || Some(axis_index) == active_axis,
+                    );
+                }
+            }
+            if mode == GizmoMode::Rotate {
+                paint_curved_rotate_arrows(
+                    painter,
+                    matrix,
+                    rect,
+                    &geometry.lines,
+                    active_axis.or(hovered_axis),
+                );
+            }
+            for triangle in &geometry.triangles {
+                let points = clip_gizmo_triangle(
+                    matrix,
+                    rect,
+                    [triangle.first, triangle.second, triangle.third],
+                );
+                if points.len() >= 3 {
+                    painter.add(egui::Shape::convex_polygon(
+                        points,
+                        color(triangle.color),
+                        Stroke::NONE,
+                    ));
+                }
             }
         }
     }
@@ -3780,28 +4371,78 @@ impl Builder3dApp {
             .into_iter()
             .filter_map(|(h, p)| {
                 let p = delta.and_then(|d| d.transform_point(p).ok()).unwrap_or(p);
-                project_to_viewport(matrix, rect, p).map(|(p, z)| (h, p, z))
+                project_to_viewport(matrix, rect, p).map(|(screen, z)| (h, screen, z, p))
             })
             .collect::<Vec<_>>();
         projected.sort_by(|a, b| b.2.total_cmp(&a.2));
-        for (handle, position, _) in projected {
-            let color = match handle {
-                ResizeHandle::Face { axis, .. } | ResizeHandle::Edge { axis, .. } => [
-                    Color32::from_rgb(255, 51, 51),
-                    Color32::from_rgb(51, 204, 51),
-                    Color32::from_rgb(51, 51, 255),
-                ][axis],
-                ResizeHandle::Corner(_) => palette.text,
-            };
+        let pixels_per_point = painter.ctx().pixels_per_point().max(1.0e-6);
+        let active_handle = self.active_resize_handle();
+        let hovered_handle = active_handle
+            .is_none()
+            .then(|| {
+                painter
+                    .ctx()
+                    .input(|input| input.pointer.hover_pos())
+                    .filter(|position| rect.contains(*position))
+                    .and_then(|position| {
+                        self.resize_handle_at_pointer(rect, position, pixels_per_point)
+                    })
+            })
+            .flatten();
+        let probe_length = self.camera.world_tolerance(GIZMO_TARGET_PIXELS).max(0.01);
+        for (handle, position, _, world_position) in projected {
+            let emphasized = hovered_handle == Some(handle) || active_handle == Some(handle);
             match handle {
                 ResizeHandle::Corner(_) => {
-                    painter.circle_filled(position, 5.0, color);
-                    painter.circle_stroke(position, 5.0, Stroke::new(1.0, palette.border));
+                    if emphasized {
+                        painter.circle_filled(
+                            position,
+                            7.0 / pixels_per_point,
+                            with_alpha(palette.accent, 70),
+                        );
+                    }
+                    painter.circle_filled(
+                        position,
+                        (if emphasized { 5.5 } else { 5.0 }) / pixels_per_point,
+                        if emphasized {
+                            palette.accent
+                        } else {
+                            palette.text
+                        },
+                    );
+                    painter.circle_stroke(
+                        position,
+                        5.0 / pixels_per_point,
+                        Stroke::new(1.0 / pixels_per_point, palette.border),
+                    );
                 }
-                ResizeHandle::Face { .. } | ResizeHandle::Edge { .. } => {
-                    painter.circle_filled(position, 4.0, color);
-                    painter.circle_stroke(position, 4.0, Stroke::new(1.0, palette.border));
+                ResizeHandle::Face { axis, side } => {
+                    let axis_direction = scale(frame.axes[axis], side);
+                    let Some([anchor, tip]) = project_resize_arrow_segment(
+                        matrix,
+                        rect,
+                        world_position,
+                        axis_direction,
+                        probe_length,
+                        pixels_per_point,
+                    ) else {
+                        continue;
+                    };
+                    let direction = tip - anchor;
+                    let direction_length = direction.length();
+                    if !direction_length.is_finite() || direction_length <= 1.0e-3 {
+                        continue;
+                    }
+                    let color = resize_axis_color(axis);
+                    paint_resize_arrow(
+                        painter,
+                        anchor,
+                        direction / direction_length,
+                        color,
+                        emphasized,
+                    );
                 }
+                ResizeHandle::Edge { .. } => {}
             }
         }
     }
@@ -4103,9 +4744,8 @@ impl Builder3dApp {
                 self.viewport_drag = self.begin_brush_gesture(rect, position, size);
                 self.viewport_gizmo_consumed = true;
             } else {
-                let screen = viewport_pixel_position(position, rect, size);
                 self.viewport_drag = self
-                    .begin_transform_drag(screen)
+                    .begin_transform_drag(rect, position, pixels_per_point)
                     .or(Some(ViewportDrag::Orbit));
                 self.viewport_gizmo_consumed =
                     matches!(self.viewport_drag, Some(ViewportDrag::Transform(_)));
@@ -4191,9 +4831,19 @@ impl Builder3dApp {
         }
     }
 
-    fn begin_transform_drag(&self, screen: [f32; 2]) -> Option<ViewportDrag> {
+    fn begin_transform_drag(
+        &self,
+        rect: egui::Rect,
+        pointer: egui::Pos2,
+        pixels_per_point: f32,
+    ) -> Option<ViewportDrag> {
         let center = self.selected_gizmo_state()?;
         let scene_radius = self.current_scene_radius()?;
+        let size = self
+            .viewport_renderer
+            .as_ref()
+            .map_or(self.camera.viewport_size(), ViewportRenderer::size);
+        let screen = viewport_pixel_position(pointer, rect, size);
         let ray = self
             .camera
             .screen_ray(screen[0], screen[1], scene_radius)
@@ -4202,25 +4852,30 @@ impl Builder3dApp {
         let mode = self.gizmo_mode();
         let drag = if mode == GizmoMode::Resize {
             let frame = self.gizmo_frame.as_ref()?.1;
-            let size = self
-                .viewport_renderer
-                .as_ref()
-                .map_or(self.camera.viewport_size(), ViewportRenderer::size);
-            let rect = egui::Rect::from_min_size(
-                egui::Pos2::ZERO,
-                egui::vec2(size.0 as f32, size.1 as f32),
-            );
-            let pointer = egui::pos2(screen[0], screen[1]);
-            let handle = frame
-                .interactive_handles()
-                .filter_map(|(h, p)| {
-                    let (projected, z) = self.project_handle(p, rect)?;
-                    let distance = pointer.distance(projected);
-                    (distance <= 10.).then_some((h, distance, z))
-                })
-                .min_by(|a, b| a.1.total_cmp(&b.1).then(a.2.total_cmp(&b.2)))?
-                .0;
-            TransformGesture::resize(snapshot, frame, handle)
+            let handle = self.resize_handle_at_pointer(rect, pointer, pixels_per_point)?;
+            TransformGesture::resize(snapshot, frame, handle, ray)?
+        } else if mode == GizmoMode::Move {
+            let axis = self.move_axis_at_pointer(rect, pointer, pixels_per_point)?;
+            let mut gesture = TransformGesture::move_axis(snapshot, center, axis.vector(), ray)?;
+            if let Ok(snap_snapshot) = self.commands.capture_viewport_snap_snapshot() {
+                let midpoint = [
+                    (snap_snapshot.moving_bounds.minimum[0]
+                        + snap_snapshot.moving_bounds.maximum[0])
+                        * 0.5,
+                    (snap_snapshot.moving_bounds.minimum[1]
+                        + snap_snapshot.moving_bounds.maximum[1])
+                        * 0.5,
+                    (snap_snapshot.moving_bounds.minimum[2]
+                        + snap_snapshot.moving_bounds.maximum[2])
+                        * 0.5,
+                ];
+                gesture.configure_move_snapping(
+                    snap_snapshot,
+                    self.snap_view_context(midpoint),
+                    self.commands.snap_enabled(),
+                );
+            }
+            gesture
         } else {
             let hit = hit_test_with_bounds(
                 &self.camera,
@@ -4232,33 +4887,167 @@ impl Builder3dApp {
                 self.selected_gizmo_bounds(),
             )
             .ok()??;
-            if mode == GizmoMode::Move {
-                let mut gesture =
-                    TransformGesture::move_axis(snapshot, center, hit.axis.vector(), ray)?;
-                if let Ok(snap_snapshot) = self.commands.capture_viewport_snap_snapshot() {
-                    let midpoint = [
-                        (snap_snapshot.moving_bounds.minimum[0]
-                            + snap_snapshot.moving_bounds.maximum[0])
-                            * 0.5,
-                        (snap_snapshot.moving_bounds.minimum[1]
-                            + snap_snapshot.moving_bounds.maximum[1])
-                            * 0.5,
-                        (snap_snapshot.moving_bounds.minimum[2]
-                            + snap_snapshot.moving_bounds.maximum[2])
-                            * 0.5,
-                    ];
-                    gesture.configure_move_snapping(
-                        snap_snapshot,
-                        self.snap_view_context(midpoint),
-                        self.commands.snap_enabled(),
-                    );
-                }
-                gesture
-            } else {
-                TransformGesture::rotate(snapshot, center, hit.axis.vector(), ray)?
-            }
+            TransformGesture::rotate(snapshot, center, hit.axis.vector(), ray)?
         };
         Some(ViewportDrag::Transform(Box::new(drag)))
+    }
+
+    fn transform_axis_at_pointer(
+        &self,
+        rect: egui::Rect,
+        pointer: egui::Pos2,
+        pixels_per_point: f32,
+        mode: GizmoMode,
+    ) -> Option<usize> {
+        match mode {
+            GizmoMode::Move => self
+                .move_axis_at_pointer(rect, pointer, pixels_per_point)
+                .map(gizmo_axis_index),
+            GizmoMode::Rotate => {
+                let center = self.selected_gizmo_state()?;
+                let scene_radius = self.current_scene_radius()?;
+                let size = self
+                    .viewport_renderer
+                    .as_ref()
+                    .map_or(self.camera.viewport_size(), ViewportRenderer::size);
+                let screen = viewport_pixel_position(pointer, rect, size);
+                let hit = hit_test_with_bounds(
+                    &self.camera,
+                    center,
+                    GizmoMode::Rotate,
+                    screen[0],
+                    screen[1],
+                    scene_radius,
+                    self.selected_gizmo_bounds(),
+                )
+                .ok()??;
+                Some(gizmo_axis_index(hit.axis))
+            }
+            GizmoMode::Resize => None,
+        }
+    }
+
+    fn move_axis_at_pointer(
+        &self,
+        rect: egui::Rect,
+        pointer: egui::Pos2,
+        pixels_per_point: f32,
+    ) -> Option<GizmoAxis> {
+        let center = self.selected_gizmo_state()?;
+        let scene_radius = self.current_scene_radius()?;
+        let matrix = self.camera.view_projection(scene_radius).ok()?;
+        let geometry = build_gizmo_with_bounds(
+            &self.camera,
+            center,
+            GizmoMode::Move,
+            self.selected_gizmo_bounds(),
+        )
+        .ok()?;
+        let pixels_per_point = pixels_per_point.max(1.0e-6);
+        let hit_radius = MOVE_ARROW_PICK_RADIUS_PIXELS / pixels_per_point;
+        let axes = [GizmoAxis::X, GizmoAxis::Y, GizmoAxis::Z];
+        let mut nearest: Option<(f32, f32, GizmoAxis)> = None;
+        for (axis, line) in axes.into_iter().zip(&geometry.lines) {
+            let Some(anchor) = project_gizmo_point(matrix, rect, line.start) else {
+                continue;
+            };
+            let Some([axis_start, axis_end]) =
+                project_gizmo_line(matrix, rect, line.start, line.end)
+            else {
+                continue;
+            };
+            let projected_axis = axis_end - axis_start;
+            let projected_length = projected_axis.length();
+            if !projected_length.is_finite() || projected_length <= 1.0e-3 {
+                continue;
+            }
+            let tip = anchor
+                + projected_axis / projected_length * (MOVE_ARROW_LENGTH_PIXELS / pixels_per_point);
+            let distance = distance_to_screen_segment(pointer, anchor, tip);
+            if distance > hit_radius {
+                continue;
+            }
+            let depth =
+                project_to_viewport(matrix, rect, line.start).map_or(1.0, |(_, depth)| depth);
+            if nearest.is_none_or(|(best_distance, best_depth, _)| {
+                distance
+                    .total_cmp(&best_distance)
+                    .then(depth.total_cmp(&best_depth))
+                    .is_lt()
+            }) {
+                nearest = Some((distance, depth, axis));
+            }
+        }
+        nearest.map(|(_, _, axis)| axis)
+    }
+
+    fn resize_handle_at_pointer(
+        &self,
+        rect: egui::Rect,
+        pointer: egui::Pos2,
+        pixels_per_point: f32,
+    ) -> Option<ResizeHandle> {
+        let frame = self.gizmo_frame.as_ref()?.1;
+        let scene_radius = self.current_scene_radius()?;
+        let matrix = self.camera.view_projection(scene_radius).ok()?;
+        let probe_length = self.camera.world_tolerance(GIZMO_TARGET_PIXELS).max(0.01);
+        let pixels_per_point = pixels_per_point.max(1.0e-6);
+        let mut nearest: Option<(ResizeHandle, f32, f32)> = None;
+        for (handle, world_position) in frame.interactive_handles() {
+            let Some((projected, depth)) = project_to_viewport(matrix, rect, world_position) else {
+                continue;
+            };
+            let (distance, hit_radius) = match handle {
+                ResizeHandle::Face { axis, side } => {
+                    let axis_direction = scale(frame.axes[axis], side);
+                    let Some([start, end]) = project_resize_arrow_segment(
+                        matrix,
+                        rect,
+                        world_position,
+                        axis_direction,
+                        probe_length,
+                        pixels_per_point,
+                    ) else {
+                        continue;
+                    };
+                    (
+                        distance_to_screen_segment(pointer, start, end),
+                        RESIZE_ARROW_HIT_RADIUS_PIXELS / pixels_per_point,
+                    )
+                }
+                ResizeHandle::Corner(_) => (
+                    pointer.distance(projected),
+                    RESIZE_CORNER_HIT_RADIUS_PIXELS / pixels_per_point,
+                ),
+                ResizeHandle::Edge { .. } => continue,
+            };
+            if distance > hit_radius {
+                continue;
+            }
+            if nearest.is_none_or(|(_, best_distance, best_depth)| {
+                distance
+                    .total_cmp(&best_distance)
+                    .then(depth.total_cmp(&best_depth))
+                    .is_lt()
+            }) {
+                nearest = Some((handle, distance, depth));
+            }
+        }
+        nearest.map(|(handle, _, _)| handle)
+    }
+
+    fn active_gizmo_axis_index(&self) -> Option<usize> {
+        match self.viewport_drag.as_ref()? {
+            ViewportDrag::Transform(gesture) => gesture.active_axis_index(),
+            ViewportDrag::Orbit | ViewportDrag::Pan | ViewportDrag::Brush(_) => None,
+        }
+    }
+
+    fn active_resize_handle(&self) -> Option<ResizeHandle> {
+        match self.viewport_drag.as_ref()? {
+            ViewportDrag::Transform(gesture) => gesture.active_resize_handle(),
+            ViewportDrag::Orbit | ViewportDrag::Pan | ViewportDrag::Brush(_) => None,
+        }
     }
 
     fn snap_view_context(&self, midpoint: [f32; 3]) -> Option<SnapViewContext> {
@@ -4488,6 +5277,33 @@ impl Builder3dApp {
         self.brush_settings_open = open;
     }
 
+    fn settings_work_area(&self, ctx: &egui::Context) -> egui::Rect {
+        let screen = ctx.content_rect();
+        let safe_top = screen.top() + 6.0;
+        let safe_bottom = screen.bottom() - 6.0;
+        let mut top = self
+            .ribbon_rect
+            .map_or(safe_top, |rect| rect.bottom() + 6.0)
+            .max(safe_top);
+        let mut bottom = self
+            .status_bar_rect
+            .map_or(safe_bottom, |rect| rect.top() - 8.0)
+            .min(safe_bottom);
+        if let Some(rect) = self.transform_strip_rect {
+            bottom = bottom.min(rect.top() - 8.0);
+        }
+        if bottom - top < 160.0 {
+            top = safe_top;
+            bottom = safe_bottom;
+        }
+        let left = screen.left() + 8.0;
+        let width = (screen.width() - 16.0).clamp(240.0, 380.0);
+        egui::Rect::from_min_max(
+            egui::pos2(left, top),
+            egui::pos2((left + width).min(screen.right() - 4.0), bottom),
+        )
+    }
+
     fn render_dialog(&mut self, ctx: &egui::Context) {
         if let Some(message) = self.measurement_text.clone() {
             let mut close = false;
@@ -4572,10 +5388,11 @@ impl Builder3dApp {
                 }
             }
         }
+        let settings_work_area = self.settings_work_area(ctx);
         let Some(dialog) = self.dialog.as_mut() else {
             return;
         };
-        if let Some(action) = dialog.show(ctx) {
+        if let Some(action) = dialog.show_with_settings_area(ctx, Some(settings_work_area)) {
             self.apply_dialog_action(action);
         }
     }
@@ -4869,6 +5686,12 @@ impl Builder3dApp {
                 self.commands.preferences_mut().set_theme_mode(mode);
                 Ok(String::from("Theme updated"))
             }
+            DialogAction::ViewportLighting(lighting) => {
+                self.commands
+                    .preferences_mut()
+                    .set_viewport_lighting(lighting);
+                Ok(String::new())
+            }
         };
         match result {
             Ok(message) => {
@@ -5068,7 +5891,7 @@ impl Builder3dApp {
     }
 
     fn modal_active(&self) -> bool {
-        self.dialog.is_some()
+        self.dialog.as_ref().is_some_and(DialogState::is_modal)
             || self.placement_command.is_some()
             || self.measurement_text.is_some()
             || self.confirm_action.is_some()
@@ -5206,6 +6029,7 @@ impl eframe::App for Builder3dApp {
     }
 
     fn ui(&mut self, ui: &mut Ui, _frame: &mut eframe::Frame) {
+        let frame_started = std::time::Instant::now();
         let ctx = ui.ctx().clone();
         if ctx.input(|input| input.viewport().close_requested()) {
             self.handle_native_close_request(&ctx);
@@ -5233,6 +6057,18 @@ impl eframe::App for Builder3dApp {
         }
         if self.close_requested {
             ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+        }
+        if !self.close_requested {
+            ctx.request_repaint_after(crate::diagnostics::UI_HEARTBEAT_INTERVAL);
+        }
+        crate::diagnostics::complete_ui_frame(frame_started.elapsed());
+        if let Some(review) = self.review.as_mut()
+            && review.advance(&ctx) == crate::review_capture::ReviewProgress::Finished
+        {
+            // The review scene is deliberately unsaved; ending the process
+            // here avoids the unsaved-changes prompt blocking an unattended
+            // capture. Nothing outside the isolated settings file is written.
+            std::process::exit(0);
         }
     }
 }
@@ -5406,6 +6242,9 @@ fn command_enabled(command: CommandId, state: &CommandState) -> bool {
     let selected = state.selected_count();
     match command {
         CommandId::Paste => state.has_clipboard(),
+        CommandId::SelectAll | CommandId::DeselectAll | CommandId::InvertSelection => {
+            !state.scene().objects().is_empty()
+        }
         CommandId::Delete
         | CommandId::Duplicate
         | CommandId::Copy
@@ -5434,24 +6273,169 @@ fn command_enabled(command: CommandId, state: &CommandState) -> bool {
         CommandId::Group => selected > 1,
         CommandId::Merge | CommandId::Intersect | CommandId::Subtract => selected > 0,
         CommandId::Ungroup => selected > 0,
-        CommandId::Export => !state.scene().objects().is_empty(),
+        CommandId::Export => selected > 0,
         _ => true,
+    }
+}
+
+fn command_summary(command: CommandId) -> &'static str {
+    match command {
+        CommandId::Builder3dMenu => "Start screen",
+        CommandId::NewScene => "Blank scene",
+        CommandId::OpenProject => "Open project",
+        CommandId::ImportModel => "Add or open model",
+        CommandId::SaveProject => "Save project",
+        CommandId::SaveProjectAs => "Save a copy",
+        CommandId::Export => "Export selected model",
+        CommandId::Repair => "Fix mesh issues",
+        CommandId::PrintPrep => "Check for printing",
+        CommandId::Settings => "App preferences",
+        CommandId::Exit => "Close Builder3D",
+        CommandId::AddPrimitive(_) => "Add a 3D shape",
+        CommandId::EditTorus => "Edit torus shape",
+        CommandId::Duplicate => "Make a copy",
+        CommandId::Copy => "Copy selected models",
+        CommandId::Paste => "Paste copied models",
+        CommandId::Cut => "Cut selected models",
+        CommandId::Delete => "Remove selected models",
+        CommandId::Settle => "Place on floor",
+        CommandId::Mirror => "Flip selected model",
+        CommandId::Measure => "Measure selected model",
+        CommandId::Align => "Line up models",
+        CommandId::Arrange => "Space models evenly",
+        CommandId::SelectAll => "Select every model",
+        CommandId::DeselectAll => "Clear selection",
+        CommandId::InvertSelection => "Select the rest",
+        CommandId::Group => "Group selected models",
+        CommandId::Ungroup => "Separate grouped models",
+        CommandId::Simplify => "Reduce mesh detail",
+        CommandId::Subdivide => "Add mesh detail",
+        CommandId::Smooth => "Smooth model surface",
+        CommandId::Grab => "Sculpt with Grab",
+        CommandId::Crease => "Sculpt a crease",
+        CommandId::SmoothBrush => "Smooth with brush",
+        CommandId::Blob => "Add sculpted volume",
+        CommandId::Normalize => "Even out mesh detail",
+        CommandId::Merge => "Join selected models",
+        CommandId::Emboss => "Raise a design",
+        CommandId::Hollow => "Make a hollow shell",
+        CommandId::Intersect => "Keep the overlap",
+        CommandId::Subtract => "Cut one model from another",
+        CommandId::Material => "Change material",
+        CommandId::Paint => "Paint selected model",
+        CommandId::Color => "Change model color",
+        CommandId::CenterView => "Show the whole scene",
+        CommandId::FrameSelection => "Show selected models",
+        CommandId::ResetView => "Return to default view",
+        CommandId::ViewTop => "Look from above",
+        CommandId::ViewSide => "Look from the side",
+        CommandId::ToggleGrid => "Show or hide floor grid",
+        CommandId::ToggleWireframe => "Show mesh edges",
+        CommandId::ToggleXray => "See through models",
+        CommandId::ToggleSnap => "Snap moves to the floor",
+        CommandId::Undo => "Undo last change",
+        CommandId::Redo => "Redo last change",
     }
 }
 
 fn command_help(command: CommandId) -> &'static str {
     match command {
-        CommandId::ImportModel => "Add a mesh or scene file to the current project",
-        CommandId::AddPrimitive(_) => "Insert a new primitive and select it",
-        CommandId::Delete => "Delete the selected objects (Delete)",
-        CommandId::ToggleGrid => "Show or hide the build-plane grid",
-        CommandId::ToggleWireframe => "Overlay wireframe edges",
-        CommandId::ToggleXray => "Show objects translucently",
-        CommandId::ToggleSnap => "Snap Move landmarks to objects and the build floor",
-        CommandId::FrameSelection => "Frame the selected objects",
-        CommandId::CenterView => "Frame all visible scene objects",
-        CommandId::Settings => "Theme, units, import defaults, and ribbon preferences",
-        _ => "Run this Builder3D command",
+        CommandId::Builder3dMenu => "Return to the start screen and recent projects.",
+        CommandId::NewScene => "Start with a blank scene. Unsaved changes are checked first.",
+        CommandId::OpenProject => "Open a saved Builder3D project without losing unsaved work.",
+        CommandId::ImportModel => "Add a mesh or scene file to the current project.",
+        CommandId::SaveProject => "Save changes to the current project file.",
+        CommandId::SaveProjectAs => "Save a separate copy of the current project.",
+        CommandId::Export => "Export the selected model to a mesh file.",
+        CommandId::Repair => "Check the selected mesh and fix repairable problems.",
+        CommandId::PrintPrep => "Check visible models and send them to an installed slicer.",
+        CommandId::Settings => {
+            "Change the theme, viewport lighting, units, import defaults, and ribbon settings."
+        }
+        CommandId::Exit => "Close Builder3D. Unsaved changes are checked first.",
+        CommandId::AddPrimitive(_) => "Add a new 3D shape to the scene and select it.",
+        CommandId::EditTorus => "Change the size and shape of the selected torus.",
+        CommandId::Duplicate => "Create a copy of the selected models.",
+        CommandId::Copy => "Copy the selected models to the Builder3D clipboard.",
+        CommandId::Paste => "Place the copied models into the current scene.",
+        CommandId::Cut => "Remove the selected models and copy them to the clipboard.",
+        CommandId::Delete => "Remove the selected models from the scene. (Delete)",
+        CommandId::Settle => "Move the selected models down to the build floor.",
+        CommandId::Mirror => "Flip the selected models across the X axis.",
+        CommandId::Measure => "Show the dimensions of the selected models.",
+        CommandId::Align => "Line up the selected models with the first selected model.",
+        CommandId::Arrange => "Space the selected models evenly along the X axis.",
+        CommandId::SelectAll => "Select every model in the scene.",
+        CommandId::DeselectAll => "Clear the current model selection.",
+        CommandId::InvertSelection => "Select unselected models and clear the current selection.",
+        CommandId::Group => "Put the selected models into one group without joining their meshes.",
+        CommandId::Ungroup => "Separate the children of selected groups.",
+        CommandId::Simplify => "Reduce the selected mesh detail while keeping its shape close.",
+        CommandId::Subdivide => "Add faces to the selected mesh for more detail.",
+        CommandId::Smooth => "Smooth the selected model surface.",
+        CommandId::Grab => "Sculpt the selected model by pulling its surface.",
+        CommandId::Crease => "Sculpt a sharper groove into the selected model.",
+        CommandId::SmoothBrush => "Smooth the selected model where you brush.",
+        CommandId::Blob => "Add or remove rounded volume where you brush.",
+        CommandId::Normalize => "Make the selected mesh detail more even.",
+        CommandId::Merge => "Join the selected models into one solid.",
+        CommandId::Emboss => "Raise a design on the selected model.",
+        CommandId::Hollow => "Create a hollow shell from the selected model.",
+        CommandId::Intersect => "Keep only the area where selected models overlap.",
+        CommandId::Subtract => "Cut the second selected model out of the first.",
+        CommandId::Material => "Choose a material for the selected model.",
+        CommandId::Paint => "Paint the selected model in the viewport.",
+        CommandId::Color => "Choose a color for the selected model.",
+        CommandId::CenterView => "Move the camera to show all visible models.",
+        CommandId::FrameSelection => "Move the camera to show the selected models.",
+        CommandId::ResetView => "Restore the default camera angle and distance.",
+        CommandId::ViewTop => "Look down at the scene from above.",
+        CommandId::ViewSide => "Look across the scene from the side.",
+        CommandId::ToggleGrid => "Show or hide the metric build-floor grid.",
+        CommandId::ToggleWireframe => "Show the edges of the model meshes.",
+        CommandId::ToggleXray => "Make models translucent so you can see through them.",
+        CommandId::ToggleSnap => "Snap moves to nearby models and the build floor.",
+        CommandId::Undo => "Undo the last model change. (Ctrl+Z)",
+        CommandId::Redo => "Redo the last undone model change. (Ctrl+Y)",
+    }
+}
+
+fn command_disabled_help(command: CommandId, state: &CommandState) -> &'static str {
+    match command {
+        CommandId::Paste if !state.has_clipboard() => "Copy or cut a model before pasting.",
+        CommandId::Group if state.selected_count() < 2 => {
+            "Select at least two models to make a group."
+        }
+        CommandId::EditTorus => "Select a torus to change its size and shape.",
+        CommandId::Export if state.selected_count() == 0 => "Select a model before exporting it.",
+        CommandId::SelectAll | CommandId::DeselectAll | CommandId::InvertSelection => {
+            "Add or import a model before changing the selection."
+        }
+        CommandId::Delete
+        | CommandId::Duplicate
+        | CommandId::Copy
+        | CommandId::Cut
+        | CommandId::Settle
+        | CommandId::Mirror
+        | CommandId::Measure
+        | CommandId::Align
+        | CommandId::Arrange
+        | CommandId::Simplify
+        | CommandId::Subdivide
+        | CommandId::Smooth
+        | CommandId::Grab
+        | CommandId::Crease
+        | CommandId::SmoothBrush
+        | CommandId::Blob
+        | CommandId::Normalize
+        | CommandId::Emboss
+        | CommandId::Hollow
+        | CommandId::Material
+        | CommandId::Paint
+        | CommandId::Color
+        | CommandId::Repair
+        | CommandId::FrameSelection => "Select a model first.",
+        _ => command_help(command),
     }
 }
 
@@ -5588,6 +6572,14 @@ fn viewport_input(ctx: &egui::Context) -> ViewportInput {
     })
 }
 
+fn viewport_pointer_interactions_allowed(
+    interaction_blocked: bool,
+    pointer_over_viewport: bool,
+    drag_active: bool,
+) -> bool {
+    !interaction_blocked && (pointer_over_viewport || drag_active)
+}
+
 fn physical_viewport_size(size_points: Vec2, pixels_per_point: f32) -> (u32, u32) {
     let width = (size_points.x * pixels_per_point).round().max(1.0) as u32;
     let height = (size_points.y * pixels_per_point).round().max(1.0) as u32;
@@ -5610,6 +6602,482 @@ fn project_to_viewport(
         ),
         clip[2] / clip[3],
     ))
+}
+
+// Egui draws these overlays outside the GPU viewport pipeline, so clip them in
+// homogeneous space before dividing by w to avoid streaks at the near plane.
+fn project_gizmo_point(matrix: Mat4, rect: egui::Rect, point: [f32; 3]) -> Option<egui::Pos2> {
+    let clip = matrix.transform4([point[0], point[1], point[2], 1.0]);
+    if clip.iter().any(|value| !value.is_finite())
+        || (0..6).any(|plane| clip_plane_distance(clip, plane) < 0.0)
+    {
+        return None;
+    }
+    clip_point_to_viewport(rect, clip)
+}
+
+fn project_gizmo_line(
+    matrix: Mat4,
+    rect: egui::Rect,
+    start: [f32; 3],
+    end: [f32; 3],
+) -> Option<[egui::Pos2; 2]> {
+    let mut points = [
+        matrix.transform4([start[0], start[1], start[2], 1.0]),
+        matrix.transform4([end[0], end[1], end[2], 1.0]),
+    ];
+    if points.iter().flatten().any(|value| !value.is_finite()) {
+        return None;
+    }
+    for plane in 0..6 {
+        let first_distance = clip_plane_distance(points[0], plane);
+        let second_distance = clip_plane_distance(points[1], plane);
+        if !first_distance.is_finite() || !second_distance.is_finite() {
+            return None;
+        }
+        if first_distance < 0.0 && second_distance < 0.0 {
+            return None;
+        }
+        if first_distance < 0.0 {
+            let amount = first_distance / (first_distance - second_distance);
+            points[0] = interpolate_clip_point(points[0], points[1], amount);
+        } else if second_distance < 0.0 {
+            let amount = first_distance / (first_distance - second_distance);
+            points[1] = interpolate_clip_point(points[0], points[1], amount);
+        }
+    }
+    Some([
+        clip_point_to_viewport(rect, points[0])?,
+        clip_point_to_viewport(rect, points[1])?,
+    ])
+}
+
+fn paint_gizmo_shaft(
+    painter: &egui::Painter,
+    start: egui::Pos2,
+    end: egui::Pos2,
+    axis_color: Color32,
+    width_pixels: f32,
+    emphasized: bool,
+) {
+    let pixels_per_point = painter.ctx().pixels_per_point().max(1.0e-6);
+    let segment = end - start;
+    let segment_length = segment.length();
+    if !segment_length.is_finite() || segment_length <= 1.0e-3 {
+        return;
+    }
+    let direction = segment / segment_length;
+    let perpendicular = Vec2::new(-direction.y, direction.x);
+    let pixels_to_points = 1.0 / pixels_per_point;
+    let outline = Color32::from_rgba_unmultiplied(18, 24, 36, 232);
+    if emphasized {
+        painter.line_segment(
+            [start, end],
+            Stroke::new(
+                (width_pixels + 7.0) * pixels_to_points,
+                with_alpha(axis_color, 44),
+            ),
+        );
+    }
+    painter.line_segment(
+        [start, end],
+        Stroke::new((width_pixels + 2.0) * pixels_to_points, outline),
+    );
+    painter.line_segment(
+        [start, end],
+        Stroke::new(width_pixels * pixels_to_points, axis_color),
+    );
+    let highlight = axis_highlight_color(axis_color);
+    let highlight_offset = perpendicular * (width_pixels * 0.16 * pixels_to_points);
+    painter.line_segment(
+        [start + highlight_offset, end + highlight_offset],
+        Stroke::new(0.8 * pixels_to_points, with_alpha(highlight, 220)),
+    );
+}
+
+fn paint_resize_arrow(
+    painter: &egui::Painter,
+    anchor: egui::Pos2,
+    direction: Vec2,
+    axis_color: Color32,
+    emphasized: bool,
+) {
+    let pixels_per_point = painter.ctx().pixels_per_point().max(1.0e-6);
+    let shaft_end = anchor + direction * (RESIZE_ARROW_SHAFT_LENGTH_PIXELS / pixels_per_point);
+    paint_gizmo_shaft(painter, anchor, shaft_end, axis_color, 3.25, emphasized);
+
+    let perpendicular = Vec2::new(-direction.y, direction.x);
+    for fraction in [0.28, 0.55] {
+        let center =
+            anchor + direction * (RESIZE_ARROW_SHAFT_LENGTH_PIXELS * fraction / pixels_per_point);
+        let half_tick = 4.0 / pixels_per_point;
+        let tick_start = center - perpendicular * half_tick;
+        let tick_end = center + perpendicular * half_tick;
+        painter.line_segment(
+            [tick_start, tick_end],
+            Stroke::new(3.5 / pixels_per_point, Color32::from_rgb(18, 24, 36)),
+        );
+        painter.line_segment(
+            [tick_start, tick_end],
+            Stroke::new(1.5 / pixels_per_point, axis_color),
+        );
+    }
+    paint_gizmo_arrowhead(
+        painter,
+        shaft_end,
+        direction,
+        axis_color,
+        MOVE_GIZMO_SCALE,
+        emphasized,
+    );
+}
+
+fn paint_curved_rotate_arrows(
+    painter: &egui::Painter,
+    matrix: Mat4,
+    rect: egui::Rect,
+    ring_lines: &[GizmoLine],
+    emphasized_axis: Option<usize>,
+) {
+    let ring_segments = ROTATE_RING_SEGMENTS as usize;
+    let pixels_per_point = painter.ctx().pixels_per_point().max(1.0e-6);
+    let size_scale = MOVE_GIZMO_SCALE;
+    let head_length = MOVE_ARROW_HEAD_LENGTH_PIXELS * size_scale / pixels_per_point;
+    let head_half_width = MOVE_ARROW_HEAD_HALF_WIDTH_PIXELS * size_scale / pixels_per_point;
+    let visible_rect = rect.shrink(head_half_width + 4.0 / pixels_per_point);
+    let mut arrow_tips = Vec::new();
+
+    for (ring_index, ring) in ring_lines.chunks_exact(ring_segments).enumerate() {
+        let preferred = (ring_index * ring_segments / 3 + ring_segments / 8) % ring_segments;
+        let mut best: Option<(f32, usize, egui::Pos2, Vec2)> = None;
+        for (segment_index, line) in ring.iter().enumerate() {
+            let Some([start, end]) = project_gizmo_line(matrix, rect, line.start, line.end) else {
+                continue;
+            };
+            let tangent = end - start;
+            let tangent_length = tangent.length();
+            if !tangent_length.is_finite()
+                || tangent_length <= 1.0e-3
+                || !visible_rect.contains(end)
+            {
+                continue;
+            }
+            let separation = arrow_tips
+                .iter()
+                .map(|tip: &egui::Pos2| tip.distance(end))
+                .fold(150.0_f32, f32::min);
+            let center_distance = end.distance(rect.center());
+            let difference = segment_index.abs_diff(preferred);
+            let preferred_distance = difference.min(ring_segments - difference) as f32;
+            let score = tangent_length + center_distance * 0.15 + separation * 0.2
+                - preferred_distance * 0.05;
+            if best
+                .as_ref()
+                .is_none_or(|(current, _, _, _)| score > *current)
+            {
+                best = Some((score, segment_index, end, tangent / tangent_length));
+            }
+        }
+
+        let Some((_, tip_segment, tip, direction)) = best else {
+            continue;
+        };
+        let emphasized = emphasized_axis == Some(ring_index);
+        let axis_color = Color32::from(egui::Rgba::from_rgba_unmultiplied(
+            ring[tip_segment].color[0],
+            ring[tip_segment].color[1],
+            ring[tip_segment].color[2],
+            ring[tip_segment].color[3],
+        ));
+
+        // Thicken a short section of the existing ring so the arrow follows
+        // its curve into the tangent arrowhead without replacing the ring.
+        let mut curve_length = 0.0;
+        let mut step = 0;
+        while step < ring.len() && (curve_length < head_length * 1.25 || step < 4) {
+            let segment_index = (tip_segment + ring.len() - step) % ring.len();
+            let line = ring[segment_index];
+            if let Some([start, end]) = project_gizmo_line(matrix, rect, line.start, line.end) {
+                curve_length += (end - start).length();
+                paint_gizmo_shaft(
+                    painter,
+                    start,
+                    end,
+                    axis_color,
+                    line.width_pixels,
+                    emphasized,
+                );
+            }
+            step += 1;
+        }
+
+        paint_gizmo_arrowhead(
+            painter,
+            tip - direction * head_length,
+            direction,
+            axis_color,
+            size_scale,
+            emphasized,
+        );
+        arrow_tips.push(tip);
+    }
+}
+
+fn project_resize_arrow_segment(
+    matrix: Mat4,
+    rect: egui::Rect,
+    world_anchor: [f32; 3],
+    world_axis: [f32; 3],
+    probe_length: f32,
+    pixels_per_point: f32,
+) -> Option<[egui::Pos2; 2]> {
+    let world_probe = add(world_anchor, scale(world_axis, probe_length));
+    let [anchor, probe] = project_gizmo_line(matrix, rect, world_anchor, world_probe)?;
+    let screen_axis = probe - anchor;
+    let screen_length = screen_axis.length();
+    if !screen_length.is_finite() || screen_length <= 1.0e-3 {
+        return None;
+    }
+    let direction = screen_axis / screen_length;
+    Some([
+        anchor,
+        anchor + direction * (RESIZE_ARROW_LENGTH_PIXELS / pixels_per_point.max(1.0e-6)),
+    ])
+}
+
+fn distance_to_screen_segment(point: egui::Pos2, start: egui::Pos2, end: egui::Pos2) -> f32 {
+    let segment = end - start;
+    let length_squared = segment.length_sq();
+    if !length_squared.is_finite() || length_squared <= 1.0e-6 {
+        return point.distance(start);
+    }
+    let parameter = ((point - start).dot(segment) / length_squared).clamp(0.0, 1.0);
+    point.distance(start + segment * parameter)
+}
+
+fn resize_axis_color(axis: usize) -> Color32 {
+    match axis {
+        0 => Color32::from_rgb(255, 51, 51),
+        1 => Color32::from_rgb(51, 204, 51),
+        _ => Color32::from_rgb(51, 51, 255),
+    }
+}
+
+fn gizmo_axis_index(axis: GizmoAxis) -> usize {
+    match axis {
+        GizmoAxis::X => 0,
+        GizmoAxis::Y => 1,
+        GizmoAxis::Z => 2,
+    }
+}
+
+fn with_alpha(color: Color32, alpha: u8) -> Color32 {
+    Color32::from_rgba_unmultiplied(color.r(), color.g(), color.b(), alpha)
+}
+
+fn axis_highlight_color(color: Color32) -> Color32 {
+    let highlight = |channel: u8| channel + ((u8::MAX - channel) / 2);
+    Color32::from_rgb(
+        highlight(color.r()),
+        highlight(color.g()),
+        highlight(color.b()),
+    )
+}
+
+fn axis_shadow_color(color: Color32) -> Color32 {
+    Color32::from_rgb(
+        (u16::from(color.r()) * 68 / 100) as u8,
+        (u16::from(color.g()) * 68 / 100) as u8,
+        (u16::from(color.b()) * 68 / 100) as u8,
+    )
+}
+
+fn paint_gizmo_arrowhead(
+    painter: &egui::Painter,
+    base: egui::Pos2,
+    axis_direction: Vec2,
+    axis_color: Color32,
+    size_scale: f32,
+    emphasized: bool,
+) {
+    let pixels_per_point = painter.ctx().pixels_per_point().max(1.0e-6);
+    let direction_length = axis_direction.length();
+    if !direction_length.is_finite() || direction_length <= 1.0e-3 {
+        return;
+    }
+    let direction = axis_direction / direction_length;
+    let perpendicular = Vec2::new(-direction.y, direction.x);
+    let pixels_to_points = size_scale / pixels_per_point;
+    let head_length = MOVE_ARROW_HEAD_LENGTH_PIXELS * pixels_to_points;
+    let head_half_width = MOVE_ARROW_HEAD_HALF_WIDTH_PIXELS * pixels_to_points;
+    let tip = base + direction * head_length;
+    let outer_left = base + perpendicular * head_half_width;
+    let outer_right = base - perpendicular * head_half_width;
+    let outline = Color32::from_rgba_unmultiplied(18, 24, 36, 240);
+    painter.add(egui::Shape::convex_polygon(
+        vec![tip, outer_left, outer_right],
+        outline,
+        Stroke::NONE,
+    ));
+
+    let inset = 1.5 / pixels_per_point;
+    let inner_half_width = head_half_width - inset;
+    if inner_half_width <= 0.0 {
+        return;
+    }
+    let inner_tip = tip - direction * inset;
+    let inner_base = base + direction * inset;
+    let face_color = if emphasized {
+        axis_highlight_color(axis_color)
+    } else {
+        axis_color
+    };
+    painter.add(egui::Shape::convex_polygon(
+        vec![
+            inner_tip,
+            inner_base + perpendicular * inner_half_width,
+            inner_base - perpendicular * inner_half_width,
+        ],
+        face_color,
+        Stroke::NONE,
+    ));
+    painter.add(egui::Shape::convex_polygon(
+        vec![
+            inner_tip,
+            inner_base,
+            inner_base - perpendicular * inner_half_width,
+        ],
+        axis_shadow_color(face_color),
+        Stroke::NONE,
+    ));
+    painter.line_segment(
+        [
+            inner_tip,
+            inner_base + perpendicular * inner_half_width * 0.85,
+        ],
+        Stroke::new(
+            0.9 / pixels_per_point,
+            with_alpha(Color32::WHITE, if emphasized { 245 } else { 190 }),
+        ),
+    );
+}
+
+fn clip_gizmo_triangle(matrix: Mat4, rect: egui::Rect, triangle: [[f32; 3]; 3]) -> Vec<egui::Pos2> {
+    let mut polygon = triangle
+        .into_iter()
+        .map(|point| matrix.transform4([point[0], point[1], point[2], 1.0]))
+        .collect::<Vec<_>>();
+    if polygon.iter().flatten().any(|value| !value.is_finite()) {
+        return Vec::new();
+    }
+    for plane in 0..6 {
+        let input = std::mem::take(&mut polygon);
+        let Some(mut previous) = input.last().copied() else {
+            return Vec::new();
+        };
+        let mut previous_distance = clip_plane_distance(previous, plane);
+        if !previous_distance.is_finite() {
+            return Vec::new();
+        }
+        for current in input {
+            let current_distance = clip_plane_distance(current, plane);
+            if !current_distance.is_finite() {
+                return Vec::new();
+            }
+            let previous_inside = previous_distance >= 0.0;
+            let current_inside = current_distance >= 0.0;
+            if previous_inside != current_inside {
+                let amount = previous_distance / (previous_distance - current_distance);
+                polygon.push(interpolate_clip_point(previous, current, amount));
+            }
+            if current_inside {
+                polygon.push(current);
+            }
+            previous = current;
+            previous_distance = current_distance;
+        }
+    }
+    let mut projected = Vec::with_capacity(polygon.len());
+    for point in polygon {
+        let Some(point) = clip_point_to_viewport(rect, point) else {
+            return Vec::new();
+        };
+        projected.push(point);
+    }
+    projected
+}
+
+fn clip_plane_distance(point: [f32; 4], plane: usize) -> f32 {
+    match plane {
+        0 => point[3] + point[0],
+        1 => point[3] - point[0],
+        2 => point[3] + point[1],
+        3 => point[3] - point[1],
+        4 => point[2],
+        5 => point[3] - point[2],
+        _ => f32::NEG_INFINITY,
+    }
+}
+
+fn interpolate_clip_point(first: [f32; 4], second: [f32; 4], amount: f32) -> [f32; 4] {
+    [
+        first[0] + (second[0] - first[0]) * amount,
+        first[1] + (second[1] - first[1]) * amount,
+        first[2] + (second[2] - first[2]) * amount,
+        first[3] + (second[3] - first[3]) * amount,
+    ]
+}
+
+fn clip_point_to_viewport(rect: egui::Rect, point: [f32; 4]) -> Option<egui::Pos2> {
+    if point.iter().any(|value| !value.is_finite()) || point[3] <= 0.0 {
+        return None;
+    }
+    let inverse_w = point[3].recip();
+    let x = point[0] * inverse_w;
+    let y = point[1] * inverse_w;
+    if !x.is_finite() || !y.is_finite() {
+        return None;
+    }
+    Some(egui::pos2(
+        rect.left() + (x + 1.0) * rect.width() * 0.5,
+        rect.top() + (1.0 - y) * rect.height() * 0.5,
+    ))
+}
+
+fn floor_label_is_occluded(
+    scene: &RenderScene,
+    matrix: Mat4,
+    rect: egui::Rect,
+    label_position: egui::Pos2,
+    label_depth: f32,
+) -> bool {
+    scene.objects().iter().any(|object| {
+        let Ok(bounds) = object.world_bounds() else {
+            return false;
+        };
+        let mut screen_min = egui::pos2(f32::INFINITY, f32::INFINITY);
+        let mut screen_max = egui::pos2(f32::NEG_INFINITY, f32::NEG_INFINITY);
+        let mut closest_depth = f32::INFINITY;
+        for x in [bounds.minimum[0], bounds.maximum[0]] {
+            for y in [bounds.minimum[1], bounds.maximum[1]] {
+                for z in [bounds.minimum[2], bounds.maximum[2]] {
+                    if let Some((point, depth)) = project_to_viewport(matrix, rect, [x, y, z]) {
+                        screen_min.x = screen_min.x.min(point.x);
+                        screen_min.y = screen_min.y.min(point.y);
+                        screen_max.x = screen_max.x.max(point.x);
+                        screen_max.y = screen_max.y.max(point.y);
+                        closest_depth = closest_depth.min(depth);
+                    }
+                }
+            }
+        }
+        screen_min.x <= label_position.x
+            && label_position.x <= screen_max.x
+            && screen_min.y <= label_position.y
+            && label_position.y <= screen_max.y
+            && closest_depth.is_finite()
+            && label_depth > closest_depth + 1.0e-4
+    })
 }
 
 fn viewport_pixel_position(position: egui::Pos2, rect: egui::Rect, size: (u32, u32)) -> [f32; 2] {
@@ -7168,6 +8636,32 @@ mod tests {
     }
 
     #[test]
+    fn viewport_orbit_mouse_input_is_independent_of_keyboard_focus() {
+        let context = egui::Context::default();
+        let mut text = String::new();
+        let mut output = context.run_ui(
+            egui::RawInput {
+                screen_rect: Some(egui::Rect::from_min_size(
+                    egui::Pos2::ZERO,
+                    Vec2::new(800.0, 600.0),
+                )),
+                ..Default::default()
+            },
+            |ui| {
+                ui.add(egui::TextEdit::singleline(&mut text))
+                    .request_focus();
+            },
+        );
+        output.textures_delta.clear();
+
+        assert!(context.egui_wants_keyboard_input());
+        assert!(viewport_pointer_interactions_allowed(false, true, false));
+        assert!(!viewport_pointer_interactions_allowed(false, false, false));
+        assert!(viewport_pointer_interactions_allowed(false, false, true));
+        assert!(!viewport_pointer_interactions_allowed(true, true, true));
+    }
+
+    #[test]
     fn reference_faces_and_corners_start_real_gestures_and_no_motion_is_noop() {
         let mut app = Builder3dApp {
             settings_path: repository_test_directory("rb04-handle-click").join("settings.json"),
@@ -7193,7 +8687,7 @@ mod tests {
                 let (position, _) = app.project_handle(point, rect).expect("project");
                 assert!(rect.contains(position));
                 let drag = app
-                    .begin_transform_drag([position.x, position.y])
+                    .begin_transform_drag(rect, position, 1.0)
                     .expect("handle starts gesture");
                 assert!(matches!(drag, ViewportDrag::Transform(_)));
                 app.viewport_drag = Some(drag);
@@ -7438,6 +8932,9 @@ mod tests {
             ..Default::default()
         };
         app.commands
+            .preferences_mut()
+            .set_ribbon_favorites(default_favorites());
+        app.commands
             .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
             .expect("cube");
         let history = app.commands.scene().history_state_id();
@@ -7532,7 +9029,10 @@ mod tests {
         assert_eq!(app.commands.scene().objects().len(), 2);
         assert_eq!(app.commands.scene().objects()[0].object_id(), original);
         assert_ne!(app.commands.scene().objects()[1].object_id(), original);
-        assert_eq!(app.commands.scene().objects()[1].position(), [0.5, 0.5, 0.]);
+        assert_eq!(
+            app.commands.scene().objects()[1].position(),
+            [0.5, 20.5, 0.]
+        );
         let history = app.commands.scene().history_state_id();
         let mut text = String::from("editable name");
         let mut output = ctx.run_ui(egui::RawInput::default(), |ui| {

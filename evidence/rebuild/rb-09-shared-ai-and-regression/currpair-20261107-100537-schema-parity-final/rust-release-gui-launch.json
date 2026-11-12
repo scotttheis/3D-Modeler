@@ -1,0 +1,16 @@
+{
+    "launched_utc":  "2026-11-07T17:09:35.8352932Z",
+    "binary":  "E:\\Builder3D-Rust\\target\\release\\builder3d-app.exe",
+    "sha256":  "0e874b6fb06d9b6cb5e70517ca35856d3a8304975e2a0842cd971f20df2c45ba",
+    "pid":  2640,
+    "has_exited":  true,
+    "main_window_title":  "Builder3D - Untitled",
+    "main_window_handle":  53677768,
+    "responding":  true,
+    "runtime_descriptor":  "C:\\Users\\josiph\\AppData\\Local\\Builder3D\\mcp-runtime.json",
+    "runtime_descriptor_present_after_launch":  true,
+    "shutdown_utc":  "2026-11-07T17:10:37.4870445Z",
+    "runtime_descriptor_removed":  true,
+    "gui_closed_normally":  true,
+    "shutdown_method":  "CloseMainWindow followed by UI Automation Discard on the verified Unsaved changes dialog"
+}

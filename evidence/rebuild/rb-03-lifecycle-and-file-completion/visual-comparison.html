@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RB-03 Python and Rust operation captures</title>
+<style>
+:root{color-scheme:light;--ink:#182230;--muted:#526070;--line:#d3dbe5;--panel:#f7f9fc;--accent:#425bd7}
+*{box-sizing:border-box}body{margin:0;background:#eef2f7;color:var(--ink);font:16px/1.48 "Segoe UI",Arial,sans-serif}
+header{padding:24px clamp(16px,4vw,64px);background:white;border-bottom:1px solid var(--line)}main{max-width:2100px;margin:auto;padding:20px clamp(12px,2vw,32px) 64px}
+h1{margin:0 0 8px;font-size:1.8rem}h2{margin:30px 0 12px;color:var(--accent);border-bottom:1px solid var(--line);padding-bottom:6px}h3{margin:0 0 10px;font-size:1.2rem}
+.lead,.note{color:var(--muted)}.pair{background:white;border:1px solid var(--line);border-radius:12px;padding:14px;margin:14px 0 20px;box-shadow:0 2px 8px #14243a0b}
+.images{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}figure{margin:0;min-width:0}figcaption{font-size:.88rem;color:var(--muted);margin:0 0 6px;overflow-wrap:anywhere}img{display:block;width:100%;height:auto;border:1px solid var(--line);background:#eef2f7}a{color:var(--accent)}.note{margin:10px 0 0}.legend{background:#fff;padding:12px;border:1px solid var(--line);border-radius:8px}
+@media(max-width:900px){.images{grid-template-columns:1fr}}
+</style></head><body><header><h1>RB-03: Python-reference actions beside Rust</h1><p class="lead">Each Python image was captured from the visible reference app during the named operation. Rust captures are beside them for review. Both clients were 1280 × 840 px at 96 DPI / 100% display scale. Click an image to open its original capture.</p><p class="legend"><strong>Review status:</strong> captures were inspected and the observed differences are recorded; owner visual acceptance is still pending. Some pairs use different recent-list contents or accumulated scene state; each note calls that out. These are interaction records, not a pixel-difference score.</p></header><main><h2>Welcome and recents</h2>
+<section class="pair" data-category="Welcome and recents">
+  <h3>Light recent cards</h3>
+  <div class="images">
+    <figure><figcaption>Python reference — Light · <a href="captures/python-recent-welcome-light.png">python-recent-welcome-light.png</a></figcaption><a href="captures/python-recent-welcome-light.png"><img src="captures/python-recent-welcome-light.png" alt="Python reference during Light recent cards" loading="lazy"></a></figure>
+    <figure><figcaption>Rust app — Light · <a href="captures/rust-recent-welcome-light.png">rust-recent-welcome-light.png</a></figcaption><a href="captures/rust-recent-welcome-light.png"><img src="captures/rust-recent-welcome-light.png" alt="Rust app during Light recent cards" loading="lazy"></a></figure>
+  </div>
+  <p class="note">The Python reference uses two-column cards with large wireframe model thumbnails and scrolling; this capture shows only the upper portion. Rust uses four compact columns with a status label and Open button, showing more entries at once. The nine paths/order are not identical in these captures, so treat this as a layout/preview comparison, not a pixel-matched ordering check.</p>
+</section>
+<section class="pair" data-category="Welcome and recents">
+  <h3>Dark recent cards</h3>
+  <div class="images">
+    <figure><figcaption>Python reference — Dark · <a href="captures/python-recent-welcome-dark.png">python-recent-welcome-dark.png</a></figcaption><a href="captures/python-recent-welcome-dark.png"><img src="captures/python-recent-welcome-dark.png" alt="Python reference during Dark recent cards" loading="lazy"></a></figure>
+    <figure><figcaption>Rust app — Dark · <a href="captures/rust-recent-welcome-dark.png">rust-recent-welcome-dark.png</a></figcaption><a href="captures/rust-recent-welcome-dark.png"><img src="captures/rust-recent-welcome-dark.png" alt="Rust app during Dark recent cards" loading="lazy"></a></figure>
+  </div>
+  <p class="note">The same visible difference appears in Dark. The old app retains the wireframe preview style; Rust shows compact shaded preview tiles with file status and Open actions.</p>
+</section>
+<h2>Lifecycle</h2>
+<section class="pair" data-category="Lifecycle">
+  <h3>New on a dirty scene: prompt</h3>
+  <div class="images">
+    <figure><figcaption>Python reference — Light · <a href="captures/python-new-dirty-prompt-light.png">python-new-dirty-prompt-light.png</a></figcaption><a href="captures/python-new-dirty-prompt-light.png"><img src="captures/python-new-dirty-prompt-light.png" alt="Python reference during New on a dirty scene: prompt" loading="lazy"></a></figure>
+    <figure><figcaption>Rust app — Light · <a href="captures/rust-new-dirty-guard-before-cancel-light.png">rust-new-dirty-guard-before-cancel-light.png</a></figcaption><a href="captures/rust-new-dirty-guard-before-cancel-light.png"><img src="captures/rust-new-dirty-guard-before-cancel-light.png" alt="Rust app during New on a dirty scene: prompt" loading="lazy"></a></figure>
+  </div>
+  <p class="note">The old app puts a native Save Changes dialog over the current viewport, with Save, Discard, and Cancel. Rust shows its own centered Unsaved changes dialog. Both keep the current scene visible behind the prompt.</p>
+</section>
+<section class="pair" data-category="Lifecycle">
+  <h3>Cancel New and keep the scene</h3>
+  <div class="images">
+    <figure><figcaption>Python reference — Light · <a href="captures/python-new-cancel-preserved-light.png">python-new-cancel-preserved-light.png</a></figcaption><a href="captures/python-new-cancel-preserved-light.png"><img src="captures/python-new-cancel-preserved-light.png" alt="Python reference during Cancel New and keep the scene" loading="lazy"></a></figure>
+    <figure><figcaption>Rust app — Light · <a href="captures/rust-new-cancel-preserved-light.png">rust-new-cancel-preserved-light.png</a></figcaption><a href="captures/rust-new-cancel-preserved-light.png"><img src="captures/rust-new-cancel-preserved-light.png" alt="Rust app during Cancel New and keep the scene" loading="lazy"></a></figure>
+  </div>
+  <p class="note">The Python capture was taken after Cancel returned to the same dirty scene. Rust has the same action result; object counts and camera framing differ because the two app sessions used different preceding scene edits.</p>
+</section>
+<section class="pair" data-category="Lifecycle">
+  <h3>Discard and complete New</h3>
+  <div class="images">
+    <figure><figcaption>Python reference — Light · <a href="captures/python-new-discard-complete-light.png">python-new-discard-complete-light.png</a></figcaption><a href="captures/python-new-discard-complete-light.png"><img src="captures/python-new-discard-complete-light.png" alt="Python reference during Discard and complete New" loading="lazy"></a></figure>
+    <figure><figcaption>Rust app — Light · <a href="captures/rust-new-discard-complete-light.png">rust-new-discard-complete-light.png</a></figcaption><a href="captures/rust-new-discard-complete-light.png"><img src="captures/rust-new-discard-complete-light.png" alt="Rust app during Discard and complete New" loading="lazy"></a></figure>
+  </div>
+  <p class="note">The old app returns to its empty scene after Discard. Rust also completes New and clears the dirty marker.</p>
+</section>
+<section class="pair" data-category="Lifecycle">
+  <h3>Save As surface</h3>
+  <div class="images">
+    <figure><figcaption>Python reference — Light · <a href="captures/python-save-as-dialog-light.png">python-save-as-dialog-light.png</a></figcaption><a href="captures/python-save-as-dialog-light.png"><img src="captures/python-save-as-dialog-light.png" alt="Python reference during Save As surface" loading="lazy"></a></figure>
+    <figure><figcaption>Rust app — Dark · <a href="captures/rust-save-dialog-dark.png">rust-save-dialog-dark.png</a></figcaption><a href="captures/rust-save-dialog-dark.png"><img src="captures/rust-save-dialog-dark.png" alt="Rust app during Save As surface" loading="lazy"></a></figure>
+  </div>
+  <p class="note">The old app opens the Windows Save Project file picker, with the .3dp filter and standard filename controls. Rust opens an in-app Save Project form with a path field and Browse button. Themes differ in these existing captures.</p>
+</section>
+<section class="pair" data-category="Lifecycle">
+  <h3>Saved project plus OBJ and PLY imports</h3>
+  <div class="images">
+    <figure><figcaption>Python reference — Light · <a href="captures/python-project-plus-obj-ply-light.png">python-project-plus-obj-ply-light.png</a></figcaption><a href="captures/python-project-plus-obj-ply-light.png"><img src="captures/python-project-plus-obj-ply-light.png" alt="Python reference during Saved project plus OBJ and PLY imports" loading="lazy"></a></figure>
+    <figure><figcaption>Rust app — Light · <a href="captures/rust-project-plus-obj-ply-light.png">rust-project-plus-obj-ply-light.png</a></figcaption><a href="captures/rust-project-plus-obj-ply-light.png"><img src="captures/rust-project-plus-obj-ply-light.png" alt="Rust app during Saved project plus OBJ and PLY imports" loading="lazy"></a></figure>
+  </div>
+  <p class="note">Both screens show python-current.3dp with two additive model imports; the selected PLY reports 2 × 3 × 4 mm. This is the closest same-project, same-import-state scene pair.</p>
+</section>
+<h2>Import</h2>
+<section class="pair" data-category="Import">
+  <h3>Add/Open model picker</h3>
+  <div class="images">
+    <figure><figcaption>Python reference — Light · <a href="captures/python-add-open-picker-light.png">python-add-open-picker-light.png</a></figcaption><a href="captures/python-add-open-picker-light.png"><img src="captures/python-add-open-picker-light.png" alt="Python reference during Add/Open model picker" loading="lazy"></a></figure>
+    <figure><figcaption>Rust app — Light · <a href="captures/rust-import-model-dialog-light.png">rust-import-model-dialog-light.png</a></figcaption><a href="captures/rust-import-model-dialog-light.png"><img src="captures/rust-import-model-dialog-light.png" alt="Rust app during Add/Open model picker" loading="lazy"></a></figure>
+  </div>
+  <p class="note">The old app presents the Windows Add 3D Model picker and its supported-format filter. Rust presents an in-app Import Model form with a unit selector and Browse action. This is a direct visible workflow difference.</p>
+</section>
+<h2>Import units</h2>
+<section class="pair" data-category="Import units">
+  <h3>Unitless STL in millimetres</h3>
+  <div class="images">
+    <figure><figcaption>Python reference — Light · <a href="captures/python-unitless-stl-mm-size-light.png">python-unitless-stl-mm-size-light.png</a></figcaption><a href="captures/python-unitless-stl-mm-size-light.png"><img src="captures/python-unitless-stl-mm-size-light.png" alt="Python reference during Unitless STL in millimetres" loading="lazy"></a></figure>
+    <figure><figcaption>Rust app — Light · <a href="captures/rust-import-mm-resize-fields-light.png">rust-import-mm-resize-fields-light.png</a></figcaption><a href="captures/rust-import-mm-resize-fields-light.png"><img src="captures/rust-import-mm-resize-fields-light.png" alt="Rust app during Unitless STL in millimetres" loading="lazy"></a></figure>
+  </div>
+  <p class="note">Both show the unitless box as 2 × 3 × 4 mm after the mm import. The Python app places numeric values in its lower Resize strip; Rust shows them in the right Transform panel.</p>
+</section>
+<section class="pair" data-category="Import units">
+  <h3>Unitless STL in inches</h3>
+  <div class="images">
+    <figure><figcaption>Python reference — Light · <a href="captures/python-unitless-stl-inch-light.png">python-unitless-stl-inch-light.png</a></figcaption><a href="captures/python-unitless-stl-inch-light.png"><img src="captures/python-unitless-stl-inch-light.png" alt="Python reference during Unitless STL in inches" loading="lazy"></a></figure>
+    <figure><figcaption>Rust app — Light · <a href="captures/rust-import-python-box-inch-light.png">rust-import-python-box-inch-light.png</a></figcaption><a href="captures/rust-import-python-box-inch-light.png"><img src="captures/rust-import-python-box-inch-light.png" alt="Rust app during Unitless STL in inches" loading="lazy"></a></figure>
+  </div>
+  <p class="note">The old app displays the converted 50.8 × 76.2 × 101.6 mm dimensions after importing with inches. Rust reports the same dimensions; its capture includes an earlier scene object.</p>
+</section>
+<h2>Import</h2>
+<section class="pair" data-category="Import">
+  <h3>Two-object 3MF result</h3>
+  <div class="images">
+    <figure><figcaption>Python reference — Light · <a href="captures/python-multi-object-3mf-light.png">python-multi-object-3mf-light.png</a></figcaption><a href="captures/python-multi-object-3mf-light.png"><img src="captures/python-multi-object-3mf-light.png" alt="Python reference during Two-object 3MF result" loading="lazy"></a></figure>
+    <figure><figcaption>Rust app — Light · <a href="captures/rust-3mf-framed-light.png">rust-3mf-framed-light.png</a></figcaption><a href="captures/rust-3mf-framed-light.png"><img src="captures/rust-3mf-framed-light.png" alt="Rust app during Two-object 3MF result" loading="lazy"></a></figure>
+  </div>
+  <p class="note">The Python screen shows the two named 3MF parts after import. Rust shows the same two names after framing. Selection and starting-scene state differ, so geometry color and framing should be reviewed directly rather than inferred from these images.</p>
+</section>
+<section class="pair" data-category="Import">
+  <h3>Two-object glTF result</h3>
+  <div class="images">
+    <figure><figcaption>Python reference — Light · <a href="captures/python-multi-object-gltf-light.png">python-multi-object-gltf-light.png</a></figcaption><a href="captures/python-multi-object-gltf-light.png"><img src="captures/python-multi-object-gltf-light.png" alt="Python reference during Two-object glTF result" loading="lazy"></a></figure>
+    <figure><figcaption>Rust app — Light · <a href="captures/rust-gltf-first-part-light.png">rust-gltf-first-part-light.png</a></figcaption><a href="captures/rust-gltf-first-part-light.png"><img src="captures/rust-gltf-first-part-light.png" alt="Rust app during Two-object glTF result" loading="lazy"></a></figure>
+  </div>
+  <p class="note">The Python screen shows the two glTF parts and their imported scene. Rust shows the imported parts with the first part selected; its capture includes two earlier box objects.</p>
+</section>
+<section class="pair" data-category="Import">
+  <h3>Two-object GLB result</h3>
+  <div class="images">
+    <figure><figcaption>Python reference — Light · <a href="captures/python-multi-object-glb-light.png">python-multi-object-glb-light.png</a></figcaption><a href="captures/python-multi-object-glb-light.png"><img src="captures/python-multi-object-glb-light.png" alt="Python reference during Two-object GLB result" loading="lazy"></a></figure>
+    <figure><figcaption>Rust app — Light · <a href="captures/rust-glb-second-part-light.png">rust-glb-second-part-light.png</a></figcaption><a href="captures/rust-glb-second-part-light.png"><img src="captures/rust-glb-second-part-light.png" alt="Rust app during Two-object GLB result" loading="lazy"></a></figure>
+  </div>
+  <p class="note">The Python screen shows the two GLB parts. Rust shows the same two imported parts with the second selected.</p>
+</section>
+<h2>Import cancellation and errors</h2>
+<section class="pair" data-category="Import cancellation and errors">
+  <h3>Cancel the model picker</h3>
+  <div class="images">
+    <figure><figcaption>Python reference — Light · <a href="captures/python-import-picker-cancel-preserved-light.png">python-import-picker-cancel-preserved-light.png</a></figcaption><a href="captures/python-import-picker-cancel-preserved-light.png"><img src="captures/python-import-picker-cancel-preserved-light.png" alt="Python reference during Cancel the model picker" loading="lazy"></a></figure>
+    <figure><figcaption>Rust app — Light · <a href="captures/rust-import-picker-cancel-light.png">rust-import-picker-cancel-light.png</a></figcaption><a href="captures/rust-import-picker-cancel-light.png"><img src="captures/rust-import-picker-cancel-light.png" alt="Rust app during Cancel the model picker" loading="lazy"></a></figure>
+  </div>
+  <p class="note">Both captures return to the scene after cancel. The Python picker is a Windows dialog; Rust uses its own import flow and returns without adding geometry.</p>
+</section>
+<section class="pair" data-category="Import cancellation and errors">
+  <h3>Malformed STL</h3>
+  <div class="images">
+    <figure><figcaption>Python reference — Light · <a href="captures/python-malformed-import-error-light.png">python-malformed-import-error-light.png</a></figcaption><a href="captures/python-malformed-import-error-light.png"><img src="captures/python-malformed-import-error-light.png" alt="Python reference during Malformed STL" loading="lazy"></a></figure>
+    <figure><figcaption>Rust app — Light · <a href="captures/rust-import-malformed-error-light.png">rust-import-malformed-error-light.png</a></figcaption><a href="captures/rust-import-malformed-error-light.png"><img src="captures/rust-import-malformed-error-light.png" alt="Rust app during Malformed STL" loading="lazy"></a></figure>
+  </div>
+  <p class="note">The old app leaves the existing scene and reports “Import contained no objects” in the status line. Rust keeps the scene and presents a detailed in-form parse error. This is an observed error-message and presentation difference.</p>
+</section>
+<h2>Export</h2>
+<section class="pair" data-category="Export">
+  <h3>Export with no selection: completed 3MF</h3>
+  <div class="images">
+    <figure><figcaption>Python reference — Light · <a href="captures/python-export-no-selection-complete-light.png">python-export-no-selection-complete-light.png</a></figcaption><a href="captures/python-export-no-selection-complete-light.png"><img src="captures/python-export-no-selection-complete-light.png" alt="Python reference during Export with no selection: completed 3MF" loading="lazy"></a></figure>
+    <figure><figcaption>Rust app — Light · <a href="captures/rust-export-no-selection-3mf-light.png">rust-export-no-selection-3mf-light.png</a></figcaption><a href="captures/rust-export-no-selection-3mf-light.png"><img src="captures/rust-export-no-selection-3mf-light.png" alt="Rust app during Export with no selection: completed 3MF" loading="lazy"></a></figure>
+  </div>
+  <p class="note">Both complete a no-selection 3MF export. The old app reports completion in its status line after the native Save dialog; Rust reports the written path in its status line.</p>
+</section>
+<section class="pair" data-category="Export">
+  <h3>Export destination picker/form</h3>
+  <div class="images">
+    <figure><figcaption>Python reference — Light · <a href="captures/python-export-save-dialog-light.png">python-export-save-dialog-light.png</a></figcaption><a href="captures/python-export-save-dialog-light.png"><img src="captures/python-export-save-dialog-light.png" alt="Python reference during Export destination picker/form" loading="lazy"></a></figure>
+    <figure><figcaption>Rust app — Light · <a href="captures/rust-export-dialog-light.png">rust-export-dialog-light.png</a></figcaption><a href="captures/rust-export-dialog-light.png"><img src="captures/rust-export-dialog-light.png" alt="Rust app during Export destination picker/form" loading="lazy"></a></figure>
+  </div>
+  <p class="note">The old app uses the Windows Export Mesh dialog with 3MF as the default filter. Rust uses a centered Export form with a path field and Browse button.</p>
+</section>
+<section class="pair" data-category="Export">
+  <h3>Overwrite confirmation</h3>
+  <div class="images">
+    <figure><figcaption>Python reference — Light · <a href="captures/python-export-overwrite-prompt-light.png">python-export-overwrite-prompt-light.png</a></figcaption><a href="captures/python-export-overwrite-prompt-light.png"><img src="captures/python-export-overwrite-prompt-light.png" alt="Python reference during Overwrite confirmation" loading="lazy"></a></figure>
+    <figure><figcaption>Rust app — Light · <a href="captures/rust-export-overwrite-confirmation-light.png">rust-export-overwrite-confirmation-light.png</a></figcaption><a href="captures/rust-export-overwrite-confirmation-light.png"><img src="captures/rust-export-overwrite-confirmation-light.png" alt="Rust app during Overwrite confirmation" loading="lazy"></a></figure>
+  </div>
+  <p class="note">The old app nests a Confirm Save As Yes/No prompt over the Windows picker. Rust shows a Confirm overwrite form with Overwrite and Cancel. Both offer a non-destructive cancel choice.</p>
+</section>
+<section class="pair" data-category="Export">
+  <h3>Overwrite cancelled</h3>
+  <div class="images">
+    <figure><figcaption>Python reference — Light · <a href="captures/python-export-overwrite-cancelled-light.png">python-export-overwrite-cancelled-light.png</a></figcaption><a href="captures/python-export-overwrite-cancelled-light.png"><img src="captures/python-export-overwrite-cancelled-light.png" alt="Python reference during Overwrite cancelled" loading="lazy"></a></figure>
+    <figure><figcaption>Rust app — Light · <a href="captures/rust-export-overwrite-cancelled-light.png">rust-export-overwrite-cancelled-light.png</a></figcaption><a href="captures/rust-export-overwrite-cancelled-light.png"><img src="captures/rust-export-overwrite-cancelled-light.png" alt="Rust app during Overwrite cancelled" loading="lazy"></a></figure>
+  </div>
+  <p class="note">Both captures show the existing destination preserved after cancellation; the Python output hash was unchanged.</p>
+</section>
+<section class="pair" data-category="Export">
+  <h3>One object selected for export</h3>
+  <div class="images">
+    <figure><figcaption>Python reference — Light · <a href="captures/python-export-one-selected-state-light.png">python-export-one-selected-state-light.png</a></figcaption><a href="captures/python-export-one-selected-state-light.png"><img src="captures/python-export-one-selected-state-light.png" alt="Python reference during One object selected for export" loading="lazy"></a></figure>
+    <figure><figcaption>Rust app — Light · <a href="captures/rust-export-one-selected-state-light.png">rust-export-one-selected-state-light.png</a></figcaption><a href="captures/rust-export-one-selected-state-light.png"><img src="captures/rust-export-one-selected-state-light.png" alt="Rust app during One object selected for export" loading="lazy"></a></figure>
+  </div>
+  <p class="note">Both scenes show one selected object before export. The Python capture reflects its reference selection state; Rust captures the selected-visible export route.</p>
+</section>
+<section class="pair" data-category="Export">
+  <h3>Cancel the export picker</h3>
+  <div class="images">
+    <figure><figcaption>Python reference — Light · <a href="captures/python-export-picker-cancel-preserved-light.png">python-export-picker-cancel-preserved-light.png</a></figcaption><a href="captures/python-export-picker-cancel-preserved-light.png"><img src="captures/python-export-picker-cancel-preserved-light.png" alt="Python reference during Cancel the export picker" loading="lazy"></a></figure>
+    <figure><figcaption>Rust app — Light · <a href="captures/rust-export-picker-cancel-preserved-light.png">rust-export-picker-cancel-preserved-light.png</a></figcaption><a href="captures/rust-export-picker-cancel-preserved-light.png"><img src="captures/rust-export-picker-cancel-preserved-light.png" alt="Rust app during Cancel the export picker" loading="lazy"></a></figure>
+  </div>
+  <p class="note">Both return to the same visible scene after cancelling the destination picker, with no output path committed.</p>
+</section>
+<h2>Recent dispatch</h2>
+<section class="pair" data-category="Recent dispatch">
+  <h3>Open a model from Recents</h3>
+  <div class="images">
+    <figure><figcaption>Python reference — Light · <a href="captures/python-recent-model-open-light.png">python-recent-model-open-light.png</a></figcaption><a href="captures/python-recent-model-open-light.png"><img src="captures/python-recent-model-open-light.png" alt="Python reference during Open a model from Recents" loading="lazy"></a></figure>
+    <figure><figcaption>Rust app — Light · <a href="captures/rust-recent-model-open-light.png">rust-recent-model-open-light.png</a></figcaption><a href="captures/rust-recent-model-open-light.png"><img src="captures/rust-recent-model-open-light.png" alt="Rust app during Open a model from Recents" loading="lazy"></a></figure>
+  </div>
+  <p class="note">Each app opens a model recent through the additive model-import path; the Python image shows the resulting imported object.</p>
+</section>
+<h2>Recent failures</h2>
+<section class="pair" data-category="Recent failures">
+  <h3>Missing recent entry</h3>
+  <div class="images">
+    <figure><figcaption>Python reference — Light · <a href="captures/python-missing-recent-warning-light.png">python-missing-recent-warning-light.png</a></figcaption><a href="captures/python-missing-recent-warning-light.png"><img src="captures/python-missing-recent-warning-light.png" alt="Python reference during Missing recent entry" loading="lazy"></a></figure>
+    <figure><figcaption>Rust app — Light · <a href="captures/rust-missing-recent-removed-light.png">rust-missing-recent-removed-light.png</a></figcaption><a href="captures/rust-missing-recent-removed-light.png"><img src="captures/rust-missing-recent-removed-light.png" alt="Rust app during Missing recent entry" loading="lazy"></a></figure>
+  </div>
+  <p class="note">The old app shows a File Not Found dialog with the path, then removes the row after dismissal. Rust renders a Missing row with a Remove action and does not use a modal warning.</p>
+</section>
+<section class="pair" data-category="Recent failures">
+  <h3>Corrupt .3dp recent</h3>
+  <div class="images">
+    <figure><figcaption>Python reference — Light · <a href="captures/python-corrupt-recent-error-light.png">python-corrupt-recent-error-light.png</a></figcaption><a href="captures/python-corrupt-recent-error-light.png"><img src="captures/python-corrupt-recent-error-light.png" alt="Python reference during Corrupt .3dp recent" loading="lazy"></a></figure>
+    <figure><figcaption>Rust app — Light · <a href="captures/rust-corrupt-recent-preserved-light.png">rust-corrupt-recent-preserved-light.png</a></figcaption><a href="captures/rust-corrupt-recent-preserved-light.png"><img src="captures/rust-corrupt-recent-preserved-light.png" alt="Rust app during Corrupt .3dp recent" loading="lazy"></a></figure>
+  </div>
+  <p class="note">The Python app shows an Open Error dialog, then keeps the current scene. Rust leaves the corrupt entry visible and puts the invalid-project reason in the welcome status line; the scene remains unchanged.</p>
+</section>
+<section class="pair" data-category="Recent failures">
+  <h3>WRL recent import</h3>
+  <div class="images">
+    <figure><figcaption>Python reference — Light · <a href="captures/python-wrl-recent-error-light.png">python-wrl-recent-error-light.png</a></figcaption><a href="captures/python-wrl-recent-error-light.png"><img src="captures/python-wrl-recent-error-light.png" alt="Python reference during WRL recent import" loading="lazy"></a></figure>
+    <figure><figcaption>Rust app — Light · <a href="captures/rust-wrl-recent-error-preserved-light.png">rust-wrl-recent-error-preserved-light.png</a></figcaption><a href="captures/rust-wrl-recent-error-preserved-light.png"><img src="captures/rust-wrl-recent-error-preserved-light.png" alt="Rust app during WRL recent import" loading="lazy"></a></figure>
+  </div>
+  <p class="note">The old app shows an Import Error dialog because WRL is not an import format, then reports the reason in the status line. Rust keeps the entry visible and reports the unsupported format in its status line.</p>
+</section>
+<h2>Lifecycle</h2>
+<section class="pair" data-category="Lifecycle">
+  <h3>Exit a dirty scene</h3>
+  <div class="images">
+    <figure><figcaption>Python reference — Dark · <a href="captures/python-exit-dirty-prompt-dark.png">python-exit-dirty-prompt-dark.png</a></figcaption><a href="captures/python-exit-dirty-prompt-dark.png"><img src="captures/python-exit-dirty-prompt-dark.png" alt="Python reference during Exit a dirty scene" loading="lazy"></a></figure>
+    <figure><figcaption>Rust app — Dark · <a href="captures/rust-close-guard-fixed-dark.png">rust-close-guard-fixed-dark.png</a></figcaption><a href="captures/rust-close-guard-fixed-dark.png"><img src="captures/rust-close-guard-fixed-dark.png" alt="Rust app during Exit a dirty scene" loading="lazy"></a></figure>
+  </div>
+  <p class="note">Both show a Save/Discard/Cancel guard before exit. The Python app uses the native Save Changes dialog; Rust uses its custom Unsaved changes panel.</p>
+</section>
+</main></body></html>

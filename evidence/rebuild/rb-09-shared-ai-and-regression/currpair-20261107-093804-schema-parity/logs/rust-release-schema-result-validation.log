@@ -1,0 +1,25 @@
+   Compiling bindgen v0.72.1
+   Compiling qhull-sys v0.4.1 (https://github.com/LucaCiucci/qhull-rs.git?rev=62e810ccf93b458470f03cae6ef4df26023d2260#62e810cc)
+   Compiling qhull v0.4.1 (https://github.com/LucaCiucci/qhull-rs.git?rev=62e810ccf93b458470f03cae6ef4df26023d2260#62e810cc)
+   Compiling builder3d-core v0.1.0 (E:\Builder3D-Rust\crates\builder3d-core)
+   Compiling builder3d-mcp v0.1.0 (E:\Builder3D-Rust\crates\builder3d-mcp)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 16.47s
+     Running unittests src\lib.rs (target\debug\deps\builder3d_mcp-ab9bddde4abe851a.exe)
+
+running 1 test
+test r4::schema::tests::captured_release_success_results_match_reference_output_schemas_when_supplied ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 25 filtered out; finished in 0.10s
+
+     Running unittests src\bin\r0b_mcp.rs (target\debug\deps\r0b_mcp-707a864a2653189a.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src\bin\r4_mcp.rs (target\debug\deps\r4_mcp-c7c5a373cbc1d69a.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

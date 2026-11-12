@@ -1,0 +1,105 @@
+[
+  {
+    "name": "fmt",
+    "exit_code": 0,
+    "log": "logs/clipboard-complete-fmt.txt",
+    "adopted_current_source": true
+  },
+  {
+    "name": "tests",
+    "exit_code": 0,
+    "log": "logs/clipboard-complete-tests.txt",
+    "adopted_current_source": true
+  },
+  {
+    "name": "clippy",
+    "exit_code": 0,
+    "log": "logs/clipboard-complete-clippy.txt",
+    "adopted_current_source": true
+  },
+  {
+    "name": "check",
+    "command": [
+      "cargo",
+      "check",
+      "--workspace",
+      "--locked"
+    ],
+    "exit_code": 0,
+    "seconds": 0.828,
+    "log": "logs/final-native-check.txt"
+  },
+  {
+    "name": "deny",
+    "command": [
+      "cargo",
+      "deny",
+      "check"
+    ],
+    "exit_code": 0,
+    "seconds": 2.406,
+    "log": "logs/final-native-deny.txt"
+  },
+  {
+    "name": "metadata",
+    "command": [
+      "cargo",
+      "metadata",
+      "--locked",
+      "--format-version",
+      "1",
+      "--no-deps"
+    ],
+    "exit_code": 0,
+    "seconds": 0.141,
+    "log": "logs/final-native-metadata.txt"
+  },
+  {
+    "name": "smoke",
+    "command": [
+      "E:\\Builder3D-Rust\\target\\debug\\builder3d-app.exe",
+      "--smoke"
+    ],
+    "exit_code": 0,
+    "seconds": 0.14,
+    "log": "logs/final-native-smoke.txt"
+  },
+  {
+    "name": "release",
+    "command": [
+      "cargo",
+      "build",
+      "--release",
+      "--locked",
+      "-p",
+      "builder3d-app",
+      "--bin",
+      "builder3d-app"
+    ],
+    "exit_code": 0,
+    "seconds": 167.61,
+    "log": "logs/final-native-release.txt"
+  },
+  {
+    "name": "release-smoke",
+    "command": [
+      "E:\\Builder3D-Rust\\target\\rb04-final-native-build-20261031-225520\\release-builder3d-app.exe",
+      "--smoke"
+    ],
+    "exit_code": 0,
+    "seconds": 0.937,
+    "log": "logs/final-native-release-smoke.txt"
+  },
+  {
+    "name": "bloat-workspace",
+    "command": [
+      "cargo",
+      "bloat",
+      "--release",
+      "--workspace"
+    ],
+    "exit_code": 0,
+    "seconds": 295.578,
+    "log": "logs/final-native-bloat-workspace.txt"
+  }
+]

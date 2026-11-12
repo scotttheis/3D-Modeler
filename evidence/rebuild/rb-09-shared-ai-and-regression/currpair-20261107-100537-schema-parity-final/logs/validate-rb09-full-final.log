@@ -1,0 +1,9 @@
+TOML valid: docs\component-catalog.toml, evidence\rebuild\parity-matrix.toml
+component IDs unique: 37; RB-09 evidence references exist
+historical paired live-gate build identities match capture metadata; 50 accepted PNG hashes/dimensions and 2 clean scene pairs verified
+historical Rust source manifest verified: 96 files; current source manifest verified: 96 files
+current schema-parity Release identity verified: app 0e874b6fb06d9b6cb5e70517ca35856d3a8304975e2a0842cd971f20df2c45ba; gateway 636171b58800915de87fc8ad26814498279919ea80341076a344c208757da370
+identity-only official-client probe verified: 60 tools; get_status app_state=ready; 1296x879 interactive screenshot
+current Rust Release run verified: 9 historical capture records; current-reference schema parity pass for 7/52/59/60 tools; 25 successful live result envelopes validated
+JSON manifests, rebuild logs, official-client results, and accepted/rejected NDJSON journals valid
+exit_code=0

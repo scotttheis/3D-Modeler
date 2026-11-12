@@ -6,6 +6,7 @@ mod cpu;
 mod error;
 mod floor;
 mod gizmo;
+mod lighting;
 mod math;
 mod picking;
 mod renderer;
@@ -28,16 +29,18 @@ pub use cpu::{
 };
 pub use error::ViewportError;
 pub use floor::{
-    ContactCue, ContactCueCache, DEFAULT_FLOOR_SIZE, FLOOR_GRID_TARGET_PIXELS,
-    FLOOR_MAJOR_GRID_SPACING, FloorGeometry, FloorLine, FloorSurface, MAX_CONTACT_CUES,
-    MAX_FLOOR_GRID_LINES, build_floor,
+    ContactCue, ContactCueCache, DEFAULT_FLOOR_SIZE, FLOOR_CHECKER_CELL_SIZE,
+    FLOOR_GRID_TARGET_PIXELS, FLOOR_MAJOR_GRID_SPACING, FLOOR_SURFACE_SUBDIVISIONS, FloorGeometry,
+    FloorLine, FloorScaleLabel, FloorSurface, MAX_CONTACT_CUES, MAX_FLOOR_GRID_LINES, build_floor,
+    build_floor_scale_labels,
 };
 pub use gizmo::{
     GIZMO_TARGET_PIXELS, GizmoAxis, GizmoGeometry, GizmoHit, GizmoLine, GizmoMode, GizmoTriangle,
-    MOVE_ARROW_HALF_LENGTH_FACTOR, MOVE_ARROW_OFFSET_FACTOR, ROTATE_RING_GAP_FACTOR,
-    ROTATE_RING_SEGMENTS, X_AXIS_COLOR, Y_AXIS_COLOR, Z_AXIS_COLOR, build_gizmo,
-    build_gizmo_with_bounds, hit_test, hit_test_with_bounds,
+    MOVE_ARROW_HALF_LENGTH_FACTOR, MOVE_ARROW_OFFSET_FACTOR, MOVE_GIZMO_SCALE,
+    ROTATE_RING_GAP_FACTOR, ROTATE_RING_SEGMENTS, X_AXIS_COLOR, Y_AXIS_COLOR, Z_AXIS_COLOR,
+    build_gizmo, build_gizmo_with_bounds, hit_test, hit_test_with_bounds,
 };
+pub use lighting::ViewportLighting;
 pub use math::{
     Aabb, Mat4, Ray, Vec3, add, cross, dot, normalize, perspective, ray_triangle, scale, subtract,
 };

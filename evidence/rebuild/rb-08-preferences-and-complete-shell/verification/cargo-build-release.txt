@@ -1,0 +1,22 @@
+   Compiling windows-core v0.62.2
+   Compiling accesskit_consumer v0.39.2
+   Compiling windows-collections v0.3.2
+   Compiling windows-future v0.3.2
+   Compiling windows-numerics v0.3.1
+   Compiling windows v0.62.2
+   Compiling gpu-allocator v0.28.0
+   Compiling accesskit_windows v0.35.2
+   Compiling sysinfo v0.40.0
+   Compiling builder3d-core v0.1.0 (E:\Builder3D-Rust\crates\builder3d-core)
+   Compiling accesskit_winit v0.34.2
+   Compiling egui-winit v0.37.0
+   Compiling wgpu-hal v30.0.1
+   Compiling wgpu-core-deps-windows-linux-android v30.0.1
+   Compiling wgpu-core v30.0.1
+   Compiling wgpu v30.0.1
+   Compiling egui-wgpu v0.37.0
+   Compiling builder3d-platform v0.1.0 (E:\Builder3D-Rust\crates\builder3d-platform)
+   Compiling eframe v0.37.0
+   Compiling builder3d-viewport v0.1.0 (E:\Builder3D-Rust\crates\builder3d-viewport)
+   Compiling builder3d-app v0.1.0 (E:\Builder3D-Rust\crates\builder3d-app)
+    Finished `release` profile [optimized] target(s) in 3m 42s

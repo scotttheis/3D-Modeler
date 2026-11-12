@@ -114,3 +114,55 @@ verification reported only the two current-run JSON files as differing. The
 verified read-only R1 recovery point and incomplete `143410` attempt were not
 modified. This receipt and the final plan/work-log snapshot notes were appended
 after the copy; the snapshot preserves the verified pre-receipt worktree state.
+## RB-09 schema-parity pre-edit recovery snapshot (2026-11-07)
+
+Status: additive recovery copy created and verified before the first Rust source
+edits. Existing G: snapshots, including G:\B3D_R09W_20261106 and older
+snapshots, were not overwritten or changed.
+
+- Source: E:\Builder3D-Rust; destination:
+  G:\Builder3D-Rust_snapshot_20261107-154700_RB-09-schema-parity-pre-edit.
+- Copy command:
+  robocopy E:\Builder3D-Rust G:\Builder3D-Rust_snapshot_20261107-154700_RB-09-schema-parity-pre-edit /E /COPY:DAT /DCOPY:DAT /XJ /XD E:\Builder3D-Rust\target E:\Builder3D-Rust\.cache E:\Builder3D-Rust\logs /R:1 /W:1 /NP /NFL /NDL.
+- Excluded only the repository-root target, .cache, and logs directories;
+  /XJ prevented junction traversal. Git metadata and nested RB-09 evidence logs
+  were included.
+- Independent verification before source edits reported 3,743 files /
+  755,179,156 bytes on both sides; zero missing, extra, size/SHA-256-different,
+  or reparse entries.
+- All 17 critical SHA-256 comparisons matched at creation. Their verified
+  snapshot-side values are in
+  pre-edit-snapshot-critical-hashes.json. The 96-file Rust source manifest
+  regenerated from the pre-edit snapshot also matches the historical
+  96-file source manifest, SHA-256
+  9846a4a6dee484186283e169a9b7cdbbf74007bdca772efa5981f438ce78b457.
+- The independent verifier was
+  evidence/rebuild/rb-09-shared-ai-and-regression/verify_rb09_snapshot.ps1.
+## RB-09 schema-parity final additive recovery snapshot (2026-11-07)
+
+- Status: new additive G: recovery copy; no prior snapshot was overwritten,
+  moved, or deleted.
+- Source: E:\Builder3D-Rust. Destination: G:\B3D_R09S_20261107 (20-character
+  destination path). G: free space before copy: 473,061,937,152 bytes.
+- Robocopy command: robocopy E:\Builder3D-Rust G:\B3D_R09S_20261107 /E
+  /COPY:DAT /DCOPY:DAT /XJ /XD E:\Builder3D-Rust\target
+  E:\Builder3D-Rust\.cache E:\Builder3D-Rust\logs /R:1 /W:1 /NP /NFL /NDL.
+  Exit code: 1 (files copied; no failures).
+- Excluded only repository-root target, .cache, and logs. /XJ prevented
+  junction traversal; Git metadata and nested evidence logs were included.
+- First independent verification passed: 4,078 source and snapshot files /
+  766,744,485 bytes each; missing/extra/different paths 0/0/0; source/snapshot
+  reparse entries 0/0.
+- Twenty-three critical SHA-256 comparisons matched. Their paths, byte counts,
+  and hashes are in final-snapshot-critical-hashes.json.
+- After synchronizing those summary/evidence updates, the source was copied to
+  this same destination again; Robocopy exited 1 (files copied, no failures).
+  Final independent full-tree verification passed with 4,079 files /
+  766,761,893 bytes on both sides, zero missing/extra/different paths, and zero
+  source or snapshot reparse entries. The verifier compares SHA-256 for every
+  included file and found no differences. Its output is in
+  target/rb09-final-snapshot-verification-final.log.
+- Verifier: evidence/rebuild/rb-09-shared-ai-and-regression/verify_rb09_snapshot.ps1.
+  This receipt and the accompanying summary updates were written after the
+  final verification; the G: copy preserves the exact tree measured at that
+  check.

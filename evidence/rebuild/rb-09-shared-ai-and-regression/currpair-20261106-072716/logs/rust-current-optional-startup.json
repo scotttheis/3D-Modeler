@@ -1,0 +1,18 @@
+﻿{
+    "launch_time_utc":  "2026-11-06T15:32:45.1339518Z",
+    "executable":  "E:\\Builder3D-Rust\\target\\release\\builder3d-app.exe",
+    "executable_sha256":  "0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a",
+    "pid":  5400,
+    "process_alive":  true,
+    "responding":  true,
+    "window_title":  "Builder3D - Untitled",
+    "runtime_descriptor_path":  "E:\\Builder3D-Rust\\evidence\\rebuild\\rb-09-shared-ai-and-regression\\currpair-20261106-072716\\fixtures\\approved\\RB09-runtime-parent-blocker.txt\\blocked-runtime.json",
+    "runtime_parent_is_blocker_file":  true,
+    "runtime_descriptor_present":  false,
+    "owned_listener_count":  0,
+    "local_app_data":  "E:\\Builder3D-Rust\\target\\rb09-currpair-20261106-072716\\optional-runtime-failure-local",
+    "blocker_path":  "E:\\Builder3D-Rust\\evidence\\rebuild\\rb-09-shared-ai-and-regression\\currpair-20261106-072716\\fixtures\\approved\\RB09-runtime-parent-blocker.txt",
+    "blocker_sha256":  "C19715ED3F027242D1D6208C6B85C894C3BA06A57CF81F61B5A32060A3F5BAC4",
+    "screenshot":  "E:\\Builder3D-Rust\\evidence\\rebuild\\rb-09-shared-ai-and-regression\\currpair-20261106-072716\\captures\\rust-current-optional-startup-unavailable.png",
+    "screenshot_sha256":  "628E209251B6CC6D39015FA72FCDB98CC3BC5093DF94555490F4A6DF00E258B7"
+}

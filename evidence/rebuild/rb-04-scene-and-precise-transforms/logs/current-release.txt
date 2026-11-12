@@ -1,0 +1,7 @@
+COMMAND: cargo build --release --locked -p builder3d-app --bin builder3d-app
+   Compiling qhull-sys v0.4.1 (https://github.com/LucaCiucci/qhull-rs.git?rev=62e810ccf93b458470f03cae6ef4df26023d2260#62e810cc)
+   Compiling qhull v0.4.1 (https://github.com/LucaCiucci/qhull-rs.git?rev=62e810ccf93b458470f03cae6ef4df26023d2260#62e810cc)
+   Compiling builder3d-core v0.1.0 (E:\Builder3D-Rust\crates\builder3d-core)
+   Compiling builder3d-viewport v0.1.0 (E:\Builder3D-Rust\crates\builder3d-viewport)
+   Compiling builder3d-app v0.1.0 (E:\Builder3D-Rust\crates\builder3d-app)
+    Finished `release` profile [optimized] target(s) in 2m 45s

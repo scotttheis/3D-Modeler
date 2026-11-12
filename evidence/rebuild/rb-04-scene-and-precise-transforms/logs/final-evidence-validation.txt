@@ -1,0 +1,6 @@
+Assets: 108 reference and packaged SHA-256 pairs unchanged
+Component catalog: 32 unique IDs and all Rust paths resolve
+RB-04 Python/Rust/evidence paths and file::symbol references resolve
+RB-03 historical validator false positive resolved: dirty-marker file::symbol exists
+Final post-native tests pass/fail/ignored: [239, 0, 0]
+Capture SHA-256 matches: 110

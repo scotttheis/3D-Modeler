@@ -30,46 +30,35 @@ to Builder3D's cross-platform, contract-preserving rewrite.
 
 ## Sources of truth
 
-Owner direction on 2026-10-30 replaces the R8 execution/acceptance process with
-[`docs/product-rebuild-plan.md`](docs/product-rebuild-plan.md). Read it before
-product work. It owns the current RB slice order, original-design/asset parity,
-interactive and visual gates, and recovery evidence. The R8 brief is retired;
-historical R8 completion claims are withdrawn. Keep the original contracts
-below, reuse proven Rust components, and keep `L:\Builder3D` read-only. No
-commits or pull requests are authorized. Do not call a UI complete from module
-coverage, smoke output or unreviewed captures; required owner approval must
-actually occur for acceptance and promotion.
-RB-02 is complete. The owner accepted its current Light/Dark visual baseline
-on 2026-10-31 and said fine-tuning can happen later. RB-03 through RB-07
-implementation and engineering evidence are recorded; visual review and owner
-acceptance remain pending where their checkpoints say so. RB-07 is complete,
-with its report, verification, checkpoint and snapshot receipt under
-`evidence/rebuild/rb-07-appearance-jobs-and-print/`. RB-08 implementation and
-automated checks are recorded, but its paired Rust native matrix and completion
-snapshot are still pending; do not mark RB-08 complete. The owner has now
-authorized continuing to RB-09. Read
-[`docs/rb-09-shared-ai-and-regression-handoff.md`](docs/rb-09-shared-ai-and-regression-handoff.md)
-and finish that slice, then stop before RB-10. The owner's 2026-11-02 feedback
-is that the interface and floor are still missing. Record those as open product
-gaps; RB-09 does not provide visual approval or overall acceptance. Preserve
-all earlier pending statuses. RB-08's original “stop before RB-09” boundary is
-superseded by this later owner direction, not by a claim that RB-08 is closed.
-As of 2026-11-06, a current Rust Release live GUI/MCP workflow and optional-
-MCP failure check are recorded under
-`evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261106-072716/`.
-The Python product was not launched for that recheck. The current Rust tool
-names/order match the saved Python catalogs, but schema differences remain an
-open RB-09 contract gap with no owner-approved deviation. Keep RB-09 acceptance
-open, use `E:\Builder3D-Rust` as the only active Rust tree, use `G:\` for
-additive recovery snapshots, and stop before RB-10. USB copies are occasional
-one-offs only.
-The RB-01 and RB-02 capture records and acceptance are in
-[`evidence/rebuild/rb-01-visual-foundations/capture-board.md`](evidence/rebuild/rb-01-visual-foundations/capture-board.md)
-and
-[`evidence/rebuild/rb-02-first-working-application/checkpoint.md`](evidence/rebuild/rb-02-first-working-application/checkpoint.md).
-For comparison captures, open one target app, capture it, close it, then open
-the other. A background MCP gateway without a target UI window is not itself
-a blocker.
+[`docs/product-rebuild-plan.md`](docs/product-rebuild-plan.md) (v2, adopted
+2026-11-12) is the delivery plan: operating model, model routing, gates, work
+order and the open owner decisions. [`docs/STATUS.md`](docs/STATUS.md) is the
+only place current status is written. Do not restate status here, in the plan,
+or in a handoff document.
+
+A session reads this file, `docs/STATUS.md`, its task card and the files the
+card names. `WORK_LOG.md`, the v1 plan under `docs/archive/`, and the
+`docs/rb-*-handoff.md` files are history; open them only when a task card
+says to.
+
+Standing boundaries:
+
+- Keep `L:\Builder3D` read-only. Keep the original contracts below.
+- Local commits are authorized (owner decision D1, 2026-11-12): work on the
+  local branch `rebuild/work`, one commit per verified task. No push, no pull
+  request, no history rewriting, no commits to `main`. Plus one `G:\` tree
+  snapshot per completed slice (plan section 3.6).
+- Do not bloat `E:`. Build only into `target/debug`, `target/review` or
+  `target/release`; no ad hoc `--target-dir` folders and no scratch files in
+  `target/`.
+- Do not call a UI complete from module coverage, smoke output or unreviewed
+  captures. Owner approval must actually occur; it is never inferred.
+- For anything visible, produce review captures with the harness described in
+  the plan (section 3.5) instead of photographing the desktop or adding a
+  temporary startup hook. For reference comparisons, open one target app,
+  capture it, close it, then open the other.
+- Run the gate tier the plan assigns to the task, and report a gate that could
+  not run as not run.
 
 | File | Purpose |
 |---|---|
@@ -175,7 +164,8 @@ its recovery snapshot exists, and its checkpoint is written.
   name such as `G:\Builder3D-Rust_snapshot_20261029-143000_R0b-baseline`.
   Never overwrite an existing snapshot and never modify the existing
   `Builder3D_snapshot_*` backup folders.
-- After every completed subtask, create another timestamped snapshot on `G:\`
+- After every completed slice (not every patch; see plan section 3.6), create
+  another timestamped snapshot on `G:\`
   before starting the next subtask or compacting context. Include source,
   manifests, tests, documentation, and the Git metadata needed for recovery;
   exclude `target\`, caches, logs, and reproducible generated output unless

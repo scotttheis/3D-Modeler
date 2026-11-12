@@ -2,3 +2,14 @@
 **/*.rs.bk
 *.pdb
 *.ilk
+
+# Binary captures and mesh fixtures live in the G:\ slice snapshots, not in Git
+# (owner decision D1, 2026-11-12). Files already tracked stay tracked.
+/evidence/**/*.png
+/evidence/**/*.bmp
+/evidence/**/*.ppm
+/evidence/**/*.bin
+/evidence/**/*.ply
+/evidence/**/*.stl
+/logs/
+/erros/

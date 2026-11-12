@@ -1,0 +1,2 @@
+COMMAND: E:\Builder3D-Rust\target\rb04-verified-build-20261031-212336\builder3d-app.exe --smoke
+Builder3D shell smoke: objects=2 selected=1 tabs=5

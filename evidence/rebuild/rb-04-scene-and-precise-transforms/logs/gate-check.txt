@@ -1,0 +1,12 @@
+COMMAND: cargo check --workspace --locked
+    Checking builder3d-app v0.1.0 (E:\Builder3D-Rust\crates\builder3d-app)
+warning: use of deprecated associated function `eframe::egui::Id::new`: Use `Id::unique` (for a globally unique id) or `IdSalt::new` (for a locally unique salt) instead
+    --> crates\builder3d-app\src\shell.rs:2708:40
+     |
+2708 |             egui::Modal::new(egui::Id::new("placement-dialog")).show(ctx, |ui| {
+     |                                        ^^^
+     |
+     = note: `#[warn(deprecated)]` on by default
+
+warning: `builder3d-app` (lib) generated 1 warning
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.29s
