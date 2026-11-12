@@ -75,10 +75,11 @@ D5 `emboss_text` metadata.
   the owner's order (OF-1 floor, OF-1 resize + OF-3, OF-4, OF-6, OF-9, OF-2,
   OF-7/8; OF-5 waits for shots), one commit each, **none owner-reviewed
   yet**. Done so far: OF-1 floor numbers (flat on the floor plane, depth-
-  tested). Shots still owed by the owner: X-ray with two objects,
+  tested); OF-1 resize view + OF-3 (3D Builder box, dots, chevrons, size
+  label, drag band). Next: OF-4 top-bar hover. Shots still owed by the owner: X-ray with two objects,
   Paint/Color/Material, Merge.
 - Review harness: `BUILDER3D_REVIEW_CAMERA=yaw,pitch,distance` poses the
-  camera after auto-framing (used for the far/top floor-label captures).
+  camera after auto-framing; state `resize-drag` holds the +X handle mid-drag.
 
 ## Last recovery point
 

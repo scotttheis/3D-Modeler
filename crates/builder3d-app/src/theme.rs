@@ -267,24 +267,6 @@ pub fn configure_fonts(ctx: &Context) {
             family.insert(0, name);
         }
     }
-    // The emphasis family is always registered (egui rejects unknown
-    // families); it falls back to the proportional stack when the platform
-    // has no semibold UI face.
-    let mut emphasis = definitions
-        .families
-        .get(&FontFamily::Proportional)
-        .cloned()
-        .unwrap_or_default();
-    if let Some(bytes) = read_font(platform_emphasis_font_candidates()) {
-        let name = String::from("builder3d-platform-ui-semibold");
-        definitions
-            .font_data
-            .insert(name.clone(), Arc::new(FontData::from_owned(bytes)));
-        emphasis.insert(0, name);
-    }
-    definitions
-        .families
-        .insert(FontFamily::Name(EMPHASIS_FONT_FAMILY.into()), emphasis);
     ctx.set_fonts(definitions);
 
     for theme in [eframe::egui::Theme::Light, eframe::egui::Theme::Dark] {
@@ -307,33 +289,12 @@ pub fn configure_fonts(ctx: &Context) {
     }
 }
 
-const EMPHASIS_FONT_FAMILY: &str = "builder3d-emphasis";
-
-/// Semibold UI face for small, high-value labels such as viewport dimension
-/// tags. Falls back to the regular UI face where no semibold face exists.
-#[must_use]
-pub fn emphasis_font(size: f32) -> FontId {
-    FontId::new(size, FontFamily::Name(EMPHASIS_FONT_FAMILY.into()))
-}
-
 fn read_font(candidates: Vec<PathBuf>) -> Option<Vec<u8>> {
     candidates
         .into_iter()
         .find(|path| path.is_file())
         .and_then(|path| fs::read(path).ok())
         .filter(|bytes| !bytes.is_empty())
-}
-
-#[cfg(target_os = "windows")]
-fn platform_emphasis_font_candidates() -> Vec<PathBuf> {
-    std::env::var_os("WINDIR")
-        .map(|windows_dir| vec![PathBuf::from(windows_dir).join("Fonts").join("seguisb.ttf")])
-        .unwrap_or_default()
-}
-
-#[cfg(not(target_os = "windows"))]
-fn platform_emphasis_font_candidates() -> Vec<PathBuf> {
-    Vec::new()
 }
 
 #[cfg(target_os = "windows")]

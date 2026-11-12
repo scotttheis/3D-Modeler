@@ -23,10 +23,10 @@ use builder3d_core::{
     build_parametric_torus, crease_polish, elastic_grab, normalize_face_density, smooth_brush,
 };
 use builder3d_viewport::{
-    Aabb, Camera, GIZMO_TARGET_PIXELS, GizmoAxis, GizmoLine, GizmoMode, InteractionState,
-    MOVE_GIZMO_SCALE, Mat4, ROTATE_RING_SEGMENTS, RenderScene, RendererConfig, SnapViewContext,
-    ViewportRenderOptions, ViewportRenderer, ViewportTheme, add, build_gizmo_with_bounds, dot,
-    hit_test_with_bounds, pick_scene, scale, subtract,
+    Aabb, Camera, GizmoAxis, GizmoLine, GizmoMode, InteractionState, MOVE_GIZMO_SCALE, Mat4,
+    ROTATE_RING_SEGMENTS, RenderScene, RendererConfig, SnapViewContext, ViewportRenderOptions,
+    ViewportRenderer, ViewportTheme, build_gizmo_with_bounds, dot, hit_test_with_bounds,
+    pick_scene, subtract,
 };
 use eframe::egui::{
     self, Align, Align2, Color32, FontId, Key, Layout, RichText, Sense, Stroke, Ui, Vec2,
@@ -75,11 +75,6 @@ const MOVE_ARROW_LENGTH_PIXELS: f32 =
     (MOVE_ARROW_SHAFT_LENGTH_PIXELS + MOVE_ARROW_HEAD_LENGTH_PIXELS) * MOVE_GIZMO_SCALE;
 const MOVE_ARROW_PICK_RADIUS_PIXELS: f32 =
     MOVE_ARROW_HEAD_HALF_WIDTH_PIXELS * MOVE_GIZMO_SCALE + 5.0;
-const RESIZE_ARROW_SHAFT_LENGTH_PIXELS: f32 =
-    MOVE_ARROW_LENGTH_PIXELS * 1.5 - MOVE_ARROW_HEAD_LENGTH_PIXELS * MOVE_GIZMO_SCALE;
-const RESIZE_ARROW_LENGTH_PIXELS: f32 = MOVE_ARROW_LENGTH_PIXELS * 1.5;
-const RESIZE_ARROW_HIT_RADIUS_PIXELS: f32 = 26.0;
-const RESIZE_CORNER_HIT_RADIUS_PIXELS: f32 = 10.0;
 
 #[derive(Clone, Debug)]
 enum ViewportDrag {
@@ -512,9 +507,10 @@ impl Builder3dApp {
         }
         let primitives: &[builder3d_core::PrimitiveKind] = match review.state() {
             ReviewState::Welcome | ReviewState::Empty => &[],
-            ReviewState::Move | ReviewState::Rotate | ReviewState::Resize => {
-                &[builder3d_core::PrimitiveKind::Cube]
-            }
+            ReviewState::Move
+            | ReviewState::Rotate
+            | ReviewState::Resize
+            | ReviewState::ResizeDrag => &[builder3d_core::PrimitiveKind::Cube],
             ReviewState::Multi => &[
                 builder3d_core::PrimitiveKind::Cube,
                 builder3d_core::PrimitiveKind::Cylinder,
@@ -537,7 +533,7 @@ impl Builder3dApp {
         }
         self.transform_panel_mode = match review.state() {
             ReviewState::Rotate => TransformPanelMode::Rotate,
-            ReviewState::Resize => TransformPanelMode::Resize,
+            ReviewState::Resize | ReviewState::ResizeDrag => TransformPanelMode::Resize,
             _ => TransformPanelMode::Move,
         };
         if review.state() != ReviewState::Welcome {
@@ -3865,6 +3861,7 @@ impl Builder3dApp {
                 // committed scene revision so floor cues use matching bounds.
                 self.refresh_preview();
                 self.update_gizmo_frame();
+                let staged_review_drag = self.stage_review_resize_drag(rect);
                 let theme_color = palette
                     .viewport
                     .to_srgba_unmultiplied()
@@ -4020,6 +4017,9 @@ impl Builder3dApp {
                     self.paint_resize_handles(&painter, rect, palette);
                 } else {
                     self.paint_transform_handles(&painter, rect);
+                }
+                if staged_review_drag {
+                    self.viewport_drag = None;
                 }
                 if let Some(error) = self.preview_error.as_ref().or(self.viewport_error.as_ref()) {
                     painter.text(
@@ -4338,169 +4338,113 @@ impl Builder3dApp {
         &self,
         painter: &egui::Painter,
         rect: egui::Rect,
-        palette: ThemePalette,
+        _palette: ThemePalette,
     ) {
         let Some((_, frame)) = &self.gizmo_frame else {
-            return;
-        };
-        let Ok(matrix) = self
-            .camera
-            .view_projection(self.current_scene_radius().unwrap_or(1.))
-        else {
             return;
         };
         let delta = match &self.viewport_drag {
             Some(ViewportDrag::Transform(drag)) => Mat4::from_rows(drag.delta.rows()).ok(),
             _ => None,
         };
-        let handles = frame.interactive_handles().collect::<Vec<_>>();
-        let corners = handles
-            .iter()
-            .filter_map(|(h, p)| {
-                if let ResizeHandle::Corner(sides) = h {
-                    let p = delta.and_then(|d| d.transform_point(*p).ok()).unwrap_or(*p);
-                    project_to_viewport(matrix, rect, p).map(|(p, _)| (*sides, p))
-                } else {
-                    None
-                }
-            })
-            .collect::<Vec<_>>();
-        for (i, (a, p)) in corners.iter().enumerate() {
-            for (b, q) in corners.iter().skip(i + 1) {
-                if a.iter().zip(b).filter(|(x, y)| x != y).count() == 1 {
-                    painter.line_segment([*p, *q], Stroke::new(1., palette.muted));
-                }
-            }
-        }
-        let mut projected = handles
-            .into_iter()
-            .filter_map(|(h, p)| {
-                let p = delta.and_then(|d| d.transform_point(p).ok()).unwrap_or(p);
-                project_to_viewport(matrix, rect, p).map(|(screen, z)| (h, screen, z, p))
-            })
-            .collect::<Vec<_>>();
-        projected.sort_by(|a, b| b.2.total_cmp(&a.2));
-        let pixels_per_point = painter.ctx().pixels_per_point().max(1.0e-6);
-        let active_handle = self.active_resize_handle();
-        let hovered_handle = active_handle
+        let Some(overlay) = self.resize_overlay(rect, delta) else {
+            return;
+        };
+        let dragging = self.active_resize_handle();
+        let hovered = dragging
             .is_none()
             .then(|| {
                 painter
                     .ctx()
                     .input(|input| input.pointer.hover_pos())
                     .filter(|position| rect.contains(*position))
-                    .and_then(|position| {
-                        self.resize_handle_at_pointer(rect, position, pixels_per_point)
-                    })
+                    .and_then(|position| overlay.handle_at(position))
             })
             .flatten();
-        let probe_length = self.camera.world_tolerance(GIZMO_TARGET_PIXELS).max(0.01);
-        for (handle, position, _, world_position) in projected {
-            let emphasized = hovered_handle == Some(handle) || active_handle == Some(handle);
-            match handle {
-                ResizeHandle::Corner(_) => {
-                    if emphasized {
-                        painter.circle_filled(
-                            position,
-                            7.0 / pixels_per_point,
-                            with_alpha(palette.accent, 70),
-                        );
-                    }
-                    painter.circle_filled(
-                        position,
-                        (if emphasized { 5.5 } else { 5.0 }) / pixels_per_point,
-                        if emphasized {
-                            palette.accent
-                        } else {
-                            palette.text
-                        },
-                    );
-                    painter.circle_stroke(
-                        position,
-                        5.0 / pixels_per_point,
-                        Stroke::new(1.0 / pixels_per_point, palette.border),
-                    );
-                }
-                ResizeHandle::Face { axis, side } => {
-                    let axis_direction = scale(frame.axes[axis], side);
-                    let Some([anchor, tip]) = project_resize_arrow_segment(
-                        matrix,
-                        rect,
-                        world_position,
-                        axis_direction,
-                        probe_length,
-                        pixels_per_point,
-                    ) else {
-                        continue;
-                    };
-                    let direction = tip - anchor;
-                    let direction_length = direction.length();
-                    if !direction_length.is_finite() || direction_length <= 1.0e-3 {
-                        continue;
-                    }
-                    let color = resize_axis_color(axis);
-                    paint_resize_arrow(
-                        painter,
-                        anchor,
-                        direction / direction_length,
-                        color,
-                        emphasized,
-                    );
-                }
-                ResizeHandle::Edge { .. } => {}
-            }
-        }
-        let display_unit = self.commands.preferences().display_unit();
-        let frame = *frame;
-        let candidates = dimension_tag_candidates(
-            |sides| {
-                let mut point = frame.center;
-                for (axis, side) in sides.into_iter().enumerate() {
-                    point = add(
-                        point,
-                        scale(frame.axes[axis], side * frame.extents[axis] * 0.5),
-                    );
-                }
-                delta
-                    .and_then(|d| d.transform_point(point).ok())
-                    .unwrap_or(point)
-            },
-            |point| project_to_viewport(matrix, rect, point).map(|(screen, _)| screen),
+        // 3D Builder shows the size above the box, and no numbers while a
+        // handle is dragged (the transform strip carries the live value).
+        let label = dragging.is_none().then(|| {
+            let axis = match hovered {
+                Some(ResizeHandle::Face { axis, .. } | ResizeHandle::Edge { axis, .. }) => axis,
+                _ => 1,
+            };
+            crate::resize_overlay::size_label(
+                frame.extents[axis],
+                self.commands.preferences().display_unit(),
+            )
+        });
+        overlay.paint(
+            painter,
+            rect,
+            dragging.or(hovered),
+            dragging,
+            label.as_deref(),
         );
-        // Every edge of one axis has the same length, so one layout per axis
-        // sizes all of that axis's candidate tags.
-        let mut texts = candidates
-            .iter()
-            .filter_map(|ranked| ranked.first())
-            .map(|first| {
-                (
-                    first.axis,
-                    DimensionTagText::layout(painter, first.length_mm, display_unit, palette),
-                )
-            })
-            .collect::<Vec<_>>();
-        let sizes = texts
-            .iter()
-            .map(|(axis, text)| (*axis, text.size()))
-            .collect::<Vec<_>>();
-        let obstacles = self.transform_strip_rect.into_iter().collect::<Vec<_>>();
-        let placed = place_dimension_tags(
-            &candidates,
-            |axis| {
-                sizes
-                    .iter()
-                    .find(|(candidate, _)| *candidate == axis)
-                    .map_or(Vec2::ZERO, |(_, size)| *size)
-            },
-            rect.shrink(6.0),
-            &obstacles,
-        );
-        for (placement, tag) in placed {
-            if let Some(index) = texts.iter().position(|(axis, _)| *axis == placement.axis) {
-                let (_, text) = texts.swap_remove(index);
-                paint_dimension_tag(painter, placement, tag, text, palette, self.theme_mode);
-            }
+    }
+
+    /// For the `resize-drag` review capture: holds the +X face handle
+    /// 90 points outward for this frame, through the ordinary gesture code.
+    /// Returns whether a drag was staged; the caller drops it after painting
+    /// so it is never committed.
+    fn stage_review_resize_drag(&mut self, rect: egui::Rect) -> bool {
+        use crate::review_capture::ReviewState;
+        if self.viewport_drag.is_some()
+            || self
+                .review
+                .as_ref()
+                .is_none_or(|review| review.state() != ReviewState::ResizeDrag)
+        {
+            return false;
         }
+        let Some(face) = self.resize_overlay(rect, None).and_then(|overlay| {
+            overlay
+                .faces
+                .into_iter()
+                .find(|face| face.handle == ResizeHandle::Face { axis: 0, side: 1.0 })
+        }) else {
+            return false;
+        };
+        let Some(mut drag) = self.begin_transform_drag(rect, face.center, 1.0) else {
+            return false;
+        };
+        let size = self
+            .viewport_renderer
+            .as_ref()
+            .map_or(self.camera.viewport_size(), ViewportRenderer::size);
+        let screen = viewport_pixel_position(face.center + face.direction * 90.0, rect, size);
+        if let (ViewportDrag::Transform(gesture), Some(radius)) =
+            (&mut drag, self.current_scene_radius())
+            && let Ok(ray) = self.camera.screen_ray(screen[0], screen[1], radius)
+        {
+            let _ = gesture.update_with_snap(ray, true);
+        }
+        self.viewport_drag = Some(drag);
+        true
+    }
+
+    /// Lays out the Resize overlay for the current gizmo frame, moved by an
+    /// in-progress drag `delta`.
+    fn resize_overlay(
+        &self,
+        rect: egui::Rect,
+        delta: Option<Mat4>,
+    ) -> Option<crate::resize_overlay::ResizeOverlay> {
+        let frame = self.gizmo_frame.as_ref()?.1;
+        let matrix = self
+            .camera
+            .view_projection(self.current_scene_radius().unwrap_or(1.))
+            .ok()?;
+        let view_direction = builder3d_viewport::normalize(
+            subtract(self.camera.center(), self.camera.position()),
+            "camera view direction",
+        )
+        .ok()?;
+        crate::resize_overlay::ResizeOverlay::layout(
+            &frame,
+            delta,
+            |point| project_gizmo_point(matrix, rect, point),
+            view_direction,
+        )
     }
 
     fn begin_brush_gesture(
@@ -5041,55 +4985,9 @@ impl Builder3dApp {
         &self,
         rect: egui::Rect,
         pointer: egui::Pos2,
-        pixels_per_point: f32,
+        _pixels_per_point: f32,
     ) -> Option<ResizeHandle> {
-        let frame = self.gizmo_frame.as_ref()?.1;
-        let scene_radius = self.current_scene_radius()?;
-        let matrix = self.camera.view_projection(scene_radius).ok()?;
-        let probe_length = self.camera.world_tolerance(GIZMO_TARGET_PIXELS).max(0.01);
-        let pixels_per_point = pixels_per_point.max(1.0e-6);
-        let mut nearest: Option<(ResizeHandle, f32, f32)> = None;
-        for (handle, world_position) in frame.interactive_handles() {
-            let Some((projected, depth)) = project_to_viewport(matrix, rect, world_position) else {
-                continue;
-            };
-            let (distance, hit_radius) = match handle {
-                ResizeHandle::Face { axis, side } => {
-                    let axis_direction = scale(frame.axes[axis], side);
-                    let Some([start, end]) = project_resize_arrow_segment(
-                        matrix,
-                        rect,
-                        world_position,
-                        axis_direction,
-                        probe_length,
-                        pixels_per_point,
-                    ) else {
-                        continue;
-                    };
-                    (
-                        distance_to_screen_segment(pointer, start, end),
-                        RESIZE_ARROW_HIT_RADIUS_PIXELS / pixels_per_point,
-                    )
-                }
-                ResizeHandle::Corner(_) => (
-                    pointer.distance(projected),
-                    RESIZE_CORNER_HIT_RADIUS_PIXELS / pixels_per_point,
-                ),
-                ResizeHandle::Edge { .. } => continue,
-            };
-            if distance > hit_radius {
-                continue;
-            }
-            if nearest.is_none_or(|(_, best_distance, best_depth)| {
-                distance
-                    .total_cmp(&best_distance)
-                    .then(depth.total_cmp(&best_depth))
-                    .is_lt()
-            }) {
-                nearest = Some((handle, distance, depth));
-            }
-        }
-        nearest.map(|(handle, _, _)| handle)
+        self.resize_overlay(rect, None)?.handle_at(pointer)
     }
 
     fn active_gizmo_axis_index(&self) -> Option<usize> {
@@ -6751,43 +6649,6 @@ fn paint_gizmo_shaft(
     );
 }
 
-fn paint_resize_arrow(
-    painter: &egui::Painter,
-    anchor: egui::Pos2,
-    direction: Vec2,
-    axis_color: Color32,
-    emphasized: bool,
-) {
-    let pixels_per_point = painter.ctx().pixels_per_point().max(1.0e-6);
-    let shaft_end = anchor + direction * (RESIZE_ARROW_SHAFT_LENGTH_PIXELS / pixels_per_point);
-    paint_gizmo_shaft(painter, anchor, shaft_end, axis_color, 3.25, emphasized);
-
-    let perpendicular = Vec2::new(-direction.y, direction.x);
-    for fraction in [0.28, 0.55] {
-        let center =
-            anchor + direction * (RESIZE_ARROW_SHAFT_LENGTH_PIXELS * fraction / pixels_per_point);
-        let half_tick = 4.0 / pixels_per_point;
-        let tick_start = center - perpendicular * half_tick;
-        let tick_end = center + perpendicular * half_tick;
-        painter.line_segment(
-            [tick_start, tick_end],
-            Stroke::new(3.5 / pixels_per_point, Color32::from_rgb(18, 24, 36)),
-        );
-        painter.line_segment(
-            [tick_start, tick_end],
-            Stroke::new(1.5 / pixels_per_point, axis_color),
-        );
-    }
-    paint_gizmo_arrowhead(
-        painter,
-        shaft_end,
-        direction,
-        axis_color,
-        MOVE_GIZMO_SCALE,
-        emphasized,
-    );
-}
-
 fn paint_curved_rotate_arrows(
     painter: &egui::Painter,
     matrix: Mat4,
@@ -6879,28 +6740,6 @@ fn paint_curved_rotate_arrows(
     }
 }
 
-fn project_resize_arrow_segment(
-    matrix: Mat4,
-    rect: egui::Rect,
-    world_anchor: [f32; 3],
-    world_axis: [f32; 3],
-    probe_length: f32,
-    pixels_per_point: f32,
-) -> Option<[egui::Pos2; 2]> {
-    let world_probe = add(world_anchor, scale(world_axis, probe_length));
-    let [anchor, probe] = project_gizmo_line(matrix, rect, world_anchor, world_probe)?;
-    let screen_axis = probe - anchor;
-    let screen_length = screen_axis.length();
-    if !screen_length.is_finite() || screen_length <= 1.0e-3 {
-        return None;
-    }
-    let direction = screen_axis / screen_length;
-    Some([
-        anchor,
-        anchor + direction * (RESIZE_ARROW_LENGTH_PIXELS / pixels_per_point.max(1.0e-6)),
-    ])
-}
-
 fn distance_to_screen_segment(point: egui::Pos2, start: egui::Pos2, end: egui::Pos2) -> f32 {
     let segment = end - start;
     let length_squared = segment.length_sq();
@@ -6909,14 +6748,6 @@ fn distance_to_screen_segment(point: egui::Pos2, start: egui::Pos2, end: egui::P
     }
     let parameter = ((point - start).dot(segment) / length_squared).clamp(0.0, 1.0);
     point.distance(start + segment * parameter)
-}
-
-fn resize_axis_color(axis: usize) -> Color32 {
-    match axis {
-        0 => Color32::from_rgb(255, 51, 51),
-        1 => Color32::from_rgb(51, 204, 51),
-        _ => Color32::from_rgb(51, 51, 255),
-    }
 }
 
 fn gizmo_axis_index(axis: GizmoAxis) -> usize {
@@ -7100,242 +6931,6 @@ fn clip_point_to_viewport(rect: egui::Rect, point: [f32; 4]) -> Option<egui::Pos
     ))
 }
 
-/// One measured box edge chosen for a dimension tag, in viewport points.
-#[derive(Clone, Copy, Debug, PartialEq)]
-struct DimensionTagPlacement {
-    axis: usize,
-    length_mm: f32,
-    start: egui::Pos2,
-    end: egui::Pos2,
-    /// Unit vector pointing away from the box, perpendicular to the edge.
-    outward: Vec2,
-}
-
-/// Ranks, for each box axis, its four parallel edges by how well a tag reads
-/// there: outermost first so the tag sits outside the object silhouette
-/// (3D Builder style), and for horizontal axes lower edges first so tags read
-/// along the floor. Edges seen end-on are dropped, and so are axes with none left.
-fn dimension_tag_candidates(
-    world_corner: impl Fn([f32; 3]) -> [f32; 3],
-    project: impl Fn([f32; 3]) -> Option<egui::Pos2>,
-) -> Vec<Vec<DimensionTagPlacement>> {
-    const MIN_EDGE_POINTS: f32 = 18.0;
-    let mut projected_sum = Vec2::ZERO;
-    let mut projected_count = 0.0;
-    for x in [-1.0, 1.0] {
-        for y in [-1.0, 1.0] {
-            for z in [-1.0, 1.0] {
-                if let Some(point) = project(world_corner([x, y, z])) {
-                    projected_sum += point.to_vec2();
-                    projected_count += 1.0;
-                }
-            }
-        }
-    }
-    if projected_count < 8.0 {
-        return Vec::new();
-    }
-    let center = (projected_sum / projected_count).to_pos2();
-    let mut axes = Vec::with_capacity(3);
-    for axis in 0..3 {
-        let mut ranked: Vec<(f32, DimensionTagPlacement)> = Vec::with_capacity(4);
-        for a in [-1.0, 1.0] {
-            for b in [-1.0, 1.0] {
-                let mut low = [0.0_f32; 3];
-                low[(axis + 1) % 3] = a;
-                low[(axis + 2) % 3] = b;
-                let mut high = low;
-                low[axis] = -1.0;
-                high[axis] = 1.0;
-                let (world_low, world_high) = (world_corner(low), world_corner(high));
-                let (Some(start), Some(end)) = (project(world_low), project(world_high)) else {
-                    continue;
-                };
-                let edge = end - start;
-                if edge.length() < MIN_EDGE_POINTS {
-                    continue;
-                }
-                let middle = start + edge * 0.5;
-                let mut outward = edge.normalized().rot90();
-                if outward.dot(middle - center) < 0.0 {
-                    outward = -outward;
-                }
-                let lower_bias = if axis == 1 {
-                    0.0
-                } else {
-                    0.35 * (middle.y - center.y)
-                };
-                let score = (middle - center).length() + lower_bias;
-                let length_mm = subtract(world_high, world_low)
-                    .iter()
-                    .map(|value| value * value)
-                    .sum::<f32>()
-                    .sqrt();
-                ranked.push((
-                    score,
-                    DimensionTagPlacement {
-                        axis,
-                        length_mm,
-                        start,
-                        end,
-                        outward,
-                    },
-                ));
-            }
-        }
-        if !ranked.is_empty() {
-            ranked.sort_by(|a, b| b.0.total_cmp(&a.0));
-            axes.push(ranked.into_iter().map(|(_, placement)| placement).collect());
-        }
-    }
-    axes
-}
-
-/// Where a tag of `size` sits for `placement`: just outside the edge midpoint.
-fn dimension_tag_rect(placement: DimensionTagPlacement, size: Vec2) -> egui::Rect {
-    let middle = placement.start + (placement.end - placement.start) * 0.5;
-    let clearance =
-        10.0 + placement.outward.x.abs() * size.x * 0.5 + placement.outward.y.abs() * size.y * 0.5;
-    egui::Rect::from_center_size(middle + placement.outward * clearance, size)
-}
-
-/// Chooses one edge per axis whose tag lies inside `bounds` and clear of the
-/// `obstacles` (floating panels) and of tags already placed. An axis with no
-/// clear edge keeps its best-ranked edge rather than losing its measurement.
-fn place_dimension_tags(
-    candidates: &[Vec<DimensionTagPlacement>],
-    tag_size: impl Fn(usize) -> Vec2,
-    bounds: egui::Rect,
-    obstacles: &[egui::Rect],
-) -> Vec<(DimensionTagPlacement, egui::Rect)> {
-    let mut placed: Vec<(DimensionTagPlacement, egui::Rect)> = Vec::with_capacity(3);
-    for ranked in candidates {
-        let Some(first) = ranked.first().copied() else {
-            continue;
-        };
-        let size = tag_size(first.axis);
-        let clear = ranked.iter().copied().find_map(|placement| {
-            let rect = dimension_tag_rect(placement, size);
-            let fits = bounds.contains_rect(rect)
-                && !obstacles.iter().any(|obstacle| obstacle.intersects(rect))
-                && !placed.iter().any(|(_, other)| other.intersects(rect));
-            fits.then_some((placement, rect))
-        });
-        placed.push(clear.unwrap_or((first, dimension_tag_rect(first, size))));
-    }
-    placed
-}
-
-struct DimensionTagText {
-    number: std::sync::Arc<egui::Galley>,
-    unit: std::sync::Arc<egui::Galley>,
-}
-
-impl DimensionTagText {
-    const PADDING_X: f32 = 8.0;
-    const GAP: f32 = 3.0;
-    const BAR: f32 = 3.0;
-
-    fn layout(
-        painter: &egui::Painter,
-        length_mm: f32,
-        display_unit: DisplayUnit,
-        palette: ThemePalette,
-    ) -> Self {
-        Self {
-            number: painter.layout_no_wrap(
-                dimension_tag_value(length_mm, display_unit),
-                crate::theme::emphasis_font(12.5),
-                palette.text,
-            ),
-            unit: painter.layout_no_wrap(
-                display_unit.label().to_owned(),
-                FontId::proportional(10.5),
-                palette.muted,
-            ),
-        }
-    }
-
-    fn size(&self) -> Vec2 {
-        egui::vec2(
-            Self::BAR
-                + Self::PADDING_X * 2.0
-                + self.number.size().x
-                + Self::GAP
-                + self.unit.size().x,
-            22.0_f32.max(self.number.size().y + 6.0),
-        )
-    }
-}
-
-/// Compact dimension text: two decimals below ten units, one above.
-fn dimension_tag_value(value_mm: f32, display_unit: DisplayUnit) -> String {
-    let value = display_unit.from_mm(value_mm);
-    if value.abs() < 10.0 {
-        format!("{value:.2}")
-    } else {
-        format!("{value:.1}")
-    }
-}
-
-fn paint_dimension_tag(
-    painter: &egui::Painter,
-    placement: DimensionTagPlacement,
-    tag: egui::Rect,
-    text: DimensionTagText,
-    palette: ThemePalette,
-    mode: ThemeMode,
-) {
-    let accent = resize_axis_color(placement.axis);
-    painter.line_segment(
-        [placement.start, placement.end],
-        Stroke::new(1.6, with_alpha(accent, 210)),
-    );
-    let DimensionTagText { number, unit } = text;
-    let (padding_x, gap, bar) = (
-        DimensionTagText::PADDING_X,
-        DimensionTagText::GAP,
-        DimensionTagText::BAR,
-    );
-    let height = tag.height();
-    let radius = egui::CornerRadius::same(6);
-    let mut shadow = crate::theme::floating_shadow(mode);
-    shadow.offset = [0, 2];
-    shadow.blur = 10;
-    painter.add(shadow.as_shape(tag, radius));
-    painter.rect(
-        tag,
-        radius,
-        palette.surface,
-        Stroke::new(1.0, with_alpha(palette.border, 200)),
-        egui::StrokeKind::Inside,
-    );
-    painter.rect_filled(
-        egui::Rect::from_min_size(
-            tag.left_top() + egui::vec2(4.0, 5.0),
-            egui::vec2(bar, height - 10.0),
-        ),
-        egui::CornerRadius::same(2),
-        accent,
-    );
-    let text_left = tag.left() + bar + padding_x;
-    let number_size = number.size();
-    painter.galley(
-        egui::pos2(text_left, tag.center().y - number_size.y * 0.5),
-        number,
-        palette.text,
-    );
-    let unit_size = unit.size();
-    painter.galley(
-        egui::pos2(
-            text_left + number_size.x + gap,
-            tag.center().y - unit_size.y * 0.5 + 0.5,
-        ),
-        unit,
-        palette.muted,
-    );
-}
-
 fn viewport_pixel_position(position: egui::Pos2, rect: egui::Rect, size: (u32, u32)) -> [f32; 2] {
     let x = ((position.x - rect.left()) / rect.width().max(1.0e-6)) * size.0 as f32;
     let y = ((position.y - rect.top()) / rect.height().max(1.0e-6)) * size.1 as f32;
@@ -7348,85 +6943,6 @@ mod tests {
     use crate::preferences::Preferences;
     use builder3d_core::PrimitiveKind;
     use serde_json::Value;
-
-    #[test]
-    fn dimension_tags_measure_each_axis_on_the_outer_lower_edges() {
-        let half = [20.0_f32, 10.0, 5.0];
-        let corner = |sides: [f32; 3]| std::array::from_fn(|i| sides[i] * half[i]);
-        // Simple oblique projection: x right, y up, z down-left, around 400,300.
-        let project = |p: [f32; 3]| {
-            Some(egui::pos2(
-                400.0 + p[0] * 4.0 - p[2] * 2.0,
-                300.0 - p[1] * 4.0 + p[2] * 2.0,
-            ))
-        };
-        let candidates = dimension_tag_candidates(corner, project);
-        let placements = candidates
-            .iter()
-            .map(|ranked| ranked[0])
-            .collect::<Vec<_>>();
-        assert_eq!(placements.len(), 3);
-        for (placement, expected) in placements.iter().zip([40.0, 20.0, 10.0]) {
-            assert!((placement.length_mm - expected).abs() < 1.0e-4);
-            assert!((placement.outward.length() - 1.0).abs() < 1.0e-4);
-            let middle = placement.start + (placement.end - placement.start) * 0.5;
-            assert!(placement.outward.dot(middle - egui::pos2(400.0, 300.0)) > 0.0);
-        }
-        // Width and depth tags sit on edges below the box centre.
-        for placement in placements.iter().filter(|placement| placement.axis != 1) {
-            assert!(placement.start.y.max(placement.end.y) > 300.0);
-        }
-    }
-
-    #[test]
-    fn dimension_tags_skip_edges_seen_end_on_and_unprojectable_boxes() {
-        let half = [20.0_f32, 10.0, 5.0];
-        let corner = |sides: [f32; 3]| std::array::from_fn(|i| sides[i] * half[i]);
-        let front_view = |p: [f32; 3]| Some(egui::pos2(400.0 + p[0] * 4.0, 300.0 - p[1] * 4.0));
-        let axes = dimension_tag_candidates(corner, front_view)
-            .iter()
-            .map(|ranked| ranked[0].axis)
-            .collect::<Vec<_>>();
-        assert_eq!(axes, vec![0, 1]);
-        assert!(dimension_tag_candidates(corner, |_| None).is_empty());
-    }
-
-    #[test]
-    fn dimension_tags_move_off_panels_and_each_other() {
-        let half = [20.0_f32, 10.0, 5.0];
-        let corner = |sides: [f32; 3]| std::array::from_fn(|i| sides[i] * half[i]);
-        let front_view = |p: [f32; 3]| Some(egui::pos2(400.0 + p[0] * 4.0, 300.0 - p[1] * 4.0));
-        let candidates = dimension_tag_candidates(corner, front_view);
-        let size = |_| egui::vec2(70.0, 22.0);
-        let bounds = egui::Rect::from_min_max(egui::pos2(0.0, 0.0), egui::pos2(800.0, 600.0));
-        let free = place_dimension_tags(&candidates, size, bounds, &[]);
-        let width_free = free[0];
-        assert!(width_free.1.top() > 340.0, "width tag starts below the box");
-
-        // A panel across the bottom pushes the width tag to the top edge.
-        let panel = egui::Rect::from_min_max(egui::pos2(0.0, 330.0), egui::pos2(800.0, 600.0));
-        let placed = place_dimension_tags(&candidates, size, bounds, &[panel]);
-        assert_eq!(placed.len(), 2);
-        for (_, tag) in &placed {
-            assert!(!tag.intersects(panel));
-        }
-        assert!(
-            placed[0].1.bottom() < 260.0,
-            "width tag moved above the box"
-        );
-        assert!(!placed[0].1.intersects(placed[1].1));
-
-        // With nowhere clear, the best-ranked edge is still measured.
-        let everywhere = place_dimension_tags(&candidates, size, bounds, &[bounds]);
-        assert_eq!(everywhere[0].0, candidates[0][0]);
-    }
-
-    #[test]
-    fn dimension_tag_values_are_compact_in_the_display_unit() {
-        assert_eq!(dimension_tag_value(42.0, DisplayUnit::Millimetre), "42.0");
-        assert_eq!(dimension_tag_value(5.0, DisplayUnit::Millimetre), "5.00");
-        assert_eq!(dimension_tag_value(25.4, DisplayUnit::Inch), "1.00");
-    }
 
     fn test_directory(label: &str) -> PathBuf {
         let unique = std::time::SystemTime::now()
@@ -9016,10 +8532,15 @@ mod tests {
         for object_basis in [false, true] {
             app.object_resize_basis = object_basis;
             app.update_gizmo_frame();
-            let frame = app.gizmo_frame.as_ref().expect("frame").1;
-            for (_, point) in frame.interactive_handles() {
-                let (position, _) = app.project_handle(point, rect).expect("project");
+            let overlay = app.resize_overlay(rect, None).expect("overlay");
+            let grabs = overlay.grab_points().collect::<Vec<_>>();
+            assert!(grabs.len() >= 8, "four corner dots and the visible faces");
+            for (handle, position) in grabs {
                 assert!(rect.contains(position));
+                assert_eq!(
+                    app.resize_handle_at_pointer(rect, position, 1.0),
+                    Some(handle)
+                );
                 let drag = app
                     .begin_transform_drag(rect, position, 1.0)
                     .expect("handle starts gesture");

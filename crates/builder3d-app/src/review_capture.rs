@@ -11,7 +11,7 @@
 //! | Variable | Values | Default |
 //! |---|---|---|
 //! | `BUILDER3D_REVIEW_CAPTURE` | output PNG path | harness off |
-//! | `BUILDER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `resize`, `multi` | `move` |
+//! | `BUILDER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `resize`, `resize-drag`, `multi` | `move` |
 //! | `BUILDER3D_REVIEW_THEME` | `light`, `dark` | `dark` |
 //! | `BUILDER3D_REVIEW_TAB` | a ribbon tab label such as `Object` | `Insert` |
 //! | `BUILDER3D_REVIEW_CAMERA` | `yaw,pitch,distance` in degrees and mm, applied after auto-framing; distance `0` keeps the framed distance | framed view |
@@ -51,6 +51,10 @@ pub(crate) enum ReviewState {
     Rotate,
     /// One selected cube with the Resize handles.
     Resize,
+    /// The Resize state with the +X face handle held mid-drag. The drag is
+    /// staged through the shell's own gesture code each frame; no pointer
+    /// input is simulated and nothing is committed.
+    ResizeDrag,
     /// Several primitives with one selected, for list and inspector density.
     Multi,
 }
@@ -63,6 +67,7 @@ impl ReviewState {
             "move" => Some(Self::Move),
             "rotate" => Some(Self::Rotate),
             "resize" => Some(Self::Resize),
+            "resize-drag" => Some(Self::ResizeDrag),
             "multi" => Some(Self::Multi),
             _ => None,
         }

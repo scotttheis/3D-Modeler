@@ -34,8 +34,17 @@ pub(crate) struct ResizeFrame {
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub(crate) enum ResizeHandle {
-    Face { axis: usize, side: f32 },
-    Edge { axis: usize, sides: [f32; 3] },
+    Face {
+        axis: usize,
+        side: f32,
+    },
+    /// The reference's edge scaling. Its calculations are kept for parity
+    /// fixtures, but like 3D Builder the desktop exposes no edge handle.
+    #[cfg_attr(not(test), allow(dead_code))]
+    Edge {
+        axis: usize,
+        sides: [f32; 3],
+    },
     Corner([f32; 3]),
 }
 
@@ -91,6 +100,7 @@ impl ResizeFrame {
         Ok(frame)
     }
 
+    #[cfg(test)]
     pub(crate) fn handles(self) -> Vec<(ResizeHandle, [f32; 3])> {
         let mut handles = Vec::with_capacity(26);
         for axis in 0..3 {
@@ -125,15 +135,7 @@ impl ResizeFrame {
         handles
     }
 
-    /// The reference's visible picker exposes faces and corners. Its edge
-    /// calculations are internal and are not an additional desktop affordance.
-    pub(crate) fn interactive_handles(self) -> impl Iterator<Item = (ResizeHandle, [f32; 3])> {
-        self.handles()
-            .into_iter()
-            .filter(|(handle, _)| !matches!(handle, ResizeHandle::Edge { .. }))
-    }
-
-    fn point(self, sides: [f32; 3]) -> [f32; 3] {
+    pub(crate) fn point(self, sides: [f32; 3]) -> [f32; 3] {
         let mut point = self.center;
         for (i, side) in sides.into_iter().enumerate() {
             point = add(point, scale(self.axes[i], side * self.extents[i] * 0.5));
