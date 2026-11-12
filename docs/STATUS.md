@@ -72,10 +72,10 @@ D5 `emboss_text` metadata.
   work is S1 tasks 1–9. **Not yet reviewed by the owner.**
 - 2026-11-12 (second batch): nine items OF-1 to OF-9 in
   [`owner-feedback-2026-11-12.md`](owner-feedback-2026-11-12.md). OF-1
-  (floor numbers out, 3D Builder-style dimension tags) implemented and gated,
-  captures in `evidence/rebuild/captures/2026-11-12-of1-dimension-tags/`;
-  awaiting owner review. Removing the floor labels is an approved deviation
-  from Python.
+  needs a redo: `e4c62b1` removed the floor labels, but 3D Builder reference
+  captures (`evidence/rebuild/reference/3d-builder/`, see its README) show the
+  numbers belong painted flat on the floor plane. Shots still owed by the
+  owner: X-ray with two objects, Paint/Color/Material, Merge.
 
 ## Last recovery point
 
