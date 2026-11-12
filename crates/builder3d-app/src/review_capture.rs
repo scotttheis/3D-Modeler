@@ -3,8 +3,9 @@
 //! Visual work needs a current picture of the application in a known state.
 //! Setting `BUILDER3D_REVIEW_CAPTURE` to a PNG path starts the ordinary native
 //! window in a named state, waits for the viewport to settle, saves the
-//! window's own framebuffer, and exits. No pointer or keyboard input is
-//! simulated, the desktop is never photographed, and user settings are neither
+//! window's own framebuffer, and exits. No clicks or key presses are
+//! simulated (an optional resting pointer position only reveals hover
+//! states), the desktop is never photographed, and user settings are neither
 //! read nor written, so a capture is repeatable and safe to run while the
 //! machine is in use.
 //!
@@ -14,6 +15,7 @@
 //! | `BUILDER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `resize`, `resize-drag`, `multi` | `move` |
 //! | `BUILDER3D_REVIEW_THEME` | `light`, `dark` | `dark` |
 //! | `BUILDER3D_REVIEW_TAB` | a ribbon tab label such as `Object` | `Insert` |
+//! | `BUILDER3D_REVIEW_POINTER` | `x,y` in window points: rests the pointer there to show a hover state (no button is pressed) | pointer outside |
 //! | `BUILDER3D_REVIEW_CAMERA` | `yaw,pitch,distance` in degrees and mm, applied after auto-framing; distance `0` keeps the framed distance | framed view |
 //!
 //! A capture shows what was painted. It is engineering evidence for layout and
@@ -91,6 +93,7 @@ pub(crate) struct ReviewCapture {
     theme: ThemeMode,
     tab: Option<String>,
     camera: Option<[f32; 3]>,
+    pointer: Option<[f32; 2]>,
     frames: u32,
     requested: bool,
     finished: Arc<AtomicBool>,
@@ -134,12 +137,23 @@ impl ReviewCapture {
             },
             _ => None,
         };
+        let pointer = match env::var("BUILDER3D_REVIEW_POINTER") {
+            Ok(value) if !value.trim().is_empty() => match parse_numbers::<2>(&value) {
+                Some(pointer) => Some(pointer),
+                None => {
+                    eprintln!("review capture: BUILDER3D_REVIEW_POINTER must be `x,y`");
+                    return None;
+                }
+            },
+            _ => None,
+        };
         Some(Self {
             output,
             state,
             theme,
             tab,
             camera,
+            pointer,
             frames: 0,
             requested: false,
             finished: Arc::new(AtomicBool::new(false)),
@@ -156,6 +170,11 @@ impl ReviewCapture {
 
     pub(crate) fn tab(&self) -> Option<&str> {
         self.tab.as_deref()
+    }
+
+    /// Where the pointer rests, in window points, to reveal a hover state.
+    pub(crate) const fn pointer(&self) -> Option<[f32; 2]> {
+        self.pointer
     }
 
     /// The `[yaw, pitch, distance]` camera pose to apply after auto-framing.
@@ -209,11 +228,15 @@ impl ReviewCapture {
 }
 
 fn parse_camera(value: &str) -> Option<[f32; 3]> {
+    parse_numbers::<3>(value)
+}
+
+fn parse_numbers<const N: usize>(value: &str) -> Option<[f32; N]> {
     let parts = value
         .split(',')
         .map(|part| part.trim().parse::<f32>().ok().filter(|v| v.is_finite()))
         .collect::<Option<Vec<_>>>()?;
-    <[f32; 3]>::try_from(parts).ok()
+    <[f32; N]>::try_from(parts).ok()
 }
 
 fn save_png(path: &Path, image: &egui::ColorImage) -> Result<(), String> {

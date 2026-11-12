@@ -127,10 +127,11 @@ impl ThemePalette {
             border: Color32::from_rgb(0xD5, 0xDA, 0xE4),
             disabled_bg: Color32::from_rgb(0xF4, 0xF5, 0xF7),
             disabled_text: Color32::from_rgb(0xA0, 0xA8, 0xB8),
-            hover: Color32::from_rgb(0xEE, 0xF1, 0xFF),
+            // A visible light-grey tile, as on 3D Builder's toolbar.
+            hover: Color32::from_rgb(0xE4, 0xE7, 0xF0),
             pressed: Color32::from_rgb(0xE1, 0xE6, 0xFF),
             navigation: Color32::from_rgb(0xE8, 0xEA, 0xF5),
-            navigation_hover: Color32::from_rgb(0xD2, 0xD8, 0xF2),
+            navigation_hover: Color32::from_rgb(0xD0, 0xD5, 0xEA),
             viewport: Color32::from_rgb(0xF0, 0xF0, 0xF0),
             grid: Color32::from_rgba_unmultiplied(0xAD, 0xAD, 0xAD, 0x14),
         }
@@ -158,10 +159,11 @@ impl ThemePalette {
             border: Color32::from_rgb(0x31, 0x59, 0x85),
             disabled_bg: Color32::from_rgb(0x0B, 0x19, 0x30),
             disabled_text: Color32::from_rgb(0x66, 0x81, 0xA6),
-            hover: Color32::from_rgb(0x12, 0x31, 0x5C),
+            hover: Color32::from_rgb(0x1B, 0x3A, 0x66),
             pressed: Color32::from_rgb(0x1A, 0x4B, 0x82),
             navigation: Color32::from_rgb(0x15, 0x31, 0x55),
-            navigation_hover: Color32::from_rgb(0x12, 0x31, 0x5C),
+            // Darker than the tab bar, as 3D Builder's tab hover is.
+            navigation_hover: Color32::from_rgb(0x0B, 0x1E, 0x3A),
             // Keep the modelling canvas neutral in both shell themes so the
             // checkered build floor can fade into one consistent background.
             viewport: Color32::from_rgb(0xF0, 0xF0, 0xF0),

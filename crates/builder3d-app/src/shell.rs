@@ -2004,22 +2004,46 @@ impl Builder3dApp {
         ui.horizontal(|ui| {
             for tab in RibbonTab::all() {
                 let selected = tab == self.active_tab;
-                let button =
-                    egui::Button::new(RichText::new(tab.label()).size(17.0).color(if selected {
+                let (rect, response) =
+                    ui.allocate_exact_size(Vec2::new(62.0, 34.0), Sense::click());
+                response.widget_info(|| {
+                    egui::WidgetInfo::selected(egui::Role::Tab, true, selected, tab.label())
+                });
+                let response = response.on_hover_cursor(egui::CursorIcon::PointingHand);
+                // 3D Builder: the active tab is a raised tile; hovering any
+                // other tab shows a darker tile on the tab bar.
+                let fill = if selected {
+                    Some(palette.panel)
+                } else if response.is_pointer_button_down_on() {
+                    Some(palette.pressed)
+                } else if response.hovered() || response.has_focus() {
+                    Some(palette.navigation_hover)
+                } else {
+                    None
+                };
+                if let Some(fill) = fill {
+                    ui.painter().rect_filled(rect, RADIUS_CONTROL, fill);
+                }
+                if response.has_focus() {
+                    ui.painter().rect_stroke(
+                        rect,
+                        RADIUS_CONTROL,
+                        Stroke::new(1.5, palette.accent_border),
+                        egui::StrokeKind::Inside,
+                    );
+                }
+                ui.painter().text(
+                    rect.center(),
+                    Align2::CENTER_CENTER,
+                    tab.label(),
+                    FontId::proportional(17.0),
+                    if selected {
                         palette.accent_dark
                     } else {
                         palette.text
-                    }))
-                    .stroke(Stroke::NONE)
-                    .corner_radius(RADIUS_CONTROL)
-                    .fill(if selected {
-                        palette.panel
-                    } else {
-                        Color32::TRANSPARENT
-                    });
-                let response = ui
-                    .add_sized([62.0, 34.0], button)
-                    .on_hover_text(format!("{} commands", tab.label()));
+                    },
+                );
+                let response = response.on_hover_text(format!("{} commands", tab.label()));
                 if response.clicked() {
                     selected_tab = Some(tab);
                 }
@@ -5950,6 +5974,11 @@ impl Builder3dApp {
 
 impl eframe::App for Builder3dApp {
     fn raw_input_hook(&mut self, ctx: &egui::Context, input: &mut egui::RawInput) {
+        if let Some([x, y]) = self.review.as_ref().and_then(|review| review.pointer()) {
+            input
+                .events
+                .push(egui::Event::PointerMoved(egui::pos2(x, y)));
+        }
         if !ctx.egui_wants_keyboard_input() {
             return;
         }
