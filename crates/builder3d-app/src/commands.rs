@@ -1836,19 +1836,39 @@ impl CommandState {
         operation: BooleanOperation,
         clear_selection: bool,
     ) -> Result<CommandOutcome, CommandError> {
-        let (_, command_result, report) = self.scene.apply_boolean(
+        // OF-9: a Merge result takes one color, that of whichever operand
+        // sits higher in the Items list (list order is scene order).
+        let uniform_color = if operation == BooleanOperation::Union {
+            Some(self.scene.object(target_index.min(tool_index))?.color())
+        } else {
+            None
+        };
+        let outcome =
+            self.apply_boolean_pair_with_color(target_index, tool_index, operation, uniform_color)?;
+        if clear_selection && matches!(outcome, CommandOutcome::Applied(_)) {
+            self.scene.set_selection(std::iter::empty::<usize>());
+        }
+        Ok(outcome)
+    }
+
+    fn apply_boolean_pair_with_color(
+        &mut self,
+        target_index: usize,
+        tool_index: usize,
+        operation: BooleanOperation,
+        uniform_color: Option<[f32; 4]>,
+    ) -> Result<CommandOutcome, CommandError> {
+        let (_, command_result, report) = self.scene.apply_boolean_with_color(
             target_index,
             tool_index,
             operation,
             BooleanOptions::default(),
+            uniform_color,
         )?;
         if !command_result.changed {
             return Ok(CommandOutcome::Noop(String::from(
                 "Boolean made no geometry change",
             )));
-        }
-        if clear_selection {
-            self.scene.set_selection(std::iter::empty::<usize>());
         }
         self.dirty = true;
         let label = boolean_label(operation);
@@ -2902,6 +2922,54 @@ mod tests {
         assert!(state.scene.objects()[0].children().is_empty());
         assert_eq!(state.selected_count(), 1);
         assert_ne!(state.scene.history_state_id(), before_history);
+    }
+
+    #[test]
+    fn merge_paints_the_result_with_the_top_most_selected_color() {
+        let mut state = CommandState::default();
+        for _ in 0..2 {
+            assert!(
+                state
+                    .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
+                    .is_ok()
+            );
+        }
+        let red = [0.9, 0.1, 0.1, 1.0];
+        let blue = [0.1, 0.2, 0.9, 1.0];
+        assert!(state.scene.set_color(0, red).is_ok());
+        assert!(state.scene.set_color(1, blue).is_ok());
+        assert!(
+            state
+                .scene
+                .set_transform(
+                    1,
+                    Transform::identity()
+                        .translated([10.0, 0.0, 0.0])
+                        .unwrap_or_else(|_| Transform::identity())
+                )
+                .is_ok()
+        );
+        // Click the lower list row first: it becomes the boolean target, but
+        // the color still comes from the top-most row (Object 1, red).
+        state.scene.set_selection([1, 0]);
+        assert_eq!(state.scene.ordered_selection(), vec![1, 0]);
+        let before = state.scene.history_state_id();
+        assert!(matches!(
+            state.dispatch(CommandId::Merge),
+            Ok(CommandOutcome::Applied(_))
+        ));
+        assert_eq!(state.scene.objects().len(), 1);
+        let merged = &state.scene.objects()[0];
+        assert_eq!(merged.color(), red);
+        assert!(
+            builder3d_core::boolean_color_provenance(merged.metadata(), merged.mesh().faces.len())
+                .is_none(),
+            "no per-face source colors remain"
+        );
+        // One undo entry restores both objects.
+        assert!(state.dispatch(CommandId::Undo).is_ok());
+        assert_eq!(state.scene.history_state_id(), before);
+        assert_eq!(state.scene.objects().len(), 2);
     }
 
     #[test]

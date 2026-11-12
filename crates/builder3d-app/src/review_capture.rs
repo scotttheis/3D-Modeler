@@ -12,7 +12,7 @@
 //! | Variable | Values | Default |
 //! |---|---|---|
 //! | `BUILDER3D_REVIEW_CAPTURE` | output PNG path | harness off |
-//! | `BUILDER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `resize`, `resize-drag`, `multi` | `move` |
+//! | `BUILDER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `resize`, `resize-drag`, `multi`, `merge` | `move` |
 //! | `BUILDER3D_REVIEW_THEME` | `light`, `dark` | `dark` |
 //! | `BUILDER3D_REVIEW_TAB` | a ribbon tab label such as `Object` | `Insert` |
 //! | `BUILDER3D_REVIEW_VIEW` | comma list of view toggles to turn on: `wireframe`, `xray` | none |
@@ -60,6 +60,9 @@ pub(crate) enum ReviewState {
     ResizeDrag,
     /// Several primitives with one selected, for list and inspector density.
     Multi,
+    /// A red cube (top of the Items list) and an overlapping blue cube,
+    /// selected blue-first and merged.
+    Merge,
 }
 
 impl ReviewState {
@@ -72,6 +75,7 @@ impl ReviewState {
             "resize" => Some(Self::Resize),
             "resize-drag" => Some(Self::ResizeDrag),
             "multi" => Some(Self::Multi),
+            "merge" => Some(Self::Merge),
             _ => None,
         }
     }

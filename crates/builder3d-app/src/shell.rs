@@ -511,6 +511,10 @@ impl Builder3dApp {
             | ReviewState::Rotate
             | ReviewState::Resize
             | ReviewState::ResizeDrag => &[builder3d_core::PrimitiveKind::Cube],
+            ReviewState::Merge => &[
+                builder3d_core::PrimitiveKind::Cube,
+                builder3d_core::PrimitiveKind::Cube,
+            ],
             ReviewState::Multi => &[
                 builder3d_core::PrimitiveKind::Cube,
                 builder3d_core::PrimitiveKind::Cylinder,
@@ -530,6 +534,27 @@ impl Builder3dApp {
             if let Some((id, position)) = placement {
                 let _ = self.commands.set_object_position_by_id(&id, position);
             }
+        }
+        if review.state() == ReviewState::Merge {
+            let colors = [[0.86, 0.16, 0.16, 1.0], [0.16, 0.36, 0.90, 1.0]];
+            for (index, color) in colors.into_iter().enumerate() {
+                self.commands.set_selection_indices([index]);
+                let _ = self.commands.set_selected_color(color);
+            }
+            if let Some(id) = self
+                .commands
+                .scene()
+                .objects()
+                .get(1)
+                .map(|object| object.object_id().to_owned())
+            {
+                let _ = self
+                    .commands
+                    .set_object_position_by_id(&id, [22.0, 20.0, 12.0]);
+            }
+            self.commands.set_selection_indices(std::iter::empty());
+            self.commands.set_selection_indices([1, 0]);
+            self.dispatch(CommandId::Merge);
         }
         self.transform_panel_mode = match review.state() {
             ReviewState::Rotate => TransformPanelMode::Rotate,

@@ -5,7 +5,10 @@ use serde_json::{Map, Value};
 use uuid::Uuid;
 
 use crate::commands::{Command, HistoryEntry};
-use crate::{BooleanColorProvenance, CoreError, Mesh, Transform, with_boolean_color_provenance};
+use crate::{
+    BooleanColorProvenance, CoreError, Mesh, Transform, with_boolean_color_provenance,
+    without_boolean_color_provenance,
+};
 
 /// Durable object ID used by scene, command, and project boundaries.
 pub type ObjectId = String;
@@ -1158,6 +1161,22 @@ impl Scene {
         operation: crate::BooleanOperation,
         options: crate::BooleanOptions,
     ) -> Result<(usize, CommandResult, crate::BooleanReport), CoreError> {
+        self.apply_boolean_with_color(target_index, tool_index, operation, options, None)
+    }
+
+    /// [`Self::apply_boolean`] with an optional single result color. With
+    /// `Some(color)` the result drops the per-face source colors and is
+    /// painted `color` in the same grouped history entry (the desktop Merge
+    /// uses the color of the top-most selected object); with `None` the
+    /// faces keep their source colors.
+    pub fn apply_boolean_with_color(
+        &mut self,
+        target_index: usize,
+        tool_index: usize,
+        operation: crate::BooleanOperation,
+        options: crate::BooleanOptions,
+        uniform_color: Option<[f32; 4]>,
+    ) -> Result<(usize, CommandResult, crate::BooleanReport), CoreError> {
         if target_index == tool_index {
             return Err(CoreError::MeshOperation(
                 "boolean target and tool must be different objects".to_owned(),
@@ -1191,7 +1210,11 @@ impl Scene {
             face_sources,
             tool_face_count,
         };
-        let metadata = with_boolean_color_provenance(&target_metadata, &provenance);
+        let metadata = if uniform_color.is_some() {
+            without_boolean_color_provenance(&target_metadata)
+        } else {
+            with_boolean_color_provenance(&target_metadata, &provenance)
+        };
         let target_local = result.mesh.transformed(&target_transform.inverse()?)?;
         let new_target_index = if target_index < tool_index {
             target_index
@@ -1199,11 +1222,14 @@ impl Scene {
             target_index.saturating_sub(1)
         };
         let after_selection = [new_target_index].into_iter().collect();
-        let commands: Vec<Box<dyn crate::Command>> = vec![
+        let mut commands: Vec<Box<dyn crate::Command>> = vec![
             Box::new(crate::ReplaceMeshCommand::new(target_index, target_local)),
             Box::new(crate::SetMetadataCommand::new(target_index, metadata)),
-            Box::new(crate::RemoveObjectCommand::new(tool_index)),
         ];
+        if let Some(color) = uniform_color {
+            commands.push(Box::new(crate::SetColorCommand::new(target_index, color)));
+        }
+        commands.push(Box::new(crate::RemoveObjectCommand::new(tool_index)));
         let command_result = self.execute(crate::GroupedCommand::with_after_selection(
             commands,
             after_selection,
