@@ -90,6 +90,6 @@ D5 `emboss_text` metadata.
 
 ## Last recovery point
 
-Git: branch `rebuild/work`, baseline commit of 2026-11-12. Tree snapshot:
-`G:\Builder3D-Rust_snapshot_20261112-042842_plan-v2-finish-pass` (4,133 files,
-781,834,354 bytes, counts verified).
+Git: branch `rebuild/work` at the OF-7/OF-8 commit (`89c1e6f`). Tree snapshot:
+`G:\Builder3D-Rust_snapshot_20261112-104713_OF-batch2` (5,603 files,
+827,512,382 bytes, counts verified; excludes `target\`).
