@@ -20,9 +20,8 @@ use crate::{
     camera::Camera,
     cpu::{CpuRenderOptions, render_cpu_with_options, write_ppm},
     floor::{
-        CONTACT_SHADOW_LAYERS, ContactCueCache, DEFAULT_FLOOR_SIZE, FLOOR_SURFACE_SUBDIVISIONS,
-        FloorGeometry, FloorTextMesh, build_floor, expand_shadow_polygon,
-        shadow_light_direction_world,
+        ContactCueCache, DEFAULT_FLOOR_SIZE, FLOOR_SURFACE_SUBDIVISIONS, FloorGeometry,
+        FloorTextMesh, build_floor, shadow_light_direction_world,
     },
     gizmo::{GizmoMode, build_gizmo},
     lighting::ViewportLighting,
@@ -36,6 +35,10 @@ const OVERLAY_VERTEX_STRIDE: usize = 36;
 const BYTES_PER_PIXEL: u64 = 4;
 const COPY_BYTES_PER_ROW_ALIGNMENT: u64 = 256;
 const MESH_UNIFORM_BYTES: usize = 240;
+/// Mesh uniform plus the view-space floor plane and the reflection fade.
+const REFLECTION_UNIFORM_BYTES: usize = MESH_UNIFORM_BYTES + 32;
+/// Opacity of the floor reflection where an object touches the floor.
+const REFLECTION_ALPHA: f32 = 0.20;
 const FLOOR_TEXT_VERTEX_STRIDE: usize = 36;
 /// Position plus barycentric coordinate per wireframe vertex.
 const WIRE_VERTEX_STRIDE: usize = 24;
@@ -183,6 +186,8 @@ struct GpuMaterialBatch {
     index_count: u32,
     uniform: wgpu::Buffer,
     bind_group: wgpu::BindGroup,
+    reflection_uniform: wgpu::Buffer,
+    reflection_bind_group: wgpu::BindGroup,
 }
 
 struct FaceIndexBatch {
@@ -228,6 +233,7 @@ pub struct ViewportRenderer {
     overlay_triangle_pipeline: wgpu::RenderPipeline,
     floor_text_pipeline: wgpu::RenderPipeline,
     wireframe_pipeline: wgpu::RenderPipeline,
+    reflection_pipeline: wgpu::RenderPipeline,
     text_atlas_layout: wgpu::BindGroupLayout,
     text_atlas_sampler: wgpu::Sampler,
     text_atlas: Option<wgpu::BindGroup>,
@@ -387,6 +393,7 @@ impl ViewportRenderer {
         let floor_text_pipeline =
             create_floor_text_pipeline(&device, &uniform_layout, &text_atlas_layout);
         let wireframe_pipeline = create_wireframe_pipeline(&device, &uniform_layout);
+        let reflection_pipeline = create_reflection_pipeline(&device, &uniform_layout);
         Ok(Self {
             instance,
             device,
@@ -416,6 +423,7 @@ impl ViewportRenderer {
             overlay_triangle_pipeline,
             floor_text_pipeline,
             wireframe_pipeline,
+            reflection_pipeline,
             text_atlas_layout,
             text_atlas_sampler,
             text_atlas: None,
@@ -865,6 +873,11 @@ impl ViewportRenderer {
                     usage: wgpu::BufferUsages::VERTEX,
                 })
         });
+        // A faint mirror image in the floor, as in 3D Builder; only when the
+        // floor is seen from above and never through X-ray.
+        let reflection = (floor.visible && !options.xray)
+            .then(|| floor_reflection(view_matrix))
+            .flatten();
         let mut encoder = self
             .device
             .create_command_encoder(&wgpu::CommandEncoderDescriptor {
@@ -937,6 +950,28 @@ impl ViewportRenderer {
                         material_parameters,
                     );
                     self.queue.write_buffer(&batch.uniform, 0, &bytes);
+                    if let Some(reflection) = &reflection {
+                        let mirrored = reflection.mirror.multiply(transform);
+                        let mirrored_view = view_matrix.multiply(mirrored);
+                        let mut reflection_bytes = make_mesh_uniform(
+                            view_projection.multiply(mirrored),
+                            mirrored_view,
+                            mirrored_view.inverse()?.transpose(),
+                            color,
+                            light_direction,
+                            material_parameters,
+                        );
+                        for value in reflection.plane.into_iter().chain([
+                            reflection_fade_height(object),
+                            REFLECTION_ALPHA,
+                            0.0,
+                            0.0,
+                        ]) {
+                            reflection_bytes.extend_from_slice(&value.to_le_bytes());
+                        }
+                        self.queue
+                            .write_buffer(&batch.reflection_uniform, 0, &reflection_bytes);
+                    }
                     pass.set_bind_group(0, &batch.bind_group, &[]);
                     pass.set_index_buffer(batch.index.slice(..), wgpu::IndexFormat::Uint32);
                     pass.draw_indexed(0..batch.index_count, 0, 0..1);
@@ -963,6 +998,23 @@ impl ViewportRenderer {
                 pass.set_bind_group(0, &overlay_bind_group, &[]);
                 pass.set_vertex_buffer(0, triangle_buffer.slice(..));
                 pass.draw(0..overlay.triangle_vertex_count(), 0..1);
+            }
+            if reflection.is_some() {
+                pass.set_pipeline(&self.reflection_pipeline);
+                for object in scene.objects() {
+                    let Some(gpu) = self.gpu_objects.get(object.object_id()) else {
+                        continue;
+                    };
+                    if preview_translation.is_some_and(|(id, _)| id == object.object_id()) {
+                        continue;
+                    }
+                    pass.set_vertex_buffer(0, gpu.vertex.slice(..));
+                    for batch in &gpu.batches {
+                        pass.set_bind_group(0, &batch.reflection_bind_group, &[]);
+                        pass.set_index_buffer(batch.index.slice(..), wgpu::IndexFormat::Uint32);
+                        pass.draw_indexed(0..batch.index_count, 0, 0..1);
+                    }
+                }
             }
             // Floor text lies on the build plane after the floor surface and
             // shadows; the depth test lets objects standing on it hide it.
@@ -1177,7 +1229,7 @@ impl ViewportRenderer {
                     "GPU material batch count exceeds u64",
                 ))
             })?
-            .checked_mul(MESH_UNIFORM_BYTES as u64)
+            .checked_mul((MESH_UNIFORM_BYTES + REFLECTION_UNIFORM_BYTES) as u64)
             .ok_or_else(|| {
                 ViewportError::CapacityExceeded(String::from(
                     "GPU material uniform allocation overflow",
@@ -1228,12 +1280,29 @@ impl ViewportRenderer {
                         resource: uniform.as_entire_binding(),
                     }],
                 });
+                let reflection_uniform = self.device.create_buffer(&wgpu::BufferDescriptor {
+                    label: Some("builder3d-reflection-uniform"),
+                    size: REFLECTION_UNIFORM_BYTES as u64,
+                    usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+                    mapped_at_creation: false,
+                });
+                let reflection_bind_group =
+                    self.device.create_bind_group(&wgpu::BindGroupDescriptor {
+                        label: Some("builder3d-reflection-bind-group"),
+                        layout: &self.uniform_layout,
+                        entries: &[wgpu::BindGroupEntry {
+                            binding: 0,
+                            resource: reflection_uniform.as_entire_binding(),
+                        }],
+                    });
                 GpuMaterialBatch {
                     authored_color: batch.authored_color,
                     index,
                     index_count,
                     uniform,
                     bind_group,
+                    reflection_uniform,
+                    reflection_bind_group,
                 }
             })
             .collect();
@@ -1807,6 +1876,103 @@ fn create_floor_text_pipeline(
     })
 }
 
+/// Mirror transform and view-space floor plane for one frame's reflection.
+struct FloorReflection {
+    mirror: Mat4,
+    /// View-space plane `(normal, d)` of the world floor y = 0.
+    plane: [f32; 4],
+}
+
+fn floor_reflection(view_matrix: Mat4) -> Option<FloorReflection> {
+    let mirror = Mat4::from_rows([
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, -1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0],
+    ])
+    .ok()?;
+    let normal = view_matrix.transform4([0.0, 1.0, 0.0, 0.0]);
+    let origin = view_matrix.transform4([0.0, 0.0, 0.0, 1.0]);
+    let d = -(normal[0] * origin[0] + normal[1] * origin[1] + normal[2] * origin[2]);
+    Some(FloorReflection {
+        mirror,
+        plane: [normal[0], normal[1], normal[2], d],
+    })
+}
+
+/// Depth below the floor over which an object's reflection fades out.
+fn reflection_fade_height(object: &RenderObject) -> f32 {
+    object
+        .world_bounds()
+        .map(|bounds| ((bounds.maximum[1] - bounds.minimum[1]) * 0.35).clamp(2.0, 60.0))
+        .unwrap_or(10.0)
+}
+
+fn create_reflection_pipeline(
+    device: &wgpu::Device,
+    uniform_layout: &wgpu::BindGroupLayout,
+) -> wgpu::RenderPipeline {
+    let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
+        label: Some("builder3d-reflection-shader"),
+        source: wgpu::ShaderSource::Wgsl(REFLECTION_SHADER.into()),
+    });
+    let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+        label: Some("builder3d-reflection-pipeline-layout"),
+        bind_group_layouts: &[Some(uniform_layout)],
+        immediate_size: 0,
+    });
+    let targets = [Some(wgpu::ColorTargetState {
+        format: wgpu::TextureFormat::Rgba8Unorm,
+        blend: Some(wgpu::BlendState::ALPHA_BLENDING),
+        write_mask: wgpu::ColorWrites::ALL,
+    })];
+    device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+        label: Some("builder3d-reflection-pipeline"),
+        layout: Some(&pipeline_layout),
+        vertex: wgpu::VertexState {
+            module: &shader,
+            entry_point: Some("vertex_main"),
+            compilation_options: Default::default(),
+            buffers: &[Some(wgpu::VertexBufferLayout {
+                array_stride: 24,
+                step_mode: wgpu::VertexStepMode::Vertex,
+                attributes: &[
+                    wgpu::VertexAttribute {
+                        format: wgpu::VertexFormat::Float32x3,
+                        offset: 0,
+                        shader_location: 0,
+                    },
+                    wgpu::VertexAttribute {
+                        format: wgpu::VertexFormat::Float32x3,
+                        offset: 12,
+                        shader_location: 1,
+                    },
+                ],
+            })],
+        },
+        primitive: wgpu::PrimitiveState::default(),
+        depth_stencil: Some(wgpu::DepthStencilState {
+            format: wgpu::TextureFormat::Depth24Plus,
+            depth_write_enabled: Some(false),
+            depth_compare: Some(wgpu::CompareFunction::LessEqual),
+            stencil: Default::default(),
+            bias: Default::default(),
+        }),
+        multisample: wgpu::MultisampleState {
+            count: VIEWPORT_SAMPLE_COUNT,
+            ..Default::default()
+        },
+        fragment: Some(wgpu::FragmentState {
+            module: &shader,
+            entry_point: Some("fragment_main"),
+            compilation_options: Default::default(),
+            targets: &targets,
+        }),
+        multiview_mask: None,
+        cache: None,
+    })
+}
+
 fn release_gpu_geometry(ledger: &mut ResourceLedger, gpu: GpuGeometry) {
     let _ = ledger.release(gpu.ledger_id);
     if let Some(wire) = gpu.wire {
@@ -2044,23 +2210,35 @@ fn build_overlay_vertices(
     if shadow_strength > 0.0 {
         let light_world = shadow_light_direction_world(camera, options.lighting);
         for cue in cues {
-            let polygon = cue.shadow_polygon(light_world);
-            for (layer_scale, layer_alpha) in CONTACT_SHADOW_LAYERS {
-                let expanded = expand_shadow_polygon(&polygon, layer_scale);
-                let mut shadow_color = cue_color(cue.color, options.theme);
-                shadow_color[3] = (shadow_color[3] * shadow_strength * layer_alpha).clamp(0.0, 1.0);
-                for pair in expanded.windows(2) {
-                    triangles.push(OverlayVertex {
-                        ..OverlayVertex::new(expanded[0], shadow_color)
-                    });
-                    triangles.push(OverlayVertex {
-                        ..OverlayVertex::new(pair[0], shadow_color)
-                    });
-                    triangles.push(OverlayVertex {
-                        ..OverlayVertex::new(pair[1], shadow_color)
-                    });
-                }
+            let cast = cue.shadow_polygon(light_world);
+            // Each polygon vertex costs a core triangle, an edge quad and a
+            // corner fan. Keep room for the gizmo: a crowded scene loses
+            // its last shadows rather than the whole frame.
+            let needed = (cue.polygon.len() + cast.len()) * (3 + 6 + 3 * SOFT_CORNER_SEGMENTS);
+            let used = lines.len().saturating_add(triangles.len());
+            if used.saturating_add(needed)
+                > MAX_OVERLAY_VERTICES.saturating_sub(OVERLAY_GIZMO_RESERVE)
+            {
+                break;
             }
+            let extent = cue.bounds.maximum[1] - cue.bounds.minimum[1];
+            let footprint = polygon_span(&cue.polygon).max(1.0);
+            // A tight, darker contact shadow grounds the object; a wider,
+            // lighter cast shadow falls away from the key light.
+            push_soft_polygon(
+                &mut triangles,
+                &cue.polygon,
+                (footprint * 0.10).max(1.5),
+                SHADOW_COLOR,
+                CONTACT_SHADOW_ALPHA * shadow_strength,
+            );
+            push_soft_polygon(
+                &mut triangles,
+                &cast,
+                (footprint * 0.22 + extent.max(0.0) * 0.18).max(3.0),
+                SHADOW_COLOR,
+                CAST_SHADOW_ALPHA * shadow_strength,
+            );
         }
     }
     if let Some(center) = gizmo_center {
@@ -2164,6 +2342,118 @@ fn display_color(authored: [f32; 4], selected: bool, options: &ViewportRenderOpt
         color[3] = (color[3] * 0.30).clamp(0.05, 0.45);
     }
     color
+}
+
+/// Neutral shadow tone, as in 3D Builder, for both themes.
+const SHADOW_COLOR: [f32; 3] = [0.0, 0.0, 0.0];
+const CONTACT_SHADOW_ALPHA: f32 = 0.30;
+const CAST_SHADOW_ALPHA: f32 = 0.17;
+/// Arc segments per corner of a soft polygon's penumbra.
+const SOFT_CORNER_SEGMENTS: usize = 4;
+/// `floor_pattern` marker for soft-shadow vertices: the fragment shader
+/// fades alpha smoothly over `surface_fade` (0 inside, 1 at the outer edge).
+const SOFT_SHADOW_PATTERN: f32 = 2.0;
+/// Overlay vertices kept free for the gizmo after floor shadows.
+const OVERLAY_GIZMO_RESERVE: usize = 2_048;
+
+/// Largest x/z distance across a floor polygon.
+fn polygon_span(polygon: &[[f32; 3]]) -> f32 {
+    let mut span = 0.0_f32;
+    for (index, first) in polygon.iter().enumerate() {
+        for second in &polygon[index + 1..] {
+            let dx = first[0] - second[0];
+            let dz = first[2] - second[2];
+            span = span.max((dx * dx + dz * dz).sqrt());
+        }
+    }
+    span
+}
+
+/// Appends a convex floor polygon with a smooth penumbra `radius` wide:
+/// the solid core, one quad per edge and an arc fan per corner, each
+/// carrying a 0..1 gradient the shader turns into a soft falloff. One
+/// continuous gradient replaces stacked translucent layers, so there are
+/// no bands.
+fn push_soft_polygon(
+    triangles: &mut Vec<OverlayVertex>,
+    polygon: &[[f32; 3]],
+    radius: f32,
+    color: [f32; 3],
+    alpha: f32,
+) {
+    let count = polygon.len();
+    if count < 3 || alpha <= 0.0 || !radius.is_finite() {
+        return;
+    }
+    let y = 0.004;
+    let mut center = [0.0_f32; 2];
+    for point in polygon {
+        center[0] += point[0] / count as f32;
+        center[1] += point[2] / count as f32;
+    }
+    let rgba = [color[0], color[1], color[2], alpha];
+    let vertex = |x: f32, z: f32, gradient: f32| OverlayVertex {
+        position: [x, y, z],
+        color: rgba,
+        surface_fade: gradient,
+        floor_pattern: SOFT_SHADOW_PATTERN,
+    };
+    // Outward unit normal of each edge (point[i] -> point[i + 1]).
+    let normals = (0..count)
+        .map(|index| {
+            let a = polygon[index];
+            let b = polygon[(index + 1) % count];
+            let (dx, dz) = (b[0] - a[0], b[2] - a[2]);
+            let length = (dx * dx + dz * dz).sqrt().max(1.0e-6);
+            let mut normal = [dz / length, -dx / length];
+            let middle = [
+                (a[0] + b[0]) * 0.5 - center[0],
+                (a[2] + b[2]) * 0.5 - center[1],
+            ];
+            if normal[0] * middle[0] + normal[1] * middle[1] < 0.0 {
+                normal = [-normal[0], -normal[1]];
+            }
+            normal
+        })
+        .collect::<Vec<_>>();
+    for index in 0..count {
+        let a = polygon[index];
+        let b = polygon[(index + 1) % count];
+        triangles.extend([
+            vertex(center[0], center[1], 0.0),
+            vertex(a[0], a[2], 0.0),
+            vertex(b[0], b[2], 0.0),
+        ]);
+        let normal = normals[index];
+        let (ox, oz) = (normal[0] * radius, normal[1] * radius);
+        triangles.extend([
+            vertex(a[0], a[2], 0.0),
+            vertex(b[0], b[2], 0.0),
+            vertex(b[0] + ox, b[2] + oz, 1.0),
+            vertex(a[0], a[2], 0.0),
+            vertex(b[0] + ox, b[2] + oz, 1.0),
+            vertex(a[0] + ox, a[2] + oz, 1.0),
+        ]);
+        // Corner arc at b, from this edge's normal to the next edge's.
+        let next = normals[(index + 1) % count];
+        let start = normal[1].atan2(normal[0]);
+        let mut sweep = next[1].atan2(next[0]) - start;
+        while sweep > std::f32::consts::PI {
+            sweep -= std::f32::consts::TAU;
+        }
+        while sweep < -std::f32::consts::PI {
+            sweep += std::f32::consts::TAU;
+        }
+        for step in 0..SOFT_CORNER_SEGMENTS {
+            let t0 = start + sweep * step as f32 / SOFT_CORNER_SEGMENTS as f32;
+            let t1 = start + sweep * (step + 1) as f32 / SOFT_CORNER_SEGMENTS as f32;
+            triangles.extend([
+                vertex(b[0], b[2], 0.0),
+                vertex(b[0] + t0.cos() * radius, b[2] + t0.sin() * radius, 1.0),
+                vertex(b[0] + t1.cos() * radius, b[2] + t1.sin() * radius, 1.0),
+            ]);
+        }
+    }
 }
 
 fn floor_surface_vertex(position: [f32; 3], color: [f32; 4], fade_parameter: f32) -> OverlayVertex {
@@ -2319,7 +2609,12 @@ fn vertex_main(
 @fragment
 fn fragment_main(input: VertexOutput) -> @location(0) vec4<f32> {
     var color = input.color;
-    if input.floor_pattern > 0.5 {
+    if input.floor_pattern > 1.5 {
+        // Soft shadow penumbra: an eased falloff with no visible edge.
+        let t = clamp(input.surface_fade, 0.0, 1.0);
+        let falloff = (1.0 - t) * (1.0 - t) * (1.0 + 2.0 * t);
+        color = vec4<f32>(color.rgb, color.a * falloff);
+    } else if input.floor_pattern > 0.5 {
         let checker_cell = vec2<i32>(floor(input.world_position.xz / 50.0));
         let alternate = ((checker_cell.x + checker_cell.y) & 1) == 1;
         let cell_position = input.world_position.xz / 50.0;
@@ -2335,6 +2630,55 @@ fn fragment_main(input: VertexOutput) -> @location(0) vec4<f32> {
     let low = linear * 12.92;
     let high = 1.055 * pow(linear, vec3<f32>(1.0 / 2.4)) - vec3<f32>(0.055);
     return vec4<f32>(select(high, low, linear <= vec3<f32>(0.0031308)), color.a);
+}
+"#;
+
+const REFLECTION_SHADER: &str = r#"
+struct Uniforms {
+    view_projection: mat4x4<f32>,
+    model_view: mat4x4<f32>,
+    normal_transform: mat4x4<f32>,
+    color: vec4<f32>,
+    light_direction: vec4<f32>,
+    material: vec4<f32>,
+    floor_plane: vec4<f32>,
+    fade: vec4<f32>,
+};
+@group(0) @binding(0) var<uniform> uniforms: Uniforms;
+struct VertexOutput {
+    @builtin(position) position: vec4<f32>,
+    @location(0) normal: vec3<f32>,
+    @location(1) view_position: vec3<f32>,
+};
+@vertex
+fn vertex_main(@location(0) position: vec3<f32>, @location(1) normal: vec3<f32>) -> VertexOutput {
+    let local_position = vec4<f32>(position, 1.0);
+    let view_position = uniforms.model_view * local_position;
+    let view_normal = uniforms.normal_transform * vec4<f32>(normal, 0.0);
+    return VertexOutput(
+        uniforms.view_projection * local_position,
+        view_normal.xyz,
+        view_position.xyz,
+    );
+}
+@fragment
+fn fragment_main(input: VertexOutput) -> @location(0) vec4<f32> {
+    // Mirrored geometry lies below the floor; fade it out with depth.
+    let below = -(dot(uniforms.floor_plane.xyz, input.view_position) + uniforms.floor_plane.w);
+    let fade = 1.0 - smoothstep(0.0, uniforms.fade.x, below);
+    if fade <= 0.002 {
+        discard;
+    }
+    let normal = normalize(input.normal);
+    let light = normalize(uniforms.light_direction.xyz);
+    let facing = dot(normal, light);
+    let wrapped = (facing * 0.5 + 0.5) * (facing * 0.5 + 0.5);
+    let intensity = uniforms.material.y + uniforms.material.x * (0.55 * max(facing, 0.0) + 0.45 * wrapped);
+    let linear = max(uniforms.color.rgb * intensity, vec3<f32>(0.0));
+    let low = linear * 12.92;
+    let high = 1.055 * pow(linear, vec3<f32>(1.0 / 2.4)) - vec3<f32>(0.055);
+    let srgb = select(high, low, linear <= vec3<f32>(0.0031308));
+    return vec4<f32>(srgb, uniforms.fade.y * fade);
 }
 "#;
 
@@ -2435,6 +2779,40 @@ mod tests {
             cpu_clear_color(ViewportTheme::Dark),
             cpu_clear_color(ViewportTheme::Light)
         );
+    }
+
+    #[test]
+    fn soft_shadow_polygon_has_a_solid_core_and_one_smooth_penumbra() {
+        let square = [
+            [0.0, 0.0, 0.0],
+            [10.0, 0.0, 0.0],
+            [10.0, 0.0, 10.0],
+            [0.0, 0.0, 10.0],
+        ];
+        let mut triangles = Vec::new();
+        push_soft_polygon(&mut triangles, &square, 2.0, SHADOW_COLOR, 0.3);
+        assert_eq!(
+            triangles.len(),
+            square.len() * (3 + 6 + 3 * SOFT_CORNER_SEGMENTS)
+        );
+        for vertex in &triangles {
+            assert_eq!(vertex.floor_pattern, SOFT_SHADOW_PATTERN);
+            assert_eq!(vertex.color, [0.0, 0.0, 0.0, 0.3]);
+            let [x, _, z] = vertex.position;
+            // Inside the polygon the gradient is 0; at the penumbra edge, 1,
+            // exactly one radius outside the square.
+            let distance =
+                ((x - x.clamp(0.0, 10.0)).powi(2) + (z - z.clamp(0.0, 10.0)).powi(2)).sqrt();
+            if vertex.surface_fade == 0.0 {
+                assert!(distance < 1.0e-4);
+            } else {
+                assert_eq!(vertex.surface_fade, 1.0);
+                assert!((distance - 2.0).abs() < 1.0e-3, "{distance}");
+            }
+        }
+        let mut none = Vec::new();
+        push_soft_polygon(&mut none, &square[..2], 2.0, SHADOW_COLOR, 0.3);
+        assert!(none.is_empty());
     }
 
     #[test]

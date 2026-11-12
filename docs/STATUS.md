@@ -76,7 +76,9 @@ D5 `emboss_text` metadata.
   OF-7/8; OF-5 waits for shots), one commit each, **none owner-reviewed
   yet**. Done so far: OF-1 floor numbers (flat on the floor plane, depth-
   tested); OF-1 resize view + OF-3 (3D Builder box, dots, chevrons, size
-  label, drag band); OF-4 top-bar hover; OF-6 wireframe; OF-9 Merge color. Next: OF-2 contact shadow. Shots still owed by the owner: X-ray with two objects,
+  label, drag band); OF-4 top-bar hover; OF-6 wireframe; OF-9 Merge color; OF-2 contact
+  shadow and floor reflection. Next: OF-7/OF-8 (Paint/Color/Material, Edit
+  tools). Shots still owed by the owner: X-ray with two objects,
   Paint/Color/Material, Merge.
 - Review harness: `BUILDER3D_REVIEW_CAMERA=yaw,pitch,distance` poses the
   camera after auto-framing; state `resize-drag` holds the +X handle mid-drag;
