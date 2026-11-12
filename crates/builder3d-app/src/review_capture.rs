@@ -12,11 +12,12 @@
 //! | Variable | Values | Default |
 //! |---|---|---|
 //! | `BUILDER3D_REVIEW_CAPTURE` | output PNG path | harness off |
-//! | `BUILDER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `resize`, `resize-drag`, `multi`, `merge` | `move` |
+//! | `BUILDER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `resize`, `resize-drag`, `multi`, `merge`, `unselected`, `material` | `move` |
 //! | `BUILDER3D_REVIEW_THEME` | `light`, `dark` | `dark` |
 //! | `BUILDER3D_REVIEW_TAB` | a ribbon tab label such as `Object` | `Insert` |
 //! | `BUILDER3D_REVIEW_VIEW` | comma list of view toggles to turn on: `wireframe`, `xray` | none |
 //! | `BUILDER3D_REVIEW_POINTER` | `x,y` in window points: rests the pointer there to show a hover state (no button is pressed) | pointer outside |
+//! | `BUILDER3D_REVIEW_INTERACTIVE` | `1`: set up the state with isolated settings and stay open for hands-on checks instead of capturing | off |
 //! | `BUILDER3D_REVIEW_CAMERA` | `yaw,pitch,distance` in degrees and mm, applied after auto-framing; distance `0` keeps the framed distance | framed view |
 //!
 //! A capture shows what was painted. It is engineering evidence for layout and
@@ -63,6 +64,10 @@ pub(crate) enum ReviewState {
     /// A red cube (top of the Items list) and an overlapping blue cube,
     /// selected blue-first and merged.
     Merge,
+    /// One cube with nothing selected.
+    Unselected,
+    /// One selected cube with the Material dialog open.
+    Material,
 }
 
 impl ReviewState {
@@ -76,6 +81,8 @@ impl ReviewState {
             "resize-drag" => Some(Self::ResizeDrag),
             "multi" => Some(Self::Multi),
             "merge" => Some(Self::Merge),
+            "unselected" => Some(Self::Unselected),
+            "material" => Some(Self::Material),
             _ => None,
         }
     }
@@ -100,6 +107,7 @@ pub(crate) struct ReviewCapture {
     camera: Option<[f32; 3]>,
     pointer: Option<[f32; 2]>,
     view: Vec<String>,
+    interactive: bool,
     frames: u32,
     requested: bool,
     finished: Arc<AtomicBool>,
@@ -170,6 +178,8 @@ impl ReviewCapture {
             camera,
             pointer,
             view,
+            interactive: env::var_os("BUILDER3D_REVIEW_INTERACTIVE")
+                .is_some_and(|value| value == "1"),
             frames: 0,
             requested: false,
             finished: Arc::new(AtomicBool::new(false)),
@@ -213,6 +223,9 @@ impl ReviewCapture {
     /// settled, and reports completion after the backend has delivered it.
     pub(crate) fn advance(&mut self, ctx: &egui::Context) -> ReviewProgress {
         self.frames = self.frames.saturating_add(1);
+        if self.interactive {
+            return ReviewProgress::Pending;
+        }
         if self.finished.load(Ordering::Acquire) {
             return ReviewProgress::Finished;
         }

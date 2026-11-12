@@ -825,15 +825,49 @@ impl DialogState {
 
     fn material_dialog(&mut self, ui: &mut egui::Ui, action: &mut Option<DialogAction>) {
         ui.label(format!(
-            "Selected object(s) color (RGBA, {})",
+            "Choose a color for {} selected object(s)",
             self.selected_object_count
         ));
-        ui.horizontal(|ui| {
-            ui.color_edit_button_rgba_unmultiplied(&mut self.color);
-            ui.label("Choose a solid color");
+        // Basic colors, as in the Python build's color dialog.
+        ui.horizontal_wrapped(|ui| {
+            ui.spacing_mut().item_spacing = egui::vec2(4.0, 4.0);
+            for swatch in MATERIAL_SWATCHES {
+                let color = egui::Color32::from_rgb(swatch[0], swatch[1], swatch[2]);
+                let (rect, response) =
+                    ui.allocate_exact_size(egui::vec2(22.0, 22.0), egui::Sense::click());
+                let chosen = self.color[..3]
+                    .iter()
+                    .zip(swatch)
+                    .all(|(value, channel)| (value * 255.0).round() as u8 == channel);
+                ui.painter().rect_filled(rect, 4.0, color);
+                ui.painter().rect_stroke(
+                    rect,
+                    4.0,
+                    egui::Stroke::new(
+                        if chosen || response.hovered() {
+                            2.0
+                        } else {
+                            1.0
+                        },
+                        ui.visuals().widgets.inactive.bg_stroke.color,
+                    ),
+                    egui::StrokeKind::Inside,
+                );
+                if response.clicked() {
+                    let alpha = self.color[3];
+                    self.color = [
+                        f32::from(swatch[0]) / 255.0,
+                        f32::from(swatch[1]) / 255.0,
+                        f32::from(swatch[2]) / 255.0,
+                        alpha,
+                    ];
+                }
+            }
         });
-        for (label, index) in [("R", 0_usize), ("G", 1), ("B", 2), ("A", 3)] {
-            ui.add(egui::Slider::new(&mut self.color[index], 0.0..=1.0).text(label));
+        ui.add_space(4.0);
+        let alpha = self.color[3];
+        if let Some([r, g, b]) = hsv_picker(ui, [self.color[0], self.color[1], self.color[2]]) {
+            self.color = [r, g, b, alpha];
         }
         if ui
             .button(format!(
@@ -1093,7 +1127,166 @@ fn native_path_picker(kind: DialogKind, current: &str) -> Option<PathBuf> {
     }
 }
 
-fn image_path_picker(current: &str) -> Option<PathBuf> {
+/// A compact saturation/value square over a hue bar, with a preview chip.
+/// Returns the new sRGB color (0..1 channels) when the user changed it.
+fn hsv_picker(ui: &mut egui::Ui, rgb: [f32; 3]) -> Option<[f32; 3]> {
+    let id = ui.scope_id().with("builder3d-hsv-picker");
+    // Keep the hue while saturation or value is zero, where RGB loses it.
+    let stored = ui.data(|data| data.get_temp::<[f32; 3]>(id));
+    let mut hsv = rgb_to_hsv(rgb);
+    if let Some(previous) = stored
+        && hsv_to_rgb(previous)
+            .iter()
+            .zip(rgb)
+            .all(|(a, b)| (a - b).abs() < 1.5 / 255.0)
+    {
+        hsv = previous;
+    }
+    let mut changed = false;
+    let size = egui::vec2(220.0, 140.0);
+    let (square, response) = ui.allocate_exact_size(size, egui::Sense::click_and_drag());
+    let hue_rgb = hsv_to_rgb([hsv[0], 1.0, 1.0]);
+    let to_color = |c: [f32; 3]| {
+        egui::Color32::from_rgb(
+            (c[0] * 255.0).round() as u8,
+            (c[1] * 255.0).round() as u8,
+            (c[2] * 255.0).round() as u8,
+        )
+    };
+    // White to hue across, then a black overlay down: the classic picker.
+    let mut mesh = egui::Mesh::default();
+    mesh.colored_vertex(square.left_top(), egui::Color32::WHITE);
+    mesh.colored_vertex(square.right_top(), to_color(hue_rgb));
+    mesh.colored_vertex(square.right_bottom(), to_color(hue_rgb));
+    mesh.colored_vertex(square.left_bottom(), egui::Color32::WHITE);
+    mesh.add_triangle(0, 1, 2);
+    mesh.add_triangle(0, 2, 3);
+    mesh.colored_vertex(square.left_top(), egui::Color32::TRANSPARENT);
+    mesh.colored_vertex(square.right_top(), egui::Color32::TRANSPARENT);
+    mesh.colored_vertex(square.right_bottom(), egui::Color32::BLACK);
+    mesh.colored_vertex(square.left_bottom(), egui::Color32::BLACK);
+    mesh.add_triangle(4, 5, 6);
+    mesh.add_triangle(4, 6, 7);
+    ui.painter().add(egui::Shape::mesh(mesh));
+    if let Some(pointer) = response.interact_pointer_pos() {
+        hsv[1] = ((pointer.x - square.left()) / square.width()).clamp(0.0, 1.0);
+        hsv[2] = 1.0 - ((pointer.y - square.top()) / square.height()).clamp(0.0, 1.0);
+        changed = true;
+    }
+    let marker = egui::pos2(
+        square.left() + hsv[1] * square.width(),
+        square.top() + (1.0 - hsv[2]) * square.height(),
+    );
+    ui.painter()
+        .circle_stroke(marker, 6.0, egui::Stroke::new(2.0, egui::Color32::WHITE));
+    ui.painter().circle_stroke(
+        marker,
+        7.0,
+        egui::Stroke::new(1.0, egui::Color32::from_black_alpha(140)),
+    );
+    let (bar, bar_response) =
+        ui.allocate_exact_size(egui::vec2(size.x, 14.0), egui::Sense::click_and_drag());
+    let mut hue_mesh = egui::Mesh::default();
+    for step in 0..=6 {
+        let t = step as f32 / 6.0;
+        let color = to_color(hsv_to_rgb([t, 1.0, 1.0]));
+        let x = bar.left() + t * bar.width();
+        hue_mesh.colored_vertex(egui::pos2(x, bar.top()), color);
+        hue_mesh.colored_vertex(egui::pos2(x, bar.bottom()), color);
+        if step > 0 {
+            let base = (step as u32 - 1) * 2;
+            hue_mesh.add_triangle(base, base + 1, base + 2);
+            hue_mesh.add_triangle(base + 1, base + 3, base + 2);
+        }
+    }
+    ui.painter().add(egui::Shape::mesh(hue_mesh));
+    if let Some(pointer) = bar_response.interact_pointer_pos() {
+        hsv[0] = ((pointer.x - bar.left()) / bar.width()).clamp(0.0, 0.9999);
+        changed = true;
+    }
+    let hue_x = bar.left() + hsv[0] * bar.width();
+    ui.painter().rect_stroke(
+        egui::Rect::from_center_size(egui::pos2(hue_x, bar.center().y), egui::vec2(6.0, 18.0)),
+        2.0,
+        egui::Stroke::new(2.0, egui::Color32::WHITE),
+        egui::StrokeKind::Middle,
+    );
+    let result = hsv_to_rgb(hsv);
+    ui.horizontal(|ui| {
+        let (chip, _) = ui.allocate_exact_size(egui::vec2(40.0, 20.0), egui::Sense::hover());
+        ui.painter().rect_filled(chip, 4.0, to_color(result));
+        ui.label(format!(
+            "#{:02X}{:02X}{:02X}",
+            (result[0] * 255.0).round() as u8,
+            (result[1] * 255.0).round() as u8,
+            (result[2] * 255.0).round() as u8
+        ));
+    });
+    ui.data_mut(|data| data.insert_temp(id, hsv));
+    changed.then_some(result)
+}
+
+fn rgb_to_hsv([r, g, b]: [f32; 3]) -> [f32; 3] {
+    let max = r.max(g).max(b);
+    let min = r.min(g).min(b);
+    let delta = max - min;
+    let hue = if delta <= f32::EPSILON {
+        0.0
+    } else if max == r {
+        ((g - b) / delta).rem_euclid(6.0) / 6.0
+    } else if max == g {
+        ((b - r) / delta + 2.0) / 6.0
+    } else {
+        ((r - g) / delta + 4.0) / 6.0
+    };
+    let saturation = if max <= f32::EPSILON {
+        0.0
+    } else {
+        delta / max
+    };
+    [hue, saturation, max]
+}
+
+fn hsv_to_rgb([h, s, v]: [f32; 3]) -> [f32; 3] {
+    let sector = (h.rem_euclid(1.0) * 6.0).min(5.9999);
+    let index = sector.floor();
+    let fraction = sector - index;
+    let (p, q, t) = (
+        v * (1.0 - s),
+        v * (1.0 - s * fraction),
+        v * (1.0 - s * (1.0 - fraction)),
+    );
+    match index as u8 {
+        0 => [v, t, p],
+        1 => [q, v, p],
+        2 => [p, v, t],
+        3 => [p, q, v],
+        4 => [t, p, v],
+        _ => [v, p, q],
+    }
+}
+
+/// The Python color dialog's basic colors, as RGB.
+const MATERIAL_SWATCHES: [[u8; 3]; 16] = [
+    [255, 255, 255],
+    [192, 192, 192],
+    [128, 128, 128],
+    [32, 32, 32],
+    [220, 40, 40],
+    [240, 130, 30],
+    [250, 210, 40],
+    [120, 200, 60],
+    [40, 160, 80],
+    [40, 180, 200],
+    [40, 110, 220],
+    [90, 70, 200],
+    [160, 60, 190],
+    [230, 90, 160],
+    [150, 95, 50],
+    [235, 205, 160],
+];
+
+pub(crate) fn image_path_picker(current: &str) -> Option<PathBuf> {
     let current_path = Path::new(current.trim());
     let mut dialog = rfd::FileDialog::new().set_title("Open Image for Average Color");
     if let Some(parent) = current_path
@@ -1209,6 +1402,17 @@ mod tests {
         });
         output.textures_delta.clear();
         assert_eq!(action, Some(DialogAction::Close));
+    }
+
+    #[test]
+    fn hsv_conversion_round_trips_the_swatches() {
+        for swatch in MATERIAL_SWATCHES {
+            let rgb = swatch.map(|channel| f32::from(channel) / 255.0);
+            let back = hsv_to_rgb(rgb_to_hsv(rgb));
+            for (a, b) in rgb.iter().zip(back) {
+                assert!((a - b).abs() < 1.0e-4, "{swatch:?}");
+            }
+        }
     }
 
     #[test]

@@ -205,7 +205,10 @@ pub fn apply(ctx: &Context, mode: ThemeMode) {
     visuals.widgets.noninteractive.fg_stroke.color = palette.text;
     visuals.widgets.noninteractive.bg_stroke.color = palette.divider;
     visuals.widgets.noninteractive.weak_bg_fill = palette.surface_alt;
-    visuals.widgets.inactive.bg_fill = palette.panel;
+    // Slider rails and checkbox wells use this fill; on the panel color
+    // they vanished (white on white), leaving only floating handles.
+    visuals.widgets.inactive.bg_fill = palette.surface_raised;
+    visuals.slider_trailing_fill = true;
     visuals.widgets.inactive.weak_bg_fill = palette.surface;
     visuals.widgets.inactive.bg_stroke.color = palette.border;
     visuals.widgets.inactive.fg_stroke.color = palette.text;

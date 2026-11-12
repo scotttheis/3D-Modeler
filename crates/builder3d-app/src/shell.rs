@@ -343,6 +343,9 @@ pub struct Builder3dApp {
     viewport_drag: Option<ViewportDrag>,
     active_brush: Option<ActiveBrush>,
     brush_settings_open: bool,
+    /// Native image picker used by Color; replaceable so tests never open
+    /// a real OS dialog.
+    image_picker: fn(&str) -> Option<PathBuf>,
     brush_settings: BrushSettings,
     boolean_pick: Option<BooleanPick>,
     viewport_gizmo_consumed: bool,
@@ -437,6 +440,7 @@ impl Default for Builder3dApp {
             viewport_drag: None,
             active_brush: None,
             brush_settings_open: false,
+            image_picker: crate::dialogs::image_path_picker,
             brush_settings: BrushSettings::default(),
             boolean_pick: None,
             viewport_gizmo_consumed: false,
@@ -510,7 +514,9 @@ impl Builder3dApp {
             ReviewState::Move
             | ReviewState::Rotate
             | ReviewState::Resize
-            | ReviewState::ResizeDrag => &[builder3d_core::PrimitiveKind::Cube],
+            | ReviewState::ResizeDrag
+            | ReviewState::Unselected
+            | ReviewState::Material => &[builder3d_core::PrimitiveKind::Cube],
             ReviewState::Merge => &[
                 builder3d_core::PrimitiveKind::Cube,
                 builder3d_core::PrimitiveKind::Cube,
@@ -534,6 +540,12 @@ impl Builder3dApp {
             if let Some((id, position)) = placement {
                 let _ = self.commands.set_object_position_by_id(&id, position);
             }
+        }
+        if review.state() == ReviewState::Unselected {
+            self.commands.set_selection_indices(std::iter::empty());
+        }
+        if review.state() == ReviewState::Material {
+            self.dispatch(CommandId::Material);
         }
         if review.state() == ReviewState::Merge {
             let colors = [[0.86, 0.16, 0.16, 1.0], [0.16, 0.36, 0.90, 1.0]];
@@ -787,6 +799,33 @@ impl Builder3dApp {
             self.transform_error = None;
             return;
         }
+        if matches!(
+            command,
+            CommandId::Material | CommandId::Paint | CommandId::Color
+        ) && self.commands.selected_count() == 0
+        {
+            self.commands.set_status(if command == CommandId::Color {
+                "Select an object to sample image color"
+            } else {
+                "Select an object to paint"
+            });
+            return;
+        }
+        if command == CommandId::Color {
+            // Python parity: Color samples an image's average color straight
+            // from a file picker; it does not open the Material dialog.
+            match (self.image_picker)("") {
+                Some(path) => match self.commands.set_selected_color_from_image(&path, 8) {
+                    Ok(message) => {
+                        self.commands.set_status(message);
+                        self.invalidate_presentation();
+                    }
+                    Err(error) => self.report_command_error(error),
+                },
+                None => self.commands.set_status("Color sampling cancelled"),
+            }
+            return;
+        }
         if command == CommandId::NewScene && self.commands.is_dirty() {
             self.confirm_action = Some(PendingReplacement::NewScene);
             return;
@@ -839,7 +878,7 @@ impl Builder3dApp {
     fn toggle_brush(&mut self, brush: ActiveBrush) {
         if self.commands.selected_count() == 0 {
             self.commands
-                .set_status(format!("{} requires a selected mesh", brush.label()));
+                .set_status(format!("Select a mesh to use {}", brush.label()));
             return;
         }
         self.viewport_drag = None;
@@ -6272,18 +6311,21 @@ fn command_enabled(command: CommandId, state: &CommandState) -> bool {
         | CommandId::Simplify
         | CommandId::Subdivide
         | CommandId::Smooth
-        | CommandId::Grab
+        | CommandId::Emboss
+        | CommandId::Hollow
+        | CommandId::Repair
+        | CommandId::FrameSelection => selected > 0,
+        // As in the Python build these stay clickable whenever there is
+        // something to work on, and explain themselves when nothing is
+        // selected instead of sitting greyed out.
+        CommandId::Grab
         | CommandId::Crease
         | CommandId::SmoothBrush
         | CommandId::Blob
         | CommandId::Normalize
-        | CommandId::Emboss
-        | CommandId::Hollow
         | CommandId::Material
         | CommandId::Paint
-        | CommandId::Color
-        | CommandId::Repair
-        | CommandId::FrameSelection => selected > 0,
+        | CommandId::Color => !state.scene().objects().is_empty(),
         CommandId::EditTorus => selected > 0 && state.has_selected_parametric_torus(),
         CommandId::Group => selected > 1,
         CommandId::Merge | CommandId::Intersect | CommandId::Subtract => selected > 0,
@@ -7005,6 +7047,118 @@ mod tests {
     use builder3d_core::PrimitiveKind;
     use serde_json::Value;
 
+    #[test]
+    fn grab_brush_shift_drag_on_a_mesh_changes_it_in_one_undo_entry() {
+        let mut app = Builder3dApp {
+            settings_path: repository_test_directory("of8-grab-stroke").join("settings.json"),
+            ..Default::default()
+        };
+        app.commands
+            .dispatch(CommandId::AddPrimitive(PrimitiveKind::Sphere))
+            .expect("sphere");
+        app.refresh_preview();
+        app.camera.set_viewport_size(800, 600).expect("size");
+        app.frame_camera_if_pending();
+        // Like the Python build, a brush needs a selected mesh, and says so
+        // instead of silently doing nothing.
+        app.commands.set_selection_indices(std::iter::empty());
+        assert!(command_enabled(CommandId::Grab, &app.commands));
+        app.dispatch(CommandId::Grab);
+        assert_eq!(app.active_brush, None);
+        assert_eq!(app.commands.last_status(), "Select a mesh to use Grab");
+        app.commands.set_selection_indices([0]);
+        app.dispatch(CommandId::Grab);
+        assert_eq!(app.active_brush, Some(ActiveBrush::Grab));
+        let rect = egui::Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(800., 600.));
+        let center = rect.center();
+        let before = app.commands.scene().objects()[0].mesh().vertices.clone();
+        let history = app.commands.scene().history_state_id();
+        let shift = egui::Modifiers {
+            shift: true,
+            ..Default::default()
+        };
+        let frame = |app: &mut Builder3dApp, position: egui::Pos2, delta: Vec2, phase: u8| {
+            let input = ViewportInput {
+                pointer_position: Some(position),
+                pointer_delta: delta,
+                primary_pressed: phase == 0,
+                primary_down: phase < 2,
+                primary_released: phase == 2,
+                secondary_pressed: false,
+                secondary_down: false,
+                secondary_released: false,
+                middle_pressed: false,
+                middle_down: false,
+                middle_released: false,
+                scroll_y: 0.,
+                pinch_zoom_factor: 1.,
+                escape_pressed: false,
+                focused: true,
+                modifiers: shift,
+            };
+            app.route_viewport_input(rect, 1., input, true);
+            app.refresh_preview();
+        };
+        frame(&mut app, center, Vec2::ZERO, 0);
+        assert!(
+            matches!(app.viewport_drag, Some(ViewportDrag::Brush(_))),
+            "Shift-press on the mesh starts a stroke: {}",
+            app.commands.last_status()
+        );
+        for step in 1..=6 {
+            let position = center + Vec2::new(0.0, -8.0 * step as f32);
+            frame(&mut app, position, Vec2::new(0.0, -8.0), 1);
+        }
+        frame(&mut app, center + Vec2::new(0.0, -48.0), Vec2::ZERO, 2);
+        assert!(app.viewport_drag.is_none());
+        let after = &app.commands.scene().objects()[0].mesh().vertices;
+        assert_ne!(&before, after, "{}", app.commands.last_status());
+        app.commands.dispatch(CommandId::Undo).expect("undo");
+        assert_eq!(app.commands.scene().history_state_id(), history);
+    }
+
+    #[test]
+    fn paint_tab_explains_itself_without_a_selection_and_colors_with_one() {
+        let mut app = Builder3dApp {
+            settings_path: repository_test_directory("of7-paint").join("settings.json"),
+            image_picker: |_| None,
+            ..Default::default()
+        };
+        for command in [CommandId::Material, CommandId::Paint, CommandId::Color] {
+            assert!(!command_enabled(command, &app.commands), "empty scene");
+        }
+        app.commands
+            .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
+            .expect("cube");
+        app.commands.set_selection_indices(std::iter::empty());
+        for command in [CommandId::Material, CommandId::Paint] {
+            assert!(command_enabled(command, &app.commands));
+            app.dispatch(command);
+            assert!(app.dialog.is_none());
+            assert_eq!(app.commands.last_status(), "Select an object to paint");
+        }
+        app.dispatch(CommandId::Color);
+        assert_eq!(
+            app.commands.last_status(),
+            "Select an object to sample image color"
+        );
+        app.commands.set_selection_indices([0]);
+        app.dispatch(CommandId::Paint);
+        assert!(
+            app.dialog
+                .as_ref()
+                .is_some_and(|dialog| dialog.kind() == DialogKind::Material)
+        );
+        let history = app.commands.scene().history_state_id();
+        app.apply_dialog_action(DialogAction::Color([0.9, 0.2, 0.1, 1.0]));
+        assert_eq!(
+            app.commands.scene().objects()[0].color(),
+            [0.9, 0.2, 0.1, 1.0]
+        );
+        app.commands.dispatch(CommandId::Undo).expect("undo");
+        assert_eq!(app.commands.scene().history_state_id(), history);
+    }
+
     fn test_directory(label: &str) -> PathBuf {
         let unique = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
@@ -7278,14 +7432,15 @@ mod tests {
     }
 
     #[test]
-    fn material_paint_and_color_routes_share_the_same_native_dialog() {
+    fn material_and_paint_open_the_color_dialog_and_color_samples_an_image() {
         let (mut app, directory) = shell_for_jobs("appearance-routes");
+        app.image_picker = |_| None;
         assert!(
             app.commands
                 .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
                 .is_ok()
         );
-        for command in [CommandId::Material, CommandId::Paint, CommandId::Color] {
+        for command in [CommandId::Material, CommandId::Paint] {
             app.dispatch(command);
             assert!(
                 app.dialog
@@ -7294,6 +7449,10 @@ mod tests {
             );
             app.apply_dialog_action(DialogAction::Close);
         }
+        // Python parity: Color goes straight to the image picker.
+        app.dispatch(CommandId::Color);
+        assert!(app.dialog.is_none());
+        assert_eq!(app.commands.last_status(), "Color sampling cancelled");
         assert!(std::fs::remove_dir_all(directory).is_ok());
     }
 

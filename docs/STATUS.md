@@ -77,14 +77,16 @@ D5 `emboss_text` metadata.
   yet**. Done so far: OF-1 floor numbers (flat on the floor plane, depth-
   tested); OF-1 resize view + OF-3 (3D Builder box, dots, chevrons, size
   label, drag band); OF-4 top-bar hover; OF-6 wireframe; OF-9 Merge color; OF-2 contact
-  shadow and floor reflection. Next: OF-7/OF-8 (Paint/Color/Material, Edit
-  tools). Shots still owed by the owner: X-ray with two objects,
+  shadow and floor reflection; OF-7/OF-8 (Paint tab and sculpt tools were
+  disabled without a selection; invisible sliders). OF-5 waits for shots. Shots still owed by the owner: X-ray with two objects,
   Paint/Color/Material, Merge.
 - Review harness: `BUILDER3D_REVIEW_CAMERA=yaw,pitch,distance` poses the
   camera after auto-framing; state `resize-drag` holds the +X handle mid-drag;
   `BUILDER3D_REVIEW_POINTER=x,y` rests the pointer to show hover states;
   `BUILDER3D_REVIEW_VIEW=wireframe,xray` turns view toggles on; state
-  `merge` merges a red and a blue cube.
+  `merge` merges a red and a blue cube; `unselected`, `material` states;
+  `BUILDER3D_REVIEW_INTERACTIVE=1` stays open with isolated settings for
+  hands-on checks.
 
 ## Last recovery point
 
