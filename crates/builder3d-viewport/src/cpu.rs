@@ -164,6 +164,7 @@ pub fn render_cpu_with_options(
     };
     if options.lighting.normalized().contact_shadow_percent > 0
         && let Some(floor) = floor.as_mut()
+        && floor.visible
     {
         let mut cache = ContactCueCache::new();
         cache.settle(scene, 0)?;

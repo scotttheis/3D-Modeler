@@ -94,7 +94,7 @@ has before/after captures in both themes. **None is owner-reviewed yet.**
   Material shots.
 - The sculpt brushes have not been compared hands-on against Blender's.
 - The CPU fallback renderer has neither the floor reflection nor the new
-  soft shadow.
+  soft shadow. It does use the new object-shaped outline (follow-up below).
 - Merge still joins exactly two objects; 3D Builder joins every selected
   object. The result keeps the name of the object clicked first.
 - Shots still owed by the owner: X-ray with two objects, Paint/Color/Material,
@@ -115,3 +115,59 @@ has before/after captures in both themes. **None is owner-reviewed yet.**
   the whole cargo argument string as one quoted argument.
 - A restored file copy can keep its old modification time, and cargo then
   skips rebuilding it. Touch the file after restoring.
+
+## Follow-up: shadow shape, below-floor view, drag (2026-11-12, uncommitted)
+
+Owner asked, after reviewing the app live:
+
+1. The square floor shadow should take the object's shape, or be removed if
+   that is expensive.
+2. Looking up through the floor, the shadow (and floor) should be gone.
+3. A dragged object's shadow stayed at the old place until the move
+   committed; it should vanish at drag start and return once the object lands.
+
+The owner confirmed in the app that 3 is "way better". A shadow that follows
+the moving object would be the ideal; hiding it is the accepted interim.
+1 and 2 are not yet owner-reviewed. No review captures were made.
+
+What changed (`builder3d-viewport` only):
+
+- **Shape** (`floor.rs`: `silhouette_points`, `ContactCue::silhouette`):
+  - The cause of the square: the shadow was projected from the 8 corners of
+    the object's world bounding box.
+  - When the cue cache settles, each object's display mesh is sampled and
+    the extreme point along each of 122 support directions is kept. The
+    sampling is capped at 200,000 vertices per scene, at least 2,048 per
+    object.
+  - Per frame, those points are projected along the key light and hulled.
+    The contact polygon is their top-down hull. The bounding box remains the
+    fallback for degenerate meshes.
+  - The outline is convex, so concave objects lose their holes: a torus
+    casts a disc, an L-shape a filled shape. An exact shadow would need a
+    second draw of every mesh per frame; not done.
+- **Budget** (`renderer.rs`): `MAX_OVERLAY_VERTICES` raised from 32,768 to
+  65,536, because the floor alone takes 24,576. `limit_outline` thins each
+  outline to 8–48 vertices according to the room left, so a crowded scene
+  gets coarser shadows before it loses any.
+- **Below the floor** (`renderer.rs`, `cpu.rs`): shadows and floor text are
+  now gated on `FloorGeometry::visible`, as the floor surface and reflection
+  already were. Before, shadows and floor labels still drew from below.
+- **Drag** (`renderer.rs`: `cues_for_settled_objects`): each frame, a cue is
+  dropped if its object's current world bounds differ from the cached ones by
+  more than 0.001 mm, or if the object is the translation-preview target.
+  This covers mouse and gizmo drags and any other previewed change. Other
+  objects keep their shadows, and camera motion hides nothing.
+- **Cost:** per frame, about 120 projected points and a 2D hull per object,
+  plus a bounds check. The cache rebuild runs only when the scene revision
+  changes. It is estimated at under 1 ms for normal scenes and about 10 ms at
+  the 200,000-vertex cap; neither figure has been timed.
+- **Tests added:** `round_objects_cast_round_shadows_not_bounding_squares`,
+  `shadows_vanish_with_the_floor_when_the_camera_is_below_it`,
+  `a_moving_object_has_no_shadow_until_it_settles`. The viewport crate
+  passes (48 tests), with clippy `-D warnings` and fmt clean for the crate.
+  The full workspace gate was not run.
+- **Release build:** `cargo build --release -p builder3d-app` succeeded
+  twice this session (4m50s, 3m43s). Relevant to F5.
+
+Open from this follow-up: a shadow that tracks the dragged object; holes in
+concave shadows; measured rebuild timings; owner review of 1 and 2; commit.

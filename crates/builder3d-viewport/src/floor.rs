@@ -3,7 +3,7 @@ use crate::{
     camera::Camera,
     lighting::ViewportLighting,
     math::{Aabb, Mat4, Vec3, add, cross, dot, normalize, scale},
-    scene::RenderScene,
+    scene::{RenderObject, RenderScene},
 };
 
 /// Default build-window floor extent in millimetres.
@@ -20,6 +20,16 @@ pub const FLOOR_SURFACE_SUBDIVISIONS: usize = 64;
 pub const FLOOR_CHECKER_CELL_SIZE: f32 = 10.0;
 /// Maximum cached contact-cue polygons.
 pub const MAX_CONTACT_CUES: usize = 256;
+/// Mesh vertices sampled across the whole scene when a shadow outline is
+/// rebuilt. Shadows are rebuilt only when the scene changes, never while the
+/// camera moves, so this bounds the one-off cost on very dense scenes.
+const SILHOUETTE_SCENE_VERTEX_BUDGET: usize = 200_000;
+/// Minimum vertices sampled from one object, however crowded the scene.
+const SILHOUETTE_OBJECT_VERTEX_FLOOR: usize = 2_048;
+/// Azimuth steps per elevation ring of the silhouette support directions.
+const SILHOUETTE_AZIMUTH_STEPS: usize = 24;
+/// Elevations, in degrees, of the silhouette support-direction rings.
+const SILHOUETTE_ELEVATIONS: [f32; 5] = [-60.0, -25.0, 0.0, 25.0, 60.0];
 /// Expanding translucent polygons that soften the cached floor-shadow edge.
 pub(crate) const CONTACT_SHADOW_LAYERS: [(f32, f32); 12] = [
     (1.900, 0.050),
@@ -118,8 +128,11 @@ pub struct FloorScaleLabel {
 pub struct ContactCue {
     /// Source object ID.
     pub object_id: String,
-    /// Fallback footprint polygon on y=0.
+    /// Top-down outline of the object on y=0 (convex).
     pub polygon: Vec<Vec3>,
+    /// World-space extreme points of the mesh: projecting these along any
+    /// light direction and taking the hull gives the object's convex shadow.
+    pub silhouette: Vec<Vec3>,
     /// RGBA cue color.
     pub color: [f32; 4],
     /// World-space bounds projected in the current light direction.
@@ -143,10 +156,15 @@ impl ContactCue {
         let maximum_shadow_distance =
             (extent[0] * extent[0] + extent[1] * extent[1] + extent[2] * extent[2]).sqrt() * 4.0
                 + 10.0;
-        let points = self
-            .bounds
-            .corners()
-            .into_iter()
+        let corners;
+        let source: &[Vec3] = if self.silhouette.len() >= 3 {
+            &self.silhouette
+        } else {
+            corners = self.bounds.corners();
+            &corners
+        };
+        let points = source
+            .iter()
             .map(|point| {
                 let distance = (point[1].max(0.0) / light_world[1]).min(maximum_shadow_distance);
                 [
@@ -246,13 +264,28 @@ impl ContactCueCache {
             return Ok(());
         }
         let mut cues = Vec::new();
+        let object_count = scene.objects().len().clamp(1, MAX_CONTACT_CUES);
+        let vertex_budget =
+            (SILHOUETTE_SCENE_VERTEX_BUDGET / object_count).max(SILHOUETTE_OBJECT_VERTEX_FLOOR);
         for object in scene.objects().iter().take(MAX_CONTACT_CUES) {
             let bounds = object.world_bounds()?;
-            let polygon = footprint(bounds);
+            let silhouette = silhouette_points(object, vertex_budget)?;
+            let outline = convex_hull_xz(
+                silhouette
+                    .iter()
+                    .map(|point| [point[0], 0.004, point[2]])
+                    .collect(),
+            );
+            let polygon = if outline.len() >= 3 {
+                outline
+            } else {
+                footprint(bounds)
+            };
             if polygon.len() >= 3 {
                 cues.push(ContactCue {
                     object_id: object.object_id().to_owned(),
                     polygon,
+                    silhouette,
                     color: [0.05, 0.08, 0.12, 0.28],
                     bounds,
                 });
@@ -744,6 +777,62 @@ fn footprint(bounds: Aabb) -> Vec<Vec3> {
         [bounds.maximum[0], 0.004, bounds.maximum[2]],
         [bounds.minimum[0], 0.004, bounds.maximum[2]],
     ]
+}
+
+/// Unit support directions: rings around the vertical axis plus straight up
+/// and down. Each keeps the mesh point furthest along it, so the kept points
+/// approximate the mesh's convex hull from every side the light can come.
+fn silhouette_directions() -> Vec<Vec3> {
+    let mut directions = vec![[0.0, 1.0, 0.0], [0.0, -1.0, 0.0]];
+    for elevation in SILHOUETTE_ELEVATIONS {
+        let (sin_e, cos_e) = elevation.to_radians().sin_cos();
+        for step in 0..SILHOUETTE_AZIMUTH_STEPS {
+            let azimuth = std::f32::consts::TAU * step as f32 / SILHOUETTE_AZIMUTH_STEPS as f32;
+            let (sin_a, cos_a) = azimuth.sin_cos();
+            directions.push([cos_e * cos_a, sin_e, cos_e * sin_a]);
+        }
+    }
+    directions
+}
+
+/// Samples at most `vertex_budget` vertices of an object's bounded display
+/// mesh and returns its world-space extreme points, one per support
+/// direction, without duplicates.
+fn silhouette_points(
+    object: &RenderObject,
+    vertex_budget: usize,
+) -> Result<Vec<Vec3>, ViewportError> {
+    let geometry = object.interaction_geometry();
+    let count = geometry.vertex_count();
+    if count == 0 {
+        return Ok(Vec::new());
+    }
+    let stride = count.div_ceil(vertex_budget.max(1)).max(1);
+    let directions = silhouette_directions();
+    let mut best = vec![(f32::NEG_INFINITY, [0.0_f32; 3]); directions.len()];
+    let transform = object.transform();
+    for index in (0..count).step_by(stride) {
+        let Some(local) = u32::try_from(index)
+            .ok()
+            .and_then(|index| geometry.position(index))
+        else {
+            continue;
+        };
+        let world = transform.transform_point(local)?;
+        for (slot, direction) in best.iter_mut().zip(&directions) {
+            let support = dot(world, *direction);
+            if support > slot.0 {
+                *slot = (support, world);
+            }
+        }
+    }
+    let mut points = Vec::with_capacity(best.len());
+    for (support, point) in best {
+        if support.is_finite() && !points.contains(&point) {
+            points.push(point);
+        }
+    }
+    Ok(points)
 }
 
 fn convex_hull_xz(mut points: Vec<Vec3>) -> Vec<Vec3> {

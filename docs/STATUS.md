@@ -18,7 +18,7 @@ closed. Stop before RB-10 work (S3) as before.
 | `cargo clippy --workspace --all-targets --locked -- -D warnings` | Pass |
 | `cargo test --workspace --locked --no-fail-fast` | Pass (re-run 2026-11-12 after each OF commit; F2 commit `f1b581d` fixed the six below) |
 | `cargo deny check` | Not run |
-| Release (fat LTO) build | Not run this session; failed with LLVM out-of-memory on 2026-11-11 |
+| Release (fat LTO) build | `cargo build --release -p builder3d-app` passed twice on 2026-11-12 (4m50s, 3m43s); failed with LLVM out-of-memory on 2026-11-11 |
 | `review` profile build | Pass (3m56s clean build; capture verified) |
 
 Failing tests, all present before the 2026-11-12 finish pass and all
@@ -41,7 +41,7 @@ unreviewed — each needs a decision: is the test stale, or is the code wrong?
 | F2 | Whole suite green | **Done** 2026-11-12 (`f1b581d`; re-verified after OF-1) |
 | F3 | Clippy on all targets | **Done** 2026-11-12 |
 | F4 | Baseline commit of 220+ uncommitted paths | **Done** 2026-11-12 on `rebuild/work` |
-| F5 | Release link reliability | Open |
+| F5 | Release link reliability | Open — two clean release builds 2026-11-12; not yet shown reliable |
 | F6 | Reconcile the 147-row feature ledger with the app | Open |
 | F7 | Clear ad hoc `target/` directories (`E:` had 40 GB free) | **Done** 2026-11-12 — archived to `G:\Builder3D-Rust_target-adhoc-archive_20261112`, `target/` 91 → ~55 GB |
 | F8 | `scripts/Invoke-Gate.ps1` | Open |
@@ -84,6 +84,15 @@ D5 `emboss_text` metadata.
   comparison with Blender's brushes, the shadow and reflection on the CPU
   fallback, and Merge of more than two objects. Shots still owed by the
   owner: X-ray with two objects, Paint/Color/Material, Merge.
+- 2026-11-12 (shadow follow-up, **uncommitted** in the working tree): floor
+  shadow now follows the object's convex outline instead of its bounding
+  box; shadows and floor text hide with the floor when the camera is below
+  it; a dragged object's shadow hides during the gesture and returns once
+  it lands (owner: "way better"; ideal would be a shadow that follows the
+  object). Details and open points at the end of
+  [`owner-feedback-2026-11-12.md`](owner-feedback-2026-11-12.md). Viewport
+  tests, clippy and fmt pass for the crate; full workspace gate not run.
+- Suggested next: commit the shadow follow-up, then F9.
 - Review harness: `BUILDER3D_REVIEW_CAMERA=yaw,pitch,distance` poses the
   camera after auto-framing; state `resize-drag` holds the +X handle mid-drag;
   `BUILDER3D_REVIEW_POINTER=x,y` rests the pointer to show hover states;
@@ -94,6 +103,8 @@ D5 `emboss_text` metadata.
 
 ## Last recovery point
 
-Git: branch `rebuild/work` at the OF-7/OF-8 commit (`89c1e6f`). Tree snapshot:
+Git: branch `rebuild/work` at the OF-7/OF-8 commit (`89c1e6f`), plus
+uncommitted shadow follow-up changes in `crates/builder3d-viewport/src/`
+(`cpu.rs`, `floor.rs`, `renderer.rs`). Tree snapshot:
 `G:\Builder3D-Rust_snapshot_20261112-104713_OF-batch2` (5,603 files,
 827,512,382 bytes, counts verified; excludes `target\`).

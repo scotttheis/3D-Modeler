@@ -30,7 +30,7 @@ use crate::{
 };
 
 const MAX_RENDER_DIMENSION: u32 = 4_096;
-const MAX_OVERLAY_VERTICES: usize = 32_768;
+const MAX_OVERLAY_VERTICES: usize = 65_536;
 const OVERLAY_VERTEX_STRIDE: usize = 36;
 const BYTES_PER_PIXEL: u64 = 4;
 const COPY_BYTES_PER_ROW_ALIGNMENT: u64 = 256;
@@ -765,6 +765,7 @@ impl ViewportRenderer {
             interaction == InteractionState::Active,
             scene_revision,
         )?;
+        let cues = cues_for_settled_objects(cues, scene, preview_translation);
         let overlay = build_overlay_vertices(
             &floor,
             &cues,
@@ -790,7 +791,10 @@ impl ViewportRenderer {
             None
         };
         let floor_text = &options.floor_text;
-        let floor_text_drawable = self.text_atlas.is_some()
+        // The floor and everything lying on it vanish once the camera dips
+        // below the build plane.
+        let floor_text_drawable = floor.visible
+            && self.text_atlas.is_some()
             && !floor_text.is_empty()
             && floor_text.vertices.len() <= MAX_FLOOR_TEXT_VERTICES;
         let floor_text_reservation = if floor_text_drawable {
@@ -2207,27 +2211,33 @@ fn build_overlay_vertices(
         }
     }
     let shadow_strength = f32::from(options.lighting.normalized().contact_shadow_percent) / 100.0;
-    if shadow_strength > 0.0 {
+    // Shadows lie on the floor, so they go with it when the camera is below.
+    if shadow_strength > 0.0 && floor.visible {
         let light_world = shadow_light_direction_world(camera, options.lighting);
-        for cue in cues {
-            let cast = cue.shadow_polygon(light_world);
-            // Each polygon vertex costs a core triangle, an edge quad and a
-            // corner fan. Keep room for the gizmo: a crowded scene loses
-            // its last shadows rather than the whole frame.
-            let needed = (cue.polygon.len() + cast.len()) * (3 + 6 + 3 * SOFT_CORNER_SEGMENTS);
+        // Each polygon vertex costs a core triangle, an edge quad and a
+        // corner fan. Keep room for the gizmo: a crowded scene gets coarser
+        // outlines first, then loses its last shadows rather than the frame.
+        let per_vertex = 3 + 6 + 3 * SOFT_CORNER_SEGMENTS;
+        let shadow_limit = MAX_OVERLAY_VERTICES.saturating_sub(OVERLAY_GIZMO_RESERVE);
+        for (index, cue) in cues.iter().enumerate() {
             let used = lines.len().saturating_add(triangles.len());
-            if used.saturating_add(needed)
-                > MAX_OVERLAY_VERTICES.saturating_sub(OVERLAY_GIZMO_RESERVE)
-            {
+            let remaining_cues = cues.len() - index;
+            let outline_limit =
+                (shadow_limit.saturating_sub(used) / remaining_cues / (2 * per_vertex))
+                    .clamp(MIN_SHADOW_OUTLINE_VERTICES, MAX_SHADOW_OUTLINE_VERTICES);
+            let contact = limit_outline(&cue.polygon, outline_limit);
+            let cast = limit_outline(&cue.shadow_polygon(light_world), outline_limit);
+            let needed = (contact.len() + cast.len()) * per_vertex;
+            if used.saturating_add(needed) > shadow_limit {
                 break;
             }
             let extent = cue.bounds.maximum[1] - cue.bounds.minimum[1];
-            let footprint = polygon_span(&cue.polygon).max(1.0);
+            let footprint = polygon_span(&contact).max(1.0);
             // A tight, darker contact shadow grounds the object; a wider,
             // lighter cast shadow falls away from the key light.
             push_soft_polygon(
                 &mut triangles,
-                &cue.polygon,
+                &contact,
                 (footprint * 0.10).max(1.5),
                 SHADOW_COLOR,
                 CONTACT_SHADOW_ALPHA * shadow_strength,
@@ -2355,6 +2365,57 @@ const SOFT_CORNER_SEGMENTS: usize = 4;
 const SOFT_SHADOW_PATTERN: f32 = 2.0;
 /// Overlay vertices kept free for the gizmo after floor shadows.
 const OVERLAY_GIZMO_RESERVE: usize = 2_048;
+
+/// Keeps only the shadows of objects still where their shadow was cached.
+/// An object being dragged, resized or otherwise previewed loses its shadow
+/// for the length of the gesture; it returns once the change is committed
+/// and the cache settles at the new place.
+fn cues_for_settled_objects(
+    cues: Vec<crate::floor::ContactCue>,
+    scene: &RenderScene,
+    preview_translation: Option<(&str, [f32; 3])>,
+) -> Vec<crate::floor::ContactCue> {
+    cues.into_iter()
+        .filter(|cue| {
+            if preview_translation.is_some_and(|(id, _)| id == cue.object_id) {
+                return false;
+            }
+            scene
+                .objects()
+                .iter()
+                .find(|object| object.object_id() == cue.object_id)
+                .and_then(|object| object.world_bounds().ok())
+                .is_some_and(|bounds| {
+                    bounds
+                        .minimum
+                        .iter()
+                        .chain(&bounds.maximum)
+                        .zip(cue.bounds.minimum.iter().chain(&cue.bounds.maximum))
+                        .all(|(now, cached)| (now - cached).abs() <= SETTLED_BOUNDS_TOLERANCE_MM)
+                })
+        })
+        .collect()
+}
+
+/// Movement, in millimetres, below which an object still counts as settled.
+const SETTLED_BOUNDS_TOLERANCE_MM: f32 = 0.001;
+
+/// Fewest outline vertices a shadow is reduced to in a crowded scene.
+const MIN_SHADOW_OUTLINE_VERTICES: usize = 8;
+/// Most outline vertices one shadow polygon keeps.
+const MAX_SHADOW_OUTLINE_VERTICES: usize = 48;
+
+/// Thins a convex outline to at most `limit` evenly spaced vertices; the
+/// result stays convex because it keeps a subset of the hull's corners.
+fn limit_outline(polygon: &[[f32; 3]], limit: usize) -> Vec<[f32; 3]> {
+    let count = polygon.len();
+    if count <= limit || limit < 3 {
+        return polygon.to_vec();
+    }
+    (0..limit)
+        .map(|index| polygon[index * count / limit])
+        .collect()
+}
 
 /// Largest x/z distance across a floor polygon.
 fn polygon_span(polygon: &[[f32; 3]]) -> f32 {
@@ -2931,6 +2992,105 @@ mod tests {
             FLOOR_SURFACE_SUBDIVISIONS * FLOOR_SURFACE_SUBDIVISIONS * 6
         );
         assert!(overlay.total_vertices() <= MAX_OVERLAY_VERTICES);
+    }
+
+    fn cylinder_cues() -> (RenderScene, Vec<crate::floor::ContactCue>) {
+        let mesh = builder3d_core::make_cylinder(20.0, 40.0, 48).expect("cylinder");
+        let mut core_scene = builder3d_core::Scene::new();
+        core_scene
+            .add_object(builder3d_core::SceneObject::new(mesh))
+            .expect("add cylinder");
+        let scene = RenderScene::from_core(&core_scene).expect("render scene");
+        let mut cache = crate::floor::ContactCueCache::new();
+        cache.settle(&scene, 1).expect("settle");
+        let camera = Camera::new();
+        let cues = cache
+            .cues_for_frame(&camera, &scene, false, 1)
+            .expect("cues");
+        (scene, cues)
+    }
+
+    #[test]
+    fn round_objects_cast_round_shadows_not_bounding_squares() {
+        let (_, cues) = cylinder_cues();
+        let cue = &cues[0];
+        assert!(cue.polygon.len() > 8, "contact outline follows the mesh");
+        // A square footprint would reach the bounding-box corners (r * sqrt 2).
+        let center = [
+            (cue.bounds.minimum[0] + cue.bounds.maximum[0]) * 0.5,
+            (cue.bounds.minimum[2] + cue.bounds.maximum[2]) * 0.5,
+        ];
+        for point in &cue.polygon {
+            let radius = ((point[0] - center[0]).powi(2) + (point[2] - center[1]).powi(2)).sqrt();
+            assert!(
+                radius <= 20.5,
+                "outline point {point:?} lies outside the cylinder"
+            );
+        }
+        let camera = Camera::new();
+        let light = shadow_light_direction_world(&camera, ViewportLighting::default());
+        assert!(cue.shadow_polygon(light).len() > 8);
+    }
+
+    #[test]
+    fn a_moving_object_has_no_shadow_until_it_settles() {
+        let (scene, cues) = cylinder_cues();
+        let id = cues[0].object_id.clone();
+        assert_eq!(
+            cues_for_settled_objects(cues.clone(), &scene, None).len(),
+            1
+        );
+        assert!(cues_for_settled_objects(cues.clone(), &scene, Some((&id, [5.0; 3]))).is_empty());
+        let delta = Mat4::identity()
+            .translated_by([30.0, 0.0, 0.0])
+            .expect("delta");
+        let ids = std::collections::HashSet::from([id]);
+        let dragged = scene.with_world_preview(&ids, delta).expect("drag preview");
+        assert!(cues_for_settled_objects(cues, &dragged, None).is_empty());
+    }
+
+    #[test]
+    fn shadows_vanish_with_the_floor_when_the_camera_is_below_it() {
+        let (scene, cues) = cylinder_cues();
+        let mut camera = Camera::new();
+        camera.set_viewport_size(800, 600).expect("viewport");
+        let options = ViewportRenderOptions::default();
+        let above = build_floor(&camera, DEFAULT_FLOOR_SIZE, true, true).expect("floor");
+        let with_floor = build_overlay_vertices(
+            &above,
+            &cues,
+            &camera,
+            None,
+            GizmoMode::Move,
+            1.0,
+            800,
+            600,
+            &scene,
+            &options,
+        )
+        .expect("overlay above");
+        assert!(
+            with_floor.triangles.len()
+                > FLOOR_SURFACE_SUBDIVISIONS * FLOOR_SURFACE_SUBDIVISIONS * 6
+        );
+
+        camera.set_view(30.0, -40.0).expect("look up from below");
+        let below = build_floor(&camera, DEFAULT_FLOOR_SIZE, true, true).expect("floor");
+        assert!(!below.visible);
+        let without_floor = build_overlay_vertices(
+            &below,
+            &cues,
+            &camera,
+            None,
+            GizmoMode::Move,
+            1.0,
+            800,
+            600,
+            &scene,
+            &options,
+        )
+        .expect("overlay below");
+        assert!(without_floor.triangles.is_empty());
     }
 
     #[test]
