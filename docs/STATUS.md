@@ -3,7 +3,7 @@
 The only place current status is written. Keep it to one screen. Plan:
 [`product-rebuild-plan.md`](product-rebuild-plan.md).
 
-Updated 2026-11-13.
+Updated 2026-11-13. Full gate passed 2026-11-13 (fmt, clippy, tests, deny, audit, MCP parity, smoke, 28-image capture board; the board and the other steps ran in two runs because the first run's smoke step had a script bug, since fixed). Release exe rebuild for this work is **not done**: the running `targeteleaseuilder3d-app.exe` locks the file.
 
 ## Now
 
@@ -19,7 +19,7 @@ closed. Stop before RB-10 work (S3) as before.
 | `cargo test --workspace --locked --no-fail-fast` | Pass (2026-11-12, after the shadow follow-up and the MCP Merge color change) |
 | `cargo deny check` | Pass 2026-11-12 (advisories, bans, licenses, sources ok; warning: `async-executor 1.14.0` yanked, Linux accessibility path only) |
 | `cargo audit` | Pass 2026-11-12 — 0 vulnerabilities in 493 crates; 5 allowed warnings (4 unmaintained already accepted in `deny.toml`, 1 yanked as above). Tool installed 2026-11-12 |
-| MCP catalog parity check | Not run — needs the ledger action→tool column (F12) |
+| MCP catalog parity check | Pass 2026-11-13 (`cargo test -p builder3d-mcp --test ledger_parity`; all 147 ledger rows map to a catalog tool or "visual only") |
 | Release (fat LTO) build | `cargo build --release -p builder3d-app` passed twice on 2026-11-12 (4m50s, 3m43s); failed with LLVM out-of-memory on 2026-11-11 |
 | `review` profile build | Pass (3m56s clean build; capture verified) |
 
@@ -34,11 +34,11 @@ closed. Stop before RB-10 work (S3) as before.
 | F5 | Release link reliability | Open — three clean release builds 2026-11-12 (third 4m05s, after the snap fix); not yet shown reliable |
 | F6 | Reconcile the 147-row feature ledger with the app | Open |
 | F7 | Clear ad hoc `target/` directories (`E:` had 40 GB free) | **Done** 2026-11-12 — archived to `G:\Builder3D-Rust_target-adhoc-archive_20261112`, `target/` 91 → ~55 GB |
-| F8 | `scripts/Invoke-Gate.ps1` | Open |
-| F9 | Depth fight where meshes meet the floor | Open |
+| F8 | `scripts/Invoke-Gate.ps1` | **Done** 2026-11-13 — `-Tier fast\|full\|ship`; ship does not script package staging or the performance run |
+| F9 | Depth fight where meshes meet the floor | **Done, owner review pending** 2026-11-13 — depth bias on floor surface, shadows and text; captures `evidence/rebuild/captures/2026-11-13-f9-floor-depth/` (before/after, both themes). Dark serration gone; a faint pale dotted fringe on the rim remains and does not change with the bias or the reflection (cause not found). CPU fallback not touched |
 | F10 | `emboss_text` long-running metadata | Blocked on decision D5 |
 | F11 | Status narrative out of `AGENTS.md` | **Done** 2026-11-12 |
-| F12 | MCP 100% desktop parity (plan 3.7) | Open — Merge color now shared in core, desktop and MCP tested (done); still to add: rename-object tool, show/hide tool, ledger action→tool column |
+| F12 | MCP 100% desktop parity (plan 3.7) | **Done** 2026-11-13 — Merge color; `rename_object` and `set_visibility` tools (catalog now 62, each with a desktop-vs-MCP test); `launch_slicer` falls back to the saved slicer; ledger `mcp_tool` / `mcp_exempt` column and parity check. Judgement calls for owner: theme, display units, clear recents, About, ribbon layout, sticky selection, recents and exit are marked "visual only" |
 | F13 | Run `cargo deny` and `cargo audit` | **Done** 2026-11-12 — both pass; now in the Full gate |
 
 ## Ledger (`evidence/rebuild/parity-matrix.toml`, 147 features, not yet reconciled)
