@@ -513,9 +513,10 @@ impl R4Server {
             | "transform_selection"
             | "apply_actions" => self.wrapped_detail_result(name, arguments, &raw)?,
             "scene_summary" => self.scene_summary(arguments.get("fields"))?,
-            "select" | "settle" | "mirror" | "align" | "arrange" | "undo" | "redo"
-            | "delete_selected" | "cut_selected" | "paste" | "duplicate_selected"
-            | "group_selected" | "ungroup_selected" | "sample_image_color" => {
+            "select" | "settle" | "mirror" | "rename_object" | "set_visibility" | "align"
+            | "arrange" | "undo" | "redo" | "delete_selected" | "cut_selected" | "paste"
+            | "duplicate_selected" | "group_selected" | "ungroup_selected"
+            | "sample_image_color" => {
                 self.scene_summary_with_changes(None, changed_object_ids(&raw))?
             }
             "snap_translate" => self.snap_translation_result(arguments, &raw)?,
@@ -823,6 +824,8 @@ impl R4Server {
             "snap_translate" => self.snap_translate(args),
             "settle" => self.settle(args),
             "mirror" => self.mirror(args),
+            "rename_object" => self.rename_object(args),
+            "set_visibility" => self.set_visibility(args),
             "align" => self.align(args),
             "arrange" => self.arrange(args),
             "set_color" => self.set_color(args),
@@ -1432,6 +1435,46 @@ impl R4Server {
             "mirror",
             &result,
             Some((state.scene.object(index)?.object_id().to_owned(), index)),
+            None,
+        ))
+    }
+
+    /// Same core command the desktop Rename uses (`RenameObjectCommand`), so a
+    /// rename is one undo entry and an unchanged name is no history entry.
+    fn rename_object(&self, args: &Map<String, Value>) -> Result<Value, AdapterError> {
+        let name = schema::required_string(args, "name")?;
+        let mut state = self.lock_state()?;
+        check_expected(&state, args)?;
+        let index = target_index(&state.scene, args)?;
+        let object_id = state.scene.object(index)?.object_id().to_owned();
+        let result = state
+            .scene
+            .execute(builder3d_core::RenameObjectCommand::new(index, name))?;
+        state.dirty |= result.changed;
+        Ok(command_output(
+            "rename_object",
+            &result,
+            Some((object_id, index)),
+            None,
+        ))
+    }
+
+    /// Same core call the desktop Show/Hide uses (`Scene::set_visible`).
+    fn set_visibility(&self, args: &Map<String, Value>) -> Result<Value, AdapterError> {
+        let visible = args
+            .get("visible")
+            .and_then(Value::as_bool)
+            .ok_or_else(|| AdapterError::Validation("visible must be a boolean".to_owned()))?;
+        let mut state = self.lock_state()?;
+        check_expected(&state, args)?;
+        let index = target_index(&state.scene, args)?;
+        let object_id = state.scene.object(index)?.object_id().to_owned();
+        let result = state.scene.set_visible(index, visible)?;
+        state.dirty |= result.changed;
+        Ok(command_output(
+            "set_visibility",
+            &result,
+            Some((object_id, index)),
             None,
         ))
     }
@@ -3673,14 +3716,14 @@ mod tests {
     fn full_profile_publishes_the_fixed_catalog_with_strict_metadata() {
         let server = server(Profile::Full);
         let tools = server.tools();
-        assert_eq!(tools.len(), 60);
+        assert_eq!(tools.len(), 62);
         assert_eq!(
             tools.first().map(|tool| tool.name.as_ref()),
             Some("get_status")
         );
         assert_eq!(
             tools.last().map(|tool| tool.name.as_ref()),
-            Some("launch_slicer")
+            Some("set_visibility")
         );
         let launch = tools.iter().find(|tool| tool.name == "launch_slicer");
         assert_eq!(

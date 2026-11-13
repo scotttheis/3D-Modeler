@@ -11441,6 +11441,153 @@
         "type": "object"
       },
       "output_schema_id": "f0a6f90159d14e55a6bd30a4fe62cc3e05a09e8b53bd826635f889c20951e9e7"
+    },
+    "rename_object": {
+      "input_schema": {
+        "properties": {
+          "expected_project_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Expected Project Id"
+          },
+          "expected_scene_revision": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Expected Scene Revision"
+          },
+          "idempotency_key": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Idempotency Key"
+          },
+          "index": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Index"
+          },
+          "name": {
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "object_id": {
+            "default": "",
+            "title": "Object Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "rename_objectArguments",
+        "type": "object"
+      },
+      "output_schema_id": "c4e458f9c57d4c836dce7e46e8c5eaccc2e4f21cfa6c7d5ed60774b491697f1d"
+    },
+    "set_visibility": {
+      "input_schema": {
+        "properties": {
+          "expected_project_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Expected Project Id"
+          },
+          "expected_scene_revision": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Expected Scene Revision"
+          },
+          "idempotency_key": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Idempotency Key"
+          },
+          "index": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Index"
+          },
+          "object_id": {
+            "default": "",
+            "title": "Object Id",
+            "type": "string"
+          },
+          "visible": {
+            "title": "Visible",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "visible"
+        ],
+        "title": "set_visibilityArguments",
+        "type": "object"
+      },
+      "output_schema_id": "c4e458f9c57d4c836dce7e46e8c5eaccc2e4f21cfa6c7d5ed60774b491697f1d"
     }
   }
 }

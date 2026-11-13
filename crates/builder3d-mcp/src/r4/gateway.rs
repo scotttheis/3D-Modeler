@@ -358,14 +358,14 @@ mod tests {
             )),
         );
         let tools = gateway.tools();
-        assert_eq!(tools.len(), 60);
+        assert_eq!(tools.len(), 62);
         assert_eq!(
             tools.first().map(|tool| tool.name.as_ref()),
             Some("get_status")
         );
         assert_eq!(
             tools.last().map(|tool| tool.name.as_ref()),
-            Some("launch_slicer")
+            Some("set_visibility")
         );
         assert!(matches!(
             gateway.call_desktop("get_status", &json!({})),

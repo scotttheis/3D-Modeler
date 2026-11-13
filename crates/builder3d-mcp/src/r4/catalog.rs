@@ -90,7 +90,7 @@ pub const CATALOG_VERSION: &str = "2026-09-25.1";
 
 /// The exact reference order.  Keep this list append-only unless the Python
 /// catalog version changes with an explicit compatibility decision.
-pub const TOOL_CATALOG: [ToolSpec; 60] = [
+pub const TOOL_CATALOG: [ToolSpec; 62] = [
     ToolSpec {
         name: "get_status",
         category: "inspection",
@@ -691,6 +691,28 @@ pub const TOOL_CATALOG: [ToolSpec; 60] = [
         long_running: true,
         profile: Profile::Full,
     },
+    // Appended for desktop parity (F12, owner decision D6). The first 60 keep
+    // the reference order; these two mirror the desktop Rename and Show/Hide.
+    ToolSpec {
+        name: "rename_object",
+        category: "organization",
+        read_only: false,
+        destructive: false,
+        idempotent: true,
+        open_world: false,
+        long_running: false,
+        profile: Profile::Model,
+    },
+    ToolSpec {
+        name: "set_visibility",
+        category: "organization",
+        read_only: false,
+        destructive: false,
+        idempotent: true,
+        open_world: false,
+        long_running: false,
+        profile: Profile::Model,
+    },
 ];
 
 /// Finds a catalog entry by its exact case-sensitive wire name.
@@ -705,9 +727,11 @@ mod tests {
 
     #[test]
     fn catalog_is_exactly_ordered_and_profile_monotonic() {
-        assert_eq!(TOOL_CATALOG.len(), 60);
+        assert_eq!(TOOL_CATALOG.len(), 62);
         assert_eq!(TOOL_CATALOG[0].name, "get_status");
         assert_eq!(TOOL_CATALOG[59].name, "launch_slicer");
+        assert_eq!(TOOL_CATALOG[60].name, "rename_object");
+        assert_eq!(TOOL_CATALOG[61].name, "set_visibility");
         assert!(
             TOOL_CATALOG
                 .windows(2)
@@ -725,7 +749,7 @@ mod tests {
             .iter()
             .filter(|spec| spec.visible_in(Profile::Files))
             .count();
-        assert_eq!((observe, model, files), (7, 52, 59));
+        assert_eq!((observe, model, files), (7, 54, 61));
         assert!(Profile::Full.includes(Profile::Full));
         assert!(!Profile::Files.includes(Profile::Full));
         assert_eq!(Profile::parse(" MODEL "), Some(Profile::Model));

@@ -2605,6 +2605,131 @@ mod tests {
         }
     }
 
+    /// Runs one MCP tool against a desktop `CommandState`, the way the live
+    /// bridge does: attach the document, call, hand the document back.
+    fn run_mcp(
+        commands: &mut CommandState,
+        tool: &str,
+        arguments: serde_json::Value,
+    ) -> serde_json::Value {
+        let version = commands.mcp_document_version();
+        let roots = builder3d_mcp::ApprovedRoots::from_paths(Vec::new()).expect("deny-all roots");
+        let server = builder3d_mcp::R4Server::new(builder3d_mcp::R4Config::for_profile(
+            builder3d_mcp::Profile::Full,
+            roots,
+        ));
+        let mut document = Some(commands.take_mcp_document(builder3d_mcp::ViewState::default()));
+        server.replace_document(&mut document).expect("attach");
+        let result = server.call_value(tool, arguments).expect("MCP call");
+        let document = server.take_document().expect("detach");
+        commands
+            .install_mcp_document(document, &version)
+            .expect("install");
+        result
+    }
+
+    fn one_cube_pair() -> (CommandState, CommandState) {
+        let mut desktop = CommandState::default();
+        let mut mcp = CommandState::default();
+        for state in [&mut desktop, &mut mcp] {
+            state
+                .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
+                .expect("add cube");
+        }
+        desktop.select_index(0);
+        (desktop, mcp)
+    }
+
+    #[test]
+    fn mcp_rename_object_matches_the_desktop_rename() {
+        let (mut desktop, mut mcp) = one_cube_pair();
+        let history = desktop.scene().history_state_id();
+        assert_eq!(history, mcp.scene().history_state_id());
+        let originals = [
+            desktop.scene().objects()[0].name().to_owned(),
+            mcp.scene().objects()[0].name().to_owned(),
+        ];
+
+        assert!(desktop.rename_selected("Bracket".to_owned()).is_ok());
+        let result = run_mcp(
+            &mut mcp,
+            "rename_object",
+            serde_json::json!({"index":0,"name":"Bracket"}),
+        );
+        assert_eq!(
+            result["changed_object_ids"].as_array().map(Vec::len),
+            Some(1)
+        );
+
+        for state in [&desktop, &mcp] {
+            assert_eq!(state.scene().objects()[0].name(), "Bracket");
+            assert_eq!(state.scene().history_state_id(), history + 1);
+            assert!(state.is_dirty());
+        }
+        // The same name again is a no-op on both sides: no history entry.
+        assert!(matches!(
+            desktop.rename_selected("Bracket".to_owned()),
+            Ok(CommandOutcome::Noop(_))
+        ));
+        run_mcp(
+            &mut mcp,
+            "rename_object",
+            serde_json::json!({"index":0,"name":"Bracket"}),
+        );
+        assert_eq!(desktop.scene().history_state_id(), history + 1);
+        assert_eq!(mcp.scene().history_state_id(), history + 1);
+        // One undo restores the name on both.
+        for (state, original) in [&mut desktop, &mut mcp].into_iter().zip(&originals) {
+            assert!(state.dispatch(CommandId::Undo).is_ok());
+            assert_eq!(state.scene().objects()[0].name(), original.as_str());
+        }
+    }
+
+    #[test]
+    fn mcp_set_visibility_matches_the_desktop_show_hide() {
+        let (mut desktop, mut mcp) = one_cube_pair();
+        let history = desktop.scene().history_state_id();
+
+        assert!(desktop.set_visibility(0, false).is_ok());
+        let result = run_mcp(
+            &mut mcp,
+            "set_visibility",
+            serde_json::json!({"index":0,"visible":false}),
+        );
+        assert_eq!(
+            result["changed_object_ids"].as_array().map(Vec::len),
+            Some(1)
+        );
+        for state in [&desktop, &mcp] {
+            assert!(!state.scene().objects()[0].is_visible());
+            assert_eq!(state.scene().history_state_id(), history + 1);
+        }
+        // Hiding a hidden object changes nothing on either side.
+        assert!(matches!(
+            desktop.set_visibility(0, false),
+            Ok(CommandOutcome::Noop(_))
+        ));
+        run_mcp(
+            &mut mcp,
+            "set_visibility",
+            serde_json::json!({"index":0,"visible":false}),
+        );
+        assert_eq!(desktop.scene().history_state_id(), history + 1);
+        assert_eq!(mcp.scene().history_state_id(), history + 1);
+        // Show again, then undo twice to the start, on both.
+        assert!(desktop.set_visibility(0, true).is_ok());
+        run_mcp(
+            &mut mcp,
+            "set_visibility",
+            serde_json::json!({"index":0,"visible":true}),
+        );
+        for state in [&mut desktop, &mut mcp] {
+            assert!(state.scene().objects()[0].is_visible());
+            assert!(state.dispatch(CommandId::Undo).is_ok());
+            assert!(!state.scene().objects()[0].is_visible());
+        }
+    }
+
     #[test]
     fn mcp_scene_attachment_returns_the_live_history_to_command_state() {
         let mut commands = CommandState::default();
