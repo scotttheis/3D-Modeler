@@ -118,6 +118,20 @@ viewport in dark theme · D5 `emboss_text` metadata.
   `builder3d-app` passed. Captures
   `evidence/rebuild/captures/2026-11-13-of26-27-menu-hover-tab/`. Table in
   [`owner-feedback-2026-11-12.md`](owner-feedback-2026-11-12.md).
+- 2026-11-13 (test release RC1): `packaging/msi/Build-Msi.ps1 -Version 0.1.1
+  -Name Builder3D-RC1` builds a per-user WiX 5 MSI (no admin; installs to
+  `%LOCALAPPDATA%\Programs\Builder3D`; Start-menu + desktop shortcuts; VC++
+  runtime app-local; bump the version's third field per candidate).
+  Output `E:\Builder3D-RC\Builder3D-RC1.msi` (50 MB). Silent install,
+  launch, smoke and clean uninstall verified on the dev PC; not yet tried on
+  a clean PC. Fixed `--package` artwork staging (arguments swapped; never
+  worked) with a regression test. The script stages directly because the
+  package is 64 MB against the 40 MB S3 budget: the action icons are
+  1254 px PNGs (~32 MB). Shrinking them is an S3 owner decision.
+- Owner merge report 2026-11-13: Merge of a sphere and a cylinder that only
+  touched gave one object with 2 disconnected shells (no warning); smoothing
+  then melted the sparse stock cylinder (two rings only). Options and owner
+  decision pending.
 - **Paused by the owner 2026-11-12** after batch 3. On resume, suggested
   next: MCP `launch_slicer` falls back to the saved slicer when no
   `slicer_key` is given (owner said yes; F12 parity), then F12 rename and

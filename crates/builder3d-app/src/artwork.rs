@@ -326,7 +326,7 @@ pub(crate) fn load_native_icon(root: &Path) -> Result<IconData, ArtworkError> {
 pub(crate) fn stage_original_artwork(destination: &Path) -> Result<(), ArtworkError> {
     let source = original_asset_root();
     let target = destination.join("assets").join("original");
-    copy_asset_tree(&source, &target, &source)
+    copy_asset_tree(&source, &source, &target)
 }
 
 fn copy_asset_tree(root: &Path, current: &Path, destination: &Path) -> Result<(), ArtworkError> {
@@ -761,5 +761,19 @@ mod tests {
         assert_ne!(light.svg, dark.svg);
         assert!(light.svg.len() < MAX_ARTWORK_BYTES);
         assert!(dark.svg.len() < MAX_ARTWORK_BYTES);
+    }
+
+    #[test]
+    fn staged_package_artwork_validates_beside_the_executable() {
+        let destination = std::env::temp_dir().join(format!(
+            "builder3d-stage-artwork-{}",
+            uuid::Uuid::new_v4().simple()
+        ));
+        let result = stage_original_artwork(&destination);
+        let staged_root = destination.join("assets").join("original");
+        let validation = validate_original_artwork(&staged_root);
+        let _ = fs::remove_dir_all(&destination);
+        assert!(result.is_ok(), "staging failed: {result:?}");
+        assert!(validation.is_ok(), "staged artwork invalid: {validation:?}");
     }
 }
