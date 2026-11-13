@@ -125,9 +125,9 @@ viewport in dark theme · D5 `emboss_text` metadata.
 
 ## Last recovery point
 
-Git: branch `rebuild/work` at `0d00561` (fourth batch, OF-15 to OF-19);
+Git: branch `rebuild/work` at `98fc1b6` (fifth batch, OF-20 to OF-25);
 see `git log`. Tree snapshot:
-`G:\Builder3D-Rust_snapshot_20261112-180548_OF-batch4` (5,722 files,
-830,735,925 bytes, counts verified; excludes `target\`). Release build
-`target\release\builder3d-app.exe` rebuilt 2026-11-12 (3m41s, fifth clean
+`G:\Builder3D-Rust_snapshot_20261112-211315_OF-batch5` (5,766 files,
+835,733,618 bytes, counts verified; excludes `target\`). Release build
+`target\release\builder3d-app.exe` rebuilt 2026-11-12 (3m43s, sixth clean
 release link, F5).
