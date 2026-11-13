@@ -16,6 +16,7 @@ snapshot_exclusions = ["root target/", "root .cache/", "directory reparse points
 
 [[feature]]
 id = "builder3d.ui.shell.application_menu"
+mcp_exempt = "visual only"
 area = "shell"
 behavior = "The icon-only hamburger opens the application menu; Builder3D returns to Welcome while retaining the in-memory scene."
 python_paths = ["src/main_window.py", "src/toolbar.py"]
@@ -42,6 +43,7 @@ next_slice = "RB-01"
 
 [[feature]]
 id = "builder3d.ui.scene.new_dirty_guard"
+mcp_tool = ["new_project"]
 area = "project"
 behavior = "New Scene replaces the scene only after the Save/Discard/Cancel dirty guard; Welcome card, menu and Ctrl+N share the action."
 python_paths = ["src/main_window.py", "src/application_services.py", "src/project_io.py"]
@@ -68,6 +70,7 @@ next_slice = "RB-04 — Scene and precise transforms (after RB-03 visual review)
 
 [[feature]]
 id = "builder3d.ui.project.open"
+mcp_tool = ["open_project"]
 area = "project"
 behavior = "Open Project loads validated .3dp; identity and recent path change only after success."
 python_paths = ["src/main_window.py", "src/application_services.py", "src/project_io.py"]
@@ -94,6 +97,7 @@ next_slice = "RB-04 — Scene and precise transforms (after RB-03 visual review)
 
 [[feature]]
 id = "builder3d.ui.project.save"
+mcp_tool = ["save_project"]
 area = "project"
 behavior = "Save writes the active .3dp project and clears dirty state only after success."
 python_paths = ["src/main_window.py", "src/application_services.py", "src/project_io.py"]
@@ -120,6 +124,7 @@ next_slice = "RB-04 — Scene and precise transforms (after RB-03 visual review)
 
 [[feature]]
 id = "builder3d.ui.project.save_as"
+mcp_tool = ["save_project_as"]
 area = "project"
 behavior = "Save As writes to a chosen new path and changes active path only after success."
 python_paths = ["src/main_window.py", "src/application_services.py", "src/project_io.py"]
@@ -146,6 +151,7 @@ next_slice = "RB-04 — Scene and precise transforms (after RB-03 visual review)
 
 [[feature]]
 id = "builder3d.ui.project.format_contract"
+mcp_tool = ["open_project", "save_project"]
 area = "project"
 behavior = ".3dp schema 1 round-trips project/object identity, revision, transforms, RGBA, visibility, metadata and meshes; schema 0 migrates in memory; future or malformed archives are rejected before scene replacement."
 python_paths = ["src/project_io.py"]
@@ -172,6 +178,7 @@ next_slice = "RB-04 — Scene and precise transforms (after RB-03 visual review)
 
 [[feature]]
 id = "builder3d.ui.file.export"
+mcp_tool = ["export_file"]
 area = "files"
 behavior = "Export selected objects when selection exists; otherwise visible objects. Formats: 3MF, glTF/GLB, WRL, STL, OBJ, PLY."
 python_paths = ["src/main_window.py", "src/application_services.py", "src/mesh_ops.py"]
@@ -198,6 +205,7 @@ next_slice = "RB-04 — Scene and precise transforms (after RB-03 visual review)
 
 [[feature]]
 id = "builder3d.ui.export.selection_visibility"
+mcp_tool = ["export_file"]
 area = "files"
 behavior = "Export selected visible objects, or all visible objects when selection is empty; fail with the reference error when none remain."
 python_paths = ["src/application_services.py", "src/main_window.py"]
@@ -224,6 +232,7 @@ next_slice = "RB-04 — Scene and precise transforms (after RB-03 visual review)
 
 [[feature]]
 id = "builder3d.ui.export.format.stl"
+mcp_tool = ["export_file"]
 area = "files"
 behavior = "Export world-space selected/visible geometry to STL; omit color as the lossy format contract requires."
 python_paths = ["src/application_services.py", "src/mesh_ops.py"]
@@ -250,6 +259,7 @@ next_slice = "RB-04 — Scene and precise transforms (after RB-03 visual review)
 
 [[feature]]
 id = "builder3d.ui.export.format.obj"
+mcp_tool = ["export_file"]
 area = "files"
 behavior = "Export world-space selected/visible geometry to OBJ with per-vertex RGB derived from each scene object's display color."
 python_paths = ["src/application_services.py", "src/mesh_ops.py"]
@@ -276,6 +286,7 @@ next_slice = "RB-04 — Scene and precise transforms (after RB-03 visual review)
 
 [[feature]]
 id = "builder3d.ui.export.format.ply"
+mcp_tool = ["export_file"]
 area = "files"
 behavior = "Export world-space selected/visible geometry to PLY with per-vertex RGBA from each scene object's display color."
 python_paths = ["src/application_services.py", "src/mesh_ops.py"]
@@ -302,6 +313,7 @@ next_slice = "RB-04 — Scene and precise transforms (after RB-03 visual review)
 
 [[feature]]
 id = "builder3d.ui.export.format.3mf"
+mcp_tool = ["export_file"]
 area = "files"
 behavior = "Export separate named 3MF objects with local meshes, world transforms, and display colors."
 python_paths = ["src/application_services.py", "src/three_mf.py"]
@@ -328,6 +340,7 @@ next_slice = "RB-04 — Scene and precise transforms (after RB-03 visual review)
 
 [[feature]]
 id = "builder3d.ui.export.format.gltf"
+mcp_tool = ["export_file"]
 area = "files"
 behavior = "Export separate named glTF nodes with local meshes, world transforms, and material colors."
 python_paths = ["src/application_services.py", "src/gltf_io.py"]
@@ -354,6 +367,7 @@ next_slice = "RB-04 — Scene and precise transforms (after RB-03 visual review)
 
 [[feature]]
 id = "builder3d.ui.export.format.glb"
+mcp_tool = ["export_file"]
 area = "files"
 behavior = "Export separate named GLB nodes with local meshes, world transforms, and material colors."
 python_paths = ["src/application_services.py", "src/gltf_io.py"]
@@ -380,6 +394,7 @@ next_slice = "RB-04 — Scene and precise transforms (after RB-03 visual review)
 
 [[feature]]
 id = "builder3d.ui.export.format.wrl"
+mcp_tool = ["export_file"]
 area = "files"
 behavior = "Export named VRML 2.0 Transform/Shape/IndexedFaceSet nodes with geometry, transforms, and material RGBA; import remains unsupported."
 python_paths = ["src/application_services.py", "src/wrl_io.py"]
@@ -406,6 +421,7 @@ next_slice = "RB-04 — Scene and precise transforms (after RB-03 visual review)
 
 [[feature]]
 id = "builder3d.ui.app.exit_dirty_guard"
+mcp_exempt = "visual only"
 area = "project"
 behavior = "Exit closes when clean; dirty state prompts Save/Discard/Cancel, and a failed save keeps the app open."
 python_paths = ["src/main_window.py", "src/application_services.py", "src/project_io.py"]
@@ -432,6 +448,7 @@ next_slice = "RB-04 — Scene and precise transforms (after RB-03 visual review)
 
 [[feature]]
 id = "builder3d.ui.import.add_open"
+mcp_tool = ["import_file"]
 area = "files"
 behavior = "Add/Open imports STL, OBJ, PLY, 3MF, glTF or GLB into the current scene and selects inserted objects."
 python_paths = ["src/main_window.py", "src/application_services.py", "src/mesh_ops.py"]
@@ -458,6 +475,7 @@ next_slice = "RB-04 — Scene and precise transforms (after RB-03 visual review)
 
 [[feature]]
 id = "builder3d.ui.import.ambiguous_units"
+mcp_tool = ["import_file"]
 area = "files"
 behavior = "STL/OBJ/PLY use saved default unless caller supplies override; current visible ribbon has no Add with Units command."
 python_paths = ["src/main_window.py", "src/application_services.py", "src/mesh_ops.py"]
@@ -484,6 +502,7 @@ next_slice = "RB-04 — Scene and precise transforms (after RB-03 visual review)
 
 [[feature]]
 id = "builder3d.ui.import.authoritative_units"
+mcp_tool = ["import_file"]
 area = "files"
 behavior = "3MF uses declared units and glTF/GLB use meters; ambiguous defaults do not rescale these formats."
 python_paths = ["src/main_window.py", "src/application_services.py", "src/mesh_ops.py"]
@@ -510,6 +529,7 @@ next_slice = "RB-04 — Scene and precise transforms (after RB-03 visual review)
 
 [[feature]]
 id = "builder3d.ui.import.multi_object_placement"
+mcp_tool = ["import_file"]
 area = "files"
 behavior = "Multi-object import preserves spacing, centers the group, settles it to bed and commits one undoable change."
 python_paths = ["src/main_window.py", "src/application_services.py", "src/mesh_ops.py"]
@@ -536,6 +556,7 @@ next_slice = "RB-04 — Scene and precise transforms (after RB-03 visual review)
 
 [[feature]]
 id = "builder3d.ui.import.format.stl"
+mcp_tool = ["import_file"]
 area = "files"
 behavior = "Import STL geometry and apply the chosen/default unit exactly once."
 python_paths = ["src/main_window.py", "src/mesh_ops.py"]
@@ -562,6 +583,7 @@ next_slice = "RB-04 — Scene and precise transforms (after RB-03 visual review)
 
 [[feature]]
 id = "builder3d.ui.import.format.obj"
+mcp_tool = ["import_file"]
 area = "files"
 behavior = "Import OBJ geometry/colors and apply the chosen/default unit exactly once."
 python_paths = ["src/main_window.py", "src/mesh_ops.py"]
@@ -588,6 +610,7 @@ next_slice = "RB-04 — Scene and precise transforms (after RB-03 visual review)
 
 [[feature]]
 id = "builder3d.ui.import.format.ply"
+mcp_tool = ["import_file"]
 area = "files"
 behavior = "Import PLY geometry/RGBA and apply the chosen/default unit exactly once."
 python_paths = ["src/main_window.py", "src/mesh_ops.py"]
@@ -614,6 +637,7 @@ next_slice = "RB-04 — Scene and precise transforms (after RB-03 visual review)
 
 [[feature]]
 id = "builder3d.ui.import.format.3mf"
+mcp_tool = ["import_file"]
 area = "files"
 behavior = "Import multiple 3MF objects using the declared model unit, names, colors, and transforms."
 python_paths = ["src/main_window.py", "src/three_mf.py"]
@@ -640,6 +664,7 @@ next_slice = "RB-04 — Scene and precise transforms (after RB-03 visual review)
 
 [[feature]]
 id = "builder3d.ui.import.format.gltf"
+mcp_tool = ["import_file"]
 area = "files"
 behavior = "Import multi-object glTF scenes in metres without applying an ambiguous-unit override."
 python_paths = ["src/main_window.py", "src/gltf_io.py"]
@@ -666,6 +691,7 @@ next_slice = "RB-04 — Scene and precise transforms (after RB-03 visual review)
 
 [[feature]]
 id = "builder3d.ui.import.format.glb"
+mcp_tool = ["import_file"]
 area = "files"
 behavior = "Import multi-object GLB scenes in metres without applying an ambiguous-unit override."
 python_paths = ["src/main_window.py", "src/gltf_io.py"]
@@ -692,6 +718,7 @@ next_slice = "RB-04 — Scene and precise transforms (after RB-03 visual review)
 
 [[feature]]
 id = "builder3d.ui.file.native_pickers"
+mcp_exempt = "visual only"
 area = "files"
 behavior = "Native project Open/Save, model Add, and seven-format Export pickers use appropriate filters and preserve state on cancel."
 python_paths = ["src/main_window.py"]
@@ -718,6 +745,7 @@ next_slice = "RB-04 — Scene and precise transforms (after RB-03 visual review)
 
 [[feature]]
 id = "builder3d.ui.file.failure_preservation"
+mcp_tool = ["import_file", "export_file", "open_project", "save_project"]
 area = "files"
 behavior = "Failed or cancelled replacement, save, import, or export preserves scene, path, dirty state, selection, and history; cancelled overwrite preserves destination."
 python_paths = ["src/main_window.py", "src/application_services.py", "src/project_io.py", "src/mesh_ops.py"]
@@ -744,6 +772,7 @@ next_slice = "RB-04 — Scene and precise transforms (after RB-03 visual review)
 
 [[feature]]
 id = "builder3d.ui.welcome.recent_files"
+mcp_exempt = "visual only"
 area = "welcome"
 behavior = "Welcome retains ten newest-first deduplicated recent projects/models across restart, dispatches successful entries, and provides safe preview fallbacks."
 python_paths = ["src/main_window.py"]
@@ -770,6 +799,7 @@ next_slice = "RB-04 — Scene and precise transforms (after RB-03 visual review)
 
 [[feature]]
 id = "builder3d.ui.welcome.recent_dispatch"
+mcp_exempt = "visual only"
 area = "welcome"
 behavior = "A .3dp recent opens as a project, a model recent imports additively, missing entries are removed with a warning, and failed/corrupt/WRL opens preserve the live scene."
 python_paths = ["src/main_window.py"]
@@ -796,6 +826,7 @@ next_slice = "RB-04 — Scene and precise transforms (after RB-03 visual review)
 
 [[feature]]
 id = "builder3d.ui.welcome.recent_previews"
+mcp_exempt = "visual only"
 area = "welcome"
 behavior = "Welcome loads bounded real previews in the background for visible .3dp scenes, supported models, raster recents, and embedded 3MF thumbnails, with icon fallback for unavailable previews."
 python_paths = ["src/main_window.py"]
@@ -847,6 +878,7 @@ next_slice = "Complete the RB-03 native walkthrough, visual comparison, and owne
 
 [[feature]]
 id = "builder3d.ui.insert.cube"
+mcp_tool = ["add_primitive"]
 area = "creation"
 behavior = "Insert Cube creates the reference-size cube at origin, selects it and records one history action."
 python_paths = ["src/main_window.py", "src/mesh_ops.py", "src/scene.py"]
@@ -873,6 +905,7 @@ next_slice = "RB-02"
 
 [[feature]]
 id = "builder3d.ui.insert.cylinder"
+mcp_tool = ["add_primitive"]
 area = "creation"
 behavior = "Insert Cylinder creates/selects the reference-dimension cylinder."
 python_paths = ["src/main_window.py", "src/mesh_ops.py", "src/scene.py"]
@@ -899,6 +932,7 @@ next_slice = "RB-06"
 
 [[feature]]
 id = "builder3d.modelling.primitives_and_torus"
+mcp_tool = ["add_primitive", "set_torus_parameters"]
 area = "modelling"
 behavior = "Primitive insertion remains reachable; Torus uses bounded typed parameters, Solid/Hole preview state, editable metadata, and rejects non-parametric Edit Torus selections."
 python_paths = ["src/main_window.py", "src/scene.py"]
@@ -925,6 +959,7 @@ next_slice = "RB-07"
 
 [[feature]]
 id = "builder3d.modelling.mesh_operations"
+mcp_tool = ["repair", "simplify", "subdivide", "smooth", "emboss_text", "hollow"]
 area = "modelling"
 behavior = "Repair, Simplify, Subdivide, Smooth, Normalize, Emboss, and Hollow use typed core operations with bounded options, one-command history, and observable failure/cancel paths."
 python_paths = ["src/mesh_ops.py", "src/repair.py", "src/application_services.py", "src/main_window.py"]
@@ -951,6 +986,7 @@ next_slice = "RB-07"
 
 [[feature]]
 id = "builder3d.modelling.persistent_brushes"
+mcp_tool = ["elastic_grab", "crease_polish", "smooth_brush", "blob", "normalize_face_density"]
 area = "modelling"
 behavior = "Grab, Crease, Smooth Brush, Blob, and Normalize are persistent tools with picked Shift-primary strokes, preview without history, and one commit on release."
 python_paths = ["src/viewport.py", "src/mesh_operations.py", "src/main_window.py"]
@@ -977,6 +1013,7 @@ next_slice = "RB-07"
 
 [[feature]]
 id = "builder3d.modelling.booleans"
+mcp_tool = ["boolean_merge", "boolean_subtract", "boolean_intersect"]
 area = "modelling"
 behavior = "Merge performs Boolean Union; Intersect and Subtract use an exact-two target/tool route, with one-selection picker and Escape cancellation."
 python_paths = ["src/mesh_ops.py", "src/main_window.py"]
@@ -1003,6 +1040,7 @@ next_slice = "RB-07"
 
 [[feature]]
 id = "builder3d.ui.rb06.button_audit"
+mcp_exempt = "visual only"
 area = "shell"
 behavior = "Visible modelling, Object, Paint, View, Items, and dialog buttons have a live route, typed enablement/error handling, or a documented bounded limitation."
 python_paths = ["src/main_window.py", "src/toolbar.py", "src/viewport.py"]
@@ -1063,6 +1101,7 @@ next_slice = "RB-07; not started"
 
 [[feature]]
 id = "builder3d.ui.insert.pyramid"
+mcp_tool = ["add_primitive"]
 area = "creation"
 behavior = "Insert Pyramid creates/selects reference geometry with its apex at the top."
 python_paths = ["src/main_window.py", "src/mesh_ops.py", "src/scene.py"]
@@ -1089,6 +1128,7 @@ next_slice = "RB-06"
 
 [[feature]]
 id = "builder3d.ui.insert.cone"
+mcp_tool = ["add_primitive"]
 area = "creation"
 behavior = "Insert Cone creates/selects reference-dimension geometry."
 python_paths = ["src/main_window.py", "src/mesh_ops.py", "src/scene.py"]
@@ -1115,6 +1155,7 @@ next_slice = "RB-06"
 
 [[feature]]
 id = "builder3d.ui.insert.sphere"
+mcp_tool = ["add_primitive"]
 area = "creation"
 behavior = "Insert Sphere creates/selects reference-diameter geometry."
 python_paths = ["src/main_window.py", "src/mesh_ops.py", "src/scene.py"]
@@ -1141,6 +1182,7 @@ next_slice = "RB-06"
 
 [[feature]]
 id = "builder3d.ui.insert.torus_parameters"
+mcp_tool = ["add_primitive", "set_torus_parameters"]
 area = "creation"
 behavior = "Insert Torus creates durable parametric metadata and opens live editing; cancel restores exact state, OK commits one update."
 python_paths = ["src/main_window.py", "src/mesh_ops.py", "src/scene.py"]
@@ -1167,6 +1209,7 @@ next_slice = "RB-06"
 
 [[feature]]
 id = "builder3d.ui.insert.hexagon"
+mcp_tool = ["add_primitive"]
 area = "creation"
 behavior = "Insert Hexagon creates/selects the reference-size hexagon."
 python_paths = ["src/main_window.py", "src/mesh_ops.py", "src/scene.py"]
@@ -1193,6 +1236,7 @@ next_slice = "RB-06"
 
 [[feature]]
 id = "builder3d.ui.insert.wedge"
+mcp_tool = ["add_primitive"]
 area = "creation"
 behavior = "Insert Wedge creates/selects reference bounds and volume."
 python_paths = ["src/main_window.py", "src/mesh_ops.py", "src/scene.py"]
@@ -1219,6 +1263,7 @@ next_slice = "RB-06"
 
 [[feature]]
 id = "builder3d.ui.object.edit_torus"
+mcp_tool = ["set_torus_parameters"]
 area = "object"
 behavior = "Edit Torus works only on a selected parametric torus; update preserves metadata and undoes once."
 python_paths = ["src/main_window.py", "src/application_services.py", "src/model_actions.py", "src/scene.py"]
@@ -1245,6 +1290,7 @@ next_slice = "RB-06"
 
 [[feature]]
 id = "builder3d.ui.object.repair"
+mcp_tool = ["repair"]
 area = "mesh"
 behavior = "Repair runs staged best-effort repair; unsafe candidates do not replace source, safe replacements preserve state and undo once."
 python_paths = ["src/main_window.py", "src/application_services.py", "src/mesh_ops.py", "src/operation_manager.py"]
@@ -1271,6 +1317,7 @@ next_slice = "RB-06"
 
 [[feature]]
 id = "builder3d.ui.object.duplicate"
+mcp_tool = ["duplicate_selected"]
 area = "object"
 behavior = "Duplicate creates independent selected copies with world-space offset and one undo entry."
 python_paths = ["src/main_window.py", "src/application_services.py", "src/model_actions.py", "src/scene.py"]
@@ -1297,6 +1344,7 @@ next_slice = "RB-04"
 
 [[feature]]
 id = "builder3d.ui.object.copy"
+mcp_tool = ["copy_selected"]
 area = "object"
 behavior = "Copy stores selected objects and needed identity/appearance data on clipboard without changing scene."
 python_paths = ["src/main_window.py", "src/application_services.py", "src/model_actions.py", "src/scene.py"]
@@ -1323,6 +1371,7 @@ next_slice = "RB-04"
 
 [[feature]]
 id = "builder3d.ui.object.cut"
+mcp_tool = ["cut_selected"]
 area = "object"
 behavior = "Cut copies and removes selection as one undoable change; current ribbon has no Cut item."
 python_paths = ["src/main_window.py", "src/application_services.py", "src/model_actions.py", "src/scene.py"]
@@ -1349,6 +1398,7 @@ next_slice = "RB-04"
 
 [[feature]]
 id = "builder3d.ui.object.paste"
+mcp_tool = ["paste"]
 area = "object"
 behavior = "Paste creates new durable IDs with world offset and stays enabled after deselection when clipboard has data."
 python_paths = ["src/main_window.py", "src/application_services.py", "src/model_actions.py", "src/scene.py"]
@@ -1375,6 +1425,7 @@ next_slice = "RB-04"
 
 [[feature]]
 id = "builder3d.ui.object.delete"
+mcp_tool = ["delete_selected"]
 area = "object"
 behavior = "Delete removes selection as one undoable action and keyboard does not steal editing focus."
 python_paths = ["src/main_window.py", "src/application_services.py", "src/model_actions.py", "src/scene.py"]
@@ -1401,6 +1452,7 @@ next_slice = "RB-04"
 
 [[feature]]
 id = "builder3d.ui.object.group"
+mcp_tool = ["group_selected"]
 area = "object"
 behavior = "Group creates a semantic group without merging mesh geometry and commits once."
 python_paths = ["src/main_window.py", "src/application_services.py", "src/model_actions.py", "src/scene.py"]
@@ -1427,6 +1479,7 @@ next_slice = "RB-04"
 
 [[feature]]
 id = "builder3d.ui.object.ungroup"
+mcp_tool = ["ungroup_selected"]
 area = "object"
 behavior = "Ungroup restores group children while preserving transforms and identity."
 python_paths = ["src/main_window.py", "src/application_services.py", "src/model_actions.py", "src/scene.py"]
@@ -1453,6 +1506,7 @@ next_slice = "RB-04"
 
 [[feature]]
 id = "builder3d.ui.items.select_row"
+mcp_tool = ["select"]
 area = "selection"
 behavior = "Click row selects; Ctrl/Command toggles; Shift selects range from anchor."
 python_paths = ["src/main_window.py", "src/viewport.py", "src/scene.py"]
@@ -1479,6 +1533,7 @@ next_slice = "RB-04"
 
 [[feature]]
 id = "builder3d.ui.items.select_all"
+mcp_tool = ["select"]
 area = "selection"
 behavior = "Select All selects all top-level objects without undo history."
 python_paths = ["src/main_window.py", "src/viewport.py", "src/scene.py"]
@@ -1505,6 +1560,7 @@ next_slice = "RB-04"
 
 [[feature]]
 id = "builder3d.ui.items.deselect_all"
+mcp_tool = ["select"]
 area = "selection"
 behavior = "Deselect All clears selection without geometry/history changes."
 python_paths = ["src/main_window.py", "src/viewport.py", "src/scene.py"]
@@ -1531,6 +1587,7 @@ next_slice = "RB-04"
 
 [[feature]]
 id = "builder3d.ui.items.invert"
+mcp_tool = ["select"]
 area = "selection"
 behavior = "Invert selects the complement of top-level current selection without history."
 python_paths = ["src/main_window.py", "src/viewport.py", "src/scene.py"]
@@ -1557,6 +1614,7 @@ next_slice = "RB-04"
 
 [[feature]]
 id = "builder3d.ui.items.sticky"
+mcp_exempt = "visual only"
 area = "selection"
 behavior = "Sticky Selection retains selection after empty-space click; Deselect All is explicit clear."
 python_paths = ["src/main_window.py", "src/viewport.py", "src/scene.py"]
@@ -1583,6 +1641,7 @@ next_slice = "RB-04"
 
 [[feature]]
 id = "builder3d.ui.items.health_warning"
+mcp_tool = ["mesh_health"]
 area = "mesh"
 behavior = "Items marks unhealthy meshes and exposes Repair."
 python_paths = ["src/main_window.py", "src/application_services.py", "src/mesh_ops.py", "src/operation_manager.py"]
@@ -1609,6 +1668,7 @@ next_slice = "RB-04"
 
 [[feature]]
 id = "builder3d.audit.items.visibility_gap"
+mcp_tool = ["set_visibility"]
 area = "selection"
 behavior = "Python visibility affects rendering/export/print and has no row control; Rust retains its existing toggle for the explicitly requested visibility scope, with appearance difference pending review."
 python_paths = ["src/main_window.py", "src/viewport.py", "src/scene.py"]
@@ -1635,6 +1695,7 @@ next_slice = "RB-04"
 
 [[feature]]
 id = "builder3d.ui.object.settle"
+mcp_tool = ["settle"]
 area = "transforms"
 behavior = "Settle moves selection so lowest world Y touches bed as one history action."
 python_paths = ["src/main_window.py", "src/toolbar.py", "src/gizmo.py", "src/application_services.py"]
@@ -1661,6 +1722,7 @@ next_slice = "RB-04"
 
 [[feature]]
 id = "builder3d.ui.object.mirror"
+mcp_tool = ["mirror"]
 area = "transforms"
 behavior = "Mirror applies reference axis rule to selection in one undo step."
 python_paths = ["src/main_window.py", "src/toolbar.py", "src/gizmo.py", "src/application_services.py"]
@@ -1687,6 +1749,7 @@ next_slice = "RB-04"
 
 [[feature]]
 id = "builder3d.ui.object.measure"
+mcp_tool = ["scene_summary"]
 area = "transforms"
 behavior = "Measure reports selected world dimensions in scene units."
 python_paths = ["src/main_window.py", "src/toolbar.py", "src/gizmo.py", "src/application_services.py"]
@@ -1713,6 +1776,7 @@ next_slice = "RB-04"
 
 [[feature]]
 id = "builder3d.ui.object.align"
+mcp_tool = ["align"]
 area = "transforms"
 behavior = "Align applies chosen world-space axis/landmark relation as one grouped commit."
 python_paths = ["src/main_window.py", "src/toolbar.py", "src/gizmo.py", "src/application_services.py"]
@@ -1739,6 +1803,7 @@ next_slice = "RB-04"
 
 [[feature]]
 id = "builder3d.ui.object.arrange"
+mcp_tool = ["arrange"]
 area = "transforms"
 behavior = "Arrange orders selected objects along configured axis/gap using world bounds."
 python_paths = ["src/main_window.py", "src/toolbar.py", "src/gizmo.py", "src/application_services.py"]
@@ -1765,6 +1830,7 @@ next_slice = "RB-04"
 
 [[feature]]
 id = "builder3d.ui.transform.move_numeric"
+mcp_tool = ["set_transform", "translate", "transform_selection"]
 area = "transforms"
 behavior = "Move fields edit absolute world X/Y/Z in internal mm; multi-selection is one grouped command."
 python_paths = ["src/main_window.py", "src/toolbar.py", "src/gizmo.py", "src/application_services.py"]
@@ -1791,6 +1857,7 @@ next_slice = "RB-04"
 
 [[feature]]
 id = "builder3d.ui.transform.rotate_numeric"
+mcp_tool = ["set_transform", "transform_selection"]
 area = "transforms"
 behavior = "Roll/Pitch/Yaw edit Euler degrees and preserve scale; grouped edits undo once."
 python_paths = ["src/main_window.py", "src/toolbar.py", "src/gizmo.py", "src/application_services.py"]
@@ -1817,6 +1884,7 @@ next_slice = "RB-04"
 
 [[feature]]
 id = "builder3d.ui.transform.resize_numeric"
+mcp_tool = ["set_transform", "transform_selection"]
 area = "transforms"
 behavior = "Resize edits world dimensions; proportional lock uses changed axis ratio."
 python_paths = ["src/main_window.py", "src/toolbar.py", "src/gizmo.py", "src/application_services.py"]
@@ -1843,6 +1911,7 @@ next_slice = "RB-04"
 
 [[feature]]
 id = "builder3d.ui.transform.units"
+mcp_exempt = "visual only"
 area = "preferences"
 behavior = "Move/Resize display mm/in with 25.4 conversion; internal values stay mm; Rotate is degrees."
 python_paths = ["src/main_window.py", "src/toolbar.py", "src/constants.py"]
@@ -1869,6 +1938,7 @@ next_slice = "RB-04"
 
 [[feature]]
 id = "builder3d.ui.transform.resize_basis"
+mcp_exempt = "visual only"
 area = "transforms"
 behavior = "Resize alignment toggles Grid/world axes or Object basis and appears only in Resize mode."
 python_paths = ["src/main_window.py", "src/toolbar.py", "src/gizmo.py", "src/application_services.py"]
@@ -1895,6 +1965,7 @@ next_slice = "RB-04"
 
 [[feature]]
 id = "builder3d.ui.transform.proportional_lock"
+mcp_exempt = "visual only"
 area = "transforms"
 behavior = "Resize proportional lock scales each axis according to changed field ratio."
 python_paths = ["src/main_window.py", "src/toolbar.py", "src/gizmo.py", "src/application_services.py"]
@@ -1921,6 +1992,7 @@ next_slice = "RB-04"
 
 [[feature]]
 id = "builder3d.ui.gizmo.move"
+mcp_tool = ["translate", "snap_translate"]
 area = "viewport"
 behavior = "Move drag uses world axes, camera-nearest face placement and one undo entry."
 python_paths = ["src/viewport.py", "src/gizmo.py", "src/snapping.py"]
@@ -1947,6 +2019,7 @@ next_slice = "RB-05"
 
 [[feature]]
 id = "builder3d.ui.gizmo.rotate"
+mcp_tool = ["set_transform", "transform_selection"]
 area = "viewport"
 behavior = "Rotate ring drag applies world-axis rotation and one undo entry."
 python_paths = ["src/viewport.py", "src/gizmo.py", "src/snapping.py"]
@@ -1973,6 +2046,7 @@ next_slice = "RB-05"
 
 [[feature]]
 id = "builder3d.ui.gizmo.resize"
+mcp_tool = ["set_transform", "transform_selection"]
 area = "viewport"
 behavior = "Resize handles change dimensions; face handles anchor opposite side; corners scale uniformly."
 python_paths = ["src/viewport.py", "src/gizmo.py", "src/snapping.py"]
@@ -1999,6 +2073,7 @@ next_slice = "RB-05"
 
 [[feature]]
 id = "builder3d.ui.snap.preference"
+mcp_tool = ["set_snapping"]
 area = "viewport"
 behavior = "Ribbon Snap persists on/off object landmark snapping and is distinct from fixed increments."
 python_paths = ["src/viewport.py", "src/gizmo.py", "src/snapping.py"]
@@ -2025,6 +2100,7 @@ next_slice = "RB-05"
 
 [[feature]]
 id = "builder3d.ui.snap.landmarks"
+mcp_tool = ["snap_translate"]
 area = "viewport"
 behavior = "Move captures lower/upper/center object landmarks and floor; Shift bypasses capture; no open-space fixed increments."
 python_paths = ["src/viewport.py", "src/gizmo.py", "src/snapping.py"]
@@ -2051,6 +2127,7 @@ next_slice = "RB-05"
 
 [[feature]]
 id = "builder3d.ui.camera.orbit"
+mcp_tool = ["orbit_view"]
 area = "viewport"
 behavior = "Left drag orbits with fixed logical-pixel sensitivity; persistent brush still permits navigation and Shift+left edits."
 python_paths = ["src/viewport.py", "src/gizmo.py", "src/snapping.py"]
@@ -2077,6 +2154,7 @@ next_slice = "RB-02"
 
 [[feature]]
 id = "builder3d.ui.camera.pan"
+mcp_tool = ["pan_view"]
 area = "viewport"
 behavior = "Middle/right drag pans in camera plane without changing scene objects."
 python_paths = ["src/viewport.py", "src/gizmo.py", "src/snapping.py"]
@@ -2103,6 +2181,7 @@ next_slice = "RB-05"
 
 [[feature]]
 id = "builder3d.ui.camera.zoom"
+mcp_tool = ["zoom_view"]
 area = "viewport"
 behavior = "Wheel and pinch zoom camera within safe distance bounds."
 python_paths = ["src/viewport.py", "src/gizmo.py", "src/snapping.py"]
@@ -2129,6 +2208,7 @@ next_slice = "RB-05"
 
 [[feature]]
 id = "builder3d.ui.viewport.exact_pick"
+mcp_tool = ["select"]
 area = "viewport"
 behavior = "Click selects exact frontmost mesh face/object; modifiers select/toggle, sticky mode preserves, gizmo hit is prioritized."
 python_paths = ["src/viewport.py", "src/gizmo.py", "src/snapping.py"]
@@ -2155,6 +2235,7 @@ next_slice = "RB-04"
 
 [[feature]]
 id = "builder3d.ui.viewport.double_click_frame"
+mcp_tool = ["frame_view"]
 area = "viewport"
 behavior = "Double-click object centers camera on it without scene mutation."
 python_paths = ["src/viewport.py", "src/gizmo.py", "src/snapping.py"]
@@ -2181,6 +2262,7 @@ next_slice = "RB-05"
 
 [[feature]]
 id = "builder3d.ui.view.center_all"
+mcp_tool = ["frame_view"]
 area = "view"
 behavior = "Center View frames all visible scene objects by world bounds."
 python_paths = ["src/main_window.py", "src/viewport.py", "src/application_services.py"]
@@ -2207,6 +2289,7 @@ next_slice = "RB-05"
 
 [[feature]]
 id = "builder3d.ui.view.frame_selection"
+mcp_tool = ["frame_view"]
 area = "view"
 behavior = "Frame fits the selection; empty-selection behavior uses documented safe fallback."
 python_paths = ["src/main_window.py", "src/viewport.py", "src/application_services.py"]
@@ -2233,6 +2316,7 @@ next_slice = "RB-05"
 
 [[feature]]
 id = "builder3d.ui.view.reset"
+mcp_tool = ["view_preset"]
 area = "view"
 behavior = "Reset View restores validated default camera state."
 python_paths = ["src/main_window.py", "src/viewport.py", "src/application_services.py"]
@@ -2259,6 +2343,7 @@ next_slice = "RB-05"
 
 [[feature]]
 id = "builder3d.ui.view.top"
+mcp_tool = ["view_preset"]
 area = "view"
 behavior = "Top sets camera to named top preset."
 python_paths = ["src/main_window.py", "src/viewport.py", "src/application_services.py"]
@@ -2285,6 +2370,7 @@ next_slice = "RB-05"
 
 [[feature]]
 id = "builder3d.ui.view.side"
+mcp_tool = ["view_preset"]
 area = "view"
 behavior = "Side sets camera to named side preset."
 python_paths = ["src/main_window.py", "src/viewport.py", "src/application_services.py"]
@@ -2311,6 +2397,7 @@ next_slice = "RB-05"
 
 [[feature]]
 id = "builder3d.audit.view.front_unwired"
+mcp_tool = ["view_preset"]
 area = "view"
 behavior = "_on_view_front and Front icon exist but no current RIBBON_SPEC route; not a visible requirement without owner direction."
 python_paths = ["src/main_window.py", "src/viewport.py", "src/application_services.py"]
@@ -2337,6 +2424,7 @@ next_slice = "RB-01"
 
 [[feature]]
 id = "builder3d.ui.view.grid"
+mcp_tool = ["set_view"]
 area = "view"
 behavior = "Grid toggles metric build-plane display independently of object shading."
 python_paths = ["src/main_window.py", "src/viewport.py", "src/application_services.py"]
@@ -2363,6 +2451,7 @@ next_slice = "RB-05"
 
 [[feature]]
 id = "builder3d.ui.view.wireframe"
+mcp_tool = ["set_view"]
 area = "view"
 behavior = "Wireframe retains opaque shading with unlit black depth-tested edges."
 python_paths = ["src/main_window.py", "src/viewport.py", "src/application_services.py"]
@@ -2389,6 +2478,7 @@ next_slice = "RB-05"
 
 [[feature]]
 id = "builder3d.ui.view.xray"
+mcp_tool = ["set_view"]
 area = "view"
 behavior = "X-Ray is an independent translucent mode, separate from Wireframe."
 python_paths = ["src/main_window.py", "src/viewport.py", "src/application_services.py"]
@@ -2415,6 +2505,7 @@ next_slice = "RB-05"
 
 [[feature]]
 id = "builder3d.ui.mesh.simplify"
+mcp_tool = ["simplify"]
 area = "mesh"
 behavior = "Simplify reduces selected geometry under bounds, preserves object state and supports cancel/undo."
 python_paths = ["src/main_window.py", "src/application_services.py", "src/mesh_ops.py", "src/operation_manager.py"]
@@ -2441,6 +2532,7 @@ next_slice = "RB-06"
 
 [[feature]]
 id = "builder3d.ui.mesh.subdivide"
+mcp_tool = ["subdivide"]
 area = "mesh"
 behavior = "Subdivide applies reference subdivision and undo; reference maps icon to Simplify.png."
 python_paths = ["src/main_window.py", "src/application_services.py", "src/mesh_ops.py", "src/operation_manager.py"]
@@ -2467,6 +2559,7 @@ next_slice = "RB-06"
 
 [[feature]]
 id = "builder3d.ui.mesh.smooth"
+mcp_tool = ["smooth"]
 area = "mesh"
 behavior = "Smooth modifies selected geometry while preserving identity/appearance and undo."
 python_paths = ["src/main_window.py", "src/application_services.py", "src/mesh_ops.py", "src/operation_manager.py"]
@@ -2493,6 +2586,7 @@ next_slice = "RB-06"
 
 [[feature]]
 id = "builder3d.ui.brush.grab"
+mcp_tool = ["elastic_grab"]
 area = "brush"
 behavior = "Persistent Grab popover retains bounded settings; Shift-click dabs and drag edits local mesh; ordinary drag remains camera navigation."
 python_paths = ["src/main_window.py", "src/viewport.py", "src/mesh_ops.py"]
@@ -2519,6 +2613,7 @@ next_slice = "RB-06"
 
 [[feature]]
 id = "builder3d.ui.brush.crease"
+mcp_tool = ["crease_polish"]
 area = "brush"
 behavior = "Persistent Crease settings drive bounded local path pinch and one undo."
 python_paths = ["src/main_window.py", "src/viewport.py", "src/mesh_ops.py"]
@@ -2545,6 +2640,7 @@ next_slice = "RB-06"
 
 [[feature]]
 id = "builder3d.ui.brush.smooth"
+mcp_tool = ["smooth_brush"]
 area = "brush"
 behavior = "Persistent Smooth Brush controls tangential smoothing/shrinkage on bounded path, preserves topology and undo."
 python_paths = ["src/main_window.py", "src/viewport.py", "src/mesh_ops.py"]
@@ -2571,6 +2667,7 @@ next_slice = "RB-06"
 
 [[feature]]
 id = "builder3d.ui.brush.blob"
+mcp_tool = ["blob"]
 area = "brush"
 behavior = "Persistent Blob controls bounded inflate/deflate along drawn path and commits once."
 python_paths = ["src/main_window.py", "src/viewport.py", "src/mesh_ops.py"]
@@ -2597,6 +2694,7 @@ next_slice = "RB-06"
 
 [[feature]]
 id = "builder3d.ui.mesh.normalize_density"
+mcp_tool = ["normalize_face_density"]
 area = "mesh"
 behavior = "Normalize selects surface region, preserves boundary, previews/cancels, reports counts and commits once."
 python_paths = ["src/main_window.py", "src/application_services.py", "src/mesh_ops.py", "src/operation_manager.py"]
@@ -2623,6 +2721,7 @@ next_slice = "RB-06"
 
 [[feature]]
 id = "builder3d.ui.mesh.merge"
+mcp_tool = ["boolean_merge"]
 area = "mesh"
 behavior = "Merge combines selected operands into permanent mesh preserving target state and undo."
 python_paths = ["src/main_window.py", "src/application_services.py", "src/mesh_ops.py", "src/operation_manager.py"]
@@ -2649,6 +2748,7 @@ next_slice = "RB-06"
 
 [[feature]]
 id = "builder3d.ui.mesh.intersect"
+mcp_tool = ["boolean_intersect"]
 area = "mesh"
 behavior = "Intersect keeps common volume using reference operand/selection rules."
 python_paths = ["src/main_window.py", "src/application_services.py", "src/mesh_ops.py", "src/operation_manager.py"]
@@ -2675,6 +2775,7 @@ next_slice = "RB-06"
 
 [[feature]]
 id = "builder3d.ui.mesh.subtract"
+mcp_tool = ["boolean_subtract"]
 area = "mesh"
 behavior = "Subtract uses selected order or viewport cutter pick; Escape cancels selection."
 python_paths = ["src/main_window.py", "src/application_services.py", "src/mesh_ops.py", "src/operation_manager.py"]
@@ -2701,6 +2802,7 @@ next_slice = "RB-06"
 
 [[feature]]
 id = "builder3d.ui.mesh.emboss"
+mcp_tool = ["emboss_text"]
 area = "mesh"
 behavior = "Emboss offers bounded text/font/size/depth/relief/placement controls and one undoable surface relief."
 python_paths = ["src/main_window.py", "src/application_services.py", "src/mesh_ops.py", "src/operation_manager.py"]
@@ -2727,6 +2829,7 @@ next_slice = "RB-06"
 
 [[feature]]
 id = "builder3d.ui.mesh.hollow"
+mcp_tool = ["hollow"]
 area = "mesh"
 behavior = "Hollow creates validated constant-thickness shell preserving identity, appearance and transform with one undo."
 python_paths = ["src/main_window.py", "src/application_services.py", "src/mesh_ops.py", "src/operation_manager.py"]
@@ -2753,6 +2856,7 @@ next_slice = "RB-06"
 
 [[feature]]
 id = "builder3d.ui.paint.material"
+mcp_tool = ["set_color"]
 area = "appearance"
 behavior = "Material opens solid RGBA material editor for selected objects."
 python_paths = ["src/main_window.py", "src/image_color.py", "src/model_actions.py"]
@@ -2779,6 +2883,7 @@ next_slice = "RB-08"
 
 [[feature]]
 id = "builder3d.ui.paint.paint"
+mcp_tool = ["set_color"]
 area = "appearance"
 behavior = "Paint is a separate visible command using the same solid-color handler as Material."
 python_paths = ["src/main_window.py", "src/image_color.py", "src/model_actions.py"]
@@ -2805,6 +2910,7 @@ next_slice = "RB-08"
 
 [[feature]]
 id = "builder3d.ui.paint.average_color"
+mcp_tool = ["sample_image_color"]
 area = "appearance"
 behavior = "Color samples image average and applies solid color; it does not create texture mapping."
 python_paths = ["src/main_window.py", "src/image_color.py", "src/model_actions.py"]
@@ -2831,6 +2937,7 @@ next_slice = "RB-08"
 
 [[feature]]
 id = "builder3d.ui.operations.progress_cancel"
+mcp_tool = ["operation_status", "cancel_operation"]
 area = "operations"
 behavior = "Long operations show progress/cancel; cancellation/stale revision/failure must leave scene and history unchanged."
 python_paths = ["src/main_window.py"]
@@ -2857,6 +2964,7 @@ next_slice = "RB-08"
 
 [[feature]]
 id = "builder3d.ui.print.prep"
+mcp_tool = ["print_check"]
 area = "print"
 behavior = "Print Prep Check reports bed-fit/scale/empty-hidden/mesh-health without mutating scene."
 python_paths = ["src/main_window.py", "src/application_services.py", "src/print_prep.py", "src/slicer_launcher.py"]
@@ -2883,6 +2991,7 @@ next_slice = "RB-08"
 
 [[feature]]
 id = "builder3d.ui.print.handoff"
+mcp_tool = ["discover_slicers", "launch_slicer"]
 area = "print"
 behavior = "3D Print discovers slicers, stages visible models as 3MF or required STL fallback, remembers chooser and launches staged result."
 python_paths = ["src/main_window.py", "src/application_services.py", "src/print_prep.py", "src/slicer_launcher.py"]
@@ -2909,6 +3018,7 @@ next_slice = "RB-08"
 
 [[feature]]
 id = "builder3d.ui.settings.theme"
+mcp_exempt = "visual only"
 area = "preferences"
 behavior = "Light/Dark applies immediately and persists; the original and Rust first-run theme are Dark."
 python_paths = ["src/main_window.py", "src/toolbar.py", "src/constants.py"]
@@ -2935,6 +3045,7 @@ next_slice = "RB-01"
 
 [[feature]]
 id = "builder3d.ui.settings.default_import_unit"
+mcp_tool = ["import_file"]
 area = "preferences"
 behavior = "Settings changes ambiguous STL/OBJ/PLY default without overriding 3MF/glTF declarations."
 python_paths = ["src/main_window.py", "src/toolbar.py", "src/constants.py"]
@@ -2961,6 +3072,7 @@ next_slice = "RB-08"
 
 [[feature]]
 id = "builder3d.ui.settings.display_unit"
+mcp_exempt = "visual only"
 area = "preferences"
 behavior = "Settings persists transform display units while internal values remain mm."
 python_paths = ["src/main_window.py", "src/toolbar.py", "src/constants.py"]
@@ -2987,6 +3099,7 @@ next_slice = "RB-08"
 
 [[feature]]
 id = "builder3d.ui.settings.preferred_slicer"
+mcp_tool = ["launch_slicer"]
 area = "preferences"
 behavior = "Settings chooses/browses/clears preferred slicer; 3D Print can remember choice."
 python_paths = ["src/main_window.py", "src/toolbar.py", "src/constants.py"]
@@ -3013,6 +3126,7 @@ next_slice = "RB-08"
 
 [[feature]]
 id = "builder3d.ui.settings.clear_recents"
+mcp_exempt = "visual only"
 area = "preferences"
 behavior = "Settings clears recent paths without deleting user files."
 python_paths = ["src/main_window.py", "src/toolbar.py", "src/constants.py"]
@@ -3039,6 +3153,7 @@ next_slice = "RB-08"
 
 [[feature]]
 id = "builder3d.ui.settings.about"
+mcp_exempt = "visual only"
 area = "preferences"
 behavior = "About is available only from Settings, not the file menu."
 python_paths = ["src/main_window.py", "src/toolbar.py", "src/constants.py"]
@@ -3065,6 +3180,7 @@ next_slice = "RB-08"
 
 [[feature]]
 id = "builder3d.ui.ribbon.collapse_pin"
+mcp_exempt = "visual only"
 area = "shell"
 behavior = "Click tab toggles command row; Pin keeps row open and persists."
 python_paths = ["src/main_window.py", "src/toolbar.py"]
@@ -3091,6 +3207,7 @@ next_slice = "RB-01"
 
 [[feature]]
 id = "builder3d.ui.ribbon.favorites"
+mcp_exempt = "visual only"
 area = "shell"
 behavior = "Favorites add/remove/reorder persist and overflow only when top row is tight."
 python_paths = ["src/main_window.py", "src/toolbar.py"]
@@ -3117,6 +3234,7 @@ next_slice = "RB-08"
 
 [[feature]]
 id = "builder3d.ui.ribbon.tab_order"
+mcp_exempt = "visual only"
 area = "shell"
 behavior = "Tab/Edit command order can be changed, persisted and reset per tab/defaults."
 python_paths = ["src/main_window.py", "src/toolbar.py"]
@@ -3143,6 +3261,7 @@ next_slice = "RB-08"
 
 [[feature]]
 id = "builder3d.ui.ribbon.utility_layout"
+mcp_exempt = "visual only"
 area = "shell"
 behavior = "Top utility has Save/Save As/Undo/Redo and 3D Print in documented locations; hamburger alone at left."
 python_paths = ["src/main_window.py", "src/toolbar.py"]
@@ -3169,6 +3288,7 @@ next_slice = "RB-01"
 
 [[feature]]
 id = "builder3d.ui.artwork.theme_sets"
+mcp_exempt = "visual only"
 area = "artwork"
 behavior = "Use owner transparent theme-specific artwork and exact mappings including ExRay/Subtract and Subdivide->Simplify."
 python_paths = ["src/icon_assets.py", "src/style.py", "src/branding.py"]
@@ -3195,6 +3315,7 @@ next_slice = "RB-01"
 
 [[feature]]
 id = "builder3d.audit.artwork.conflicts"
+mcp_exempt = "visual only"
 area = "artwork"
 behavior = "Pin/Snap action PNG lookup shadows root pin.jpg/snap.png fallback; source maps Undo/Redo raster files though style guide describes generated curved arrows."
 python_paths = ["src/icon_assets.py", "src/style.py", "src/branding.py"]
@@ -3221,6 +3342,7 @@ next_slice = "RB-01"
 
 [[feature]]
 id = "builder3d.audit.theme.default_and_dark_palette"
+mcp_exempt = "visual only"
 area = "appearance"
 behavior = "RB-00 found Python default Dark while Rust defaulted Light and used divergent dark tokens; RB-01 now sets Rust to Dark and copies the source tokens, with live visual review pending."
 python_paths = ["src/main_window.py", "src/image_color.py", "src/model_actions.py"]
@@ -3247,6 +3369,7 @@ next_slice = "RB-01"
 
 [[feature]]
 id = "builder3d.ui.branding.startup"
+mcp_exempt = "visual only"
 area = "branding"
 behavior = "Startup applies Builder3D.ico and Builder3D.png splash; product title remains branded."
 python_paths = ["src/branding.py", "src/main.py"]
@@ -3273,6 +3396,7 @@ next_slice = "RB-01"
 
 [[feature]]
 id = "builder3d.ui.shortcut.new"
+mcp_tool = ["new_project"]
 area = "shortcuts"
 behavior = "Ctrl+N shares New Scene dirty guard with menu."
 python_paths = ["src/main_window.py", "src/scene.py"]
@@ -3299,6 +3423,7 @@ next_slice = "RB-08"
 
 [[feature]]
 id = "builder3d.ui.shortcut.open"
+mcp_tool = ["open_project"]
 area = "shortcuts"
 behavior = "Ctrl+O shares Open Project action."
 python_paths = ["src/main_window.py", "src/scene.py"]
@@ -3325,6 +3450,7 @@ next_slice = "RB-08"
 
 [[feature]]
 id = "builder3d.ui.shortcut.save"
+mcp_tool = ["save_project"]
 area = "shortcuts"
 behavior = "Ctrl+S saves through common handler."
 python_paths = ["src/main_window.py", "src/scene.py"]
@@ -3351,6 +3477,7 @@ next_slice = "RB-02"
 
 [[feature]]
 id = "builder3d.ui.shortcut.save_as"
+mcp_tool = ["save_project_as"]
 area = "shortcuts"
 behavior = "Ctrl+Shift+S opens Save As."
 python_paths = ["src/main_window.py", "src/scene.py"]
@@ -3377,6 +3504,7 @@ next_slice = "RB-08"
 
 [[feature]]
 id = "builder3d.ui.shortcut.duplicate"
+mcp_tool = ["duplicate_selected"]
 area = "shortcuts"
 behavior = "Ctrl+D duplicates through common handler."
 python_paths = ["src/main_window.py", "src/scene.py"]
@@ -3403,6 +3531,7 @@ next_slice = "RB-08"
 
 [[feature]]
 id = "builder3d.ui.shortcut.delete"
+mcp_tool = ["delete_selected"]
 area = "shortcuts"
 behavior = "Delete removes selection and yields while text editor owns focus."
 python_paths = ["src/main_window.py", "src/scene.py"]
@@ -3429,6 +3558,7 @@ next_slice = "RB-04"
 
 [[feature]]
 id = "builder3d.ui.shortcut.exit"
+mcp_exempt = "visual only"
 area = "shortcuts"
 behavior = "Ctrl+Q requests exit through dirty guard."
 python_paths = ["src/main_window.py", "src/scene.py"]
@@ -3455,6 +3585,7 @@ next_slice = "RB-08"
 
 [[feature]]
 id = "builder3d.ui.shortcut.copy"
+mcp_tool = ["copy_selected"]
 area = "shortcuts"
 behavior = "Ctrl/Command+C copies scene selection; text editors retain native editing."
 python_paths = ["src/main_window.py", "src/scene.py"]
@@ -3481,6 +3612,7 @@ next_slice = "RB-08"
 
 [[feature]]
 id = "builder3d.ui.shortcut.cut"
+mcp_tool = ["cut_selected"]
 area = "shortcuts"
 behavior = "Ctrl/Command+X cuts scene selection; text editors retain native editing."
 python_paths = ["src/main_window.py", "src/scene.py"]
@@ -3507,6 +3639,7 @@ next_slice = "RB-08"
 
 [[feature]]
 id = "builder3d.ui.shortcut.paste"
+mcp_tool = ["paste"]
 area = "shortcuts"
 behavior = "Ctrl/Command+V pastes scene clipboard; text editors retain native editing."
 python_paths = ["src/main_window.py", "src/scene.py"]
@@ -3533,6 +3666,7 @@ next_slice = "RB-08"
 
 [[feature]]
 id = "builder3d.ui.shortcut.undo"
+mcp_tool = ["undo"]
 area = "shortcuts"
 behavior = "Ctrl/Command+Z undoes one model action, except when text editing owns focus."
 python_paths = ["src/main_window.py", "src/scene.py"]
@@ -3559,6 +3693,7 @@ next_slice = "RB-02"
 
 [[feature]]
 id = "builder3d.ui.shortcut.redo"
+mcp_tool = ["redo"]
 area = "shortcuts"
 behavior = "Ctrl+Y or platform Shift+Z redo chord redoes one model action; text editing keeps focus."
 python_paths = ["src/main_window.py", "src/scene.py"]
@@ -3585,6 +3720,7 @@ next_slice = "RB-08"
 
 [[feature]]
 id = "builder3d.ui.history.dirty_marker"
+mcp_tool = ["get_status", "undo", "redo", "save_project"]
 area = "history"
 behavior = "Dirty marker follows saved checkpoints through edit/undo/redo branches; failed saves do not clear dirty state."
 python_paths = ["src/main_window.py", "src/scene.py"]
@@ -3611,6 +3747,7 @@ next_slice = "RB-04 — Scene and precise transforms (after RB-03 visual review)
 
 [[feature]]
 id = "builder3d.audit.failure_preserves_state"
+mcp_tool = ["import_file", "export_file", "open_project", "save_project"]
 area = "reliability"
 behavior = "Invalid files and parse errors in project, import, or export operations preserve the authoritative scene, active path, dirty flag, selection, history, and recent list."
 python_paths = ["src/main_window.py", "src/application_services.py", "src/project_io.py"]
@@ -3637,6 +3774,7 @@ next_slice = "RB-04 — Scene and precise transforms (after RB-03 visual review)
 
 [[feature]]
 id = "builder3d.audit.stale_job_preserves_state"
+mcp_tool = ["operation_status", "cancel_operation"]
 area = "reliability"
 behavior = "Cancelled or stale long-running work cannot commit to a changed scene or overwrite its current path, dirty state, and history."
 python_paths = ["src/main_window.py", "src/application_services.py"]
@@ -3663,8 +3801,9 @@ next_slice = "RB-07"
 
 [[feature]]
 id = "builder3d.mcp.catalog_and_parity"
+mcp_tool = ["get_status"]
 area = "mcp"
-behavior = "Preserve the fixed 60-tool public catalog, schemas, profiles, replay and file contracts while routing Rust MCP requests through the optional desktop-owned bridge to the same live document and command history."
+behavior = "Preserve the fixed public catalog (the 60 reference tools plus the F12 additions rename_object and set_visibility), schemas, profiles, replay and file contracts while routing Rust MCP requests through the optional desktop-owned bridge to the same live document and command history."
 python_paths = ["scripts/mcp_catalog.py", "src/ai_commands.py", "scripts/builder3d_mcp.py"]
 python_symbols = ["scripts/mcp_catalog.py::TOOL_CATALOG", "src/ai_qt_bridge.py::QtLocalMCPServer", "scripts/builder3d_mcp.py::main"]
 python_tests = ["tests/test_mcp_catalog.py::test_mcp_catalog_is_deterministic_and_complete", "tests/test_mcp_catalog.py::test_mcp_catalog_rejects_registration_drift_and_generic_execution", "tests/test_mcp_catalog.py::test_desktop_parity_audit_has_shared_tools_or_named_exceptions", "tests/test_mcp_catalog.py::test_mcp_profiles_are_monotonic_and_files_are_not_client_widenable", "tests/test_mcp_catalog.py::test_gateway_tools_publish_typed_output_schemas", "tests/test_mcp_catalog.py::test_object_mutation_output_accepts_embedded_mesh_health", "tests/test_mcp_catalog.py::test_mcp_profile_and_output_schema_snapshot_is_stable", "tests/test_ai_bridge.py::test_ai_bridge_compatibility_import_is_qt_lazy", "tests/test_ai_bridge.py::test_local_server_uses_descriptor_authentication_and_cleans_up", "tests/test_ai_bridge.py::test_stdio_gateway_discovers_and_authenticates_without_fixed_port", "tests/test_ai_bridge.py::test_two_independent_gateway_clients_discover_the_same_authenticated_service", "tests/test_mcp_sdk.py::test_official_sdk_discovers_stdio_gateway_and_calls_tool"]
@@ -3687,6 +3826,7 @@ known_limits = ["The 2026-11-07 repair used a read-only current-reference tools/
 [[feature]]
 slice = "RB-01"
 id = "builder3d.ui.visual.theme_foundation"
+mcp_exempt = "visual only"
 area = "appearance"
 behavior = "The shell uses the source Light and Dark tokens, platform UI font, and original Dark first-run default."
 python_paths = ["src/style.py", "src/main_window.py"]
@@ -3714,6 +3854,7 @@ next_slice = "RB-01"
 [[feature]]
 slice = "RB-01"
 id = "builder3d.ui.visual.ribbon_foundation"
+mcp_exempt = "visual only"
 area = "shell"
 behavior = "The ribbon uses the original hamburger/tabs/quick-access/print/utility order, source command-row geometry and transparent theme artwork."
 python_paths = ["src/main_window.py", "src/style.py"]
@@ -3741,6 +3882,7 @@ next_slice = "RB-01"
 [[feature]]
 slice = "RB-01"
 id = "builder3d.ui.visual.welcome_foundation"
+mcp_exempt = "visual only"
 area = "welcome"
 behavior = "Welcome uses the original brandmark and action artwork with responsive project cards and source-matched surfaces."
 python_paths = ["src/main_window.py", "src/branding.py", "src/style.py"]
@@ -3768,6 +3910,7 @@ next_slice = "RB-01"
 [[feature]]
 slice = "RB-01"
 id = "builder3d.ui.visual.items_panel_foundation"
+mcp_exempt = "visual only"
 area = "object"
 behavior = "The right Items panel presents the source action-card hierarchy, object rows, primitive artwork, and compact panel proportions."
 python_paths = ["src/main_window.py", "src/style.py"]
@@ -3795,6 +3938,7 @@ next_slice = "RB-01"
 [[feature]]
 slice = "RB-01"
 id = "builder3d.ui.visual.transform_strip_foundation"
+mcp_exempt = "visual only"
 area = "shell"
 behavior = "The shell presents contextual Move/Rotate/Resize modes and existing numeric fields in the original bottom-strip location."
 python_paths = ["src/toolbar.py", "src/main_window.py", "src/style.py"]
@@ -3853,6 +3997,7 @@ owner_review = "pending; RB-02 not started"
 [[feature]]
 slice = "RB-02"
 id = "builder3d.workflow.first_shaded_editable_project"
+mcp_tool = ["add_primitive", "import_file"]
 area = "workflow"
 behavior = "The existing eframe window creates a scene, adds a cube, imports a model through the native picker, presents a shaded viewport, supports camera navigation and exact stable-ID pick, commits a translation-gizmo move, undoes/redoes it, and saves/reopens the resulting .3dp project."
 python_paths = ["src/main_window.py", "src/viewport.py", "src/gizmo.py", "src/project_io.py"]
@@ -3928,6 +4073,7 @@ next_slice = "RB-03 handoff prepared at docs/rb-03-lifecycle-and-file-completion
 
 [[feature]]
 id = "builder3d.ui.items.naming"
+mcp_tool = ["rename_object"]
 area = "items"
 behavior = "Named objects preserve names and identity through rename, clipboard, groups and history. Python has constructor/copy names; no original interactive rename route was found."
 python_paths = ["src/scene.py", "src/main_window.py"]
@@ -3954,6 +4100,7 @@ next_slice = "RB-04"
 
 [[feature]]
 id = "builder3d.ui.items.thumbnails"
+mcp_exempt = "visual only"
 area = "items"
 behavior = "Items thumbnails represent actual object geometry; hidden rows remain represented."
 python_paths = ["src/main_window.py"]
