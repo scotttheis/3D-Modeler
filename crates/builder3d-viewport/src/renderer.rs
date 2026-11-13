@@ -1720,6 +1720,18 @@ fn create_mesh_pipeline(
     })
 }
 
+/// Pushes the floor surface, its shadows and its text slightly away from the
+/// camera in the depth buffer. Meshes rest exactly on Y = 0, so without this a
+/// mesh rim and the floor have equal depth and the floor wins pixel by pixel,
+/// which serrates the lower edge of round bodies (F9). Slope scaling keeps it
+/// enough at grazing angles; the constant covers face-on views. Grid and
+/// gizmo lines are not biased, so they still draw over the pushed-back floor.
+const FLOOR_SURFACE_DEPTH_BIAS: wgpu::DepthBiasState = wgpu::DepthBiasState {
+    constant: 2,
+    slope_scale: 1.0,
+    clamp: 0.0,
+};
+
 fn create_overlay_pipeline(
     device: &wgpu::Device,
     layout: &wgpu::BindGroupLayout,
@@ -1788,7 +1800,11 @@ fn create_overlay_pipeline(
             depth_write_enabled: Some(false),
             depth_compare: Some(wgpu::CompareFunction::LessEqual),
             stencil: Default::default(),
-            bias: Default::default(),
+            bias: if topology == wgpu::PrimitiveTopology::TriangleList {
+                FLOOR_SURFACE_DEPTH_BIAS
+            } else {
+                Default::default()
+            },
         }),
         multisample: wgpu::MultisampleState {
             count: VIEWPORT_SAMPLE_COUNT,
@@ -1863,7 +1879,7 @@ fn create_floor_text_pipeline(
             depth_write_enabled: Some(false),
             depth_compare: Some(wgpu::CompareFunction::LessEqual),
             stencil: Default::default(),
-            bias: Default::default(),
+            bias: FLOOR_SURFACE_DEPTH_BIAS,
         }),
         multisample: wgpu::MultisampleState {
             count: VIEWPORT_SAMPLE_COUNT,
