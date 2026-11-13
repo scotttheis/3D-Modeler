@@ -31,7 +31,7 @@ closed. Stop before RB-10 work (S3) as before.
 | F2 | Whole suite green | **Done** 2026-11-12 (`f1b581d`; re-verified after OF-1) |
 | F3 | Clippy on all targets | **Done** 2026-11-12 |
 | F4 | Baseline commit of 220+ uncommitted paths | **Done** 2026-11-12 on `rebuild/work` |
-| F5 | Release link reliability | Open — two clean release builds 2026-11-12; not yet shown reliable |
+| F5 | Release link reliability | Open — three clean release builds 2026-11-12 (third 4m05s, after the snap fix); not yet shown reliable |
 | F6 | Reconcile the 147-row feature ledger with the app | Open |
 | F7 | Clear ad hoc `target/` directories (`E:` had 40 GB free) | **Done** 2026-11-12 — archived to `G:\Builder3D-Rust_target-adhoc-archive_20261112`, `target/` 91 → ~55 GB |
 | F8 | `scripts/Invoke-Gate.ps1` | Open |
@@ -95,8 +95,9 @@ viewport in dark theme · D5 `emboss_text` metadata.
   exclusion lifts as soon as the pointer leaves the point's capture band, so
   coming back near it snaps again from either side. Desktop drag only; the
   MCP `snap_translate` tool is one-shot and already snaps whenever near.
-  Test `missed_snap_recaptures_when_the_pointer_comes_back_near_it`. Not yet
-  hand-checked by the owner.
+  Test `missed_snap_recaptures_when_the_pointer_comes_back_near_it`.
+  Commit `2c7b319`. **Owner-approved** in the release build 2026-11-12
+  ("fantastic").
 - Suggested next: F12 rename and show/hide tools, then F9.
 - Review harness: `BUILDER3D_REVIEW_CAMERA=yaw,pitch,distance` poses the
   camera after auto-framing; state `resize-drag` holds the +X handle mid-drag;
