@@ -101,7 +101,7 @@ viewport in dark theme · D5 `emboss_text` metadata.
 - 2026-11-12 (third batch): OF-10 to OF-14 all committed, **none
   owner-reviewed yet** — icon-only shortcuts, Slicer button with remembered
   slicer (no dialog), labelled Save / Save As, light/dark toggle (`0f3dd09`);
-  Shift+drag box select (next commit). Full workspace gate passed. Captures
+  Shift+drag box select (`907f9b0`). Full workspace gate passed. Captures
   `evidence/rebuild/captures/2026-11-12-of10-14-topbar/`. Open: MCP
   `launch_slicer` still needs an explicit `slicer_key` (it cannot yet say
   "the saved slicer"); box select needs a hand check. Table in
@@ -117,7 +117,9 @@ viewport in dark theme · D5 `emboss_text` metadata.
 
 ## Last recovery point
 
-Git: branch `rebuild/work` at the MCP Merge color commit (after the shadow
-follow-up `43f0fd0`); see `git log`. Tree snapshot:
-`G:\Builder3D-Rust_snapshot_20261112-104713_OF-batch2` (5,603 files,
-827,512,382 bytes, counts verified; excludes `target\`).
+Git: branch `rebuild/work` at the OF-13 box-select commit `907f9b0` (third
+batch); see `git log`. Tree snapshot:
+`G:\Builder3D-Rust_snapshot_20261112-174438_OF-batch3` (5,687 files,
+829,330,824 bytes, counts verified; excludes `target\`). Release build
+`targeteleaseuilder3d-app.exe` rebuilt 2026-11-12 (3m42s, fourth clean
+release link, F5).
