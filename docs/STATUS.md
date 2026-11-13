@@ -121,5 +121,5 @@ Git: branch `rebuild/work` at the OF-13 box-select commit `907f9b0` (third
 batch); see `git log`. Tree snapshot:
 `G:\Builder3D-Rust_snapshot_20261112-174438_OF-batch3` (5,687 files,
 829,330,824 bytes, counts verified; excludes `target\`). Release build
-`targeteleaseuilder3d-app.exe` rebuilt 2026-11-12 (3m42s, fourth clean
+`target\release\builder3d-app.exe` rebuilt 2026-11-12 (3m42s, fourth clean
 release link, F5).
