@@ -1765,7 +1765,7 @@ impl Builder3dApp {
                             if self.menu_open {
                                 palette.pressed
                             } else {
-                                palette.hover
+                                palette.navigation_hover
                             },
                         );
                     }
@@ -2209,7 +2209,9 @@ impl Builder3dApp {
 
     fn render_tabs(&mut self, ui: &mut Ui, palette: ThemePalette) {
         let mut selected_tab = None;
-        ui.horizontal(|ui| {
+        // Tabs share the top row with the menu button instead of a nested
+        // row, so both centre on the same line (OF-19).
+        {
             for tab in RibbonTab::all() {
                 let selected = tab == self.active_tab;
                 let (rect, response) =
@@ -2256,7 +2258,7 @@ impl Builder3dApp {
                     selected_tab = Some(tab);
                 }
             }
-        });
+        }
         if let Some(tab) = selected_tab {
             if tab == self.active_tab {
                 if !self.ribbon_pinned {
@@ -5666,6 +5668,7 @@ impl Builder3dApp {
         let Some(dialog) = self.dialog.as_mut() else {
             return;
         };
+        dialog.sync_theme_mode(self.theme_mode);
         if let Some(action) = dialog.show_with_settings_area(ctx, Some(settings_work_area)) {
             self.apply_dialog_action(action);
         }
@@ -7705,6 +7708,24 @@ mod tests {
         app.toggle_theme();
         assert_eq!(app.theme_mode, ThemeMode::Light);
         assert_eq!(app.commands.preferences().theme_mode(), ThemeMode::Light);
+        assert!(std::fs::remove_dir_all(directory).is_ok());
+    }
+
+    #[test]
+    fn open_settings_shows_the_theme_picked_with_the_top_bar_toggle() {
+        let (mut app, directory) = shell_for_jobs("of16-theme-sync");
+        app.theme_mode = ThemeMode::Light;
+        app.surface = WorkspaceSurface::Scene;
+        app.open_dialog(DialogKind::Settings);
+        app.toggle_theme();
+        let context = egui::Context::default();
+        let mut output = context.run_ui(egui::RawInput::default(), |ui| {
+            app.render_dialog(ui.ctx());
+        });
+        output.textures_delta.clear();
+        assert!(app.dialog.as_ref().is_some_and(|dialog| {
+            dialog.kind() == DialogKind::Settings && dialog.theme_mode() == ThemeMode::Dark
+        }));
         assert!(std::fs::remove_dir_all(directory).is_ok());
     }
 

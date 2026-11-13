@@ -105,6 +105,12 @@ viewport in dark theme · D5 `emboss_text` metadata.
   additive, touching counts (`907f9b0`). Full workspace gate passed.
   Captures `evidence/rebuild/captures/2026-11-12-of10-14-topbar/`. Table in
   [`owner-feedback-2026-11-12.md`](owner-feedback-2026-11-12.md).
+- 2026-11-12 (fourth batch): OF-15 to OF-19 done, **awaiting owner
+  review** — darker light-mode top bar, Settings follows the top-bar theme
+  toggle, a press outside Settings closes it, one Close button (Done
+  removed), menu icon centred with the tab text. Full workspace gate passed.
+  Captures `evidence/rebuild/captures/2026-11-12-of15-19-settings-topbar/`.
+  Table in [`owner-feedback-2026-11-12.md`](owner-feedback-2026-11-12.md).
 - **Paused by the owner 2026-11-12** after batch 3. On resume, suggested
   next: MCP `launch_slicer` falls back to the saved slicer when no
   `slicer_key` is given (owner said yes; F12 parity), then F12 rename and

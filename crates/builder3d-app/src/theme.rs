@@ -130,8 +130,8 @@ impl ThemePalette {
             // A visible light-grey tile, as on 3D Builder's toolbar.
             hover: Color32::from_rgb(0xE4, 0xE7, 0xF0),
             pressed: Color32::from_rgb(0xE1, 0xE6, 0xFF),
-            navigation: Color32::from_rgb(0xE8, 0xEA, 0xF5),
-            navigation_hover: Color32::from_rgb(0xD0, 0xD5, 0xEA),
+            navigation: Color32::from_rgb(0xDC, 0xDF, 0xEE),
+            navigation_hover: Color32::from_rgb(0xC9, 0xCF, 0xE6),
             viewport: Color32::from_rgb(0xF0, 0xF0, 0xF0),
             grid: Color32::from_rgba_unmultiplied(0xAD, 0xAD, 0xAD, 0x14),
         }

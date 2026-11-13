@@ -320,6 +320,11 @@ impl DialogState {
         self.kind
     }
 
+    #[cfg(test)]
+    pub(crate) const fn theme_mode(&self) -> ThemeMode {
+        self.theme_mode
+    }
+
     /// Settings stays alongside the viewport; its About popup remains modal.
     pub(crate) fn is_modal(&self) -> bool {
         self.kind != DialogKind::Settings || self.about_open
@@ -360,7 +365,7 @@ impl DialogState {
         } else {
             window.anchor(Align2::CENTER_CENTER, [0.0, 0.0])
         };
-        window.show(ctx, |ui| {
+        let shown = window.show(ctx, |ui| {
             let min_width = if self.kind == DialogKind::Settings {
                 settings_work_area.map_or(360.0, |rect| (rect.width() - 24.0).max(240.0))
             } else {
@@ -408,6 +413,12 @@ impl DialogState {
                 action = Some(DialogAction::Close);
             }
         });
+        if action.is_none()
+            && let Some(shown) = shown
+            && self.settings_dismissed_by_outside_press(ctx, shown.response.rect)
+        {
+            action = Some(DialogAction::Close);
+        }
         if self.about_open {
             let mut close_about = false;
             egui::Modal::new(egui::Id::unique("builder3d-settings-about")).show(ctx, |ui| {
@@ -431,6 +442,28 @@ impl DialogState {
             }
         }
         action
+    }
+
+    /// Settings is non-modal, so a press anywhere outside its window closes it
+    /// (owner request OF-17). A press inside one of its own drop-down lists
+    /// (an open popup) or while About is up does not count.
+    fn settings_dismissed_by_outside_press(&self, ctx: &Context, window_rect: egui::Rect) -> bool {
+        if self.kind != DialogKind::Settings || self.about_open || egui::Popup::is_any_open(ctx) {
+            return false;
+        }
+        ctx.input(|input| {
+            input.pointer.any_pressed()
+                && input
+                    .pointer
+                    .press_origin()
+                    .is_some_and(|origin| !window_rect.contains(origin))
+        })
+    }
+
+    /// Keeps Settings' Light/Dark choice in step with a theme changed
+    /// elsewhere (the top-bar toggle) while Settings is open (OF-16).
+    pub(crate) fn sync_theme_mode(&mut self, mode: ThemeMode) {
+        self.theme_mode = mode;
     }
 
     fn path_dialog(
@@ -699,9 +732,6 @@ impl DialogState {
         ui.label("Application");
         if ui.button("About").clicked() {
             self.about_open = true;
-        }
-        if ui.button("Done").clicked() {
-            *action = Some(DialogAction::Close);
         }
     }
 
@@ -1362,6 +1392,78 @@ mod tests {
     fn cancelling_image_browse_keeps_the_typed_path_for_retry() {
         let current = String::from("C:/images/sample.png");
         assert_eq!(path_after_browse(&current, None), current);
+    }
+
+    fn press_at(pos: egui::Pos2) -> Vec<egui::RawInput> {
+        let screen = Some(egui::Rect::from_min_size(
+            egui::Pos2::ZERO,
+            egui::vec2(1280.0, 840.0),
+        ));
+        let pointer_button = |pressed| egui::Event::PointerButton {
+            pos,
+            button: egui::PointerButton::Primary,
+            pressed,
+            modifiers: egui::Modifiers::default(),
+        };
+        vec![
+            egui::RawInput {
+                screen_rect: screen,
+                events: vec![egui::Event::PointerMoved(pos)],
+                ..Default::default()
+            },
+            egui::RawInput {
+                screen_rect: screen,
+                events: vec![pointer_button(true)],
+                ..Default::default()
+            },
+            egui::RawInput {
+                screen_rect: screen,
+                events: vec![pointer_button(false)],
+                ..Default::default()
+            },
+        ]
+    }
+
+    fn settings_actions_for_press(pos: egui::Pos2) -> Vec<DialogAction> {
+        let context = Context::default();
+        let mut dialog = DialogState::new(DialogKind::Settings, ThemeMode::Light);
+        let area = egui::Rect::from_min_max(egui::pos2(0.0, 130.0), egui::pos2(420.0, 800.0));
+        let mut actions = Vec::new();
+        for input in std::iter::once(egui::RawInput::default()).chain(press_at(pos)) {
+            let mut output = context.run_ui(input, |ui| {
+                actions.extend(dialog.show_with_settings_area(ui.ctx(), Some(area)));
+            });
+            output.textures_delta.clear();
+        }
+        actions
+    }
+
+    #[test]
+    fn pressing_outside_settings_closes_it_and_inside_does_not() {
+        assert_eq!(
+            settings_actions_for_press(egui::pos2(900.0, 400.0)),
+            vec![DialogAction::Close]
+        );
+        assert!(settings_actions_for_press(egui::pos2(200.0, 400.0)).is_empty());
+    }
+
+    #[test]
+    fn settings_has_one_close_button() {
+        let source = include_str!("dialogs.rs");
+        let settings_body = source
+            .split("fn settings_dialog(")
+            .nth(1)
+            .and_then(|rest| rest.split("\n    fn ").next())
+            .unwrap_or_default();
+        assert!(!settings_body.is_empty());
+        assert!(!settings_body.contains("\"Done\""));
+    }
+
+    #[test]
+    fn settings_follows_a_theme_changed_elsewhere() {
+        let mut dialog = DialogState::new(DialogKind::Settings, ThemeMode::Light);
+        dialog.sync_theme_mode(ThemeMode::Dark);
+        assert_eq!(dialog.theme_mode, ThemeMode::Dark);
     }
 
     #[test]
