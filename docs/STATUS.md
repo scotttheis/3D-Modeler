@@ -98,15 +98,17 @@ viewport in dark theme · D5 `emboss_text` metadata.
   Test `missed_snap_recaptures_when_the_pointer_comes_back_near_it`.
   Commit `2c7b319`. **Owner-approved** in the release build 2026-11-12
   ("fantastic").
-- 2026-11-12 (third batch): OF-10 to OF-14 all committed, **none
-  owner-reviewed yet** — icon-only shortcuts, Slicer button with remembered
-  slicer (no dialog), labelled Save / Save As, light/dark toggle (`0f3dd09`);
-  Shift+drag box select (`907f9b0`). Full workspace gate passed. Captures
-  `evidence/rebuild/captures/2026-11-12-of10-14-topbar/`. Open: MCP
-  `launch_slicer` still needs an explicit `slicer_key` (it cannot yet say
-  "the saved slicer"); box select needs a hand check. Table in
+- 2026-11-12 (third batch): OF-10 to OF-14 **owner-approved** in the
+  release build ("you did amazing. i say yes to it all") — icon-only
+  shortcuts, Slicer button with remembered slicer (no dialog), labelled
+  Save / Save As, light/dark toggle (`0f3dd09`); Shift+drag box select,
+  additive, touching counts (`907f9b0`). Full workspace gate passed.
+  Captures `evidence/rebuild/captures/2026-11-12-of10-14-topbar/`. Table in
   [`owner-feedback-2026-11-12.md`](owner-feedback-2026-11-12.md).
-- Suggested next: F12 rename and show/hide tools, then F9.
+- **Paused by the owner 2026-11-12** after batch 3. On resume, suggested
+  next: MCP `launch_slicer` falls back to the saved slicer when no
+  `slicer_key` is given (owner said yes; F12 parity), then F12 rename and
+  show/hide tools, then F9.
 - Review harness: `BUILDER3D_REVIEW_CAMERA=yaw,pitch,distance` poses the
   camera after auto-framing; state `resize-drag` holds the +X handle mid-drag;
   `BUILDER3D_REVIEW_POINTER=x,y` rests the pointer to show hover states;
