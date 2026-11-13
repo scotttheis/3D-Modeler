@@ -9567,6 +9567,76 @@ mod tests {
         );
     }
 
+    /// The whole shell at `size` with Settings open: wheels over Settings and
+    /// returns how far its "Restore 3D Builder defaults" button moved up.
+    fn shell_settings_wheel_scroll(size: UiSize) -> f32 {
+        let mut app = Builder3dApp::default();
+        app.dispatch(CommandId::AddPrimitive(builder3d_core::PrimitiveKind::Cube));
+        app.ui_size = size;
+        app.open_dialog(DialogKind::Settings);
+        let ctx = egui::Context::default();
+        ctx.enable_accesskit();
+        // Short enough that Settings overflows at either size.
+        let window = match size {
+            UiSize::Normal => Vec2::new(1280.0, 640.0),
+            UiSize::Big => Vec2::new(1920.0, 1040.0),
+        };
+        let screen = egui::Rect::from_min_size(egui::Pos2::ZERO, window / size.zoom_factor());
+        let frame = |app: &mut Builder3dApp, events: Vec<egui::Event>| {
+            let mut output = ctx.run_ui(
+                egui::RawInput {
+                    screen_rect: Some(screen),
+                    events,
+                    ..Default::default()
+                },
+                |ui| {
+                    theme::apply(ui.ctx(), app.theme_mode);
+                    theme::apply_size(ui.ctx(), app.ui_size);
+                    app.render_background(ui);
+                    app.render_dialog(ui.ctx());
+                },
+            );
+            output.textures_delta.clear();
+            output.platform_output.accesskit_update.and_then(|update| {
+                update.nodes.iter().find_map(|(_, node)| {
+                    (node.label() == Some("Restore 3D Builder defaults"))
+                        .then(|| node.bounds().map(|bounds| bounds.y0 as f32))
+                        .flatten()
+                })
+            })
+        };
+        let over = egui::pos2(120.0, screen.height() * 0.5);
+        let mut before = None;
+        for _ in 0..4 {
+            before = frame(&mut app, vec![egui::Event::PointerMoved(over)]).or(before);
+        }
+        let wheel = egui::Event::MouseWheel {
+            unit: egui::MouseWheelUnit::Point,
+            delta: egui::vec2(0.0, -200.0),
+            phase: egui::TouchPhase::Move,
+            modifiers: egui::Modifiers::default(),
+            source: egui::MouseWheelSource::Unknown,
+        };
+        let distance = app.camera.distance();
+        let mut after = frame(&mut app, vec![egui::Event::PointerMoved(over), wheel]);
+        for _ in 0..30 {
+            after = frame(&mut app, vec![egui::Event::PointerMoved(over)]).or(after);
+        }
+        assert!(
+            (app.camera.distance() - distance).abs() < f32::EPSILON,
+            "wheeling over Settings must not zoom the 3D view"
+        );
+        before.unwrap_or_default() - after.unwrap_or_default()
+    }
+
+    #[test]
+    fn settings_scrolls_and_the_view_stays_put_at_normal_and_big() {
+        for size in [UiSize::Normal, UiSize::Big] {
+            let scrolled = shell_settings_wheel_scroll(size);
+            assert!(scrolled > 20.0, "{size:?} Settings scrolled {scrolled}");
+        }
+    }
+
     #[test]
     fn modal_pointer_input_cannot_duplicate_or_apply_background_transform() {
         fn frame(

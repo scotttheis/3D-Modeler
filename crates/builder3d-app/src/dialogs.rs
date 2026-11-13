@@ -1858,6 +1858,67 @@ mod tests {
         assert_eq!(dialog.ui_size(), UiSize::Normal);
     }
 
+    /// Wheels over a short Settings panel at `zoom` and returns how far the
+    /// "Restore 3D Builder defaults" button moved up, in points.
+    fn settings_wheel_scroll_distance(zoom: f32) -> f32 {
+        let context = Context::default();
+        context.enable_accesskit();
+        context.set_zoom_factor(zoom);
+        // Raw input is in points, so a 1280x840 window is 640x420 at Big.
+        let screen = egui::Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(1280.0, 840.0) / zoom);
+        let points = screen.size();
+        let area = egui::Rect::from_min_max(
+            egui::pos2(8.0, 60.0),
+            egui::pos2(300.0, (points.y - 20.0).min(400.0)),
+        );
+        let over = egui::pos2(100.0, area.center().y);
+        let mut dialog = DialogState::new(DialogKind::Settings, ThemeMode::Light);
+        let mut find = |events: Vec<egui::Event>| {
+            let mut found = None;
+            let input = egui::RawInput {
+                screen_rect: Some(screen),
+                events,
+                ..Default::default()
+            };
+            let mut output = context.run_ui(input, |ui| {
+                let _ = dialog.show_with_settings_area(ui.ctx(), Some(area));
+            });
+            output.textures_delta.clear();
+            if let Some(update) = output.platform_output.accesskit_update {
+                found = update.nodes.iter().find_map(|(_, node)| {
+                    (node.label() == Some("Restore 3D Builder defaults"))
+                        .then(|| node.bounds().map(|bounds| bounds.y0 as f32))
+                        .flatten()
+                });
+            }
+            found
+        };
+        let mut before = None;
+        for _ in 0..3 {
+            before = find(vec![egui::Event::PointerMoved(over)]).or(before);
+        }
+        let wheel = egui::Event::MouseWheel {
+            unit: egui::MouseWheelUnit::Point,
+            delta: egui::vec2(0.0, -200.0),
+            phase: egui::TouchPhase::Move,
+            modifiers: egui::Modifiers::default(),
+            source: egui::MouseWheelSource::Unknown,
+        };
+        let mut after = find(vec![egui::Event::PointerMoved(over), wheel]);
+        for _ in 0..30 {
+            after = find(vec![egui::Event::PointerMoved(over)]).or(after);
+        }
+        before.unwrap_or_default() - after.unwrap_or_default()
+    }
+
+    #[test]
+    fn settings_scrolls_with_the_wheel_at_normal_and_big() {
+        let normal = settings_wheel_scroll_distance(1.0);
+        let big = settings_wheel_scroll_distance(2.0);
+        assert!(normal > 20.0, "normal size scrolled {normal}");
+        assert!(big > 20.0, "big size scrolled {big}");
+    }
+
     #[test]
     fn settings_application_about_and_close_share_one_line() {
         let mut dialog = DialogState::new(DialogKind::Settings, ThemeMode::Light);
