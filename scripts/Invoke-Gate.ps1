@@ -154,7 +154,7 @@ if ($fullScope -or $lockChanged) {
 # --- full-tier extras -------------------------------------------------------
 if ($fullScope) {
     [void](Invoke-Step 'MCP catalog parity' 'cargo test -p builder3d-mcp --test ledger_parity --locked')
-    [void](Invoke-Step 'smoke' 'cargo run -p builder3d-app --locked -- --smoke')
+    [void](Invoke-Step 'smoke' 'cargo run -p builder3d-app --bin builder3d-app --locked -- --smoke')
 
     if ($SkipCaptures) {
         Skip-Step 'capture board' '-SkipCaptures'
