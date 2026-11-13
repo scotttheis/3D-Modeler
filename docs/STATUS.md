@@ -98,6 +98,10 @@ viewport in dark theme · D5 `emboss_text` metadata.
   Test `missed_snap_recaptures_when_the_pointer_comes_back_near_it`.
   Commit `2c7b319`. **Owner-approved** in the release build 2026-11-12
   ("fantastic").
+- 2026-11-12 (third batch, **in progress**): OF-10 to OF-14 — icon-only
+  shortcuts, Slicer button with remembered slicer, labelled Save / Save As,
+  Shift+drag box select, light/dark toggle. Table in
+  [`owner-feedback-2026-11-12.md`](owner-feedback-2026-11-12.md).
 - Suggested next: F12 rename and show/hide tools, then F9.
 - Review harness: `BUILDER3D_REVIEW_CAMERA=yaw,pitch,distance` poses the
   camera after auto-framing; state `resize-drag` holds the +X handle mid-drag;

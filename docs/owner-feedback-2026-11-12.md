@@ -171,3 +171,20 @@ What changed (`builder3d-viewport` only):
 
 Open from this follow-up: a shadow that tracks the dragged object; holes in
 concave shadows; measured rebuild timings; owner review of 1 and 2; commit.
+
+## Third batch (2026-11-12) — top bar and box select
+
+Raw owner requests, in the order given. Worked in this order, one commit each.
+
+| # | Area | What the owner wants | State |
+|---|---|---|---|
+| OF-10 | Shortcut bar | Remove the description and the name under each pinned shortcut; icon only. The tooltip is the tool's name. | Done 2026-11-12, awaiting owner review: 36 px icon-only buttons, tooltip and accessible name = the command name; right-click still removes. captures `evidence/rebuild/captures/2026-11-12-of10-14-topbar/`. |
+| OF-11 | Slicer button | The "3D Print" button becomes **Slicer**. First click: choose a slicer; it is remembered and every click after that exports straight to it with no confirmation. Changing it only happens in Settings. | Done 2026-11-12, awaiting owner review: no saved slicer → a chooser under the button (installed slicers + Browse); the pick is saved and sent to at once. Saved slicer → stage visible objects and launch, no dialog (`launch_when_staged` job). Missing saved slicer → status says to change it in Settings. Settings keeps Change/Clear. Tests `slicer_button_*`. |
+| OF-12 | Save buttons | The two top-right icons are **Save** and **Save As**, labelled as such and doing exactly that. | Done 2026-11-12, awaiting owner review: icon + "Save" / "Save As" text buttons (Ctrl+S / Ctrl+Shift+S). |
+| OF-13 | Box select | Shift + press on the workspace floor (empty space) and drag draws a selection box; objects inside it are selected. | Open |
+| OF-14 | Theme toggle | A light/dark toggle in the top bar, between the Slicer button and the Save buttons. | Done 2026-11-12, awaiting owner review: pill switch, knob shows sun (light) or moon (dark); saved to settings. Test `theme_toggle_flips_the_mode_and_saves_it`. |
+
+MCP parity (plan 3.7): OF-10, OF-12, OF-14 are visual/shell only. OF-11 uses the
+existing slicer handoff that MCP `launch_slicer` already exposes. OF-13 is a
+pointer gesture; its result (a selection set) is what MCP `select` already
+sets, so no new tool.

@@ -654,7 +654,7 @@ impl DialogState {
             }
             None => {
                 ui.label(
-                    RichText::new("No slicer selected. The print workflow can search for one.")
+                    RichText::new("No slicer chosen yet. Click Slicer in the top bar to pick one.")
                         .weak(),
                 );
             }

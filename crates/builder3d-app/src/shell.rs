@@ -63,11 +63,23 @@ use builder3d_platform::{
 };
 
 const RIBBON_BUTTON_HEIGHT: f32 = 68.0;
-const FAVORITE_ICON_SIZE: f32 = 24.0;
-const FAVORITE_BUTTON_WIDTH: f32 = 92.0;
-const FAVORITE_BUTTON_HEIGHT: f32 = 52.0;
+const FAVORITE_ICON_SIZE: f32 = 22.0;
+const FAVORITE_BUTTON_WIDTH: f32 = 36.0;
+const FAVORITE_BUTTON_HEIGHT: f32 = 34.0;
 const FAVORITE_OVERFLOW_WIDTH: f32 = 40.0;
 const TOP_ROW_SPACING: f32 = 1.0;
+const SLICER_BUTTON_WIDTH: f32 = 84.0;
+const THEME_TOGGLE_WIDTH: f32 = 52.0;
+/// Room for the top-right cluster: Slicer, theme toggle, "Save", "Save As",
+/// Undo and Redo, with spacing. The labelled buttons size to their text, so
+/// this is a measured upper bound.
+const TOP_RIGHT_CLUSTER_WIDTH: f32 = SLICER_BUTTON_WIDTH
+    + THEME_TOGGLE_WIDTH
+    + 64.0
+    + 82.0
+    + 2.0 * 36.0
+    + 6.0 * TOP_ROW_SPACING
+    + 12.0;
 const MOVE_ARROW_HEAD_LENGTH_PIXELS: f32 = 12.0;
 const MOVE_ARROW_SHAFT_LENGTH_PIXELS: f32 = 22.0;
 const MOVE_ARROW_HEAD_HALF_WIDTH_PIXELS: f32 = 5.0;
@@ -258,6 +270,9 @@ struct RunningDesktopJob {
     dialog_generation: u64,
     resume_dialog: Option<DialogState>,
     cancel_on_drop: bool,
+    /// Launch the slicer as soon as staging succeeds (the top-bar Slicer
+    /// button) instead of handing the staged files to the print dialog.
+    launch_when_staged: bool,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -292,6 +307,10 @@ pub struct Builder3dApp {
     active_tab: RibbonTab,
     surface: WorkspaceSurface,
     menu_open: bool,
+    /// Open while the first-use slicer chooser under the Slicer button shows.
+    slicer_chooser_open: bool,
+    /// Slicers found when the chooser opened.
+    slicer_choices: Vec<SlicerInfo>,
     ribbon_pinned: bool,
     ribbon_expanded: bool,
     ribbon_rect: Option<egui::Rect>,
@@ -381,6 +400,8 @@ impl Default for Builder3dApp {
             active_tab: RibbonTab::Insert,
             surface: WorkspaceSurface::Welcome,
             menu_open: false,
+            slicer_chooser_open: false,
+            slicer_choices: Vec::new(),
             ribbon_pinned: false,
             ribbon_expanded: true,
             ribbon_rect: None,
@@ -502,6 +523,13 @@ impl Builder3dApp {
 
         self.settings_path = review.isolated_settings_path();
         self.theme_mode = review.theme();
+        // A real start seeds the shortcut bar when it is empty; do the same so
+        // captures show it.
+        if self.commands.preferences().ribbon_favorites().is_empty() {
+            self.commands
+                .preferences_mut()
+                .set_ribbon_favorites(default_favorites());
+        }
         if let Some(tab) = review.tab().and_then(|label| {
             RibbonTab::all()
                 .into_iter()
@@ -893,7 +921,7 @@ impl Builder3dApp {
             self.active_brush = Some(brush);
             self.brush_settings_open = true;
             self.commands.set_status(format!(
-                "{} active — hold Shift and drag on a mesh",
+                "{} active â€” hold Shift and drag on a mesh",
                 brush.label()
             ));
         }
@@ -1183,6 +1211,59 @@ impl Builder3dApp {
         );
     }
 
+    /// The top-bar Slicer button. With a saved slicer it exports the visible
+    /// objects straight to it, with no dialog; the first time, it opens the
+    /// chooser. The saved slicer is changed only in Settings.
+    fn slicer_button_clicked(&mut self) {
+        let preferences = self.commands.preferences();
+        let Some(path) = preferences.preferred_slicer_path().map(Path::to_path_buf) else {
+            self.slicer_choices = crate::print_handoff::discover_print_slicers();
+            self.slicer_chooser_open = true;
+            return;
+        };
+        match slicer_info_from_path(&path, preferences.preferred_slicer_label()) {
+            Ok(slicer) => self.send_to_slicer(slicer),
+            Err(error) => self.commands.set_status(format!(
+                "Saved slicer is unavailable ({error}); change it in Settings"
+            )),
+        }
+    }
+
+    /// Remembers the slicer picked in the first-use chooser and sends to it.
+    fn choose_slicer(&mut self, slicer: SlicerInfo) {
+        self.slicer_chooser_open = false;
+        self.slicer_choices.clear();
+        self.commands
+            .preferences_mut()
+            .set_preferred_slicer(Some(slicer.path.clone()), Some(slicer.label.clone()));
+        self.persist_preferences();
+        self.send_to_slicer(slicer);
+    }
+
+    fn send_to_slicer(&mut self, slicer: SlicerInfo) {
+        if self.desktop_job.is_some() {
+            self.commands
+                .set_status("Cannot send to the slicer: another operation is still running");
+            return;
+        }
+        let snapshot = self.commands.scene().snapshot();
+        let document_generation = self.commands.document_generation();
+        self.start_desktop_job(
+            "Send to slicer",
+            DesktopJobRequest::PreparePrint {
+                snapshot,
+                slicer,
+                temp_root: current_runtime_paths().temp_dir,
+                document_generation,
+            },
+            None,
+            false,
+        );
+        if let Some(job) = self.desktop_job.as_mut() {
+            job.launch_when_staged = true;
+        }
+    }
+
     fn start_desktop_job(
         &mut self,
         title: &str,
@@ -1265,6 +1346,7 @@ impl Builder3dApp {
             dialog_generation,
             resume_dialog,
             cancel_on_drop: true,
+            launch_when_staged: false,
         });
     }
 
@@ -1487,6 +1569,26 @@ impl Builder3dApp {
                     );
                     return;
                 }
+                if job.launch_when_staged {
+                    match launch_prepared_print(&prepared) {
+                        Ok(launch) => {
+                            let message = format!(
+                                "Sent {} object(s) to {}",
+                                prepared.objects_exported, launch.slicer.label
+                            );
+                            self.commands.set_status(message);
+                            let _ = self.commands.operations().complete(
+                                &job.handle.operation_id,
+                                Some(serde_json::json!({ "staged": true, "launched": true })),
+                            );
+                        }
+                        Err(error) => {
+                            let _ = discard_prepared_print(&prepared);
+                            self.fail_desktop_job(&mut job, error.to_string());
+                        }
+                    }
+                    return;
+                }
                 let message = format!(
                     "Prepared {} object(s) as {} for {}",
                     prepared.objects_exported, prepared.format, prepared.slicer.label
@@ -1624,8 +1726,19 @@ impl Builder3dApp {
         self.ribbon_rect = Some(response.response.rect);
     }
 
+    fn toggle_theme(&mut self) {
+        let mode = match self.theme_mode {
+            ThemeMode::Light => ThemeMode::Dark,
+            ThemeMode::Dark => ThemeMode::Light,
+        };
+        self.theme_mode = mode;
+        self.commands.preferences_mut().set_theme_mode(mode);
+        self.persist_preferences();
+    }
+
     fn render_menu_and_utility(&mut self, ui: &mut Ui, palette: ThemePalette) {
         let mut menu_response = None;
+        let mut slicer_response = None;
         egui::Frame::new()
             .fill(palette.navigation)
             .inner_margin(egui::Margin::symmetric(6, 2))
@@ -1691,28 +1804,118 @@ impl Builder3dApp {
                         ) {
                             self.dispatch(CommandId::Undo);
                         }
-                        if self.utility_button(
+                        if labelled_save_button(
                             ui,
-                            CommandId::SaveProjectAs,
-                            "Save a copy of the current project (Ctrl+Shift+S)",
+                            "Save As",
+                            true,
+                            "Save the project under a new name (Ctrl+Shift+S)",
                             palette,
                         ) {
                             self.dispatch(CommandId::SaveProjectAs);
                         }
-                        if self.utility_button(
+                        if labelled_save_button(
                             ui,
-                            CommandId::SaveProject,
-                            "Save the current project (Ctrl+S)",
+                            "Save",
+                            false,
+                            "Save the project (Ctrl+S)",
                             palette,
                         ) {
                             self.dispatch(CommandId::SaveProject);
                         }
-                        if self.print_button(ui, palette) {
-                            self.dispatch(CommandId::PrintPrep);
+                        if theme_toggle(ui, self.theme_mode, palette) {
+                            self.toggle_theme();
                         }
+                        let tooltip = self
+                            .commands
+                            .preferences()
+                            .preferred_slicer_label()
+                            .map_or_else(
+                                || String::from("Choose the slicer to send your models to"),
+                                |label| format!("Send the visible models to {label}"),
+                            );
+                        let response = slicer_button(ui, &tooltip, palette);
+                        if response.clicked() {
+                            self.slicer_button_clicked();
+                        }
+                        slicer_response = Some(response);
                     });
                 });
             });
+
+        if let Some(response) = slicer_response {
+            let mut chosen = None;
+            let mut browse = false;
+            let choices = &self.slicer_choices;
+            egui::Popup::from_response(&response)
+                .open_bool(&mut self.slicer_chooser_open)
+                .close_behavior(egui::PopupCloseBehavior::CloseOnClickOutside)
+                .align(egui::RectAlign::BOTTOM_END)
+                .frame(
+                    egui::Frame::new()
+                        .fill(palette.panel)
+                        .stroke(Stroke::new(1.0, palette.divider))
+                        .corner_radius(crate::chrome::RADIUS_SURFACE)
+                        .shadow(theme::floating_shadow(self.theme_mode))
+                        .inner_margin(egui::Margin::same(10)),
+                )
+                .width(260.0)
+                .show(|ui| {
+                    ui.spacing_mut().item_spacing.y = 4.0;
+                    ui.label(RichText::new("Choose your slicer").strong());
+                    ui.label(
+                        RichText::new(
+                            "The Slicer button will send to it every time. \
+                             Change it later in Settings.",
+                        )
+                        .small()
+                        .color(palette.muted),
+                    );
+                    ui.add_space(4.0);
+                    if choices.is_empty() {
+                        ui.label(RichText::new("No installed slicers were found.").weak());
+                    }
+                    for slicer in choices {
+                        if ui
+                            .add_sized(
+                                [ui.available_width(), 28.0],
+                                egui::Button::new(&slicer.label)
+                                    .stroke(Stroke::NONE)
+                                    .fill(Color32::TRANSPARENT),
+                            )
+                            .on_hover_text(slicer.path.display().to_string())
+                            .clicked()
+                        {
+                            chosen = Some(slicer.clone());
+                        }
+                    }
+                    ui.separator();
+                    if ui
+                        .add_sized(
+                            [ui.available_width(), 28.0],
+                            egui::Button::new("Browse for a slicer...")
+                                .stroke(Stroke::NONE)
+                                .fill(Color32::TRANSPARENT),
+                        )
+                        .clicked()
+                    {
+                        browse = true;
+                    }
+                });
+            if browse {
+                self.slicer_chooser_open = false;
+                if let Some(path) = native_slicer_picker(None) {
+                    match slicer_info_from_path(&path, None) {
+                        Ok(slicer) => chosen = Some(slicer),
+                        Err(error) => self
+                            .commands
+                            .set_status(format!("Could not use selected slicer: {error}")),
+                    }
+                }
+            }
+            if let Some(slicer) = chosen {
+                self.choose_slicer(slicer);
+            }
+        }
 
         let mut menu_command = None;
         let mut customize_ribbon = false;
@@ -1818,47 +2021,6 @@ impl Builder3dApp {
         response.on_hover_text(help).clicked()
     }
 
-    fn print_button(&mut self, ui: &mut Ui, palette: ThemePalette) -> bool {
-        let (rect, response) = ui.allocate_exact_size(Vec2::new(92.0, 30.0), Sense::click());
-        response.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, true, "3D Print"));
-        let response = response.on_hover_cursor(egui::CursorIcon::PointingHand);
-        let painter = ui.painter_at(rect);
-        let fill = if response.is_pointer_button_down_on() {
-            palette.accent_dark
-        } else if response.hovered() {
-            palette.accent_control_hover
-        } else {
-            palette.accent_control
-        };
-        painter.rect_filled(rect, 6.0, fill);
-        paint_print_symbol(
-            &painter,
-            egui::Rect::from_min_size(
-                egui::pos2(rect.left() + 9.0, rect.center().y - 8.0),
-                Vec2::splat(16.0),
-            ),
-            palette.accent_text,
-        );
-        painter.text(
-            egui::pos2(rect.left() + 31.0, rect.center().y),
-            Align2::LEFT_CENTER,
-            "3D Print",
-            FontId::proportional(12.0),
-            palette.accent_text,
-        );
-        if response.has_focus() {
-            painter.rect_stroke(
-                rect,
-                6.0,
-                Stroke::new(1.5, palette.accent_text),
-                egui::StrokeKind::Inside,
-            );
-        }
-        response
-            .on_hover_text("Check the scene and hand visible objects to a known slicer")
-            .clicked()
-    }
-
     fn render_favorites(&mut self, ui: &mut Ui, palette: ThemePalette) {
         let available = all_command_keys();
         let current = normalize_favorites(
@@ -1875,7 +2037,7 @@ impl Builder3dApp {
                 .set_ribbon_favorites(current.clone());
         }
 
-        let fixed_row_width = 92.0 + 4.0 * 36.0 + 5.0 * TOP_ROW_SPACING + 12.0;
+        let fixed_row_width = TOP_RIGHT_CLUSTER_WIDTH;
         let available_width = (ui.available_width() - fixed_row_width).max(0.0);
         let horizontal_margins = 8.0;
         let spacing = TOP_ROW_SPACING;
@@ -1910,11 +2072,7 @@ impl Builder3dApp {
                         Sense::click_and_drag(),
                     );
                     response.widget_info(|| {
-                        egui::WidgetInfo::labeled(
-                            egui::Role::Button,
-                            enabled,
-                            format!("{}: {}", command.label, command_summary(command.id)),
-                        )
+                        egui::WidgetInfo::labeled(egui::Role::Button, enabled, command.label)
                     });
                     let response = response.on_hover_cursor(if enabled {
                         egui::CursorIcon::PointingHand
@@ -1946,7 +2104,7 @@ impl Builder3dApp {
                     self.paint_command_icon(
                         ui,
                         egui::Rect::from_center_size(
-                            egui::pos2(rect.center().x, rect.top() + 14.0),
+                            rect.center(),
                             Vec2::splat(FAVORITE_ICON_SIZE),
                         ),
                         command.id,
@@ -1960,25 +2118,6 @@ impl Builder3dApp {
                             }
                         },
                     );
-                    let painter = ui.painter_at(rect);
-                    painter.text(
-                        egui::pos2(rect.center().x, rect.top() + 31.0),
-                        Align2::CENTER_CENTER,
-                        command.label,
-                        FontId::proportional(11.0),
-                        if enabled {
-                            palette.text
-                        } else {
-                            palette.disabled_text
-                        },
-                    );
-                    painter.text(
-                        egui::pos2(rect.center().x, rect.top() + 43.0),
-                        Align2::CENTER_CENTER,
-                        command_summary(command.id),
-                        FontId::proportional(9.5),
-                        palette.muted,
-                    );
                     response.dnd_set_drag_payload(key.clone());
                     if let Some(payload) = response.dnd_release_payload::<String>()
                         && payload.as_str() != key
@@ -1987,9 +2126,6 @@ impl Builder3dApp {
                     }
                     let mut remove_this = false;
                     response.context_menu(|ui| {
-                        ui.label(RichText::new(command.label).strong());
-                        ui.label(command_summary(command.id));
-                        ui.separator();
                         if ui.button("Remove from shortcut bar").clicked() {
                             remove_this = true;
                             ui.close();
@@ -1998,14 +2134,7 @@ impl Builder3dApp {
                     if remove_this {
                         unpin = Some(key.clone());
                     }
-                    if response
-                        .on_hover_text(format!(
-                            "{}\n\nDrag to reorder. Right-click to remove this shortcut.",
-                            command_help(command.id)
-                        ))
-                        .clicked()
-                        && enabled
-                    {
+                    if response.on_hover_text(command.label).clicked() && enabled {
                         clicked = Some((tab, command.id));
                     }
                 }
@@ -2482,7 +2611,7 @@ impl Builder3dApp {
                             ui.add_space(18.0);
                             ui.vertical(|ui| {
                                 ui.label(
-                                    RichText::new("CREATE  •  REPAIR  •  PREPARE")
+                                    RichText::new("CREATE  â€¢  REPAIR  â€¢  PREPARE")
                                         .small()
                                         .strong()
                                         .color(palette.accent),
@@ -3885,9 +4014,9 @@ impl Builder3dApp {
                                         ));
                                     }
                                 } else if status.phase == OperationPhase::Cancelling {
-                                    ui.add_enabled(false, egui::Button::new("Cancelling…"));
+                                    ui.add_enabled(false, egui::Button::new("Cancellingâ€¦"));
                                 } else if status.phase == OperationPhase::Committing {
-                                    ui.add_enabled(false, egui::Button::new("Applying…"));
+                                    ui.add_enabled(false, egui::Button::new("Applyingâ€¦"));
                                 }
                             }
                             ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
@@ -5877,13 +6006,13 @@ impl Builder3dApp {
                 for key in order_snapshot {
                     ui.horizontal(|ui| {
                         ui.label(&key);
-                        if ui.small_button("↑").clicked()
+                        if ui.small_button("â†‘").clicked()
                             && let Some(moved) = move_favorite(&next, &key, -1)
                         {
                             next = moved;
                             changed = true;
                         }
-                        if ui.small_button("↓").clicked()
+                        if ui.small_button("â†“").clicked()
                             && let Some(moved) = move_favorite(&next, &key, 1)
                         {
                             next = moved;
@@ -6216,6 +6345,180 @@ fn ribbon_separator(ui: &mut Ui, palette: ThemePalette) {
     ui.painter().rect_filled(rect, 1.0, palette.divider);
 }
 
+/// The accent "Slicer" button at the left of the top-right cluster.
+fn slicer_button(ui: &mut Ui, tooltip: &str, palette: ThemePalette) -> egui::Response {
+    let (rect, response) =
+        ui.allocate_exact_size(Vec2::new(SLICER_BUTTON_WIDTH, 30.0), Sense::click());
+    response.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, true, "Slicer"));
+    let response = response.on_hover_cursor(egui::CursorIcon::PointingHand);
+    let painter = ui.painter_at(rect);
+    let fill = if response.is_pointer_button_down_on() {
+        palette.accent_dark
+    } else if response.hovered() {
+        palette.accent_control_hover
+    } else {
+        palette.accent_control
+    };
+    painter.rect_filled(rect, 6.0, fill);
+    paint_slicer_symbol(
+        &painter,
+        egui::Rect::from_min_size(
+            egui::pos2(rect.left() + 10.0, rect.center().y - 8.0),
+            Vec2::splat(16.0),
+        ),
+        palette.accent_text,
+    );
+    painter.text(
+        egui::pos2(rect.left() + 32.0, rect.center().y),
+        Align2::LEFT_CENTER,
+        "Slicer",
+        FontId::proportional(12.5),
+        palette.accent_text,
+    );
+    if response.has_focus() {
+        painter.rect_stroke(
+            rect,
+            6.0,
+            Stroke::new(1.5, palette.accent_text),
+            egui::StrokeKind::Inside,
+        );
+    }
+    response.on_hover_text(tooltip)
+}
+
+/// Three stacked layers: a model cut into slices.
+fn paint_slicer_symbol(painter: &egui::Painter, rect: egui::Rect, color: Color32) {
+    let stroke = Stroke::new(1.8, color);
+    for (row, inset) in [(0.0_f32, 4.0_f32), (1.0, 2.0), (2.0, 0.0)] {
+        let y = rect.top() + 3.0 + row * 5.0;
+        painter.line_segment(
+            [
+                egui::pos2(rect.left() + inset, y),
+                egui::pos2(rect.right() - inset, y),
+            ],
+            stroke,
+        );
+    }
+}
+
+/// Light/dark switch: a pill track with a knob carrying the current mode's
+/// sun or moon. Returns true when clicked.
+fn theme_toggle(ui: &mut Ui, mode: ThemeMode, palette: ThemePalette) -> bool {
+    let (slot, response) =
+        ui.allocate_exact_size(Vec2::new(THEME_TOGGLE_WIDTH, 36.0), Sense::click());
+    let dark = mode == ThemeMode::Dark;
+    let label = if dark {
+        "Switch to light mode"
+    } else {
+        "Switch to dark mode"
+    };
+    response
+        .widget_info(|| egui::WidgetInfo::selected(egui::Role::CheckBox, true, dark, "Dark mode"));
+    let response = response.on_hover_cursor(egui::CursorIcon::PointingHand);
+    let painter = ui.painter_at(slot);
+    let track = egui::Rect::from_center_size(slot.center(), Vec2::new(44.0, 24.0));
+    let track_fill = if response.hovered() {
+        palette.pressed
+    } else {
+        palette.hover
+    };
+    painter.rect_filled(track, 12.0, track_fill);
+    painter.rect_stroke(
+        track,
+        12.0,
+        Stroke::new(1.0, palette.divider),
+        egui::StrokeKind::Inside,
+    );
+    let left = egui::pos2(track.left() + 12.0, track.center().y);
+    let right = egui::pos2(track.right() - 12.0, track.center().y);
+    let (knob, other) = if dark { (right, left) } else { (left, right) };
+    // The mode not in use, faint, on the empty side of the track.
+    if dark {
+        paint_sun(&painter, other, palette.muted.gamma_multiply(0.7));
+    } else {
+        paint_moon(
+            &painter,
+            other,
+            palette.muted.gamma_multiply(0.7),
+            track_fill,
+        );
+    }
+    painter.circle_filled(knob, 9.5, palette.accent_control);
+    if dark {
+        paint_moon(&painter, knob, palette.accent_text, palette.accent_control);
+    } else {
+        paint_sun(&painter, knob, palette.accent_text);
+    }
+    if response.has_focus() {
+        painter.rect_stroke(
+            track,
+            12.0,
+            Stroke::new(1.5, palette.accent_border),
+            egui::StrokeKind::Inside,
+        );
+    }
+    response.on_hover_text(label).clicked()
+}
+
+fn paint_sun(painter: &egui::Painter, center: egui::Pos2, color: Color32) {
+    painter.circle_filled(center, 3.0, color);
+    let stroke = Stroke::new(1.3, color);
+    for step in 0..8 {
+        let angle = step as f32 * std::f32::consts::FRAC_PI_4;
+        let direction = Vec2::new(angle.cos(), angle.sin());
+        painter.line_segment([center + direction * 4.8, center + direction * 6.6], stroke);
+    }
+}
+
+fn paint_moon(painter: &egui::Painter, center: egui::Pos2, color: Color32, background: Color32) {
+    painter.circle_filled(center, 5.5, color);
+    painter.circle_filled(center + Vec2::new(2.8, -2.2), 4.6, background);
+}
+
+/// A save icon with its name beside it ("Save" / "Save As").
+fn labelled_save_button(
+    ui: &mut Ui,
+    label: &str,
+    save_as: bool,
+    tooltip: &str,
+    palette: ThemePalette,
+) -> bool {
+    let galley =
+        ui.painter()
+            .layout_no_wrap(label.to_owned(), FontId::proportional(12.5), palette.text);
+    let width = 8.0 + 18.0 + 6.0 + galley.size().x + 10.0;
+    let (rect, response) = ui.allocate_exact_size(Vec2::new(width, 36.0), Sense::click());
+    response.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, true, label));
+    let response = response.on_hover_cursor(egui::CursorIcon::PointingHand);
+    let painter = ui.painter_at(rect);
+    if response.hovered() || response.has_focus() {
+        painter.rect_filled(rect, 6.0, palette.hover);
+    }
+    if response.has_focus() {
+        painter.rect_stroke(
+            rect,
+            6.0,
+            Stroke::new(1.5, palette.accent_border),
+            egui::StrokeKind::Inside,
+        );
+    }
+    paint_save_symbol(
+        &painter,
+        egui::Rect::from_min_size(
+            egui::pos2(rect.left() + 8.0, rect.center().y - 9.0),
+            Vec2::splat(18.0),
+        ),
+        palette.muted,
+        save_as,
+    );
+    painter.galley(
+        egui::pos2(rect.left() + 32.0, rect.center().y - galley.size().y * 0.5),
+        galley,
+        palette.text,
+    );
+    response.on_hover_text(tooltip).clicked()
+}
+
 fn paint_save_symbol(painter: &egui::Painter, rect: egui::Rect, color: Color32, save_as: bool) {
     let stroke = Stroke::new(1.7, color);
     let body = rect.shrink(2.0);
@@ -6245,28 +6548,6 @@ fn paint_save_symbol(painter: &egui::Painter, rect: egui::Rect, color: Color32, 
             stroke,
         );
     }
-}
-
-fn paint_print_symbol(painter: &egui::Painter, rect: egui::Rect, color: Color32) {
-    let stroke = Stroke::new(1.6, color);
-    let paper = egui::Rect::from_min_max(
-        egui::pos2(rect.left() + 3.0, rect.top()),
-        egui::pos2(rect.right() - 3.0, rect.bottom() - 4.0),
-    );
-    painter.rect_stroke(paper, 1.0, stroke, egui::StrokeKind::Inside);
-    let base = egui::Rect::from_min_max(
-        egui::pos2(rect.left() + 1.0, rect.top() + 6.0),
-        egui::pos2(rect.right() - 1.0, rect.bottom() - 1.0),
-    );
-    painter.rect_stroke(base, 2.0, stroke, egui::StrokeKind::Inside);
-    painter.line_segment(
-        [
-            egui::pos2(paper.left() + 2.0, paper.bottom() - 3.0),
-            egui::pos2(paper.right() - 2.0, paper.bottom() - 3.0),
-        ],
-        stroke,
-    );
-    painter.circle_filled(egui::pos2(base.right() - 3.0, base.center().y), 1.0, color);
 }
 
 fn all_command_keys() -> Vec<String> {
@@ -7177,6 +7458,79 @@ mod tests {
             ..Builder3dApp::default()
         };
         (app, directory)
+    }
+
+    #[test]
+    fn slicer_button_without_a_saved_slicer_opens_the_chooser_and_starts_nothing() {
+        let (mut app, directory) = shell_for_jobs("of11-slicer-chooser");
+        app.slicer_button_clicked();
+        assert!(app.slicer_chooser_open);
+        assert!(app.desktop_job.is_none());
+        assert!(app.dialog.is_none());
+        assert!(std::fs::remove_dir_all(directory).is_ok());
+    }
+
+    #[test]
+    fn slicer_button_with_a_missing_saved_slicer_points_to_settings() {
+        let (mut app, directory) = shell_for_jobs("of11-slicer-missing");
+        app.commands
+            .preferences_mut()
+            .set_preferred_slicer(Some(directory.join("gone.exe")), Some("Gone".into()));
+        app.slicer_button_clicked();
+        assert!(!app.slicer_chooser_open);
+        assert!(app.desktop_job.is_none());
+        assert!(app.commands.last_status().contains("change it in Settings"));
+        assert!(std::fs::remove_dir_all(directory).is_ok());
+    }
+
+    #[test]
+    fn slicer_button_with_a_saved_slicer_sends_straight_to_it_without_a_dialog() {
+        let (mut app, directory) = shell_for_jobs("of11-slicer-direct");
+        assert!(
+            app.commands
+                .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
+                .is_ok()
+        );
+        // Not a runnable program, so the launch step fails after staging and
+        // the staged files must be discarded.
+        let slicer = directory.join("not-a-slicer.exe");
+        assert!(std::fs::write(&slicer, b"").is_ok());
+        app.commands
+            .preferences_mut()
+            .set_preferred_slicer(Some(slicer), Some("Test Slicer".into()));
+        app.slicer_button_clicked();
+        assert!(!app.slicer_chooser_open);
+        assert!(app.dialog.is_none());
+        let job = app
+            .desktop_job
+            .as_ref()
+            .expect("send-to-slicer job started");
+        assert!(job.launch_when_staged);
+        assert!(job.resume_dialog.is_none());
+        wait_for_desktop_job(&mut app);
+        assert!(app.dialog.is_none());
+        assert!(
+            app.commands
+                .last_status()
+                .starts_with("Send to slicer failed"),
+            "{}",
+            app.commands.last_status()
+        );
+        assert!(std::fs::remove_dir_all(directory).is_ok());
+    }
+
+    #[test]
+    fn theme_toggle_flips_the_mode_and_saves_it() {
+        let (mut app, directory) = shell_for_jobs("of14-theme-toggle");
+        app.theme_mode = ThemeMode::Light;
+        app.toggle_theme();
+        assert_eq!(app.theme_mode, ThemeMode::Dark);
+        assert_eq!(app.commands.preferences().theme_mode(), ThemeMode::Dark);
+        assert!(directory.join("settings.json").is_file());
+        app.toggle_theme();
+        assert_eq!(app.theme_mode, ThemeMode::Light);
+        assert_eq!(app.commands.preferences().theme_mode(), ThemeMode::Light);
+        assert!(std::fs::remove_dir_all(directory).is_ok());
     }
 
     fn wait_for_desktop_job(app: &mut Builder3dApp) {
@@ -9001,9 +9355,12 @@ mod tests {
                 );
             }
         }
+        // Shortcut-bar buttons are icon-only (OF-10), so target the labelled
+        // Duplicate button on the Object ribbon tab.
         let mut app = Builder3dApp {
             settings_path: repository_test_directory("rb04-modal-pointer").join("settings.json"),
             surface: WorkspaceSurface::Scene,
+            active_tab: RibbonTab::Object,
             ..Default::default()
         };
         app.commands
