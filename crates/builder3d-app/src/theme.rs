@@ -17,6 +17,58 @@ pub enum ThemeMode {
     Dark,
 }
 
+/// The shell size chosen in Settings (owner request OF-20).
+///
+/// Big doubles every shell surface — text, icons, bars, panels and dialogs —
+/// through egui's zoom factor. The 3D viewport keeps its physical resolution
+/// because it is sized from `pixels_per_point`.
+#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+pub enum UiSize {
+    /// The original size.
+    #[default]
+    Normal,
+    /// Twice the original size.
+    Big,
+}
+
+impl UiSize {
+    /// Returns the stable settings-file spelling.
+    #[must_use]
+    pub const fn key(self) -> &'static str {
+        match self {
+            Self::Normal => "normal",
+            Self::Big => "big",
+        }
+    }
+
+    /// Parses a persisted size; unknown text is `None`.
+    #[must_use]
+    pub fn from_key(value: &str) -> Option<Self> {
+        match value.trim().to_ascii_lowercase().as_str() {
+            "normal" => Some(Self::Normal),
+            "big" => Some(Self::Big),
+            _ => None,
+        }
+    }
+
+    /// The egui zoom factor for this size.
+    #[must_use]
+    pub const fn zoom_factor(self) -> f32 {
+        match self {
+            Self::Normal => 1.0,
+            Self::Big => 2.0,
+        }
+    }
+}
+
+/// Applies the shell size, touching egui only when it changes.
+pub fn apply_size(ctx: &Context, size: UiSize) {
+    let zoom = size.zoom_factor();
+    if (ctx.zoom_factor() - zoom).abs() > f32::EPSILON {
+        ctx.set_zoom_factor(zoom);
+    }
+}
+
 impl ThemeMode {
     /// Returns the stable settings-file spelling used by the desktop adapter.
     #[must_use]

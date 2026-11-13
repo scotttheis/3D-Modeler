@@ -12,8 +12,9 @@
 //! | Variable | Values | Default |
 //! |---|---|---|
 //! | `BUILDER3D_REVIEW_CAPTURE` | output PNG path | harness off |
-//! | `BUILDER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `resize`, `resize-drag`, `multi`, `merge`, `unselected`, `material` | `move` |
+//! | `BUILDER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `resize`, `resize-drag`, `multi`, `merge`, `unselected`, `material`, `settings`, `save`, `export` | `move` |
 //! | `BUILDER3D_REVIEW_THEME` | `light`, `dark` | `dark` |
+//! | `BUILDER3D_REVIEW_SIZE` | `normal`, `big` (Settings > Size) | `normal` |
 //! | `BUILDER3D_REVIEW_TAB` | a ribbon tab label such as `Object` | `Insert` |
 //! | `BUILDER3D_REVIEW_VIEW` | comma list of view toggles to turn on: `wireframe`, `xray` | none |
 //! | `BUILDER3D_REVIEW_POINTER` | `x,y` in window points: rests the pointer there to show a hover state (no button is pressed) | pointer outside |
@@ -34,7 +35,7 @@ use std::{
 
 use eframe::egui;
 
-use crate::theme::ThemeMode;
+use crate::theme::{ThemeMode, UiSize};
 
 /// Frames to wait before requesting the framebuffer, so fonts, artwork
 /// textures, auto-framing, and the first viewport render have all settled.
@@ -68,6 +69,12 @@ pub(crate) enum ReviewState {
     Unselected,
     /// One selected cube with the Material dialog open.
     Material,
+    /// One selected cube with Settings open.
+    Settings,
+    /// One selected cube with the Save dialog open.
+    Save,
+    /// One selected cube with the Export dialog open.
+    Export,
 }
 
 impl ReviewState {
@@ -83,6 +90,9 @@ impl ReviewState {
             "merge" => Some(Self::Merge),
             "unselected" => Some(Self::Unselected),
             "material" => Some(Self::Material),
+            "settings" => Some(Self::Settings),
+            "save" => Some(Self::Save),
+            "export" => Some(Self::Export),
             _ => None,
         }
     }
@@ -103,6 +113,7 @@ pub(crate) struct ReviewCapture {
     output: PathBuf,
     state: ReviewState,
     theme: ThemeMode,
+    size: UiSize,
     tab: Option<String>,
     camera: Option<[f32; 3]>,
     pointer: Option<[f32; 2]>,
@@ -134,6 +145,10 @@ impl ReviewCapture {
         };
         let theme = env::var("BUILDER3D_REVIEW_THEME")
             .map(|value| ThemeMode::from_key(&value))
+            .unwrap_or_default();
+        let size = env::var("BUILDER3D_REVIEW_SIZE")
+            .ok()
+            .and_then(|value| UiSize::from_key(&value))
             .unwrap_or_default();
         let tab = env::var("BUILDER3D_REVIEW_TAB")
             .ok()
@@ -174,6 +189,7 @@ impl ReviewCapture {
             output,
             state,
             theme,
+            size,
             tab,
             camera,
             pointer,
@@ -192,6 +208,10 @@ impl ReviewCapture {
 
     pub(crate) const fn theme(&self) -> ThemeMode {
         self.theme
+    }
+
+    pub(crate) const fn size(&self) -> UiSize {
+        self.size
     }
 
     pub(crate) fn tab(&self) -> Option<&str> {

@@ -50,7 +50,7 @@ use crate::numeric_controls::{
 use crate::operations::{OperationFailure, OperationHandle, OperationPhase};
 use crate::preferences::DisplayUnit;
 use crate::print_handoff::{PreparedPrint, discard_prepared_print, launch_prepared_print};
-use crate::theme::{self, ThemeMode, ThemePalette};
+use crate::theme::{self, ThemeMode, ThemePalette, UiSize};
 use crate::transform_gesture::{ResizeFrame, ResizeHandle, TransformGesture};
 use crate::transforms::{Alignment, Axis, world_bounds};
 use crate::ui_state::{
@@ -326,6 +326,8 @@ pub struct Builder3dApp {
     transform_strip_rect: Option<egui::Rect>,
     dialog: Option<DialogState>,
     theme_mode: ThemeMode,
+    /// Shell size from Settings; Big doubles every shell surface (OF-20).
+    ui_size: UiSize,
     close_requested: bool,
     confirm_action: Option<PendingReplacement>,
     pending_overwrite: Option<PendingOverwrite>,
@@ -417,6 +419,7 @@ impl Default for Builder3dApp {
             transform_strip_rect: None,
             dialog: None,
             theme_mode: ThemeMode::Dark,
+            ui_size: UiSize::Normal,
             close_requested: false,
             confirm_action: None,
             pending_overwrite: None,
@@ -531,6 +534,7 @@ impl Builder3dApp {
 
         self.settings_path = review.isolated_settings_path();
         self.theme_mode = review.theme();
+        self.ui_size = review.size();
         // A real start seeds the shortcut bar when it is empty; do the same so
         // captures show it.
         if self.commands.preferences().ribbon_favorites().is_empty() {
@@ -552,7 +556,10 @@ impl Builder3dApp {
             | ReviewState::Resize
             | ReviewState::ResizeDrag
             | ReviewState::Unselected
-            | ReviewState::Material => &[builder3d_core::PrimitiveKind::Cube],
+            | ReviewState::Material
+            | ReviewState::Settings
+            | ReviewState::Save
+            | ReviewState::Export => &[builder3d_core::PrimitiveKind::Cube],
             ReviewState::Merge => &[
                 builder3d_core::PrimitiveKind::Cube,
                 builder3d_core::PrimitiveKind::Cube,
@@ -580,8 +587,12 @@ impl Builder3dApp {
         if review.state() == ReviewState::Unselected {
             self.commands.set_selection_indices(std::iter::empty());
         }
-        if review.state() == ReviewState::Material {
-            self.dispatch(CommandId::Material);
+        match review.state() {
+            ReviewState::Material => self.dispatch(CommandId::Material),
+            ReviewState::Settings => self.open_dialog(DialogKind::Settings),
+            ReviewState::Save => self.open_dialog(DialogKind::SaveProject),
+            ReviewState::Export => self.open_dialog(DialogKind::Export),
+            _ => {}
         }
         if review.state() == ReviewState::Merge {
             let colors = [[0.86, 0.16, 0.16, 1.0], [0.16, 0.36, 0.90, 1.0]];
@@ -704,6 +715,7 @@ impl Builder3dApp {
             Ok(report) => {
                 *self.commands.preferences_mut() = report.preferences;
                 self.theme_mode = self.commands.preferences().theme_mode();
+                self.ui_size = self.commands.preferences().ui_size();
                 self.ribbon_pinned = self.commands.preferences().ribbon_pinned();
                 if self.commands.preferences().ribbon_favorites().is_empty() {
                     self.commands
@@ -1057,7 +1069,7 @@ impl Builder3dApp {
 
     fn save_before_replacement(&mut self, action: PendingReplacement) {
         if let Some(path) = self.commands.project_path().map(Path::to_path_buf) {
-            if let Err(error) = self.commands.save_to_path(&path) {
+            if let Err(error) = self.commands.save_document_to_path(&path) {
                 self.report_command_error(error);
                 self.confirm_action = Some(action);
                 return;
@@ -1156,6 +1168,10 @@ impl Builder3dApp {
                 .map(str::to_owned),
         );
         dialog.set_recent_file_count(self.commands.preferences().recent_files().paths().len());
+        dialog.sync_ui_size(self.ui_size);
+        if matches!(kind, DialogKind::SaveProject | DialogKind::Export) {
+            dialog.set_suggested_path(self.commands.project_path());
+        }
         if kind == DialogKind::Torus {
             dialog.load_torus_from_state(&self.commands);
         }
@@ -5565,7 +5581,12 @@ impl Builder3dApp {
             .status_bar_rect
             .map_or(safe_bottom, |rect| rect.top() - 8.0)
             .min(safe_bottom);
-        if let Some(rect) = self.transform_strip_rect {
+        // Stop above the transform strip when there is room; on a short window
+        // (or at Big size) run down to the status bar instead, so Settings
+        // stays under the ribbon rather than covering it.
+        if let Some(rect) = self.transform_strip_rect
+            && rect.top() - 8.0 - top >= 160.0
+        {
             bottom = bottom.min(rect.top() - 8.0);
         }
         if bottom - top < 160.0 {
@@ -5669,6 +5690,7 @@ impl Builder3dApp {
             return;
         };
         dialog.sync_theme_mode(self.theme_mode);
+        dialog.sync_ui_size(self.ui_size);
         if let Some(action) = dialog.show_with_settings_area(ctx, Some(settings_work_area)) {
             self.apply_dialog_action(action);
         }
@@ -5767,16 +5789,24 @@ impl Builder3dApp {
             DialogAction::Import(path, unit) => {
                 self.commands.import_from_path_with_unit(&path, unit)
             }
-            DialogAction::Save(path, _) => self.commands.save_to_path(&path).map(|_| {
+            DialogAction::Save(path, _) => self.commands.save_document_to_path(&path).map(|_| {
                 self.commands.project_path().map_or_else(
                     || format!("Saved {}", path.display()),
                     |saved| format!("Saved {}", saved.display()),
                 )
             }),
-            DialogAction::Export(path, _) => self
-                .commands
-                .export_to_path(&path)
-                .map(|_| format!("Exported {}", path.display())),
+            DialogAction::Export(path, _) => {
+                let is_project = path
+                    .extension()
+                    .and_then(|extension| extension.to_str())
+                    .is_some_and(|extension| extension.eq_ignore_ascii_case("3dp"));
+                let exported = if is_project {
+                    self.commands.export_project_copy(&path)
+                } else {
+                    self.commands.export_to_path(&path)
+                };
+                exported.map(|_| format!("Exported {}", path.display()))
+            }
             DialogAction::Repair => {
                 self.start_mesh_job(MeshJobOperation::Repair, true);
                 return;
@@ -5962,6 +5992,14 @@ impl Builder3dApp {
                 self.theme_mode = mode;
                 self.commands.preferences_mut().set_theme_mode(mode);
                 Ok(String::from("Theme updated"))
+            }
+            DialogAction::UiSize(size) => {
+                self.ui_size = size;
+                self.commands.preferences_mut().set_ui_size(size);
+                Ok(String::from(match size {
+                    UiSize::Big => "Size set to Big",
+                    UiSize::Normal => "Size set to Normal",
+                }))
             }
             DialogAction::ViewportLighting(lighting) => {
                 self.commands
@@ -6320,6 +6358,7 @@ impl eframe::App for Builder3dApp {
         self.poll_desktop_job(&ctx);
         ctx.send_viewport_cmd(egui::ViewportCommand::Title(self.window_title()));
         theme::apply(&ctx, self.theme_mode);
+        theme::apply_size(&ctx, self.ui_size);
         self.handle_shortcuts(&ctx);
         if self.surface == WorkspaceSurface::Welcome {
             self.update_recent_previews(&ctx);
@@ -6710,7 +6749,7 @@ fn command_enabled(command: CommandId, state: &CommandState) -> bool {
         CommandId::Group => selected > 1,
         CommandId::Merge | CommandId::Intersect | CommandId::Subtract => selected > 0,
         CommandId::Ungroup => selected > 0,
-        CommandId::Export => selected > 0,
+        CommandId::Export => !state.scene().objects().is_empty(),
         _ => true,
     }
 }
@@ -6721,9 +6760,9 @@ fn command_summary(command: CommandId) -> &'static str {
         CommandId::NewScene => "Blank scene",
         CommandId::OpenProject => "Open project",
         CommandId::ImportModel => "Add or open model",
-        CommandId::SaveProject => "Save project",
-        CommandId::SaveProjectAs => "Save a copy",
-        CommandId::Export => "Export selected model",
+        CommandId::SaveProject => "Save as STL",
+        CommandId::SaveProjectAs => "Save as STL or 3MF",
+        CommandId::Export => "Export to any format",
         CommandId::Repair => "Fix mesh issues",
         CommandId::PrintPrep => "Check for printing",
         CommandId::Settings => "App preferences",
@@ -6781,9 +6820,11 @@ fn command_help(command: CommandId) -> &'static str {
         CommandId::NewScene => "Start with a blank scene. Unsaved changes are checked first.",
         CommandId::OpenProject => "Open a saved Builder3D project without losing unsaved work.",
         CommandId::ImportModel => "Add a mesh or scene file to the current project.",
-        CommandId::SaveProject => "Save changes to the current project file.",
-        CommandId::SaveProjectAs => "Save a separate copy of the current project.",
-        CommandId::Export => "Export the selected model to a mesh file.",
+        CommandId::SaveProject => "Save the scene (STL by default).",
+        CommandId::SaveProjectAs => "Save the scene to a new STL or 3MF file.",
+        CommandId::Export => {
+            "Export the selection (or every visible model) to a mesh, scene or project file."
+        }
         CommandId::Repair => "Check the selected mesh and fix repairable problems.",
         CommandId::PrintPrep => "Check visible models and send them to an installed slicer.",
         CommandId::Settings => {
@@ -6844,7 +6885,9 @@ fn command_disabled_help(command: CommandId, state: &CommandState) -> &'static s
             "Select at least two models to make a group."
         }
         CommandId::EditTorus => "Select a torus to change its size and shape.",
-        CommandId::Export if state.selected_count() == 0 => "Select a model before exporting it.",
+        CommandId::Export if state.scene().objects().is_empty() => {
+            "Add or import a model before exporting."
+        }
         CommandId::SelectAll | CommandId::DeselectAll | CommandId::InvertSelection => {
             "Add or import a model before changing the selection."
         }
@@ -7708,6 +7751,35 @@ mod tests {
         app.toggle_theme();
         assert_eq!(app.theme_mode, ThemeMode::Light);
         assert_eq!(app.commands.preferences().theme_mode(), ThemeMode::Light);
+        assert!(std::fs::remove_dir_all(directory).is_ok());
+    }
+
+    #[test]
+    fn big_size_doubles_the_shell_and_survives_a_restart() {
+        let (mut app, directory) = shell_for_jobs("of20-ui-size");
+        app.open_dialog(DialogKind::Settings);
+        app.apply_dialog_action(DialogAction::UiSize(UiSize::Big));
+        assert_eq!(app.ui_size, UiSize::Big);
+        assert_eq!(app.commands.preferences().ui_size(), UiSize::Big);
+        assert!(
+            app.dialog.is_some(),
+            "Size, like Theme, keeps Settings open"
+        );
+
+        let context = egui::Context::default();
+        for _ in 0..2 {
+            let mut output = context.run_ui(egui::RawInput::default(), |ui| {
+                theme::apply_size(ui.ctx(), app.ui_size);
+            });
+            output.textures_delta.clear();
+        }
+        assert!((context.zoom_factor() - 2.0).abs() < f32::EPSILON);
+
+        let settings = directory.join("settings.json");
+        assert!(app.commands.preferences().save_to_path(&settings).is_ok());
+        let reloaded =
+            crate::preferences::Preferences::load_from_path(&settings).expect("settings reload");
+        assert_eq!(reloaded.ui_size(), UiSize::Big);
         assert!(std::fs::remove_dir_all(directory).is_ok());
     }
 
@@ -8636,7 +8708,7 @@ mod tests {
         assert!(shell.commands.is_dirty());
 
         shell.apply_dialog_action(DialogAction::Save(save_path.clone(), false));
-        let saved_path = save_path.with_extension("3dp");
+        let saved_path = save_path.with_extension("stl");
         assert!(saved_path.is_file());
         assert!(shell.commands.scene().objects().is_empty());
         assert!(shell.commands.project_path().is_none());
@@ -8824,7 +8896,7 @@ mod tests {
         assert!(shell.commands.is_dirty());
 
         shell.apply_dialog_action(DialogAction::Save(save_path.clone(), false));
-        assert!(save_path.with_extension("3dp").is_file());
+        assert!(save_path.with_extension("stl").is_file());
         assert_eq!(shell.commands.scene().objects().len(), 1);
         assert_eq!(shell.commands.scene().objects()[0].name(), expected_name);
         assert_eq!(shell.commands.project_path(), Some(target.as_path()));

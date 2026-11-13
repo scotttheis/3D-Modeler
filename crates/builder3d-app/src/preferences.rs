@@ -11,7 +11,7 @@ use std::{
 };
 
 use crate::ImportUnit;
-use crate::theme::ThemeMode;
+use crate::theme::{ThemeMode, UiSize};
 use builder3d_platform::LegacySettings;
 use builder3d_viewport::ViewportLighting;
 use serde::{Deserialize, Serialize};
@@ -169,6 +169,9 @@ pub struct Preferences {
     display_unit: DisplayUnit,
     #[serde(default)]
     theme_mode: ThemeMode,
+    /// Shell size: Normal or Big (twice the size), OF-20.
+    #[serde(default)]
+    ui_size: UiSize,
     /// User's durable mesh light, highlight, and floor contact shadow controls.
     #[serde(default)]
     viewport_lighting: ViewportLighting,
@@ -204,6 +207,7 @@ impl Default for Preferences {
             edit_ribbon_order: Vec::new(),
             display_unit: DisplayUnit::Millimetre,
             theme_mode: ThemeMode::Dark,
+            ui_size: UiSize::Normal,
             viewport_lighting: ViewportLighting::default(),
             ribbon_orders: BTreeMap::new(),
             object_snapping_enabled: true,
@@ -292,6 +296,15 @@ impl Preferences {
         json_field!("theme_mode", parse_theme_mode, |p: &mut Self, v| p
             .theme_mode =
             v);
+        if let Some(value) = object.remove("ui_size") {
+            match value.as_str().and_then(UiSize::from_key) {
+                Some(parsed) => preferences.ui_size = parsed,
+                None => push_warning(
+                    &mut warnings,
+                    "Ignored unsupported setting 'ui_size'.".to_owned(),
+                ),
+            }
+        }
         if let Some(value) = object.remove("viewport_lighting") {
             match parse_viewport_lighting(&value) {
                 Some(parsed) => preferences.viewport_lighting = parsed,
@@ -542,6 +555,17 @@ impl Preferences {
     /// Sets the shell theme preference.
     pub const fn set_theme_mode(&mut self, mode: ThemeMode) {
         self.theme_mode = mode;
+    }
+
+    /// Returns the persisted shell size.
+    #[must_use]
+    pub const fn ui_size(&self) -> UiSize {
+        self.ui_size
+    }
+
+    /// Sets the shell size preference.
+    pub const fn set_ui_size(&mut self, size: UiSize) {
+        self.ui_size = size;
     }
 
     /// Returns the persisted viewport lighting controls.

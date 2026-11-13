@@ -20,7 +20,87 @@ use crate::preferences::DisplayUnit;
 use crate::preferences::import_uses_authoritative_units;
 use crate::print_handoff::{PreparedPrint, discard_prepared_print, discover_print_slicers};
 use crate::print_prep::DEFAULT_BED_SIZE_MM;
-use crate::theme::ThemeMode;
+use crate::theme::{ThemeMode, UiSize};
+
+/// A file type offered by Save (STL, 3MF) or Export (every writer).
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) enum FileType {
+    Stl,
+    ThreeMf,
+    Obj,
+    Ply,
+    Gltf,
+    Glb,
+    Wrl,
+    Project,
+}
+
+impl FileType {
+    /// Save's quick-pick types; STL is the default (OF-23/OF-24).
+    const SAVE: [Self; 2] = [Self::Stl, Self::ThreeMf];
+    /// Export's drop-down, in menu order (OF-25).
+    const EXPORT: [Self; 8] = [
+        Self::Stl,
+        Self::ThreeMf,
+        Self::Obj,
+        Self::Ply,
+        Self::Gltf,
+        Self::Glb,
+        Self::Wrl,
+        Self::Project,
+    ];
+
+    pub(crate) const fn extension(self) -> &'static str {
+        match self {
+            Self::Stl => "stl",
+            Self::ThreeMf => "3mf",
+            Self::Obj => "obj",
+            Self::Ply => "ply",
+            Self::Gltf => "gltf",
+            Self::Glb => "glb",
+            Self::Wrl => "wrl",
+            Self::Project => "3dp",
+        }
+    }
+
+    const fn short_label(self) -> &'static str {
+        match self {
+            Self::Stl => "STL",
+            Self::ThreeMf => "3MF",
+            Self::Obj => "OBJ",
+            Self::Ply => "PLY",
+            Self::Gltf => "glTF",
+            Self::Glb => "GLB",
+            Self::Wrl => "VRML",
+            Self::Project => "Builder3D project",
+        }
+    }
+
+    const fn label(self) -> &'static str {
+        match self {
+            Self::Stl => "STL mesh (.stl)",
+            Self::ThreeMf => "3MF model (.3mf)",
+            Self::Obj => "OBJ mesh (.obj)",
+            Self::Ply => "PLY mesh (.ply)",
+            Self::Gltf => "glTF scene (.gltf)",
+            Self::Glb => "GLB scene (.glb)",
+            Self::Wrl => "VRML scene (.wrl)",
+            Self::Project => "Builder3D project (.3dp)",
+        }
+    }
+}
+
+/// What the native save window is asked for: its title, the one file type it
+/// filters to, and the suggested path (directory plus file name).
+#[derive(Clone, Debug, PartialEq)]
+pub(crate) struct SavePickerRequest {
+    pub(crate) title: &'static str,
+    pub(crate) file_type: FileType,
+    pub(crate) suggested: PathBuf,
+}
+
+/// Opens a native save window. Replaceable so tests never block on one.
+pub(crate) type SavePicker = fn(&SavePickerRequest) -> Option<PathBuf>;
 
 /// A result emitted by one dialog interaction.
 #[derive(Clone, Debug, PartialEq)]
@@ -69,6 +149,8 @@ pub(crate) enum DialogAction {
     Hollow(HollowOptions),
     /// Select a theme mode.
     Theme(ThemeMode),
+    /// Select the shell size (Big doubles it).
+    UiSize(UiSize),
     /// Update the mesh light, highlights, and floor contact shadows.
     ViewportLighting(ViewportLighting),
 }
@@ -103,6 +185,9 @@ pub(crate) struct DialogState {
     emboss_offset_z_mm: f32,
     hollow_wall_thickness_mm: f32,
     theme_mode: ThemeMode,
+    ui_size: UiSize,
+    file_type: FileType,
+    save_picker: SavePicker,
     viewport_lighting: ViewportLighting,
     print_bed_size: String,
     print_slicers: Vec<SlicerInfo>,
@@ -123,8 +208,7 @@ impl DialogState {
         let path_text = match kind {
             DialogKind::OpenProject => String::from("Builder3D.3dp"),
             DialogKind::ImportModel => String::from("model.stl"),
-            DialogKind::SaveProject => String::from("Builder3D.3dp"),
-            DialogKind::Export => String::from("Builder3D.stl"),
+            DialogKind::SaveProject | DialogKind::Export => String::from("Builder3D.stl"),
             _ => String::new(),
         };
         let print_slicers = if kind == DialogKind::PrintPrep {
@@ -156,6 +240,9 @@ impl DialogState {
             emboss_offset_z_mm: 0.0,
             hollow_wall_thickness_mm: 1.0,
             theme_mode,
+            ui_size: UiSize::Normal,
+            file_type: FileType::Stl,
+            save_picker: native_save_picker,
             viewport_lighting: ViewportLighting::default(),
             print_bed_size: format!("{DEFAULT_BED_SIZE_MM:.1} mm"),
             print_slicers,
@@ -375,12 +462,11 @@ impl DialogState {
             match self.kind {
                 DialogKind::OpenProject => self.path_dialog(ui, "Open", &mut action),
                 DialogKind::ImportModel => self.import_dialog(ui, &mut action),
-                DialogKind::SaveProject => self.path_dialog(ui, "Save", &mut action),
-                DialogKind::Export => self.path_dialog(ui, "Export", &mut action),
+                DialogKind::SaveProject | DialogKind::Export => self.file_type_dialog(ui),
                 DialogKind::Settings => {
                     let max_height = settings_work_area.map_or_else(
                         || (ctx.content_rect().height() - 160.0).max(280.0),
-                        |rect| (rect.height() - 76.0).max(120.0),
+                        |rect| (rect.height() - 92.0).max(120.0),
                     );
                     egui::ScrollArea::vertical()
                         .max_height(max_height)
@@ -404,13 +490,16 @@ impl DialogState {
                     .max_height(180.0)
                     .show(ui, |ui| ui.label(RichText::new(&self.message).color(color)));
             }
-            let close_label = if self.kind == DialogKind::Settings {
-                "Close"
-            } else {
-                "Cancel"
-            };
-            if ui.button(close_label).clicked() {
-                action = Some(DialogAction::Close);
+            match self.kind {
+                DialogKind::Settings => self.settings_footer(ui, &mut action),
+                DialogKind::SaveProject | DialogKind::Export => {
+                    self.file_type_footer(ui, &mut action);
+                }
+                _ => {
+                    if ui.button("Cancel").clicked() {
+                        action = Some(DialogAction::Close);
+                    }
+                }
             }
         });
         if action.is_none()
@@ -460,6 +549,38 @@ impl DialogState {
         })
     }
 
+    /// Keeps Settings' Big/Normal choice in step with the applied size.
+    pub(crate) fn sync_ui_size(&mut self, size: UiSize) {
+        self.ui_size = size;
+    }
+
+    /// Seeds the native save window's folder and file name from the current
+    /// document; the chosen type's extension is put on when the window opens.
+    pub(crate) fn set_suggested_path(&mut self, document: Option<&Path>) {
+        if let Some(stem) = document.and_then(Path::file_stem) {
+            let mut suggested = document
+                .and_then(Path::parent)
+                .map_or_else(PathBuf::new, Path::to_path_buf);
+            suggested.push(stem);
+            self.path_text = suggested.to_string_lossy().into_owned();
+        }
+    }
+
+    #[cfg(test)]
+    pub(crate) fn set_save_picker(&mut self, picker: SavePicker) {
+        self.save_picker = picker;
+    }
+
+    #[cfg(test)]
+    pub(crate) fn set_file_type(&mut self, file_type: FileType) {
+        self.file_type = file_type;
+    }
+
+    #[cfg(test)]
+    pub(crate) const fn ui_size(&self) -> UiSize {
+        self.ui_size
+    }
+
     /// Keeps Settings' Light/Dark choice in step with a theme changed
     /// elsewhere (the top-bar toggle) while Settings is open (OF-16).
     pub(crate) fn sync_theme_mode(&mut self, mode: ThemeMode) {
@@ -474,8 +595,6 @@ impl DialogState {
     ) {
         ui.label(match self.kind {
             DialogKind::OpenProject => "Builder3D project (.3dp)",
-            DialogKind::SaveProject => "Save project (.3dp)",
-            DialogKind::Export => "Export model",
             _ => "Path",
         });
         ui.horizontal(|ui| {
@@ -498,16 +617,98 @@ impl DialogState {
             let path = PathBuf::from(self.path_text.trim());
             *action = Some(match self.kind {
                 DialogKind::OpenProject => DialogAction::Open(path),
-                DialogKind::SaveProject => {
-                    DialogAction::Save(path, self.native_overwrite_confirmed)
-                }
-                DialogKind::Export => DialogAction::Export(
-                    export_path_with_default_extension(path),
-                    self.native_overwrite_confirmed,
-                ),
                 _ => return,
             });
         }
+    }
+
+    /// Save: quick-pick STL or 3MF (STL default). Export: a drop-down of every
+    /// type. The file window opens from the Save / Export button (OF-22..25).
+    fn file_type_dialog(&mut self, ui: &mut egui::Ui) {
+        if self.kind == DialogKind::SaveProject {
+            ui.label("Save as");
+            ui.horizontal(|ui| {
+                for file_type in FileType::SAVE {
+                    let button = egui::Button::selectable(
+                        self.file_type == file_type,
+                        RichText::new(file_type.short_label()).strong(),
+                    )
+                    .min_size(egui::vec2(72.0, 32.0));
+                    if ui.add(button).on_hover_text(file_type.label()).clicked() {
+                        self.file_type = file_type;
+                    }
+                }
+            });
+        } else {
+            ui.label("File type");
+            let combo = egui::ComboBox::from_id_salt("export-file-type")
+                .width(240.0)
+                .selected_text(self.file_type.label())
+                .show_ui(ui, |ui| {
+                    for file_type in FileType::EXPORT {
+                        ui.selectable_value(&mut self.file_type, file_type, file_type.label());
+                    }
+                });
+            combo.response.widget_info(|| {
+                egui::WidgetInfo::labeled(egui::Role::ComboBox, true, "Export file type")
+            });
+        }
+    }
+
+    /// The Save / Export button and Cancel on one line (OF-22, OF-25).
+    fn file_type_footer(&mut self, ui: &mut egui::Ui, action: &mut Option<DialogAction>) {
+        let (label, title) = if self.kind == DialogKind::SaveProject {
+            ("Save", "Save Builder3D model")
+        } else {
+            ("Export", "Export Builder3D model")
+        };
+        ui.horizontal(|ui| {
+            if ui.button(label).clicked() {
+                let request = SavePickerRequest {
+                    title,
+                    file_type: self.file_type,
+                    suggested: Path::new(self.path_text.trim())
+                        .with_extension(self.file_type.extension()),
+                };
+                if let Some(selected) = (self.save_picker)(&request) {
+                    *action = Some(self.file_action(selected));
+                }
+            }
+            if ui.button("Cancel").clicked() {
+                *action = Some(DialogAction::Close);
+            }
+        });
+    }
+
+    /// Turns a path chosen in the native window into Save / Export, adding
+    /// the chosen type's extension when the window returned none. The native
+    /// window has already asked about replacing an existing file.
+    fn file_action(&self, selected: PathBuf) -> DialogAction {
+        let path = if selected.extension().is_some() {
+            selected
+        } else {
+            selected.with_extension(self.file_type.extension())
+        };
+        let confirmed = path.is_file();
+        if self.kind == DialogKind::SaveProject {
+            DialogAction::Save(path, confirmed)
+        } else {
+            DialogAction::Export(export_path_with_default_extension(path), confirmed)
+        }
+    }
+
+    /// Application, About and Close on one line under Settings (OF-21).
+    fn settings_footer(&mut self, ui: &mut egui::Ui, action: &mut Option<DialogAction>) {
+        ui.separator();
+        ui.horizontal(|ui| {
+            ui.label("Application");
+            if ui.button("About").clicked() {
+                self.about_open = true;
+            }
+            if ui.button("Close").clicked() {
+                *action = Some(DialogAction::Close);
+            }
+        });
     }
 
     fn import_dialog(&mut self, ui: &mut egui::Ui, action: &mut Option<DialogAction>) {
@@ -561,24 +762,34 @@ impl DialogState {
     }
 
     fn settings_dialog(&mut self, ui: &mut egui::Ui, action: &mut Option<DialogAction>) {
-        ui.label("Theme");
         ui.horizontal(|ui| {
-            if ui
-                .selectable_label(self.theme_mode == ThemeMode::Light, "Light")
-                .clicked()
-            {
-                self.theme_mode = ThemeMode::Light;
-                *action = Some(DialogAction::Theme(ThemeMode::Light));
-            }
-            if ui
-                .selectable_label(self.theme_mode == ThemeMode::Dark, "Dark")
-                .clicked()
-            {
-                self.theme_mode = ThemeMode::Dark;
-                *action = Some(DialogAction::Theme(ThemeMode::Dark));
-            }
+            ui.vertical(|ui| {
+                ui.label("Theme");
+                ui.horizontal(|ui| {
+                    for (mode, label) in [(ThemeMode::Light, "Light"), (ThemeMode::Dark, "Dark")] {
+                        if ui
+                            .selectable_label(self.theme_mode == mode, label)
+                            .clicked()
+                        {
+                            self.theme_mode = mode;
+                            *action = Some(DialogAction::Theme(mode));
+                        }
+                    }
+                });
+            });
+            ui.add_space(24.0);
+            ui.vertical(|ui| {
+                ui.label("Size");
+                ui.horizontal(|ui| {
+                    for (size, label) in [(UiSize::Big, "Big"), (UiSize::Normal, "Normal")] {
+                        if ui.selectable_label(self.ui_size == size, label).clicked() {
+                            self.ui_size = size;
+                            *action = Some(DialogAction::UiSize(size));
+                        }
+                    }
+                });
+            });
         });
-        ui.label(RichText::new("Theme changes apply immediately to shell surfaces.").weak());
         ui.separator();
         ui.label("Default units for ambiguous imports");
         let import_unit_combo = egui::ComboBox::from_id_salt("settings-import-unit")
@@ -727,11 +938,6 @@ impl DialogState {
                 ))
                 .weak(),
             );
-        }
-        ui.separator();
-        ui.label("Application");
-        if ui.button("About").clicked() {
-            self.about_open = true;
         }
     }
 
@@ -1075,7 +1281,7 @@ impl DialogState {
         match self.kind {
             DialogKind::OpenProject => "Open Project",
             DialogKind::ImportModel => "Import Model",
-            DialogKind::SaveProject => "Save Project",
+            DialogKind::SaveProject => "Save",
             DialogKind::Export => "Export",
             DialogKind::Settings => "Settings",
             DialogKind::Repair => "Repair",
@@ -1135,26 +1341,26 @@ fn native_path_picker(kind: DialogKind, current: &str) -> Option<PathBuf> {
             .set_title("Open Builder3D project")
             .add_filter("Builder3D project", &["3dp"])
             .pick_file(),
-        DialogKind::SaveProject => dialog
-            .set_title("Save Builder3D project")
-            .add_filter("Builder3D project", &["3dp"])
-            .save_file(),
-        DialogKind::Export => dialog
-            .set_title("Export Builder3D model")
-            .add_filter(
-                "Builder3D models",
-                &["stl", "obj", "ply", "3mf", "gltf", "glb", "wrl"],
-            )
-            .add_filter("3MF model", &["3mf"])
-            .add_filter("glTF scene", &["gltf"])
-            .add_filter("GLB scene", &["glb"])
-            .add_filter("VRML scene", &["wrl"])
-            .add_filter("STL mesh", &["stl"])
-            .add_filter("OBJ mesh", &["obj"])
-            .add_filter("PLY mesh", &["ply"])
-            .save_file(),
         _ => None,
     }
+}
+
+/// The native save window for Save and Export, filtered to one file type.
+fn native_save_picker(request: &SavePickerRequest) -> Option<PathBuf> {
+    let mut dialog = rfd::FileDialog::new()
+        .set_title(request.title)
+        .add_filter(request.file_type.label(), &[request.file_type.extension()]);
+    if let Some(parent) = request
+        .suggested
+        .parent()
+        .filter(|parent| !parent.as_os_str().is_empty())
+    {
+        dialog = dialog.set_directory(parent);
+    }
+    if let Some(name) = request.suggested.file_name().and_then(|name| name.to_str()) {
+        dialog = dialog.set_file_name(name);
+    }
+    dialog.save_file()
 }
 
 /// A compact saturation/value square over a hue bar, with a preview chip.
@@ -1340,7 +1546,8 @@ mod tests {
     #[test]
     fn dialog_defaults_are_bounded_and_typed() {
         let state = DialogState::new(DialogKind::SaveProject, ThemeMode::Light);
-        assert_eq!(state.path_text, "Builder3D.3dp");
+        assert_eq!(state.path_text, "Builder3D.stl");
+        assert_eq!(state.file_type, FileType::Stl);
         assert!(state.torus.radius_mm > state.torus.tube_mm);
         assert_eq!(state.theme_mode, ThemeMode::Light);
 
@@ -1457,6 +1664,213 @@ mod tests {
             .unwrap_or_default();
         assert!(!settings_body.is_empty());
         assert!(!settings_body.contains("\"Done\""));
+    }
+
+    /// Renders `dialog` for a few frames, pressing at `press` (if any), and
+    /// returns its actions plus every labelled widget's rect from the last
+    /// frame (read from egui's accessibility tree).
+    fn run_dialog(
+        dialog: &mut DialogState,
+        press: Option<egui::Pos2>,
+    ) -> (Vec<DialogAction>, Vec<(String, egui::Rect)>) {
+        let context = Context::default();
+        context.enable_accesskit();
+        let area = egui::Rect::from_min_max(egui::pos2(0.0, 130.0), egui::pos2(420.0, 800.0));
+        let screen = egui::RawInput {
+            screen_rect: Some(egui::Rect::from_min_size(
+                egui::Pos2::ZERO,
+                egui::vec2(1280.0, 840.0),
+            )),
+            ..Default::default()
+        };
+        let mut inputs = vec![screen.clone(), screen];
+        if let Some(pos) = press {
+            inputs.extend(press_at(pos));
+        }
+        let mut actions = Vec::new();
+        let mut widgets = Vec::new();
+        for input in inputs {
+            let mut output = context.run_ui(input, |ui| {
+                actions.extend(dialog.show_with_settings_area(ui.ctx(), Some(area)));
+            });
+            output.textures_delta.clear();
+            if let Some(update) = output.platform_output.accesskit_update {
+                widgets = update
+                    .nodes
+                    .iter()
+                    .filter_map(|(_, node)| {
+                        // The window title shares text with its buttons
+                        // ("Save"); keep titles out of the lookup.
+                        if node.role() == egui::accesskit::Role::Window {
+                            return None;
+                        }
+                        let label = node.label()?.to_owned();
+                        let bounds = node.bounds()?;
+                        Some((
+                            label,
+                            egui::Rect::from_min_max(
+                                egui::pos2(bounds.x0 as f32, bounds.y0 as f32),
+                                egui::pos2(bounds.x1 as f32, bounds.y1 as f32),
+                            ),
+                        ))
+                    })
+                    .collect();
+            }
+        }
+        (actions, widgets)
+    }
+
+    fn widget(widgets: &[(String, egui::Rect)], label: &str) -> egui::Rect {
+        widgets
+            .iter()
+            .find(|(text, _)| text == label)
+            .map(|(_, rect)| *rect)
+            .unwrap_or_else(|| panic!("no widget labelled {label:?} in {widgets:?}"))
+    }
+
+    fn has_widget(widgets: &[(String, egui::Rect)], label: &str) -> bool {
+        widgets.iter().any(|(text, _)| text == label)
+    }
+
+    fn same_line(a: egui::Rect, b: egui::Rect) -> bool {
+        (a.center().y - b.center().y).abs() < 2.0
+    }
+
+    thread_local! {
+        static PICKED: std::cell::RefCell<Vec<SavePickerRequest>> =
+            const { std::cell::RefCell::new(Vec::new()) };
+    }
+
+    /// A save window stub that records the request and "chooses" the
+    /// suggested path without its extension, as some native windows return.
+    fn stub_picker(request: &SavePickerRequest) -> Option<PathBuf> {
+        PICKED.with(|picked| picked.borrow_mut().push(request.clone()));
+        Some(request.suggested.with_extension(""))
+    }
+
+    fn take_picked() -> Vec<SavePickerRequest> {
+        PICKED.with(|picked| std::mem::take(&mut *picked.borrow_mut()))
+    }
+
+    #[test]
+    fn save_dialog_offers_stl_and_3mf_with_save_and_cancel_on_one_line() {
+        let mut dialog = DialogState::new(DialogKind::SaveProject, ThemeMode::Light);
+        let (actions, widgets) = run_dialog(&mut dialog, None);
+        assert!(actions.is_empty());
+        assert!(has_widget(&widgets, "STL"));
+        assert!(has_widget(&widgets, "3MF"));
+        assert!(same_line(
+            widget(&widgets, "Save"),
+            widget(&widgets, "Cancel")
+        ));
+        assert!(!has_widget(&widgets, "Browse..."));
+        assert_eq!(dialog.file_type, FileType::Stl);
+    }
+
+    #[test]
+    fn save_click_opens_the_file_window_for_stl_by_default() {
+        take_picked();
+        let mut dialog = DialogState::new(DialogKind::SaveProject, ThemeMode::Light);
+        dialog.set_save_picker(stub_picker);
+        dialog.set_suggested_path(Some(Path::new("models/part.3dp")));
+        let (_, widgets) = run_dialog(&mut dialog, None);
+        let save = widget(&widgets, "Save").center();
+        let (actions, _) = run_dialog(&mut dialog, Some(save));
+        let picked = take_picked();
+        assert_eq!(picked.len(), 1);
+        assert_eq!(picked[0].file_type, FileType::Stl);
+        assert_eq!(picked[0].suggested, Path::new("models").join("part.stl"));
+        assert_eq!(
+            actions,
+            vec![DialogAction::Save(
+                Path::new("models").join("part.stl"),
+                false
+            )]
+        );
+    }
+
+    #[test]
+    fn save_as_3mf_is_one_click() {
+        take_picked();
+        let mut dialog = DialogState::new(DialogKind::SaveProject, ThemeMode::Light);
+        dialog.set_save_picker(stub_picker);
+        let (_, widgets) = run_dialog(&mut dialog, None);
+        let three_mf = widget(&widgets, "3MF").center();
+        let (actions, _) = run_dialog(&mut dialog, Some(three_mf));
+        assert!(actions.is_empty());
+        assert_eq!(dialog.file_type, FileType::ThreeMf);
+        let (_, widgets) = run_dialog(&mut dialog, None);
+        let (actions, _) = run_dialog(&mut dialog, Some(widget(&widgets, "Save").center()));
+        assert_eq!(take_picked()[0].file_type, FileType::ThreeMf);
+        assert_eq!(
+            actions,
+            vec![DialogAction::Save(PathBuf::from("Builder3D.3mf"), false)]
+        );
+    }
+
+    #[test]
+    fn export_has_a_type_list_and_export_beside_cancel_opening_the_file_window() {
+        take_picked();
+        let mut dialog = DialogState::new(DialogKind::Export, ThemeMode::Light);
+        dialog.set_save_picker(stub_picker);
+        let (_, widgets) = run_dialog(&mut dialog, None);
+        assert!(has_widget(&widgets, "Export file type"));
+        assert!(!has_widget(&widgets, "Browse..."));
+        let export = widget(&widgets, "Export");
+        assert!(same_line(export, widget(&widgets, "Cancel")));
+        assert_eq!(FileType::EXPORT.len(), 8);
+        dialog.set_file_type(FileType::Project);
+        let (actions, _) = run_dialog(&mut dialog, Some(export.center()));
+        assert_eq!(take_picked()[0].file_type, FileType::Project);
+        assert_eq!(
+            actions,
+            vec![DialogAction::Export(PathBuf::from("Builder3D.3dp"), false)]
+        );
+    }
+
+    #[test]
+    fn cancelling_the_file_window_keeps_the_dialog_open() {
+        let mut dialog = DialogState::new(DialogKind::Export, ThemeMode::Light);
+        dialog.set_save_picker(|_| None);
+        let (_, widgets) = run_dialog(&mut dialog, None);
+        let (actions, _) = run_dialog(&mut dialog, Some(widget(&widgets, "Export").center()));
+        assert!(actions.is_empty());
+    }
+
+    #[test]
+    fn settings_size_sits_beside_theme_and_big_doubles() {
+        let mut dialog = DialogState::new(DialogKind::Settings, ThemeMode::Light);
+        let (_, widgets) = run_dialog(&mut dialog, None);
+        let light = widget(&widgets, "Light");
+        let big = widget(&widgets, "Big");
+        assert!(same_line(light, big));
+        assert!(big.left() > widget(&widgets, "Dark").right());
+        assert!(has_widget(&widgets, "Normal"));
+        assert!(
+            !widgets
+                .iter()
+                .any(|(text, _)| text.contains("Theme changes apply"))
+        );
+        let (actions, _) = run_dialog(&mut dialog, Some(big.center()));
+        assert_eq!(actions, vec![DialogAction::UiSize(UiSize::Big)]);
+        assert_eq!(dialog.ui_size(), UiSize::Big);
+        dialog.sync_ui_size(UiSize::Normal);
+        assert_eq!(dialog.ui_size(), UiSize::Normal);
+    }
+
+    #[test]
+    fn settings_application_about_and_close_share_one_line() {
+        let mut dialog = DialogState::new(DialogKind::Settings, ThemeMode::Light);
+        let (_, widgets) = run_dialog(&mut dialog, None);
+        // "Application" is plain text (no accessible label); it sits left of
+        // About, so About starts well right of the panel edge.
+        let about = widget(&widgets, "About");
+        let close = widget(&widgets, "Close");
+        assert!(same_line(about, close));
+        assert!(about.left() > 60.0);
+        assert!(about.bottom() > widget(&widgets, "Clear Recent Files List").bottom());
+        let (actions, _) = run_dialog(&mut dialog, Some(close.center()));
+        assert_eq!(actions, vec![DialogAction::Close]);
     }
 
     #[test]

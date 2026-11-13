@@ -207,3 +207,33 @@ Raw owner requests, in the order given.
 | OF-19 | Menu button | The hamburger (pancake) menu icon sits higher than the menu text beside it; centre it vertically. | **Owner-approved 2026-11-12** in the release build ("You did great. i approve of it all"). Done. Cause: the tabs sat in a nested row that centred lower than the menu button. Tabs now share the menu button's row, so the icon and the tab text centre on the same line (the bar is also ~4 px shorter). captures `evidence/rebuild/captures/2026-11-12-of15-19-settings-topbar/`. |
 
 Owner approved all five, including the side effects (the theme toggle counts as clicking away from Settings; the top bar is ~4 px shorter), on 2026-11-12.
+
+## Fifth batch (2026-11-12) — Settings size, Save and Export dialogs
+
+Raw owner requests, in the order given.
+
+| # | Area | What the owner wants | State |
+|---|---|---|---|
+| OF-20 | Settings size | In Settings, to the right of Theme, add **Size** with **Big** and **Normal**. Big doubles the size of the menus, with all icons and text. It toggles like Light/Dark. Remove the descriptor text under Light/Dark. | Done 2026-11-12, awaiting owner review: Size (Big / Normal) sits right of Theme and toggles like it; Big sets egui's zoom to 2x, so every bar, icon, panel and dialog doubles (the 3D view keeps full resolution). Saved to settings (`ui_size`). The "Theme changes apply immediately…" line is gone. Tests `settings_size_sits_beside_theme_and_big_doubles`, `big_size_doubles_the_shell_and_survives_a_restart`. captures `evidence/rebuild/captures/2026-11-12-of20-25-settings-save-export/` |
+| OF-21 | Settings footer | Move **About** and **Close** onto the same line as **Application** at the bottom of Settings, beside it, to shorten the menu. | Done 2026-11-12, awaiting owner review: Application, About and Close are one footer line under the scrolling Settings body, so they are always visible. Test `settings_application_about_and_close_share_one_line`. captures `evidence/rebuild/captures/2026-11-12-of20-25-settings-save-export/` |
+| OF-22 | Save dialog buttons | The save dialog has **Save** and **Cancel** on the same line. | Done 2026-11-12, awaiting owner review: Save and Cancel on one line. Test `save_dialog_offers_stl_and_3mf_with_save_and_cancel_on_one_line`. captures `evidence/rebuild/captures/2026-11-12-of20-25-settings-save-export/` |
+| OF-23 | Save default | Saving defaults to `.stl`. | Done 2026-11-12, awaiting owner review: Save writes STL by default (a name with no extension gets `.stl`). Owner decision: Save/Save As write STL or 3MF only; `.3dp` moved to Export. Save writes every object, hidden ones included, and the saved file becomes the document, so Ctrl+S rewrites it in the same format. A project opened from `.3dp` still saves back to `.3dp`. Tests `save_defaults_to_stl_keeps_hidden_objects_and_resaves_in_place`, `save_click_opens_the_file_window_for_stl_by_default`. |
+| OF-24 | Save As types | Save As offers the file type — **3MF** or **STL** — with a quick-click button for each. | Done 2026-11-12, awaiting owner review: Save and Save As show two quick-pick buttons, **STL** (default) and **3MF**. Tests `save_as_3mf_is_one_click`, `save_writes_3mf_and_rejects_export_only_formats`. captures `evidence/rebuild/captures/2026-11-12-of20-25-settings-save-export/` |
+| OF-25 | Export dialog | Export has a drop-down selector for every export file type. **Export** sits on the same line as **Cancel**; clicking Export opens the native file window (like Browse). The **Browse:** rows are removed from every save and export dialog; the file window opens from the Save / Export click. | Done 2026-11-12, awaiting owner review: Export has a File type drop-down (STL, 3MF, OBJ, PLY, glTF, GLB, VRML, Builder3D project `.3dp`) and Export beside Cancel; Export (and Save) open the native save window filtered to the chosen type. The path box and Browse… row are gone from Save and Export. Export is enabled whenever the scene has objects (selection, or every visible object). A `.3dp` export is a copy: the document path and unsaved state do not change. Test `export_has_a_type_list_and_export_beside_cancel_opening_the_file_window`, `exporting_a_project_copy_leaves_the_document_alone`. captures `evidence/rebuild/captures/2026-11-12-of20-25-settings-save-export/` |
+
+Owner decisions for this batch (2026-11-12): `.3dp` is written by Export, not
+Save; Big doubles the whole app UI, not only Settings.
+
+Notes:
+
+- The review captures are 1280×840, which at Big is only 640×420 points. At
+  that size the Move/Rotate/Resize strip overlaps Settings and the Slicer
+  button overlaps the Paint tab. Big needs a large window; those overlaps are
+  the existing narrow-window layout, not new code. Settings now stays under the
+  ribbon on a short window instead of covering it.
+- The harness gained states `settings`, `save`, `export` and
+  `BUILDER3D_REVIEW_SIZE=big|normal`. There are no "before" captures: the old
+  build has no harness state for these dialogs.
+- Open is unchanged (path box + Browse); only Save and Export were asked for.
+- MCP parity (plan 3.7): MCP already writes STL/3MF through `export_file` and
+  `.3dp` through `save_project` / `save_project_as`, so no tool changes. Size is visual only.

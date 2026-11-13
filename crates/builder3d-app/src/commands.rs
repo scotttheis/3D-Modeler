@@ -919,7 +919,7 @@ impl CommandState {
             CommandId::ImportModel => Ok(CommandOutcome::OpenDialog(DialogKind::ImportModel)),
             CommandId::SaveProject => {
                 if let Some(path) = self.project_path.clone() {
-                    self.save_to_path(&path)?;
+                    self.save_document_to_path(&path)?;
                     Ok(CommandOutcome::Applied(format!("Saved {}", path.display())))
                 } else {
                     Ok(CommandOutcome::OpenDialog(DialogKind::SaveProject))
@@ -1188,6 +1188,44 @@ impl CommandState {
         self.saved_history_state_id = self.scene.history_state_id();
         self.dirty = false;
         self.status(format!("Saved {}", path.display()));
+        Ok(())
+    }
+
+    /// Saves the document in the format its extension names (owner requests
+    /// OF-23/OF-24): `.stl` (also the default when no extension is given) or
+    /// `.3mf` write every object as one mesh file; `.3dp` writes a project.
+    /// The saved path becomes the document path, so a later Save rewrites it
+    /// in the same format.
+    pub fn save_document_to_path(&mut self, path: &Path) -> Result<(), CommandError> {
+        let path = document_save_path(path)?;
+        if has_extension(&path, "3dp") {
+            return self.save_to_path(&path);
+        }
+        if self.scene.objects().is_empty() {
+            return Err(ExportError::EmptyScene.into());
+        }
+        // Like a project save, create a missing parent folder.
+        if let Some(parent) = path
+            .parent()
+            .filter(|parent| !parent.as_os_str().is_empty())
+        {
+            std::fs::create_dir_all(parent)?;
+        }
+        export::save_scene_document(&self.scene, &path)?;
+        self.project_path = Some(path.clone());
+        self.preferences.recent_files_mut().record(&path);
+        self.saved_history_state_id = self.scene.history_state_id();
+        self.dirty = false;
+        self.status(format!("Saved {}", path.display()));
+        Ok(())
+    }
+
+    /// Writes a `.3dp` project copy without changing the document path or the
+    /// saved state; this is Export's "Builder3D project" type (OF-25).
+    pub fn export_project_copy(&mut self, path: &Path) -> Result<(), CommandError> {
+        let path = project_save_path(path)?;
+        save_project(&self.scene, &path)?;
+        self.status(format!("Exported {}", path.display()));
         Ok(())
     }
 
@@ -2391,6 +2429,25 @@ fn has_extension(path: &Path, expected: &str) -> bool {
         .is_some_and(|extension| extension.eq_ignore_ascii_case(expected))
 }
 
+/// Document saves accept `.stl`, `.3mf` and `.3dp`; no extension means `.stl`.
+fn document_save_path(path: &Path) -> Result<PathBuf, CommandError> {
+    validate_path(path)?;
+    if ["stl", "3mf", "3dp"]
+        .iter()
+        .any(|extension| has_extension(path, extension))
+    {
+        return Ok(path.to_path_buf());
+    }
+    if path.extension().is_some() {
+        return Err(CommandError::InvalidPath(
+            "Save writes .stl or .3mf files; use Export for other formats".to_owned(),
+        ));
+    }
+    let mut normalized = path.to_path_buf();
+    normalized.set_extension("stl");
+    Ok(normalized)
+}
+
 fn project_save_path(path: &Path) -> Result<PathBuf, CommandError> {
     validate_path(path)?;
     if has_extension(path, "3dp") {
@@ -3092,6 +3149,110 @@ mod tests {
         assert!(state.scene().objects().is_empty());
         assert_eq!(state.scene().revision(), 0);
         assert!(!state.is_dirty());
+    }
+
+    fn document_test_directory(label: &str) -> PathBuf {
+        let unique = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map_or(0, |duration| duration.as_nanos());
+        let directory =
+            std::env::temp_dir().join(format!("builder3d-{label}-{}-{unique}", std::process::id()));
+        assert!(std::fs::create_dir_all(&directory).is_ok());
+        directory
+    }
+
+    fn two_cubes_one_hidden() -> CommandState {
+        let mut state = CommandState::default();
+        for _ in 0..2 {
+            assert!(matches!(
+                state.dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube)),
+                Ok(CommandOutcome::Applied(_))
+            ));
+        }
+        assert!(state.set_visibility(1, false).is_ok());
+        state
+    }
+
+    #[test]
+    fn save_defaults_to_stl_keeps_hidden_objects_and_resaves_in_place() {
+        let directory = document_test_directory("save-stl");
+        let mut state = two_cubes_one_hidden();
+        assert!(
+            state
+                .save_document_to_path(&directory.join("scene"))
+                .is_ok()
+        );
+        let saved = directory.join("scene.stl");
+        assert_eq!(state.project_path(), Some(saved.as_path()));
+        assert!(!state.is_dirty());
+        let mesh = builder3d_core::load_mesh(&saved).expect("saved STL loads");
+        assert_eq!(mesh.face_count(), 24, "both cubes, hidden one included");
+
+        assert!(
+            state
+                .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
+                .is_ok()
+        );
+        assert!(state.is_dirty());
+        assert!(state.dispatch(CommandId::SaveProject).is_ok());
+        assert!(!state.is_dirty());
+        let mesh = builder3d_core::load_mesh(&saved).expect("resaved STL loads");
+        assert_eq!(mesh.face_count(), 36);
+        assert!(std::fs::remove_dir_all(directory).is_ok());
+    }
+
+    #[test]
+    fn save_writes_3mf_and_rejects_export_only_formats() {
+        let directory = document_test_directory("save-3mf");
+        let mut state = two_cubes_one_hidden();
+        let target = directory.join("scene.3mf");
+        assert!(state.save_document_to_path(&target).is_ok());
+        assert!(target.is_file());
+        assert_eq!(state.project_path(), Some(target.as_path()));
+
+        let before = state.project_path().map(Path::to_path_buf);
+        let obj = state.save_document_to_path(&directory.join("scene.obj"));
+        assert!(matches!(obj, Err(CommandError::InvalidPath(_))));
+        assert_eq!(state.project_path(), before.as_deref());
+        assert!(std::fs::remove_dir_all(directory).is_ok());
+    }
+
+    #[test]
+    fn saving_an_empty_scene_reports_it_and_stays_dirty_free() {
+        let directory = document_test_directory("save-empty");
+        let mut state = CommandState::default();
+        let result = state.save_document_to_path(&directory.join("empty.stl"));
+        assert!(matches!(
+            result,
+            Err(CommandError::Export(ExportError::EmptyScene))
+        ));
+        assert_eq!(state.project_path(), None);
+        let _ = std::fs::remove_dir_all(directory);
+    }
+
+    #[test]
+    fn exporting_a_project_copy_leaves_the_document_alone() {
+        let directory = document_test_directory("export-3dp");
+        let mut state = two_cubes_one_hidden();
+        let document = directory.join("scene.stl");
+        assert!(state.save_document_to_path(&document).is_ok());
+        assert!(
+            state
+                .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
+                .is_ok()
+        );
+        assert!(state.is_dirty());
+
+        let copy = directory.join("copy");
+        assert!(state.export_project_copy(&copy).is_ok());
+        assert!(directory.join("copy.3dp").is_file());
+        assert_eq!(state.project_path(), Some(document.as_path()));
+        assert!(state.is_dirty());
+
+        let mut reopened = CommandState::default();
+        assert!(reopened.open_from_path(&directory.join("copy.3dp")).is_ok());
+        assert_eq!(reopened.scene().objects().len(), 3);
+        assert!(std::fs::remove_dir_all(directory).is_ok());
     }
 
     #[test]

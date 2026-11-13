@@ -35,6 +35,9 @@ pub enum ExportError {
     /// No visible object was eligible for export.
     #[error("no visible objects to export")]
     NoVisibleObjects,
+    /// A document save was asked for a scene with no objects.
+    #[error("the scene has no objects to save")]
+    EmptyScene,
     /// The application does not route this extension.
     #[error("unsupported export extension: {0}")]
     UnsupportedExtension(String),
@@ -90,6 +93,28 @@ pub fn export_scene_objects(
                 .is_some_and(|object| object.is_visible())
         })
         .collect::<Vec<_>>();
+    write_objects(scene, &indices, path)
+}
+
+/// Writes every scene object, hidden ones included, as one mesh document.
+///
+/// This is the desktop Save path for `.stl` and `.3mf` (owner requests
+/// OF-23/OF-24): a save must not drop objects the user only hid, because the
+/// saved file becomes the document. Export keeps its visible-only rule.
+pub fn save_scene_document(scene: &Scene, path: &Path) -> Result<ExportReport, ExportError> {
+    validate_path(path)?;
+    if scene.objects().is_empty() {
+        return Err(ExportError::EmptyScene);
+    }
+    let indices = (0..scene.objects().len()).collect::<Vec<_>>();
+    write_objects(scene, &indices, path)
+}
+
+fn write_objects(
+    scene: &Scene,
+    indices: &[usize],
+    path: &Path,
+) -> Result<ExportReport, ExportError> {
     if indices.is_empty() {
         return Err(ExportError::NoVisibleObjects);
     }
@@ -103,7 +128,7 @@ pub fn export_scene_objects(
             let preserve_vertex_colors = matches!(extension.as_str(), "obj" | "ply");
             let mut meshes = Vec::with_capacity(indices.len());
             let mut vertex_colors = Vec::new();
-            for index in &indices {
+            for index in indices {
                 let object = scene.object(*index)?;
                 let mesh = object.transformed_mesh()?;
                 if preserve_vertex_colors {
