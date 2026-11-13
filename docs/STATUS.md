@@ -113,7 +113,8 @@ viewport in dark theme · D5 `emboss_text` metadata.
   Table in [`owner-feedback-2026-11-12.md`](owner-feedback-2026-11-12.md).
 - 2026-11-13 (sixth batch): OF-26 menu rows highlight under the pointer
   (also the Slicer chooser); OF-27 the active tab is joined to the open
-  ribbon like a folder tab. Done, **awaiting owner review**. Fast gate on
+  ribbon like a folder tab. **Owner-approved** in the release build
+  2026-11-13 ("dang, that looks good. well done!"). Fast gate on
   `builder3d-app` passed. Captures
   `evidence/rebuild/captures/2026-11-13-of26-27-menu-hover-tab/`. Table in
   [`owner-feedback-2026-11-12.md`](owner-feedback-2026-11-12.md).
