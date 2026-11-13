@@ -559,7 +559,8 @@ impl Builder3dApp {
             | ReviewState::Material
             | ReviewState::Settings
             | ReviewState::Save
-            | ReviewState::Export => &[builder3d_core::PrimitiveKind::Cube],
+            | ReviewState::Export
+            | ReviewState::Menu => &[builder3d_core::PrimitiveKind::Cube],
             ReviewState::Merge => &[
                 builder3d_core::PrimitiveKind::Cube,
                 builder3d_core::PrimitiveKind::Cube,
@@ -592,6 +593,7 @@ impl Builder3dApp {
             ReviewState::Settings => self.open_dialog(DialogKind::Settings),
             ReviewState::Save => self.open_dialog(DialogKind::SaveProject),
             ReviewState::Export => self.open_dialog(DialogKind::Export),
+            ReviewState::Menu => self.menu_open = true,
             _ => {}
         }
         if review.state() == ReviewState::Merge {
@@ -1763,7 +1765,8 @@ impl Builder3dApp {
     fn render_menu_and_utility(&mut self, ui: &mut Ui, palette: ThemePalette) {
         let mut menu_response = None;
         let mut slicer_response = None;
-        egui::Frame::new()
+        let mut active_tab_rect = None;
+        let bar = egui::Frame::new()
             .fill(palette.navigation)
             .inner_margin(egui::Margin::symmetric(6, 2))
             .show(ui, |ui| {
@@ -1808,7 +1811,7 @@ impl Builder3dApp {
                     }
                     menu_response = Some(response);
 
-                    self.render_tabs(ui, palette);
+                    active_tab_rect = self.render_tabs(ui, palette);
                     self.render_favorites(ui, palette);
 
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
@@ -1866,6 +1869,10 @@ impl Builder3dApp {
                 });
             });
 
+        if let Some(tab_rect) = active_tab_rect.filter(|_| self.ribbon_expanded) {
+            attach_tab_to_ribbon(ui, tab_rect, bar.response.rect.bottom(), palette);
+        }
+
         if let Some(response) = slicer_response {
             let mut chosen = None;
             let mut browse = false;
@@ -1899,13 +1906,7 @@ impl Builder3dApp {
                         ui.label(RichText::new("No installed slicers were found.").weak());
                     }
                     for slicer in choices {
-                        if ui
-                            .add_sized(
-                                [ui.available_width(), 28.0],
-                                egui::Button::new(&slicer.label)
-                                    .stroke(Stroke::NONE)
-                                    .fill(Color32::TRANSPARENT),
-                            )
+                        if menu_row(ui, &slicer.label, palette)
                             .on_hover_text(slicer.path.display().to_string())
                             .clicked()
                         {
@@ -1913,15 +1914,7 @@ impl Builder3dApp {
                         }
                     }
                     ui.separator();
-                    if ui
-                        .add_sized(
-                            [ui.available_width(), 28.0],
-                            egui::Button::new("Browse for a slicer...")
-                                .stroke(Stroke::NONE)
-                                .fill(Color32::TRANSPARENT),
-                        )
-                        .clicked()
-                    {
+                    if menu_row(ui, "Browse for a slicer...", palette).clicked() {
                         browse = true;
                     }
                 });
@@ -1964,13 +1957,7 @@ impl Builder3dApp {
                                 ui.separator();
                             }
                             RibbonItem::Command(command) => {
-                                let response = ui
-                                    .add_sized(
-                                        [ui.available_width(), 28.0],
-                                        egui::Button::new(command.label)
-                                            .stroke(Stroke::NONE)
-                                            .fill(Color32::TRANSPARENT),
-                                    )
+                                let response = menu_row(ui, command.label, palette)
                                     .on_hover_text(command_help(command.id));
                                 if response.clicked() {
                                     menu_command = Some(command.id);
@@ -1980,15 +1967,7 @@ impl Builder3dApp {
                         }
                     }
                     ui.separator();
-                    if ui
-                        .add_sized(
-                            [ui.available_width(), 28.0],
-                            egui::Button::new("Customize ribbon")
-                                .stroke(Stroke::NONE)
-                                .fill(Color32::TRANSPARENT),
-                        )
-                        .clicked()
-                    {
+                    if menu_row(ui, "Customize ribbon", palette).clicked() {
                         customize_ribbon = true;
                         ui.close();
                     }
@@ -2223,8 +2202,10 @@ impl Builder3dApp {
         self.persist_preferences();
     }
 
-    fn render_tabs(&mut self, ui: &mut Ui, palette: ThemePalette) {
+    /// Paints the ribbon tabs and returns the active tab's tile.
+    fn render_tabs(&mut self, ui: &mut Ui, palette: ThemePalette) -> Option<egui::Rect> {
         let mut selected_tab = None;
+        let mut active_rect = None;
         // Tabs share the top row with the menu button instead of a nested
         // row, so both centre on the same line (OF-19).
         {
@@ -2232,6 +2213,9 @@ impl Builder3dApp {
                 let selected = tab == self.active_tab;
                 let (rect, response) =
                     ui.allocate_exact_size(Vec2::new(62.0, 34.0), Sense::click());
+                if selected {
+                    active_rect = Some(rect);
+                }
                 response.widget_info(|| {
                     egui::WidgetInfo::selected(egui::Role::Tab, true, selected, tab.label())
                 });
@@ -2286,6 +2270,7 @@ impl Builder3dApp {
                 self.artwork_cache.clear();
             }
         }
+        active_rect
     }
 
     fn render_active_tab(&mut self, ui: &mut Ui, palette: ThemePalette) {
@@ -6614,6 +6599,76 @@ fn paint_moon(painter: &egui::Painter, center: egui::Pos2, color: Color32, backg
 }
 
 /// A save icon with its name beside it ("Save" / "Save As").
+/// Joins the active tab's tile to the open ribbon below it, like a folder
+/// tab (OF-27): the tile's bottom is squared off and filled down through the
+/// tab bar, and small concave corners at its base blend it into the bar.
+fn attach_tab_to_ribbon(ui: &Ui, tab: egui::Rect, bar_bottom: f32, palette: ThemePalette) {
+    if bar_bottom <= tab.bottom() {
+        return;
+    }
+    let painter = ui.painter();
+    let radius = RADIUS_CONTROL;
+    painter.rect_filled(
+        egui::Rect::from_min_max(
+            egui::pos2(tab.left(), tab.bottom() - radius),
+            egui::pos2(tab.right(), bar_bottom),
+        ),
+        0.0,
+        palette.panel,
+    );
+    for (corner_x, centre_x) in [
+        (tab.left() - radius, tab.left() - radius),
+        (tab.right(), tab.right() + radius),
+    ] {
+        let square = egui::Rect::from_min_size(
+            egui::pos2(corner_x, bar_bottom - radius),
+            Vec2::splat(radius),
+        );
+        painter.rect_filled(square, 0.0, palette.panel);
+        painter.with_clip_rect(square).circle_filled(
+            egui::pos2(centre_x, bar_bottom - radius),
+            radius,
+            palette.navigation,
+        );
+    }
+}
+
+/// One full-width row of a drop-down menu. The row under the pointer is
+/// tinted so the user can see where they are as they move down the menu
+/// (OF-26); a pressed row is tinted deeper and a keyboard-focused row is
+/// outlined.
+fn menu_row(ui: &mut Ui, label: &str, palette: ThemePalette) -> egui::Response {
+    let (rect, response) =
+        ui.allocate_exact_size(Vec2::new(ui.available_width(), 28.0), Sense::click());
+    response.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, true, label));
+    let fill = if response.is_pointer_button_down_on() {
+        Some(palette.pressed)
+    } else if response.hovered() || response.has_focus() {
+        Some(palette.hover)
+    } else {
+        None
+    };
+    if let Some(fill) = fill {
+        ui.painter().rect_filled(rect, RADIUS_CONTROL, fill);
+    }
+    if response.has_focus() {
+        ui.painter().rect_stroke(
+            rect,
+            RADIUS_CONTROL,
+            Stroke::new(1.5, palette.accent_border),
+            egui::StrokeKind::Inside,
+        );
+    }
+    ui.painter().text(
+        rect.center(),
+        Align2::CENTER_CENTER,
+        label,
+        egui::TextStyle::Button.resolve(ui.style()),
+        palette.text,
+    );
+    response
+}
+
 fn labelled_save_button(
     ui: &mut Ui,
     label: &str,
@@ -7752,6 +7807,64 @@ mod tests {
         assert_eq!(app.theme_mode, ThemeMode::Light);
         assert_eq!(app.commands.preferences().theme_mode(), ThemeMode::Light);
         assert!(std::fs::remove_dir_all(directory).is_ok());
+    }
+
+    /// Renders one menu row at the top-left with the pointer at `pointer`
+    /// and returns the fill colours painted that frame.
+    fn menu_row_fills(pointer: egui::Pos2) -> Vec<Color32> {
+        let palette = ThemePalette::for_mode(ThemeMode::Light);
+        let context = egui::Context::default();
+        let mut fills = Vec::new();
+        for _ in 0..3 {
+            let input = egui::RawInput {
+                events: vec![egui::Event::PointerMoved(pointer)],
+                ..Default::default()
+            };
+            let mut output = context.run_ui(input, |ui| {
+                ui.set_width(200.0);
+                let _ = menu_row(ui, "Export", palette);
+            });
+            output.textures_delta.clear();
+            fills = output
+                .shapes
+                .iter()
+                .filter_map(|clipped| match &clipped.shape {
+                    egui::Shape::Rect(rect) => Some(rect.fill),
+                    _ => None,
+                })
+                .collect();
+        }
+        fills
+    }
+
+    #[test]
+    fn menu_row_under_the_pointer_is_highlighted() {
+        let palette = ThemePalette::for_mode(ThemeMode::Light);
+        assert!(menu_row_fills(egui::pos2(40.0, 12.0)).contains(&palette.hover));
+        assert!(!menu_row_fills(egui::pos2(40.0, 400.0)).contains(&palette.hover));
+    }
+
+    #[test]
+    fn active_tab_is_joined_to_the_ribbon_below() {
+        let palette = ThemePalette::for_mode(ThemeMode::Light);
+        let tab = egui::Rect::from_min_size(egui::pos2(100.0, 4.0), Vec2::new(62.0, 34.0));
+        let bar_bottom = 41.0;
+        let context = egui::Context::default();
+        let mut output = context.run_ui(egui::RawInput::default(), |ui| {
+            attach_tab_to_ribbon(ui, tab, bar_bottom, palette);
+        });
+        output.textures_delta.clear();
+        let bridged = output.shapes.iter().any(|clipped| match &clipped.shape {
+            egui::Shape::Rect(rect) => {
+                rect.fill == palette.panel
+                    && (rect.rect.left() - tab.left()).abs() < 0.01
+                    && (rect.rect.right() - tab.right()).abs() < 0.01
+                    && rect.rect.top() < tab.bottom()
+                    && (rect.rect.bottom() - bar_bottom).abs() < 0.01
+            }
+            _ => false,
+        });
+        assert!(bridged, "the active tab must reach down to the ribbon");
     }
 
     #[test]

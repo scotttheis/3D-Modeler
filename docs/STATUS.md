@@ -3,7 +3,7 @@
 The only place current status is written. Keep it to one screen. Plan:
 [`product-rebuild-plan.md`](product-rebuild-plan.md).
 
-Updated 2026-11-12.
+Updated 2026-11-13.
 
 ## Now
 
@@ -111,6 +111,12 @@ viewport in dark theme · D5 `emboss_text` metadata.
   removed), menu icon centred with the tab text. Full workspace gate passed.
   Captures `evidence/rebuild/captures/2026-11-12-of15-19-settings-topbar/`.
   Table in [`owner-feedback-2026-11-12.md`](owner-feedback-2026-11-12.md).
+- 2026-11-13 (sixth batch): OF-26 menu rows highlight under the pointer
+  (also the Slicer chooser); OF-27 the active tab is joined to the open
+  ribbon like a folder tab. Done, **awaiting owner review**. Fast gate on
+  `builder3d-app` passed. Captures
+  `evidence/rebuild/captures/2026-11-13-of26-27-menu-hover-tab/`. Table in
+  [`owner-feedback-2026-11-12.md`](owner-feedback-2026-11-12.md).
 - **Paused by the owner 2026-11-12** after batch 3. On resume, suggested
   next: MCP `launch_slicer` falls back to the saved slicer when no
   `slicer_key` is given (owner said yes; F12 parity), then F12 rename and

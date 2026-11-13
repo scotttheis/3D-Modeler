@@ -237,3 +237,19 @@ Notes:
 - Open is unchanged (path box + Browse); only Save and Export were asked for.
 - MCP parity (plan 3.7): MCP already writes STL/3MF through `export_file` and
   `.3dp` through `save_project` / `save_project_as`, so no tool changes. Size is visual only.
+
+## Sixth batch (2026-11-13) — menu hover and the active tab
+
+Raw owner requests, in the order given.
+
+| # | Area | What the owner wants | State |
+|---|---|---|---|
+| OF-26 | Menu hover | The drop-down menu (Save, Export, Repair…) shows no highlight as the mouse moves over each option. Show where the mouse is as it moves down the menu. | Done 2026-11-13, awaiting owner review. Cause: every menu row was an egui button with its fill forced to transparent, which also removed its hover fill. Now each row is tinted (`hover`) under the pointer, deeper (`pressed`) while held, and outlined when keyboard-focused. Same fix in the Slicer chooser, which had the same rows. Test `menu_row_under_the_pointer_is_highlighted`. captures `evidence/rebuild/captures/2026-11-13-of26-27-menu-hover-tab/` |
+| OF-27 | Active tab | The active top-menu tab highlight is clean, but it should be attached to the ribbon below it, to subtly show what it is affecting. | Done 2026-11-13, awaiting owner review: while the ribbon is open, the active tab's tile is squared off at the bottom and filled down through the tab bar into the ribbon, with small concave corners at its base (a folder tab). With the ribbon collapsed the tile floats as before. Test `active_tab_is_joined_to_the_ribbon_below`. captures `evidence/rebuild/captures/2026-11-13-of26-27-menu-hover-tab/` |
+
+Notes:
+
+- The harness gained state `menu` (application menu open); use
+  `BUILDER3D_REVIEW_POINTER=124,220` to rest the pointer on Export. There is no
+  "before" menu capture: the old build has no harness state for the menu.
+- MCP parity (plan 3.7): visual only, no tool changes.
