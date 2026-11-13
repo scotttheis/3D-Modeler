@@ -105,8 +105,8 @@ viewport in dark theme · D5 `emboss_text` metadata.
   additive, touching counts (`907f9b0`). Full workspace gate passed.
   Captures `evidence/rebuild/captures/2026-11-12-of10-14-topbar/`. Table in
   [`owner-feedback-2026-11-12.md`](owner-feedback-2026-11-12.md).
-- 2026-11-12 (fourth batch): OF-15 to OF-19 done, **awaiting owner
-  review** — darker light-mode top bar, Settings follows the top-bar theme
+- 2026-11-12 (fourth batch): OF-15 to OF-19 **owner-approved** in the
+  release build 2026-11-12 ("You did great. i approve of it all") — darker light-mode top bar, Settings follows the top-bar theme
   toggle, a press outside Settings closes it, one Close button (Done
   removed), menu icon centred with the tab text. Full workspace gate passed.
   Captures `evidence/rebuild/captures/2026-11-12-of15-19-settings-topbar/`.
