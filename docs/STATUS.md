@@ -88,6 +88,15 @@ viewport in dark theme · D5 `emboss_text` metadata.
 - 2026-11-12: owner wants MCP at 100% (F12, D6, D7); `cargo deny` and
   `cargo audit` now run (F13). Not stressed about module size, lint
   enforcement or more comments; those are not work items.
+- 2026-11-12 (snap re-capture, approved deviation from Python): owner
+  reported that after missing a snap point while dragging, nothing snapped
+  again for the rest of the drag. Cause: the released snap point stayed
+  excluded until the pointer crossed back past it (Python behaviour). Now the
+  exclusion lifts as soon as the pointer leaves the point's capture band, so
+  coming back near it snaps again from either side. Desktop drag only; the
+  MCP `snap_translate` tool is one-shot and already snaps whenever near.
+  Test `missed_snap_recaptures_when_the_pointer_comes_back_near_it`. Not yet
+  hand-checked by the owner.
 - Suggested next: F12 rename and show/hide tools, then F9.
 - Review harness: `BUILDER3D_REVIEW_CAMERA=yaw,pitch,distance` poses the
   camera after auto-framing; state `resize-drag` holds the +X handle mid-drag;

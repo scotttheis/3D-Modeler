@@ -496,6 +496,17 @@ pub fn snap_translation_result(
         state.released_key = state.active_key.take();
         state.active_delta = None;
     }
+    // The just-released candidate stays excluded only while the pointer is
+    // still inside its capture band. Once the pointer has left the band, it
+    // may be captured again whenever it comes back within tolerance, from
+    // either side (owner request 2026-11-12: snap every time it is near).
+    if let Some(released) = state.released_delta
+        && (proposed_delta - released).abs() > state.release_distance.max(0.05) + 1.0e-6
+    {
+        state.released_delta = None;
+        state.released_direction = 0.0;
+        state.released_key = None;
+    }
     let excluded = state.released_key.as_ref();
     let result = select_snap_correction(SnapQuery {
         snapshot,
@@ -679,5 +690,38 @@ mod tests {
         assert!(held.is_ok_and(|value| (value.applied_delta - 4.0).abs() < 1.0e-5));
         state.clear();
         assert!(state.active_delta.is_none());
+    }
+
+    #[test]
+    fn missed_snap_recaptures_when_the_pointer_comes_back_near_it() {
+        let mut state = SnapState::new();
+        let scene = snapshot();
+        let mut step = |proposed: f32, previous: f32| {
+            snap_translation_result(
+                SnapQuery {
+                    snapshot: &scene,
+                    axis: [1.0, 0.0, 0.0],
+                    proposed_delta: proposed,
+                    previous_delta: previous,
+                    tolerance_mm: Some(1.0),
+                    tolerance_mode: SNAP_TOLERANCE_FIXED_MM,
+                    view_context: None,
+                    floor_y: None,
+                    excluded: None,
+                },
+                &mut state,
+            )
+        };
+        // Capture at 4.0, overshoot past the band, then come back from the
+        // overshoot side without crossing the snap point.
+        assert!(step(3.5, 0.0).is_ok_and(|value| value.snapped));
+        assert!(step(7.0, 3.5).is_ok_and(|value| !value.snapped));
+        let back = step(4.6, 7.0);
+        assert!(
+            back.is_ok_and(|value| value.snapped && (value.applied_delta - 4.0).abs() < 1.0e-5)
+        );
+        // And again after a second miss.
+        assert!(step(7.0, 4.6).is_ok_and(|value| !value.snapped));
+        assert!(step(4.4, 7.0).is_ok_and(|value| value.snapped));
     }
 }
