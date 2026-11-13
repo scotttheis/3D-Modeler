@@ -264,6 +264,18 @@ pub struct R4State {
     pub replay: ReplayCache,
     /// Bounded operation records.
     pub operations: VecDeque<OperationRecord>,
+    /// The slicer saved in the desktop settings, used by `launch_slicer` when
+    /// no `slicer_key` is given. Set by the desktop adapter; never by a tool.
+    pub saved_slicer: Option<SavedSlicer>,
+}
+
+/// The desktop's saved slicer: executable path and display label.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct SavedSlicer {
+    /// Saved executable path.
+    pub path: PathBuf,
+    /// Saved display label, when the owner has one.
+    pub label: Option<String>,
 }
 
 impl Default for R4State {
@@ -278,6 +290,7 @@ impl Default for R4State {
             staging_directories: VecDeque::new(),
             replay: ReplayCache::default(),
             operations: VecDeque::new(),
+            saved_slicer: None,
         }
     }
 }

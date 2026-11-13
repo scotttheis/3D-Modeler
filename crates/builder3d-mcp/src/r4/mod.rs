@@ -11,4 +11,4 @@ pub use catalog::{CATALOG_VERSION, Profile, TOOL_CATALOG, ToolSpec};
 pub use gateway::R4Gateway;
 pub use security::ApprovedRoots;
 pub use server::{AdapterError, R4Config, R4Document, R4Server};
-pub use state::ViewState;
+pub use state::{SavedSlicer, ViewState};

@@ -11424,14 +11424,19 @@
             "title": "Idempotency Key"
           },
           "slicer_key": {
-            "minLength": 1,
-            "title": "Slicer Key",
-            "type": "string"
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Slicer Key"
           }
         },
-        "required": [
-          "slicer_key"
-        ],
         "title": "launch_slicerArguments",
         "type": "object"
       },

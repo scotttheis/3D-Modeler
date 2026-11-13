@@ -43,7 +43,7 @@ use super::{
     catalog::{self, Profile, ToolSpec},
     schema,
     security::{ApprovedRoots, SecurityError},
-    state::{self, OperationPhase, OperationRecord, R4State, ViewState},
+    state::{self, OperationPhase, OperationRecord, R4State, SavedSlicer, ViewState},
 };
 
 /// A document temporarily attached to the R4 semantic adapter.
@@ -238,6 +238,14 @@ impl R4Server {
             call_gate: Arc::new(Mutex::new(())),
             config,
         }
+    }
+
+    /// Records the slicer saved in the desktop settings. `launch_slicer` uses
+    /// it when a call gives no `slicer_key`, exactly as the desktop Slicer
+    /// button does. `None` means no slicer is saved.
+    pub fn set_saved_slicer(&self, saved: Option<SavedSlicer>) -> Result<(), AdapterError> {
+        self.lock_state()?.saved_slicer = saved;
+        Ok(())
     }
 
     /// Attaches one document while retaining this server's replay, operation,
@@ -2396,11 +2404,26 @@ impl R4Server {
         let args = arguments
             .as_object()
             .ok_or_else(|| AdapterError::Validation("arguments must be an object".to_owned()))?;
-        let slicer_key = schema::required_string(args, "slicer_key")?;
-        let slicer = builder3d_platform::discover_slicers()
-            .into_iter()
-            .find(|slicer| slicer.key == slicer_key || slicer.path.to_string_lossy() == slicer_key)
-            .ok_or_else(|| SlicerError::UnknownSlicer(slicer_key.clone()))?;
+        let slicer = match args.get("slicer_key") {
+            None | Some(Value::Null) => {
+                let saved = self.lock_state()?.saved_slicer.clone().ok_or_else(|| {
+                    AdapterError::Validation(
+                        "slicer_key was not given and no slicer is saved; choose one in Settings or pass slicer_key"
+                            .to_owned(),
+                    )
+                })?;
+                builder3d_platform::slicer_info_from_path(&saved.path, saved.label.as_deref())?
+            }
+            Some(_) => {
+                let slicer_key = schema::required_string(args, "slicer_key")?;
+                builder3d_platform::discover_slicers()
+                    .into_iter()
+                    .find(|slicer| {
+                        slicer.key == slicer_key || slicer.path.to_string_lossy() == slicer_key
+                    })
+                    .ok_or_else(|| SlicerError::UnknownSlicer(slicer_key.clone()))?
+            }
+        };
         const MAX_SLICER_OBJECTS: usize = 64;
 
         self.update_operation(operation_id, |record| {
@@ -3552,6 +3575,74 @@ mod tests {
         assert!(document.scene.undo().expect("undo merge").is_some());
         assert_eq!(document.scene.history_state_id(), before);
         assert_eq!(document.scene.objects().len(), 2);
+    }
+
+    fn finished_operation(server: &R4Server, started: &Value) -> Value {
+        let operation_id = started["operation_id"].as_str().expect("operation ID");
+        for _ in 0..300 {
+            let status = server
+                .call_value("operation_status", json!({"operation_id":operation_id}))
+                .expect("operation status");
+            if matches!(
+                status["state"].as_str(),
+                Some("completed" | "failed" | "cancelled")
+            ) {
+                return status;
+            }
+            thread::sleep(Duration::from_millis(10));
+        }
+        panic!("operation did not finish");
+    }
+
+    #[test]
+    fn launch_slicer_without_a_key_and_without_a_saved_slicer_asks_for_one() {
+        let server = server(Profile::Full);
+        server
+            .call_value("add_primitive", json!({"primitive":"cube"}))
+            .expect("add cube");
+        let started = server
+            .call_value("launch_slicer", json!({}))
+            .expect("start launch");
+        let status = finished_operation(&server, &started);
+        assert_eq!(status["state"], json!("failed"), "{status}");
+        assert!(
+            status.to_string().contains("no slicer is saved"),
+            "{status}"
+        );
+    }
+
+    #[test]
+    fn launch_slicer_without_a_key_uses_the_saved_slicer_like_the_desktop_button() {
+        let server = server(Profile::Full);
+        server
+            .call_value("add_primitive", json!({"primitive":"cube"}))
+            .expect("add cube");
+        // The same stand-in the desktop Slicer-button test uses: an empty file
+        // is a valid saved path that cannot start, so the failure proves the
+        // saved slicer was the one chosen and staged for.
+        let directory =
+            env::temp_dir().join(format!("builder3d-saved-slicer-{}", std::process::id()));
+        fs::create_dir_all(&directory).expect("directory");
+        let slicer = directory.join("not-a-slicer.exe");
+        fs::write(&slicer, b"").expect("stand-in slicer");
+        server
+            .set_saved_slicer(Some(SavedSlicer {
+                path: slicer,
+                label: Some("Test Slicer".to_owned()),
+            }))
+            .expect("save slicer");
+        let started = server
+            .call_value("launch_slicer", json!({}))
+            .expect("start launch");
+        let status = finished_operation(&server, &started);
+        let text = status.to_string();
+        assert!(!text.contains("no slicer is saved"), "{status}");
+        assert!(
+            !text.contains("must identify a discovered slicer"),
+            "{status}"
+        );
+        assert!(text.contains("could not be started"), "{status}");
+        let _ = fs::remove_dir_all(directory);
     }
 
     #[test]

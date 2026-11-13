@@ -18,7 +18,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-use builder3d_mcp::{AdapterError, R4Config, R4Document, R4Server, ViewState};
+use builder3d_mcp::{AdapterError, R4Config, R4Document, R4Server, SavedSlicer, ViewState};
 use builder3d_platform::{current_runtime_paths, process_is_alive};
 use builder3d_viewport::CameraState;
 use eframe::egui;
@@ -399,6 +399,14 @@ impl McpDesktopIntegration {
             .map_err(|error| AdapterError::Validation(error.to_string()))?;
         let mut document = Some(document);
         self.server.replace_document(&mut document)?;
+        // The Slicer button's saved slicer is also the default for
+        // `launch_slicer` when the call names none (F12 parity).
+        let preferences = app.commands.preferences();
+        self.server
+            .set_saved_slicer(preferences.preferred_slicer_path().map(|path| SavedSlicer {
+                path: path.to_path_buf(),
+                label: preferences.preferred_slicer_label().map(str::to_owned),
+            }))?;
         let result = match self.server.call_value(name, arguments) {
             Ok(result) => result,
             Err(error) => {
