@@ -98,9 +98,13 @@ viewport in dark theme · D5 `emboss_text` metadata.
   Test `missed_snap_recaptures_when_the_pointer_comes_back_near_it`.
   Commit `2c7b319`. **Owner-approved** in the release build 2026-11-12
   ("fantastic").
-- 2026-11-12 (third batch, **in progress**): OF-10 to OF-14 — icon-only
-  shortcuts, Slicer button with remembered slicer, labelled Save / Save As,
-  Shift+drag box select, light/dark toggle. Table in
+- 2026-11-12 (third batch): OF-10 to OF-14 all committed, **none
+  owner-reviewed yet** — icon-only shortcuts, Slicer button with remembered
+  slicer (no dialog), labelled Save / Save As, light/dark toggle (`0f3dd09`);
+  Shift+drag box select (next commit). Full workspace gate passed. Captures
+  `evidence/rebuild/captures/2026-11-12-of10-14-topbar/`. Open: MCP
+  `launch_slicer` still needs an explicit `slicer_key` (it cannot yet say
+  "the saved slicer"); box select needs a hand check. Table in
   [`owner-feedback-2026-11-12.md`](owner-feedback-2026-11-12.md).
 - Suggested next: F12 rename and show/hide tools, then F9.
 - Review harness: `BUILDER3D_REVIEW_CAMERA=yaw,pitch,distance` poses the

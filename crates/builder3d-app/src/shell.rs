@@ -94,7 +94,15 @@ enum ViewportDrag {
     Pan,
     Transform(Box<TransformGesture>),
     Brush(Box<BrushGesture>),
+    /// Shift + drag from empty floor: a selection rectangle in screen points.
+    BoxSelect {
+        start: egui::Pos2,
+        current: egui::Pos2,
+    },
 }
+
+/// Below this size (points, either side) a Shift box gesture is a click.
+const BOX_SELECT_MIN_SIZE: f32 = 4.0;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum ActiveBrush {
@@ -4242,6 +4250,7 @@ impl Builder3dApp {
                 } else {
                     self.paint_transform_handles(&painter, rect);
                 }
+                self.paint_box_selection(&painter, palette);
                 if staged_review_drag {
                     self.viewport_drag = None;
                 }
@@ -4968,9 +4977,17 @@ impl Builder3dApp {
                 self.viewport_drag = self.begin_brush_gesture(rect, position, size);
                 self.viewport_gizmo_consumed = true;
             } else {
-                self.viewport_drag = self
-                    .begin_transform_drag(rect, position, pixels_per_point)
-                    .or(Some(ViewportDrag::Orbit));
+                let transform = self.begin_transform_drag(rect, position, pixels_per_point);
+                self.viewport_drag = if transform.is_some() {
+                    transform
+                } else if input.modifiers.shift && !self.object_under_pointer(rect, position) {
+                    Some(ViewportDrag::BoxSelect {
+                        start: position,
+                        current: position,
+                    })
+                } else {
+                    Some(ViewportDrag::Orbit)
+                };
                 self.viewport_gizmo_consumed =
                     matches!(self.viewport_drag, Some(ViewportDrag::Transform(_)));
             }
@@ -4988,6 +5005,11 @@ impl Builder3dApp {
                 Some(ViewportDrag::Orbit) if input.primary_down || input.primary_released => {
                     let delta = input.pointer_delta * pixels_per_point;
                     let _ = self.camera.orbit(delta.x, delta.y);
+                }
+                Some(ViewportDrag::BoxSelect { current, .. })
+                    if input.primary_down || input.primary_released =>
+                {
+                    *current = position;
                 }
                 Some(ViewportDrag::Pan)
                     if input.middle_down
@@ -5047,6 +5069,15 @@ impl Builder3dApp {
                     }
                 }
                 Some(ViewportDrag::Brush(gesture)) => self.commit_brush_gesture(*gesture),
+                Some(ViewportDrag::BoxSelect { start, current }) => {
+                    let marquee = egui::Rect::from_two_pos(start, current);
+                    if marquee.width() >= BOX_SELECT_MIN_SIZE
+                        || marquee.height() >= BOX_SELECT_MIN_SIZE
+                    {
+                        self.apply_box_selection(rect, marquee);
+                        self.viewport_gizmo_consumed = true;
+                    }
+                }
                 Some(ViewportDrag::Orbit | ViewportDrag::Pan) | None => {}
             }
         }
@@ -5217,14 +5248,20 @@ impl Builder3dApp {
     fn active_gizmo_axis_index(&self) -> Option<usize> {
         match self.viewport_drag.as_ref()? {
             ViewportDrag::Transform(gesture) => gesture.active_axis_index(),
-            ViewportDrag::Orbit | ViewportDrag::Pan | ViewportDrag::Brush(_) => None,
+            ViewportDrag::Orbit
+            | ViewportDrag::Pan
+            | ViewportDrag::Brush(_)
+            | ViewportDrag::BoxSelect { .. } => None,
         }
     }
 
     fn active_resize_handle(&self) -> Option<ResizeHandle> {
         match self.viewport_drag.as_ref()? {
             ViewportDrag::Transform(gesture) => gesture.active_resize_handle(),
-            ViewportDrag::Orbit | ViewportDrag::Pan | ViewportDrag::Brush(_) => None,
+            ViewportDrag::Orbit
+            | ViewportDrag::Pan
+            | ViewportDrag::Brush(_)
+            | ViewportDrag::BoxSelect { .. } => None,
         }
     }
 
@@ -5301,6 +5338,65 @@ impl Builder3dApp {
             pick_state.operation,
             pick_state.clear_selection,
         );
+    }
+
+    fn object_under_pointer(&self, rect: egui::Rect, pointer: egui::Pos2) -> bool {
+        let Some(scene) = self.preview.as_ref() else {
+            return false;
+        };
+        let size = self
+            .viewport_renderer
+            .as_ref()
+            .map_or(self.camera.viewport_size(), ViewportRenderer::size);
+        let screen = viewport_pixel_position(pointer, rect, size);
+        matches!(
+            pick_scene(scene, &self.camera, screen[0], screen[1]),
+            Ok(Some(_))
+        )
+    }
+
+    /// Adds every visible object whose on-screen footprint overlaps the
+    /// Shift box to the selection. Selection is not model history.
+    fn apply_box_selection(&mut self, rect: egui::Rect, marquee: egui::Rect) {
+        let Some(scene) = self.preview.as_ref() else {
+            return;
+        };
+        let Ok(matrix) = self
+            .camera
+            .view_projection(self.current_scene_radius().unwrap_or(1.0))
+        else {
+            return;
+        };
+        let hits = objects_in_marquee(scene, matrix, rect, marquee);
+        let mut selection = self.commands.scene().selection().clone();
+        let before = selection.len();
+        for object_id in &hits {
+            if let Ok(index) = self.commands.scene().object_index(object_id) {
+                selection.insert(index);
+            }
+        }
+        let added = selection.len() - before;
+        self.commands.set_selection_indices(selection);
+        if !hits.is_empty() {
+            self.surface = WorkspaceSurface::Scene;
+        }
+        self.commands.set_status(match hits.len() {
+            0 => String::from("Box select: nothing inside the box"),
+            count => format!("Box select: {count} object(s) in the box, {added} added"),
+        });
+    }
+
+    fn paint_box_selection(&self, painter: &egui::Painter, palette: ThemePalette) {
+        if let Some(ViewportDrag::BoxSelect { start, current }) = self.viewport_drag {
+            let marquee = egui::Rect::from_two_pos(start, current);
+            painter.rect_filled(marquee, 2.0, palette.accent_control.gamma_multiply(0.12));
+            painter.rect_stroke(
+                marquee,
+                2.0,
+                Stroke::new(1.0, palette.accent_control),
+                egui::StrokeKind::Inside,
+            );
+        }
     }
 
     fn pick_viewport_object(
@@ -6942,6 +7038,51 @@ fn project_to_viewport(
     ))
 }
 
+/// Ids of objects whose projected world bounds overlap `marquee` (screen
+/// points inside `rect`). Corners behind the camera are skipped; an object
+/// with no corner in front of it is never hit.
+fn objects_in_marquee(
+    scene: &RenderScene,
+    matrix: Mat4,
+    rect: egui::Rect,
+    marquee: egui::Rect,
+) -> Vec<String> {
+    scene
+        .objects()
+        .iter()
+        .filter(|object| {
+            let Ok(bounds) = object.world_bounds() else {
+                return false;
+            };
+            let mut footprint = egui::Rect::NOTHING;
+            for corner in 0..8 {
+                let point = [
+                    if corner & 1 == 0 {
+                        bounds.minimum[0]
+                    } else {
+                        bounds.maximum[0]
+                    },
+                    if corner & 2 == 0 {
+                        bounds.minimum[1]
+                    } else {
+                        bounds.maximum[1]
+                    },
+                    if corner & 4 == 0 {
+                        bounds.minimum[2]
+                    } else {
+                        bounds.maximum[2]
+                    },
+                ];
+                if let Some((screen, _)) = project_to_viewport(matrix, rect, point) {
+                    footprint.extend_with(screen);
+                }
+            }
+            footprint.is_positive() && footprint.intersects(marquee)
+        })
+        .map(|object| object.object_id().to_owned())
+        .collect()
+}
+
 // Egui draws these overlays outside the GPU viewport pipeline, so clip them in
 // homogeneous space before dividing by w to avoid streaks at the near plane.
 fn project_gizmo_point(matrix: Mat4, rect: egui::Rect, point: [f32; 3]) -> Option<egui::Pos2> {
@@ -7516,6 +7657,40 @@ mod tests {
             "{}",
             app.commands.last_status()
         );
+        assert!(std::fs::remove_dir_all(directory).is_ok());
+    }
+
+    #[test]
+    fn shift_box_selects_objects_it_covers_without_history() {
+        let (mut app, directory) = shell_for_jobs("of13-box-select");
+        for kind in [PrimitiveKind::Cube, PrimitiveKind::Sphere] {
+            assert!(app.commands.dispatch(CommandId::AddPrimitive(kind)).is_ok());
+        }
+        app.commands.deselect_all();
+        let history = app.commands.scene().history_state_id();
+        app.refresh_preview();
+        let bounds = app
+            .preview
+            .as_ref()
+            .expect("preview")
+            .objects()
+            .iter()
+            .filter_map(|object| object.world_bounds().ok())
+            .collect::<Vec<_>>();
+        assert!(app.camera.set_viewport_size(1280, 840).is_ok());
+        assert!(app.camera.frame_bounds(&bounds).is_ok());
+        let viewport = egui::Rect::from_min_size(egui::Pos2::ZERO, Vec2::new(1280.0, 840.0));
+
+        // A box in an empty corner selects nothing.
+        let corner = egui::Rect::from_min_size(egui::pos2(2.0, 2.0), Vec2::splat(10.0));
+        app.apply_box_selection(viewport, corner);
+        assert!(app.commands.scene().selection().is_empty());
+
+        // A box over the whole view selects both objects.
+        app.apply_box_selection(viewport, viewport.shrink(1.0));
+        assert_eq!(app.commands.scene().selection().len(), 2);
+        assert_eq!(app.commands.scene().history_state_id(), history);
+        assert!(app.commands.last_status().contains("2 object(s)"));
         assert!(std::fs::remove_dir_all(directory).is_ok());
     }
 
