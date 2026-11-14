@@ -146,3 +146,35 @@ impl ViewportLighting {
         shaded
     }
 }
+
+/// How much darker a selected object is drawn than its own colour (OF-34):
+/// selection keeps the object's colour family, as 3D Builder does, instead
+/// of mixing in a highlight colour.
+pub const SELECTED_SHADE: f32 = 0.82;
+
+/// The display colour of a selected object or face: the authored colour,
+/// slightly darker, alpha unchanged. The GPU renderer and the CPU fallback
+/// both use this rule.
+#[must_use]
+pub fn selection_shade(color: [f32; 4]) -> [f32; 4] {
+    [
+        color[0] * SELECTED_SHADE,
+        color[1] * SELECTED_SHADE,
+        color[2] * SELECTED_SHADE,
+        color[3],
+    ]
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn selection_darkens_slightly_and_keeps_the_colour_family() {
+        let red = [0.8, 0.2, 0.1, 1.0];
+        let shaded = super::selection_shade(red);
+        assert!(shaded[0] < red[0] && shaded[0] > red[0] * 0.7);
+        // Same hue: channel ratios are unchanged.
+        assert!((shaded[0] / shaded[1] - red[0] / red[1]).abs() < 1.0e-5);
+        assert!((shaded[1] / shaded[2] - red[1] / red[2]).abs() < 1.0e-5);
+        assert_eq!(shaded[3], red[3]);
+    }
+}

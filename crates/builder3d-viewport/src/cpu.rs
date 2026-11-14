@@ -42,10 +42,9 @@ pub struct CpuRenderOptions {
     pub wireframe: bool,
     /// Blend mesh colors translucently without changing authored geometry.
     pub xray: bool,
-    /// Durable IDs receiving the selection tint.
+    /// Durable IDs drawn with the selection shade
+    /// ([`crate::selection_shade`]).
     pub selected_object_ids: Vec<String>,
-    /// RGBA tint mixed into selected authored colors.
-    pub selected_tint: [f32; 4],
     /// View aligned key light, material highlights, and contact shadow strength.
     pub lighting: ViewportLighting,
     /// Whether the build-plane surface is drawn.
@@ -69,7 +68,6 @@ impl Default for CpuRenderOptions {
             wireframe: false,
             xray: false,
             selected_object_ids: Vec::new(),
-            selected_tint: [0.0, 0.55, 1.0, 1.0],
             lighting: ViewportLighting::default(),
             floor_enabled: false,
             grid_visible: false,
@@ -208,12 +206,11 @@ pub fn render_cpu_with_options(
             .selected_object_ids
             .iter()
             .any(|id| id == object.object_id());
-        let mut color = object.color();
-        if selected {
-            for (channel, tint) in color[..3].iter_mut().zip(options.selected_tint) {
-                *channel = *channel * 0.62 + tint * 0.38;
-            }
-        }
+        let mut color = if selected {
+            crate::selection_shade(object.color())
+        } else {
+            object.color()
+        };
         if options.xray {
             color[3] = (color[3] * 0.30).clamp(0.05, 0.45);
         }
@@ -226,7 +223,6 @@ pub fn render_cpu_with_options(
             color,
             object,
             selected,
-            options.selected_tint,
             options.xray,
             material_parameters,
             width,
@@ -457,7 +453,6 @@ fn rasterize_geometry(
     color: [f32; 4],
     object: &RenderObject,
     selected: bool,
-    selected_tint: [f32; 4],
     xray: bool,
     material_parameters: [f32; 4],
     width: u32,
@@ -508,9 +503,7 @@ fn rasterize_geometry(
             .unwrap_or(color);
         if authored_face_color.is_some() {
             if selected {
-                for (channel, tint) in face_color[..3].iter_mut().zip(selected_tint) {
-                    *channel = *channel * 0.62 + tint * 0.38;
-                }
+                face_color = crate::selection_shade(face_color);
             }
             if xray {
                 face_color[3] = (face_color[3] * 0.30).clamp(0.05, 0.45);

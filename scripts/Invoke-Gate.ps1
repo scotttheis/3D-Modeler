@@ -166,7 +166,7 @@ if ($fullScope) {
             $exe = Join-Path $root 'target\review\builder3d-app.exe'
             $boardDir = Join-Path $root "evidence\rebuild\captures\gate-$stamp"
             New-Item -ItemType Directory -Force $boardDir | Out-Null
-            $states = @('welcome', 'empty', 'move', 'rotate', 'resize', 'resize-drag', 'multi', 'merge', 'unselected', 'material', 'settings', 'save', 'export', 'menu')
+            $states = @('welcome', 'empty', 'move', 'rotate', 'resize', 'resize-drag', 'multi', 'merge', 'unselected', 'material', 'settings', 'save', 'export', 'menu', 'colors')
             $started = Get-Date
             $missing = @()
             Write-Host ""

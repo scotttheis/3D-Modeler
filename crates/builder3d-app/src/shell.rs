@@ -571,6 +571,7 @@ impl Builder3dApp {
                 builder3d_core::PrimitiveKind::Sphere,
                 builder3d_core::PrimitiveKind::Cone,
             ],
+            ReviewState::Colors => &[builder3d_core::PrimitiveKind::Cube; 4],
         };
         for (index, kind) in primitives.iter().copied().enumerate() {
             self.dispatch(CommandId::AddPrimitive(kind));
@@ -595,6 +596,19 @@ impl Builder3dApp {
             ReviewState::Export => self.open_dialog(DialogKind::Export),
             ReviewState::Menu => self.menu_open = true,
             _ => {}
+        }
+        if review.state() == ReviewState::Colors {
+            let colors = [
+                [0.86, 0.16, 0.16, 1.0],
+                [0.18, 0.66, 0.24, 1.0],
+                [0.16, 0.36, 0.90, 1.0],
+                [0.95, 0.80, 0.15, 1.0],
+            ];
+            for (index, color) in colors.into_iter().enumerate() {
+                self.commands.set_selection_indices([index]);
+                let _ = self.commands.set_selected_color(color);
+            }
+            self.commands.set_selection_indices([0, 2]);
         }
         if review.state() == ReviewState::Merge {
             let colors = [[0.86, 0.16, 0.16, 1.0], [0.16, 0.36, 0.90, 1.0]];
@@ -4133,7 +4147,6 @@ impl Builder3dApp {
                     wireframe: display.wireframe,
                     xray: display.xray,
                     selected_object_ids,
-                    selected_tint: [0.0, 0.55, 1.0, 1.0],
                     lighting: self.commands.preferences().viewport_lighting(),
                     theme: match self.theme_mode {
                         ThemeMode::Light => ViewportTheme::Light,

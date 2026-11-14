@@ -82,10 +82,9 @@ pub struct ViewportRenderOptions {
     pub wireframe: bool,
     /// Whether mesh colors use the translucent X-Ray pass.
     pub xray: bool,
-    /// Durable IDs receiving the viewport selection tint.
+    /// Durable IDs drawn with the selection shade
+    /// ([`crate::selection_shade`]).
     pub selected_object_ids: Vec<String>,
-    /// RGBA tint mixed into selected authored colors.
-    pub selected_tint: [f32; 4],
     /// Active shell theme.
     pub theme: ViewportTheme,
     /// User-adjustable screen-aligned lighting and floor contact shadows.
@@ -104,7 +103,6 @@ impl Default for ViewportRenderOptions {
             wireframe: false,
             xray: false,
             selected_object_ids: Vec::new(),
-            selected_tint: [0.0, 0.55, 1.0, 1.0],
             theme: ViewportTheme::Dark,
             lighting: ViewportLighting::default(),
             floor_text: FloorTextMesh::default(),
@@ -1092,7 +1090,6 @@ impl ViewportRenderer {
                 wireframe: options.wireframe,
                 xray: options.xray,
                 selected_object_ids: options.selected_object_ids.clone(),
-                selected_tint: options.selected_tint,
                 lighting: options.lighting,
                 floor_enabled: true,
                 grid_visible: options.grid_visible,
@@ -2358,12 +2355,11 @@ fn color_from_rgba8(color: [u8; 4]) -> [f32; 4] {
 }
 
 fn display_color(authored: [f32; 4], selected: bool, options: &ViewportRenderOptions) -> [f32; 4] {
-    let mut color = authored;
-    if selected {
-        for (channel, tint) in color[..3].iter_mut().zip(options.selected_tint) {
-            *channel = *channel * 0.62 + tint * 0.38;
-        }
-    }
+    let mut color = if selected {
+        crate::selection_shade(authored)
+    } else {
+        authored
+    };
     if options.xray {
         color[3] = (color[3] * 0.30).clamp(0.05, 0.45);
     }
