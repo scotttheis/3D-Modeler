@@ -982,6 +982,19 @@ impl Scene {
         ))
     }
 
+    /// Whether the selection contains a group, the only thing Ungroup can
+    /// act on (OF-37). A merged object is one mesh, not a group. The desktop
+    /// enables Ungroup and the MCP `ungroup_selected` tool accepts a call
+    /// only when this is true.
+    #[must_use]
+    pub fn selection_contains_group(&self) -> bool {
+        self.selection.iter().any(|index| {
+            self.objects
+                .get(*index)
+                .is_some_and(|object| !object.children().is_empty())
+        })
+    }
+
     /// Replaces selected groups with their children, composing parent and
     /// child transforms as the Python scene graph does.
     pub fn ungroup_selected(&mut self) -> Result<CommandResult, CoreError> {

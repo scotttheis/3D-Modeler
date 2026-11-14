@@ -6851,7 +6851,7 @@ fn command_enabled(command: CommandId, state: &CommandState) -> bool {
         CommandId::EditTorus => selected > 0 && state.has_selected_parametric_torus(),
         CommandId::Group => selected > 1,
         CommandId::Merge | CommandId::Intersect | CommandId::Subtract => selected > 0,
-        CommandId::Ungroup => selected > 0,
+        CommandId::Ungroup => state.scene().selection_contains_group(),
         CommandId::Export => !state.scene().objects().is_empty(),
         _ => true,
     }

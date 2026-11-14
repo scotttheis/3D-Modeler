@@ -844,9 +844,18 @@ impl R4Server {
             "group_selected" => {
                 self.simple_scene_command("group_selected", args, Scene::group_selected)
             }
-            "ungroup_selected" => {
-                self.simple_scene_command("ungroup_selected", args, Scene::ungroup_selected)
-            }
+            "ungroup_selected" => self.simple_scene_command("ungroup_selected", args, |scene| {
+                if scene.selection_contains_group() {
+                    scene.ungroup_selected()
+                } else {
+                    Err(builder3d_core::CoreError::CommandFailed {
+                        command: String::from("ungroup_selected"),
+                        reason: String::from(
+                            "select a group first; a merged object is one mesh, not a group",
+                        ),
+                    })
+                }
+            }),
             "view_state" => self.view_state(),
             "set_view" => self.set_view(args),
             "frame_view" => self.frame_view(args),

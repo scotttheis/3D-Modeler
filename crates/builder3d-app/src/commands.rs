@@ -1758,6 +1758,11 @@ impl CommandState {
     /// Ungroups selected group objects through the portable scene command.
     pub fn ungroup_selected(&mut self) -> Result<CommandOutcome, CommandError> {
         self.selected_indices("Ungroup")?;
+        if !self.scene.selection_contains_group() {
+            return Ok(CommandOutcome::Noop(String::from(
+                "Nothing to ungroup: select a group",
+            )));
+        }
         let result = self.scene.ungroup_selected()?;
         if !result.changed {
             return Ok(CommandOutcome::Noop(String::from("Nothing to ungroup")));
@@ -2683,6 +2688,79 @@ mod tests {
             assert!(state.dispatch(CommandId::Undo).is_ok());
             assert_eq!(state.scene().objects()[0].name(), original.as_str());
         }
+    }
+
+    #[test]
+    fn ungroup_needs_a_group_on_the_desktop_and_in_mcp() {
+        let mut desktop = CommandState::default();
+        let mut mcp = CommandState::default();
+        for state in [&mut desktop, &mut mcp] {
+            for _ in 0..2 {
+                state
+                    .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
+                    .expect("add cube");
+            }
+            state.set_selection_indices([0, 1]);
+            assert!(state.dispatch(CommandId::Merge).is_ok());
+            // After Merge there is one object and it is not a group.
+            assert_eq!(state.scene().objects().len(), 1);
+            state.set_selection_indices([0]);
+            assert!(!state.scene().selection_contains_group());
+        }
+        let history = desktop.scene().history_state_id();
+        assert!(matches!(
+            desktop.dispatch(CommandId::Ungroup),
+            Ok(CommandOutcome::Noop(_))
+        ));
+        assert_eq!(desktop.scene().history_state_id(), history);
+        let refused = try_mcp(&mut mcp, "ungroup_selected", serde_json::json!({}));
+        assert!(
+            refused.as_ref().is_err_and(|error| error.contains("group")),
+            "{refused:?}"
+        );
+        assert_eq!(mcp.scene().history_state_id(), history);
+
+        // With a real group selected both sides ungroup it.
+        for state in [&mut desktop, &mut mcp] {
+            state
+                .dispatch(CommandId::AddPrimitive(PrimitiveKind::Sphere))
+                .expect("add sphere");
+            state.set_selection_indices([0, 1]);
+            assert!(state.dispatch(CommandId::Group).is_ok());
+            assert!(state.scene().selection_contains_group());
+        }
+        assert!(desktop.dispatch(CommandId::Ungroup).is_ok());
+        let result = try_mcp(&mut mcp, "ungroup_selected", serde_json::json!({}));
+        assert!(result.is_ok(), "{result:?}");
+        for state in [&desktop, &mcp] {
+            assert_eq!(state.scene().objects().len(), 2);
+            assert!(!state.scene().selection_contains_group());
+        }
+    }
+
+    /// Like [`run_mcp`], but returns the tool's error text instead of
+    /// panicking when the call is refused.
+    fn try_mcp(
+        commands: &mut CommandState,
+        tool: &str,
+        arguments: serde_json::Value,
+    ) -> Result<serde_json::Value, String> {
+        let version = commands.mcp_document_version();
+        let roots = builder3d_mcp::ApprovedRoots::from_paths(Vec::new()).expect("deny-all roots");
+        let server = builder3d_mcp::R4Server::new(builder3d_mcp::R4Config::for_profile(
+            builder3d_mcp::Profile::Full,
+            roots,
+        ));
+        let mut document = Some(commands.take_mcp_document(builder3d_mcp::ViewState::default()));
+        server.replace_document(&mut document).expect("attach");
+        let result = server
+            .call_value(tool, arguments)
+            .map_err(|error| error.to_string());
+        let document = server.take_document().expect("detach");
+        commands
+            .install_mcp_document(document, &version)
+            .expect("install");
+        result
     }
 
     #[test]
