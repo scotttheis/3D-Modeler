@@ -3,7 +3,7 @@
 The only place current status is written. Keep it to one screen. Plan:
 [`product-rebuild-plan.md`](product-rebuild-plan.md).
 
-Updated 2026-11-13. Full gate passed 2026-11-13 (fmt, clippy, tests, deny, audit, MCP parity, smoke, 28-image capture board; the board and the other steps ran in two runs because the first run's smoke step had a script bug, since fixed). Release exe is current (built 15:22 from the same source; `cargo build --release` reports nothing to do).
+Updated 2026-11-14. Full gate passed 2026-11-14 after Phase 1 (fmt, clippy, tests, deny, audit, MCP parity, smoke, 40-image capture board). Release exe rebuilt from the same source for the Phase 1 review pack.
 
 Test releases (how-to: [`packaging.md`](packaging.md)): last is **RC1**,
 version 0.1.1, 2026-11-13, `E:\Builder3D-RC\Builder3D-RC1.msi` (50 MB),
@@ -12,8 +12,12 @@ version 0.1.1, 2026-11-13, `E:\Builder3D-RC\Builder3D-RC1.msi` (50 MB),
 ## Now
 
 **Owner batch 7** ([`owner-feedback-2026-11-14.md`](owner-feedback-2026-11-14.md),
-OF-28 to OF-58, five phases; Emboss OF-56/57 deferred by the owner). Current: **Phase 1 — quick fixes and polish**,
-starting at OF-28. Each phase ends in a review pack and a stop for owner
+OF-28 to OF-58, five phases; Emboss OF-56/57 deferred by the owner).
+**Phase 1 done, stopped for owner review** (OF-28 to OF-45, one commit each,
+all "Done, awaiting owner review"). Pack:
+`evidence/rebuild/captures/2026-11-14-review-phase1/`. Owner picks for the
+pack: OF-35 shade A or B; confirm the OF-43 reading (10 mm gap beside the
+original). Next after review: **Phase 2** (OF-44, OF-46, OF-47). Each phase ends in a review pack and a stop for owner
 review. The remaining S0 items (F5, F6) follow the batch unless the owner
 says otherwise. Stop before RB-10 work (S3) as before.
 
@@ -31,6 +35,9 @@ says otherwise. Stop before RB-10 work (S3) as before.
 | `review` profile build | Pass (3m56s clean build; capture verified) |
 
 ## Last review pack
+
+`evidence/rebuild/captures/2026-11-14-review-phase1/` (Phase 1), not yet
+reviewed. Before that:
 
 `evidence/rebuild/captures/2026-11-13-review-of1-9-f9/`, reviewed by the
 owner 2026-11-14. Approved: floor look, F9, resize view, OF-2 shadow, OF-6
