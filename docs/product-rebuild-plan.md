@@ -325,9 +325,11 @@ decided by an agent.
 | D1 | Allow local commits on a work branch (no push, no PR) as the recovery mechanism | **Approved 2026-11-12** | — |
 | D2 | Keep fat LTO for shipping builds if it cannot link reliably | **Approved 2026-11-12:** thin LTO is acceptable if the 40 MB budget holds | — |
 | D3 | Delete the ad hoc build directories under `target/` | **Approved and done 2026-11-12** | — |
-| D4 | Viewport background stays light in the dark theme | Keep (it is the current accepted choice); revisit in session 1 with a side-by-side | Unchanged |
-| D5 | `emboss_text` long-running metadata | Match the reference | Recorded as a known difference |
+| D4 | Viewport background in the dark theme | **Decided 2026-11-13:** a bit darker than now, but not full dark mode; before/after captures for owner approval | Unchanged |
+| D5 | `emboss_text` long-running metadata | **Decided 2026-11-13:** show progress — keep the Rust "may take a while" flag (approved difference from Python) and show a progress bar, or a Builder3D-styled working spinner when the time can't be estimated, desktop and MCP | — |
 | D6 | MCP at 100% desktop parity, growing the catalog beyond the Python 60 where needed | **Approved 2026-11-12** | — |
+| D8 | Merge of parts that don't overlap | **Decided 2026-11-13:** group them instead of merging and show a small popup for about 4 s saying the objects were not touching; MCP returns the group with the same message | — |
+| D9 | Smoothing on sparse meshes | **Decided 2026-11-13:** match Blender's default sculpt Smooth (the brush Shift switches to); studied with item 13, the Blender brush comparison | — |
 | D7 | Merge color: one color from the top-most object, desktop and MCP alike | **Approved 2026-11-12** (differs from the Python MCP, which kept per-face colors) | — |
 
 ## 9. What does not change

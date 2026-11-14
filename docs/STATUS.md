@@ -46,7 +46,7 @@ Owner review not yet done.
 | F7 | Clear ad hoc `target/` directories (`E:` had 40 GB free) | **Done** 2026-11-12 — archived to `G:\Builder3D-Rust_target-adhoc-archive_20261112`, `target/` 91 → ~55 GB |
 | F8 | `scripts/Invoke-Gate.ps1` | **Done** 2026-11-13 — `-Tier fast\|full\|ship`; ship does not script package staging or the performance run |
 | F9 | Depth fight where meshes meet the floor | **Done, owner review pending** 2026-11-13 — depth bias on floor surface, shadows and text; captures `evidence/rebuild/captures/2026-11-13-f9-floor-depth/` (before/after, both themes). Dark serration gone; a faint pale dotted fringe on the rim remains and does not change with the bias or the reflection (cause not found). CPU fallback not touched |
-| F10 | `emboss_text` long-running metadata | Blocked on decision D5 |
+| F10 | `emboss_text` long-running metadata | Decided (D5, 2026-11-13): keep the flag, add a progress bar or Builder3D-styled spinner, desktop and MCP. Not built yet |
 | F11 | Status narrative out of `AGENTS.md` | **Done** 2026-11-12 |
 | F12 | MCP 100% desktop parity (plan 3.7) | **Done** 2026-11-13 — Merge color; `rename_object` and `set_visibility` tools (catalog now 62, each with a desktop-vs-MCP test); `launch_slicer` falls back to the saved slicer; ledger `mcp_tool` / `mcp_exempt` column and parity check. Judgement calls for owner: theme, display units, clear recents, About, ribbon layout, sticky selection, recents and exit are marked "visual only" |
 | F13 | Run `cargo deny` and `cargo audit` | **Done** 2026-11-12 — both pass; now in the Full gate |
@@ -61,8 +61,11 @@ parity complete, full acceptance open.
 ## Owner decisions waiting (plan section 8)
 
 D1, D2, D3, D6 (MCP 100% parity, catalog may grow) and D7 (Merge takes the
-top-most color, desktop and MCP) approved 2026-11-12. Still open: D4 light
-viewport in dark theme · D5 `emboss_text` metadata.
+top-most color, desktop and MCP) approved 2026-11-12. D4 (somewhat darker
+viewport in dark theme), D5 (progress indicator for emboss), D8 (non-overlapping
+Merge groups + 4 s popup) and D9 (smoothing like Blender's sculpt Smooth)
+decided 2026-11-13, none built yet. Still open: F12 "visual only" list
+(asked 2026-11-13, no answer yet).
 
 ## Owner feedback queue
 
@@ -141,8 +144,8 @@ viewport in dark theme · D5 `emboss_text` metadata.
   1254 px PNGs (~32 MB). Shrinking them is an S3 owner decision.
 - Owner merge report 2026-11-13: Merge of a sphere and a cylinder that only
   touched gave one object with 2 disconnected shells (no warning); smoothing
-  then melted the sparse stock cylinder (two rings only). Options and owner
-  decision pending.
+  then melted the sparse stock cylinder (two rings only). Decided 2026-11-13:
+  D8 and D9 (plan section 8). Not built yet.
 - **Paused by the owner 2026-11-12** after batch 3. On resume, suggested
   next: MCP `launch_slicer` falls back to the saved slicer when no
   `slicer_key` is given (owner said yes; F12 parity), then F12 rename and
