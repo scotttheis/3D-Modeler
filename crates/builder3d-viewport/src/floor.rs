@@ -110,8 +110,11 @@ pub struct FloorScaleLabel {
     pub value_mm: u32,
     /// World-space anchor of the text, stable while the camera pans.
     pub position: Vec3,
-    /// Unit direction the text block extends in from `position`, or zero
-    /// when `position` is the centre of the text.
+    /// Which side of `position` the text block lies on, per world axis
+    /// (components -1, 0 or 1): zero centres the text on `position` along
+    /// that axis; a sign places the text's edge just past `position` on that
+    /// side. `[1, 0, 1]` puts the text in the floor square diagonally beyond
+    /// a grid corner, whichever way the text reads.
     pub extend: Vec3,
     /// Unit world direction the text reads along.
     pub baseline: Vec3,
@@ -450,13 +453,17 @@ pub const MAX_FLOOR_LABELS_PER_AXIS: usize = 40;
 /// Projected em heights, in pixels, over which a distant label fades in
 /// instead of shimmering as an unreadable speck.
 const FLOOR_LABEL_FADE_PIXELS: (f32, f32) = (1.0, 3.5);
-/// Distance of each label row from its axis, in millimetres: the X row runs
-/// just in front of a default 40 mm primitive and the Z row just right of
-/// it, as in 3D Builder.
-const FLOOR_LABEL_ROW_OFFSET_MM: f32 = 24.0;
+/// Gap between a label and the grid corner it is anchored to, as a fraction
+/// of the text height.
+const FLOOR_LABEL_CORNER_GAP: f32 = 0.25;
 
 /// Builds the floor distance labels: text lying flat on the build plane at
 /// fixed 50 mm steps along the world +X and -Z axes.
+///
+/// Each label sits at the grid corner its distance refers to, where the
+/// 50 mm line meets the axis line and where snapping happens (OF-31): the
+/// text lies in the floor square on the +X/+Z side of that corner, its
+/// nearest edge a small gap from the corner.
 ///
 /// Every label is a world-space quad, so perspective foreshortens distant
 /// labels instead of stacking upright screen text. Each label's baseline
@@ -488,11 +495,11 @@ pub fn build_floor_scale_labels(camera: &Camera) -> Vec<FloorScaleLabel> {
     let mut labels = Vec::with_capacity(MAX_FLOOR_LABELS_PER_AXIS * 2);
     for step in 1..=MAX_FLOOR_LABELS_PER_AXIS {
         let value = step as f32 * FLOOR_LABEL_SPACING_MM;
-        // X labels are centred on their distance; Z labels start beside the
-        // Z axis and extend to the right of it.
+        // Both rows anchor at a grid corner on their axis line and extend
+        // into the square on the +X/+Z side of it.
         for (position, extend) in [
-            ([value, 0.0, FLOOR_LABEL_ROW_OFFSET_MM], [0.0; 3]),
-            ([FLOOR_LABEL_ROW_OFFSET_MM, 0.0, -value], [1.0, 0.0, 0.0]),
+            ([value, 0.0, 0.0], [1.0, 0.0, 1.0]),
+            ([0.0, 0.0, -value], [1.0, 0.0, 1.0]),
         ] {
             let floor_alpha = surface.fade_alpha_at(position);
             // A label seen at a grazing angle is squashed flat but still
@@ -627,13 +634,17 @@ pub fn build_floor_text<'a>(
         };
         let world_per_point = label.text_height_mm / text.font_size;
         let half = [text.size[0] * 0.5, text.size[1] * 0.5];
+        let gap = label.text_height_mm * FLOOR_LABEL_CORNER_GAP;
+        // Signed side of the anchor along the reading and glyph-down
+        // directions; the text's half extent plus the gap moves its edge
+        // just past the anchor on that side.
+        let along = dot(label.baseline, label.extend).round();
+        let across = dot(label.down, label.extend).round();
         let center = add(
             label.position,
-            scale(
-                label.extend,
-                (dot(label.baseline, label.extend).abs() * half[0]
-                    + dot(label.down, label.extend).abs() * half[1])
-                    * world_per_point,
+            add(
+                scale(label.baseline, along * (half[0] * world_per_point + gap)),
+                scale(label.down, across * (half[1] * world_per_point + gap)),
             ),
         );
         for vertex in &text.vertices {
@@ -991,7 +1002,7 @@ mod tests {
         let alpha_at = |value: u32| {
             labels
                 .iter()
-                .filter(|label| label.value_mm == value && label.position[0] == 24.0)
+                .filter(|label| label.value_mm == value && label.position[0] == 0.0)
                 .map(|label| label.alpha)
                 .next()
                 .unwrap_or(0.0)
@@ -1042,8 +1053,50 @@ mod tests {
             ..label
         };
         let mesh = build_floor_text(&[started], |_| Some(&text), [0.2; 4]);
-        assert_eq!(mesh.vertices[0].position[0], 50.0);
+        // 1.25 mm gap (a quarter of the 5 mm text height) past the anchor.
+        assert_eq!(mesh.vertices[0].position[0], 51.25);
+        assert_eq!(mesh.vertices[0].position[2], 21.5);
+        // A corner-anchored label lies in the square beyond the corner,
+        // whichever way the text reads.
+        let corner = FloorScaleLabel {
+            position: [50.0, 0.0, 0.0],
+            extend: [1.0, 0.0, 1.0],
+            ..label
+        };
+        let mesh = build_floor_text(&[corner], |_| Some(&text), [0.2; 4]);
+        assert_eq!(mesh.vertices[0].position, [51.25, 0.0, 1.25]);
+        assert_eq!(mesh.vertices[2].position, [61.25, 0.0, 6.25]);
+        let turned = FloorScaleLabel {
+            baseline: [-1.0, 0.0, 0.0],
+            down: [0.0, 0.0, -1.0],
+            ..corner
+        };
+        let mesh = build_floor_text(&[turned], |_| Some(&text), [0.2; 4]);
+        assert_eq!(mesh.vertices[0].position, [61.25, 0.0, 6.25]);
+        assert_eq!(mesh.vertices[2].position, [51.25, 0.0, 1.25]);
         assert!(build_floor_text(&[label], |_| None, [0.2; 4]).is_empty());
+    }
+
+    #[test]
+    fn floor_labels_sit_on_the_grid_corner_of_their_distance() {
+        let mut camera = Camera::new();
+        camera.reset_view();
+        assert!(camera.set_viewport_size(800, 600).is_ok());
+        let labels = build_floor_scale_labels(&camera);
+        assert!(!labels.is_empty());
+        for label in &labels {
+            let value = label.value_mm as f32;
+            assert!(
+                label.position == [value, 0.0, 0.0] || label.position == [0.0, 0.0, -value],
+                "label {} anchored off its grid corner: {:?}",
+                label.value_mm,
+                label.position
+            );
+            // Every anchor is a corner of the 50 mm checker squares.
+            assert_eq!(label.position[0] % 50.0, 0.0);
+            assert_eq!(label.position[2] % 50.0, 0.0);
+            assert_eq!(label.extend, [1.0, 0.0, 1.0]);
+        }
     }
 
     #[test]
@@ -1057,7 +1110,7 @@ mod tests {
         assert!(
             before
                 .iter()
-                .any(|label| { label.value_mm == 50 && label.position == [24.0, 0.0, -50.0] })
+                .any(|label| { label.value_mm == 50 && label.position == [0.0, 0.0, -50.0] })
         );
         let before_positions = before
             .iter()
