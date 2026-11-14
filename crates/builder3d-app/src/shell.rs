@@ -572,6 +572,8 @@ impl Builder3dApp {
                 builder3d_core::PrimitiveKind::Cone,
             ],
             ReviewState::Colors => &[builder3d_core::PrimitiveKind::Cube; 4],
+            ReviewState::Mirror => &[builder3d_core::PrimitiveKind::Cube],
+            ReviewState::Align => &[builder3d_core::PrimitiveKind::Cube; 2],
         };
         for (index, kind) in primitives.iter().copied().enumerate() {
             self.dispatch(CommandId::AddPrimitive(kind));
@@ -595,6 +597,11 @@ impl Builder3dApp {
             ReviewState::Save => self.open_dialog(DialogKind::SaveProject),
             ReviewState::Export => self.open_dialog(DialogKind::Export),
             ReviewState::Menu => self.menu_open = true,
+            ReviewState::Mirror => self.dispatch(CommandId::Mirror),
+            ReviewState::Align => {
+                self.commands.set_selection_indices([0, 1]);
+                self.dispatch(CommandId::Align);
+            }
             _ => {}
         }
         if review.state() == ReviewState::Colors {
@@ -5640,8 +5647,7 @@ impl Builder3dApp {
     fn render_dialog(&mut self, ctx: &egui::Context) {
         if let Some(message) = self.measurement_text.clone() {
             let mut close = false;
-            egui::Modal::new(egui::Id::unique("dimensions")).show(ctx, |ui| {
-                ui.heading("Dimensions");
+            crate::dialogs::dialog_window(ctx, "Dimensions").show(ctx, |ui| {
                 ui.label(message);
                 close = ui.button("OK").clicked();
             });
@@ -5657,8 +5663,7 @@ impl Builder3dApp {
                 CommandId::Align => "Align Objects",
                 _ => "Arrange Objects",
             };
-            egui::Modal::new(egui::Id::unique("placement-dialog")).show(ctx, |ui| {
-                ui.heading(title);
+            crate::dialogs::dialog_window(ctx, title).show(ctx, |ui| {
                 ui.horizontal(|ui| {
                     ui.label("Axis:");
                     for (axis, label) in [(Axis::X, "x"), (Axis::Y, "y"), (Axis::Z, "z")] {
@@ -6079,24 +6084,20 @@ impl Builder3dApp {
             PendingReplacement::Exit => "Save changes before exiting Builder3D?",
         };
         let mut choice = None;
-        egui::Window::new("Unsaved changes")
-            .collapsible(false)
-            .resizable(false)
-            .anchor(Align2::CENTER_CENTER, [0.0, 0.0])
-            .show(ctx, |ui| {
-                ui.label(prompt);
-                ui.horizontal(|ui| {
-                    if ui.button("Save").clicked() {
-                        choice = Some(ConfirmationChoice::Save);
-                    }
-                    if ui.button("Discard").clicked() {
-                        choice = Some(ConfirmationChoice::Discard);
-                    }
-                    if ui.button("Cancel").clicked() {
-                        choice = Some(ConfirmationChoice::Cancel);
-                    }
-                });
+        crate::dialogs::dialog_window(ctx, "Unsaved changes").show(ctx, |ui| {
+            ui.label(prompt);
+            ui.horizontal(|ui| {
+                if ui.button("Save").clicked() {
+                    choice = Some(ConfirmationChoice::Save);
+                }
+                if ui.button("Discard").clicked() {
+                    choice = Some(ConfirmationChoice::Discard);
+                }
+                if ui.button("Cancel").clicked() {
+                    choice = Some(ConfirmationChoice::Cancel);
+                }
             });
+        });
         if let Some(choice) = choice {
             self.finish_confirmation(choice);
         }
@@ -6110,22 +6111,18 @@ impl Builder3dApp {
             PendingOverwrite::SaveProject(path) | PendingOverwrite::Export(path) => path,
         };
         let mut overwrite = None;
-        egui::Window::new("Confirm overwrite")
-            .collapsible(false)
-            .resizable(false)
-            .anchor(Align2::CENTER_CENTER, [0.0, 0.0])
-            .show(ctx, |ui| {
-                ui.label("Replace the existing file?");
-                ui.label(path.display().to_string());
-                ui.horizontal(|ui| {
-                    if ui.button("Overwrite").clicked() {
-                        overwrite = Some(true);
-                    }
-                    if ui.button("Cancel").clicked() {
-                        overwrite = Some(false);
-                    }
-                });
+        crate::dialogs::dialog_window(ctx, "Confirm overwrite").show(ctx, |ui| {
+            ui.label("Replace the existing file?");
+            ui.label(path.display().to_string());
+            ui.horizontal(|ui| {
+                if ui.button("Overwrite").clicked() {
+                    overwrite = Some(true);
+                }
+                if ui.button("Cancel").clicked() {
+                    overwrite = Some(false);
+                }
             });
+        });
         if let Some(overwrite) = overwrite {
             self.finish_overwrite_confirmation(overwrite);
         }

@@ -435,6 +435,8 @@ impl DialogState {
     }
 
     /// Draws the dialog, docking Settings into the space between shell bars.
+    /// Every other dialog opens centred and can be dragged by its title bar
+    /// ([`dialog_window`]).
     pub(crate) fn show_with_settings_area(
         &mut self,
         ctx: &Context,
@@ -442,15 +444,13 @@ impl DialogState {
     ) -> Option<DialogAction> {
         let mut action = None;
         let title = self.title();
-        let window = egui::Window::new(title).collapsible(false).resizable(false);
-        let window = if self.kind == DialogKind::Settings {
-            if let Some(rect) = settings_work_area {
-                window.fixed_rect(rect)
-            } else {
-                window.anchor(Align2::CENTER_CENTER, [0.0, 0.0])
-            }
-        } else {
-            window.anchor(Align2::CENTER_CENTER, [0.0, 0.0])
+        let window = match settings_work_area {
+            // Settings is docked between the shell bars and fills that area.
+            Some(rect) if self.kind == DialogKind::Settings => egui::Window::new(title)
+                .collapsible(false)
+                .resizable(false)
+                .fixed_rect(rect),
+            _ => dialog_window(ctx, title),
         };
         let shown = window.show(ctx, |ui| {
             let min_width = if self.kind == DialogKind::Settings {
@@ -510,8 +510,7 @@ impl DialogState {
         }
         if self.about_open {
             let mut close_about = false;
-            egui::Modal::new(egui::Id::unique("builder3d-settings-about")).show(ctx, |ui| {
-                ui.heading("About Builder3D");
+            dialog_window(ctx, "About Builder3D").show(ctx, |ui| {
                 ui.label(
                     "A reverse-engineering-informed 3D model repair and building application.",
                 );
@@ -1294,6 +1293,22 @@ impl DialogState {
     }
 }
 
+/// A dialog window (OF-36): a title bar, centred when it first opens,
+/// draggable by its title bar, and kept on screen. The window remembers
+/// where it was dragged for the rest of the session.
+pub(crate) fn dialog_window<'open>(
+    ctx: &Context,
+    title: impl Into<egui::WidgetText>,
+) -> egui::Window<'open> {
+    egui::Window::new(title)
+        .collapsible(false)
+        .resizable(false)
+        .movable(true)
+        .constrain(true)
+        .pivot(Align2::CENTER_CENTER)
+        .default_pos(ctx.content_rect().center())
+}
+
 impl Drop for DialogState {
     fn drop(&mut self) {
         if !self.prepared_print_launched
@@ -1643,6 +1658,89 @@ mod tests {
             output.textures_delta.clear();
         }
         actions
+    }
+
+    /// Drags from `from` by `delta` over several frames and returns the
+    /// dialog window's rect before and after (read from egui's
+    /// accessibility tree).
+    fn drag_dialog(
+        dialog: &mut DialogState,
+        from: impl Fn(egui::Rect) -> egui::Pos2,
+        delta: egui::Vec2,
+    ) -> (egui::Rect, egui::Rect) {
+        let context = Context::default();
+        context.enable_accesskit();
+        let screen = Some(egui::Rect::from_min_size(
+            egui::Pos2::ZERO,
+            egui::vec2(1280.0, 840.0),
+        ));
+        let frame = |events: Vec<egui::Event>| egui::RawInput {
+            screen_rect: screen,
+            events,
+            ..Default::default()
+        };
+        let mut window = egui::Rect::NOTHING;
+        let mut run = |input: egui::RawInput| {
+            let mut output = context.run_ui(input, |ui| {
+                let _ = dialog.show_with_settings_area(ui.ctx(), None);
+            });
+            output.textures_delta.clear();
+            if let Some(bounds) = output.platform_output.accesskit_update.and_then(|update| {
+                update.nodes.iter().find_map(|(_, node)| {
+                    (node.role() == egui::accesskit::Role::Window)
+                        .then(|| node.bounds())
+                        .flatten()
+                })
+            }) {
+                window = egui::Rect::from_min_max(
+                    egui::pos2(bounds.x0 as f32, bounds.y0 as f32),
+                    egui::pos2(bounds.x1 as f32, bounds.y1 as f32),
+                );
+            }
+            window
+        };
+        run(frame(Vec::new()));
+        let before = run(frame(Vec::new()));
+        let start = from(before);
+        let button = |pos, pressed| egui::Event::PointerButton {
+            pos,
+            button: egui::PointerButton::Primary,
+            pressed,
+            modifiers: egui::Modifiers::default(),
+        };
+        run(frame(vec![egui::Event::PointerMoved(start)]));
+        run(frame(vec![button(start, true)]));
+        for step in 1..=4 {
+            run(frame(vec![egui::Event::PointerMoved(
+                start + delta * (step as f32 / 4.0),
+            )]));
+        }
+        run(frame(vec![button(start + delta, false)]));
+        let after = run(frame(Vec::new()));
+        (before, after)
+    }
+
+    #[test]
+    fn dialogs_open_centred_and_move_by_their_title_bar() {
+        let mut dialog = DialogState::new(DialogKind::Material, ThemeMode::Light);
+        let title_bar = |rect: egui::Rect| egui::pos2(rect.center().x, rect.top() + 10.0);
+        let (before, after) = drag_dialog(&mut dialog, title_bar, egui::vec2(-200.0, -120.0));
+        assert!(before.is_positive(), "the window was drawn");
+        assert!(
+            (before.center().x - 640.0).abs() < 2.0 && (before.center().y - 420.0).abs() < 2.0,
+            "opens centred: {before:?}"
+        );
+        assert!(
+            (after.min - before.min - egui::vec2(-200.0, -120.0)).length() < 2.0,
+            "follows the title-bar drag: {before:?} -> {after:?}"
+        );
+        // Dragged far past the edge, it stays on screen.
+        let mut dialog = DialogState::new(DialogKind::Material, ThemeMode::Light);
+        let (_, clamped) = drag_dialog(&mut dialog, title_bar, egui::vec2(-2_000.0, -2_000.0));
+        assert!(
+            clamped.min.x >= -0.5 && clamped.min.y >= -0.5,
+            "{clamped:?}"
+        );
     }
 
     #[test]
