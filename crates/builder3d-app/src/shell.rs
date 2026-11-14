@@ -399,6 +399,8 @@ pub struct Builder3dApp {
     mcp_bridge: Option<crate::mcp_bridge::McpDesktopIntegration>,
     dialog_generation: u64,
     review: Option<crate::review_capture::ReviewCapture>,
+    /// A brief notice fading out over the viewport (OF-38).
+    toast: Option<crate::toast::Toast>,
 }
 
 impl Default for Builder3dApp {
@@ -497,6 +499,7 @@ impl Default for Builder3dApp {
             mcp_bridge: None,
             dialog_generation: 0,
             review: None,
+            toast: None,
         }
     }
 }
@@ -573,6 +576,7 @@ impl Builder3dApp {
             ],
             ReviewState::Colors => &[builder3d_core::PrimitiveKind::Cube; 4],
             ReviewState::Mirror => &[builder3d_core::PrimitiveKind::Cube],
+            ReviewState::MergeApart => &[builder3d_core::PrimitiveKind::Cube; 2],
             ReviewState::Align => &[builder3d_core::PrimitiveKind::Cube; 2],
         };
         for (index, kind) in primitives.iter().copied().enumerate() {
@@ -616,6 +620,21 @@ impl Builder3dApp {
                 let _ = self.commands.set_selected_color(color);
             }
             self.commands.set_selection_indices([0, 2]);
+        }
+        if review.state() == ReviewState::MergeApart {
+            if let Some(id) = self
+                .commands
+                .scene()
+                .objects()
+                .get(1)
+                .map(|object| object.object_id().to_owned())
+            {
+                let _ = self
+                    .commands
+                    .set_object_position_by_id(&id, [90.0, 20.0, 0.0]);
+            }
+            self.commands.set_selection_indices([0, 1]);
+            self.dispatch(CommandId::Merge);
         }
         if review.state() == ReviewState::Merge {
             let colors = [[0.86, 0.16, 0.16, 1.0], [0.16, 0.36, 0.90, 1.0]];
@@ -3112,10 +3131,8 @@ impl Builder3dApp {
             self.item_health.clear();
             for object in self.commands.scene().objects() {
                 if object.mesh().faces.len() <= 1_000_000 {
-                    let healthy = builder3d_core::inspect_mesh(object.mesh())
-                        .is_ok_and(|report| report.valid);
                     self.item_health
-                        .insert(object.object_id().to_owned(), healthy);
+                        .insert(object.object_id().to_owned(), item_is_healthy(object));
                 }
             }
             self.item_revision = self.commands.scene().revision();
@@ -6402,6 +6419,17 @@ impl eframe::App for Builder3dApp {
         self.render_overwrite_confirmation(&ctx);
         self.render_confirmation(&ctx);
         self.render_ribbon_customizer(&ctx);
+        if let Some(notice) = self.commands.take_notice() {
+            self.toast = Some(crate::toast::Toast::new(
+                notice,
+                ctx.input(|input| input.time),
+            ));
+        }
+        if let Some(toast) = &self.toast
+            && !toast.show(&ctx, &ThemePalette::for_mode(self.theme_mode))
+        {
+            self.toast = None;
+        }
         if let Some(warning) = &self.settings_warning {
             egui::Area::new(egui::Id::unique("settings-warning"))
                 .fixed_pos(egui::pos2(16.0, 92.0))
@@ -7153,6 +7181,23 @@ fn viewport_input(ctx: &egui::Context) -> ViewportInput {
             modifiers: input.modifiers,
         }
     })
+}
+
+/// Whether an Items row is free of the "needs repair" marker. A group is
+/// separate pieces by design, so it needs repair only when one of its parts
+/// does (nested groups are not inspected).
+fn item_is_healthy(object: &builder3d_core::SceneObject) -> bool {
+    let mesh_healthy = |mesh: &builder3d_core::Mesh| {
+        builder3d_core::inspect_mesh(mesh).is_ok_and(|report| report.valid)
+    };
+    if object.children().is_empty() {
+        mesh_healthy(object.mesh())
+    } else {
+        object
+            .children()
+            .iter()
+            .all(|child| !child.children().is_empty() || mesh_healthy(child.mesh()))
+    }
 }
 
 fn viewport_pointer_interactions_allowed(
@@ -9591,6 +9636,24 @@ mod tests {
                 assert_eq!(history, app.commands.scene().history_state_id());
             }
         }
+    }
+
+    #[test]
+    fn a_group_of_sound_parts_is_not_marked_for_repair() {
+        let mut state = CommandState::default();
+        for _ in 0..2 {
+            state
+                .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
+                .expect("cube");
+        }
+        state.set_selection_indices([0, 1]);
+        state.dispatch(CommandId::Group).expect("group");
+        let group = &state.scene().objects()[0];
+        assert_eq!(group.children().len(), 2);
+        // The combined mesh is two shells, which a single object would be
+        // flagged for; the group is not.
+        assert!(!builder3d_core::inspect_mesh(group.mesh()).is_ok_and(|report| report.valid));
+        assert!(item_is_healthy(group));
     }
 
     #[test]

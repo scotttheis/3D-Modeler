@@ -31,6 +31,7 @@ mod rotation;
 mod shell;
 mod signals;
 mod theme;
+mod toast;
 mod transform_gesture;
 mod transforms;
 mod ui_state;

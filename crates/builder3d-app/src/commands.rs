@@ -488,6 +488,8 @@ pub struct CommandState {
     view_state: view_state::ViewStateController,
     preferences: Preferences,
     last_status: String,
+    /// A brief notice for the user, shown once as a toast and then cleared.
+    notice: Option<String>,
 }
 
 impl Default for CommandState {
@@ -508,6 +510,7 @@ impl Default for CommandState {
             view_state: view_state::ViewStateController::default(),
             preferences: Preferences::default(),
             last_status: String::from("Ready"),
+            notice: None,
         }
     }
 }
@@ -1892,13 +1895,28 @@ impl CommandState {
         tool_index: usize,
         operation: BooleanOperation,
     ) -> Result<CommandOutcome, CommandError> {
-        // The core owns the OF-9 Merge color rule so MCP gets the same result.
-        let (_, command_result, report) = self.scene.apply_product_boolean(
+        // The core owns the OF-9 Merge color rule and the D8 rule for
+        // objects that are not touching, so MCP gets the same result.
+        let (command_result, report) = match self.scene.apply_product_boolean(
             target_index,
             tool_index,
             operation,
             BooleanOptions::default(),
-        )?;
+        )? {
+            builder3d_core::ProductBooleanOutcome::Applied { result, report, .. } => {
+                (result, report)
+            }
+            builder3d_core::ProductBooleanOutcome::GroupedApart { result, .. } => {
+                if !result.changed {
+                    return Ok(CommandOutcome::Noop(String::from("Nothing to group")));
+                }
+                self.dirty = true;
+                let message = builder3d_core::MERGE_NOT_TOUCHING_MESSAGE.to_owned();
+                self.notice = Some(message.clone());
+                self.status(message.clone());
+                return Ok(CommandOutcome::Applied(message));
+            }
+        };
         if !command_result.changed {
             return Ok(CommandOutcome::Noop(String::from(
                 "Boolean made no geometry change",
@@ -2150,6 +2168,12 @@ impl CommandState {
 
     fn status(&mut self, message: impl Into<String>) {
         self.last_status = message.into();
+    }
+
+    /// Takes the pending one-off notice, if any, for the shell to show as a
+    /// toast.
+    pub(crate) fn take_notice(&mut self) -> Option<String> {
+        self.notice.take()
     }
 
     fn sync_view_display(&mut self) {
@@ -2688,6 +2712,138 @@ mod tests {
             assert!(state.dispatch(CommandId::Undo).is_ok());
             assert_eq!(state.scene().objects()[0].name(), original.as_str());
         }
+    }
+
+    /// Runs a long-running MCP tool to completion against a desktop
+    /// `CommandState` and returns the operation's result.
+    fn run_mcp_operation(
+        commands: &mut CommandState,
+        tool: &str,
+        arguments: serde_json::Value,
+    ) -> serde_json::Value {
+        let version = commands.mcp_document_version();
+        let roots = builder3d_mcp::ApprovedRoots::from_paths(Vec::new()).expect("deny-all roots");
+        let server = builder3d_mcp::R4Server::new(builder3d_mcp::R4Config::for_profile(
+            builder3d_mcp::Profile::Full,
+            roots,
+        ));
+        let mut document = Some(commands.take_mcp_document(builder3d_mcp::ViewState::default()));
+        server.replace_document(&mut document).expect("attach");
+        let started = server.call_value(tool, arguments).expect("MCP call");
+        let operation_id = started["operation_id"]
+            .as_str()
+            .expect("operation ID")
+            .to_owned();
+        let mut status = serde_json::Value::Null;
+        for _ in 0..500 {
+            status = server
+                .call_value(
+                    "operation_status",
+                    serde_json::json!({"operation_id": operation_id}),
+                )
+                .expect("operation status");
+            if matches!(
+                status["state"].as_str(),
+                Some("completed" | "failed" | "cancelled")
+            ) {
+                break;
+            }
+            std::thread::sleep(std::time::Duration::from_millis(10));
+        }
+        assert_eq!(status["state"], serde_json::json!("completed"), "{status}");
+        let document = server.take_document().expect("detach");
+        commands
+            .install_mcp_document(document, &version)
+            .expect("install");
+        status["result"].clone()
+    }
+
+    /// Two cubes 100 mm apart on X (not touching), both selected.
+    fn two_cubes_apart() -> CommandState {
+        let mut state = CommandState::default();
+        for _ in 0..2 {
+            state
+                .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
+                .expect("add cube");
+        }
+        let id = state.scene().objects()[1].object_id().to_owned();
+        let position = state.scene().objects()[1].position();
+        state
+            .set_object_position_by_id(&id, [100.0, position[1], position[2]])
+            .expect("move apart");
+        state.set_selection_indices([0, 1]);
+        state
+    }
+
+    #[test]
+    fn merge_of_objects_not_touching_groups_them_with_a_notice_desktop_and_mcp() {
+        let mut desktop = two_cubes_apart();
+        let mut mcp = two_cubes_apart();
+        let history = desktop.scene().history_state_id();
+
+        let outcome = desktop.apply_boolean_pair(0, 1, BooleanOperation::Union, false);
+        assert!(
+            matches!(&outcome, Ok(CommandOutcome::Applied(message))
+                if message == builder3d_core::MERGE_NOT_TOUCHING_MESSAGE),
+            "{outcome:?}"
+        );
+        assert_eq!(
+            desktop.take_notice().as_deref(),
+            Some(builder3d_core::MERGE_NOT_TOUCHING_MESSAGE)
+        );
+        assert_eq!(desktop.take_notice(), None, "the notice is shown once");
+
+        let ids = [
+            mcp.scene().objects()[0].object_id().to_owned(),
+            mcp.scene().objects()[1].object_id().to_owned(),
+        ];
+        let result = run_mcp_operation(
+            &mut mcp,
+            "boolean_merge",
+            serde_json::json!({"target_object_id": ids[0], "tool_object_id": ids[1]}),
+        );
+        assert_eq!(result["grouped"], serde_json::json!(true), "{result}");
+        assert_eq!(
+            result["message"].as_str(),
+            Some(builder3d_core::MERGE_NOT_TOUCHING_MESSAGE)
+        );
+
+        for state in [&desktop, &mcp] {
+            // One group holding both cubes, selected, in one history entry.
+            assert_eq!(state.scene().objects().len(), 1);
+            assert_eq!(state.scene().objects()[0].children().len(), 2);
+            assert!(state.scene().selection_contains_group());
+            assert_eq!(state.scene().history_state_id(), history + 1);
+        }
+        assert_eq!(
+            result["object_id"].as_str(),
+            Some(mcp.scene().objects()[0].object_id())
+        );
+        // One undo brings both cubes back on both sides.
+        for state in [&mut desktop, &mut mcp] {
+            assert!(state.dispatch(CommandId::Undo).is_ok());
+            assert_eq!(state.scene().objects().len(), 2);
+        }
+    }
+
+    #[test]
+    fn merge_of_overlapping_objects_still_merges() {
+        let mut state = CommandState::default();
+        for _ in 0..2 {
+            state
+                .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
+                .expect("add cube");
+        }
+        let id = state.scene().objects()[1].object_id().to_owned();
+        let position = state.scene().objects()[1].position();
+        state
+            .set_object_position_by_id(&id, [20.0, position[1], position[2]])
+            .expect("overlap");
+        let outcome = state.apply_boolean_pair(0, 1, BooleanOperation::Union, false);
+        assert!(matches!(outcome, Ok(CommandOutcome::Applied(_))));
+        assert_eq!(state.take_notice(), None);
+        assert_eq!(state.scene().objects().len(), 1);
+        assert!(state.scene().objects()[0].children().is_empty());
     }
 
     #[test]

@@ -2356,17 +2356,35 @@ impl R4Server {
         let tool_id = schema::required_string(args, "tool_object_id")?;
         let target_index = state.scene.object_index(&target_id)?;
         let tool_index = state.scene.object_index(&tool_id)?;
-        // Same core rule as the desktop: a Merge takes the top-most color.
-        let (new_index, result, report) = state.scene.apply_product_boolean(
+        // Same core rules as the desktop: a Merge takes the top-most color,
+        // and objects that are not touching are grouped instead (D8).
+        let (new_index, result, report, grouped) = match state.scene.apply_product_boolean(
             target_index,
             tool_index,
             operation,
             BooleanOptions::default(),
-        )?;
+        )? {
+            builder3d_core::ProductBooleanOutcome::Applied {
+                index,
+                result,
+                report,
+            } => (index, result, report, false),
+            builder3d_core::ProductBooleanOutcome::GroupedApart {
+                index,
+                result,
+                report,
+            } => (index, result, report, true),
+        };
         state.dirty |= result.changed;
-        Ok(
-            json!({"action":action,"changed":result.changed,"scene_revision":state.scene.revision(),"index":new_index,"object_id":state.scene.object(new_index)?.object_id(),"report":boolean_report(&report)}),
-        )
+        let mut output = json!({"action":action,"changed":result.changed,"scene_revision":state.scene.revision(),"index":new_index,"object_id":state.scene.object(new_index)?.object_id(),"report":boolean_report(&report)});
+        if grouped && let Some(fields) = output.as_object_mut() {
+            fields.insert("grouped".to_owned(), json!(true));
+            fields.insert(
+                "message".to_owned(),
+                json!(builder3d_core::MERGE_NOT_TOUCHING_MESSAGE),
+            );
+        }
+        Ok(output)
     }
 
     fn execute_import(

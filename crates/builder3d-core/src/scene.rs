@@ -1177,24 +1177,38 @@ impl Scene {
         self.apply_boolean_with_color(target_index, tool_index, operation, options, None)
     }
 
-    /// Applies the product's boolean color rule: a Merge result takes one
-    /// color, that of whichever operand sits higher in the Items list (the
-    /// lower scene index), regardless of which one is the target. Subtract
-    /// and Intersect keep their per-face source colors. The desktop and MCP
-    /// both call this so the two adapters produce the same object (OF-9).
+    /// Applies the product's boolean rules, which the desktop and MCP both
+    /// call so the two adapters produce the same objects:
+    ///
+    /// - A Merge result takes one color, that of whichever operand sits
+    ///   higher in the Items list (the lower scene index), regardless of
+    ///   which one is the target (OF-9). Subtract and Intersect keep their
+    ///   per-face source colors.
+    /// - A Merge of objects that are not touching, so that the result would
+    ///   still be separate pieces, groups the two objects instead
+    ///   (decision D8, OF-38); adapters tell the user with
+    ///   [`MERGE_NOT_TOUCHING_MESSAGE`].
     pub fn apply_product_boolean(
         &mut self,
         target_index: usize,
         tool_index: usize,
         operation: crate::BooleanOperation,
         options: crate::BooleanOptions,
-    ) -> Result<(usize, CommandResult, crate::BooleanReport), CoreError> {
-        let uniform_color = if operation == crate::BooleanOperation::Union {
+    ) -> Result<ProductBooleanOutcome, CoreError> {
+        let merge = operation == crate::BooleanOperation::Union;
+        let uniform_color = if merge {
             Some(self.object(target_index.min(tool_index))?.color())
         } else {
             None
         };
-        self.apply_boolean_with_color(target_index, tool_index, operation, options, uniform_color)
+        self.apply_boolean_inner(
+            target_index,
+            tool_index,
+            operation,
+            options,
+            uniform_color,
+            merge,
+        )
     }
 
     /// [`Self::apply_boolean`] with an optional single result color. With
@@ -1210,6 +1224,36 @@ impl Scene {
         options: crate::BooleanOptions,
         uniform_color: Option<[f32; 4]>,
     ) -> Result<(usize, CommandResult, crate::BooleanReport), CoreError> {
+        match self.apply_boolean_inner(
+            target_index,
+            tool_index,
+            operation,
+            options,
+            uniform_color,
+            false,
+        )? {
+            ProductBooleanOutcome::Applied {
+                index,
+                result,
+                report,
+            }
+            | ProductBooleanOutcome::GroupedApart {
+                index,
+                result,
+                report,
+            } => Ok((index, result, report)),
+        }
+    }
+
+    fn apply_boolean_inner(
+        &mut self,
+        target_index: usize,
+        tool_index: usize,
+        operation: crate::BooleanOperation,
+        options: crate::BooleanOptions,
+        uniform_color: Option<[f32; 4]>,
+        group_if_apart: bool,
+    ) -> Result<ProductBooleanOutcome, CoreError> {
         if target_index == tool_index {
             return Err(CoreError::MeshOperation(
                 "boolean target and tool must be different objects".to_owned(),
@@ -1228,6 +1272,24 @@ impl Scene {
         let target_world = target.transformed_mesh()?;
         let tool_world = tool.transformed_mesh()?;
         let result = crate::boolean_operation(&target_world, &tool_world, operation, options)?;
+        if group_if_apart && merge_left_pieces_apart(&result.report) {
+            self.set_selection([target_index, tool_index]);
+            let command_result = self.group_selected()?;
+            let index =
+                self.selection
+                    .iter()
+                    .next()
+                    .copied()
+                    .ok_or_else(|| CoreError::CommandFailed {
+                        command: "merge".to_owned(),
+                        reason: "grouping the objects left nothing selected".to_owned(),
+                    })?;
+            return Ok(ProductBooleanOutcome::GroupedApart {
+                index,
+                result: command_result,
+                report: result.report,
+            });
+        }
         let face_sources = result
             .face_sources
             .iter()
@@ -1267,7 +1329,11 @@ impl Scene {
             commands,
             after_selection,
         ))?;
-        Ok((new_target_index, command_result, result.report))
+        Ok(ProductBooleanOutcome::Applied {
+            index: new_target_index,
+            result: command_result,
+            report: result.report,
+        })
     }
 
     /// Sets one object transform through an undoable command.
@@ -1583,6 +1649,49 @@ fn validate_unique_object_ids(objects: &[SceneObject]) -> Result<(), CoreError> 
 
 pub(crate) fn validate_scene_objects(objects: &[SceneObject]) -> Result<(), CoreError> {
     validate_unique_object_ids(objects)
+}
+
+/// What the user is told when Merge groups objects that are not touching
+/// (decision D8, OF-38). The desktop shows it for about four seconds; MCP
+/// returns it as the result's `message`.
+pub const MERGE_NOT_TOUCHING_MESSAGE: &str =
+    "These objects weren't touching, so they were grouped instead of merged.";
+
+/// Result of [`Scene::apply_product_boolean`].
+#[derive(Debug)]
+#[must_use]
+pub enum ProductBooleanOutcome {
+    /// The boolean was applied; `index` is the resulting object.
+    Applied {
+        /// Scene index of the resulting object.
+        index: usize,
+        /// The history entry.
+        result: CommandResult,
+        /// Kernel report of the operation.
+        report: crate::BooleanReport,
+    },
+    /// A Merge of objects that were not touching: they were grouped instead
+    /// and `index` is the new group.
+    GroupedApart {
+        /// Scene index of the new group.
+        index: usize,
+        /// The history entry (the grouping).
+        result: CommandResult,
+        /// Kernel report of the Merge that was not applied.
+        report: crate::BooleanReport,
+    },
+}
+
+/// Whether a Merge result is still as many separate pieces as its two
+/// inputs together, i.e. the objects did not overlap (touching at a point
+/// or along a line does not join them either).
+fn merge_left_pieces_apart(report: &crate::BooleanReport) -> bool {
+    let inputs = report
+        .target_before
+        .body_count
+        .max(1)
+        .saturating_add(report.tool_before.body_count.max(1));
+    report.result_after.body_count >= inputs
 }
 
 #[cfg(test)]
