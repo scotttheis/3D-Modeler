@@ -849,16 +849,23 @@ impl Scene {
         self.execute(crate::commands::GroupedCommand::new(commands))
     }
 
-    /// Duplicates selected objects, offsetting each copy by one millimetre on X.
+    /// Duplicates selected objects, placing the copies beside the originals
+    /// ([`beside_offset`], OF-43) and selecting them, so duplicating again
+    /// steps on to the side.
     pub fn duplicate_selected(&mut self) -> Result<CommandResult, CoreError> {
         let indices: Vec<usize> = self.selection.iter().copied().collect();
+        let sources = indices
+            .iter()
+            .map(|index| self.object(*index))
+            .collect::<Result<Vec<_>, _>>()?;
+        let step = beside_offset(sources.iter().copied());
         let start = self.objects.len();
         let mut commands = Vec::with_capacity(indices.len());
         for (offset, index) in indices.iter().copied().enumerate() {
             let source = self.object(index)?;
             let mut duplicate =
                 source.duplicate_with_new_id(format!("{} (copy)", source.name()))?;
-            duplicate.set_transform_raw(source.translated_transform([1.0, 0.0, 0.0])?);
+            duplicate.set_transform_raw(source.translated_transform(step)?);
             commands.push(Box::new(crate::commands::AddObjectCommand::at_index(
                 duplicate,
                 start + offset,
@@ -886,8 +893,37 @@ impl Scene {
             .collect()
     }
 
-    /// Pastes copied objects as one undoable command with fresh durable IDs.
+    /// Pastes copied objects as one undoable command with fresh durable IDs,
+    /// beside where the clipboard objects stand ([`beside_offset`], OF-43).
+    /// The clipboard then moves along with the pasted copies, so pasting
+    /// again places the next copy beside the previous one. The desktop and
+    /// MCP both paste through this.
+    pub fn paste_beside(
+        &mut self,
+        clipboard: &mut [SceneObject],
+    ) -> Result<CommandResult, CoreError> {
+        let step = beside_offset(clipboard.iter());
+        let result = self.paste_objects_offset(clipboard, step)?;
+        if result.changed {
+            for object in clipboard.iter_mut() {
+                let moved = object.translated_transform(step)?;
+                object.set_transform_raw(moved);
+            }
+        }
+        Ok(result)
+    }
+
+    /// Pastes copied objects, unmoved, as one undoable command with fresh
+    /// durable IDs. Adapters use [`Self::paste_beside`].
     pub fn paste_objects(&mut self, objects: &[SceneObject]) -> Result<CommandResult, CoreError> {
+        self.paste_objects_offset(objects, [0.0; 3])
+    }
+
+    fn paste_objects_offset(
+        &mut self,
+        objects: &[SceneObject],
+        step: [f32; 3],
+    ) -> Result<CommandResult, CoreError> {
         if objects.is_empty() {
             return Err(CoreError::CommandFailed {
                 command: "paste".to_owned(),
@@ -898,7 +934,7 @@ impl Scene {
         let mut commands = Vec::with_capacity(objects.len());
         for (offset, source) in objects.iter().enumerate() {
             let mut pasted = source.duplicate_with_new_id(format!("{} (copy)", source.name()))?;
-            pasted.set_transform_raw(source.translated_transform([0.5, 0.5, 0.0])?);
+            pasted.set_transform_raw(source.translated_transform(step)?);
             commands.push(Box::new(crate::commands::AddObjectCommand::at_index(
                 pasted,
                 start + offset,
@@ -1649,6 +1685,43 @@ fn validate_unique_object_ids(objects: &[SceneObject]) -> Result<(), CoreError> 
 
 pub(crate) fn validate_scene_objects(objects: &[SceneObject]) -> Result<(), CoreError> {
     validate_unique_object_ids(objects)
+}
+
+/// Gap between objects and their copies from Paste or Duplicate, in
+/// millimetres (OF-43).
+pub const COPY_GAP_MM: f32 = 10.0;
+
+/// Where copies of `objects` go relative to them: along +X, the axis that
+/// points screen-right in the opening view, by the objects' combined width
+/// plus [`COPY_GAP_MM`], so the copies sit beside the originals with a
+/// 10 mm gap. Y and Z are unchanged. The width is the X extent of each
+/// object's world-space box (its local box corners, transformed).
+fn beside_offset<'a>(objects: impl IntoIterator<Item = &'a SceneObject>) -> [f32; 3] {
+    let mut minimum = f32::INFINITY;
+    let mut maximum = f32::NEG_INFINITY;
+    for object in objects {
+        let Some((low, high)) = object.mesh().bounds() else {
+            continue;
+        };
+        for corner in 0..8 {
+            let point = [
+                if corner & 1 == 0 { low[0] } else { high[0] },
+                if corner & 2 == 0 { low[1] } else { high[1] },
+                if corner & 4 == 0 { low[2] } else { high[2] },
+            ];
+            let x = object.transform().transform_point(point)[0];
+            if x.is_finite() {
+                minimum = minimum.min(x);
+                maximum = maximum.max(x);
+            }
+        }
+    }
+    let width = if maximum >= minimum {
+        maximum - minimum
+    } else {
+        0.0
+    };
+    [width + COPY_GAP_MM, 0.0, 0.0]
 }
 
 /// Fewest objects Align and Arrange work on (OF-42): both place objects

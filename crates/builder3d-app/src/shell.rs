@@ -577,7 +577,7 @@ impl Builder3dApp {
             ReviewState::Colors => &[builder3d_core::PrimitiveKind::Cube; 4],
             ReviewState::Mirror => &[builder3d_core::PrimitiveKind::Cube],
             ReviewState::MergeApart => &[builder3d_core::PrimitiveKind::Cube; 2],
-            ReviewState::Repair => &[builder3d_core::PrimitiveKind::Cube],
+            ReviewState::Repair | ReviewState::Paste => &[builder3d_core::PrimitiveKind::Cube],
             ReviewState::Align => &[builder3d_core::PrimitiveKind::Cube; 2],
         };
         for (index, kind) in primitives.iter().copied().enumerate() {
@@ -603,6 +603,11 @@ impl Builder3dApp {
             ReviewState::Export => self.open_dialog(DialogKind::Export),
             ReviewState::Menu => self.menu_open = true,
             ReviewState::Mirror => self.dispatch(CommandId::Mirror),
+            ReviewState::Paste => {
+                self.dispatch(CommandId::Copy);
+                self.dispatch(CommandId::Paste);
+                self.dispatch(CommandId::Paste);
+            }
             ReviewState::Repair => {
                 self.dispatch(CommandId::Repair);
                 self.apply_dialog_action(crate::dialogs::DialogAction::Repair);
@@ -10212,10 +10217,8 @@ mod tests {
         assert_eq!(app.commands.scene().objects().len(), 2);
         assert_eq!(app.commands.scene().objects()[0].object_id(), original);
         assert_ne!(app.commands.scene().objects()[1].object_id(), original);
-        assert_eq!(
-            app.commands.scene().objects()[1].position(),
-            [0.5, 20.5, 0.]
-        );
+        // OF-43 replaced the Python offsets: copies sit 10 mm beside the original.
+        assert_eq!(app.commands.scene().objects()[1].position(), [50., 20., 0.]);
         let history = app.commands.scene().history_state_id();
         let mut text = String::from("editable name");
         let mut output = ctx.run_ui(egui::RawInput::default(), |ui| {

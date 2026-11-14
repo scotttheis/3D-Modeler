@@ -99,9 +99,9 @@ pub use repair::{
     repair_mesh_with_options, repair_mesh_with_profile,
 };
 pub use scene::{
-    CommandResult, DEFAULT_MESH_COLOR, MERGE_NOT_TOUCHING_MESSAGE, ObjectId, PLACEMENT_MIN_OBJECTS,
-    PLACEMENT_NEEDS_TWO_MESSAGE, ProductBooleanOutcome, Scene, SceneChild, SceneObject,
-    SceneSnapshot,
+    COPY_GAP_MM, CommandResult, DEFAULT_MESH_COLOR, MERGE_NOT_TOUCHING_MESSAGE, ObjectId,
+    PLACEMENT_MIN_OBJECTS, PLACEMENT_NEEDS_TWO_MESSAGE, ProductBooleanOutcome, Scene, SceneChild,
+    SceneObject, SceneSnapshot,
 };
 pub use shell_ops::{
     EMBOSS_DEPTH_MAX_MM, EMBOSS_FONT_SIZE_MAX, EMBOSS_FONT_SIZE_MIN, EMBOSS_MAX_TEXT_LENGTH,
@@ -371,7 +371,8 @@ mod tests {
             scene.objects()[0].object_id(),
             scene.objects()[2].object_id()
         );
-        assert_eq!(scene.objects()[2].position(), [1.0, 0.0, 0.0]);
+        // OF-43: beside the 2 mm box with a 10 mm gap (was 1 mm in Python).
+        assert_eq!(scene.objects()[2].position(), [12.0, 0.0, 0.0]);
     }
 
     #[test]

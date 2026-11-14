@@ -942,11 +942,11 @@ impl CommandState {
                 Ok(CommandOutcome::Applied(String::from("Copied selection")))
             }
             CommandId::Paste => {
-                let clipboard = self.clipboard.clone();
-                if clipboard.is_empty() {
+                if self.clipboard.is_empty() {
                     return Err(CommandError::SelectionRequired("Paste"));
                 }
-                self.scene.paste_objects(&clipboard)?;
+                // Beside the original, then beside each previous copy (OF-43).
+                self.scene.paste_beside(&mut self.clipboard)?;
                 self.dirty = true;
                 self.status("Paste");
                 Ok(CommandOutcome::Applied(String::from("Paste")))
@@ -2830,6 +2830,55 @@ mod tests {
         }
     }
 
+    #[test]
+    fn paste_and_duplicate_place_copies_beside_desktop_and_mcp() {
+        let (mut desktop, mut mcp) = one_cube_pair();
+        mcp.set_selection_indices([0]);
+        let start = desktop.scene().objects()[0].position();
+        let step = 40.0 + builder3d_core::COPY_GAP_MM;
+        assert!(desktop.dispatch(CommandId::Copy).is_ok());
+        run_mcp(&mut mcp, "copy_selected", serde_json::json!({}));
+        for _ in 0..2 {
+            assert!(desktop.dispatch(CommandId::Paste).is_ok());
+            run_mcp(&mut mcp, "paste", serde_json::json!({}));
+        }
+        for state in [&desktop, &mcp] {
+            let positions = state
+                .scene()
+                .objects()
+                .iter()
+                .map(|object| object.position())
+                .collect::<Vec<_>>();
+            assert_eq!(
+                positions,
+                vec![
+                    start,
+                    [start[0] + step, start[1], start[2]],
+                    [start[0] + 2.0 * step, start[1], start[2]],
+                ],
+                "beside the original, then beside the previous copy"
+            );
+        }
+        // Duplicate does the same with the selection, and steps on when the
+        // copy (now selected) is duplicated again.
+        for state in [&mut desktop, &mut mcp] {
+            state.set_selection_indices([0]);
+        }
+        assert!(desktop.dispatch(CommandId::Duplicate).is_ok());
+        assert!(desktop.dispatch(CommandId::Duplicate).is_ok());
+        run_mcp(&mut mcp, "duplicate_selected", serde_json::json!({}));
+        run_mcp(&mut mcp, "duplicate_selected", serde_json::json!({}));
+        for state in [&desktop, &mcp] {
+            let objects = state.scene().objects();
+            assert_eq!(objects.len(), 5);
+            assert_eq!(objects[3].position(), [start[0] + step, start[1], start[2]]);
+            assert_eq!(
+                objects[4].position(),
+                [start[0] + 2.0 * step, start[1], start[2]]
+            );
+        }
+    }
+
     /// Two cubes 100 mm apart on X (not touching), both selected.
     fn two_cubes_apart() -> CommandState {
         let mut state = CommandState::default();
@@ -4365,14 +4414,16 @@ mod rb04_regressions {
         state.dispatch(CommandId::Paste).expect("paste");
         let pasted = state.scene.objects()[1].object_id().to_owned();
         assert_ne!(original, pasted);
-        assert_eq!(state.scene.objects()[1].position(), [12.5, 24.5, 36.]);
+        // OF-43 replaced the Python offsets: copies sit 10 mm beside the original
+        // (40 mm cube + 10 mm gap on X; Python offset 0.5 mm on X and Y).
+        assert_eq!(state.scene.objects()[1].position(), [62., 24., 36.]);
         assert!(!state.scene.objects()[1].is_visible());
         state.dispatch(CommandId::Undo).expect("undo");
         assert_eq!(state.scene.objects().len(), 1);
         state.dispatch(CommandId::Redo).expect("redo");
         assert_eq!(state.scene.objects()[1].object_id(), pasted);
         state.dispatch(CommandId::Duplicate).expect("duplicate");
-        assert_eq!(state.scene.objects()[2].position(), [13.5, 24.5, 36.]);
+        assert_eq!(state.scene.objects()[2].position(), [112., 24., 36.]);
         state.dispatch(CommandId::Cut).expect("cut");
         state.dispatch(CommandId::Undo).expect("undo cut");
         assert_eq!(state.scene.objects().len(), 3);

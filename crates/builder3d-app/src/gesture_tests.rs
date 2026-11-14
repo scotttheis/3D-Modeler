@@ -338,7 +338,8 @@ fn grouped_hidden_clipboard_duplicate_delete_and_undo_preserve_metadata_and_fres
     assert_ne!(pasted.object_id(), original.object_id());
     assert_eq!(pasted.name(), "Named group (copy)");
     assert_eq!(pasted.mesh(), original.mesh());
-    assert_eq!(pasted.position(), [0.5, 0.5, 0.]);
+    // OF-43 replaced the Python offsets: copies sit 10 mm beside the original.
+    assert_eq!(pasted.position(), [50., 0., 0.]);
     for (a, b) in original.children().iter().zip(pasted.children()) {
         assert_ne!(a.object_id(), b.object_id());
         assert_eq!(a.mesh(), b.mesh());
@@ -357,7 +358,7 @@ fn grouped_hidden_clipboard_duplicate_delete_and_undo_preserve_metadata_and_fres
     assert_object_eq(&state.scene.objects()[1], &pasted);
     state.dispatch(CommandId::Duplicate).expect("duplicate");
     let duplicate = state.scene.objects()[2].clone();
-    assert_eq!(duplicate.position(), [1.5, 0.5, 0.]);
+    assert_eq!(duplicate.position(), [100., 0., 0.]);
     assert_ne!(duplicate.object_id(), pasted.object_id());
     state.dispatch(CommandId::Delete).expect("delete");
     assert_eq!(state.scene.objects().len(), 2);

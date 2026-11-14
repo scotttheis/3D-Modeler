@@ -1709,12 +1709,16 @@ impl R4Server {
     fn paste(&self, args: &Map<String, Value>) -> Result<Value, AdapterError> {
         let mut state = self.lock_state()?;
         check_expected(&state, args)?;
-        let clipboard = state.clipboard.clone().ok_or_else(|| {
+        let mut clipboard = state.clipboard.take().ok_or_else(|| {
             AdapterError::Validation(
                 "paste requires a prior copy_selected or cut_selected".to_owned(),
             )
         })?;
-        let result = state.scene.paste_objects(&clipboard)?;
+        // Same rule as the desktop (OF-43): beside the original, then beside
+        // each previous copy.
+        let result = state.scene.paste_beside(&mut clipboard);
+        state.clipboard = Some(clipboard);
+        let result = result?;
         state.dirty |= result.changed;
         Ok(command_output("paste", &result, None, None))
     }
