@@ -251,8 +251,6 @@ pub enum CommandId {
     Material,
     /// Open the paint tool.
     Paint,
-    /// Sample a color from the viewport.
-    Color,
     /// Center the camera on the scene.
     CenterView,
     /// Frame the selected objects.
@@ -1015,7 +1013,7 @@ impl CommandState {
             CommandId::Hollow => Ok(CommandOutcome::OpenDialog(DialogKind::Hollow)),
             CommandId::Intersect => self.boolean_selected(BooleanOperation::Intersection),
             CommandId::Subtract => self.boolean_selected(BooleanOperation::Difference),
-            CommandId::Material | CommandId::Paint | CommandId::Color => {
+            CommandId::Material | CommandId::Paint => {
                 Ok(CommandOutcome::OpenDialog(DialogKind::Material))
             }
             CommandId::EditTorus => {
@@ -2307,8 +2305,9 @@ pub fn ribbon_spec() -> Vec<(RibbonTab, Vec<RibbonItem>)> {
             RibbonTab::Paint,
             vec![
                 command(CommandId::Material, "Material", IconKey::Edit),
+                // The Color button was removed by the owner (OF-45); image
+                // colour sampling stays in the Material dialog and MCP.
                 command(CommandId::Paint, "Paint", IconKey::Edit),
-                command(CommandId::Color, "Color", IconKey::Edit),
             ],
         ),
         (

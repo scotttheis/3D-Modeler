@@ -374,7 +374,6 @@ pub struct Builder3dApp {
     brush_settings_open: bool,
     /// Native image picker used by Color; replaceable so tests never open
     /// a real OS dialog.
-    image_picker: fn(&str) -> Option<PathBuf>,
     brush_settings: BrushSettings,
     boolean_pick: Option<BooleanPick>,
     viewport_gizmo_consumed: bool,
@@ -474,7 +473,6 @@ impl Default for Builder3dApp {
             viewport_drag: None,
             active_brush: None,
             brush_settings_open: false,
-            image_picker: crate::dialogs::image_path_picker,
             brush_settings: BrushSettings::default(),
             boolean_pick: None,
             viewport_gizmo_consumed: false,
@@ -899,31 +897,10 @@ impl Builder3dApp {
             self.transform_error = None;
             return;
         }
-        if matches!(
-            command,
-            CommandId::Material | CommandId::Paint | CommandId::Color
-        ) && self.commands.selected_count() == 0
+        if matches!(command, CommandId::Material | CommandId::Paint)
+            && self.commands.selected_count() == 0
         {
-            self.commands.set_status(if command == CommandId::Color {
-                "Select an object to sample image color"
-            } else {
-                "Select an object to paint"
-            });
-            return;
-        }
-        if command == CommandId::Color {
-            // Python parity: Color samples an image's average color straight
-            // from a file picker; it does not open the Material dialog.
-            match (self.image_picker)("") {
-                Some(path) => match self.commands.set_selected_color_from_image(&path, 8) {
-                    Ok(message) => {
-                        self.commands.set_status(message);
-                        self.invalidate_presentation();
-                    }
-                    Err(error) => self.report_command_error(error),
-                },
-                None => self.commands.set_status("Color sampling cancelled"),
-            }
+            self.commands.set_status("Select an object to paint");
             return;
         }
         if command == CommandId::NewScene && self.commands.is_dirty() {
@@ -6899,8 +6876,7 @@ fn command_enabled(command: CommandId, state: &CommandState) -> bool {
         | CommandId::Blob
         | CommandId::Normalize
         | CommandId::Material
-        | CommandId::Paint
-        | CommandId::Color => !state.scene().objects().is_empty(),
+        | CommandId::Paint => !state.scene().objects().is_empty(),
         CommandId::EditTorus => selected > 0 && state.has_selected_parametric_torus(),
         CommandId::Group => selected > 1,
         CommandId::Merge | CommandId::Intersect | CommandId::Subtract => selected > 0,
@@ -6955,7 +6931,6 @@ fn command_summary(command: CommandId) -> &'static str {
         CommandId::Subtract => "Cut one model from another",
         CommandId::Material => "Change material",
         CommandId::Paint => "Paint selected model",
-        CommandId::Color => "Change model color",
         CommandId::CenterView => "Show the whole scene",
         CommandId::FrameSelection => "Show selected models",
         CommandId::ResetView => "Return to default view",
@@ -7019,7 +6994,6 @@ fn command_help(command: CommandId) -> &'static str {
         CommandId::Subtract => "Cut the second selected model out of the first.",
         CommandId::Material => "Choose a material for the selected model.",
         CommandId::Paint => "Paint the selected model in the viewport.",
-        CommandId::Color => "Choose a color for the selected model.",
         CommandId::CenterView => "Move the camera to show all visible models.",
         CommandId::FrameSelection => "Move the camera to show the selected models.",
         CommandId::ResetView => "Restore the default camera angle and distance.",
@@ -7074,7 +7048,6 @@ fn command_disabled_help(command: CommandId, state: &CommandState) -> &'static s
         | CommandId::Hollow
         | CommandId::Material
         | CommandId::Paint
-        | CommandId::Color
         | CommandId::Repair
         | CommandId::FrameSelection => "Select a model first.",
         _ => command_help(command),
@@ -7775,10 +7748,9 @@ mod tests {
     fn paint_tab_explains_itself_without_a_selection_and_colors_with_one() {
         let mut app = Builder3dApp {
             settings_path: repository_test_directory("of7-paint").join("settings.json"),
-            image_picker: |_| None,
             ..Default::default()
         };
-        for command in [CommandId::Material, CommandId::Paint, CommandId::Color] {
+        for command in [CommandId::Material, CommandId::Paint] {
             assert!(!command_enabled(command, &app.commands), "empty scene");
         }
         app.commands
@@ -7791,11 +7763,6 @@ mod tests {
             assert!(app.dialog.is_none());
             assert_eq!(app.commands.last_status(), "Select an object to paint");
         }
-        app.dispatch(CommandId::Color);
-        assert_eq!(
-            app.commands.last_status(),
-            "Select an object to sample image color"
-        );
         app.commands.set_selection_indices([0]);
         app.dispatch(CommandId::Paint);
         assert!(
@@ -8347,9 +8314,8 @@ mod tests {
     }
 
     #[test]
-    fn material_and_paint_open_the_color_dialog_and_color_samples_an_image() {
+    fn material_and_paint_open_the_color_dialog_and_there_is_no_color_button() {
         let (mut app, directory) = shell_for_jobs("appearance-routes");
-        app.image_picker = |_| None;
         assert!(
             app.commands
                 .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
@@ -8364,10 +8330,18 @@ mod tests {
             );
             app.apply_dialog_action(DialogAction::Close);
         }
-        // Python parity: Color goes straight to the image picker.
-        app.dispatch(CommandId::Color);
-        assert!(app.dialog.is_none());
-        assert_eq!(app.commands.last_status(), "Color sampling cancelled");
+        // The owner removed the Color button (OF-45): the Paint tab has
+        // Material and Paint only.
+        let paint_labels = crate::commands::ribbon_spec()
+            .into_iter()
+            .filter(|(tab, _)| *tab == RibbonTab::Paint)
+            .flat_map(|(_, items)| items)
+            .filter_map(|item| match item {
+                RibbonItem::Command(command) => Some(command.label),
+                RibbonItem::Separator => None,
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(paint_labels, ["Material", "Paint"]);
         assert!(std::fs::remove_dir_all(directory).is_ok());
     }
 
