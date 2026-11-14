@@ -1,5 +1,8 @@
 # Native installers
 
+For the Windows MSI handed to testers, see `docs/packaging.md` and
+`packaging/msi/`. The scripts below are the older script-based installers.
+
 The package contains platform-specific installation and removal scripts. They
 operate only on their documented private Builder3D destination by default and
 refuse the broad system roots. The scripts expect a native `Builder3D.exe` or

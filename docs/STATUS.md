@@ -118,8 +118,9 @@ viewport in dark theme · D5 `emboss_text` metadata.
   `builder3d-app` passed. Captures
   `evidence/rebuild/captures/2026-11-13-of26-27-menu-hover-tab/`. Table in
   [`owner-feedback-2026-11-12.md`](owner-feedback-2026-11-12.md).
-- 2026-11-13 (test release RC1): `packaging/msi/Build-Msi.ps1 -Version 0.1.1
-  -Name Builder3D-RC1` builds a per-user WiX 5 MSI (no admin; installs to
+- 2026-11-13 (test release RC1; how-to in [`packaging.md`](packaging.md)):
+  `packaging/msi/Build-Msi.ps1 -Version 0.1.1 -Name Builder3D-RC1 -Build
+  -Verify` builds a per-user WiX 5 MSI (no admin; installs to
   `%LOCALAPPDATA%\Programs\Builder3D`; Start-menu + desktop shortcuts; VC++
   runtime app-local; bump the version's third field per candidate).
   Output `E:\Builder3D-RC\Builder3D-RC1.msi` (50 MB). Silent install,

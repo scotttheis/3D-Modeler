@@ -36,5 +36,8 @@ bounded three-dimensional input, and no temporary-file capture. The native
 kernel's own license and wrapper MIT license are included in staged packages
 under `licenses/`; see `packaging/licenses/QHULL-NOTICE.txt`.
 
+To package a Windows installer (MSI) for testers, see
+[`packaging.md`](packaging.md).
+
 Compatibility and parity probes ran on Windows x64/MSVC. Real Linux/macOS
 builds remain part of the existing final host gate; no host pass is inferred.
