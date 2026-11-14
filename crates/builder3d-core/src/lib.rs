@@ -99,8 +99,9 @@ pub use repair::{
     repair_mesh_with_options, repair_mesh_with_profile,
 };
 pub use scene::{
-    CommandResult, DEFAULT_MESH_COLOR, MERGE_NOT_TOUCHING_MESSAGE, ObjectId, ProductBooleanOutcome,
-    Scene, SceneChild, SceneObject, SceneSnapshot,
+    CommandResult, DEFAULT_MESH_COLOR, MERGE_NOT_TOUCHING_MESSAGE, ObjectId, PLACEMENT_MIN_OBJECTS,
+    PLACEMENT_NEEDS_TWO_MESSAGE, ProductBooleanOutcome, Scene, SceneChild, SceneObject,
+    SceneSnapshot,
 };
 pub use shell_ops::{
     EMBOSS_DEPTH_MAX_MM, EMBOSS_FONT_SIZE_MAX, EMBOSS_FONT_SIZE_MIN, EMBOSS_MAX_TEXT_LENGTH,

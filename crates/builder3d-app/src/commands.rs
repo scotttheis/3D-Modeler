@@ -1640,6 +1640,13 @@ impl CommandState {
         gap_mm: f32,
     ) -> Result<CommandOutcome, CommandError> {
         let indices = self.selected_indices("Placement")?;
+        if matches!(command, CommandId::Align | CommandId::Arrange)
+            && indices.len() < builder3d_core::PLACEMENT_MIN_OBJECTS
+        {
+            return Ok(CommandOutcome::Noop(
+                builder3d_core::PLACEMENT_NEEDS_TWO_MESSAGE.to_owned(),
+            ));
+        }
         let changed = match command {
             CommandId::Mirror => transforms::mirror(&mut self.scene, &indices, axis)?,
             CommandId::Align => transforms::align(&mut self.scene, &indices, axis, alignment)?,
@@ -2770,6 +2777,57 @@ mod tests {
             Some(builder3d_core::REPAIR_NOTHING_TO_FIX_MESSAGE)
         );
         assert_eq!(mcp.scene().history_state_id(), history);
+    }
+
+    #[test]
+    fn align_and_arrange_need_two_objects_on_the_desktop_and_in_mcp() {
+        let (mut desktop, mut mcp) = one_cube_pair();
+        mcp.set_selection_indices([0]);
+        let history = desktop.scene().history_state_id();
+        for command in [CommandId::Align, CommandId::Arrange] {
+            assert!(matches!(
+                desktop.place_selected(command, Axis::X, Alignment::Center, 0.0),
+                Ok(CommandOutcome::Noop(message))
+                    if message == builder3d_core::PLACEMENT_NEEDS_TWO_MESSAGE
+            ));
+        }
+        for tool in ["align", "arrange"] {
+            let refused = try_mcp(&mut mcp, tool, serde_json::json!({"axis": "x"}));
+            assert!(
+                refused
+                    .as_ref()
+                    .is_err_and(|error| error.contains(builder3d_core::PLACEMENT_NEEDS_TWO_MESSAGE)),
+                "{tool}: {refused:?}"
+            );
+        }
+        assert_eq!(desktop.scene().history_state_id(), history);
+        assert_eq!(mcp.scene().history_state_id(), history);
+
+        // With two objects both sides align.
+        for state in [&mut desktop, &mut mcp] {
+            state
+                .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
+                .expect("second cube");
+            let id = state.scene().objects()[1].object_id().to_owned();
+            state
+                .set_object_position_by_id(&id, [60.0, 20.0, 30.0])
+                .expect("offset");
+            state.set_selection_indices([0, 1]);
+        }
+        assert!(matches!(
+            desktop.place_selected(CommandId::Align, Axis::Z, Alignment::Center, 0.0),
+            Ok(CommandOutcome::Applied(_))
+        ));
+        let aligned = try_mcp(
+            &mut mcp,
+            "align",
+            serde_json::json!({"axis": "z", "mode": "center"}),
+        );
+        assert!(aligned.is_ok(), "{aligned:?}");
+        for state in [&desktop, &mcp] {
+            let z = |index: usize| state.scene().objects()[index].position()[2];
+            assert!((z(0) - z(1)).abs() < 1.0e-4, "aligned on Z");
+        }
     }
 
     /// Two cubes 100 mm apart on X (not touching), both selected.

@@ -6877,8 +6877,6 @@ fn command_enabled(command: CommandId, state: &CommandState) -> bool {
         | CommandId::Settle
         | CommandId::Mirror
         | CommandId::Measure
-        | CommandId::Align
-        | CommandId::Arrange
         | CommandId::Simplify
         | CommandId::Subdivide
         | CommandId::Smooth
@@ -6886,6 +6884,7 @@ fn command_enabled(command: CommandId, state: &CommandState) -> bool {
         | CommandId::Hollow
         | CommandId::Repair
         | CommandId::FrameSelection => selected > 0,
+        CommandId::Align | CommandId::Arrange => selected >= builder3d_core::PLACEMENT_MIN_OBJECTS,
         // As in the Python build these stay clickable whenever there is
         // something to work on, and explain themselves when nothing is
         // selected instead of sitting greyed out.
@@ -7036,6 +7035,12 @@ fn command_disabled_help(command: CommandId, state: &CommandState) -> &'static s
         CommandId::Group if state.selected_count() < 2 => {
             "Select at least two models to make a group."
         }
+        CommandId::Align | CommandId::Arrange
+            if state.selected_count() < builder3d_core::PLACEMENT_MIN_OBJECTS =>
+        {
+            builder3d_core::PLACEMENT_NEEDS_TWO_MESSAGE
+        }
+        CommandId::Ungroup => "Select a group to ungroup it.",
         CommandId::EditTorus => "Select a torus to change its size and shape.",
         CommandId::Export if state.scene().objects().is_empty() => {
             "Add or import a model before exporting."
@@ -9712,6 +9717,33 @@ mod tests {
                 app.route_viewport_input(rect, 1., input, true);
                 assert_eq!(history, app.commands.scene().history_state_id());
             }
+        }
+    }
+
+    #[test]
+    fn align_and_arrange_are_disabled_with_a_hint_under_two_objects() {
+        let mut state = CommandState::default();
+        state
+            .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
+            .expect("cube");
+        state.set_selection_indices([0]);
+        for command in [CommandId::Align, CommandId::Arrange] {
+            assert!(!command_enabled(command, &state));
+            assert_eq!(
+                command_disabled_help(command, &state),
+                builder3d_core::PLACEMENT_NEEDS_TWO_MESSAGE
+            );
+        }
+        assert!(
+            command_enabled(CommandId::Mirror, &state),
+            "Mirror works on one"
+        );
+        state
+            .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
+            .expect("second cube");
+        state.set_selection_indices([0, 1]);
+        for command in [CommandId::Align, CommandId::Arrange] {
+            assert!(command_enabled(command, &state));
         }
     }
 

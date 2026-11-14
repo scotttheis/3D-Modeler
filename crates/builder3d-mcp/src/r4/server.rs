@@ -1500,9 +1500,9 @@ impl R4Server {
         let mut state = self.lock_state()?;
         check_expected(&state, args)?;
         let indices = selected_or_targets(&state.scene, args)?;
-        if indices.is_empty() {
+        if indices.len() < builder3d_core::PLACEMENT_MIN_OBJECTS {
             return Err(AdapterError::Validation(
-                "align requires at least one object".to_owned(),
+                builder3d_core::PLACEMENT_NEEDS_TWO_MESSAGE.to_owned(),
             ));
         }
         let mut bounds = Vec::new();
@@ -1564,6 +1564,11 @@ impl R4Server {
         let mut state = self.lock_state()?;
         check_expected(&state, args)?;
         let indices = selected_or_targets(&state.scene, args)?;
+        if indices.len() < builder3d_core::PLACEMENT_MIN_OBJECTS {
+            return Err(AdapterError::Validation(
+                builder3d_core::PLACEMENT_NEEDS_TWO_MESSAGE.to_owned(),
+            ));
+        }
         let mut entries = Vec::new();
         for index in indices {
             let object = state.scene.object(index)?;

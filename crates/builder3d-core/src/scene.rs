@@ -1651,6 +1651,16 @@ pub(crate) fn validate_scene_objects(objects: &[SceneObject]) -> Result<(), Core
     validate_unique_object_ids(objects)
 }
 
+/// Fewest objects Align and Arrange work on (OF-42): both place objects
+/// relative to each other, so one object alone has nothing to line up with.
+pub const PLACEMENT_MIN_OBJECTS: usize = 2;
+
+/// What the user is told when Align or Arrange has fewer than
+/// [`PLACEMENT_MIN_OBJECTS`] objects. The desktop shows it on the disabled
+/// buttons; MCP `align` and `arrange` return it as their error.
+pub const PLACEMENT_NEEDS_TWO_MESSAGE: &str =
+    "Select at least two objects to align or arrange them.";
+
 /// What the user is told when Merge groups objects that are not touching
 /// (decision D8, OF-38). The desktop shows it for about four seconds; MCP
 /// returns it as the result's `message`.
