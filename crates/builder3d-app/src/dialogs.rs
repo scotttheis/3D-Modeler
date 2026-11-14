@@ -20,7 +20,7 @@ use crate::preferences::DisplayUnit;
 use crate::preferences::import_uses_authoritative_units;
 use crate::print_handoff::{PreparedPrint, discard_prepared_print, discover_print_slicers};
 use crate::print_prep::DEFAULT_BED_SIZE_MM;
-use crate::theme::{ThemeMode, UiSize};
+use crate::theme::{ThemeMode, ThemePalette, UiSize};
 
 /// A file type offered by Save (STL, 3MF) or Export (every writer).
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -257,6 +257,28 @@ impl DialogState {
         }
     }
 
+    /// Colour of the inline message: ordinary results use the normal text
+    /// colour of the theme; warnings and errors use the theme's readable
+    /// warning and error colours (OF-39).
+    fn message_color(&self) -> Color32 {
+        let palette = ThemePalette::for_mode(self.theme_mode);
+        match self.message_tone {
+            MessageTone::Info => palette.text,
+            MessageTone::Warning => palette.warning_text,
+            MessageTone::Error => palette.error_text,
+        }
+    }
+
+    /// The button that dismisses the dialog: "Close" once it shows a result
+    /// or message (there is nothing left to cancel), otherwise "Cancel".
+    pub(crate) fn dismiss_label(&self) -> &'static str {
+        if self.message.is_empty() {
+            "Cancel"
+        } else {
+            "Close"
+        }
+    }
+
     /// Updates the inline result/error message without closing the dialog.
     pub(crate) fn set_message(&mut self, message: impl Into<String>) {
         self.message = message.into();
@@ -481,11 +503,7 @@ impl DialogState {
             }
             if !self.message.is_empty() {
                 ui.separator();
-                let color = match self.message_tone {
-                    MessageTone::Info => Color32::from_rgb(0x40, 0x52, 0xB5),
-                    MessageTone::Warning => Color32::from_rgb(0x9A, 0x62, 0x00),
-                    MessageTone::Error => Color32::from_rgb(0xB4, 0x23, 0x18),
-                };
+                let color = self.message_color();
                 egui::ScrollArea::vertical()
                     .max_height(180.0)
                     .show(ui, |ui| ui.label(RichText::new(&self.message).color(color)));
@@ -496,7 +514,7 @@ impl DialogState {
                     self.file_type_footer(ui, &mut action);
                 }
                 _ => {
-                    if ui.button("Cancel").clicked() {
+                    if ui.button(self.dismiss_label()).clicked() {
                         action = Some(DialogAction::Close);
                     }
                 }
@@ -891,7 +909,7 @@ impl DialogState {
             Some(path) => {
                 ui.label(
                     RichText::new("Saved slicer is unavailable")
-                        .color(Color32::from_rgb(0x9A, 0x62, 0x00)),
+                        .color(ThemePalette::for_mode(self.theme_mode).warning_text),
                 );
                 ui.label(RichText::new(path.display().to_string()).small().weak());
             }
@@ -975,7 +993,7 @@ impl DialogState {
         if self.print_slicers.is_empty() {
             ui.label(
                 RichText::new("No supported slicer was discovered on this machine.")
-                    .color(Color32::from_rgb(0x9A, 0x62, 0x00)),
+                    .color(ThemePalette::for_mode(self.theme_mode).warning_text),
             );
         } else {
             let mut slicer_changed = false;
@@ -1718,6 +1736,43 @@ mod tests {
         run(frame(vec![button(start + delta, false)]));
         let after = run(frame(Vec::new()));
         (before, after)
+    }
+
+    #[test]
+    fn results_read_in_the_normal_text_colour_and_offer_close() {
+        for mode in [ThemeMode::Light, ThemeMode::Dark] {
+            let palette = ThemePalette::for_mode(mode);
+            let mut dialog = DialogState::new(DialogKind::Repair, mode);
+            assert_eq!(dialog.dismiss_label(), "Cancel");
+            dialog.set_message("Repair complete");
+            assert_eq!(dialog.message_color(), palette.text);
+            assert_eq!(dialog.dismiss_label(), "Close");
+            dialog.set_report("Warnings", false, true);
+            assert_eq!(dialog.message_color(), palette.warning_text);
+            dialog.set_error("Failed");
+            assert_eq!(dialog.message_color(), palette.error_text);
+            // Every message colour is readable on the dialog background.
+            for color in [palette.text, palette.warning_text, palette.error_text] {
+                let ratio = contrast_ratio(color, palette.panel);
+                assert!(ratio >= 4.5, "{mode:?} {color:?} on panel: {ratio:.2}");
+            }
+        }
+    }
+
+    fn contrast_ratio(first: Color32, second: Color32) -> f32 {
+        let luminance = |color: Color32| {
+            let channel = |value: u8| {
+                let value = f32::from(value) / 255.0;
+                if value <= 0.039_28 {
+                    value / 12.92
+                } else {
+                    ((value + 0.055) / 1.055).powf(2.4)
+                }
+            };
+            0.2126 * channel(color.r()) + 0.7152 * channel(color.g()) + 0.0722 * channel(color.b())
+        };
+        let (a, b) = (luminance(first), luminance(second));
+        (a.max(b) + 0.05) / (a.min(b) + 0.05)
     }
 
     #[test]

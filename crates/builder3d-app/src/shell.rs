@@ -577,6 +577,7 @@ impl Builder3dApp {
             ReviewState::Colors => &[builder3d_core::PrimitiveKind::Cube; 4],
             ReviewState::Mirror => &[builder3d_core::PrimitiveKind::Cube],
             ReviewState::MergeApart => &[builder3d_core::PrimitiveKind::Cube; 2],
+            ReviewState::Repair => &[builder3d_core::PrimitiveKind::Cube],
             ReviewState::Align => &[builder3d_core::PrimitiveKind::Cube; 2],
         };
         for (index, kind) in primitives.iter().copied().enumerate() {
@@ -602,6 +603,10 @@ impl Builder3dApp {
             ReviewState::Export => self.open_dialog(DialogKind::Export),
             ReviewState::Menu => self.menu_open = true,
             ReviewState::Mirror => self.dispatch(CommandId::Mirror),
+            ReviewState::Repair => {
+                self.dispatch(CommandId::Repair);
+                self.apply_dialog_action(crate::dialogs::DialogAction::Repair);
+            }
             ReviewState::Align => {
                 self.commands.set_selection_indices([0, 1]);
                 self.dispatch(CommandId::Align);
@@ -6434,7 +6439,10 @@ impl eframe::App for Builder3dApp {
             egui::Area::new(egui::Id::unique("settings-warning"))
                 .fixed_pos(egui::pos2(16.0, 92.0))
                 .show(&ctx, |ui| {
-                    ui.label(RichText::new(warning).color(Color32::from_rgb(0x9A, 0x62, 0x00)));
+                    ui.label(
+                        RichText::new(warning)
+                            .color(ThemePalette::for_mode(self.theme_mode).warning_text),
+                    );
                 });
         }
         if self.close_requested {

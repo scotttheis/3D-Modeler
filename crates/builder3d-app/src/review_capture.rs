@@ -12,7 +12,7 @@
 //! | Variable | Values | Default |
 //! |---|---|---|
 //! | `BUILDER3D_REVIEW_CAPTURE` | output PNG path | harness off |
-//! | `BUILDER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `resize`, `resize-drag`, `multi`, `merge`, `unselected`, `material`, `settings`, `save`, `export`, `menu`, `colors`, `mirror`, `merge-apart`, `align` | `move` |
+//! | `BUILDER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `resize`, `resize-drag`, `multi`, `merge`, `unselected`, `material`, `settings`, `save`, `export`, `menu`, `colors`, `mirror`, `merge-apart`, `repair`, `align` | `move` |
 //! | `BUILDER3D_REVIEW_THEME` | `light`, `dark` | `dark` |
 //! | `BUILDER3D_REVIEW_SIZE` | `normal`, `big` (Settings > Size) | `normal` |
 //! | `BUILDER3D_REVIEW_TAB` | a ribbon tab label such as `Object` | `Insert` |
@@ -85,6 +85,8 @@ pub(crate) enum ReviewState {
     /// Two cubes that do not touch, merged: they are grouped and the
     /// "not touching" notice shows.
     MergeApart,
+    /// One selected cube with Repair run: the Repair dialog shows its result.
+    Repair,
     /// Two selected cubes with the Align dialog open.
     Align,
 }
@@ -109,6 +111,7 @@ impl ReviewState {
             "colors" => Some(Self::Colors),
             "mirror" => Some(Self::Mirror),
             "merge-apart" => Some(Self::MergeApart),
+            "repair" => Some(Self::Repair),
             "align" => Some(Self::Align),
             _ => None,
         }

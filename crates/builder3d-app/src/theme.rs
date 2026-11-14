@@ -132,6 +132,10 @@ pub struct ThemePalette {
     pub text: Color32,
     /// Muted text.
     pub muted: Color32,
+    /// Warning text, readable on this theme's panels (OF-39).
+    pub warning_text: Color32,
+    /// Error text, readable on this theme's panels (OF-39).
+    pub error_text: Color32,
     /// Dividers.
     pub divider: Color32,
     /// Control and card border.
@@ -175,6 +179,8 @@ impl ThemePalette {
             surface_raised: Color32::from_rgb(0xE8, 0xEA, 0xF5),
             text: Color32::from_rgb(0x1D, 0x24, 0x33),
             muted: Color32::from_rgb(0x66, 0x70, 0x85),
+            warning_text: Color32::from_rgb(0x9A, 0x62, 0x00),
+            error_text: Color32::from_rgb(0xB4, 0x23, 0x18),
             divider: Color32::from_rgb(0xDD, 0xE2, 0xEA),
             border: Color32::from_rgb(0xD5, 0xDA, 0xE4),
             disabled_bg: Color32::from_rgb(0xF4, 0xF5, 0xF7),
@@ -207,6 +213,8 @@ impl ThemePalette {
             surface_raised: Color32::from_rgb(0x15, 0x31, 0x55),
             text: Color32::from_rgb(0xEA, 0xF7, 0xFF),
             muted: Color32::from_rgb(0x9D, 0xB5, 0xD6),
+            warning_text: Color32::from_rgb(0xF5, 0xC1, 0x5C),
+            error_text: Color32::from_rgb(0xFF, 0x9C, 0x92),
             divider: Color32::from_rgb(0x27, 0x49, 0x76),
             border: Color32::from_rgb(0x31, 0x59, 0x85),
             disabled_bg: Color32::from_rgb(0x0B, 0x19, 0x30),
