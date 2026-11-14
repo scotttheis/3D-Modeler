@@ -24,10 +24,14 @@ use crate::transform_gesture::{ResizeFrame, ResizeHandle};
 const HANDLE_GREEN: Color32 = Color32::from_rgb(118, 214, 46);
 /// 3D Builder's sky blue for vertical (Y) and depth (Z) handles.
 const HANDLE_BLUE: Color32 = Color32::from_rgb(36, 162, 238);
+/// Size of the face-handle chevrons relative to 3D Builder's originals. The
+/// owner asked for them twice as big (OF-32); the gap from the box and the
+/// pointer reach scale with them.
+const FACE_HANDLE_SCALE: f32 = 2.0;
 /// Gap between the box outline and a face handle's centre, in points.
-const FACE_HANDLE_GAP: f32 = 16.0;
+const FACE_HANDLE_GAP: f32 = 16.0 * FACE_HANDLE_SCALE;
 /// Pointer reach of a face handle and of a corner dot, in points.
-const FACE_HIT_RADIUS: f32 = 14.0;
+const FACE_HIT_RADIUS: f32 = 14.0 * FACE_HANDLE_SCALE;
 const CORNER_HIT_RADIUS: f32 = 9.0;
 /// A face axis at least this aligned with the view direction is "seen
 /// end-on": its handle sits on the face instead of outside the box, and the
@@ -226,9 +230,9 @@ impl ResizeOverlay {
                 HANDLE_BLUE
             };
             let size = if emphasized == Some(face.handle) {
-                1.15
+                1.15 * FACE_HANDLE_SCALE
             } else {
-                1.0
+                FACE_HANDLE_SCALE
             };
             paint_double_chevron(painter, face.center, face.direction, color, size);
         }
@@ -236,7 +240,7 @@ impl ResizeOverlay {
             let top = self
                 .faces
                 .iter()
-                .map(|face| face.center.y - 9.0)
+                .map(|face| face.center.y - 9.0 * FACE_HANDLE_SCALE)
                 .filter(|y| *y < self.bounds.top())
                 .fold(self.bounds.top(), f32::min);
             let galley = painter.layout_no_wrap(
