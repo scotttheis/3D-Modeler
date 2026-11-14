@@ -2141,6 +2141,14 @@ impl R4Server {
             "repair" => {
                 let profile = schema::string_or(args, "profile", "extended")?;
                 let result = repair_mesh_with_profile(&source, &profile)?;
+                if result.report.nothing_to_fix() {
+                    // Same rule as the desktop (OF-40): nothing is applied
+                    // and no history entry is made.
+                    let state = self.lock_state()?;
+                    return Ok(
+                        json!({"action":action,"operation_id":id,"index":index,"object_id":object_id,"report":repair_report(&result.report),"changed":false,"scene_revision":state.scene.revision(),"message":builder3d_core::REPAIR_NOTHING_TO_FIX_MESSAGE}),
+                    );
+                }
                 (
                     result.mesh,
                     json!({"action":action,"operation_id":id,"index":index,"object_id":object_id,"report":repair_report(&result.report)}),

@@ -1578,6 +1578,14 @@ impl Builder3dApp {
                     Err(error) => self.fail_desktop_job(&mut job, error.to_string()),
                 }
             }
+            DesktopJobResult::Unchanged { message } => {
+                let _ = self.commands.operations().complete(
+                    &job.handle.operation_id,
+                    Some(serde_json::json!({ "changed": false })),
+                );
+                self.commands.set_status(message.clone());
+                self.restore_job_dialog(&mut job, |dialog| dialog.set_message(message));
+            }
             DesktopJobResult::PrintPrep {
                 bed_size_mm,
                 report,
@@ -8013,6 +8021,55 @@ mod tests {
             dialog.kind() == DialogKind::Settings && dialog.theme_mode() == ThemeMode::Dark
         }));
         assert!(std::fs::remove_dir_all(directory).is_ok());
+    }
+
+    #[test]
+    fn repair_of_a_clean_model_says_so_and_changes_nothing() {
+        let mut app = Builder3dApp {
+            settings_path: repository_test_directory("of40-clean-repair").join("settings.json"),
+            ..Default::default()
+        };
+        app.commands
+            .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
+            .expect("cube");
+        let history = app.commands.scene().history_state_id();
+        let revision = app.commands.scene().revision();
+        app.open_dialog(DialogKind::Repair);
+        app.apply_dialog_action(DialogAction::Repair);
+        wait_for_desktop_job(&mut app);
+        assert_eq!(
+            app.commands.scene().history_state_id(),
+            history,
+            "no undo entry"
+        );
+        assert_eq!(app.commands.scene().revision(), revision, "scene untouched");
+        assert_eq!(
+            app.commands.last_status(),
+            builder3d_core::REPAIR_NOTHING_TO_FIX_MESSAGE
+        );
+        assert!(app.dialog.as_ref().is_some_and(|dialog| {
+            dialog.kind() == DialogKind::Repair
+                && dialog.message() == builder3d_core::REPAIR_NOTHING_TO_FIX_MESSAGE
+                && dialog.dismiss_label() == "Close"
+        }));
+
+        // A model with a hole is still repaired, in one undo step.
+        let mut open = app.commands.scene().objects()[0].mesh().clone();
+        open.faces.pop();
+        let object_id = app.commands.scene().objects()[0].object_id().to_owned();
+        let generation = app.commands.document_generation();
+        let revision = app.commands.scene().revision();
+        app.commands
+            .replace_mesh_if_current(generation, revision, &object_id, open)
+            .expect("open the cube");
+        let history = app.commands.scene().history_state_id();
+        app.apply_dialog_action(DialogAction::Repair);
+        wait_for_desktop_job(&mut app);
+        assert_eq!(app.commands.scene().history_state_id(), history + 1);
+        assert_ne!(
+            app.commands.last_status(),
+            builder3d_core::REPAIR_NOTHING_TO_FIX_MESSAGE
+        );
     }
 
     fn wait_for_desktop_job(app: &mut Builder3dApp) {

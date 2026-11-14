@@ -2758,6 +2758,20 @@ mod tests {
         status["result"].clone()
     }
 
+    #[test]
+    fn mcp_repair_of_a_clean_model_matches_the_desktop_and_changes_nothing() {
+        let (_, mut mcp) = one_cube_pair();
+        let history = mcp.scene().history_state_id();
+        let id = mcp.scene().objects()[0].object_id().to_owned();
+        let result = run_mcp_operation(&mut mcp, "repair", serde_json::json!({"object_id": id}));
+        assert_eq!(result["changed"], serde_json::json!(false), "{result}");
+        assert_eq!(
+            result["message"].as_str(),
+            Some(builder3d_core::REPAIR_NOTHING_TO_FIX_MESSAGE)
+        );
+        assert_eq!(mcp.scene().history_state_id(), history);
+    }
+
     /// Two cubes 100 mm apart on X (not touching), both selected.
     fn two_cubes_apart() -> CommandState {
         let mut state = CommandState::default();

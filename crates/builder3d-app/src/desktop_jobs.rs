@@ -68,6 +68,10 @@ pub(crate) enum DesktopJobResult {
         report: PrintPrepReport,
     },
     PreparedPrint(PreparedPrintGuard),
+    /// The operation found nothing to do; the scene is left untouched.
+    Unchanged {
+        message: String,
+    },
 }
 
 /// Owns staged output until the UI accepts it. Channel teardown, cancellation,
@@ -126,6 +130,11 @@ where
             let (mesh, detail) = match operation {
                 MeshJobOperation::Repair => {
                     let result = repair_mesh(&mesh).map_err(|error| error.to_string())?;
+                    if result.report.nothing_to_fix() {
+                        return Ok(DesktopJobResult::Unchanged {
+                            message: builder3d_core::REPAIR_NOTHING_TO_FIX_MESSAGE.to_owned(),
+                        });
+                    }
                     let stage_count = result.report.stages.len();
                     (result.mesh, format!("{stage_count} repair stage(s)"))
                 }

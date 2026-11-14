@@ -124,6 +124,20 @@ pub struct RepairReport {
     pub can_apply: bool,
 }
 
+/// What the user is told when Repair finds nothing to fix (OF-40). The
+/// desktop shows it in the Repair dialog; MCP returns it as `message`.
+pub const REPAIR_NOTHING_TO_FIX_MESSAGE: &str =
+    "No problems found — your model was already clean. Nothing was changed.";
+
+impl RepairReport {
+    /// Whether the mesh had no problems to begin with (OF-40). Adapters then
+    /// apply nothing, so Repair on a clean model leaves no history entry.
+    #[must_use]
+    pub fn nothing_to_fix(&self) -> bool {
+        self.before.valid
+    }
+}
+
 /// Non-mutating repair result containing the candidate mesh and report.
 #[derive(Clone, Debug, PartialEq)]
 pub struct RepairResult {
