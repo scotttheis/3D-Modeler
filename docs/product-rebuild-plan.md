@@ -330,6 +330,7 @@ decided by an agent.
 | D6 | MCP at 100% desktop parity, growing the catalog beyond the Python 60 where needed | **Approved 2026-11-12** | — |
 | D8 | Merge of parts that don't overlap | **Decided 2026-11-13:** group them instead of merging and show a small popup for about 4 s saying the objects were not touching; MCP returns the group with the same message | — |
 | D9 | Smoothing on sparse meshes | **Decided 2026-11-13:** match Blender's default sculpt Smooth (the brush Shift switches to); studied with item 13, the Blender brush comparison | — |
+| D10 | MCP coverage of look-and-feel controls (theme, recents, ribbon, shortcuts, About, exit …) | **Decided 2026-11-14:** MCP does everything; no "visual only" exemptions (OF-58) | — |
 | D7 | Merge color: one color from the top-most object, desktop and MCP alike | **Approved 2026-11-12** (differs from the Python MCP, which kept per-face colors) | — |
 
 ## 9. What does not change

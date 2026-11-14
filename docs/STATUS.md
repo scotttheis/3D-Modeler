@@ -11,8 +11,11 @@ version 0.1.1, 2026-11-13, `E:\Builder3D-RC\Builder3D-RC1.msi` (50 MB),
 
 ## Now
 
-Stage **S0 Stabilise**. Nothing in S1–S4 starts until the fix-first list is
-closed. Stop before RB-10 work (S3) as before.
+**Owner batch 7** ([`owner-feedback-2026-11-14.md`](owner-feedback-2026-11-14.md),
+OF-28 to OF-58, five phases). Current: **Phase 1 — quick fixes and polish**,
+starting at OF-28. Each phase ends in a review pack and a stop for owner
+review. The remaining S0 items (F5, F6) follow the batch unless the owner
+says otherwise. Stop before RB-10 work (S3) as before.
 
 ## Gates on the working tree (2026-11-12, debug build)
 
@@ -27,11 +30,13 @@ closed. Stop before RB-10 work (S3) as before.
 | Release (fat LTO) build | `cargo build --release -p builder3d-app` passed twice on 2026-11-12 (4m50s, 3m43s); failed with LLVM out-of-memory on 2026-11-11 |
 | `review` profile build | Pass (3m56s clean build; capture verified) |
 
-## Review pack waiting for the owner
+## Last review pack
 
-`evidence/rebuild/captures/2026-11-13-review-of1-9-f9/` (index in its
-`README.md`): F9 and OF-1 to OF-9 from one release exe, both themes.
-Owner review not yet done.
+`evidence/rebuild/captures/2026-11-13-review-of1-9-f9/`, reviewed by the
+owner 2026-11-14. Approved: floor look, F9, resize view, OF-2 shadow, OF-6
+wireframe (for now), OF-9 Merge color, Smooth / Smooth Brush / Blob,
+Intersect, Subtract. Follow-ups became OF-28 to OF-58. OF-4 hover: owner did
+not know what it meant; explain it in the next pack.
 
 ## Fix-first list (plan section 4)
 
@@ -45,10 +50,10 @@ Owner review not yet done.
 | F6 | Reconcile the 147-row feature ledger with the app | Open |
 | F7 | Clear ad hoc `target/` directories (`E:` had 40 GB free) | **Done** 2026-11-12 — archived to `G:\Builder3D-Rust_target-adhoc-archive_20261112`, `target/` 91 → ~55 GB |
 | F8 | `scripts/Invoke-Gate.ps1` | **Done** 2026-11-13 — `-Tier fast\|full\|ship`; ship does not script package staging or the performance run |
-| F9 | Depth fight where meshes meet the floor | **Done, owner review pending** 2026-11-13 — depth bias on floor surface, shadows and text; captures `evidence/rebuild/captures/2026-11-13-f9-floor-depth/` (before/after, both themes). Dark serration gone; a faint pale dotted fringe on the rim remains and does not change with the bias or the reflection (cause not found). CPU fallback not touched |
-| F10 | `emboss_text` long-running metadata | Decided (D5, 2026-11-13): keep the flag, add a progress bar or Builder3D-styled spinner, desktop and MCP. Not built yet |
+| F9 | Depth fight where meshes meet the floor | **Owner-approved 2026-11-14** ("works exactly as I asked"); done 2026-11-13 — depth bias on floor surface, shadows and text; captures `evidence/rebuild/captures/2026-11-13-f9-floor-depth/` (before/after, both themes). Dark serration gone; a faint pale dotted fringe on the rim remains and does not change with the bias or the reflection (cause not found). CPU fallback not touched |
+| F10 | `emboss_text` long-running metadata | Decided (D5): keep the flag; progress indicator is OF-57 |
 | F11 | Status narrative out of `AGENTS.md` | **Done** 2026-11-12 |
-| F12 | MCP 100% desktop parity (plan 3.7) | **Done** 2026-11-13 — Merge color; `rename_object` and `set_visibility` tools (catalog now 62, each with a desktop-vs-MCP test); `launch_slicer` falls back to the saved slicer; ledger `mcp_tool` / `mcp_exempt` column and parity check. Judgement calls for owner: theme, display units, clear recents, About, ribbon layout, sticky selection, recents and exit are marked "visual only" |
+| F12 | MCP 100% desktop parity (plan 3.7) | **Done** 2026-11-13 — Merge color; `rename_object` and `set_visibility` tools (catalog now 62, each with a desktop-vs-MCP test); `launch_slicer` falls back to the saved slicer; ledger `mcp_tool` / `mcp_exempt` column and parity check. Owner 2026-11-14 (D10): no "visual only" exemptions — MCP gets tools for all of them (OF-58) |
 | F13 | Run `cargo deny` and `cargo audit` | **Done** 2026-11-12 — both pass; now in the Full gate |
 
 ## Ledger (`evidence/rebuild/parity-matrix.toml`, 147 features, not yet reconciled)
@@ -64,8 +69,9 @@ D1, D2, D3, D6 (MCP 100% parity, catalog may grow) and D7 (Merge takes the
 top-most color, desktop and MCP) approved 2026-11-12. D4 (somewhat darker
 viewport in dark theme), D5 (progress indicator for emboss), D8 (non-overlapping
 Merge groups + 4 s popup) and D9 (smoothing like Blender's sculpt Smooth)
-decided 2026-11-13, none built yet. Still open: F12 "visual only" list
-(asked 2026-11-13, no answer yet).
+decided 2026-11-13, none built yet. D10 (MCP does everything,
+no "visual only" rows) decided 2026-11-14. Build order for D4/D5/D8/D9/D10:
+owner batch 7.
 
 ## Owner feedback queue
 
@@ -88,8 +94,8 @@ decided 2026-11-13, none built yet. Still open: F12 "visual only" list
   Details, known limits and lessons are in the batch summary at the end of
   the feedback file. Open: OF-5 (waits for shots), face/region painting, a
   comparison with Blender's brushes, the shadow and reflection on the CPU
-  fallback, and Merge of more than two objects. Shots still owed by the
-  owner: X-ray with two objects, Paint/Color/Material, Merge.
+  fallback, and Merge of more than two objects. X-ray and Paint reference shots received 2026-11-14 (OF-47, OF-44); Merge
+  needs none now (owner approved it).
 - 2026-11-12 (shadow follow-up, committed `43f0fd0`): floor
   shadow now follows the object's convex outline instead of its bounding
   box; shadows and floor text hide with the floor when the camera is below
