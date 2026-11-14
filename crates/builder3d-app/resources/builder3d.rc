@@ -1,0 +1,4 @@
+// Windows resources for builder3d-app (OF-29): the application icon shown on
+// the .exe in Explorer, in Alt+Tab and on the taskbar. The first icon
+// resource is the one Windows uses for the file.
+1 ICON "../assets/original/Builder3D.ico"
