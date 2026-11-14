@@ -77,13 +77,13 @@ Small, independent, mostly visible. One review pack at the end.
 | OF-41 | Mirror axis colours | Colour X, Y and Z in the Mirror dialog to match the arrows. | Use the same axis colour tokens as the gizmo. | Open |
 | OF-42 | Align and Arrange | Need 2+ objects selected; axis letters in the arrow colours. | Disabled (with a hint) under 2 objects; MCP returns a clear error. | Open |
 | OF-43 | Paste and Duplicate placement | Put the copy 10 mm to the side of the original, other axes the same. Don't ask which axis. | "Side" = the screen-right axis of the default (loading) view. Repeat pastes keep stepping 10 mm. MCP same. | Open |
+| OF-45 | Remove the Color button | "get rid of the color button for now. we can evaluate using it for something later." (2026-11-14) | Remove the desktop button (ribbon, favourites, any menu entry). If an MCP tool exists only for image-colour sampling, remove it too so desktop and MCP stay equal; keep the core code if other features use it. Ledger row updated. | Open |
 
 ## Phase 2 — Paint, Color, Material, X-ray (3D Builder model)
 
 | # | Item | Owner's request | Notes | Status |
 |---|---|---|---|---|
 | OF-44 | Paint like 3D Builder | Choose a colour, get a paint-can (spray nozzle) cursor, click the object to colour it. | Reference `erros/paint dialogue.png`: top bar with Cancel, Color, "Selected" swatch + drop-down, Coverage slider. Coverage = whole object vs. region; face/region painting is part of this item. One undo entry per click. MCP: paint object / faces by id with a colour. | Open |
-| OF-45 | Color button | "No idea what Color does." Picking an image does nothing. | Today it samples an image's average colour and applies it silently. Decide with the owner whether it becomes the colour picker in the Paint bar (as in 3D Builder) or goes away. Ask with a capture; don't guess. | Open — needs owner decision |
 | OF-46 | Material = textures | Material should let you import a texture and apply it. Grab some free samples to try. | Larger feature: texture import, UV mapping on primitives/meshes, `.3dp` and export implications (3MF supports textures; STL does not). Use only CC0 samples (e.g. ambientCG, Poly Haven) and record their licences. If this changes the `.3dp` format, stop and ask first. May split into its own phase if big. | Open |
 | OF-47 | X-ray like 3D Builder (OF-5) | Mostly transparent objects; the selected one(s) stay visible. | Reference `erros/XRayObject.png`: unselected objects pale and see-through, selected solid with an edge outline. Closes OF-5. | Open |
 
@@ -103,16 +103,24 @@ brush comparison) is done as part of OF-48 to OF-50.
 | OF-53 | Normalize | "seems to do nothing or I have no idea how to use it." | Find out which. Either fix it or make the use obvious (hint text, visible brush area). Report back before redesigning. | Open |
 | OF-54 | Hollow resource limit | Hollow failed: "exceeded its resource limit … above the 2,000,000 unit limit". Suggests simpler geometry inside the hollow. | Make hollow work on normal models: simplified inner shell, a better work estimate, or raise the limit after measuring. Error text in plain words if it still can't. | Open |
 
-## Phase 4 — Measure and Emboss
+## Phase 4 — Measure
 
 | # | Item | Owner's request | Notes | Status |
 |---|---|---|---|---|
 | OF-55 | Measure ruler | Measure should give a ruler you can run across objects, not a dialog. | Click-to-click on surfaces, live distance with axis components, snaps to vertices/edges. MCP: measure between two points/objects. | Open |
-| OF-56 | Emboss like 3D Builder | "Not working … not doing its job remotely like 3D Builder." Owner said it can wait. | Study 3D Builder's emboss (owner capture needed) before building. | Open — needs owner reference |
-| OF-57 | Emboss progress (D5) | Show a progress bar, or a working spinner in Builder3D's style if the time can't be estimated. | Keep MCP `longRunning: true`; send MCP progress. Reusable busy indicator for other long operations. | Open |
 
 ## Phase 5 — MCP does everything (D10)
 
 | # | Item | Owner's request | Notes | Status |
 |---|---|---|---|---|
 | OF-58 | No "visual only" exemptions | "The AI MCP should be able to do anything." Theme, recent files, ribbon, shortcuts — "100 % yes. All of it." So a user can customise the app by talking to an AI. | Add tools for every ledger row now marked `mcp_exempt = "visual only"` (theme, display units, recents list/open/clear, ribbon pin/favourites/order, shortcuts, sticky selection, About, exit with the unsaved check, …). Remove the exemptions; the parity check then requires a tool for every row. A desktop-vs-MCP test per tool. | Open |
+
+## Deferred — not now
+
+The owner deferred these on 2026-11-14 ("don't do emboss right now"). Do not
+work them until the owner brings them back.
+
+| # | Item | Owner's request | Notes | Status |
+|---|---|---|---|---|
+| OF-56 | Emboss like 3D Builder | "Not working … not doing its job remotely like 3D Builder." No reference screenshots coming. | Known not doing its job. | Deferred |
+| OF-57 | Emboss progress (D5) | Show a progress bar, or a working spinner in Builder3D's style if the time can't be estimated. | Keep MCP `longRunning: true`. If another long operation (e.g. Hollow, OF-54) needs a busy indicator first, build the reusable one there. | Deferred |

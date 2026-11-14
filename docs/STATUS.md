@@ -12,7 +12,7 @@ version 0.1.1, 2026-11-13, `E:\Builder3D-RC\Builder3D-RC1.msi` (50 MB),
 ## Now
 
 **Owner batch 7** ([`owner-feedback-2026-11-14.md`](owner-feedback-2026-11-14.md),
-OF-28 to OF-58, five phases). Current: **Phase 1 — quick fixes and polish**,
+OF-28 to OF-58, five phases; Emboss OF-56/57 deferred by the owner). Current: **Phase 1 — quick fixes and polish**,
 starting at OF-28. Each phase ends in a review pack and a stop for owner
 review. The remaining S0 items (F5, F6) follow the batch unless the owner
 says otherwise. Stop before RB-10 work (S3) as before.
@@ -51,7 +51,7 @@ not know what it meant; explain it in the next pack.
 | F7 | Clear ad hoc `target/` directories (`E:` had 40 GB free) | **Done** 2026-11-12 — archived to `G:\Builder3D-Rust_target-adhoc-archive_20261112`, `target/` 91 → ~55 GB |
 | F8 | `scripts/Invoke-Gate.ps1` | **Done** 2026-11-13 — `-Tier fast\|full\|ship`; ship does not script package staging or the performance run |
 | F9 | Depth fight where meshes meet the floor | **Owner-approved 2026-11-14** ("works exactly as I asked"); done 2026-11-13 — depth bias on floor surface, shadows and text; captures `evidence/rebuild/captures/2026-11-13-f9-floor-depth/` (before/after, both themes). Dark serration gone; a faint pale dotted fringe on the rim remains and does not change with the bias or the reflection (cause not found). CPU fallback not touched |
-| F10 | `emboss_text` long-running metadata | Decided (D5): keep the flag; progress indicator is OF-57 |
+| F10 | `emboss_text` long-running metadata | Decided (D5): keep the flag; progress indicator is OF-57, deferred by the owner 2026-11-14 |
 | F11 | Status narrative out of `AGENTS.md` | **Done** 2026-11-12 |
 | F12 | MCP 100% desktop parity (plan 3.7) | **Done** 2026-11-13 — Merge color; `rename_object` and `set_visibility` tools (catalog now 62, each with a desktop-vs-MCP test); `launch_slicer` falls back to the saved slicer; ledger `mcp_tool` / `mcp_exempt` column and parity check. Owner 2026-11-14 (D10): no "visual only" exemptions — MCP gets tools for all of them (OF-58) |
 | F13 | Run `cargo deny` and `cargo audit` | **Done** 2026-11-12 — both pass; now in the Full gate |
