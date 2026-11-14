@@ -36,6 +36,7 @@ static PANIC_HOOK_INSTALLED: Once = Once::new();
 static WATCHDOG_STATE: OnceLock<Arc<UiWatchdogState>> = OnceLock::new();
 static LAST_SLOW_UI_FRAME_MS: AtomicU64 = AtomicU64::new(0);
 static LAST_SLOW_VIEWPORT_FRAME_MS: AtomicU64 = AtomicU64::new(0);
+static ECHO_TO_CONSOLE: AtomicBool = AtomicBool::new(false);
 
 /// Caches the platform-owned log path without creating the directory or file.
 pub(crate) fn initialize() {
@@ -44,6 +45,16 @@ pub(crate) fn initialize() {
             .log_dir
             .join(LOG_FILE_NAME)
     });
+}
+
+/// Mirrors every log line to standard error as well as the log file
+/// (`--console`). The log file is always written.
+pub(crate) fn echo_to_console() {
+    ECHO_TO_CONSOLE.store(true, Ordering::Release);
+    eprintln!(
+        "Builder3D diagnostics: also writing to {}",
+        log_path().display()
+    );
 }
 
 /// Installs a panic hook that records the payload and a Rust backtrace.
@@ -282,6 +293,9 @@ fn record(level: &str, context: &str, detail: &str) {
         std::process::id(),
         single_line(thread_name, MAX_CONTEXT_BYTES)
     );
+    if ECHO_TO_CONSOLE.load(Ordering::Acquire) {
+        let _ = io::stderr().lock().write_all(line.as_bytes());
+    }
     let path = log_path();
     if let Err(error) = append_line_at(&path, line.as_bytes()) {
         let _ = writeln!(

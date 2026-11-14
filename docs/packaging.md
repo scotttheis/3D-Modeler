@@ -111,6 +111,12 @@ Send them the `.msi` only. Tell them:
 - **`--package` artwork bug:** before commit `4c99d5c` it could not copy the
   artwork at all (swapped arguments). Covered by the test
   `staged_package_artwork_validates_beside_the_executable`.
+- **No console window (OF-28):** the release exe is a windowed program on
+  Windows. PowerShell does not wait for a windowed exe unless its output is
+  piped, so script calls such as `--smoke` end in `| Write-Host` to get a real
+  `$LASTEXITCODE`. Diagnostics always go to
+  `%LOCALAPPDATA%\Builder3D\logs\builder3d.log`; `Builder3D.exe --console`
+  also shows them live in a console window.
 - **WiX source rules:** no `--` inside XML comments; keep `License.rtf`
   plain ASCII (code page 1252); one versioned file per `<Component>`; do not
   set `ARPNOMODIFY` (WixUI_Minimal already does); `wix build` has no `-sice`

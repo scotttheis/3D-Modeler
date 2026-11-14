@@ -99,11 +99,11 @@ function Test-CargoTool([string]$Subcommand) {
 # --- changed crates (fast tier) ---------------------------------------------
 $lockChanged = $false
 if ($Tier -eq 'fast' -and $Crates.Count -eq 0) {
-    $paths = @(& git diff --name-only HEAD) + @(& git ls-files --others --exclude-standard)
+    $paths = @(& git -c core.safecrlf=false diff --name-only HEAD) + @(& git ls-files --others --exclude-standard)
     $paths = @($paths | Where-Object { $_ })
     $source = 'working tree against HEAD'
     if ($paths.Count -eq 0) {
-        $paths = @(& git diff --name-only HEAD~1 HEAD)
+        $paths = @(& git -c core.safecrlf=false diff --name-only HEAD~1 HEAD)
         $source = 'HEAD against HEAD~1'
     }
     $found = @{}

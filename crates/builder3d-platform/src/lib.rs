@@ -5,6 +5,7 @@
 //! The public data model is portable; the discovery adapter supplies native
 //! memory-budget and display information when the host exposes it.
 
+mod console;
 mod discovery;
 mod ledger;
 mod legacy_settings;
@@ -12,6 +13,7 @@ mod routing;
 mod runtime;
 mod slicer;
 
+pub use console::attach_console;
 pub use discovery::{
     AdapterKind, AdapterProfile, BackendKind, CapabilityProfile, CpuProfile, DiscoveryError,
     DisplayRelationship, MemoryProfile, OsMemoryBudget, discover_capability_profile,

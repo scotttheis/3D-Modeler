@@ -109,9 +109,21 @@ pub enum AppError {
 }
 
 /// Runs the native Builder3D shell, or the bounded command smoke check.
+///
+/// On Windows the release executable is windowed, so no console opens behind
+/// the app (OF-28). Command-line modes and review captures attach to the
+/// terminal that started them; `--console` also opens a console when there is
+/// none and mirrors the diagnostic log to it.
 pub fn run() -> Result<(), AppError> {
     diagnostics::initialize();
     diagnostics::install_panic_hook();
+    let console_requested = has_argument("--console");
+    if console_requested || wants_terminal_output() {
+        let attached = builder3d_platform::attach_console(console_requested);
+        if console_requested && attached {
+            diagnostics::echo_to_console();
+        }
+    }
     let result = run_inner();
     if let Err(error) = &result {
         diagnostics::record_error("application startup or shutdown", error);
@@ -143,7 +155,7 @@ fn run_inner() -> Result<(), AppError> {
         println!("staged {} native launchers in {}", paths.len(), destination);
         return Ok(());
     }
-    if env::args().skip(1).any(|argument| argument == "--smoke") {
+    if has_argument("--smoke") {
         run_smoke_check()?;
         return Ok(());
     }
@@ -180,6 +192,18 @@ fn run_smoke_check() -> Result<(), AppError> {
         RibbonTab::all().len()
     );
     Ok(())
+}
+
+fn has_argument(name: &str) -> bool {
+    env::args().skip(1).any(|argument| argument == name)
+}
+
+/// Modes that print results for whoever started the program.
+fn wants_terminal_output() -> bool {
+    ["--smoke", "--package", "--stage-launchers"]
+        .iter()
+        .any(|flag| has_argument(flag))
+        || env::var_os("BUILDER3D_REVIEW_CAPTURE").is_some()
 }
 
 fn argument_value(name: &str) -> Option<String> {

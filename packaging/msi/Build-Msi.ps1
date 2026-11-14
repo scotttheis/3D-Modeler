@@ -53,7 +53,8 @@ Copy-Item -LiteralPath (Join-Path $projectRoot 'crates\builder3d-app\assets\orig
     -Destination (Join-Path $stage 'assets\original') -Recurse
 Copy-Item -LiteralPath (Join-Path $projectRoot 'packaging\licenses') `
     -Destination (Join-Path $stage 'licenses') -Recurse
-& (Join-Path $stage 'Builder3D.exe') --smoke
+# Piped so PowerShell waits for the windowed exe and sets $LASTEXITCODE (OF-28).
+& (Join-Path $stage 'Builder3D.exe') --smoke | Write-Host
 if ($LASTEXITCODE -ne 0) { throw "Staged app failed its smoke check ($LASTEXITCODE)." }
 
 $msi = Join-Path $OutDir "$Name.msi"
@@ -78,7 +79,7 @@ if ($Verify) {
                           "$installDir\assets\original\Builder3D.ico", $startMenu, $desktop) {
             if (-not (Test-Path -LiteralPath $path)) { throw "Installed item missing: $path" }
         }
-        & "$installDir\Builder3D.exe" --smoke
+        & "$installDir\Builder3D.exe" --smoke | Write-Host
         if ($LASTEXITCODE -ne 0) { throw "Installed app failed its smoke check ($LASTEXITCODE)." }
         $app = Start-Process "$installDir\Builder3D.exe" -PassThru
         Start-Sleep -Seconds 8
