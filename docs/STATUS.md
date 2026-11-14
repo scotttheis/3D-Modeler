@@ -3,7 +3,7 @@
 The only place current status is written. Keep it to one screen. Plan:
 [`product-rebuild-plan.md`](product-rebuild-plan.md).
 
-Updated 2026-11-13. Full gate passed 2026-11-13 (fmt, clippy, tests, deny, audit, MCP parity, smoke, 28-image capture board; the board and the other steps ran in two runs because the first run's smoke step had a script bug, since fixed). Release exe rebuild for this work is **not done**: the running `targeteleaseuilder3d-app.exe` locks the file.
+Updated 2026-11-13. Full gate passed 2026-11-13 (fmt, clippy, tests, deny, audit, MCP parity, smoke, 28-image capture board; the board and the other steps ran in two runs because the first run's smoke step had a script bug, since fixed). Release exe is current (built 15:22 from the same source; `cargo build --release` reports nothing to do).
 
 Test releases (how-to: [`packaging.md`](packaging.md)): last is **RC1**,
 version 0.1.1, 2026-11-13, `E:\Builder3D-RC\Builder3D-RC1.msi` (50 MB),
@@ -26,6 +26,12 @@ closed. Stop before RB-10 work (S3) as before.
 | MCP catalog parity check | Pass 2026-11-13 (`cargo test -p builder3d-mcp --test ledger_parity`; all 147 ledger rows map to a catalog tool or "visual only") |
 | Release (fat LTO) build | `cargo build --release -p builder3d-app` passed twice on 2026-11-12 (4m50s, 3m43s); failed with LLVM out-of-memory on 2026-11-11 |
 | `review` profile build | Pass (3m56s clean build; capture verified) |
+
+## Review pack waiting for the owner
+
+`evidence/rebuild/captures/2026-11-13-review-of1-9-f9/` (index in its
+`README.md`): F9 and OF-1 to OF-9 from one release exe, both themes.
+Owner review not yet done.
 
 ## Fix-first list (plan section 4)
 
