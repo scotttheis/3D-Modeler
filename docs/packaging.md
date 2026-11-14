@@ -1,8 +1,19 @@
 # Packaging a Windows test release (MSI)
 
 How to turn the current source into an installable `Builder3D-RCn.msi` that
-someone else can run on their PC. Status of past releases lives in
-[`STATUS.md`](STATUS.md), not here.
+someone else can run on their PC. The owner only asks for "a release
+candidate" (or similar); the session does every step below itself and reports
+the MSI path. The last release number is on the "Test releases" line in
+[`STATUS.md`](STATUS.md).
+
+## Steps for the session
+
+1. Read the "Test releases" line in `STATUS.md`; the new candidate is the
+   next number (after RC1 / 0.1.1 comes RC2 / 0.1.2).
+2. Run the one command below. Fix and rerun on any failure.
+3. Update the "Test releases" line in `STATUS.md` (number, version, date,
+   size, verify result), commit on `rebuild/work`.
+4. Give the owner the MSI path and the "person installing it" section below.
 
 ## One command
 

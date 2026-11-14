@@ -150,6 +150,16 @@ product behaviour it mirrors. See plan section 3.7. Each needs a golden-file tes
 Python build's current output. Shared contracts live as test fixtures, never
 as shared source.
 
+## Test releases and packaging
+
+When the owner asks for a release candidate, test build, installer, MSI or
+"something a friend can install", the session does the whole job itself by
+following [`docs/packaging.md`](docs/packaging.md). Do not hand the owner a
+command to run. Take the next RC number from the "Test releases" line in
+`docs/STATUS.md`, build with `-Build -Verify`, update that line, commit, and
+give the owner the MSI path and the tester instructions from the doc. Stopping
+a running Builder3D to unlock the build is always allowed.
+
 ## Git and recovery
 
 This tree is its own Git repository. Commit in the style of the Python tree:

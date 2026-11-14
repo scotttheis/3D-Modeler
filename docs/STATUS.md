@@ -5,6 +5,10 @@ The only place current status is written. Keep it to one screen. Plan:
 
 Updated 2026-11-13. Full gate passed 2026-11-13 (fmt, clippy, tests, deny, audit, MCP parity, smoke, 28-image capture board; the board and the other steps ran in two runs because the first run's smoke step had a script bug, since fixed). Release exe rebuild for this work is **not done**: the running `targeteleaseuilder3d-app.exe` locks the file.
 
+Test releases (how-to: [`packaging.md`](packaging.md)): last is **RC1**,
+version 0.1.1, 2026-11-13, `E:\Builder3D-RC\Builder3D-RC1.msi` (50 MB),
+`-Verify` passed on the dev PC. Next: RC2 / 0.1.2.
+
 ## Now
 
 Stage **S0 Stabilise**. Nothing in S1–S4 starts until the fix-first list is
