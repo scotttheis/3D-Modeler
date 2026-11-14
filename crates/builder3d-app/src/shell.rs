@@ -5696,8 +5696,13 @@ impl Builder3dApp {
             crate::dialogs::dialog_window(ctx, title).show(ctx, |ui| {
                 ui.horizontal(|ui| {
                     ui.label("Axis:");
-                    for (axis, label) in [(Axis::X, "x"), (Axis::Y, "y"), (Axis::Z, "z")] {
-                        ui.selectable_value(&mut self.placement_axis, axis, label);
+                    // Letters in the same colours as the move arrows (OF-41).
+                    for (axis, letter, color) in placement_axis_labels() {
+                        ui.selectable_value(
+                            &mut self.placement_axis,
+                            axis,
+                            RichText::new(letter).strong().color(color),
+                        );
                     }
                 });
                 if command == CommandId::Align {
@@ -7214,6 +7219,13 @@ fn item_is_healthy(object: &builder3d_core::SceneObject) -> bool {
             .iter()
             .all(|child| !child.children().is_empty() || mesh_healthy(child.mesh()))
     }
+}
+
+/// The axis choices of the Mirror, Align and Arrange dialogs: upper-case
+/// letters coloured like the move arrows (OF-41, OF-42).
+fn placement_axis_labels() -> [(Axis, &'static str, Color32); 3] {
+    let [x, y, z] = crate::chrome::AXIS_COLORS;
+    [(Axis::X, "X", x), (Axis::Y, "Y", y), (Axis::Z, "Z", z)]
 }
 
 fn viewport_pointer_interactions_allowed(
@@ -9701,6 +9713,18 @@ mod tests {
                 assert_eq!(history, app.commands.scene().history_state_id());
             }
         }
+    }
+
+    #[test]
+    fn placement_axis_letters_use_the_arrow_colours() {
+        assert_eq!(
+            placement_axis_labels(),
+            [
+                (Axis::X, "X", crate::chrome::AXIS_COLORS[0]),
+                (Axis::Y, "Y", crate::chrome::AXIS_COLORS[1]),
+                (Axis::Z, "Z", crate::chrome::AXIS_COLORS[2]),
+            ]
+        );
     }
 
     #[test]
