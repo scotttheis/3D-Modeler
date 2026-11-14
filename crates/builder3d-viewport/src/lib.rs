@@ -48,8 +48,8 @@ pub use math::{
 };
 pub use picking::{MAX_EXACT_PICK_TRIANGLES, PickHit, pick_ray, pick_scene};
 pub use renderer::{
-    RendererAdapterInfo, RendererConfig, ViewportFrameReport, ViewportRenderOptions,
-    ViewportRenderer, ViewportTheme,
+    DARK_VIEWPORT_TONE, RendererAdapterInfo, RendererConfig, ViewportFrameReport,
+    ViewportRenderOptions, ViewportRenderer, ViewportTheme,
 };
 pub use scene::{
     INTERACTIVE_FULL_RES_FACE_LIMIT, INTERACTIVE_LOD_MAX_FACE_TARGET,

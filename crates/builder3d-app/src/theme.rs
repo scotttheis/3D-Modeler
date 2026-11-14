@@ -216,9 +216,13 @@ impl ThemePalette {
             navigation: Color32::from_rgb(0x15, 0x31, 0x55),
             // Darker than the tab bar, as 3D Builder's tab hover is.
             navigation_hover: Color32::from_rgb(0x0B, 0x1E, 0x3A),
-            // Keep the modelling canvas neutral in both shell themes so the
-            // checkered build floor can fade into one consistent background.
-            viewport: Color32::from_rgb(0xF0, 0xF0, 0xF0),
+            // A neutral grey canvas, somewhat darker than the light theme's
+            // (D4, OF-35); the viewport crate owns the shade so the floor
+            // fades into exactly this colour.
+            viewport: {
+                let [r, g, b, _] = builder3d_viewport::ViewportTheme::Dark.background_srgb8();
+                Color32::from_rgb(r, g, b)
+            },
             grid: Color32::from_rgba_unmultiplied(0x40, 0xB8, 0xDB, 0x1F),
         }
     }

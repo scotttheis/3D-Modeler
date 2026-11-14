@@ -72,6 +72,48 @@ pub enum ViewportTheme {
     Light,
 }
 
+/// Brightness of the viewport in the dark shell theme relative to the light
+/// one (owner decision D4, OF-35): "a bit darker, but not so much as full
+/// dark mode". It scales the background the floor fades into, the floor,
+/// its grid lines and its numbers, in sRGB.
+pub const DARK_VIEWPORT_TONE: f32 = 0.84;
+
+/// Light-theme viewport background, sRGB grey level.
+const VIEWPORT_BACKGROUND_GREY: f32 = 240.0;
+
+impl ViewportTheme {
+    /// sRGB brightness multiplier for the background, floor, grid and floor
+    /// numbers: 1 in the light theme, [`DARK_VIEWPORT_TONE`] in the dark one.
+    #[must_use]
+    pub fn tone(self) -> f32 {
+        match self {
+            Self::Light => 1.0,
+            Self::Dark => DARK_VIEWPORT_TONE,
+        }
+    }
+
+    /// The viewport background as sRGB bytes: the clear colour, and the
+    /// colour the floor fades into at the horizon.
+    #[must_use]
+    pub fn background_srgb8(self) -> [u8; 4] {
+        let grey = (VIEWPORT_BACKGROUND_GREY * self.tone())
+            .round()
+            .clamp(0.0, 255.0) as u8;
+        [grey, grey, grey, 255]
+    }
+
+    /// Darkens a linear-light RGB colour by this theme's sRGB tone.
+    fn tone_linear(self, color: [f32; 4]) -> [f32; 4] {
+        let factor = self.tone().powf(2.4);
+        [
+            color[0] * factor,
+            color[1] * factor,
+            color[2] * factor,
+            color[3],
+        ]
+    }
+}
+
 /// Presentation options owned by the desktop adapter and consumed by the
 /// renderer without changing authoritative scene data.
 #[derive(Clone, Debug, PartialEq)]
@@ -2539,13 +2581,11 @@ fn floor_surface_vertex(position: [f32; 3], color: [f32; 4], fade_parameter: f32
 }
 
 fn floor_line_color(color: [f32; 4], theme: ViewportTheme) -> [f32; 4] {
-    let _ = theme;
-    [0.35, 0.35, 0.38, (color[3] * 0.22).min(0.13)]
+    theme.tone_linear([0.35, 0.35, 0.38, (color[3] * 0.22).min(0.13)])
 }
 
 fn floor_surface_color(theme: ViewportTheme) -> [f32; 4] {
-    let _ = theme;
-    [0.74, 0.74, 0.74, 1.0]
+    theme.tone_linear([0.74, 0.74, 0.74, 1.0])
 }
 
 fn cue_color(color: [f32; 4], theme: ViewportTheme) -> [f32; 4] {
@@ -2560,23 +2600,25 @@ fn cpu_contact_shadow_color(theme: ViewportTheme) -> [f32; 4] {
 }
 
 fn cpu_clear_color(theme: ViewportTheme) -> [u8; 4] {
-    let _ = theme;
-    [240, 240, 240, 255]
+    theme.background_srgb8()
+}
+
+/// Scales an sRGB colour by the theme tone (the CPU fallback works in sRGB).
+fn tone_srgb(color: [f32; 4], theme: ViewportTheme) -> [f32; 4] {
+    let tone = theme.tone();
+    [color[0] * tone, color[1] * tone, color[2] * tone, color[3]]
 }
 
 fn cpu_floor_color(theme: ViewportTheme) -> [f32; 4] {
-    let _ = theme;
-    [0.875, 0.875, 0.875, 1.0]
+    tone_srgb([0.875, 0.875, 0.875, 1.0], theme)
 }
 
 fn cpu_grid_major_color(theme: ViewportTheme) -> [f32; 4] {
-    let _ = theme;
-    [0.35, 0.35, 0.38, 0.13]
+    tone_srgb([0.35, 0.35, 0.38, 0.13], theme)
 }
 
 fn cpu_grid_minor_color(theme: ViewportTheme) -> [f32; 4] {
-    let _ = theme;
-    [0.35, 0.35, 0.38, 0.07]
+    tone_srgb([0.35, 0.35, 0.38, 0.07], theme)
 }
 
 fn pack_overlay(vertices: &[OverlayVertex]) -> Vec<u8> {
@@ -2844,14 +2886,26 @@ mod tests {
         assert_ne!(selected, plain);
         assert!((0.05..=0.45).contains(&selected[3]));
         assert!((0.05..=0.45).contains(&plain[3]));
+    }
+
+    #[test]
+    fn dark_theme_viewport_is_somewhat_darker_and_light_is_unchanged() {
+        // Light theme keeps its original colours.
         assert_eq!(
             floor_surface_color(ViewportTheme::Light),
-            floor_surface_color(ViewportTheme::Dark)
+            [0.74, 0.74, 0.74, 1.0]
         );
-        assert_eq!(
-            cpu_clear_color(ViewportTheme::Dark),
-            cpu_clear_color(ViewportTheme::Light)
-        );
+        assert_eq!(cpu_clear_color(ViewportTheme::Light), [240, 240, 240, 255]);
+        // Dark theme: darker, but still a light grey, not a dark mode.
+        let dark = ViewportTheme::Dark.background_srgb8();
+        assert!(dark[0] < 240 && dark[0] >= 150, "{dark:?}");
+        assert_eq!(cpu_clear_color(ViewportTheme::Dark), dark);
+        let floor_dark = floor_surface_color(ViewportTheme::Dark);
+        assert!(floor_dark[0] < floor_surface_color(ViewportTheme::Light)[0]);
+        // The floor stays darker than the background it fades into.
+        let floor_srgb = 1.055 * floor_dark[0].powf(1.0 / 2.4) - 0.055;
+        assert!(floor_srgb * 255.0 < f32::from(dark[0]));
+        assert!(cpu_floor_color(ViewportTheme::Dark)[0] * 255.0 < f32::from(dark[0]));
     }
 
     #[test]

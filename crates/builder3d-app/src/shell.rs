@@ -4140,18 +4140,23 @@ impl Builder3dApp {
                     },
                     |texture| [texture.width() as f32, texture.height() as f32],
                 );
-                let floor_text =
-                    crate::floor_labels::floor_label_mesh(&painter, &self.camera, atlas_size);
+                let viewport_theme = match self.theme_mode {
+                    ThemeMode::Light => ViewportTheme::Light,
+                    ThemeMode::Dark => ViewportTheme::Dark,
+                };
+                let floor_text = crate::floor_labels::floor_label_mesh(
+                    &painter,
+                    &self.camera,
+                    atlas_size,
+                    viewport_theme,
+                );
                 let render_options = ViewportRenderOptions {
                     grid_visible: display.grid_visible,
                     wireframe: display.wireframe,
                     xray: display.xray,
                     selected_object_ids,
                     lighting: self.commands.preferences().viewport_lighting(),
-                    theme: match self.theme_mode {
-                        ThemeMode::Light => ViewportTheme::Light,
-                        ThemeMode::Dark => ViewportTheme::Dark,
-                    },
+                    theme: viewport_theme,
                     floor_text,
                 };
                 let derived_preview = match (&self.preview, &self.viewport_drag) {

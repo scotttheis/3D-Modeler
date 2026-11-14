@@ -11,8 +11,8 @@
 use std::collections::BTreeMap;
 
 use builder3d_viewport::{
-    Camera, FloorTextMesh, Mat4, PlanarText, PlanarTextVertex, build_floor_scale_labels,
-    build_floor_text,
+    Camera, FloorTextMesh, Mat4, PlanarText, PlanarTextVertex, ViewportTheme,
+    build_floor_scale_labels, build_floor_text,
 };
 use eframe::egui::{self, Color32, FontId};
 
@@ -23,11 +23,12 @@ const LABEL_FONT_POINTS: f32 = 28.0;
 const LABEL_COLOR: [f32; 4] = [0.36, 0.36, 0.38, 0.62];
 
 /// Builds this frame's floor-label mesh with UVs normalised to an atlas of
-/// `atlas_size` texels.
+/// `atlas_size` texels. The text darkens with the floor in the dark theme.
 pub(crate) fn floor_label_mesh(
     painter: &egui::Painter,
     camera: &Camera,
     atlas_size: [f32; 2],
+    theme: ViewportTheme,
 ) -> FloorTextMesh {
     let labels = build_floor_scale_labels(camera);
     if labels.is_empty() || atlas_size[0] <= 0.0 || atlas_size[1] <= 0.0 {
@@ -44,7 +45,14 @@ pub(crate) fn floor_label_mesh(
             planar_text(&galley, LABEL_FONT_POINTS, atlas_size)
         });
     }
-    build_floor_text(&labels, |value| texts.get(&value), LABEL_COLOR)
+    let tone = theme.tone();
+    let color = [
+        LABEL_COLOR[0] * tone,
+        LABEL_COLOR[1] * tone,
+        LABEL_COLOR[2] * tone,
+        LABEL_COLOR[3],
+    ];
+    build_floor_text(&labels, |value| texts.get(&value), color)
 }
 
 /// Converts an egui galley's glyph meshes into the viewport's toolkit-neutral
