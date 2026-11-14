@@ -4253,6 +4253,13 @@ impl Builder3dApp {
                 } else {
                     self.paint_transform_handles(&painter, rect);
                 }
+                let hover = ui.ctx().input(|input| input.pointer.hover_pos());
+                let hovering = response.hovered() && !self.interaction_blocked();
+                if let Some(icon) =
+                    self.transform_handle_cursor(rect, hover, pixels_per_point, hovering)
+                {
+                    ui.ctx().set_cursor_icon(icon);
+                }
                 self.paint_box_selection(&painter, palette);
                 if staged_review_drag {
                     self.viewport_drag = None;
@@ -5237,6 +5244,32 @@ impl Builder3dApp {
             }
         }
         nearest.map(|(_, _, axis)| axis)
+    }
+
+    /// The pointer over a Move, Rotate or Resize handle shows an open hand;
+    /// while a handle is held it shows a closed hand (OF-33).
+    fn transform_handle_cursor(
+        &self,
+        rect: egui::Rect,
+        pointer: Option<egui::Pos2>,
+        pixels_per_point: f32,
+        hovering: bool,
+    ) -> Option<egui::CursorIcon> {
+        match &self.viewport_drag {
+            Some(ViewportDrag::Transform(_)) => return Some(egui::CursorIcon::Grabbing),
+            Some(_) => return None,
+            None => {}
+        }
+        let pointer = pointer.filter(|position| hovering && rect.contains(*position))?;
+        let over_handle = match self.gizmo_mode() {
+            GizmoMode::Resize => self
+                .resize_handle_at_pointer(rect, pointer, pixels_per_point)
+                .is_some(),
+            mode => self
+                .transform_axis_at_pointer(rect, pointer, pixels_per_point, mode)
+                .is_some(),
+        };
+        over_handle.then_some(egui::CursorIcon::Grab)
     }
 
     fn resize_handle_at_pointer(
@@ -9488,6 +9521,11 @@ mod tests {
             app.object_resize_basis = object_basis;
             app.update_gizmo_frame();
             let overlay = app.resize_overlay(rect, None).expect("overlay");
+            assert_eq!(
+                app.transform_handle_cursor(rect, Some(egui::pos2(4., 4.)), 1.0, true),
+                None,
+                "ordinary pointer away from the handles"
+            );
             let grabs = overlay.grab_points().collect::<Vec<_>>();
             assert!(grabs.len() >= 8, "four corner dots and the visible faces");
             for (handle, position) in grabs {
@@ -9496,11 +9534,26 @@ mod tests {
                     app.resize_handle_at_pointer(rect, position, 1.0),
                     Some(handle)
                 );
+                assert_eq!(
+                    app.transform_handle_cursor(rect, Some(position), 1.0, true),
+                    Some(egui::CursorIcon::Grab),
+                    "open hand over every handle (OF-33)"
+                );
+                assert_eq!(
+                    app.transform_handle_cursor(rect, Some(position), 1.0, false),
+                    None,
+                    "no hand when a panel covers the viewport"
+                );
                 let drag = app
                     .begin_transform_drag(rect, position, 1.0)
                     .expect("handle starts gesture");
                 assert!(matches!(drag, ViewportDrag::Transform(_)));
                 app.viewport_drag = Some(drag);
+                assert_eq!(
+                    app.transform_handle_cursor(rect, Some(position), 1.0, true),
+                    Some(egui::CursorIcon::Grabbing),
+                    "closed hand while a handle is held"
+                );
                 let input = ViewportInput {
                     pointer_position: Some(position),
                     pointer_delta: Vec2::ZERO,
@@ -9522,6 +9575,50 @@ mod tests {
                 app.route_viewport_input(rect, 1., input, true);
                 assert_eq!(history, app.commands.scene().history_state_id());
             }
+        }
+    }
+
+    #[test]
+    fn move_and_rotate_handles_show_the_open_hand() {
+        let mut app = Builder3dApp {
+            settings_path: repository_test_directory("of33-handle-cursor").join("settings.json"),
+            ..Default::default()
+        };
+        app.commands
+            .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
+            .expect("cube");
+        app.refresh_preview();
+        app.camera.set_viewport_size(800, 600).expect("size");
+        app.frame_camera_if_pending();
+        let rect = egui::Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(800., 600.));
+        for mode in [TransformPanelMode::Move, TransformPanelMode::Rotate] {
+            app.transform_panel_mode = mode;
+            app.update_gizmo_frame();
+            let gizmo = app.gizmo_mode();
+            let mut on_handle = 0;
+            let mut off_handle = 0;
+            for y in (0..600).step_by(6) {
+                for x in (0..800).step_by(6) {
+                    let point = egui::pos2(x as f32, y as f32);
+                    let over = app
+                        .transform_axis_at_pointer(rect, point, 1.0, gizmo)
+                        .is_some();
+                    let cursor = app.transform_handle_cursor(rect, Some(point), 1.0, true);
+                    if over {
+                        on_handle += 1;
+                        assert_eq!(
+                            cursor,
+                            Some(egui::CursorIcon::Grab),
+                            "{mode:?} at {point:?}"
+                        );
+                    } else {
+                        off_handle += 1;
+                        assert_eq!(cursor, None, "{mode:?} at {point:?}");
+                    }
+                }
+            }
+            assert!(on_handle > 0, "{mode:?} handles were found");
+            assert!(off_handle > on_handle);
         }
     }
 
