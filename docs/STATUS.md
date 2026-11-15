@@ -17,9 +17,25 @@ OF-28 to OF-58, five phases; Emboss OF-56/57 deferred by the owner).
 all "Done, awaiting owner review"). Pack:
 `evidence/rebuild/captures/2026-11-14-review-phase1/`. Owner picks for the
 pack: OF-35 shade A or B; confirm the OF-43 reading (10 mm gap beside the
-original). Next after review: **Phase 2** (OF-44, OF-46, OF-47). Each phase ends in a review pack and a stop for owner
-review. The remaining S0 items (F5, F6) follow the batch unless the owner
-says otherwise. Stop before RB-10 work (S3) as before.
+original).
+
+**Known work, in order** (a session takes the first item not done):
+
+1. Phase 2 — Paint, Material, X-ray (OF-44, OF-46, OF-47). OF-46: stop and
+   ask first if textures would change the `.3dp` format.
+2. Phase 3 — Sculpt and mesh tools (OF-48 to OF-54).
+3. Phase 4 — Measure ruler (OF-55).
+4. Phase 5 — MCP does everything (OF-58).
+5. F5 — release link reliability; F6 — reconcile the 147-row ledger
+   (fix-first list below).
+6. Stop before RB-10 (S3). OF-56/57 (Emboss) stay deferred until the owner
+   brings them back.
+
+Each phase ends with its review pack and a stop for owner review, as
+[`owner-feedback-2026-11-14.md`](owner-feedback-2026-11-14.md) says. When the
+owner starts a new session and asks to carry on, that counts as having looked
+at the previous pack; open owner answers (above) are kept and asked again in
+the next stop message, not guessed.
 
 ## Gates on the working tree (2026-11-12, debug build)
 
