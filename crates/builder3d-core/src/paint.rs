@@ -254,7 +254,9 @@ fn painted_appearance(
         return Ok((object.color(), cleared));
     };
     if colors.iter().all(|face| *face == first) {
-        return Ok((first, cleared));
+        // One solid colour over the whole object replaces its texture, as in
+        // 3D Builder; painting part of it keeps the texture elsewhere.
+        return Ok((first, crate::texture::without_texture(&cleared)));
     }
     let base = object.color();
     let mut palette: Vec<[f32; 4]> = Vec::new();

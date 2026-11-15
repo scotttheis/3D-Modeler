@@ -316,7 +316,7 @@ mod tests {
     fn captured_contract_compiles_for_every_tool_in_every_profile() {
         assert_eq!(
             contract()["tools"].as_object().map(JsonObject::len),
-            Some(63)
+            Some(65)
         );
         assert_eq!(
             contract()["output_schemas"]
@@ -327,9 +327,9 @@ mod tests {
 
         for (profile, expected_count) in [
             (Profile::Observe, 7),
-            (Profile::Model, 55),
-            (Profile::Files, 62),
-            (Profile::Full, 63),
+            (Profile::Model, 56),
+            (Profile::Files, 64),
+            (Profile::Full, 65),
         ] {
             let visible = TOOL_CATALOG
                 .iter()

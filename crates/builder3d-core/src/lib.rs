@@ -24,6 +24,7 @@ mod shell_ops;
 mod simplify;
 mod smooth;
 mod subdivide;
+mod texture;
 mod three_mf;
 mod transform;
 mod wrl;
@@ -95,7 +96,8 @@ pub use project::{
     MAX_PROJECT_METADATA_BYTES, MAX_PROJECT_OBJECT_METADATA_BYTES, MAX_PROJECT_OBJECTS,
     MAX_PROJECT_SCENE_JSON_BYTES, MAX_PROJECT_TOTAL_MESH_FACES, MAX_PROJECT_TOTAL_MESH_VERTICES,
     MAX_PROJECT_UNCOMPRESSED_BYTES, PROJECT_FORMAT, PROJECT_SCHEMA_VERSION, load_project,
-    load_project_bytes, save_project, save_project_bytes,
+    load_project_bytes, referenced_texture_bytes, referenced_texture_ids, save_project,
+    save_project_bytes,
 };
 pub use repair::{
     PlanarCleanupDetail, PlanarCleanupReport, REPAIR_DEFAULT_PROFILE,
@@ -124,6 +126,13 @@ pub use smooth::{
 };
 pub use subdivide::{
     SubdivideReport, SubdivideResult, subdivide_mesh, subdivide_mesh_with_options,
+};
+pub use texture::{
+    BOX_BLEND_POWER, DEFAULT_TEXTURE_TILE_MM, MAX_PROJECT_TEXTURE_BYTES, MAX_TEXTURE_SIDE_PX,
+    MAX_TEXTURE_SOURCE_BYTES, MAX_TEXTURE_STORED_BYTES, MAX_TEXTURE_TILE_MM, MIN_TEXTURE_TILE_MM,
+    ObjectTexture, TEXTURE_METADATA_KEY, TextureEncoding, TextureImage, box_axis, box_uv,
+    box_weights, clamp_tile_mm, import_texture_file, object_texture, register_texture,
+    resolved_texture, texture_by_id, with_texture, without_texture,
 };
 pub use three_mf::{
     MAX_3MF_ARCHIVE_BYTES, MAX_3MF_ARCHIVE_ENTRIES, MAX_3MF_BUILD_ITEMS, MAX_3MF_COMPONENT_DEPTH,

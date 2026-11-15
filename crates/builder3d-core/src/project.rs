@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
 
 use serde::Serialize;
-use serde_json::Value;
+use serde_json::{Map, Value};
 use uuid::Uuid;
 use zip::write::SimpleFileOptions;
 use zip::{CompressionMethod, ZipArchive, ZipWriter};
@@ -78,6 +78,10 @@ struct StoredProject {
     project_id: String,
     scene_revision: u64,
     objects: Vec<StoredObject>,
+    /// Texture images (OF-46) by content id; omitted when there are none so
+    /// untextured projects stay byte-compatible with the reference.
+    #[serde(skip_serializing_if = "Map::is_empty")]
+    textures: Map<String, Value>,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -204,8 +208,15 @@ pub fn save_project_bytes(scene: &Scene) -> Result<Vec<u8>, CoreError> {
         project_id: scene.project_id().to_owned(),
         scene_revision: scene.revision(),
         objects: stored_objects,
+        textures: stored_textures(scene.objects())?,
     };
     let scene_json = serde_json::to_vec_pretty(&project).map_err(CoreError::json)?;
+    if scene_json.len() as u64 > MAX_PROJECT_SCENE_JSON_BYTES {
+        return Err(CoreError::ProjectFormat(format!(
+            "the project description would exceed {} MB; remove a texture or some object notes",
+            MAX_PROJECT_SCENE_JSON_BYTES / (1024 * 1024)
+        )));
+    }
     writer
         .start_file("scene.json", options)
         .map_err(CoreError::archive)?;
@@ -247,6 +258,7 @@ pub fn load_project_bytes(bytes: &[u8]) -> Result<Scene, CoreError> {
     let root: Value = serde_json::from_slice(&scene_json)
         .map_err(|_| CoreError::ProjectFormat("scene.json is not valid UTF-8 JSON".to_owned()))?;
     let validated = validate_project_data(&root, &names)?;
+    let textures = load_textures(&root)?;
     let mut mesh_budget = MeshBudget::default();
     let mut scene = Scene::new();
     let mut objects = Vec::with_capacity(validated.objects.len());
@@ -254,10 +266,100 @@ pub fn load_project_bytes(bytes: &[u8]) -> Result<Scene, CoreError> {
         objects.push(load_object(&mut archive, object, &mut mesh_budget)?);
     }
     validate_scene_objects(&objects)?;
+    for texture in textures {
+        crate::texture::register_texture(texture);
+    }
     scene.set_project_fields(validated.project_id, validated.revision);
     *scene.objects_mut() = objects;
     scene.set_loaded_archive(bytes.to_vec());
     Ok(scene)
+}
+
+/// Most distinct texture images in one project.
+const MAX_PROJECT_TEXTURES: usize = 64;
+
+/// Content ids of every texture the objects (and their group children)
+/// refer to, in a stable order.
+#[must_use]
+pub fn referenced_texture_ids(objects: &[SceneObject]) -> BTreeSet<String> {
+    fn child_ids(child: &SceneChild, ids: &mut BTreeSet<String>) {
+        if let Some(texture) = crate::texture::object_texture(child.metadata()) {
+            ids.insert(texture.id);
+        }
+        for nested in child.children() {
+            child_ids(nested, ids);
+        }
+    }
+    let mut ids = BTreeSet::new();
+    for object in objects {
+        if let Some(texture) = crate::texture::object_texture(object.metadata()) {
+            ids.insert(texture.id);
+        }
+        for child in object.children() {
+            child_ids(child, &mut ids);
+        }
+    }
+    ids
+}
+
+/// Stored bytes of the distinct, resolvable textures the objects refer to.
+#[must_use]
+pub fn referenced_texture_bytes(objects: &[SceneObject]) -> usize {
+    referenced_texture_ids(objects)
+        .iter()
+        .filter_map(|id| crate::texture::texture_by_id(id))
+        .map(|image| image.encoded().len())
+        .sum()
+}
+
+fn stored_textures(objects: &[SceneObject]) -> Result<Map<String, Value>, CoreError> {
+    let mut table = Map::new();
+    let mut total = 0_usize;
+    // A reference whose image is not loaded (for example after the Python
+    // build resaved the project) is kept in metadata but has nothing to write.
+    for id in referenced_texture_ids(objects) {
+        let Some(image) = crate::texture::texture_by_id(&id) else {
+            continue;
+        };
+        total = total.saturating_add(image.encoded().len());
+        if total > crate::texture::MAX_PROJECT_TEXTURE_BYTES || table.len() >= MAX_PROJECT_TEXTURES
+        {
+            return Err(CoreError::ProjectFormat(format!(
+                "the project's textures exceed {} MB or {MAX_PROJECT_TEXTURES} images; remove one",
+                crate::texture::MAX_PROJECT_TEXTURE_BYTES / (1024 * 1024)
+            )));
+        }
+        table.insert(id, crate::texture::texture_to_json(&image));
+    }
+    Ok(table)
+}
+
+fn load_textures(root: &Value) -> Result<Vec<crate::texture::TextureImage>, CoreError> {
+    let Some(table) = root.get("textures") else {
+        return Ok(Vec::new());
+    };
+    let table = table
+        .as_object()
+        .ok_or_else(|| CoreError::ProjectFormat("textures must be an object".to_owned()))?;
+    if table.len() > MAX_PROJECT_TEXTURES {
+        return Err(CoreError::ProjectFormat(format!(
+            "project contains more than {MAX_PROJECT_TEXTURES} textures"
+        )));
+    }
+    let mut total = 0_usize;
+    let mut images = Vec::with_capacity(table.len());
+    for (id, entry) in table {
+        let image = crate::texture::texture_from_json(id, entry)?;
+        total = total.saturating_add(image.encoded().len());
+        if total > crate::texture::MAX_PROJECT_TEXTURE_BYTES {
+            return Err(CoreError::ProjectFormat(format!(
+                "project textures exceed {} bytes",
+                crate::texture::MAX_PROJECT_TEXTURE_BYTES
+            )));
+        }
+        images.push(image);
+    }
+    Ok(images)
 }
 
 fn write_object<W: Write + std::io::Seek>(

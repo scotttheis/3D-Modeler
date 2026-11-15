@@ -486,6 +486,8 @@ pub struct RenderObject {
     color: [f32; 4],
     face_colors: Option<Arc<[[u8; 4]]>>,
     face_color_identity: u64,
+    /// Material texture (OF-46) and its repeat size in millimetres.
+    texture: Option<(Arc<builder3d_core::TextureImage>, f32)>,
     transform: Mat4,
     full_geometry: Arc<MeshGeometry>,
     interaction_geometry: Arc<MeshGeometry>,
@@ -520,6 +522,15 @@ impl RenderObject {
     ) -> Option<[u8; 4]> {
         let source_face = geometry.source_face_index(face_index)?;
         self.face_colors.as_ref()?.get(source_face).copied()
+    }
+
+    /// The object's texture image and repeat size, when it has one. It
+    /// covers every face that has no painted or boolean source colour.
+    #[must_use]
+    pub fn texture(&self) -> Option<(&builder3d_core::TextureImage, f32)> {
+        self.texture
+            .as_ref()
+            .map(|(image, tile_mm)| (image.as_ref(), *tile_mm))
     }
 
     /// Stable cache key for the per-face palette and source assignments.
@@ -736,6 +747,7 @@ fn flatten_object(object: &SceneObject, scene: &mut RenderScene) -> Result<(), V
         color,
         face_colors,
         face_color_identity,
+        texture: builder3d_core::resolved_texture(object.metadata()),
         transform: Mat4::from_rows(object.transform().rows())?,
         full_geometry: full,
         interaction_geometry: interaction,

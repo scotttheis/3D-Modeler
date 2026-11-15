@@ -173,6 +173,8 @@ fn write_objects(
                     )?;
                     // Region paint (OF-44) or boolean source colours.
                     item.face_colors = builder3d_core::object_face_colors(object);
+                    // Material texture (OF-46) travels as a 3MF texture.
+                    item.texture = builder3d_core::object_texture(object.metadata());
                     Ok(item)
                 })
                 .collect::<Result<Vec<_>, CoreError>>()?;

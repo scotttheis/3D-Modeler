@@ -1451,6 +1451,65 @@ impl Scene {
         self.paint_faces(index, faces, color)
     }
 
+    /// Gives the listed objects one texture (OF-46) as one undo entry. The
+    /// image must already be registered; the project's distinct textures
+    /// must stay within [`crate::MAX_PROJECT_TEXTURE_BYTES`].
+    pub fn apply_texture(
+        &mut self,
+        indices: &[usize],
+        image: &crate::TextureImage,
+        tile_mm: f32,
+    ) -> Result<CommandResult, CoreError> {
+        if indices.is_empty() {
+            return Err(CoreError::InvalidObject(
+                "select an object to texture".to_owned(),
+            ));
+        }
+        if crate::texture_by_id(image.id()).is_none() {
+            return Err(CoreError::InvalidTexture(
+                "the image has not been imported".to_owned(),
+            ));
+        }
+        let mut ids = crate::referenced_texture_ids(&self.objects);
+        ids.insert(image.id().to_owned());
+        let total: usize = ids
+            .iter()
+            .filter_map(|id| crate::texture_by_id(id))
+            .map(|texture| texture.encoded().len())
+            .sum();
+        if total > crate::MAX_PROJECT_TEXTURE_BYTES {
+            return Err(CoreError::InvalidTexture(format!(
+                "a project can hold about {} MB of textures; this one would go over",
+                crate::MAX_PROJECT_TEXTURE_BYTES / (1024 * 1024)
+            )));
+        }
+        let reference = crate::ObjectTexture::new(image.id(), tile_mm);
+        let mut commands: Vec<Box<dyn Command>> = Vec::with_capacity(indices.len());
+        for &index in indices {
+            let metadata = crate::with_texture(self.object(index)?.metadata(), &reference);
+            commands.push(Box::new(crate::commands::SetMetadataCommand::new(
+                index, metadata,
+            )));
+        }
+        self.execute(crate::commands::GroupedCommand::new(commands))
+    }
+
+    /// Removes the listed objects' textures as one undo entry; objects
+    /// without one are left alone (no history entry when nothing changes).
+    pub fn remove_texture(&mut self, indices: &[usize]) -> Result<CommandResult, CoreError> {
+        let mut commands: Vec<Box<dyn Command>> = Vec::new();
+        for &index in indices {
+            let metadata = self.object(index)?.metadata();
+            if crate::object_texture(metadata).is_some() {
+                commands.push(Box::new(crate::commands::SetMetadataCommand::new(
+                    index,
+                    crate::without_texture(metadata),
+                )));
+            }
+        }
+        self.execute(crate::commands::GroupedCommand::new(commands))
+    }
+
     /// Sets one object visibility flag through an undoable command.
     pub fn set_visible(&mut self, index: usize, visible: bool) -> Result<CommandResult, CoreError> {
         self.execute(crate::commands::SetVisibilityCommand::new(index, visible))

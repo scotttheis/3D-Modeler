@@ -599,6 +599,22 @@ fn rasterize_geometry(
                 view_positions,
                 light_direction,
                 material_parameters,
+                surface: object
+                    .texture()
+                    .filter(|_| {
+                        authored_face_color.is_none_or(|authored| {
+                            authored == builder3d_core::color_rgba8(object.color())
+                        })
+                    })
+                    .map(|(image, tile_mm)| SurfaceTexture {
+                        image,
+                        tile_mm,
+                        local_positions: [first_position, second_position, third_position],
+                        local_normals: [first_normal, second_normal, third_normal],
+                        authored: object.color(),
+                        selected,
+                        xray,
+                    }),
             }),
         );
     }
@@ -716,11 +732,44 @@ fn rasterize_floor_triangle(
 }
 
 #[derive(Clone, Copy)]
-struct TriangleLighting {
+struct TriangleLighting<'a> {
     normals: [Vec3; 3],
     view_positions: [Vec3; 3],
     light_direction: Vec3,
     material_parameters: [f32; 4],
+    surface: Option<SurfaceTexture<'a>>,
+}
+
+/// A textured triangle (OF-46): the same box projection and tint rule as
+/// the GPU shader, sampled per pixel.
+#[derive(Clone, Copy)]
+struct SurfaceTexture<'a> {
+    image: &'a builder3d_core::TextureImage,
+    tile_mm: f32,
+    local_positions: [Vec3; 3],
+    local_normals: [Vec3; 3],
+    authored: [f32; 4],
+    selected: bool,
+    xray: bool,
+}
+
+impl SurfaceTexture<'_> {
+    fn color_at(&self, weights: [f32; 3]) -> [f32; 4] {
+        let position = interpolate_vector(self.local_positions, weights);
+        let normal = interpolate_vector(self.local_normals, weights);
+        let texel = self.image.sample_box(position, normal, self.tile_mm);
+        let mut base = self.authored;
+        for (channel, value) in base.iter_mut().zip(texel).take(3) {
+            *channel += (crate::renderer::srgb_to_linear(value) - *channel) * texel[3];
+        }
+        if self.xray {
+            crate::xray_shade(base, self.selected)
+        } else if self.selected {
+            crate::selection_shade(base)
+        } else {
+            base
+        }
+    }
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -830,6 +879,9 @@ fn rasterize_triangle_internal(
                 color[3] *= surface.fade_alpha_at(world);
             }
             if let Some(lighting) = mesh_lighting {
+                if let Some(surface) = lighting.surface {
+                    color = surface.color_at([w0, w1, w2]);
+                }
                 let normal = interpolate_vector(lighting.normals, [w0, w1, w2]);
                 let view_position = interpolate_vector(lighting.view_positions, [w0, w1, w2]);
                 color = ViewportLighting::shade_sample(
@@ -935,6 +987,53 @@ mod tests {
 
     use super::*;
     use crate::scene::RenderScene;
+
+    #[test]
+    fn cpu_fallback_draws_a_material_texture_like_the_gpu() {
+        let stripes = image::RgbaImage::from_fn(16, 16, |x, _| {
+            if x < 8 {
+                image::Rgba([230, 20, 20, 255])
+            } else {
+                image::Rgba([20, 20, 230, 255])
+            }
+        });
+        let mut png = Vec::new();
+        assert!(
+            image::DynamicImage::ImageRgba8(stripes)
+                .write_to(&mut std::io::Cursor::new(&mut png), image::ImageFormat::Png)
+                .is_ok()
+        );
+        let texture = builder3d_core::register_texture(
+            builder3d_core::TextureImage::from_source_bytes(&png).expect("texture"),
+        );
+        let mut core_scene = Scene::new();
+        let mesh = make_box([20.0, 20.0, 20.0]).expect("box");
+        assert!(core_scene.add_object(SceneObject::new(mesh)).is_ok());
+        assert!(core_scene.apply_texture(&[0], &texture, 10.0).is_ok());
+        let render_scene = RenderScene::from_core(&core_scene).expect("render scene");
+        assert!(render_scene.objects()[0].texture().is_some());
+        let mut camera = Camera::new();
+        assert!(camera.set_viewport_size(96, 96).is_ok());
+        let bounds = render_scene.world_bounds().ok().flatten().expect("bounds");
+        assert!(camera.frame_bounds(&[bounds]).is_ok());
+        let frame = render_cpu(&render_scene, &camera, 96, 96, false).expect("frame");
+        let (mut reddish, mut bluish) = (0, 0);
+        for pixel in frame.rgba.as_chunks::<4>().0 {
+            let (r, g, b) = (
+                i32::from(pixel[0]),
+                i32::from(pixel[1]),
+                i32::from(pixel[2]),
+            );
+            if r > b + 60 && r > g + 60 {
+                reddish += 1;
+            }
+            if b > r + 60 && b > g + 60 {
+                bluish += 1;
+            }
+        }
+        // Both stripes show on the default green box instead of plain green.
+        assert!(reddish > 50 && bluish > 50, "red {reddish}, blue {bluish}");
+    }
 
     #[test]
     fn cpu_fallback_rasterizes_a_real_triangle_scene() {

@@ -2909,6 +2909,33 @@ verification_context = "Windows 11 Enterprise; Quadro RTX 4000; Python reference
 next_slice = "RB-08"
 
 [[feature]]
+id = "builder3d.ui.paint.material-texture"
+mcp_tool = ["apply_texture", "remove_texture"]
+area = "appearance"
+behavior = "Material texture (OF-46, owner batch 7; new behaviour, no Python equivalent): the Material dialog covers the selected objects with a picture (PNG, JPEG, BMP, GIF, TGA, TIFF, WebP) that is box-mapped in object millimetres and repeats every N mm on every side; Change repeat size and Remove texture; a solid colour or full-coverage paint replaces it; region paint shows over it. The picture (at most 1024 px, re-encoded) is stored inside the .3dp in scene.json's textures table so the Python build still opens the project (colour only). 3MF export writes it as a texture2d with per-corner coordinates. MCP apply_texture and remove_texture make the same core calls."
+python_paths = []
+python_symbols = []
+python_tests = []
+rust_component_ids = ["builder3d.core.texture", "builder3d.app.commands", "builder3d.app.desktop-adapters", "builder3d.viewport.renderer"]
+rust_paths = ["crates/builder3d-core/src/texture.rs", "crates/builder3d-core/src/project.rs", "crates/builder3d-core/src/three_mf.rs", "crates/builder3d-viewport/src/renderer.rs", "crates/builder3d-viewport/src/cpu.rs", "crates/builder3d-app/src/dialogs.rs", "crates/builder3d-app/src/commands.rs", "crates/builder3d-mcp/src/r4/server.rs"]
+rust_symbols = ["TextureImage", "Scene::apply_texture", "Scene::remove_texture", "CommandState::apply_texture_to_selection", "DialogState::texture_section", "box_uv", "box_weights"]
+desktop_entry_points = ["Paint Material"]
+contracts = ["one-undo-per-apply", "solid-colour-replaces-texture", "python-opens-textured-project", "desktop-mcp-same-core-call", "3mf-texture2d"]
+fixture = "crates/builder3d-core/tests/fixtures/projects/rust-textured.3dp, python-resaved-textured.3dp"
+implementation = "pass"
+automated = "pass"
+interactive = "pending"
+visual = "pending"
+owner_acceptance = "pending"
+reuse = "new"
+evidence = ["docs/owner-feedback-2026-11-14.md", "evidence/rebuild/captures/2026-11-14-of46-textures/", "crates/builder3d-core/tests/texture_project_golden.rs"]
+known_limits = ["glTF, OBJ, PLY, WRL and STL exports carry the colour only.", "3MF texture import is not read back (geometry and colours are).", "Box mapping only; no per-face UV editing."]
+visual_capture_pair = ["evidence/rebuild/captures/2026-11-14-of46-textures/before-material-light.png", "evidence/rebuild/captures/2026-11-14-of46-textures/after-texture-dialog-light.png", "evidence/rebuild/captures/2026-11-14-of46-textures/before-material-dark.png", "evidence/rebuild/captures/2026-11-14-of46-textures/after-texture-dialog-dark.png"]
+observed_steps = "Review harness states texture and texture-dialog with the owner's test pictures; Python reference loader opened rust-textured.3dp (colour, reference kept) and resaved it as python-resaved-textured.3dp."
+verification_context = "Windows 11 Enterprise; Quadro RTX 4000; review profile build; 1280x840, 96 DPI / 100%; owner visual review pending."
+next_slice = "owner batch 7 phase 2 review"
+
+[[feature]]
 id = "builder3d.ui.paint.average_color"
 mcp_tool = ["sample_image_color"]
 area = "appearance"

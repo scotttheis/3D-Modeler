@@ -21,6 +21,8 @@ const MODEL_RELATIONSHIP_TYPE: &str =
     "http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel";
 const THUMBNAIL_RELATIONSHIP_TYPE: &str =
     "http://schemas.openxmlformats.org/package/2006/relationships/metadata/thumbnail";
+const TEXTURE_RELATIONSHIP_TYPE: &str =
+    "http://schemas.microsoft.com/3dmanufacturing/2013/01/3dtexture";
 
 /// Maximum bytes accepted for a complete 3MF ZIP archive.
 pub const MAX_3MF_ARCHIVE_BYTES: u64 = 512 * 1024 * 1024;
@@ -251,6 +253,10 @@ pub struct ThreeMfItem {
     pub metadata: ThreeMfMetadata,
     /// Resolved per-face material colors when the model supplied them.
     pub face_colors: Option<Vec<[u8; 4]>>,
+    /// Material texture (OF-46) exported as a 3MF texture2d with box-mapped
+    /// coordinates on every face still in the item's own colour. Not read on
+    /// import.
+    pub texture: Option<crate::ObjectTexture>,
 }
 
 impl ThreeMfItem {
@@ -271,8 +277,59 @@ impl ThreeMfItem {
             object_id: String::new(),
             metadata: ThreeMfMetadata::new(),
             face_colors: None,
+            texture: None,
         })
     }
+}
+
+/// The distinct texture images the items refer to, in first-use order,
+/// with the package path each is written to.
+fn export_textures(items: &[ThreeMfItem]) -> Vec<(std::sync::Arc<crate::TextureImage>, String)> {
+    let mut textures: Vec<(std::sync::Arc<crate::TextureImage>, String)> = Vec::new();
+    for item in items {
+        let Some(reference) = &item.texture else {
+            continue;
+        };
+        let Some(image) = crate::texture_by_id(&reference.id) else {
+            continue;
+        };
+        if textures.iter().any(|(known, _)| known.id() == image.id()) {
+            continue;
+        }
+        let path = format!(
+            "/3D/Textures/texture_{}.{}",
+            &image.id()[..16],
+            image.encoding().extension()
+        );
+        textures.push((image, path));
+    }
+    textures
+}
+
+/// Box-mapped texture coordinates for each face of a local mesh, three per
+/// face, using the same projection as the viewport (one axis per face).
+fn face_texture_coordinates(mesh: &Mesh, tile_mm: f32) -> Vec<[[f32; 2]; 3]> {
+    mesh.faces
+        .iter()
+        .map(|face| {
+            let corner = |index: u32| {
+                mesh.vertices
+                    .get(index as usize)
+                    .copied()
+                    .unwrap_or([0.0; 3])
+            };
+            let [a, b, c] = [corner(face[0]), corner(face[1]), corner(face[2])];
+            let ab = [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
+            let ac = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
+            let normal = [
+                ab[1] * ac[2] - ab[2] * ac[1],
+                ab[2] * ac[0] - ab[0] * ac[2],
+                ab[0] * ac[1] - ab[1] * ac[0],
+            ];
+            let axis = crate::box_axis(normal);
+            [a, b, c].map(|point| crate::box_uv(point, normal, axis, tile_mm))
+        })
+        .collect()
 }
 
 /// Parsed package data and its millimetre scene instances.
@@ -2197,6 +2254,78 @@ fn model_xml(
     }
     write_end(&mut writer, "m:basematerials")?;
 
+    // Textures (OF-46): one texture2d per image, one texture2dgroup of
+    // per-corner coordinates per textured item. Ids follow the objects'.
+    let textures = export_textures(items);
+    let mut next_resource_id = items.len() + 2;
+    let mut texture_resource_ids = HashMap::new();
+    for (image, path) in &textures {
+        write_empty(
+            &mut writer,
+            "m:texture2d",
+            &[
+                ("id", next_resource_id.to_string()),
+                ("path", path.clone()),
+                ("contenttype", image.encoding().mime().to_owned()),
+                ("tilestyleu", "wrap".to_owned()),
+                ("tilestylev", "wrap".to_owned()),
+            ],
+        )?;
+        texture_resource_ids.insert(image.id().to_owned(), next_resource_id);
+        next_resource_id += 1;
+    }
+    let mut item_texture_groups: Vec<Option<(usize, Vec<bool>)>> = Vec::with_capacity(items.len());
+    for item in items {
+        let resource = item.texture.as_ref().and_then(|reference| {
+            texture_resource_ids
+                .get(&reference.id)
+                .map(|texture_id| (*texture_id, reference.tile_mm))
+        });
+        let Some((texture_id, tile_mm)) = resource else {
+            item_texture_groups.push(None);
+            continue;
+        };
+        let base = export_color_bytes(item.color)?;
+        let textured_faces = (0..item.mesh.face_count())
+            .map(|face| {
+                item.face_colors
+                    .as_ref()
+                    .and_then(|colors| colors.get(face))
+                    .is_none_or(|color| *color == base)
+            })
+            .collect::<Vec<_>>();
+        let group_id = next_resource_id;
+        next_resource_id += 1;
+        write_start(
+            &mut writer,
+            "m:texture2dgroup",
+            &[
+                ("id", group_id.to_string()),
+                ("texid", texture_id.to_string()),
+            ],
+        )?;
+        for (face, coordinates) in face_texture_coordinates(&item.mesh, tile_mm)
+            .into_iter()
+            .enumerate()
+        {
+            if !textured_faces.get(face).copied().unwrap_or(false) {
+                continue;
+            }
+            for [u, v] in coordinates {
+                write_empty(
+                    &mut writer,
+                    "m:tex2coord",
+                    &[
+                        ("u", format_number(f64::from(u))?),
+                        ("v", format_number(f64::from(v))?),
+                    ],
+                )?;
+            }
+        }
+        write_end(&mut writer, "m:texture2dgroup")?;
+        item_texture_groups.push(Some((group_id, textured_faces)));
+    }
+
     for (index, item) in items.iter().enumerate() {
         item.mesh.validate_non_empty()?;
         let name = if item.name.is_empty() {
@@ -2237,8 +2366,27 @@ fn model_xml(
         }
         write_end(&mut writer, "vertices")?;
         write_start(&mut writer, "triangles", &[])?;
+        let texture_group = item_texture_groups.get(index).and_then(Option::as_ref);
+        let mut next_coordinate = 0_usize;
         for (face_index, face) in item.mesh.faces.iter().enumerate() {
-            if let Some(face_colors) = &item.face_colors {
+            if let Some((group_id, textured_faces)) = texture_group
+                && textured_faces.get(face_index).copied().unwrap_or(false)
+            {
+                write_empty(
+                    &mut writer,
+                    "triangle",
+                    &[
+                        ("v1", face[0].to_string()),
+                        ("v2", face[1].to_string()),
+                        ("v3", face[2].to_string()),
+                        ("pid", group_id.to_string()),
+                        ("p1", next_coordinate.to_string()),
+                        ("p2", (next_coordinate + 1).to_string()),
+                        ("p3", (next_coordinate + 2).to_string()),
+                    ],
+                )?;
+                next_coordinate += 3;
+            } else if let Some(face_colors) = &item.face_colors {
                 let color = face_colors
                     .get(face_index)
                     .ok_or_else(|| CoreError::three_mf("export face-color entry is unavailable"))?;
@@ -2302,7 +2450,7 @@ fn model_xml(
     Ok(bytes)
 }
 
-fn content_types_xml(include_thumbnail: bool) -> Result<Vec<u8>, CoreError> {
+fn content_types_xml(include_png: bool, include_jpeg: bool) -> Result<Vec<u8>, CoreError> {
     let mut writer = Writer::new(Vec::new());
     writer
         .write_event(Event::Decl(BytesDecl::new("1.0", Some("UTF-8"), None)))
@@ -2334,13 +2482,23 @@ fn content_types_xml(include_thumbnail: bool) -> Result<Vec<u8>, CoreError> {
             ),
         ],
     )?;
-    if include_thumbnail {
+    if include_png {
         write_empty(
             &mut writer,
             "Default",
             &[
                 ("Extension", "png".to_owned()),
                 ("ContentType", "image/png".to_owned()),
+            ],
+        )?;
+    }
+    if include_jpeg {
+        write_empty(
+            &mut writer,
+            "Default",
+            &[
+                ("Extension", "jpg".to_owned()),
+                ("ContentType", "image/jpeg".to_owned()),
             ],
         )?;
     }
@@ -2409,7 +2567,16 @@ pub fn export_3mf(
         }
     }
     let model = model_xml(items, &merge_metadata(items, metadata), &limits)?;
-    let content_types = content_types_xml(thumbnail_data.is_some())?;
+    let textures = export_textures(items);
+    let has_encoding = |encoding: crate::TextureEncoding| {
+        textures
+            .iter()
+            .any(|(image, _)| image.encoding() == encoding)
+    };
+    let content_types = content_types_xml(
+        thumbnail_data.is_some() || has_encoding(crate::TextureEncoding::Png),
+        has_encoding(crate::TextureEncoding::Jpeg),
+    )?;
     let root_relationships =
         relationships_xml(&[("rModel", MODEL_RELATIONSHIP_TYPE, "/3D/3dmodel.model")])?;
     let mut writer = ZipWriter::new(Cursor::new(Vec::new()));
@@ -2434,12 +2601,22 @@ pub fn export_3mf(
     writer
         .write_all(&model)
         .map_err(|error| CoreError::three_mf(format!("could not write model part: {error}")))?;
-    if let Some(thumbnail) = thumbnail_data {
-        let model_relationships = relationships_xml(&[(
+    let texture_relationship_ids = (0..textures.len())
+        .map(|index| format!("rTexture{}", index + 1))
+        .collect::<Vec<_>>();
+    let mut model_relationship_entries = Vec::new();
+    if thumbnail_data.is_some() {
+        model_relationship_entries.push((
             "rThumbnail",
             THUMBNAIL_RELATIONSHIP_TYPE,
             "../Metadata/thumbnail.png",
-        )])?;
+        ));
+    }
+    for ((_, path), id) in textures.iter().zip(&texture_relationship_ids) {
+        model_relationship_entries.push((id.as_str(), TEXTURE_RELATIONSHIP_TYPE, path.as_str()));
+    }
+    if !model_relationship_entries.is_empty() {
+        let model_relationships = relationships_xml(&model_relationship_entries)?;
         writer
             .start_file("3D/_rels/3dmodel.model.rels", options)
             .map_err(|error| {
@@ -2448,6 +2625,16 @@ pub fn export_3mf(
         writer.write_all(&model_relationships).map_err(|error| {
             CoreError::three_mf(format!("could not write model relationships: {error}"))
         })?;
+    }
+    for (image, path) in &textures {
+        writer
+            .start_file(path.trim_start_matches('/'), options)
+            .map_err(|error| CoreError::three_mf(format!("could not start texture: {error}")))?;
+        writer
+            .write_all(image.encoded())
+            .map_err(|error| CoreError::three_mf(format!("could not write texture: {error}")))?;
+    }
+    if let Some(thumbnail) = thumbnail_data {
         writer
             .start_file("Metadata/thumbnail.png", options)
             .map_err(|error| CoreError::three_mf(format!("could not start thumbnail: {error}")))?;

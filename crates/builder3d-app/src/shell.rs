@@ -592,6 +592,12 @@ impl Builder3dApp {
                 builder3d_core::PrimitiveKind::Cube,
                 builder3d_core::PrimitiveKind::Sphere,
             ],
+            ReviewState::Texture => &[
+                builder3d_core::PrimitiveKind::Cube,
+                builder3d_core::PrimitiveKind::Sphere,
+                builder3d_core::PrimitiveKind::Cylinder,
+            ],
+            ReviewState::TextureDialog => &[builder3d_core::PrimitiveKind::Cube],
         };
         for (index, kind) in primitives.iter().copied().enumerate() {
             self.dispatch(CommandId::AddPrimitive(kind));
@@ -667,6 +673,26 @@ impl Builder3dApp {
                 if review.state() == ReviewState::PaintPicker {
                     mode.open_colour_picker();
                 }
+            }
+        }
+        if matches!(
+            review.state(),
+            ReviewState::Texture | ReviewState::TextureDialog
+        ) {
+            let pictures = crate::review_capture::review_texture_paths();
+            let count = self.commands.scene().objects().len();
+            for index in 0..count {
+                self.commands.set_selection_indices([index]);
+                let picture = pictures.get(index % pictures.len().max(1)).cloned();
+                let _ = self
+                    .commands
+                    .apply_texture_to_selection(picture.as_deref(), 20.0);
+            }
+            if review.state() == ReviewState::Texture {
+                self.commands.set_selection_indices(std::iter::empty());
+            } else {
+                self.commands.set_selection_indices([0]);
+                self.dispatch(CommandId::Material);
             }
         }
         if review.state() == ReviewState::Xray {
@@ -5932,6 +5958,8 @@ impl Builder3dApp {
                 | DialogAction::Export(_, _)
                 | DialogAction::Color(_)
                 | DialogAction::ColorFromImage(_)
+                | DialogAction::Texture(_, _)
+                | DialogAction::RemoveTexture
                 | DialogAction::Torus(_)
                 | DialogAction::Emboss(_)
                 | DialogAction::Hollow(_)
@@ -6132,6 +6160,17 @@ impl Builder3dApp {
             DialogAction::ColorFromImage(path) => {
                 self.commands.set_selected_color_from_image(&path, 8)
             }
+            DialogAction::Texture(path, tile_mm) => self
+                .commands
+                .apply_texture_to_selection(
+                    (!path.as_os_str().is_empty()).then_some(path.as_path()),
+                    tile_mm,
+                )
+                .map(|_| self.commands.last_status().to_owned()),
+            DialogAction::RemoveTexture => self
+                .commands
+                .remove_texture_from_selection()
+                .map(|_| self.commands.last_status().to_owned()),
             DialogAction::Torus(parameters) => self.commands.update_selected_torus(parameters),
             DialogAction::TorusPreview(parameters) => {
                 self.update_torus_preview(parameters);

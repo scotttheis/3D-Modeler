@@ -1346,6 +1346,67 @@ impl CommandState {
         Ok(message)
     }
 
+    /// Covers the whole selection with a picture (OF-46) as one undo entry.
+    /// With no path, the selection's current texture gets the new repeat
+    /// size. MCP `apply_texture` makes the same core calls.
+    pub fn apply_texture_to_selection(
+        &mut self,
+        path: Option<&Path>,
+        tile_mm: f32,
+    ) -> Result<CommandOutcome, CommandError> {
+        let indices = self.selected_indices("Texture")?;
+        let image = match path {
+            Some(path) => {
+                validate_path(path)?;
+                builder3d_core::import_texture_file(path)?
+            }
+            None => indices
+                .iter()
+                .find_map(|index| {
+                    self.scene
+                        .object(*index)
+                        .ok()
+                        .and_then(|object| builder3d_core::resolved_texture(object.metadata()))
+                })
+                .map(|(image, _)| image)
+                .ok_or_else(|| {
+                    CommandError::Core(CoreError::InvalidTexture(
+                        "choose a picture first".to_owned(),
+                    ))
+                })?,
+        };
+        let result = self.scene.apply_texture(&indices, &image, tile_mm)?;
+        if !result.changed {
+            let message = String::from("Texture unchanged");
+            self.status(message.clone());
+            return Ok(CommandOutcome::Noop(message));
+        }
+        self.dirty = true;
+        let message = format!(
+            "Texture applied to {} object(s), repeating every {:.0} mm",
+            indices.len(),
+            builder3d_core::clamp_tile_mm(tile_mm)
+        );
+        self.status(message.clone());
+        Ok(CommandOutcome::Applied(message))
+    }
+
+    /// Removes the selection's textures as one undo entry; their colour
+    /// shows again.
+    pub fn remove_texture_from_selection(&mut self) -> Result<CommandOutcome, CommandError> {
+        let indices = self.selected_indices("Remove texture")?;
+        let result = self.scene.remove_texture(&indices)?;
+        if !result.changed {
+            let message = String::from("No texture to remove");
+            self.status(message.clone());
+            return Ok(CommandOutcome::Noop(message));
+        }
+        self.dirty = true;
+        let message = format!("Texture removed from {} object(s)", indices.len());
+        self.status(message.clone());
+        Ok(CommandOutcome::Applied(message))
+    }
+
     /// Applies one atomic world-space transform to the current selection.
     pub fn transform_selected(
         &mut self,
@@ -2752,6 +2813,92 @@ mod tests {
             assert!(state.dispatch(CommandId::Undo).is_ok());
             assert!(builder3d_core::object_face_colors(&state.scene().objects()[0]).is_some());
         }
+    }
+
+    fn run_mcp_in_root(
+        commands: &mut CommandState,
+        root: &Path,
+        tool: &str,
+        arguments: serde_json::Value,
+    ) -> serde_json::Value {
+        let version = commands.mcp_document_version();
+        let roots =
+            builder3d_mcp::ApprovedRoots::from_paths([root.to_path_buf()]).expect("approved root");
+        let server = builder3d_mcp::R4Server::new(builder3d_mcp::R4Config::for_profile(
+            builder3d_mcp::Profile::Full,
+            roots,
+        ));
+        let mut document = Some(commands.take_mcp_document(builder3d_mcp::ViewState::default()));
+        server.replace_document(&mut document).expect("attach");
+        let result = server.call_value(tool, arguments).expect("MCP call");
+        let document = server.take_document().expect("detach");
+        commands
+            .install_mcp_document(document, &version)
+            .expect("install");
+        result
+    }
+
+    #[test]
+    fn mcp_texture_tools_match_the_desktop_material_texture() {
+        let root = std::env::temp_dir().join(format!("builder3d-of46-{}", std::process::id()));
+        let _ = std::fs::create_dir_all(&root);
+        let picture = root.join("stripes.png");
+        let image = image::RgbaImage::from_fn(16, 16, |x, _| {
+            if x < 8 {
+                image::Rgba([200, 40, 40, 255])
+            } else {
+                image::Rgba([40, 40, 200, 255])
+            }
+        });
+        assert!(image.save(&picture).is_ok());
+        let (mut desktop, mut mcp) = one_cube_pair();
+        let history = desktop.scene().history_state_id();
+        assert!(matches!(
+            desktop.apply_texture_to_selection(Some(&picture), 30.0),
+            Ok(CommandOutcome::Applied(_))
+        ));
+        let result = run_mcp_in_root(
+            &mut mcp,
+            &root,
+            "apply_texture",
+            serde_json::json!({"path":picture.display().to_string(),"tile_mm":30.0,"indices":[0]}),
+        );
+        assert_eq!(
+            result["changed_object_ids"].as_array().map(Vec::len),
+            Some(1)
+        );
+        assert_eq!(result["objects"][0]["texture"]["tile_mm"], 30.0);
+        let texture_of = |state: &CommandState| {
+            builder3d_core::object_texture(state.scene().objects()[0].metadata())
+        };
+        assert!(texture_of(&desktop).is_some());
+        assert_eq!(texture_of(&desktop), texture_of(&mcp));
+        // No picture: the current texture takes the new repeat size.
+        assert!(desktop.apply_texture_to_selection(None, 60.0).is_ok());
+        run_mcp_in_root(
+            &mut mcp,
+            &root,
+            "apply_texture",
+            serde_json::json!({"tile_mm":60.0,"indices":[0]}),
+        );
+        assert_eq!(texture_of(&desktop), texture_of(&mcp));
+        assert!(texture_of(&mcp).is_some_and(|texture| (texture.tile_mm - 60.0).abs() < 1e-4));
+        assert!(matches!(
+            desktop.remove_texture_from_selection(),
+            Ok(CommandOutcome::Applied(_))
+        ));
+        run_mcp(
+            &mut mcp,
+            "remove_texture",
+            serde_json::json!({"indices":[0]}),
+        );
+        for state in [&mut desktop, &mut mcp] {
+            assert!(texture_of(state).is_none());
+            assert_eq!(state.scene().history_state_id(), history + 3);
+            assert!(state.dispatch(CommandId::Undo).is_ok());
+            assert!(texture_of(state).is_some());
+        }
+        let _ = std::fs::remove_dir_all(&root);
     }
 
     #[test]

@@ -514,9 +514,9 @@ impl R4Server {
             | "apply_actions" => self.wrapped_detail_result(name, arguments, &raw)?,
             "scene_summary" => self.scene_summary(arguments.get("fields"))?,
             "select" | "settle" | "mirror" | "rename_object" | "set_visibility" | "paint"
-            | "align" | "arrange" | "undo" | "redo" | "delete_selected" | "cut_selected"
-            | "paste" | "duplicate_selected" | "group_selected" | "ungroup_selected"
-            | "sample_image_color" => {
+            | "apply_texture" | "remove_texture" | "align" | "arrange" | "undo" | "redo"
+            | "delete_selected" | "cut_selected" | "paste" | "duplicate_selected"
+            | "group_selected" | "ungroup_selected" | "sample_image_color" => {
                 self.scene_summary_with_changes(None, changed_object_ids(&raw))?
             }
             "snap_translate" => self.snap_translation_result(arguments, &raw)?,
@@ -827,6 +827,8 @@ impl R4Server {
             "rename_object" => self.rename_object(args),
             "set_visibility" => self.set_visibility(args),
             "paint" => self.paint(args),
+            "apply_texture" => self.apply_texture(args),
+            "remove_texture" => self.remove_texture(args),
             "align" => self.align(args),
             "arrange" => self.arrange(args),
             "set_color" => self.set_color(args),
@@ -1545,6 +1547,58 @@ impl R4Server {
             Some((object_id, index)),
             None,
         ))
+    }
+
+    /// Desktop Material > Texture (OF-46): the same core import and one
+    /// grouped undo entry. Without `path`, the targets' current texture
+    /// takes the new repeat size.
+    fn apply_texture(&self, args: &Map<String, Value>) -> Result<Value, AdapterError> {
+        let tile_mm = schema::number_or(args, "tile_mm", builder3d_core::DEFAULT_TEXTURE_TILE_MM)?;
+        let image = match args.get("path") {
+            None | Some(Value::Null) => None,
+            Some(Value::String(path)) if !path.trim().is_empty() => {
+                let path = self.config.approved_roots.read_path(path)?;
+                Some(builder3d_core::import_texture_file(&path)?)
+            }
+            Some(_) => {
+                return Err(AdapterError::Validation(
+                    "path must be a picture file path".to_owned(),
+                ));
+            }
+        };
+        let mut state = self.lock_state()?;
+        check_expected(&state, args)?;
+        let indices = selected_or_targets(&state.scene, args)?;
+        let image = match image {
+            Some(image) => image,
+            None => indices
+                .iter()
+                .find_map(|index| {
+                    state
+                        .scene
+                        .object(*index)
+                        .ok()
+                        .and_then(|object| builder3d_core::resolved_texture(object.metadata()))
+                })
+                .map(|(image, _)| image)
+                .ok_or_else(|| {
+                    AdapterError::Validation(
+                        "path is required when the objects have no texture yet".to_owned(),
+                    )
+                })?,
+        };
+        let result = state.scene.apply_texture(&indices, &image, tile_mm)?;
+        state.dirty |= result.changed;
+        Ok(command_output("apply_texture", &result, None, None))
+    }
+
+    fn remove_texture(&self, args: &Map<String, Value>) -> Result<Value, AdapterError> {
+        let mut state = self.lock_state()?;
+        check_expected(&state, args)?;
+        let indices = selected_or_targets(&state.scene, args)?;
+        let result = state.scene.remove_texture(&indices)?;
+        state.dirty |= result.changed;
+        Ok(command_output("remove_texture", &result, None, None))
     }
 
     fn align(&self, args: &Map<String, Value>) -> Result<Value, AdapterError> {
@@ -3106,6 +3160,21 @@ fn object_summary(
     if include("color") {
         summary.insert("color".to_owned(), json!(object.color()));
     }
+    if include("texture")
+        && let Some(texture) = builder3d_core::object_texture(object.metadata())
+    {
+        let image = builder3d_core::texture_by_id(&texture.id);
+        summary.insert(
+            "texture".to_owned(),
+            json!({
+                "id": texture.id,
+                "tile_mm": texture.tile_mm,
+                "loaded": image.is_some(),
+                "width_px": image.as_ref().map(|image| image.width()),
+                "height_px": image.as_ref().map(|image| image.height()),
+            }),
+        );
+    }
     if include("mesh_health") {
         summary.insert(
             "mesh_health".to_owned(),
@@ -3819,12 +3888,15 @@ mod tests {
     fn full_profile_publishes_the_fixed_catalog_with_strict_metadata() {
         let server = server(Profile::Full);
         let tools = server.tools();
-        assert_eq!(tools.len(), 63);
+        assert_eq!(tools.len(), 65);
         assert_eq!(
             tools.first().map(|tool| tool.name.as_ref()),
             Some("get_status")
         );
-        assert_eq!(tools.last().map(|tool| tool.name.as_ref()), Some("paint"));
+        assert_eq!(
+            tools.last().map(|tool| tool.name.as_ref()),
+            Some("remove_texture")
+        );
         let launch = tools.iter().find(|tool| tool.name == "launch_slicer");
         assert_eq!(
             launch

@@ -358,12 +358,15 @@ mod tests {
             )),
         );
         let tools = gateway.tools();
-        assert_eq!(tools.len(), 63);
+        assert_eq!(tools.len(), 65);
         assert_eq!(
             tools.first().map(|tool| tool.name.as_ref()),
             Some("get_status")
         );
-        assert_eq!(tools.last().map(|tool| tool.name.as_ref()), Some("paint"));
+        assert_eq!(
+            tools.last().map(|tool| tool.name.as_ref()),
+            Some("remove_texture")
+        );
         assert!(matches!(
             gateway.call_desktop("get_status", &json!({})),
             Err(AdapterError::Unavailable(_))

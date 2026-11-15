@@ -354,14 +354,19 @@ impl Command for SetColorCommand {
         if self.target_id.is_none() {
             self.target_id = Some(object.object_id().to_owned());
         }
-        if object.color() == self.new_color {
+        let textured = crate::texture::object_texture(object.metadata()).is_some();
+        if object.color() == self.new_color && !textured {
             return Ok(false);
         }
         if self.old_color.is_none() {
             self.old_color = Some(object.color());
             self.old_metadata = Some(object.metadata().clone());
         }
-        let metadata = with_boolean_target_color(object.metadata(), self.new_color);
+        // A solid colour replaces the object's texture (OF-46).
+        let metadata = crate::texture::without_texture(&with_boolean_target_color(
+            object.metadata(),
+            self.new_color,
+        ));
         object.set_color_raw(self.new_color);
         object.set_metadata_raw(metadata);
         Ok(true)

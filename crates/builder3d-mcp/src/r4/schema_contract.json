@@ -421,6 +421,56 @@
               "default": null,
               "title": "Size Mm"
             },
+            "texture": {
+              "anyOf": [
+                {
+                  "additionalProperties": false,
+                  "description": "Material texture (OF-46): content id, repeat size, and whether the picture is loaded (false after the Python build resaved the project).",
+                  "properties": {
+                    "height_px": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "loaded": {
+                      "type": "boolean"
+                    },
+                    "tile_mm": {
+                      "type": "number"
+                    },
+                    "width_px": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "tile_mm",
+                    "loaded"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Texture"
+            },
             "torus_parameters": {
               "anyOf": [
                 {
@@ -1351,6 +1401,56 @@
               ],
               "default": null
             },
+            "texture": {
+              "anyOf": [
+                {
+                  "additionalProperties": false,
+                  "description": "Material texture (OF-46): content id, repeat size, and whether the picture is loaded (false after the Python build resaved the project).",
+                  "properties": {
+                    "height_px": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "loaded": {
+                      "type": "boolean"
+                    },
+                    "tile_mm": {
+                      "type": "number"
+                    },
+                    "width_px": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "tile_mm",
+                    "loaded"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Texture"
+            },
             "torus_parameters": {
               "anyOf": [
                 {
@@ -1833,6 +1933,56 @@
               ],
               "default": null,
               "title": "Size Mm"
+            },
+            "texture": {
+              "anyOf": [
+                {
+                  "additionalProperties": false,
+                  "description": "Material texture (OF-46): content id, repeat size, and whether the picture is loaded (false after the Python build resaved the project).",
+                  "properties": {
+                    "height_px": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "loaded": {
+                      "type": "boolean"
+                    },
+                    "tile_mm": {
+                      "type": "number"
+                    },
+                    "width_px": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "tile_mm",
+                    "loaded"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Texture"
             },
             "torus_parameters": {
               "anyOf": [
@@ -3109,6 +3259,56 @@
               ],
               "default": null
             },
+            "texture": {
+              "anyOf": [
+                {
+                  "additionalProperties": false,
+                  "description": "Material texture (OF-46): content id, repeat size, and whether the picture is loaded (false after the Python build resaved the project).",
+                  "properties": {
+                    "height_px": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "loaded": {
+                      "type": "boolean"
+                    },
+                    "tile_mm": {
+                      "type": "number"
+                    },
+                    "width_px": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "tile_mm",
+                    "loaded"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Texture"
+            },
             "torus_parameters": {
               "anyOf": [
                 {
@@ -3677,6 +3877,56 @@
               ],
               "default": null,
               "title": "Size Mm"
+            },
+            "texture": {
+              "anyOf": [
+                {
+                  "additionalProperties": false,
+                  "description": "Material texture (OF-46): content id, repeat size, and whether the picture is loaded (false after the Python build resaved the project).",
+                  "properties": {
+                    "height_px": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "loaded": {
+                      "type": "boolean"
+                    },
+                    "tile_mm": {
+                      "type": "number"
+                    },
+                    "width_px": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "tile_mm",
+                    "loaded"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Texture"
             },
             "torus_parameters": {
               "anyOf": [
@@ -4687,6 +4937,56 @@
               "default": null,
               "title": "Size Mm"
             },
+            "texture": {
+              "anyOf": [
+                {
+                  "additionalProperties": false,
+                  "description": "Material texture (OF-46): content id, repeat size, and whether the picture is loaded (false after the Python build resaved the project).",
+                  "properties": {
+                    "height_px": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "loaded": {
+                      "type": "boolean"
+                    },
+                    "tile_mm": {
+                      "type": "number"
+                    },
+                    "width_px": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "tile_mm",
+                    "loaded"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Texture"
+            },
             "torus_parameters": {
               "anyOf": [
                 {
@@ -5513,6 +5813,56 @@
                 }
               ],
               "default": null
+            },
+            "texture": {
+              "anyOf": [
+                {
+                  "additionalProperties": false,
+                  "description": "Material texture (OF-46): content id, repeat size, and whether the picture is loaded (false after the Python build resaved the project).",
+                  "properties": {
+                    "height_px": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "loaded": {
+                      "type": "boolean"
+                    },
+                    "tile_mm": {
+                      "type": "number"
+                    },
+                    "width_px": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "tile_mm",
+                    "loaded"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Texture"
             },
             "torus_parameters": {
               "anyOf": [
@@ -6410,6 +6760,56 @@
           ],
           "default": null
         },
+        "texture": {
+          "anyOf": [
+            {
+              "additionalProperties": false,
+              "description": "Material texture (OF-46): content id, repeat size, and whether the picture is loaded (false after the Python build resaved the project).",
+              "properties": {
+                "height_px": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "id": {
+                  "type": "string"
+                },
+                "loaded": {
+                  "type": "boolean"
+                },
+                "tile_mm": {
+                  "type": "number"
+                },
+                "width_px": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "tile_mm",
+                "loaded"
+              ],
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Texture"
+        },
         "torus_parameters": {
           "anyOf": [
             {
@@ -7051,6 +7451,56 @@
               ],
               "default": null,
               "title": "Size Mm"
+            },
+            "texture": {
+              "anyOf": [
+                {
+                  "additionalProperties": false,
+                  "description": "Material texture (OF-46): content id, repeat size, and whether the picture is loaded (false after the Python build resaved the project).",
+                  "properties": {
+                    "height_px": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "loaded": {
+                      "type": "boolean"
+                    },
+                    "tile_mm": {
+                      "type": "number"
+                    },
+                    "width_px": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "tile_mm",
+                    "loaded"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Texture"
             },
             "torus_parameters": {
               "anyOf": [
@@ -11702,6 +12152,188 @@
           "color"
         ],
         "title": "paintArguments",
+        "type": "object"
+      },
+      "output_schema_id": "c4e458f9c57d4c836dce7e46e8c5eaccc2e4f21cfa6c7d5ed60774b491697f1d"
+    },
+    "apply_texture": {
+      "input_schema": {
+        "properties": {
+          "expected_project_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Expected Project Id"
+          },
+          "expected_scene_revision": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Expected Scene Revision"
+          },
+          "idempotency_key": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Idempotency Key"
+          },
+          "indices": {
+            "anyOf": [
+              {
+                "items": {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Indices"
+          },
+          "object_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Object Ids"
+          },
+          "path": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Path",
+            "description": "Picture file (PNG, JPEG, BMP, GIF, TGA, TIFF or WebP) under an approved root. Omit to change only the repeat size of the objects' current texture."
+          },
+          "tile_mm": {
+            "default": 50.0,
+            "maximum": 1000.0,
+            "minimum": 1.0,
+            "title": "Tile Mm",
+            "type": "number",
+            "description": "The picture repeats every tile_mm millimetres on every side."
+          }
+        },
+        "title": "apply_textureArguments",
+        "type": "object"
+      },
+      "output_schema_id": "c4e458f9c57d4c836dce7e46e8c5eaccc2e4f21cfa6c7d5ed60774b491697f1d"
+    },
+    "remove_texture": {
+      "input_schema": {
+        "properties": {
+          "expected_project_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Expected Project Id"
+          },
+          "expected_scene_revision": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Expected Scene Revision"
+          },
+          "idempotency_key": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Idempotency Key"
+          },
+          "indices": {
+            "anyOf": [
+              {
+                "items": {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Indices"
+          },
+          "object_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Object Ids"
+          }
+        },
+        "title": "remove_textureArguments",
         "type": "object"
       },
       "output_schema_id": "c4e458f9c57d4c836dce7e46e8c5eaccc2e4f21cfa6c7d5ed60774b491697f1d"

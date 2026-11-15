@@ -12,6 +12,9 @@ pub enum CoreError {
     /// A color is not a finite RGBA value in the inclusive 0..=1 range.
     #[error("invalid color: {0}")]
     InvalidColor(String),
+    /// A texture image could not be imported, stored or found.
+    #[error("texture problem: {0}")]
+    InvalidTexture(String),
     /// A scene object or project field violates its domain contract.
     #[error("invalid object: {0}")]
     InvalidObject(String),

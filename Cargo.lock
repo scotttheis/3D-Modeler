@@ -544,11 +544,13 @@ name = "builder3d-core"
 version = "0.1.0"
 dependencies = [
  "fontdue",
+ "image",
  "manifold-csg",
  "qhull",
  "quick-xml 0.42.0",
  "serde",
  "serde_json",
+ "sha2 0.10.9",
  "thiserror 2.0.21",
  "uuid",
  "windows",
@@ -588,6 +590,7 @@ version = "0.1.0"
 dependencies = [
  "builder3d-core",
  "builder3d-platform",
+ "image",
  "serde",
  "serde_json",
  "thiserror 2.0.21",

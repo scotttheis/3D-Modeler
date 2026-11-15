@@ -34,9 +34,17 @@ const MAX_OVERLAY_VERTICES: usize = 65_536;
 const OVERLAY_VERTEX_STRIDE: usize = 36;
 const BYTES_PER_PIXEL: u64 = 4;
 const COPY_BYTES_PER_ROW_ALIGNMENT: u64 = 256;
-const MESH_UNIFORM_BYTES: usize = 240;
-/// Mesh uniform plus the view-space floor plane and the reflection fade.
-const REFLECTION_UNIFORM_BYTES: usize = MESH_UNIFORM_BYTES + 32;
+/// Matrices, colour, light and material shared by the mesh and reflection
+/// shaders.
+const MESH_BASE_UNIFORM_BYTES: usize = 240;
+/// Mesh uniform: the shared block plus the texture parameters (OF-46).
+const MESH_UNIFORM_BYTES: usize = MESH_BASE_UNIFORM_BYTES + 16;
+/// Shared block plus the view-space floor plane and the reflection fade.
+const REFLECTION_UNIFORM_BYTES: usize = MESH_BASE_UNIFORM_BYTES + 32;
+/// Texture tint modes; keep in step with `fragment_main` in `MESH_SHADER`.
+const TINT_NONE: f32 = 0.0;
+const TINT_SELECTED: f32 = 1.0;
+const TINT_XRAY_PALE: f32 = 2.0;
 /// Opacity of the floor reflection where an object touches the floor.
 const REFLECTION_ALPHA: f32 = 0.20;
 const FLOOR_TEXT_VERTEX_STRIDE: usize = 36;
@@ -230,6 +238,13 @@ struct GpuMaterialBatch {
     reflection_bind_group: wgpu::BindGroup,
 }
 
+/// One uploaded material texture (OF-46) with its mip chain.
+struct GpuTexture {
+    _texture: wgpu::Texture,
+    bind_group: wgpu::BindGroup,
+    ledger_id: Option<AllocationId>,
+}
+
 struct FaceIndexBatch {
     authored_color: Option<[u8; 4]>,
     indices: Vec<u32>,
@@ -277,6 +292,12 @@ pub struct ViewportRenderer {
     text_atlas_layout: wgpu::BindGroupLayout,
     text_atlas_sampler: wgpu::Sampler,
     text_atlas: Option<wgpu::BindGroup>,
+    /// Repeating sampler for material textures.
+    surface_sampler: wgpu::Sampler,
+    /// 1x1 white texture bound for untextured batches.
+    blank_texture: GpuTexture,
+    /// Material textures by content id.
+    gpu_textures: HashMap<String, GpuTexture>,
     uniform_layout: wgpu::BindGroupLayout,
     ledger: ResourceLedger,
     render_target_ledger_id: AllocationId,
@@ -392,8 +413,6 @@ impl ViewportRenderer {
                 count: None,
             }],
         });
-        let mesh_pipeline = create_mesh_pipeline(&device, &uniform_layout, false);
-        let mesh_xray_pipeline = create_mesh_pipeline(&device, &uniform_layout, true);
         let overlay_line_pipeline = create_overlay_pipeline(
             &device,
             &uniform_layout,
@@ -435,6 +454,30 @@ impl ViewportRenderer {
         });
         let floor_text_pipeline =
             create_floor_text_pipeline(&device, &uniform_layout, &text_atlas_layout);
+        let mesh_pipeline =
+            create_mesh_pipeline(&device, &uniform_layout, &text_atlas_layout, false);
+        let mesh_xray_pipeline =
+            create_mesh_pipeline(&device, &uniform_layout, &text_atlas_layout, true);
+        let surface_sampler = device.create_sampler(&wgpu::SamplerDescriptor {
+            label: Some("builder3d-surface-texture-sampler"),
+            address_mode_u: wgpu::AddressMode::Repeat,
+            address_mode_v: wgpu::AddressMode::Repeat,
+            mag_filter: wgpu::FilterMode::Linear,
+            min_filter: wgpu::FilterMode::Linear,
+            mipmap_filter: wgpu::MipmapFilterMode::Linear,
+            anisotropy_clamp: 8,
+            ..Default::default()
+        });
+        let blank_texture = upload_surface_texture(
+            &device,
+            &queue,
+            &text_atlas_layout,
+            &surface_sampler,
+            1,
+            1,
+            &[255, 255, 255, 255],
+            None,
+        );
         let wireframe_pipeline = create_wireframe_pipeline(&device, &uniform_layout);
         let reflection_pipeline = create_reflection_pipeline(&device, &uniform_layout);
         Ok(Self {
@@ -470,6 +513,9 @@ impl ViewportRenderer {
             text_atlas_layout,
             text_atlas_sampler,
             text_atlas: None,
+            surface_sampler,
+            blank_texture,
+            gpu_textures: HashMap::new(),
             uniform_layout,
             ledger,
             render_target_ledger_id,
@@ -770,6 +816,9 @@ impl ViewportRenderer {
                 upload_failed = true;
                 break;
             }
+            if let Some((image, _)) = object.texture() {
+                self.ensure_gpu_texture(image);
+            }
             if options.wireframe {
                 self.ensure_gpu_wire(object.object_id(), geometry);
             }
@@ -799,6 +848,7 @@ impl ViewportRenderer {
                 release_gpu_geometry(&mut self.ledger, stale);
             }
         }
+        self.release_unused_textures(scene);
         let floor = build_floor(camera, DEFAULT_FLOOR_SIZE, options.grid_visible, true)?;
         if interaction == InteractionState::Resting {
             self.contact_cache.settle(scene, scene_revision)?;
@@ -990,21 +1040,55 @@ impl ViewportRenderer {
                     .iter()
                     .any(|id| id == object.object_id());
                 pass.set_vertex_buffer(0, gpu.vertex.slice(..));
+                let surface = object.texture().and_then(|(image, tile_mm)| {
+                    self.gpu_textures
+                        .get(image.id())
+                        .map(|texture| (texture, image.average_color(), tile_mm))
+                });
+                let tint = if options.xray && !selected {
+                    TINT_XRAY_PALE
+                } else if selected {
+                    TINT_SELECTED
+                } else {
+                    TINT_NONE
+                };
                 for batch in &gpu.batches {
                     let authored_color = batch
                         .authored_color
                         .map(color_from_rgba8)
                         .unwrap_or_else(|| object.color());
+                    // Unpainted faces of a textured object take the image;
+                    // the shader mixes it over the colour and applies the
+                    // selection / X-ray tint itself.
+                    let textured = surface.filter(|_| batch.authored_color.is_none());
                     let color = display_color(authored_color, selected, options);
-                    let bytes = make_mesh_uniform(
+                    let mut bytes = make_mesh_uniform(
                         view_projection.multiply(transform),
                         model_view,
                         normal_transform,
-                        color,
+                        if textured.is_some() {
+                            authored_color
+                        } else {
+                            color
+                        },
                         light_direction,
                         material_parameters,
                     );
+                    let texture_parameters = textured
+                        .map_or([0.0; 4], |(_, _, tile_mm)| [1.0 / tile_mm, 1.0, tint, 0.0]);
+                    for value in texture_parameters {
+                        bytes.extend_from_slice(&value.to_le_bytes());
+                    }
                     self.queue.write_buffer(&batch.uniform, 0, &bytes);
+                    let surface_bind_group = textured
+                        .map_or(&self.blank_texture.bind_group, |(texture, _, _)| {
+                            &texture.bind_group
+                        });
+                    // The faint floor reflection shows a textured surface
+                    // as the image's average colour.
+                    let reflected_color = textured.map_or(color, |(_, average, _)| {
+                        display_color(texture_tone(authored_color, average), selected, options)
+                    });
                     if let Some(reflection) = &reflection {
                         let mirrored = reflection.mirror.multiply(transform);
                         let mirrored_view = view_matrix.multiply(mirrored);
@@ -1012,7 +1096,7 @@ impl ViewportRenderer {
                             view_projection.multiply(mirrored),
                             mirrored_view,
                             mirrored_view.inverse()?.transpose(),
-                            color,
+                            reflected_color,
                             light_direction,
                             material_parameters,
                         );
@@ -1028,14 +1112,13 @@ impl ViewportRenderer {
                             .write_buffer(&batch.reflection_uniform, 0, &reflection_bytes);
                     }
                     if options.xray && !selected {
+                        see_through.push((gpu, batch, surface_bind_group));
                         continue;
                     }
                     pass.set_bind_group(0, &batch.bind_group, &[]);
+                    pass.set_bind_group(1, surface_bind_group, &[]);
                     pass.set_index_buffer(batch.index.slice(..), wgpu::IndexFormat::Uint32);
                     pass.draw_indexed(0..batch.index_count, 0, 0..1);
-                }
-                if options.xray && !selected {
-                    see_through.push(gpu);
                 }
             }
             // Wireframe: anti-aliased triangle edges over the shaded model,
@@ -1091,13 +1174,12 @@ impl ViewportRenderer {
             }
             if !see_through.is_empty() {
                 pass.set_pipeline(&self.mesh_xray_pipeline);
-                for gpu in see_through {
+                for (gpu, batch, surface_bind_group) in see_through {
                     pass.set_vertex_buffer(0, gpu.vertex.slice(..));
-                    for batch in &gpu.batches {
-                        pass.set_bind_group(0, &batch.bind_group, &[]);
-                        pass.set_index_buffer(batch.index.slice(..), wgpu::IndexFormat::Uint32);
-                        pass.draw_indexed(0..batch.index_count, 0, 0..1);
-                    }
+                    pass.set_bind_group(0, &batch.bind_group, &[]);
+                    pass.set_bind_group(1, surface_bind_group, &[]);
+                    pass.set_index_buffer(batch.index.slice(..), wgpu::IndexFormat::Uint32);
+                    pass.draw_indexed(0..batch.index_count, 0, 0..1);
                 }
             }
             // Draw surfaces first.  Grid, contact, wireframe, and gizmo lines
@@ -1451,6 +1533,62 @@ impl ViewportRenderer {
         })
     }
 
+    /// Uploads a material texture once per content id. Over-budget textures
+    /// are skipped and the object keeps its plain colour.
+    fn ensure_gpu_texture(&mut self, image: &builder3d_core::TextureImage) {
+        if self.gpu_textures.contains_key(image.id()) {
+            return;
+        }
+        let side_limit = self.max_texture_dimension_2d;
+        if image.width() > side_limit || image.height() > side_limit {
+            return;
+        }
+        // Base level plus the mip chain (about a third more).
+        let bytes = u64::from(image.width())
+            .saturating_mul(u64::from(image.height()))
+            .saturating_mul(16)
+            / 3;
+        let Ok(ledger_id) = self.ledger.reserve(
+            AllocationKind::Cache,
+            MemoryDomain::Adapter(self.adapter_index),
+            bytes,
+        ) else {
+            return;
+        };
+        let texture = upload_surface_texture(
+            &self.device,
+            &self.queue,
+            &self.text_atlas_layout,
+            &self.surface_sampler,
+            image.width(),
+            image.height(),
+            image.rgba(),
+            Some(ledger_id),
+        );
+        self.gpu_textures.insert(image.id().to_owned(), texture);
+    }
+
+    fn release_unused_textures(&mut self, scene: &RenderScene) {
+        let unused = self
+            .gpu_textures
+            .keys()
+            .filter(|id| {
+                !scene
+                    .objects()
+                    .iter()
+                    .any(|object| object.texture().is_some_and(|(image, _)| image.id() == *id))
+            })
+            .cloned()
+            .collect::<Vec<_>>();
+        for id in unused {
+            if let Some(texture) = self.gpu_textures.remove(&id)
+                && let Some(ledger_id) = texture.ledger_id
+            {
+                let _ = self.ledger.release(ledger_id);
+            }
+        }
+    }
+
     fn capture(&self, path: &PathBuf) -> Result<(), ViewportError> {
         let padded = padded_bytes_per_row(self.width)?;
         let bytes = padded.checked_mul(u64::from(self.height)).ok_or_else(|| {
@@ -1555,6 +1693,11 @@ impl Drop for ViewportRenderer {
         }
         for (_, object) in self.gpu_objects.drain() {
             let _ = self.ledger.release(object.ledger_id);
+        }
+        for (_, texture) in self.gpu_textures.drain() {
+            if let Some(ledger_id) = texture.ledger_id {
+                let _ = self.ledger.release(ledger_id);
+            }
         }
         let _ = self.ledger.release(self.render_target_ledger_id);
     }
@@ -1764,6 +1907,127 @@ fn make_mesh_uniform(
     bytes
 }
 
+/// The single colour that stands in for a texture mixed over `color`.
+fn texture_tone(color: [f32; 4], average_srgb: [f32; 4]) -> [f32; 4] {
+    let alpha = average_srgb[3];
+    let mut toned = color;
+    for (channel, average) in toned.iter_mut().zip(average_srgb).take(3) {
+        *channel += (srgb_to_linear(average) - *channel) * alpha;
+    }
+    toned
+}
+
+/// Decodes one sRGB channel in 0..=1 to linear light.
+pub(crate) fn srgb_to_linear(channel: f32) -> f32 {
+    if channel <= 0.040_45 {
+        channel / 12.92
+    } else {
+        ((channel + 0.055) / 1.055).powf(2.4)
+    }
+}
+
+/// Box-filtered mip chain of an sRGB RGBA8 image, largest level first.
+fn surface_mip_chain(width: u32, height: u32, rgba: &[u8]) -> Vec<(u32, u32, Vec<u8>)> {
+    let mut levels = vec![(width, height, rgba.to_vec())];
+    while let Some((w, h, pixels)) = levels.last() {
+        if *w <= 1 && *h <= 1 {
+            break;
+        }
+        let (w, h) = (*w as usize, *h as usize);
+        let (next_w, next_h) = ((w / 2).max(1), (h / 2).max(1));
+        let mut next = vec![0u8; next_w * next_h * 4];
+        for y in 0..next_h {
+            for x in 0..next_w {
+                for channel in 0..4 {
+                    let mut sum = 0u32;
+                    for (dx, dy) in [(0, 0), (1, 0), (0, 1), (1, 1)] {
+                        let sx = (x * 2 + dx).min(w - 1);
+                        let sy = (y * 2 + dy).min(h - 1);
+                        sum += u32::from(
+                            pixels
+                                .get((sy * w + sx) * 4 + channel)
+                                .copied()
+                                .unwrap_or(0),
+                        );
+                    }
+                    next[(y * next_w + x) * 4 + channel] = ((sum + 2) / 4) as u8;
+                }
+            }
+        }
+        levels.push((next_w as u32, next_h as u32, next));
+    }
+    levels
+}
+
+#[allow(clippy::too_many_arguments)]
+fn upload_surface_texture(
+    device: &wgpu::Device,
+    queue: &wgpu::Queue,
+    layout: &wgpu::BindGroupLayout,
+    sampler: &wgpu::Sampler,
+    width: u32,
+    height: u32,
+    rgba: &[u8],
+    ledger_id: Option<AllocationId>,
+) -> GpuTexture {
+    let levels = surface_mip_chain(width, height, rgba);
+    let texture = device.create_texture(&wgpu::TextureDescriptor {
+        label: Some("builder3d-surface-texture"),
+        size: wgpu::Extent3d {
+            width,
+            height,
+            depth_or_array_layers: 1,
+        },
+        mip_level_count: levels.len() as u32,
+        sample_count: 1,
+        dimension: wgpu::TextureDimension::D2,
+        format: wgpu::TextureFormat::Rgba8UnormSrgb,
+        usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
+        view_formats: &[],
+    });
+    for (level, (w, h, pixels)) in levels.iter().enumerate() {
+        queue.write_texture(
+            wgpu::TexelCopyTextureInfo {
+                texture: &texture,
+                mip_level: level as u32,
+                origin: wgpu::Origin3d::ZERO,
+                aspect: wgpu::TextureAspect::All,
+            },
+            pixels,
+            wgpu::TexelCopyBufferLayout {
+                offset: 0,
+                bytes_per_row: Some(w * 4),
+                rows_per_image: Some(*h),
+            },
+            wgpu::Extent3d {
+                width: *w,
+                height: *h,
+                depth_or_array_layers: 1,
+            },
+        );
+    }
+    let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
+    let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+        label: Some("builder3d-surface-texture-bind-group"),
+        layout,
+        entries: &[
+            wgpu::BindGroupEntry {
+                binding: 0,
+                resource: wgpu::BindingResource::TextureView(&view),
+            },
+            wgpu::BindGroupEntry {
+                binding: 1,
+                resource: wgpu::BindingResource::Sampler(sampler),
+            },
+        ],
+    });
+    GpuTexture {
+        _texture: texture,
+        bind_group,
+        ledger_id,
+    }
+}
+
 fn padded_bytes_per_row(width: u32) -> Result<u64, ViewportError> {
     let row_bytes = u64::from(width)
         .checked_mul(BYTES_PER_PIXEL)
@@ -1783,6 +2047,7 @@ fn wait_for_gpu(instance: &wgpu::Instance) {
 fn create_mesh_pipeline(
     device: &wgpu::Device,
     layout: &wgpu::BindGroupLayout,
+    texture_layout: &wgpu::BindGroupLayout,
     xray: bool,
 ) -> wgpu::RenderPipeline {
     let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
@@ -1791,7 +2056,7 @@ fn create_mesh_pipeline(
     });
     let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
         label: Some("builder3d-r5-mesh-pipeline-layout"),
-        bind_group_layouts: &[Some(layout)],
+        bind_group_layouts: &[Some(layout), Some(texture_layout)],
         immediate_size: 0,
     });
     let targets = [Some(wgpu::ColorTargetState {
@@ -2471,10 +2736,12 @@ fn face_index_batches(
             .or_default()
             .extend_from_slice(&triangle);
     }
+    // Faces still in the object's own colour form the unauthored batch, so
+    // they follow later colour edits and take the object's texture (OF-46).
     Ok(groups
         .into_iter()
         .map(|(authored_color, indices)| FaceIndexBatch {
-            authored_color: Some(authored_color),
+            authored_color: (authored_color != default_color).then_some(authored_color),
             indices,
         })
         .collect())
@@ -2750,12 +3017,18 @@ struct Uniforms {
     color: vec4<f32>,
     light_direction: vec4<f32>,
     material: vec4<f32>,
+    // x = 1 / tile size (mm), y = 1 when textured, z = tint mode.
+    texture_params: vec4<f32>,
 };
 @group(0) @binding(0) var<uniform> uniforms: Uniforms;
+@group(1) @binding(0) var surface_texture: texture_2d<f32>;
+@group(1) @binding(1) var surface_sampler: sampler;
 struct VertexOutput {
     @invariant @builtin(position) position: vec4<f32>,
     @location(0) normal: vec3<f32>,
     @location(1) view_position: vec3<f32>,
+    @location(2) local_position: vec3<f32>,
+    @location(3) local_normal: vec3<f32>,
 };
 @vertex
 fn vertex_main(@location(0) position: vec3<f32>, @location(1) normal: vec3<f32>) -> VertexOutput {
@@ -2766,10 +3039,49 @@ fn vertex_main(@location(0) position: vec3<f32>, @location(1) normal: vec3<f32>)
         uniforms.view_projection * local_position,
         view_normal.xyz,
         view_position.xyz,
+        position,
+        normal,
     );
+}
+// Box projection in object millimetres; keep in step with
+// `builder3d_core::box_uv` and `box_weights` (power 8). Image rows run
+// top-down, so v is flipped.
+fn box_texture(p: vec3<f32>, n: vec3<f32>) -> vec4<f32> {
+    let scale = uniforms.texture_params.x;
+    let a = abs(n);
+    var w = a * a;
+    w = w * w;
+    w = w * w;
+    w = w / max(w.x + w.y + w.z, 0.000001);
+    let sx = select(1.0, -1.0, n.x >= 0.0);
+    let sy = select(-1.0, 1.0, n.y >= 0.0);
+    let sz = select(-1.0, 1.0, n.z >= 0.0);
+    let uv_x = vec2<f32>(sx * p.z, p.y) * scale;
+    let uv_y = vec2<f32>(p.x, -sy * p.z) * scale;
+    let uv_z = vec2<f32>(sz * p.x, p.y) * scale;
+    let tx = textureSample(surface_texture, surface_sampler, vec2<f32>(uv_x.x, 1.0 - uv_x.y));
+    let ty = textureSample(surface_texture, surface_sampler, vec2<f32>(uv_y.x, 1.0 - uv_y.y));
+    let tz = textureSample(surface_texture, surface_sampler, vec2<f32>(uv_z.x, 1.0 - uv_z.y));
+    return tx * w.x + ty * w.y + tz * w.z;
 }
 @fragment
 fn fragment_main(input: VertexOutput) -> @location(0) vec4<f32> {
+    let texel = box_texture(input.local_position, input.local_normal);
+    var base = uniforms.color;
+    if uniforms.texture_params.y > 0.5 {
+        base = vec4<f32>(mix(base.rgb, texel.rgb, texel.a), base.a);
+        let tint = uniforms.texture_params.z;
+        if tint > 1.5 {
+            // X-ray, not selected: pale and see-through (see `xray_shade`).
+            base = vec4<f32>(
+                base.rgb + (vec3<f32>(1.0) - base.rgb) * 0.55,
+                clamp(base.a * 0.32, 0.05, 0.45),
+            );
+        } else if tint > 0.5 {
+            // Selected: slightly darker (see `selection_shade`).
+            base = vec4<f32>(base.rgb * 0.82, base.a);
+        }
+    }
     let normal = normalize(input.normal);
     let light = normalize(uniforms.light_direction.xyz);
     let toward_viewer = normalize(-input.view_position);
@@ -2790,12 +3102,12 @@ fn fragment_main(input: VertexOutput) -> @location(0) vec4<f32> {
     }
     let intensity = uniforms.material.y + uniforms.material.x * diffuse;
     let linear = max(
-        uniforms.color.rgb * intensity + vec3<f32>(specular),
+        base.rgb * intensity + vec3<f32>(specular),
         vec3<f32>(0.0),
     );
     let low = linear * 12.92;
     let high = 1.055 * pow(linear, vec3<f32>(1.0 / 2.4)) - vec3<f32>(0.055);
-    return vec4<f32>(select(high, low, linear <= vec3<f32>(0.0031308)), uniforms.color.a);
+    return vec4<f32>(select(high, low, linear <= vec3<f32>(0.0031308)), base.a);
 }
 "#;
 
@@ -3099,7 +3411,9 @@ mod tests {
         let batches = face_index_batches(object, object.full_geometry()).expect("index batches");
 
         assert_eq!(batches.len(), 2);
-        assert_eq!(batches[0].authored_color, Some([51, 102, 153, 255]));
+        // The target's faces are in the object's own colour, so they form
+        // the plain batch that follows the object colour and its texture.
+        assert_eq!(batches[0].authored_color, None);
         assert_eq!(batches[1].authored_color, Some([204, 51, 26, 255]));
         assert_eq!(batches[0].indices.len(), 18);
         assert_eq!(batches[1].indices.len(), 18);

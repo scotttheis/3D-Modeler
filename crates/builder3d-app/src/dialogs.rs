@@ -139,6 +139,10 @@ pub(crate) enum DialogAction {
     Color([f32; 4]),
     /// Sample and apply an image's average color.
     ColorFromImage(PathBuf),
+    /// Cover the selection with an image texture repeating every N mm.
+    Texture(PathBuf, f32),
+    /// Remove the selection's textures.
+    RemoveTexture,
     /// Apply torus parameters.
     Torus(TorusParameters),
     /// Update the isolated torus render preview without creating history.
@@ -175,6 +179,9 @@ pub(crate) struct DialogState {
     color: [f32; 4],
     selected_object_count: usize,
     color_image_path: String,
+    texture_path: String,
+    texture_tile_mm: f32,
+    selection_textured: bool,
     torus: TorusParameters,
     emboss_text: String,
     emboss_font: EmbossFont,
@@ -230,6 +237,9 @@ impl DialogState {
             color: [0.36, 0.44, 0.92, 1.0],
             selected_object_count: 0,
             color_image_path: String::new(),
+            texture_path: String::new(),
+            texture_tile_mm: builder3d_core::DEFAULT_TEXTURE_TILE_MM,
+            selection_textured: false,
             torus: TorusParameters::default(),
             emboss_text: String::from("Builder3D"),
             emboss_font: EmbossFont::Default,
@@ -416,6 +426,17 @@ impl DialogState {
             && let Ok(object) = state.scene().object(*index)
         {
             self.color = object.color();
+        }
+        self.selection_textured = false;
+        for index in state.scene().selection() {
+            if let Ok(object) = state.scene().object(*index)
+                && let Some(texture) = builder3d_core::object_texture(object.metadata())
+            {
+                if !self.selection_textured {
+                    self.texture_tile_mm = texture.tile_mm;
+                }
+                self.selection_textured = true;
+            }
         }
     }
 
@@ -1092,12 +1113,10 @@ impl DialogState {
             *action = Some(DialogAction::Color(self.color));
         }
         ui.separator();
-        ui.label(
-            "Sample an image's average color as one solid color; this does not create a texture.",
-        );
+        ui.label("Or use an image's average color as one solid color:");
         ui.horizontal(|ui| {
             if ui
-                .text_edit_singleline(&mut self.color_image_path)
+                .add(egui::TextEdit::singleline(&mut self.color_image_path).desired_width(150.0))
                 .changed()
             {
                 self.message.clear();
@@ -1114,15 +1133,78 @@ impl DialogState {
                     self.set_message("Image selection cancelled; the current path was kept.");
                 }
             }
-        });
-        if ui.button("Sample image color").clicked() {
-            let path = self.color_image_path.trim();
-            if path.is_empty() {
-                self.set_error("Enter an image path.");
-            } else {
-                *action = Some(DialogAction::ColorFromImage(PathBuf::from(path)));
+            if ui.button("Sample image color").clicked() {
+                let path = self.color_image_path.trim();
+                if path.is_empty() {
+                    self.set_error("Enter an image path.");
+                } else {
+                    *action = Some(DialogAction::ColorFromImage(PathBuf::from(path)));
+                }
             }
-        }
+        });
+        self.texture_section(ui, action);
+    }
+
+    /// Texture (OF-46): cover the selection with a picture that repeats
+    /// across every side. Choosing a colour above removes it again.
+    fn texture_section(&mut self, ui: &mut egui::Ui, action: &mut Option<DialogAction>) {
+        ui.separator();
+        ui.horizontal(|ui| {
+            ui.label(RichText::new("Texture").strong());
+            ui.add(
+                egui::Label::new("a picture that covers every side and repeats")
+                    .wrap_mode(egui::TextWrapMode::Extend),
+            );
+        });
+        ui.horizontal(|ui| {
+            if ui.text_edit_singleline(&mut self.texture_path).changed() {
+                self.message.clear();
+                self.message_tone = MessageTone::Info;
+            }
+            if ui.button("Browse picture...").clicked() {
+                let selected = texture_path_picker(&self.texture_path);
+                self.texture_path = path_after_browse(&self.texture_path, selected.as_deref());
+                if selected.is_some() {
+                    self.message.clear();
+                    self.message_tone = MessageTone::Info;
+                } else {
+                    self.set_message("Picture selection cancelled; the current path was kept.");
+                }
+            }
+        });
+        ui.horizontal(|ui| {
+            ui.label("Repeats every");
+            ui.add(
+                egui::Slider::new(&mut self.texture_tile_mm, 5.0..=500.0)
+                    .logarithmic(true)
+                    .suffix(" mm")
+                    .max_decimals(0),
+            );
+        });
+        ui.horizontal(|ui| {
+            let apply = if self.selection_textured && self.texture_path.trim().is_empty() {
+                "Change repeat size"
+            } else {
+                "Apply texture"
+            };
+            if ui.button(apply).clicked() {
+                let path = self.texture_path.trim();
+                if path.is_empty() && !self.selection_textured {
+                    self.set_error("Choose a picture first.");
+                } else {
+                    *action = Some(DialogAction::Texture(
+                        PathBuf::from(path),
+                        self.texture_tile_mm,
+                    ));
+                }
+            }
+            if ui
+                .add_enabled(self.selection_textured, egui::Button::new("Remove texture"))
+                .clicked()
+            {
+                *action = Some(DialogAction::RemoveTexture);
+            }
+        });
     }
 
     fn torus_dialog(&mut self, ui: &mut egui::Ui, action: &mut Option<DialogAction>) {
@@ -1580,6 +1662,26 @@ pub(crate) fn image_path_picker(current: &str) -> Option<PathBuf> {
         .pick_file()
 }
 
+/// Native picker for a texture picture.
+pub(crate) fn texture_path_picker(current: &str) -> Option<PathBuf> {
+    let current_path = Path::new(current.trim());
+    let mut dialog = rfd::FileDialog::new().set_title("Choose a Texture Picture");
+    if let Some(parent) = current_path
+        .parent()
+        .filter(|parent| !parent.as_os_str().is_empty())
+    {
+        dialog = dialog.set_directory(parent);
+    }
+    dialog
+        .add_filter(
+            "Pictures",
+            &[
+                "png", "jpg", "jpeg", "bmp", "gif", "tga", "tif", "tiff", "webp",
+            ],
+        )
+        .pick_file()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1725,6 +1827,9 @@ mod tests {
             }
             window
         };
+        // Tall windows (Material with its Texture section) take one more
+        // frame to settle their size after opening.
+        run(frame(Vec::new()));
         run(frame(Vec::new()));
         let before = run(frame(Vec::new()));
         let start = from(before);

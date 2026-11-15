@@ -12,7 +12,8 @@
 //! | Variable | Values | Default |
 //! |---|---|---|
 //! | `BUILDER3D_REVIEW_CAPTURE` | output PNG path | harness off |
-//! | `BUILDER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `resize`, `resize-drag`, `multi`, `merge`, `unselected`, `material`, `settings`, `save`, `export`, `menu`, `colors`, `mirror`, `merge-apart`, `repair`, `paste`, `align`, `paint`, `paint-picker`, `xray` | `move` |
+//! | `BUILDER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `resize`, `resize-drag`, `multi`, `merge`, `unselected`, `material`, `settings`, `save`, `export`, `menu`, `colors`, `mirror`, `merge-apart`, `repair`, `paste`, `align`, `paint`, `paint-picker`, `xray`, `texture`, `texture-dialog` | `move` |
+//! | `BUILDER3D_REVIEW_TEXTURES` | `;`-separated picture paths for the `texture` states (one per object, reused in turn) | a built-in brick picture |
 //! | `BUILDER3D_REVIEW_THEME` | `light`, `dark` | `dark` |
 //! | `BUILDER3D_REVIEW_SIZE` | `normal`, `big` (Settings > Size) | `normal` |
 //! | `BUILDER3D_REVIEW_TAB` | a ribbon tab label such as `Object` | `Insert` |
@@ -99,6 +100,12 @@ pub(crate) enum ReviewState {
     /// X-ray on (OF-47) with a selected green cube and an unselected sphere
     /// overlapping it, as in the owner's 3D Builder reference.
     Xray,
+    /// A cube, a sphere and a cylinder with material textures (OF-46),
+    /// nothing selected; pictures from `BUILDER3D_REVIEW_TEXTURES`.
+    Texture,
+    /// One textured, selected cube with the Material dialog open on its
+    /// Texture section.
+    TextureDialog,
 }
 
 impl ReviewState {
@@ -127,9 +134,47 @@ impl ReviewState {
             "paint" => Some(Self::Paint),
             "paint-picker" => Some(Self::PaintPicker),
             "xray" => Some(Self::Xray),
+            "texture" => Some(Self::Texture),
+            "texture-dialog" => Some(Self::TextureDialog),
             _ => None,
         }
     }
+}
+
+/// Pictures for the `texture` review states: `BUILDER3D_REVIEW_TEXTURES`
+/// (`;`-separated paths), or one generated brick picture written to the
+/// temporary folder so the state works without outside files.
+pub(crate) fn review_texture_paths() -> Vec<PathBuf> {
+    if let Ok(value) = env::var("BUILDER3D_REVIEW_TEXTURES") {
+        let paths = value
+            .split(';')
+            .map(str::trim)
+            .filter(|path| !path.is_empty())
+            .map(PathBuf::from)
+            .collect::<Vec<_>>();
+        if !paths.is_empty() {
+            return paths;
+        }
+    }
+    let path = env::temp_dir().join(format!(
+        "builder3d-review-bricks-{}.png",
+        std::process::id()
+    ));
+    let bricks = image::RgbaImage::from_fn(128, 128, |x, y| {
+        let row = y / 32;
+        let offset = if row % 2 == 0 { 0 } else { 32 };
+        let mortar = y % 32 < 3 || (x + offset) % 64 < 3;
+        if mortar {
+            image::Rgba([214, 208, 196, 255])
+        } else {
+            let shade = ((x * 7 + y * 13) % 23) as u8;
+            image::Rgba([160 + shade, 64 + shade / 2, 48, 255])
+        }
+    });
+    if bricks.save(&path).is_err() {
+        return Vec::new();
+    }
+    vec![path]
 }
 
 /// What the shell should do after a review frame.
