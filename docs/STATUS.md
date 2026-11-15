@@ -3,7 +3,7 @@
 The only place current status is written. Keep it to one screen. Plan:
 [`product-rebuild-plan.md`](product-rebuild-plan.md).
 
-Updated 2026-11-15. Full gate passed 2026-11-15 after Phase 3 (fmt, clippy, tests, deny, audit, MCP parity, smoke, 62-image capture board; the board now also takes `grab`, `crease`, `smooth-brush`, `simplify`, `subdivide`, `hollow`). Release exe rebuilt from the same source for the Phase 3 review pack.
+Updated 2026-11-15. Full gate passed 2026-11-15 after the Phase 3 follow-ups OF-59 to OF-61 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board; the board now also takes `crease-sharp`, `simplify-area`, `hollow-dialog`, `hollow-error`). Release exe rebuilt from the same source for the follow-up review pack.
 
 Test releases (how-to: [`packaging.md`](packaging.md)): last is **RC1**,
 version 0.1.1, 2026-11-13, `E:\Builder3D-RC\Builder3D-RC1.msi` (50 MB),
@@ -30,13 +30,17 @@ Phase 3 (OF-48 to OF-54) built 2026-11-15, pack
 2026-11-15:** Grab, Crease, Smooth Brush, Simplify, Subdivide approved;
 Hollow works at a 2 mm wall; Normalize to be removed; the whole-object Smooth
 button stays as it is. Follow-ups OF-59 to OF-61 (OF-62 garbled text done).
-No open owner answers.
+
+Follow-ups OF-59 to OF-61 built 2026-11-15 (`57671fb`, `fbbfff8`,
+`0238ccf`), pack `evidence/rebuild/captures/2026-11-15-review-phase3-followups/`,
+**waiting for owner review**. Open owner question: MCP
+`normalize_face_density` was kept when the Normalize button was removed
+(OF-60); keep it or remove it?
 
 **Known work, in order** (a session takes the first item not done):
 
-1. Phase 3 follow-ups OF-59 to OF-61 (Crease sharpness; Simplify by area and
-   remove Normalize; Hollow 2 mm default and copyable errors), then a short
-   review pack and stop.
+1. Done 2026-11-15, waiting for owner review: Phase 3 follow-ups OF-59 to
+   OF-61 (pack above).
 2. Phase 4 — Measure ruler (OF-55).
 3. Phase 5 — MCP does everything (OF-58).
 4. F5 — release link reliability; F6 — reconcile the 148-row ledger
@@ -67,8 +71,9 @@ the next stop message, not guessed.
 
 ## Last review pack
 
-`evidence/rebuild/captures/2026-11-14-review-phase3/` (Phase 3: OF-48 to
-OF-54), not yet reviewed. `evidence/rebuild/captures/2026-11-14-review-phase2/` (Phase 2: OF-44 and
+`evidence/rebuild/captures/2026-11-15-review-phase3-followups/` (OF-59 to
+OF-61), not yet reviewed. `evidence/rebuild/captures/2026-11-14-review-phase3/` (Phase 3: OF-48 to
+OF-54), reviewed by the owner 2026-11-15. `evidence/rebuild/captures/2026-11-14-review-phase2/` (Phase 2: OF-44 and
 OF-47 approved 2026-11-15; OF-46 added and approved 2026-11-15). `evidence/rebuild/captures/2026-11-14-review-phase1/`
 (Phase 1), not yet reviewed. Before that:
 
@@ -207,7 +212,8 @@ owner batch 7.
 
 ## Last recovery point
 
-Git: branch `rebuild/work`, see `git log` (Phase 3: `e95dbd3` OF-48,
+Git: branch `rebuild/work`, see `git log` (Phase 3 follow-ups: `57671fb`
+OF-59, `fbbfff8` OF-60, `0238ccf` OF-61; Phase 3: `e95dbd3` OF-48,
 `e9aa73d` OF-49, `7248d91` OF-50, `7432d0b` OF-51, `54b6f2a` OF-52,
 `e283f15` OF-53 findings, `114a676` OF-54; Phase 2: `654872a` (OF-46), `344e88e` (OF-44),
 `82f4a58` (OF-47), pack `06699d2`; Phase 1: `566ba48` to `3288a55`). Tree
