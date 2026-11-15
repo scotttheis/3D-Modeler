@@ -130,6 +130,10 @@ pub struct MeshHealthReport {
     pub winding_consistent: bool,
     /// Number of connected face components, or -1 when there are no faces.
     pub body_count: i32,
+    /// Shells that face inward, enclosing a hollow cavity inside another
+    /// shell (Hollow's inner surface, OF-54). They are counted in
+    /// `body_count` but are not reported as disconnected pieces.
+    pub cavity_shells: i32,
     /// Whether the mesh encloses a non-zero signed volume.
     pub is_volume: bool,
     /// Number of zero-area or non-finite triangles.
@@ -345,8 +349,14 @@ pub fn inspect_mesh(mesh: &Mesh) -> Result<MeshHealthReport, CoreError> {
 
     let body_count = connected_face_components(faces, &edges) as i32;
     let tiny_shells = count_tiny_components(mesh, faces, &edges, 0.01);
-    if body_count > 1 {
-        issues.push(format!("{body_count} disconnected shells"));
+    let cavity_shells = if body_count > 1 && winding_consistent {
+        count_cavity_shells(mesh, faces, &edges)
+    } else {
+        0
+    };
+    let pieces = body_count - cavity_shells;
+    if pieces > 1 {
+        issues.push(format!("{pieces} disconnected shells"));
     }
     if tiny_shells > 0 {
         issues.push(format!("{tiny_shells} tiny shells"));
@@ -376,6 +386,7 @@ pub fn inspect_mesh(mesh: &Mesh) -> Result<MeshHealthReport, CoreError> {
         watertight,
         winding_consistent,
         body_count,
+        cavity_shells,
         is_volume,
         degenerate_faces,
         duplicate_faces,
@@ -1071,6 +1082,56 @@ fn connected_face_components(
         }
     }
     components
+}
+
+/// Number of closed shells whose signed volume is negative (they face
+/// inward), when at least one shell faces outward.
+fn count_cavity_shells(
+    mesh: &Mesh,
+    faces: &[[u32; 3]],
+    edges: &BTreeMap<(u32, u32), Vec<(usize, bool)>>,
+) -> i32 {
+    let mut label = vec![usize::MAX; faces.len()];
+    let mut adjacency = vec![Vec::<usize>::new(); faces.len()];
+    for owners in edges.values() {
+        for (first_index, &(first_face, _)) in owners.iter().enumerate() {
+            for &(second_face, _) in owners.iter().skip(first_index + 1) {
+                adjacency[first_face].push(second_face);
+                adjacency[second_face].push(first_face);
+            }
+        }
+    }
+    let mut volumes = Vec::<f64>::new();
+    for start in 0..faces.len() {
+        if label[start] != usize::MAX {
+            continue;
+        }
+        let component = volumes.len();
+        volumes.push(0.0);
+        label[start] = component;
+        let mut queue = VecDeque::from([start]);
+        while let Some(face) = queue.pop_front() {
+            let corners = faces[face].map(|index| mesh.vertices.get(index as usize).copied());
+            if let [Some(a), Some(b), Some(c)] = corners {
+                let [a, b, c] = [a, b, c].map(|v| v.map(f64::from));
+                volumes[component] += (a[0] * (b[1] * c[2] - b[2] * c[1])
+                    + a[1] * (b[2] * c[0] - b[0] * c[2])
+                    + a[2] * (b[0] * c[1] - b[1] * c[0]))
+                    / 6.0;
+            }
+            for neighbor in &adjacency[face] {
+                if label[*neighbor] == usize::MAX {
+                    label[*neighbor] = component;
+                    queue.push_back(*neighbor);
+                }
+            }
+        }
+    }
+    let outward = volumes.iter().filter(|volume| **volume > 0.0).count();
+    if outward == 0 {
+        return 0;
+    }
+    i32::try_from(volumes.iter().filter(|volume| **volume < 0.0).count()).unwrap_or(0)
 }
 
 fn count_tiny_components(

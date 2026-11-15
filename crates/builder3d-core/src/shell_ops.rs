@@ -386,6 +386,22 @@ pub fn hollow_mesh(mesh: &Mesh, options: HollowOptions) -> Result<HollowResult, 
 pub fn hollow_mesh_with_hooks(
     mesh: &Mesh,
     options: HollowOptions,
+    cancel: Option<&mut dyn FnMut() -> Result<(), CoreError>>,
+) -> Result<HollowResult, CoreError> {
+    // OF-54: a model too big or detailed for the bounded hollow says so in
+    // plain words, on the desktop and in MCP alike.
+    hollow_mesh_bounded(mesh, options, cancel).map_err(|error| match error {
+        CoreError::OperationResourceLimit { .. } => CoreError::MeshOperation(
+            "this model is too detailed to hollow; try Simplify first, or a thicker wall"
+                .to_owned(),
+        ),
+        other => other,
+    })
+}
+
+fn hollow_mesh_bounded(
+    mesh: &Mesh,
+    options: HollowOptions,
     mut cancel: Option<&mut dyn FnMut() -> Result<(), CoreError>>,
 ) -> Result<HollowResult, CoreError> {
     check_cancel(&mut cancel, OP_HOLLOW)?;
@@ -1045,6 +1061,11 @@ fn inner_from_convex_planes(
     Ok(mesh)
 }
 
+/// Inner offset for a concave solid (OF-54). The inside is filled one grid
+/// row at a time from the triangles that row crosses, the distance to the
+/// surface comes from a grid distance transform, and the blocky inner
+/// boundary is then reduced where it is flat. The work is about the number
+/// of grid cells plus a few per triangle, instead of cells times triangles.
 fn voxel_inner_mesh(
     mesh: &Mesh,
     minimum: [f32; 3],
@@ -1059,58 +1080,36 @@ fn voxel_inner_mesh(
         f64::from(maximum[2] - minimum[2]),
     ];
     let maximum_extent = extents.iter().copied().fold(0.0_f64, f64::max);
-    let pitch = (wall * 0.25).max(maximum_extent / HOLLOW_MAX_AXIS_CELLS as f64);
-    if !pitch.is_finite() || pitch <= 0.0 || pitch > wall * 0.75 {
-        return Err(CoreError::OperationResourceLimit {
-            operation: OP_HOLLOW.to_owned(),
-            reason: format!(
-                "concave shell resolution would be unsafe (pitch {pitch:.6} mm for wall {wall:.6} mm)"
-            ),
-        });
+    let mut pitch = (wall * 0.25).max(maximum_extent / HOLLOW_MAX_AXIS_CELLS as f64);
+    let mut dimensions;
+    loop {
+        dimensions = [
+            voxel_dimension(extents[0], pitch)?,
+            voxel_dimension(extents[1], pitch)?,
+            voxel_dimension(extents[2], pitch)?,
+        ];
+        let cells = dimensions[0]
+            .saturating_mul(dimensions[1])
+            .saturating_mul(dimensions[2]);
+        if cells <= HOLLOW_MAX_VOXELS {
+            break;
+        }
+        pitch *= 1.1;
     }
-    let dimensions = [
-        voxel_dimension(extents[0], pitch)?,
-        voxel_dimension(extents[1], pitch)?,
-        voxel_dimension(extents[2], pitch)?,
-    ];
-    let cells = dimensions[0]
-        .checked_mul(dimensions[1])
-        .and_then(|value| value.checked_mul(dimensions[2]))
+    if !pitch.is_finite() || pitch <= 0.0 || pitch > wall * 0.75 {
+        return Err(CoreError::MeshOperation(format!(
+            "this model is too large for a {wall:.1} mm wall; try a thicker wall (at least {:.1} mm)",
+            pitch / 0.75
+        )));
+    }
+    let cells = dimensions[0] * dimensions[1] * dimensions[2];
+    let grid_bytes = u64::try_from(cells)
+        .ok()
+        .and_then(|cells| cells.checked_mul(5))
         .ok_or_else(|| CoreError::OperationResourceLimit {
             operation: OP_HOLLOW.to_owned(),
-            reason: "concave voxel dimensions overflowed".to_owned(),
+            reason: "concave voxel grid size overflowed".to_owned(),
         })?;
-    if cells > HOLLOW_MAX_VOXELS {
-        return Err(CoreError::OperationResourceLimit {
-            operation: OP_HOLLOW.to_owned(),
-            reason: format!("concave shell needs {cells} voxels, above {HOLLOW_MAX_VOXELS}"),
-        });
-    }
-    let face_count =
-        u64::try_from(mesh.face_count()).map_err(|_| CoreError::OperationResourceLimit {
-            operation: OP_HOLLOW.to_owned(),
-            reason: "source face count exceeds the accounting range".to_owned(),
-        })?;
-    let cell_count = u64::try_from(cells).map_err(|_| CoreError::OperationResourceLimit {
-        operation: OP_HOLLOW.to_owned(),
-        reason: "voxel count exceeds the accounting range".to_owned(),
-    })?;
-    limits.check_work(
-        OP_HOLLOW,
-        face_count
-            .checked_mul(cell_count)
-            .ok_or_else(|| CoreError::OperationResourceLimit {
-                operation: OP_HOLLOW.to_owned(),
-                reason: "concave voxel work count overflowed".to_owned(),
-            })?,
-    )?;
-    let grid_bytes =
-        cell_count
-            .checked_mul(2)
-            .ok_or_else(|| CoreError::OperationResourceLimit {
-                operation: OP_HOLLOW.to_owned(),
-                reason: "concave voxel grid size overflowed".to_owned(),
-            })?;
     if grid_bytes > limits.max_memory_bytes {
         return Err(CoreError::OperationResourceLimit {
             operation: OP_HOLLOW.to_owned(),
@@ -1123,38 +1122,95 @@ fn voxel_inner_mesh(
         f64::from(minimum[1]) - pitch,
         f64::from(minimum[2]) - pitch,
     ];
-    let mut occupied = vec![0_u8; cells];
-    let wall_squared = wall * wall;
-    let mut occupied_count = 0_usize;
+    let centre = |axis: usize, index: usize| origin[axis] + (index as f64 + 0.5) * pitch;
+    let cell_range = |axis: usize, low: f64, high: f64| -> Option<(usize, usize)> {
+        let first = ((low - origin[axis]) / pitch - 0.5).ceil().max(0.0);
+        let last = ((high - origin[axis]) / pitch - 0.5)
+            .floor()
+            .min(dimensions[axis] as f64 - 1.0);
+        (first <= last).then_some((first as usize, last as usize))
+    };
+
+    // Rows along x: each triangle is listed in the rows its y/z box crosses.
+    let row_count = dimensions[1] * dimensions[2];
+    let mut rows: Vec<Vec<u32>> = vec![Vec::new(); row_count];
+    let mut registrations = 0_u64;
+    for (index, triangle) in triangles.iter().enumerate() {
+        let low_y = triangle.a[1].min(triangle.b[1]).min(triangle.c[1]);
+        let high_y = triangle.a[1].max(triangle.b[1]).max(triangle.c[1]);
+        let low_z = triangle.a[2].min(triangle.b[2]).min(triangle.c[2]);
+        let high_z = triangle.a[2].max(triangle.b[2]).max(triangle.c[2]);
+        let (Some((y0, y1)), Some((z0, z1))) =
+            (cell_range(1, low_y, high_y), cell_range(2, low_z, high_z))
+        else {
+            continue;
+        };
+        for z in z0..=z1 {
+            for y in y0..=y1 {
+                rows[z * dimensions[1] + y].push(index as u32);
+                registrations += 1;
+            }
+        }
+    }
+    let work =
+        registrations.saturating_add(u64::try_from(cells).unwrap_or(u64::MAX).saturating_mul(4));
+    limits.check_work(OP_HOLLOW, work)?;
+
+    // Inside cells by crossing parity along each row.
+    let mut inside = vec![false; cells];
+    let mut crossings = Vec::new();
     for z in 0..dimensions[2] {
         check_cancel(cancel, OP_HOLLOW)?;
         for y in 0..dimensions[1] {
-            for x in 0..dimensions[0] {
-                let point = [
-                    origin[0] + (x as f64 + 0.5) * pitch,
-                    origin[1] + (y as f64 + 0.5) * pitch,
-                    origin[2] + (z as f64 + 0.5) * pitch,
-                ];
-                let inside = point_inside_mesh(point, &triangles);
-                if !inside {
-                    continue;
+            // A tiny offset keeps the ray off shared edges and vertices.
+            let ray_y = centre(1, y) + pitch * 1.0e-4;
+            let ray_z = centre(2, z) + pitch * 1.7e-4;
+            crossings.clear();
+            for triangle in &rows[z * dimensions[1] + y] {
+                if let Some(x) = row_crossing(&triangles[*triangle as usize], ray_y, ray_z) {
+                    crossings.push(x);
                 }
-                let distance_squared = point_mesh_distance_squared(point, &triangles);
-                if !distance_squared.is_finite() || distance_squared < wall_squared {
-                    continue;
-                }
-                let index = grid_index(x, y, z, dimensions);
-                if let Some(slot) = occupied.get_mut(index) {
-                    *slot = 1;
-                    occupied_count = occupied_count.saturating_add(1);
+            }
+            if crossings.len() < 2 {
+                continue;
+            }
+            crossings.sort_by(f64::total_cmp);
+            for pair in crossings.as_chunks::<2>().0 {
+                if let Some((x0, x1)) = cell_range(0, pair[0], pair[1]) {
+                    for x in x0..=x1 {
+                        inside[grid_index(x, y, z, dimensions)] = true;
+                    }
                 }
             }
         }
     }
+
+    // Squared distance (in cells) from each inside cell to the nearest
+    // outside cell, by the separable exact distance transform.
+    let mut distance: Vec<f32> = inside
+        .iter()
+        .map(|inside| if *inside { f32::INFINITY } else { 0.0 })
+        .collect();
+    for axis in 0..3 {
+        check_cancel(cancel, OP_HOLLOW)?;
+        distance_transform_axis(&mut distance, dimensions, axis);
+    }
+    // The surface lies between an inside and an outside cell centre, and the
+    // inner boundary is drawn on the cell faces, so require the wall plus a
+    // cell's half-diagonal: the wall is never thinner than asked.
+    let threshold = wall / pitch + 0.5 + 0.87;
+    let threshold_squared = (threshold * threshold) as f32;
+    let mut occupied: Vec<u8> = inside
+        .iter()
+        .zip(&distance)
+        .map(|(inside, squared)| u8::from(*inside && *squared >= threshold_squared))
+        .collect();
+    clean_voxel_contacts(&mut occupied, dimensions, cancel)?;
+    let occupied_count = occupied.iter().filter(|cell| **cell == 1).count();
     if occupied_count == 0 {
-        return Err(CoreError::MeshOperation(
-            "concave shell wall consumes the entire inner volume".to_owned(),
-        ));
+        return Err(CoreError::MeshOperation(format!(
+            "a {wall:.1} mm wall fills this whole model; try a thinner wall"
+        )));
     }
     let expected_faces =
         occupied_count
@@ -1169,7 +1225,179 @@ fn voxel_inner_mesh(
             reason: format!("concave inner boundary may need {expected_faces} faces"),
         });
     }
-    voxel_boundary_mesh(&occupied, dimensions, origin, pitch)
+    let blocky = voxel_boundary_mesh(&occupied, dimensions, origin, pitch)?;
+    check_cancel(cancel, OP_HOLLOW)?;
+    // Merge the flat parts of the staircase; a collapse may move the surface
+    // by at most a quarter cell, so the wall stays as thick as asked.
+    Ok(crate::simplify::simplify_within_tolerance(&blocky, pitch * 0.25, limits).unwrap_or(blocky))
+}
+
+/// Whether the cells around one grid corner (an 8-bit occupancy mask, bit
+/// `dx | dy << 1 | dz << 2`) give a manifold boundary there: the occupied
+/// cells and the empty cells must each be one face-connected group.
+fn corner_is_manifold(mask: u8) -> bool {
+    fn groups(set: u8) -> usize {
+        let mut seen = 0_u8;
+        let mut count = 0;
+        for start in 0..8_u8 {
+            if set & (1 << start) == 0 || seen & (1 << start) != 0 {
+                continue;
+            }
+            count += 1;
+            let mut stack = vec![start];
+            seen |= 1 << start;
+            while let Some(cell) = stack.pop() {
+                for bit in [1_u8, 2, 4] {
+                    let next = cell ^ bit;
+                    if set & (1 << next) != 0 && seen & (1 << next) == 0 {
+                        seen |= 1 << next;
+                        stack.push(next);
+                    }
+                }
+            }
+        }
+        count
+    }
+    groups(mask) <= 1 && groups(!mask) <= 1
+}
+
+/// Removes inner cells until every grid corner is manifold (OF-54), so the
+/// blocky inner boundary is a closed surface with no edge- or corner-only
+/// contacts. Only removes cells, so the wall can only get thicker.
+fn clean_voxel_contacts(
+    occupied: &mut [u8],
+    dimensions: [usize; 3],
+    cancel: &mut Option<&mut dyn FnMut() -> Result<(), CoreError>>,
+) -> Result<(), CoreError> {
+    let manifold: Vec<bool> = (0..=255_u8).map(corner_is_manifold).collect();
+    for _ in 0..32 {
+        check_cancel(cancel, OP_HOLLOW)?;
+        let mut changed = false;
+        for vz in 1..dimensions[2] {
+            for vy in 1..dimensions[1] {
+                for vx in 1..dimensions[0] {
+                    let cell = |bit: u8| {
+                        grid_index(
+                            vx - 1 + usize::from(bit & 1),
+                            vy - 1 + usize::from((bit >> 1) & 1),
+                            vz - 1 + usize::from((bit >> 2) & 1),
+                            dimensions,
+                        )
+                    };
+                    let mut mask = 0_u8;
+                    for bit in 0..8_u8 {
+                        if occupied[cell(bit)] == 1 {
+                            mask |= 1 << bit;
+                        }
+                    }
+                    if manifold[usize::from(mask)] {
+                        continue;
+                    }
+                    // Prefer the single removal that fixes this corner.
+                    let fix = (0..8_u8)
+                        .filter(|bit| mask & (1 << bit) != 0)
+                        .find(|bit| manifold[usize::from(mask & !(1 << bit))])
+                        .or_else(|| (0..8_u8).find(|bit| mask & (1 << bit) != 0));
+                    if let Some(bit) = fix {
+                        occupied[cell(bit)] = 0;
+                        changed = true;
+                    }
+                }
+            }
+        }
+        if !changed {
+            return Ok(());
+        }
+    }
+    Err(CoreError::MeshOperation(
+        "could not make a clean inner surface for this model; try a thicker wall".to_owned(),
+    ))
+}
+
+/// Where the row line (y, z) crosses a triangle along x, if it does.
+fn row_crossing(triangle: &Triangle, y: f64, z: f64) -> Option<f64> {
+    let (a, b, c) = (triangle.a, triangle.b, triangle.c);
+    let area = (b[1] - a[1]) * (c[2] - a[2]) - (c[1] - a[1]) * (b[2] - a[2]);
+    if area.abs() <= 1.0e-14 {
+        return None;
+    }
+    let u = ((y - a[1]) * (c[2] - a[2]) - (c[1] - a[1]) * (z - a[2])) / area;
+    let v = ((b[1] - a[1]) * (z - a[2]) - (y - a[1]) * (b[2] - a[2])) / area;
+    if u < 0.0 || v < 0.0 || u + v > 1.0 {
+        return None;
+    }
+    Some(a[0] + u * (b[0] - a[0]) + v * (c[0] - a[0]))
+}
+
+/// One axis of the Felzenszwalb-Huttenlocher squared distance transform.
+fn distance_transform_axis(grid: &mut [f32], dimensions: [usize; 3], axis: usize) {
+    let length = dimensions[axis];
+    let (other_a, other_b) = match axis {
+        0 => (1, 2),
+        1 => (0, 2),
+        _ => (0, 1),
+    };
+    let mut line = vec![0.0_f32; length];
+    let mut output = vec![0.0_f32; length];
+    let mut hull = vec![0_usize; length];
+    let mut bounds = vec![0.0_f32; length + 1];
+    for second in 0..dimensions[other_b] {
+        for first in 0..dimensions[other_a] {
+            let index_of = |position: usize| {
+                let mut coordinate = [0_usize; 3];
+                coordinate[axis] = position;
+                coordinate[other_a] = first;
+                coordinate[other_b] = second;
+                grid_index(coordinate[0], coordinate[1], coordinate[2], dimensions)
+            };
+            for (position, value) in line.iter_mut().enumerate() {
+                *value = grid[index_of(position)];
+            }
+            if line.iter().all(|value| value.is_infinite()) {
+                continue;
+            }
+            let mut count = 0_usize;
+            for position in 0..length {
+                if line[position].is_infinite() {
+                    continue;
+                }
+                loop {
+                    if count == 0 {
+                        hull[0] = position;
+                        bounds[0] = f32::NEG_INFINITY;
+                        bounds[1] = f32::INFINITY;
+                        count = 1;
+                        break;
+                    }
+                    let previous = hull[count - 1];
+                    let crossing = ((line[position] + (position * position) as f32)
+                        - (line[previous] + (previous * previous) as f32))
+                        / (2.0 * (position as f32 - previous as f32));
+                    if crossing <= bounds[count - 1] {
+                        count -= 1;
+                        continue;
+                    }
+                    hull[count] = position;
+                    bounds[count] = crossing;
+                    bounds[count + 1] = f32::INFINITY;
+                    count += 1;
+                    break;
+                }
+            }
+            let mut segment = 0_usize;
+            for (position, value) in output.iter_mut().enumerate() {
+                while bounds[segment + 1] < position as f32 {
+                    segment += 1;
+                }
+                let nearest = hull[segment];
+                let offset = position as f32 - nearest as f32;
+                *value = offset * offset + line[nearest];
+            }
+            for (position, value) in output.iter().enumerate() {
+                grid[index_of(position)] = *value;
+            }
+        }
+    }
 }
 
 fn voxel_dimension(extent: f64, pitch: f64) -> Result<usize, CoreError> {
@@ -1219,107 +1447,6 @@ fn mesh_triangles(mesh: &Mesh) -> Result<Vec<Triangle>, CoreError> {
         });
     }
     Ok(triangles)
-}
-
-fn point_inside_mesh(point: [f64; 3], triangles: &[Triangle]) -> bool {
-    let origin = [point[0], point[1] + 1.0e-8, point[2] + 2.0e-8];
-    let direction = [1.0_f64, 0.0, 0.0];
-    let intersections = triangles
-        .iter()
-        .filter(|triangle| ray_intersects_triangle(origin, direction, triangle))
-        .count();
-    intersections % 2 == 1
-}
-
-fn ray_intersects_triangle(origin: [f64; 3], direction: [f64; 3], triangle: &Triangle) -> bool {
-    let edge1 = sub3(triangle.b, triangle.a);
-    let edge2 = sub3(triangle.c, triangle.a);
-    let h = cross3(direction, edge2);
-    let determinant = dot3(edge1, h);
-    if determinant.abs() <= 1.0e-10 {
-        return false;
-    }
-    let inverse = 1.0 / determinant;
-    let s = sub3(origin, triangle.a);
-    let u = inverse * dot3(s, h);
-    if !(0.0..=1.0).contains(&u) {
-        return false;
-    }
-    let q = cross3(s, edge1);
-    let v = inverse * dot3(direction, q);
-    if v < 0.0 || u + v > 1.0 {
-        return false;
-    }
-    let distance = inverse * dot3(edge2, q);
-    distance > 1.0e-10
-}
-
-fn point_mesh_distance_squared(point: [f64; 3], triangles: &[Triangle]) -> f64 {
-    triangles
-        .iter()
-        .map(|triangle| point_triangle_distance_squared(point, triangle))
-        .fold(f64::INFINITY, f64::min)
-}
-
-fn point_triangle_distance_squared(point: [f64; 3], triangle: &Triangle) -> f64 {
-    let ab = sub3(triangle.b, triangle.a);
-    let ac = sub3(triangle.c, triangle.a);
-    let ap = sub3(point, triangle.a);
-    let d1 = dot3(ab, ap);
-    let d2 = dot3(ac, ap);
-    if d1 <= 0.0 && d2 <= 0.0 {
-        return dot3(ap, ap);
-    }
-    let bp = sub3(point, triangle.b);
-    let d3 = dot3(ab, bp);
-    let d4 = dot3(ac, bp);
-    if d3 >= 0.0 && d4 <= d3 {
-        return dot3(bp, bp);
-    }
-    let vc = d1 * d4 - d3 * d2;
-    if vc <= 0.0 && d1 >= 0.0 && d3 <= 0.0 {
-        let denominator = d1 - d3;
-        if denominator.abs() <= f64::EPSILON {
-            return dot3(ap, ap);
-        }
-        let value = d1 / denominator;
-        let projection = add3(triangle.a, scale3(ab, value));
-        return dot3(sub3(point, projection), sub3(point, projection));
-    }
-    let cp = sub3(point, triangle.c);
-    let d5 = dot3(ab, cp);
-    let d6 = dot3(ac, cp);
-    if d6 >= 0.0 && d5 <= d6 {
-        return dot3(cp, cp);
-    }
-    let vb = d5 * d2 - d1 * d6;
-    if vb <= 0.0 && d2 >= 0.0 && d6 <= 0.0 {
-        let denominator = d2 - d6;
-        if denominator.abs() <= f64::EPSILON {
-            return dot3(ap, ap);
-        }
-        let value = d2 / denominator;
-        let projection = add3(triangle.a, scale3(ac, value));
-        return dot3(sub3(point, projection), sub3(point, projection));
-    }
-    let va = d3 * d6 - d5 * d4;
-    if va <= 0.0 && d4 - d3 >= 0.0 && d5 - d6 >= 0.0 {
-        let edge = sub3(triangle.c, triangle.b);
-        let denominator = dot3(edge, edge);
-        if denominator <= f64::EPSILON {
-            return dot3(bp, bp);
-        }
-        let value = (d4 - d3) / denominator;
-        let projection = add3(triangle.b, scale3(edge, value));
-        return dot3(sub3(point, projection), sub3(point, projection));
-    }
-    let normal = cross3(ab, ac);
-    let normal_length = dot3(normal, normal);
-    if normal_length <= f64::EPSILON {
-        return dot3(ap, ap);
-    }
-    let distance = dot3(ap, normal);
-    distance * distance / normal_length
 }
 
 fn voxel_boundary_mesh(

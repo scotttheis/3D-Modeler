@@ -2088,10 +2088,7 @@ impl CommandState {
             },
         )?;
         self.dirty = true;
-        let message = format!(
-            "Hollowed with {:.2} mm wall ({})",
-            report.wall_thickness_mm, report.branch
-        );
+        let message = format!("Hollowed with a {:.1} mm wall", report.wall_thickness_mm);
         self.status(message.clone());
         Ok(message)
     }
@@ -3245,6 +3242,33 @@ mod tests {
             "subdivide",
             serde_json::json!({"object_id": id, "mode": "area", "centers_mm": centers, "radius_mm": 4.0}),
         );
+        assert_eq!(
+            desktop.scene().objects()[0].mesh(),
+            mcp.scene().objects()[0].mesh()
+        );
+    }
+
+    #[test]
+    fn mcp_hollow_of_a_stock_torus_matches_the_desktop_hollow() {
+        // OF-54: the stock torus (concave, 20,000 faces) used to exceed the
+        // resource limit; both adapters run the same core function.
+        let mut desktop = CommandState::default();
+        let mut mcp = CommandState::default();
+        for state in [&mut desktop, &mut mcp] {
+            state
+                .dispatch(CommandId::AddPrimitive(PrimitiveKind::Torus))
+                .expect("torus");
+        }
+        desktop.select_index(0);
+        let message = desktop.hollow_selected(1.5).expect("desktop hollow");
+        assert_eq!(message, "Hollowed with a 1.5 mm wall");
+        let id = mcp.scene().objects()[0].object_id().to_owned();
+        let result = run_mcp_operation(
+            &mut mcp,
+            "hollow",
+            serde_json::json!({"object_id": id, "wall_thickness_mm": 1.5}),
+        );
+        assert_eq!(result["changed"], serde_json::json!(true), "{result}");
         assert_eq!(
             desktop.scene().objects()[0].mesh(),
             mcp.scene().objects()[0].mesh()

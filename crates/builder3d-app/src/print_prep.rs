@@ -169,12 +169,12 @@ pub fn check_non_manifold(scene: &Scene) -> Result<PrintPrepReport, PrintPrepErr
                 health.issues.join("; ")
             ));
         }
-        if health.body_count > 1 {
-            report.warnings.push(format!(
-                "{}: {} disconnected shells",
-                object.name(),
-                health.body_count
-            ));
+        // A hollow's inner cavity is part of the same piece (OF-54).
+        let pieces = health.body_count - health.cavity_shells;
+        if pieces > 1 {
+            report
+                .warnings
+                .push(format!("{}: {} disconnected shells", object.name(), pieces));
         }
     }
     Ok(report)

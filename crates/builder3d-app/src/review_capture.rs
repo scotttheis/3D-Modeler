@@ -12,7 +12,7 @@
 //! | Variable | Values | Default |
 //! |---|---|---|
 //! | `BUILDER3D_REVIEW_CAPTURE` | output PNG path | harness off |
-//! | `BUILDER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `resize`, `resize-drag`, `multi`, `merge`, `unselected`, `material`, `settings`, `save`, `export`, `menu`, `colors`, `mirror`, `merge-apart`, `repair`, `paste`, `align`, `paint`, `paint-picker`, `xray`, `texture`, `texture-dialog`, `grab`, `crease`, `smooth-brush`, `simplify`, `subdivide` | `move` |
+//! | `BUILDER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `resize`, `resize-drag`, `multi`, `merge`, `unselected`, `material`, `settings`, `save`, `export`, `menu`, `colors`, `mirror`, `merge-apart`, `repair`, `paste`, `align`, `paint`, `paint-picker`, `xray`, `texture`, `texture-dialog`, `grab`, `crease`, `smooth-brush`, `simplify`, `subdivide`, `hollow` | `move` |
 //! | `BUILDER3D_REVIEW_TEXTURES` | `;`-separated picture paths for the `texture` states (one per object, reused in turn) | a built-in brick picture |
 //! | `BUILDER3D_REVIEW_THEME` | `light`, `dark` | `dark` |
 //! | `BUILDER3D_REVIEW_SIZE` | `normal`, `big` (Settings > Size) | `normal` |
@@ -123,6 +123,9 @@ pub(crate) enum ReviewState {
     /// twice; right, selected, the new even split run once; the Subdivide
     /// window open. Best with `BUILDER3D_REVIEW_VIEW=wireframe`.
     Subdivide,
+    /// The stock torus hollowed with a 1.5 mm wall (OF-54), nothing
+    /// selected and X-ray on so the inner shell shows through.
+    Hollow,
 }
 
 impl ReviewState {
@@ -158,6 +161,7 @@ impl ReviewState {
             "smooth-brush" => Some(Self::SmoothBrush),
             "simplify" => Some(Self::Simplify),
             "subdivide" => Some(Self::Subdivide),
+            "hollow" => Some(Self::Hollow),
             _ => None,
         }
     }

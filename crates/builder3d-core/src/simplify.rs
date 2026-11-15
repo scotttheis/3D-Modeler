@@ -103,6 +103,39 @@ pub fn simplify_mesh_by_percent(
     simplify_guarded(mesh, Some(target), limits, true)
 }
 
+/// Removes as many faces as possible while no collapse moves the surface
+/// by more than `tolerance_mm` (used for Hollow's inner shell, OF-54).
+/// Returns `None` when the mesh is not a clean closed manifold or nothing
+/// could be removed, so the caller keeps its input.
+pub(crate) fn simplify_within_tolerance(
+    mesh: &Mesh,
+    tolerance_mm: f64,
+    limits: &MeshOperationLimits,
+) -> Option<Mesh> {
+    let mut edges = BTreeMap::<(u32, u32), u8>::new();
+    for face in &mesh.faces {
+        for (first, second) in [(face[0], face[1]), (face[1], face[2]), (face[2], face[0])] {
+            let count = edges
+                .entry((first.min(second), first.max(second)))
+                .or_default();
+            *count = count.saturating_add(1);
+        }
+    }
+    if edges.values().any(|count| *count != 2) {
+        return None;
+    }
+    let work = u64::try_from(mesh.face_count())
+        .ok()?
+        .checked_mul(SIMPLIFY_WORK_PER_FACE)?;
+    limits.check_work("simplify", work).ok()?;
+    let mut state = Decimator::new(mesh);
+    let outcome = state.run(4, tolerance_mm * tolerance_mm);
+    if outcome.collapses == 0 {
+        return None;
+    }
+    state.into_mesh().ok()
+}
+
 fn simplify_guarded(
     mesh: &Mesh,
     face_count: Option<usize>,

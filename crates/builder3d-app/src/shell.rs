@@ -633,6 +633,7 @@ impl Builder3dApp {
             ReviewState::SmoothBrush => &[builder3d_core::PrimitiveKind::Cylinder],
             ReviewState::Simplify => &[builder3d_core::PrimitiveKind::Sphere],
             ReviewState::Subdivide => &[builder3d_core::PrimitiveKind::Cube; 2],
+            ReviewState::Hollow => &[builder3d_core::PrimitiveKind::Torus],
         };
         for (index, kind) in primitives.iter().copied().enumerate() {
             self.dispatch(CommandId::AddPrimitive(kind));
@@ -815,6 +816,28 @@ impl Builder3dApp {
                 },
             };
             let _ = self.commands.apply_brush_stroke(stroke);
+        }
+        if review.state() == ReviewState::Hollow {
+            self.commands.set_selection_indices([0]);
+            // A 40 mm torus with an 8 mm tube; adding a torus opens Edit Torus.
+            self.apply_dialog_action(crate::dialogs::DialogAction::Torus(
+                builder3d_core::TorusParameters {
+                    radius_mm: 20.0,
+                    tube_mm: 8.0,
+                    sides: 64,
+                    steps: 48,
+                    ..Default::default()
+                },
+            ));
+            self.dialog = None;
+            match self.commands.hollow_selected(1.5) {
+                Ok(message) => self.commands.set_status(message),
+                Err(error) => self.commands.set_status(error.to_string()),
+            }
+            self.commands.set_selection_indices(std::iter::empty());
+            if !self.commands.display_state().xray {
+                self.dispatch(CommandId::ToggleXray);
+            }
         }
         if review.state() == ReviewState::Subdivide {
             let limits = builder3d_core::MeshOperationLimits::default();
