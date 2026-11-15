@@ -9,10 +9,10 @@ use std::path::{Path, PathBuf};
 use builder3d_core::{
     AddObjectCommand, BlobOptions, BooleanOperation, BooleanOptions, Command as CoreCommand,
     CoreError, CreasePolishOptions, ElasticGrabOptions, GltfItem, GroupedCommand, HollowOptions,
-    Mesh, MeshFormat, NormalizeDensityOptions, PrimitiveKind, ReplaceMeshCommand, Scene,
-    SceneObject, SetColorCommand, SetMetadataCommand, SmoothBrushOptions, TextEmbossOptions,
-    ThreeMfItem, TorusParameters, Transform, TransformObjectCommand, build_parametric_torus,
-    load_3mf, load_gltf, load_mesh_asset, load_project, repair_mesh, save_project, torus_metadata,
+    Mesh, MeshFormat, PrimitiveKind, ReplaceMeshCommand, Scene, SceneObject, SetColorCommand,
+    SetMetadataCommand, SmoothBrushOptions, TextEmbossOptions, ThreeMfItem, TorusParameters,
+    Transform, TransformObjectCommand, build_parametric_torus, load_3mf, load_gltf,
+    load_mesh_asset, load_project, repair_mesh, save_project, torus_metadata,
     torus_parameters_from_metadata,
 };
 use builder3d_mcp::{R4Document, ViewState as McpViewState};
@@ -235,8 +235,6 @@ pub enum CommandId {
     SmoothBrush,
     /// Activate the persistent blob brush.
     Blob,
-    /// Activate the persistent density-normalization brush.
-    Normalize,
     /// Boolean-union the selected target and tool objects.
     Merge,
     /// Apply an emboss operation through the application editor.
@@ -452,12 +450,15 @@ pub enum BrushStroke {
         /// Bounded options.
         options: BlobOptions,
     },
-    /// Density-normalization path.
-    Normalize {
-        /// Local path centers used to select faces.
+    /// Simplify of the faces under a brushed path (OF-60): about `percent`
+    /// of them go, the area's border stays put.
+    SimplifyArea {
+        /// Local path centers.
         centers_mm: Vec<[f32; 3]>,
-        /// Bounded options.
-        options: NormalizeDensityOptions,
+        /// Faces whose centre lies this close to the path are simplified.
+        radius_mm: f32,
+        /// Share of the area's faces to remove (1-95).
+        percent: u32,
     },
     /// Even subdivision of the faces under a brushed path (OF-52).
     SubdivideArea {
@@ -475,8 +476,8 @@ impl BrushStroke {
             Self::Crease { .. } => "Crease",
             Self::SmoothBrush { .. } => "Smooth Brush",
             Self::Blob { .. } => "Blob",
-            Self::Normalize { .. } => "Normalize",
             Self::SubdivideArea { .. } => "Subdivide",
+            Self::SimplifyArea { .. } => "Simplify",
         }
     }
 }
@@ -1009,17 +1010,6 @@ impl CommandState {
             CommandId::Blob => self.apply_center_brush("Blob", |scene, index, center| {
                 scene
                     .apply_blob(index, &[center], BlobOptions::default())
-                    .map(|(result, _)| result)
-            }),
-            CommandId::Normalize => self.apply_center_brush("Normalize", |scene, index, center| {
-                let centers = [center];
-                scene
-                    .apply_normalize_face_density(
-                        index,
-                        None,
-                        Some(&centers),
-                        NormalizeDensityOptions::default(),
-                    )
                     .map(|(result, _)| result)
             }),
             CommandId::Merge => self.boolean_selected(BooleanOperation::Union),
@@ -1962,13 +1952,40 @@ impl CommandState {
                 .scene
                 .apply_blob(index, &centers_mm, options)
                 .map(|(result, report)| (result, report.changed, report.affected_vertices)),
-            BrushStroke::Normalize {
+            BrushStroke::SimplifyArea {
                 centers_mm,
-                options,
-            } => self
-                .scene
-                .apply_normalize_face_density(index, None, Some(&centers_mm), options)
-                .map(|(result, report)| (result, report.changed, report.selected_faces_after)),
+                radius_mm,
+                percent,
+            } => {
+                let faces = builder3d_core::faces_near_path(
+                    self.scene.object(index)?.mesh(),
+                    &centers_mm,
+                    radius_mm,
+                );
+                if faces.is_empty() {
+                    return Ok(CommandOutcome::Noop(
+                        "Simplify: the stroke touched no faces".to_owned(),
+                    ));
+                }
+                let (result, report) = self.scene.apply_simplify_area(index, percent, &faces)?;
+                if !result.changed {
+                    return Ok(CommandOutcome::Noop(format!(
+                        "Simplify: this area can't lose any faces without changing its shape ({} faces)",
+                        faces.len()
+                    )));
+                }
+                self.dirty = true;
+                let mut message = format!(
+                    "Simplify: {} \u{2192} {} faces",
+                    crate::desktop_jobs::group_thousands(report.before_faces),
+                    crate::desktop_jobs::group_thousands(report.after_faces)
+                );
+                if report.after_faces > report.target_faces {
+                    message.push_str(" (stopped early to keep the shape)");
+                }
+                self.status(message.clone());
+                return Ok(CommandOutcome::Applied(message));
+            }
             BrushStroke::SubdivideArea {
                 centers_mm,
                 radius_mm,
@@ -2415,7 +2432,8 @@ pub fn ribbon_spec() -> Vec<(RibbonTab, Vec<RibbonItem>)> {
                 checked_command(CommandId::Crease, "Crease", IconKey::Edit),
                 checked_command(CommandId::SmoothBrush, "Smooth Brush", IconKey::Edit),
                 checked_command(CommandId::Blob, "Blob", IconKey::Edit),
-                checked_command(CommandId::Normalize, "Normalize", IconKey::Edit),
+                // Normalize was removed by the owner (OF-60): Simplify and
+                // Subdivide by area cover it. MCP keeps normalize_face_density.
                 RibbonItem::Separator,
                 command(CommandId::Merge, "Merge", IconKey::Edit),
                 command(CommandId::Emboss, "Emboss", IconKey::Edit),
@@ -3272,6 +3290,54 @@ mod tests {
             serde_json::json!({"object_id": id, "wall_thickness_mm": 1.5}),
         );
         assert_eq!(result["changed"], serde_json::json!(true), "{result}");
+        assert_eq!(
+            desktop.scene().objects()[0].mesh(),
+            mcp.scene().objects()[0].mesh()
+        );
+    }
+
+    #[test]
+    fn mcp_simplify_area_matches_the_desktop_simplify_area_brush() {
+        // OF-60: `mode: "area"` with the same path, size and percent is the
+        // desktop Simplify window's Area I brush over; one Undo entry.
+        let mut desktop = CommandState::default();
+        let mut mcp = CommandState::default();
+        for state in [&mut desktop, &mut mcp] {
+            state
+                .dispatch(CommandId::AddPrimitive(PrimitiveKind::Sphere))
+                .expect("sphere");
+        }
+        desktop.select_index(0);
+        let source = desktop.scene().objects()[0].mesh().clone();
+        let top = source
+            .vertices
+            .iter()
+            .copied()
+            .fold([0.0_f32; 3], |best, vertex| {
+                if vertex[1] > best[1] { vertex } else { best }
+            });
+        let centers = vec![top, [top[0] + 4.0, top[1] - 0.5, top[2]]];
+        let history = desktop.scene().history_state_id();
+        assert!(matches!(
+            desktop.apply_brush_stroke(BrushStroke::SimplifyArea {
+                centers_mm: centers.clone(),
+                radius_mm: 8.0,
+                percent: 50,
+            }),
+            Ok(CommandOutcome::Applied(_))
+        ));
+        assert_ne!(desktop.scene().history_state_id(), history);
+        let after = desktop.scene().objects()[0].mesh().face_count();
+        assert!(after < source.face_count(), "the area lost faces");
+        desktop.dispatch(CommandId::Undo).expect("undo");
+        assert_eq!(desktop.scene().objects()[0].mesh(), &source);
+        desktop.dispatch(CommandId::Redo).expect("redo");
+        let id = mcp.scene().objects()[0].object_id().to_owned();
+        run_mcp_operation(
+            &mut mcp,
+            "simplify",
+            serde_json::json!({"object_id": id, "mode": "area", "percent": 50, "centers_mm": centers, "radius_mm": 8.0}),
+        );
         assert_eq!(
             desktop.scene().objects()[0].mesh(),
             mcp.scene().objects()[0].mesh()

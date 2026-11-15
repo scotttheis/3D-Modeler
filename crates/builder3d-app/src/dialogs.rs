@@ -153,6 +153,9 @@ pub(crate) enum DialogAction {
     Hollow(HollowOptions),
     /// Remove this percentage of the selected mesh's faces (OF-51).
     Simplify(u32),
+    /// Turn the Simplify area brush on with this size in mm and percentage,
+    /// or off (OF-60).
+    SimplifyArea(Option<(f32, u32)>),
     /// Cut every face of the selected mesh into four (OF-52).
     SubdivideWhole,
     /// Turn the Subdivide area brush on with this size in mm, or off.
@@ -198,6 +201,8 @@ pub(crate) struct DialogState {
     emboss_offset_z_mm: f32,
     hollow_wall_thickness_mm: f32,
     simplify_percent: u32,
+    simplify_area: bool,
+    simplify_radius_mm: f32,
     selection_faces: usize,
     subdivide_area: bool,
     subdivide_radius_mm: f32,
@@ -260,6 +265,8 @@ impl DialogState {
             emboss_offset_z_mm: 0.0,
             hollow_wall_thickness_mm: 1.0,
             simplify_percent: 10,
+            simplify_area: false,
+            simplify_radius_mm: 5.0,
             selection_faces: 0,
             subdivide_area: false,
             subdivide_radius_mm: 5.0,
@@ -1366,20 +1373,53 @@ impl DialogState {
         }
     }
 
+    /// Puts the Simplify window on "Area I brush over" with this brush size
+    /// and percentage (review harness, OF-60).
+    pub(crate) fn set_simplify_area(&mut self, radius_mm: f32, percent: u32) {
+        self.simplify_area = true;
+        self.simplify_radius_mm = radius_mm;
+        self.simplify_percent = percent;
+    }
+
     /// Face count of the selected mesh, refreshed every frame by the shell.
     pub(crate) fn set_selection_faces(&mut self, faces: usize) {
         self.selection_faces = faces;
     }
 
     /// The Simplify window (OF-51): one slider in 10 % notches and the face
-    /// count it aims for. It stays open so another notch can follow.
+    /// count it aims for. It stays open so another notch can follow. OF-60:
+    /// the whole object, or the area brushed over with Shift+drag, as in
+    /// the Subdivide window.
     fn simplify_dialog(&mut self, ui: &mut egui::Ui, action: &mut Option<DialogAction>) {
         ui.label("Remove faces while keeping the shape. Each notch removes about 10 %.");
-        ui.add(
+        let was_area = self.simplify_area;
+        ui.radio_value(&mut self.simplify_area, false, "Whole object");
+        ui.radio_value(&mut self.simplify_area, true, "Area I brush over");
+        let percent = ui.add(
             egui::Slider::new(&mut self.simplify_percent, 10..=90)
                 .step_by(10.0)
                 .suffix(" % fewer faces"),
         );
+        if self.simplify_area {
+            ui.label(
+                "Hold Shift and drag over the model to simplify that area. \
+                 Its edge stays joined to the rest.",
+            );
+            let size = ui.add(
+                egui::Slider::new(&mut self.simplify_radius_mm, 1.0..=50.0)
+                    .suffix(" mm brush size"),
+            );
+            if !was_area || size.changed() || percent.changed() {
+                *action = Some(DialogAction::SimplifyArea(Some((
+                    self.simplify_radius_mm,
+                    self.simplify_percent,
+                ))));
+            }
+            return;
+        }
+        if was_area {
+            *action = Some(DialogAction::SimplifyArea(None));
+        }
         let target = builder3d_core::simplify_target_for_percent(
             self.selection_faces,
             self.simplify_percent,
@@ -1397,7 +1437,7 @@ impl DialogState {
 
     /// The Subdivide window (OF-52): the whole object, or the area brushed
     /// over with Shift+drag (the app has no face picking; the brush is how a
-    /// region is chosen, as for Normalize).
+    /// region is chosen, as in the Simplify window).
     fn subdivide_dialog(&mut self, ui: &mut egui::Ui, action: &mut Option<DialogAction>) {
         ui.label("Cut faces into smaller, even triangles. The shape does not change.");
         let was_area = self.subdivide_area;

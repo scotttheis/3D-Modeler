@@ -1087,6 +1087,26 @@ impl Scene {
         Ok((command_result, report))
     }
 
+    /// Simplify (OF-60) of about `percent` of the given faces, keeping the
+    /// area's border fixed, as one undoable mesh replacement.
+    pub fn apply_simplify_area(
+        &mut self,
+        index: usize,
+        percent: u32,
+        faces: &[usize],
+    ) -> Result<(CommandResult, crate::SimplifyReport), CoreError> {
+        let source = self.object(index)?.mesh().clone();
+        let result = crate::simplify_mesh_by_percent_in_area(
+            &source,
+            percent,
+            Some(faces),
+            crate::MeshOperationLimits::default(),
+        )?;
+        let report = result.report.clone();
+        let command_result = self.replace_mesh(index, result.mesh)?;
+        Ok((command_result, report))
+    }
+
     /// Even subdivision (OF-52) of the whole object (`faces` = `None`) or of
     /// the given faces, as one undoable mesh replacement.
     pub fn apply_subdivide_even(

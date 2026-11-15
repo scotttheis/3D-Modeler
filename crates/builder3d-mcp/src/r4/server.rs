@@ -2283,18 +2283,59 @@ impl R4Server {
                 // OF-51: `percent` is the desktop Simplify slider (shape-guarded);
                 // `face_count` keeps the Python contract.
                 let percent = optional_usize(args, "percent")?;
-                let result = match (percent, face_count) {
-                    (Some(_), Some(_)) => {
+                // OF-60: `mode` "area" simplifies only face_indices, or the
+                // faces within `radius_mm` of the `centers_mm` path (desktop
+                // Area I brush over); "whole" is the desktop Whole object.
+                let mode = schema::string_or(args, "mode", "")?;
+                let result = match (mode.as_str(), percent, face_count) {
+                    (_, Some(_), Some(_)) => {
                         return Err(AdapterError::Validation(
                             "give either percent or face_count, not both".to_owned(),
                         ));
                     }
-                    (Some(percent), None) => builder3d_core::simplify_mesh_by_percent(
-                        &source,
-                        u32::try_from(percent).unwrap_or(u32::MAX),
-                        builder3d_core::MeshOperationLimits::default(),
-                    )?,
-                    (None, face_count) => simplify_mesh(&source, face_count)?,
+                    ("area", None, _) | ("whole", None, _) => {
+                        return Err(AdapterError::Validation(format!(
+                            "mode {mode} needs percent (1-95)"
+                        )));
+                    }
+                    ("area", Some(percent), None) => {
+                        let faces = match optional_usize_list(args, "face_indices")? {
+                            Some(faces) => faces,
+                            None => {
+                                let path = centers(args).map_err(|_| {
+                                    AdapterError::Validation(
+                                        "mode area needs face_indices or centers_mm".to_owned(),
+                                    )
+                                })?;
+                                let radius = schema::number_or(args, "radius_mm", 5.0)?;
+                                builder3d_core::faces_near_path(&source, &path, radius)
+                            }
+                        };
+                        if faces.is_empty() {
+                            return Err(AdapterError::Validation(
+                                "the area touches no faces of this object".to_owned(),
+                            ));
+                        }
+                        builder3d_core::simplify_mesh_by_percent_in_area(
+                            &source,
+                            u32::try_from(percent).unwrap_or(u32::MAX),
+                            Some(&faces),
+                            builder3d_core::MeshOperationLimits::default(),
+                        )?
+                    }
+                    ("" | "whole", ..) => match (percent, face_count) {
+                        (Some(percent), _) => builder3d_core::simplify_mesh_by_percent(
+                            &source,
+                            u32::try_from(percent).unwrap_or(u32::MAX),
+                            builder3d_core::MeshOperationLimits::default(),
+                        )?,
+                        (None, face_count) => simplify_mesh(&source, face_count)?,
+                    },
+                    (other, ..) => {
+                        return Err(AdapterError::Validation(format!(
+                            "mode must be whole or area (got {other})"
+                        )));
+                    }
                 };
                 (
                     result.mesh,

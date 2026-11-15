@@ -12,7 +12,7 @@
 //! | Variable | Values | Default |
 //! |---|---|---|
 //! | `BUILDER3D_REVIEW_CAPTURE` | output PNG path | harness off |
-//! | `BUILDER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `resize`, `resize-drag`, `multi`, `merge`, `unselected`, `material`, `settings`, `save`, `export`, `menu`, `colors`, `mirror`, `merge-apart`, `repair`, `paste`, `align`, `paint`, `paint-picker`, `xray`, `texture`, `texture-dialog`, `grab`, `crease`, `crease-sharp`, `smooth-brush`, `simplify`, `subdivide`, `hollow` | `move` |
+//! | `BUILDER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `resize`, `resize-drag`, `multi`, `merge`, `unselected`, `material`, `settings`, `save`, `export`, `menu`, `colors`, `mirror`, `merge-apart`, `repair`, `paste`, `align`, `paint`, `paint-picker`, `xray`, `texture`, `texture-dialog`, `grab`, `crease`, `crease-sharp`, `smooth-brush`, `simplify`, `simplify-area`, `subdivide`, `hollow` | `move` |
 //! | `BUILDER3D_REVIEW_TEXTURES` | `;`-separated picture paths for the `texture` states (one per object, reused in turn) | a built-in brick picture |
 //! | `BUILDER3D_REVIEW_THEME` | `light`, `dark` | `dark` |
 //! | `BUILDER3D_REVIEW_SIZE` | `normal`, `big` (Settings > Size) | `normal` |
@@ -121,6 +121,10 @@ pub(crate) enum ReviewState {
     /// One selected stock sphere simplified by 50 % (OF-51) with the
     /// Simplify window open showing the result.
     Simplify,
+    /// One selected stock sphere with a 50 % Simplify brushed across its
+    /// top (OF-60), the Simplify window open on "Area I brush over". Best
+    /// with `BUILDER3D_REVIEW_VIEW=wireframe`.
+    SimplifyArea,
     /// Two cubes with 48 faces each (OF-52): left, the old doubling run
     /// twice; right, selected, the new even split run once; the Subdivide
     /// window open. Best with `BUILDER3D_REVIEW_VIEW=wireframe`.
@@ -163,6 +167,7 @@ impl ReviewState {
             "crease-sharp" => Some(Self::CreaseSharp),
             "smooth-brush" => Some(Self::SmoothBrush),
             "simplify" => Some(Self::Simplify),
+            "simplify-area" => Some(Self::SimplifyArea),
             "subdivide" => Some(Self::Subdivide),
             "hollow" => Some(Self::Hollow),
             _ => None,

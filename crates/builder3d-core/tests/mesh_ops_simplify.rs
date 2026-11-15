@@ -1,6 +1,7 @@
 use builder3d_core::{
     Mesh, MeshOperationLimits, Scene, SceneObject, make_box, make_cylinder, make_sphere,
-    simplify_mesh, simplify_mesh_by_percent, simplify_mesh_with_options,
+    simplify_mesh, simplify_mesh_by_percent, simplify_mesh_by_percent_in_area,
+    simplify_mesh_with_options,
 };
 
 #[test]
@@ -123,4 +124,78 @@ fn simplify_by_percent_leaves_a_cube_alone_and_cuts_a_cylinder_cleanly() {
         values.clone().fold(f32::MIN, f32::max) - values.fold(f32::MAX, f32::min)
     };
     assert!((height(&result.mesh) - 40.0).abs() < 0.01);
+}
+
+#[test]
+fn simplify_in_an_area_changes_only_that_area_and_keeps_it_joined() {
+    // OF-60: simplify only the top cap of a sphere. Every face outside the
+    // cap stays exactly as it was, the cap loses about the asked share of
+    // its faces, and the surface stays closed (every edge has two faces).
+    let source = make_sphere(10.0, 4).expect("sphere fixture");
+    let centre_z = |mesh: &Mesh, face: [u32; 3]| {
+        face.iter()
+            .map(|vertex| mesh.vertices[*vertex as usize][2])
+            .sum::<f32>()
+            / 3.0
+    };
+    let area: Vec<usize> = source
+        .faces
+        .iter()
+        .enumerate()
+        .filter(|(_, face)| centre_z(&source, **face) > 5.0)
+        .map(|(index, _)| index)
+        .collect();
+    assert!(area.len() > 100 && area.len() < source.face_count() / 2);
+    let result =
+        simplify_mesh_by_percent_in_area(&source, 50, Some(&area), MeshOperationLimits::default())
+            .expect("area simplify");
+    assert!(result.report.changed);
+    let removed = source.face_count() - result.mesh.face_count();
+    assert!(
+        removed > area.len() / 4 && removed <= area.len() / 2 + 2,
+        "removed {removed} of {} area faces",
+        area.len()
+    );
+    let key = |mesh: &Mesh, face: [u32; 3]| {
+        let mut corners = face.map(|vertex| mesh.vertices[vertex as usize].map(f32::to_bits));
+        corners.sort_unstable();
+        corners
+    };
+    let after: std::collections::BTreeSet<_> = result
+        .mesh
+        .faces
+        .iter()
+        .map(|face| key(&result.mesh, *face))
+        .collect();
+    for (index, face) in source.faces.iter().enumerate() {
+        if !area.contains(&index) {
+            assert!(
+                after.contains(&key(&source, *face)),
+                "face {index} outside the area changed"
+            );
+        }
+    }
+    let mut edges = std::collections::BTreeMap::<(u32, u32), u32>::new();
+    for face in &result.mesh.faces {
+        for (a, b) in [(face[0], face[1]), (face[1], face[2]), (face[2], face[0])] {
+            *edges.entry((a.min(b), a.max(b))).or_default() += 1;
+        }
+    }
+    assert!(
+        edges.values().all(|count| *count == 2),
+        "surface stays closed"
+    );
+    assert!(
+        simplify_mesh_by_percent_in_area(&source, 50, Some(&[]), MeshOperationLimits::default())
+            .is_err()
+    );
+    // The whole-object path is unchanged by the new seam.
+    assert_eq!(
+        simplify_mesh_by_percent(&source, 30, MeshOperationLimits::default())
+            .expect("whole")
+            .mesh,
+        simplify_mesh_by_percent_in_area(&source, 30, None, MeshOperationLimits::default())
+            .expect("whole via area seam")
+            .mesh
+    );
 }

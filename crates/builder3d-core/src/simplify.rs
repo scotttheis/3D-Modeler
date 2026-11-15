@@ -88,7 +88,7 @@ pub fn simplify_mesh_with_options(
     face_count: Option<usize>,
     limits: MeshOperationLimits,
 ) -> Result<SimplifyResult, CoreError> {
-    simplify_guarded(mesh, face_count, limits, false)
+    simplify_guarded(mesh, face_count, limits, false, None)
 }
 
 /// Removes `percent` (1-95) of the faces, like the desktop Simplify slider
@@ -99,8 +99,55 @@ pub fn simplify_mesh_by_percent(
     percent: u32,
     limits: MeshOperationLimits,
 ) -> Result<SimplifyResult, CoreError> {
-    let target = simplify_target_for_percent(mesh.face_count(), percent)?;
-    simplify_guarded(mesh, Some(target), limits, true)
+    simplify_mesh_by_percent_in_area(mesh, percent, None, limits)
+}
+
+/// Removes about `percent` (1-95) of the faces in `area` (face indices; the
+/// whole mesh when `None`), like the desktop Simplify window's "Area I brush
+/// over" (OF-60). Only edges whose every touching face lies in the area may
+/// collapse, so the area's border stays exactly where it was and joined to
+/// the rest of the model, and nothing outside the area changes. The same
+/// shape guard as [`simplify_mesh_by_percent`] applies.
+pub fn simplify_mesh_by_percent_in_area(
+    mesh: &Mesh,
+    percent: u32,
+    area: Option<&[usize]>,
+    limits: MeshOperationLimits,
+) -> Result<SimplifyResult, CoreError> {
+    let Some(area) = area else {
+        let target = simplify_target_for_percent(mesh.face_count(), percent)?;
+        return simplify_guarded(mesh, Some(target), limits, true, None);
+    };
+    let face_count = mesh.face_count();
+    let mut chosen = vec![false; face_count];
+    for face in area {
+        let Some(flag) = chosen.get_mut(*face) else {
+            return Err(CoreError::MeshOperation(format!(
+                "face index {face} is outside the mesh's {face_count} faces"
+            )));
+        };
+        *flag = true;
+    }
+    let area_faces = chosen.iter().filter(|flag| **flag).count();
+    if area_faces == 0 {
+        return Err(CoreError::MeshOperation(
+            "simplify needs at least one face in the area".to_owned(),
+        ));
+    }
+    let keep = simplify_target_for_percent(area_faces, percent)?;
+    let target = face_count - (area_faces - keep);
+    // A vertex is free only when every face around it is in the area.
+    let mut free = vec![true; mesh.vertex_count()];
+    for (face, inside) in mesh.faces.iter().zip(&chosen) {
+        if !inside {
+            for vertex in face {
+                if let Some(flag) = free.get_mut(*vertex as usize) {
+                    *flag = false;
+                }
+            }
+        }
+    }
+    simplify_guarded(mesh, Some(target), limits, true, Some(free))
 }
 
 /// Removes as many faces as possible while no collapse moves the surface
@@ -128,7 +175,7 @@ pub(crate) fn simplify_within_tolerance(
         .ok()?
         .checked_mul(SIMPLIFY_WORK_PER_FACE)?;
     limits.check_work("simplify", work).ok()?;
-    let mut state = Decimator::new(mesh);
+    let mut state = Decimator::new(mesh, None);
     let outcome = state.run(4, tolerance_mm * tolerance_mm);
     if outcome.collapses == 0 {
         return None;
@@ -141,6 +188,7 @@ fn simplify_guarded(
     face_count: Option<usize>,
     limits: MeshOperationLimits,
     keep_shape: bool,
+    free: Option<Vec<bool>>,
 ) -> Result<SimplifyResult, CoreError> {
     mesh.validate_non_empty()?;
     limits.validate("simplify")?;
@@ -175,7 +223,7 @@ fn simplify_guarded(
         .and_then(|faces| faces.checked_mul(SIMPLIFY_WORK_PER_FACE))
         .ok_or_else(|| CoreError::MeshOperation("simplify work count overflow".to_owned()))?;
     limits.check_work("simplify", work_estimate)?;
-    let mut state = Decimator::new(mesh);
+    let mut state = Decimator::new(mesh, free);
     let maximum_cost = if keep_shape {
         let tolerance = state.diagonal() * SIMPLIFY_SHAPE_TOLERANCE;
         tolerance * tolerance
@@ -369,13 +417,15 @@ struct Decimator {
     face_alive: Vec<bool>,
     vertex_faces: Vec<Vec<u32>>,
     vertex_alive: Vec<bool>,
+    /// Vertices that may move (OF-60 area mode); `None` means all.
+    free: Option<Vec<bool>>,
     version: Vec<u32>,
     alive_faces: usize,
     queue: BinaryHeap<Candidate>,
 }
 
 impl Decimator {
-    fn new(mesh: &Mesh) -> Self {
+    fn new(mesh: &Mesh, free: Option<Vec<bool>>) -> Self {
         let vertices: Vec<[f64; 3]> = mesh
             .vertices
             .iter()
@@ -429,6 +479,7 @@ impl Decimator {
         }
         let mut decimator = Self {
             vertex_alive: vec![true; vertices.len()],
+            free,
             version: vec![0; vertices.len()],
             vertices,
             quadrics,
@@ -459,6 +510,12 @@ impl Decimator {
 
     fn push_edge(&mut self, first: u32, second: u32) {
         let (a, b) = (first.min(second), first.max(second));
+        if let Some(free) = &self.free
+            && !(free.get(a as usize).copied().unwrap_or(false)
+                && free.get(b as usize).copied().unwrap_or(false))
+        {
+            return;
+        }
         let mut quadric = self.quadrics[a as usize];
         add_quadric(&mut quadric, &self.quadrics[b as usize]);
         let pa = self.vertices[a as usize];

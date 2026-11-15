@@ -22,8 +22,8 @@ use std::{
 
 use builder3d_core::{
     BlobOptions, BrushDirection, BrushFalloff, BrushSymmetry, CreasePolishOptions,
-    ElasticGrabOptions, Mesh, NormalizeDensityOptions, SmoothBrushOptions, Transform, blob,
-    build_parametric_torus, crease_polish, elastic_grab, normalize_face_density, smooth_brush,
+    ElasticGrabOptions, Mesh, SmoothBrushOptions, Transform, blob, build_parametric_torus,
+    crease_polish, elastic_grab, smooth_brush,
 };
 use builder3d_viewport::{
     Aabb, Camera, GizmoAxis, GizmoLine, GizmoMode, InteractionState, MOVE_GIZMO_SCALE, Mat4,
@@ -113,9 +113,10 @@ enum ActiveBrush {
     Crease,
     SmoothBrush,
     Blob,
-    Normalize,
     /// The Subdivide window's "Area I brush over" (OF-52).
     SubdivideArea,
+    /// The Simplify window's "Area I brush over" (OF-60).
+    SimplifyArea,
 }
 
 impl ActiveBrush {
@@ -125,7 +126,6 @@ impl ActiveBrush {
             CommandId::Crease => Some(Self::Crease),
             CommandId::SmoothBrush => Some(Self::SmoothBrush),
             CommandId::Blob => Some(Self::Blob),
-            CommandId::Normalize => Some(Self::Normalize),
             _ => None,
         }
     }
@@ -136,8 +136,8 @@ impl ActiveBrush {
             Self::Crease => CommandId::Crease,
             Self::SmoothBrush => CommandId::SmoothBrush,
             Self::Blob => CommandId::Blob,
-            Self::Normalize => CommandId::Normalize,
             Self::SubdivideArea => CommandId::Subdivide,
+            Self::SimplifyArea => CommandId::Simplify,
         }
     }
 
@@ -147,8 +147,8 @@ impl ActiveBrush {
             Self::Crease => "Crease",
             Self::SmoothBrush => "Smooth Brush",
             Self::Blob => "Blob",
-            Self::Normalize => "Normalize",
             Self::SubdivideArea => "Subdivide",
+            Self::SimplifyArea => "Simplify",
         }
     }
 }
@@ -172,11 +172,9 @@ struct BrushSettings {
     blob_strength: f32,
     blob_direction: BrushDirection,
     blob_falloff: BrushFalloff,
-    normalize_radius_mm: f32,
-    normalize_target_edge_mm: f32,
-    normalize_target_enabled: bool,
-    normalize_max_iterations: usize,
     subdivide_radius_mm: f32,
+    simplify_radius_mm: f32,
+    simplify_percent: u32,
 }
 
 impl Default for BrushSettings {
@@ -185,7 +183,6 @@ impl Default for BrushSettings {
         let crease = CreasePolishOptions::default();
         let smooth = SmoothBrushOptions::default();
         let blob = BlobOptions::default();
-        let normalize = NormalizeDensityOptions::default();
         Self {
             grab_radius_mm: grab.radius_mm,
             // Blender's Grab default: the grabbed point stays under the pointer (OF-48).
@@ -208,11 +205,9 @@ impl Default for BrushSettings {
             blob_strength: blob.strength,
             blob_direction: blob.direction,
             blob_falloff: blob.falloff,
-            normalize_radius_mm: normalize.radius_mm,
-            normalize_target_edge_mm: 1.0,
-            normalize_target_enabled: normalize.target_edge_length_mm.is_some(),
-            normalize_max_iterations: normalize.max_iterations,
             subdivide_radius_mm: 5.0,
+            simplify_radius_mm: 5.0,
+            simplify_percent: 50,
         }
     }
 }
@@ -635,7 +630,9 @@ impl Builder3dApp {
                 &[builder3d_core::PrimitiveKind::Sphere]
             }
             ReviewState::SmoothBrush => &[builder3d_core::PrimitiveKind::Cylinder],
-            ReviewState::Simplify => &[builder3d_core::PrimitiveKind::Sphere],
+            ReviewState::Simplify | ReviewState::SimplifyArea => {
+                &[builder3d_core::PrimitiveKind::Sphere]
+            }
             ReviewState::Subdivide => &[builder3d_core::PrimitiveKind::Cube; 2],
             ReviewState::Hollow => &[builder3d_core::PrimitiveKind::Torus],
         };
@@ -912,6 +909,51 @@ impl Builder3dApp {
                 if let Some(dialog) = self.dialog.as_mut() {
                     dialog.set_message(message);
                 }
+            }
+        }
+        if review.state() == ReviewState::SimplifyArea {
+            self.commands.set_selection_indices([0]);
+            let radius = self
+                .commands
+                .scene()
+                .objects()
+                .first()
+                .map_or(0.0, |sphere| {
+                    sphere
+                        .mesh()
+                        .vertices
+                        .iter()
+                        .map(|vertex| vertex[1])
+                        .fold(0.0_f32, f32::max)
+                });
+            // A stroke over the top, from front left to back right.
+            let centers: Vec<[f32; 3]> = (0..=16)
+                .map(|step| {
+                    let x = -0.6 * radius + 1.2 * radius * step as f32 / 16.0;
+                    let z = 0.3 * x;
+                    let y = (radius * radius - x * x - z * z).max(0.0).sqrt();
+                    [x, y, z]
+                })
+                .collect();
+            self.dispatch(CommandId::Simplify);
+            if let Some(dialog) = self.dialog.as_mut() {
+                dialog.set_simplify_area(6.0, 50);
+            }
+            self.apply_dialog_action(crate::dialogs::DialogAction::SimplifyArea(Some((6.0, 50))));
+            let stroke = BrushStroke::SimplifyArea {
+                centers_mm: centers,
+                radius_mm: 6.0,
+                percent: 50,
+            };
+            if let Ok(outcome) = self.commands.apply_brush_stroke(stroke)
+                && let Some(dialog) = self.dialog.as_mut()
+            {
+                let message = match outcome {
+                    crate::commands::CommandOutcome::Applied(message)
+                    | crate::commands::CommandOutcome::Noop(message) => message,
+                    _ => String::new(),
+                };
+                dialog.set_message(message);
             }
         }
         if review.state() == ReviewState::SmoothBrush {
@@ -5180,8 +5222,8 @@ impl Builder3dApp {
             ActiveBrush::Crease
             | ActiveBrush::SmoothBrush
             | ActiveBrush::Blob
-            | ActiveBrush::Normalize
-            | ActiveBrush::SubdivideArea => {
+            | ActiveBrush::SubdivideArea
+            | ActiveBrush::SimplifyArea => {
                 let last = gesture
                     .centers
                     .last()
@@ -5245,16 +5287,10 @@ impl Builder3dApp {
                 centers_mm: gesture.centers.clone(),
                 radius_mm: settings.subdivide_radius_mm,
             },
-            ActiveBrush::Normalize => BrushStroke::Normalize {
+            ActiveBrush::SimplifyArea => BrushStroke::SimplifyArea {
                 centers_mm: gesture.centers.clone(),
-                options: NormalizeDensityOptions {
-                    radius_mm: settings.normalize_radius_mm,
-                    target_edge_length_mm: settings
-                        .normalize_target_enabled
-                        .then_some(settings.normalize_target_edge_mm),
-                    max_iterations: settings.normalize_max_iterations,
-                    limits: Default::default(),
-                },
+                radius_mm: settings.simplify_radius_mm,
+                percent: settings.simplify_percent,
             },
         }
     }
@@ -5285,11 +5321,6 @@ impl Builder3dApp {
                 centers_mm,
                 options,
             } => blob(&gesture.source_mesh, &centers_mm, options).map(|result| result.mesh),
-            BrushStroke::Normalize {
-                centers_mm,
-                options,
-            } => normalize_face_density(&gesture.source_mesh, None, Some(&centers_mm), options)
-                .map(|result| result.mesh),
             BrushStroke::SubdivideArea {
                 centers_mm,
                 radius_mm,
@@ -5301,6 +5332,24 @@ impl Builder3dApp {
                 }
                 builder3d_core::subdivide_mesh_even(
                     &gesture.source_mesh,
+                    Some(&faces),
+                    builder3d_core::MeshOperationLimits::default(),
+                )
+                .map(|result| result.mesh)
+            }
+            BrushStroke::SimplifyArea {
+                centers_mm,
+                radius_mm,
+                percent,
+            } => {
+                let faces =
+                    builder3d_core::faces_near_path(&gesture.source_mesh, &centers_mm, radius_mm);
+                if faces.is_empty() {
+                    return Ok(gesture.source_mesh.clone());
+                }
+                builder3d_core::simplify_mesh_by_percent_in_area(
+                    &gesture.source_mesh,
+                    percent,
                     Some(&faces),
                     builder3d_core::MeshOperationLimits::default(),
                 )
@@ -6003,31 +6052,8 @@ impl Builder3dApp {
                             "blob-falloff",
                         );
                     }
-                    ActiveBrush::Normalize => {
-                        ui.add(
-                            egui::Slider::new(&mut settings.normalize_radius_mm, 0.1..=1000.0)
-                                .text("Radius mm"),
-                        );
-                        ui.checkbox(
-                            &mut settings.normalize_target_enabled,
-                            "Explicit target edge",
-                        );
-                        if settings.normalize_target_enabled {
-                            ui.add(
-                                egui::Slider::new(
-                                    &mut settings.normalize_target_edge_mm,
-                                    0.01..=1000.0,
-                                )
-                                .text("Target mm"),
-                            );
-                        }
-                        ui.add(
-                            egui::Slider::new(&mut settings.normalize_max_iterations, 1..=4)
-                                .text("Passes"),
-                        );
-                    }
-                    // Its brush size lives in the Subdivide window.
-                    ActiveBrush::SubdivideArea => {}
+                    // Their brush size lives in the Subdivide / Simplify window.
+                    ActiveBrush::SubdivideArea | ActiveBrush::SimplifyArea => {}
                 }
             });
         self.brush_settings_open = open;
@@ -6207,7 +6233,10 @@ impl Builder3dApp {
             return;
         }
         if matches!(action, DialogAction::Close) {
-            if self.active_brush == Some(ActiveBrush::SubdivideArea) {
+            if matches!(
+                self.active_brush,
+                Some(ActiveBrush::SubdivideArea | ActiveBrush::SimplifyArea)
+            ) {
                 self.active_brush = None;
                 self.viewport_drag = None;
             }
@@ -6310,6 +6339,26 @@ impl Builder3dApp {
                 Ok(String::from(
                     "Subdivide: hold Shift and drag over the model to subdivide that area",
                 ))
+            }
+            DialogAction::SimplifyArea(Some((radius_mm, percent))) => {
+                self.brush_settings.simplify_radius_mm = radius_mm;
+                self.brush_settings.simplify_percent = percent;
+                self.viewport_drag = None;
+                self.active_brush = Some(ActiveBrush::SimplifyArea);
+                self.brush_settings_open = false;
+                self.invalidate_presentation();
+                Ok(String::from(
+                    "Simplify: hold Shift and drag over the model to simplify that area",
+                ))
+            }
+            DialogAction::SimplifyArea(None) => {
+                if self.active_brush == Some(ActiveBrush::SimplifyArea) {
+                    self.active_brush = None;
+                    self.viewport_drag = None;
+                    self.preview_mesh_override = None;
+                    self.invalidate_presentation();
+                }
+                Ok(String::from("Simplify: whole object"))
             }
             DialogAction::SubdivideArea(None) => {
                 if self.active_brush == Some(ActiveBrush::SubdivideArea) {
@@ -7336,7 +7385,6 @@ fn command_enabled(command: CommandId, state: &CommandState) -> bool {
         | CommandId::Crease
         | CommandId::SmoothBrush
         | CommandId::Blob
-        | CommandId::Normalize
         | CommandId::Material
         | CommandId::Paint => !state.scene().objects().is_empty(),
         CommandId::EditTorus => selected > 0 && state.has_selected_parametric_torus(),
@@ -7385,7 +7433,6 @@ fn command_summary(command: CommandId) -> &'static str {
         CommandId::Crease => "Sculpt a crease",
         CommandId::SmoothBrush => "Smooth with brush",
         CommandId::Blob => "Add sculpted volume",
-        CommandId::Normalize => "Even out mesh detail",
         CommandId::Merge => "Join selected models",
         CommandId::Emboss => "Raise a design",
         CommandId::Hollow => "Make a hollow shell",
@@ -7448,7 +7495,6 @@ fn command_help(command: CommandId) -> &'static str {
         CommandId::Crease => "Sculpt a sharper groove into the selected model.",
         CommandId::SmoothBrush => "Smooth the selected model where you brush.",
         CommandId::Blob => "Add or remove rounded volume where you brush.",
-        CommandId::Normalize => "Make the selected mesh detail more even.",
         CommandId::Merge => "Join the selected models into one solid.",
         CommandId::Emboss => "Raise a design on the selected model.",
         CommandId::Hollow => "Create a hollow shell from the selected model.",
@@ -7505,7 +7551,6 @@ fn command_disabled_help(command: CommandId, state: &CommandState) -> &'static s
         | CommandId::Crease
         | CommandId::SmoothBrush
         | CommandId::Blob
-        | CommandId::Normalize
         | CommandId::Emboss
         | CommandId::Hollow
         | CommandId::Material

@@ -118,8 +118,8 @@ pub use shell_ops::{
 };
 pub use simplify::{
     DEFAULT_SIMPLIFY_MIN_FACES, SIMPLIFY_SHAPE_TOLERANCE, SimplifyReport, SimplifyResult,
-    simplify_mesh, simplify_mesh_by_percent, simplify_mesh_with_options,
-    simplify_target_for_percent,
+    simplify_mesh, simplify_mesh_by_percent, simplify_mesh_by_percent_in_area,
+    simplify_mesh_with_options, simplify_target_for_percent,
 };
 pub use smooth::{
     DEFAULT_SMOOTH_MAX_ITERATIONS, SmoothReport, SmoothResult, smooth_mesh,
