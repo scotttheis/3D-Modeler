@@ -32,15 +32,13 @@ Hollow works at a 2 mm wall; Normalize to be removed; the whole-object Smooth
 button stays as it is. Follow-ups OF-59 to OF-61 (OF-62 garbled text done).
 
 Follow-ups OF-59 to OF-61 built 2026-11-15 (`57671fb`, `fbbfff8`,
-`0238ccf`), pack `evidence/rebuild/captures/2026-11-15-review-phase3-followups/`,
-**waiting for owner review**. Open owner question: MCP
-`normalize_face_density` was kept when the Normalize button was removed
-(OF-60); keep it or remove it?
+`0238ccf`), pack `evidence/rebuild/captures/2026-11-15-review-phase3-followups/`.
+**Owner review 2026-11-15: all three approved.** MCP `normalize_face_density`
+stays (owner: keep it in AI for possible later use). Phase 3 is closed.
 
 **Known work, in order** (a session takes the first item not done):
 
-1. Done 2026-11-15, waiting for owner review: Phase 3 follow-ups OF-59 to
-   OF-61 (pack above).
+1. Done and approved 2026-11-15: Phase 3 follow-ups OF-59 to OF-61.
 2. Phase 4 — Measure ruler (OF-55).
 3. Phase 5 — MCP does everything (OF-58).
 4. F5 — release link reliability; F6 — reconcile the 148-row ledger
@@ -72,7 +70,7 @@ the next stop message, not guessed.
 ## Last review pack
 
 `evidence/rebuild/captures/2026-11-15-review-phase3-followups/` (OF-59 to
-OF-61), not yet reviewed. `evidence/rebuild/captures/2026-11-14-review-phase3/` (Phase 3: OF-48 to
+OF-61), approved by the owner 2026-11-15. `evidence/rebuild/captures/2026-11-14-review-phase3/` (Phase 3: OF-48 to
 OF-54), reviewed by the owner 2026-11-15. `evidence/rebuild/captures/2026-11-14-review-phase2/` (Phase 2: OF-44 and
 OF-47 approved 2026-11-15; OF-46 added and approved 2026-11-15). `evidence/rebuild/captures/2026-11-14-review-phase1/`
 (Phase 1), not yet reviewed. Before that:
