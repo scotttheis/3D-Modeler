@@ -834,6 +834,7 @@ impl R4Server {
             "arrange" => self.arrange(args),
             "set_color" => self.set_color(args),
             "mesh_health" => self.mesh_health(args),
+            "measure" => self.measure(args),
             "undo" => self.history(false, args),
             "redo" => self.history(true, args),
             "delete_selected" => {
@@ -1743,6 +1744,60 @@ impl R4Server {
             "object_id": object.object_id(),
             "name": object.name(),
             "health": health_value(&health),
+            "project_id": state.scene.project_id(),
+            "scene_revision": state.scene.revision(),
+        }))
+    }
+
+    /// OF-55: the desktop Measure ruler's distance. Each end is a point or
+    /// an object; an object end is its surface point nearest the other end.
+    fn measure(&self, args: &Map<String, Value>) -> Result<Value, AdapterError> {
+        let state = self.lock_state()?;
+        let from = measure_end(&state.scene, args, "from")?;
+        let to = measure_end(&state.scene, args, "to")?;
+        let (from_mm, to_mm) = match (&from, &to) {
+            (MeasureEnd::Point(from), MeasureEnd::Point(to)) => (*from, *to),
+            (MeasureEnd::Point(point), MeasureEnd::Object(index)) => {
+                let mesh = state.scene.object(*index)?.transformed_mesh()?;
+                (
+                    *point,
+                    builder3d_core::closest_point_on_mesh(&mesh, *point)?,
+                )
+            }
+            (MeasureEnd::Object(index), MeasureEnd::Point(point)) => {
+                let mesh = state.scene.object(*index)?.transformed_mesh()?;
+                (
+                    builder3d_core::closest_point_on_mesh(&mesh, *point)?,
+                    *point,
+                )
+            }
+            (MeasureEnd::Object(first), MeasureEnd::Object(second)) => {
+                if first == second {
+                    return Err(AdapterError::Validation(
+                        "measure needs two different objects".to_owned(),
+                    ));
+                }
+                let first = state.scene.object(*first)?.transformed_mesh()?;
+                let second = state.scene.object(*second)?.transformed_mesh()?;
+                builder3d_core::closest_points_between_meshes(&first, &second)?
+            }
+        };
+        let measured = builder3d_core::measure_points(from_mm, to_mm)?;
+        let object_id = |end: &MeasureEnd| match end {
+            MeasureEnd::Object(index) => state
+                .scene
+                .object(*index)
+                .ok()
+                .map(|object| object.object_id().to_owned()),
+            MeasureEnd::Point(_) => None,
+        };
+        Ok(json!({
+            "from_mm": measured.from_mm,
+            "to_mm": measured.to_mm,
+            "delta_mm": measured.delta_mm,
+            "distance_mm": measured.distance_mm,
+            "from_object_id": object_id(&from),
+            "to_object_id": object_id(&to),
             "project_id": state.scene.project_id(),
             "scene_revision": state.scene.revision(),
         }))
@@ -3121,6 +3176,47 @@ fn target_index(scene: &Scene, args: &Map<String, Value>) -> Result<usize, Adapt
     target_index_or_first(scene)
 }
 
+/// One end of an MCP `measure` ruler.
+enum MeasureEnd {
+    Point([f32; 3]),
+    Object(usize),
+}
+
+fn measure_end(
+    scene: &Scene,
+    args: &Map<String, Value>,
+    prefix: &str,
+) -> Result<MeasureEnd, AdapterError> {
+    let present = |key: &str| args.get(key).is_some_and(|value| !value.is_null());
+    let point_key = format!("{prefix}_point_mm");
+    let id_key = format!("{prefix}_object_id");
+    let index_key = format!("{prefix}_index");
+    let given = [&point_key, &id_key, &index_key]
+        .into_iter()
+        .filter(|key| present(key))
+        .count();
+    if given != 1 {
+        return Err(AdapterError::Validation(format!(
+            "give exactly one of {point_key}, {id_key} or {index_key}"
+        )));
+    }
+    if present(&point_key) {
+        return Ok(MeasureEnd::Point(schema::vec3_or(
+            args, &point_key, [0.0; 3],
+        )?));
+    }
+    if let Some(object_id) = args.get(&id_key).and_then(Value::as_str) {
+        return Ok(MeasureEnd::Object(scene.object_index(object_id)?));
+    }
+    let index = args
+        .get(&index_key)
+        .and_then(Value::as_u64)
+        .and_then(|index| usize::try_from(index).ok())
+        .ok_or_else(|| AdapterError::Validation(format!("{index_key} must be an index")))?;
+    scene.object(index)?;
+    Ok(MeasureEnd::Object(index))
+}
+
 fn target_index_or_first(scene: &Scene) -> Result<usize, AdapterError> {
     if let Some(index) = scene.selection().iter().next().copied() {
         return Ok(index);
@@ -3987,15 +4083,12 @@ mod tests {
     fn full_profile_publishes_the_fixed_catalog_with_strict_metadata() {
         let server = server(Profile::Full);
         let tools = server.tools();
-        assert_eq!(tools.len(), 65);
+        assert_eq!(tools.len(), 66);
         assert_eq!(
             tools.first().map(|tool| tool.name.as_ref()),
             Some("get_status")
         );
-        assert_eq!(
-            tools.last().map(|tool| tool.name.as_ref()),
-            Some("remove_texture")
-        );
+        assert_eq!(tools.last().map(|tool| tool.name.as_ref()), Some("measure"));
         let launch = tools.iter().find(|tool| tool.name == "launch_slicer");
         assert_eq!(
             launch
@@ -4213,11 +4306,86 @@ mod tests {
         let invalid = full.call_value("mirror", json!({"axis":"bad","index":0}));
         assert!(matches!(invalid, Err(AdapterError::Validation(_))));
         let observe = server(Profile::Observe);
-        assert_eq!(observe.tools().len(), 7);
+        assert_eq!(observe.tools().len(), 8);
         assert!(
             observe
                 .call_value("translate", json!({"index":0,"offset_mm":[1,0,0]}))
                 .is_err()
+        );
+    }
+
+    #[test]
+    fn measure_takes_points_or_objects_and_never_changes_the_scene() {
+        // OF-55: the desktop ruler's distance, read-only, Observe profile.
+        let full = server(Profile::Full);
+        let server = &full;
+        for _ in 0..2 {
+            server
+                .call_value(
+                    "add_primitive",
+                    json!({"primitive":"cube","dimensions_mm":[20,20,20]}),
+                )
+                .expect("add cube");
+        }
+        let before = server
+            .call_value("scene_summary", json!({}))
+            .expect("summary");
+        let x_of = |index: usize| {
+            before["objects"][index]["position_mm"][0]
+                .as_f64()
+                .unwrap_or(f64::NAN)
+        };
+        let offset = 40.0 - (x_of(1) - x_of(0));
+        server
+            .call_value("translate", json!({"index":1,"offset_mm":[offset,0,0]}))
+            .expect("place cube");
+        let before = server
+            .call_value("scene_summary", json!({}))
+            .expect("summary");
+        let points = server
+            .call_value(
+                "measure",
+                json!({"from_point_mm":[0,0,0],"to_point_mm":[3,4,0]}),
+            )
+            .expect("point to point");
+        assert!((points["distance_mm"].as_f64().unwrap_or(0.0) - 5.0).abs() < 1e-4);
+        assert_eq!(points["delta_mm"], json!([3.0, 4.0, 0.0]));
+        assert_eq!(points["from_object_id"], Value::Null);
+        let gap = server
+            .call_value("measure", json!({"from_index":0,"to_index":1}))
+            .expect("object to object");
+        assert!(
+            (gap["distance_mm"].as_f64().unwrap_or(0.0) - 20.0).abs() < 1e-3,
+            "{gap}"
+        );
+        assert!(gap["from_object_id"].is_string() && gap["to_object_id"].is_string());
+        let to_object = server
+            .call_value(
+                "measure",
+                json!({"from_point_mm":[x_of(0),100,0],"to_index":0}),
+            )
+            .expect("point to object");
+        // Straight down onto the cube's top face.
+        let top = to_object["to_mm"][1].as_f64().unwrap_or(f64::NAN);
+        assert!(top > 0.0 && top < 100.0, "{to_object}");
+        assert!((to_object["distance_mm"].as_f64().unwrap_or(0.0) - (100.0 - top)).abs() < 1e-3);
+        assert!((to_object["to_mm"][0].as_f64().unwrap_or(f64::NAN) - x_of(0)).abs() < 1e-3);
+        for bad in [
+            json!({"to_index":0}),
+            json!({"from_index":0,"from_point_mm":[0,0,0],"to_index":1}),
+            json!({"from_index":0,"to_index":0}),
+            json!({"from_index":7,"to_index":0}),
+        ] {
+            assert!(server.call_value("measure", bad).is_err());
+        }
+        let after = server
+            .call_value("scene_summary", json!({}))
+            .expect("summary");
+        assert_eq!(before["scene_revision"], after["scene_revision"]);
+        assert!(
+            super::R4Server::tools_for_profile(Profile::Observe)
+                .iter()
+                .any(|tool| tool.name == "measure")
         );
     }
 

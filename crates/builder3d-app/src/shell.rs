@@ -6,7 +6,9 @@
 
 use crate::chrome::{CONTROL_HEIGHT, Glyph, RADIUS_CONTROL, ROW_HEIGHT};
 
+mod measure_ruler;
 mod paint_bar;
+use measure_ruler::MeasureMode;
 use paint_bar::PaintMode;
 use std::{
     collections::{BTreeSet, HashMap, HashSet},
@@ -367,7 +369,8 @@ pub struct Builder3dApp {
     selection_anchor: Option<String>,
     sticky_selection: bool,
     placement_command: Option<CommandId>,
-    measurement_text: Option<String>,
+    /// Measure ruler (OF-55); `None` when the Measure bar is closed.
+    measure_mode: Option<MeasureMode>,
     placement_axis: Axis,
     placement_alignment: Alignment,
     settings_path: PathBuf,
@@ -465,7 +468,7 @@ impl Default for Builder3dApp {
             selection_anchor: None,
             sticky_selection: false,
             placement_command: None,
-            measurement_text: None,
+            measure_mode: None,
             placement_axis: Axis::X,
             placement_alignment: Alignment::Center,
             settings_path: current_runtime_paths().config_dir.join("settings.json"),
@@ -638,6 +641,10 @@ impl Builder3dApp {
             ReviewState::HollowDialog | ReviewState::HollowError => {
                 &[builder3d_core::PrimitiveKind::Sphere]
             }
+            ReviewState::Measure | ReviewState::MeasureStart => &[
+                builder3d_core::PrimitiveKind::Cube,
+                builder3d_core::PrimitiveKind::Cylinder,
+            ],
         };
         for (index, kind) in primitives.iter().copied().enumerate() {
             self.dispatch(CommandId::AddPrimitive(kind));
@@ -689,6 +696,12 @@ impl Builder3dApp {
                 let _ = self.commands.set_selected_color(color);
             }
             self.commands.set_selection_indices([0, 2]);
+        }
+        if matches!(
+            review.state(),
+            ReviewState::Measure | ReviewState::MeasureStart
+        ) {
+            self.stage_review_ruler(review.state() == ReviewState::Measure);
         }
         if matches!(
             review.state(),
@@ -1255,6 +1268,15 @@ impl Builder3dApp {
             self.toggle_paint_mode();
             return;
         }
+        if command == CommandId::Measure {
+            self.toggle_measure_mode();
+            return;
+        }
+        // Other commands close the Measure bar; Undo, Redo and the view
+        // commands work while measuring.
+        if self.measure_mode.is_some() && !measure_keeps_running_for(command) {
+            self.finish_measure_mode();
+        }
         // Any other command closes the Paint bar and keeps the paint;
         // Undo and Redo work inside Paint.
         if self.paint_mode.is_some() && !matches!(command, CommandId::Undo | CommandId::Redo) {
@@ -1300,12 +1322,7 @@ impl Builder3dApp {
             Ok(CommandOutcome::OpenDialog(kind)) => self.open_dialog(kind),
             Ok(CommandOutcome::ExitRequested) => self.request_exit(),
             Ok(CommandOutcome::Applied(message)) | Ok(CommandOutcome::Noop(message)) => {
-                if command == CommandId::Measure {
-                    self.measurement_text = Some(message.clone());
-                    self.commands.set_status("Measured dimensions");
-                } else {
-                    self.commands.set_status(message);
-                }
+                self.commands.set_status(message);
             }
             Err(error) => self.report_command_error(error),
         }
@@ -1350,6 +1367,7 @@ impl Builder3dApp {
         self.viewport_drag = None;
         self.preview_mesh_override = None;
         self.boolean_pick = None;
+        self.measure_mode = None;
         if self.active_brush == Some(brush) {
             self.active_brush = None;
             self.brush_settings_open = false;
@@ -1566,6 +1584,7 @@ impl Builder3dApp {
         self.item_textures.clear();
         self.item_health.clear();
         self.gizmo_frame = None;
+        self.measure_mode = None;
     }
 
     fn open_dialog(&mut self, kind: DialogKind) {
@@ -2176,6 +2195,9 @@ impl Builder3dApp {
                 if self.paint_mode.is_some() {
                     ui.add_space(2.0);
                     self.render_paint_bar(ui, palette);
+                } else if self.measure_mode.is_some() {
+                    ui.add_space(2.0);
+                    self.render_measure_bar(ui, palette);
                 } else if self.ribbon_expanded {
                     ui.add_space(2.0);
                     self.render_active_tab(ui, palette);
@@ -4701,6 +4723,22 @@ impl Builder3dApp {
                         ui.ctx().set_cursor_icon(egui::CursorIcon::None);
                         paint_bar::paint_spray_cursor(&painter, pointer, mode.color, palette);
                     }
+                } else if self.measure_mode.is_some() {
+                    // Measure hides the move handles and shows the ruler.
+                    let pointer = (hovering
+                        && !matches!(
+                            self.viewport_drag,
+                            Some(ViewportDrag::Orbit | ViewportDrag::Pan)
+                        ))
+                    .then_some(hover)
+                    .flatten()
+                    .filter(|pointer| rect.contains(*pointer));
+                    let free = ui.ctx().input(|input| input.modifiers.shift);
+                    self.update_measure_hover(rect, pointer, free);
+                    if pointer.is_some() {
+                        ui.ctx().set_cursor_icon(egui::CursorIcon::Crosshair);
+                    }
+                    self.paint_measure_overlay(&painter, rect, palette);
                 } else {
                     if gizmo_mode == GizmoMode::Resize {
                         self.paint_resize_handles(&painter, rect, palette);
@@ -4733,6 +4771,8 @@ impl Builder3dApp {
                 {
                     if self.paint_mode.is_some() {
                         self.paint_click(rect, pointer);
+                    } else if self.measure_mode.is_some() {
+                        self.measure_click(rect, pointer, input.modifiers.shift);
                     } else {
                         self.pick_viewport_object(rect, pointer, input.modifiers);
                     }
@@ -5428,6 +5468,11 @@ impl Builder3dApp {
     ) {
         let stale_transform = matches!(&self.viewport_drag, Some(ViewportDrag::Transform(drag)) if drag.snapshot.revision != self.commands.scene().revision() || &drag.snapshot.selection != self.commands.scene().selection());
         let stale_brush = matches!(&self.viewport_drag, Some(ViewportDrag::Brush(gesture)) if gesture.revision != self.commands.scene().revision());
+        if self.measure_mode.is_some() && input.escape_pressed && self.viewport_drag.is_none() {
+            self.measure_escape();
+            self.viewport_gizmo_consumed = true;
+            return;
+        }
         if self.paint_mode.is_some() && input.escape_pressed && self.viewport_drag.is_none() {
             self.finish_paint_mode(true);
             self.viewport_gizmo_consumed = true;
@@ -5498,8 +5543,9 @@ impl Builder3dApp {
                 self.preview_mesh_override = None;
                 self.viewport_drag = self.begin_brush_gesture(rect, position, size);
                 self.viewport_gizmo_consumed = true;
-            } else if self.paint_mode.is_some() {
-                // While painting a drag turns the view; a click paints.
+            } else if self.paint_mode.is_some() || self.measure_mode.is_some() {
+                // While painting or measuring a drag turns the view; a click
+                // paints or places a ruler end.
                 self.viewport_drag = Some(ViewportDrag::Orbit);
                 self.viewport_gizmo_consumed = false;
             } else {
@@ -6121,16 +6167,6 @@ impl Builder3dApp {
     }
 
     fn render_dialog(&mut self, ctx: &egui::Context) {
-        if let Some(message) = self.measurement_text.clone() {
-            let mut close = false;
-            crate::dialogs::dialog_window(ctx, "Dimensions").show(ctx, |ui| {
-                ui.label(message);
-                close = ui.button("OK").clicked();
-            });
-            if close || ctx.input(|input| input.key_pressed(Key::Escape)) {
-                self.measurement_text = None;
-            }
-        }
         if let Some(command) = self.placement_command {
             let mut apply = false;
             let mut cancel = false;
@@ -6798,7 +6834,6 @@ impl Builder3dApp {
     fn modal_active(&self) -> bool {
         self.dialog.as_ref().is_some_and(DialogState::is_modal)
             || self.placement_command.is_some()
-            || self.measurement_text.is_some()
             || self.confirm_action.is_some()
             || self.pending_overwrite.is_some()
             || self.customize_ribbon
@@ -7385,6 +7420,23 @@ fn find_command_key(key: &str) -> Option<(RibbonTab, CommandDescriptor)> {
     })
 }
 
+/// Commands that leave the Measure bar open (OF-55): history and the view.
+const fn measure_keeps_running_for(command: CommandId) -> bool {
+    matches!(
+        command,
+        CommandId::Undo
+            | CommandId::Redo
+            | CommandId::CenterView
+            | CommandId::FrameSelection
+            | CommandId::ResetView
+            | CommandId::ViewTop
+            | CommandId::ViewSide
+            | CommandId::ToggleGrid
+            | CommandId::ToggleWireframe
+            | CommandId::ToggleXray
+    )
+}
+
 fn command_enabled(command: CommandId, state: &CommandState) -> bool {
     let selected = state.selected_count();
     match command {
@@ -7398,7 +7450,6 @@ fn command_enabled(command: CommandId, state: &CommandState) -> bool {
         | CommandId::Cut
         | CommandId::Settle
         | CommandId::Mirror
-        | CommandId::Measure
         | CommandId::Simplify
         | CommandId::Subdivide
         | CommandId::Smooth
@@ -7415,6 +7466,7 @@ fn command_enabled(command: CommandId, state: &CommandState) -> bool {
         | CommandId::SmoothBrush
         | CommandId::Blob
         | CommandId::Material
+        | CommandId::Measure
         | CommandId::Paint => !state.scene().objects().is_empty(),
         CommandId::EditTorus => selected > 0 && state.has_selected_parametric_torus(),
         CommandId::Group => selected > 1,
@@ -7447,7 +7499,7 @@ fn command_summary(command: CommandId) -> &'static str {
         CommandId::Delete => "Remove selected models",
         CommandId::Settle => "Place on floor",
         CommandId::Mirror => "Flip selected model",
-        CommandId::Measure => "Measure selected model",
+        CommandId::Measure => "Measure with a ruler",
         CommandId::Align => "Line up models",
         CommandId::Arrange => "Space models evenly",
         CommandId::SelectAll => "Select every model",
@@ -7509,7 +7561,9 @@ fn command_help(command: CommandId) -> &'static str {
         CommandId::Delete => "Remove the selected models from the scene. (Delete)",
         CommandId::Settle => "Move the selected models down to the build floor.",
         CommandId::Mirror => "Flip the selected models across the X axis.",
-        CommandId::Measure => "Show the dimensions of the selected models.",
+        CommandId::Measure => {
+            "Click two points on your models to measure the distance between them."
+        }
         CommandId::Align => "Line up the selected models with the first selected model.",
         CommandId::Arrange => "Space the selected models evenly along the X axis.",
         CommandId::SelectAll => "Select every model in the scene.",
@@ -7558,6 +7612,7 @@ fn command_disabled_help(command: CommandId, state: &CommandState) -> &'static s
         }
         CommandId::Ungroup => "Select a group to ungroup it.",
         CommandId::EditTorus => "Select a torus to change its size and shape.",
+        CommandId::Measure => "Add or import a model to measure.",
         CommandId::Export if state.scene().objects().is_empty() => {
             "Add or import a model before exporting."
         }
@@ -7570,7 +7625,6 @@ fn command_disabled_help(command: CommandId, state: &CommandState) -> &'static s
         | CommandId::Cut
         | CommandId::Settle
         | CommandId::Mirror
-        | CommandId::Measure
         | CommandId::Align
         | CommandId::Arrange
         | CommandId::Simplify
@@ -10360,6 +10414,126 @@ mod tests {
     }
 
     #[test]
+    fn measure_ruler_clicks_two_points_snaps_corners_and_changes_nothing() {
+        // OF-55: Measure is a ruler in the view, not a dialog.
+        let mut app = Builder3dApp {
+            settings_path: repository_test_directory("of55-measure").join("settings.json"),
+            ..Default::default()
+        };
+        for _ in 0..2 {
+            app.commands
+                .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
+                .expect("cube");
+        }
+        let second = app.commands.scene().objects()[1].object_id().to_owned();
+        app.commands
+            .set_object_position_by_id(&second, [70., 0., 0.])
+            .expect("separate");
+        app.commands.set_selection_indices([1]);
+        app.refresh_preview();
+        app.frame_camera_if_pending();
+        app.camera.set_viewport_size(800, 600).expect("size");
+        let rect = egui::Rect::from_min_size(egui::Pos2::ZERO, Vec2::new(800., 600.));
+        let centre = |app: &Builder3dApp, index: usize| {
+            let bounds = world_bounds(app.commands.scene(), &[index]).expect("bounds");
+            let middle = [0, 1, 2].map(|axis| (bounds.minimum[axis] + bounds.maximum[axis]) * 0.5);
+            app.project_handle(middle, rect).expect("project").0
+        };
+        let (a, b) = (centre(&app, 0), centre(&app, 1));
+        let history = app.commands.scene().history_state_id();
+        let revision = app.commands.scene().revision();
+
+        app.dispatch(CommandId::Measure);
+        assert!(app.measure_mode.is_some());
+        assert!(!app.modal_active(), "Measure is not a dialog");
+        app.measure_click(rect, a, true);
+        app.measure_click(rect, b, true);
+        let mode = app.measure_mode.as_ref().expect("measuring");
+        let (start, end) = (
+            mode.start.expect("first end"),
+            mode.end.expect("second end"),
+        );
+        let (delta, distance) = measure_ruler::ruler_measurement(start.world, end.world);
+        assert!(distance > 30.0, "{distance}");
+        // MCP `measure` between the same two points gives the same numbers.
+        let version = app.commands.mcp_document_version();
+        let server = builder3d_mcp::R4Server::new(builder3d_mcp::R4Config::for_profile(
+            builder3d_mcp::Profile::Observe,
+            builder3d_mcp::ApprovedRoots::from_paths(Vec::new()).expect("deny-all roots"),
+        ));
+        let mut document = Some(
+            app.commands
+                .take_mcp_document(builder3d_mcp::ViewState::default()),
+        );
+        server.replace_document(&mut document).expect("attach");
+        let mcp = server
+            .call_value(
+                "measure",
+                serde_json::json!({"from_point_mm":start.world,"to_point_mm":end.world}),
+            )
+            .expect("MCP measure");
+        app.commands
+            .install_mcp_document(server.take_document().expect("detach"), &version)
+            .expect("install");
+        assert!((mcp["distance_mm"].as_f64().unwrap_or(0.0) as f32 - distance).abs() < 1e-4);
+        for axis in 0..3 {
+            let part = mcp["delta_mm"][axis].as_f64().unwrap_or(f64::NAN) as f32;
+            assert!((part - delta[axis]).abs() < 1e-4);
+        }
+        assert!(app.commands.last_status().contains("Measured"));
+        // Measuring is not selecting and adds nothing to Undo.
+        assert_eq!(app.commands.scene().history_state_id(), history);
+        assert_eq!(app.commands.scene().revision(), revision);
+        assert_eq!(app.commands.scene().selection().len(), 1);
+
+        // Near a visible corner the pointer snaps exactly onto it.
+        let cube = app.commands.scene().objects()[0]
+            .transformed_mesh()
+            .expect("world cube");
+        let snapped = cube.vertices.iter().any(|vertex| {
+            let Some((corner, _)) = app.project_handle(*vertex, rect) else {
+                return false;
+            };
+            let towards_middle = corner + (a - corner).normalized() * 4.0;
+            app.measure_click(rect, towards_middle, false);
+            app.measure_mode
+                .as_ref()
+                .and_then(|mode| mode.start)
+                .is_some_and(|point| {
+                    point.snap == measure_ruler::RulerSnap::Corner && point.world == *vertex
+                })
+                && {
+                    app.measure_escape();
+                    true
+                }
+        });
+        assert!(snapped, "no visible cube corner caught the pointer");
+
+        // Escape drops a half-placed ruler, then leaves Measure.
+        assert!(
+            app.measure_mode
+                .as_ref()
+                .is_some_and(|mode| mode.start.is_none())
+        );
+        app.measure_click(rect, a, true);
+        app.measure_escape();
+        assert!(
+            app.measure_mode
+                .as_ref()
+                .is_some_and(|mode| mode.start.is_none())
+        );
+        app.measure_escape();
+        assert!(app.measure_mode.is_none());
+        // View commands keep Measure open; other commands close it.
+        app.dispatch(CommandId::Measure);
+        app.dispatch(CommandId::ToggleGrid);
+        assert!(app.measure_mode.is_some());
+        app.dispatch(CommandId::SelectAll);
+        assert!(app.measure_mode.is_none());
+        assert_eq!(app.commands.scene().history_state_id(), history);
+    }
+
+    #[test]
     fn viewport_picks_toggle_plain_ctrl_shift_and_empty_sticky_without_history() {
         let mut app = Builder3dApp::default();
         for _ in 0..2 {
@@ -11160,12 +11334,6 @@ mod tests {
             assert_eq!(app.commands.scene().history_state_id(), history);
         }
         app.placement_command = None;
-        app.measurement_text = Some("Dimensions".into());
-        run_without_presentation(&egui::Context::default(), delete_input(), |ui| {
-            app.handle_shortcuts(ui.ctx())
-        });
-        assert_eq!(app.commands.scene().history_state_id(), history);
-        app.measurement_text = None;
         run_without_presentation(&egui::Context::default(), delete_input(), |ui| {
             app.handle_shortcuts(ui.ctx())
         });

@@ -13,6 +13,126 @@
     "reference_git_status_sha256": "042d4cc00e5192968895f203eb12b96ab565cf9f46492899efc8c523a475ca22"
   },
   "output_schemas": {
+    "08c84ee8e816a42e7072a7453f1a9f85e6249da69cc0bb6685211df0b193bff9": {
+      "additionalProperties": false,
+      "properties": {
+        "changed_object_ids": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Changed Object Ids"
+        },
+        "delta_mm": {
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 3,
+          "minItems": 3,
+          "type": "array",
+          "title": "Delta Mm",
+          "description": "to - from on the X, Y and Z axes, millimetres (Y is up)."
+        },
+        "distance_mm": {
+          "title": "Distance Mm",
+          "type": "number"
+        },
+        "from_mm": {
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 3,
+          "minItems": 3,
+          "type": "array",
+          "title": "From Mm"
+        },
+        "from_object_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "From Object Id"
+        },
+        "project_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Project Id"
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Request Id"
+        },
+        "scene_revision": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Scene Revision"
+        },
+        "to_mm": {
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 3,
+          "minItems": 3,
+          "type": "array",
+          "title": "To Mm"
+        },
+        "to_object_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "To Object Id"
+        }
+      },
+      "required": [
+        "from_mm",
+        "to_mm",
+        "delta_mm",
+        "distance_mm"
+      ],
+      "title": "MeasureOutput",
+      "type": "object"
+    },
     "09a549bd9507ecdb2b0d203732ecb772817bb83c6528ed957c2db27fe7fac8bb": {
       "$defs": {
         "ChangeOutput": {
@@ -12504,6 +12624,108 @@
         "type": "object"
       },
       "output_schema_id": "c4e458f9c57d4c836dce7e46e8c5eaccc2e4f21cfa6c7d5ed60774b491697f1d"
+    },
+    "measure": {
+      "input_schema": {
+        "properties": {
+          "from_point_mm": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "number"
+                },
+                "maxItems": 3,
+                "minItems": 3,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "From Point Mm",
+            "description": "World point [x, y, z] in millimetres where the ruler starts. Give a point or an object for this end, not both."
+          },
+          "from_object_id": {
+            "description": "Object whose nearest surface point the ruler starts at (nearest to the other end).",
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "From Object Id"
+          },
+          "from_index": {
+            "description": "Top-level object index, as an alternative to from_object_id.",
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "From Index"
+          },
+          "to_point_mm": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "number"
+                },
+                "maxItems": 3,
+                "minItems": 3,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "To Point Mm",
+            "description": "World point [x, y, z] in millimetres where the ruler ends. Give a point or an object for this end, not both."
+          },
+          "to_object_id": {
+            "description": "Object whose nearest surface point the ruler ends at (nearest to the other end).",
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "To Object Id"
+          },
+          "to_index": {
+            "description": "Top-level object index, as an alternative to to_object_id.",
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "To Index"
+          }
+        },
+        "title": "measureArguments",
+        "type": "object",
+        "description": "Measure the straight distance between two ends, like the desktop Measure ruler. Each end is a point or an object; an object end is the point on its surface nearest the other end (two objects: their closest surface points, 0 when they touch). Read-only; never changes the scene."
+      },
+      "output_schema_id": "08c84ee8e816a42e7072a7453f1a9f85e6249da69cc0bb6685211df0b193bff9"
     }
   }
 }

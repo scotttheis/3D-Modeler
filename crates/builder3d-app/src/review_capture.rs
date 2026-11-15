@@ -12,7 +12,7 @@
 //! | Variable | Values | Default |
 //! |---|---|---|
 //! | `BUILDER3D_REVIEW_CAPTURE` | output PNG path | harness off |
-//! | `BUILDER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `resize`, `resize-drag`, `multi`, `merge`, `unselected`, `material`, `settings`, `save`, `export`, `menu`, `colors`, `mirror`, `merge-apart`, `repair`, `paste`, `align`, `paint`, `paint-picker`, `xray`, `texture`, `texture-dialog`, `grab`, `crease`, `crease-sharp`, `smooth-brush`, `simplify`, `simplify-area`, `subdivide`, `hollow`, `hollow-dialog`, `hollow-error` | `move` |
+//! | `BUILDER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `resize`, `resize-drag`, `multi`, `merge`, `unselected`, `material`, `settings`, `save`, `export`, `menu`, `colors`, `mirror`, `merge-apart`, `repair`, `paste`, `align`, `paint`, `paint-picker`, `xray`, `texture`, `texture-dialog`, `grab`, `crease`, `crease-sharp`, `smooth-brush`, `simplify`, `simplify-area`, `subdivide`, `hollow`, `hollow-dialog`, `hollow-error`, `measure`, `measure-start` | `move` |
 //! | `BUILDER3D_REVIEW_TEXTURES` | `;`-separated picture paths for the `texture` states (one per object, reused in turn) | a built-in brick picture |
 //! | `BUILDER3D_REVIEW_THEME` | `light`, `dark` | `dark` |
 //! | `BUILDER3D_REVIEW_SIZE` | `normal`, `big` (Settings > Size) | `normal` |
@@ -139,6 +139,13 @@ pub(crate) enum ReviewState {
     /// the message with its Copy buttons in the window and the status bar
     /// (OF-61).
     HollowError,
+    /// The Measure bar open (OF-55) over a cube and a cylinder, nothing
+    /// selected, with a finished ruler from the cube's front bottom-left
+    /// corner to the cylinder's top rim.
+    Measure,
+    /// The `Measure` state with only the first end placed: with
+    /// `BUILDER3D_REVIEW_POINTER` over a model the live ruler follows it.
+    MeasureStart,
 }
 
 impl ReviewState {
@@ -179,6 +186,8 @@ impl ReviewState {
             "hollow" => Some(Self::Hollow),
             "hollow-dialog" => Some(Self::HollowDialog),
             "hollow-error" => Some(Self::HollowError),
+            "measure" => Some(Self::Measure),
+            "measure-start" => Some(Self::MeasureStart),
             _ => None,
         }
     }

@@ -13,6 +13,7 @@ mod error;
 mod file_io;
 mod gltf;
 mod material;
+mod measure;
 mod mesh;
 mod mesh_ops;
 mod paint;
@@ -70,6 +71,10 @@ pub use gltf::{
 pub use material::{
     BOOLEAN_COLOR_PROVENANCE_KEY, BooleanColorProvenance, boolean_color_provenance, color_rgba8,
     with_boolean_color_provenance, with_boolean_target_color, without_boolean_color_provenance,
+};
+pub use measure::{
+    MEASURE_MAX_PAIR_CHECKS, Measurement, closest_point_on_mesh, closest_points_between_meshes,
+    measure_points,
 };
 pub use mesh::Mesh;
 pub use mesh_ops::{

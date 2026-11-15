@@ -44,6 +44,7 @@ impl Builder3dApp {
             self.commands.set_status("Add an object to paint");
             return;
         }
+        self.measure_mode = None;
         self.active_brush = None;
         self.brush_settings_open = false;
         self.boolean_pick = None;
@@ -313,7 +314,7 @@ pub(super) fn paint_spray_cursor(
     painter.rect_filled(shine, 1.5, Color32::from_white_alpha(70));
 }
 
-fn paint_bar_button(
+pub(super) fn paint_bar_button(
     ui: &mut Ui,
     label: &str,
     hint: &str,
@@ -344,7 +345,7 @@ fn paint_bar_button(
     response.clicked()
 }
 
-fn paint_bar_divider(ui: &mut Ui, palette: ThemePalette) {
+pub(super) fn paint_bar_divider(ui: &mut Ui, palette: ThemePalette) {
     let (rect, _) = ui.allocate_exact_size(Vec2::new(9.0, 34.0), Sense::hover());
     ui.painter().line_segment(
         [
