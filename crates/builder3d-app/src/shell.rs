@@ -6917,6 +6917,10 @@ impl Builder3dApp {
                 Some(CommandId::Delete)
             } else if input.key_pressed(Key::Escape) {
                 self.menu_open = false;
+                // Esc closes Measure wherever the pointer is (OF-55).
+                if self.measure_mode.is_some() {
+                    self.finish_measure_mode();
+                }
                 if self.active_brush.take().is_some() {
                     self.brush_settings_open = false;
                     self.preview_mesh_override = None;
@@ -10495,6 +10499,10 @@ mod tests {
                 return false;
             };
             let towards_middle = corner + (a - corner).normalized() * 4.0;
+            if let Some(mode) = app.measure_mode.as_mut() {
+                mode.start = None;
+                mode.end = None;
+            }
             app.measure_click(rect, towards_middle, false);
             app.measure_mode
                 .as_ref()
@@ -10502,25 +10510,17 @@ mod tests {
                 .is_some_and(|point| {
                     point.snap == measure_ruler::RulerSnap::Corner && point.world == *vertex
                 })
-                && {
-                    app.measure_escape();
-                    true
-                }
         });
         assert!(snapped, "no visible cube corner caught the pointer");
 
-        // Escape drops a half-placed ruler, then leaves Measure.
+        // One Escape closes Measure, even with a half-placed ruler.
+        if let Some(mode) = app.measure_mode.as_mut() {
+            mode.end = None;
+        }
         assert!(
             app.measure_mode
                 .as_ref()
-                .is_some_and(|mode| mode.start.is_none())
-        );
-        app.measure_click(rect, a, true);
-        app.measure_escape();
-        assert!(
-            app.measure_mode
-                .as_ref()
-                .is_some_and(|mode| mode.start.is_none())
+                .is_some_and(|mode| mode.start.is_some())
         );
         app.measure_escape();
         assert!(app.measure_mode.is_none());

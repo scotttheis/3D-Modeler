@@ -39,12 +39,14 @@ stays (owner: keep it in AI for possible later use). Phase 3 is closed.
 Phase 4 (OF-55 Measure ruler) built 2026-11-15 (`cfc96a7`), pack
 `evidence/rebuild/captures/2026-11-15-review-phase4-measure/`. Measure is now
 a click-to-click ruler with snapping; new MCP tool `measure` (catalog 66).
-**Waiting for owner review.**
+**Owner 2026-11-15: approved ("better than I imagined"; "call it all done").**
+Owner's one request, Esc closes Measure in one press, done the same day.
+Phase 4 is closed.
 
 **Known work, in order** (a session takes the first item not done):
 
 1. Done and approved 2026-11-15: Phase 3 follow-ups OF-59 to OF-61.
-2. Phase 4 — Measure ruler (OF-55): built, waiting for owner review.
+2. Done and approved 2026-11-15: Phase 4 — Measure ruler (OF-55).
 3. Phase 5 — MCP does everything (OF-58).
 4. F5 — release link reliability; F6 — reconcile the 148-row ledger
    (fix-first list below).
@@ -75,7 +77,7 @@ the next stop message, not guessed.
 ## Last review pack
 
 `evidence/rebuild/captures/2026-11-15-review-phase4-measure/` (OF-55),
-waiting for owner review. `evidence/rebuild/captures/2026-11-15-review-phase3-followups/` (OF-59 to
+approved by the owner 2026-11-15. `evidence/rebuild/captures/2026-11-15-review-phase3-followups/` (OF-59 to
 OF-61), approved by the owner 2026-11-15. `evidence/rebuild/captures/2026-11-14-review-phase3/` (Phase 3: OF-48 to
 OF-54), reviewed by the owner 2026-11-15. `evidence/rebuild/captures/2026-11-14-review-phase2/` (Phase 2: OF-44 and
 OF-47 approved 2026-11-15; OF-46 added and approved 2026-11-15). `evidence/rebuild/captures/2026-11-14-review-phase1/`

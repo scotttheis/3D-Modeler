@@ -4,7 +4,7 @@
 //! X, Y and Z parts, live while the pointer moves before the second click.
 //! The pointer snaps to corners and sharp edges near it (a cube's corners
 //! and edges, a cylinder's rim); hold Shift to place a point anywhere on the
-//! surface. Dragging still turns the view. Measuring never changes the model
+//! surface. Dragging still turns the view; Esc closes Measure. Measuring never changes the model
 //! and adds nothing to Undo. MCP `measure` uses the same core distance.
 
 use eframe::egui::{self, Color32, FontId, Stroke, Ui, Vec2};
@@ -160,16 +160,9 @@ impl Builder3dApp {
         }
     }
 
-    /// Escape: drops a half-placed ruler first, then leaves Measure.
+    /// Escape closes Measure in one press (owner, 2026-11-15).
     pub(super) fn measure_escape(&mut self) {
-        match self.measure_mode.as_mut() {
-            Some(mode) if mode.start.is_some() && mode.end.is_none() => {
-                mode.start = None;
-                self.commands.set_status("Measure: click the first point");
-            }
-            Some(_) => self.finish_measure_mode(),
-            None => {}
-        }
+        self.finish_measure_mode();
     }
 
     /// One click in the view while measuring: first end, second end, then a
@@ -190,7 +183,7 @@ impl Builder3dApp {
             mode.start = Some(point);
             mode.end = None;
             self.commands
-                .set_status("Measure: click the second point (Esc to start again)");
+                .set_status("Measure: click the second point (Esc closes Measure)");
         } else if let Some(start) = mode.start {
             mode.end = Some(point);
             let text = ruler_text(start.world, point.world, unit);
