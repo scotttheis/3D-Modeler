@@ -25,18 +25,18 @@ OF-46 done 2026-11-15 (`654872a`) and approved by the owner 2026-11-15 ("it
 works, good enough for now"); the texture dialog is to be revisited later
 (last item below). Phase 2 is closed.
 
-Phase 3 (OF-48 to OF-54) built 2026-11-15, `e95dbd3` to `114a676`, pack
-`evidence/rebuild/captures/2026-11-14-review-phase3/`; **stopped for owner
-review**. Open owner answers (ask again at the next stop): OF-53 Normalize
-— rebuild it, fold it into Subdivide/Simplify, or remove it (findings in the
-row); OF-52 — is brushing over an area the right way to choose "selected
-faces"; OF-50 — should the whole-object Smooth button also keep sharp edges
-(only the Smooth Brush does now). Also seen, not yet fixed: garbled text
-("Ã¢â‚¬â€") in six status messages in `shell.rs`, present before Phase 3.
+Phase 3 (OF-48 to OF-54) built 2026-11-15, pack
+`evidence/rebuild/captures/2026-11-14-review-phase3/`. **Owner review
+2026-11-15:** Grab, Crease, Smooth Brush, Simplify, Subdivide approved;
+Hollow works at a 2 mm wall; Normalize to be removed; the whole-object Smooth
+button stays as it is. Follow-ups OF-59 to OF-61 (OF-62 garbled text done).
+No open owner answers.
 
 **Known work, in order** (a session takes the first item not done):
 
-1. Phase 3 — owner review of the pack; then OF-53 as the owner decides.
+1. Phase 3 follow-ups OF-59 to OF-61 (Crease sharpness; Simplify by area and
+   remove Normalize; Hollow 2 mm default and copyable errors), then a short
+   review pack and stop.
 2. Phase 4 — Measure ruler (OF-55).
 3. Phase 5 — MCP does everything (OF-58).
 4. F5 — release link reliability; F6 — reconcile the 148-row ledger
