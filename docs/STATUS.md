@@ -21,8 +21,9 @@ and OF-47 X-ray approved by the owner 2026-11-15 (pack
 original); OF-44 keep the "Done" label; OF-46 store the texture image inside
 the project file (`.3dp` format change approved), test textures in
 `C:\Users\josiph\Pictures\textures\` (owner-supplied; do not commit them).
-OF-46 done 2026-11-15 (`654872a`), awaiting owner review; Phase 2 pack
-updated. **Stopped for owner review of OF-46.** No open owner answers.
+OF-46 done 2026-11-15 (`654872a`) and approved by the owner 2026-11-15 ("it
+works, good enough for now"); the texture dialog is to be revisited later
+(last item below). Phase 2 is closed. No open owner answers.
 
 **Known work, in order** (a session takes the first item not done):
 
@@ -31,7 +32,9 @@ updated. **Stopped for owner review of OF-46.** No open owner answers.
 3. Phase 5 — MCP does everything (OF-58).
 4. F5 — release link reliability; F6 — reconcile the 148-row ledger
    (fix-first list below).
-5. Stop before RB-10 (S3). OF-56/57 (Emboss) stay deferred until the owner
+5. Revisit the Material texture dialog (OF-46 follow-up): the owner wants to
+   look at its layout again; ask what to change before building.
+6. Stop before RB-10 (S3). OF-56/57 (Emboss) stay deferred until the owner
    brings them back.
 
 Each phase ends with its review pack and a stop for owner review, as
@@ -56,7 +59,7 @@ the next stop message, not guessed.
 ## Last review pack
 
 `evidence/rebuild/captures/2026-11-14-review-phase2/` (Phase 2: OF-44 and
-OF-47 approved 2026-11-15; OF-46 added 2026-11-15, not yet reviewed). `evidence/rebuild/captures/2026-11-14-review-phase1/`
+OF-47 approved 2026-11-15; OF-46 added and approved 2026-11-15). `evidence/rebuild/captures/2026-11-14-review-phase1/`
 (Phase 1), not yet reviewed. Before that:
 
 `evidence/rebuild/captures/2026-11-13-review-of1-9-f9/`, reviewed by the
