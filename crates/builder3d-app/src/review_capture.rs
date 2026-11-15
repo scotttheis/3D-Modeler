@@ -12,7 +12,7 @@
 //! | Variable | Values | Default |
 //! |---|---|---|
 //! | `BUILDER3D_REVIEW_CAPTURE` | output PNG path | harness off |
-//! | `BUILDER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `resize`, `resize-drag`, `multi`, `merge`, `unselected`, `material`, `settings`, `save`, `export`, `menu`, `colors`, `mirror`, `merge-apart`, `repair`, `paste`, `align`, `paint`, `paint-picker`, `xray`, `texture`, `texture-dialog` | `move` |
+//! | `BUILDER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `resize`, `resize-drag`, `multi`, `merge`, `unselected`, `material`, `settings`, `save`, `export`, `menu`, `colors`, `mirror`, `merge-apart`, `repair`, `paste`, `align`, `paint`, `paint-picker`, `xray`, `texture`, `texture-dialog`, `grab` | `move` |
 //! | `BUILDER3D_REVIEW_TEXTURES` | `;`-separated picture paths for the `texture` states (one per object, reused in turn) | a built-in brick picture |
 //! | `BUILDER3D_REVIEW_THEME` | `light`, `dark` | `dark` |
 //! | `BUILDER3D_REVIEW_SIZE` | `normal`, `big` (Settings > Size) | `normal` |
@@ -106,6 +106,10 @@ pub(crate) enum ReviewState {
     /// One textured, selected cube with the Material dialog open on its
     /// Texture section.
     TextureDialog,
+    /// One selected sphere pulled out by a Grab stroke (OF-48): the point on
+    /// its upper right is pinched and pulled up and out, with the desktop's
+    /// Grab settings.
+    Grab,
 }
 
 impl ReviewState {
@@ -136,6 +140,7 @@ impl ReviewState {
             "xray" => Some(Self::Xray),
             "texture" => Some(Self::Texture),
             "texture-dialog" => Some(Self::TextureDialog),
+            "grab" => Some(Self::Grab),
             _ => None,
         }
     }

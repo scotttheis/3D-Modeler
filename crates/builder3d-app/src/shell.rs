@@ -182,7 +182,8 @@ impl Default for BrushSettings {
         let normalize = NormalizeDensityOptions::default();
         Self {
             grab_radius_mm: grab.radius_mm,
-            grab_strength: grab.strength,
+            // Blender's Grab default: the grabbed point stays under the pointer (OF-48).
+            grab_strength: 1.0,
             grab_falloff: grab.falloff,
             grab_symmetry: grab.symmetry,
             crease_radius_mm: crease.radius_mm,
@@ -214,7 +215,28 @@ struct BrushGesture {
     centers: Vec<[f32; 3]>,
     start_center: [f32; 3],
     offset: [f32; 3],
+    /// World point the stroke started on; Grab drags it across a
+    /// camera-facing plane through this point (OF-48).
+    start_world: [f32; 3],
+    /// Unit normal of the Grab drag plane (toward the camera).
+    plane_normal: [f32; 3],
     revision: u64,
+}
+
+/// Where a pointer ray crosses the camera-facing Grab plane, like Blender's
+/// Grab brush: the grabbed point follows the pointer across the screen even
+/// off the object, instead of sliding along the surface it was picked on.
+fn grab_plane_target(
+    ray: builder3d_viewport::Ray,
+    plane_point: [f32; 3],
+    plane_normal: [f32; 3],
+) -> Option<[f32; 3]> {
+    let denominator = dot(ray.direction, plane_normal);
+    if denominator.abs() < 1.0e-6 {
+        return None;
+    }
+    let distance = dot(subtract(plane_point, ray.origin), plane_normal) / denominator;
+    (distance.is_finite() && distance > 0.0).then(|| ray.at(distance))
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -598,6 +620,7 @@ impl Builder3dApp {
                 builder3d_core::PrimitiveKind::Cylinder,
             ],
             ReviewState::TextureDialog => &[builder3d_core::PrimitiveKind::Cube],
+            ReviewState::Grab => &[builder3d_core::PrimitiveKind::Sphere],
         };
         for (index, kind) in primitives.iter().copied().enumerate() {
             self.dispatch(CommandId::AddPrimitive(kind));
@@ -714,6 +737,34 @@ impl Builder3dApp {
             self.commands.set_selection_indices([0]);
             if !self.commands.display_state().xray {
                 self.dispatch(CommandId::ToggleXray);
+            }
+        }
+        if review.state() == ReviewState::Grab {
+            self.commands.set_selection_indices([0]);
+            let center = self.commands.scene().objects().first().and_then(|sphere| {
+                sphere
+                    .mesh()
+                    .vertices
+                    .iter()
+                    .copied()
+                    .max_by(|first, second| {
+                        (first[0] + first[1]).total_cmp(&(second[0] + second[1]))
+                    })
+            });
+            if let Some(center) = center {
+                let settings = self.brush_settings;
+                let stroke = BrushStroke::Grab {
+                    center_mm: center,
+                    offset_mm: [9.0, 9.0, 0.0],
+                    options: ElasticGrabOptions {
+                        radius_mm: settings.grab_radius_mm,
+                        strength: settings.grab_strength,
+                        falloff: settings.grab_falloff,
+                        symmetry: settings.grab_symmetry,
+                        limits: Default::default(),
+                    },
+                };
+                let _ = self.commands.apply_brush_stroke(stroke);
             }
         }
         if review.state() == ReviewState::MergeApart {
@@ -4882,6 +4933,11 @@ impl Builder3dApp {
             }
         };
         let center = inverse.transform_point(hit.position);
+        let plane_normal = builder3d_viewport::normalize(
+            subtract(self.camera.position(), self.camera.center()),
+            "grab plane normal",
+        )
+        .unwrap_or([0.0, 0.0, 1.0]);
         let object_id = object.object_id().to_owned();
         let source_mesh = object.mesh().clone();
         self.commands.select_index(index);
@@ -4894,11 +4950,14 @@ impl Builder3dApp {
             centers: vec![center],
             start_center: center,
             offset: [0.0; 3],
+            start_world: hit.position,
+            plane_normal,
             revision: self.commands.scene().revision(),
         })))
     }
 
     fn update_brush_gesture(&mut self, rect: egui::Rect, pointer: egui::Pos2, size: (u32, u32)) {
+        let scene_radius = self.current_scene_radius().unwrap_or(1.0);
         let Some(ViewportDrag::Brush(gesture)) = self.viewport_drag.as_mut() else {
             return;
         };
@@ -4906,6 +4965,20 @@ impl Builder3dApp {
             return;
         };
         let screen = viewport_pixel_position(pointer, rect, size);
+        if gesture.tool == ActiveBrush::Grab {
+            let Some(target) = self
+                .camera
+                .screen_ray(screen[0], screen[1], scene_radius)
+                .ok()
+                .and_then(|ray| grab_plane_target(ray, gesture.start_world, gesture.plane_normal))
+            else {
+                return;
+            };
+            let local_target = gesture.source_transform.transform_point(target);
+            gesture.offset = subtract(local_target, gesture.start_center);
+            self.update_brush_preview();
+            return;
+        }
         let hit = match pick_scene(scene, &self.camera, screen[0], screen[1]) {
             Ok(Some(hit)) if hit.object_id == gesture.object_id => hit,
             Ok(Some(_)) | Ok(None) => return,
@@ -4916,9 +4989,8 @@ impl Builder3dApp {
         };
         let local = gesture.source_transform.transform_point(hit.position);
         match gesture.tool {
-            ActiveBrush::Grab => {
-                gesture.offset = subtract(local, gesture.start_center);
-            }
+            // Grab follows the camera-facing plane above and never gets here.
+            ActiveBrush::Grab => {}
             ActiveBrush::Crease
             | ActiveBrush::SmoothBrush
             | ActiveBrush::Blob
@@ -7876,6 +7948,89 @@ mod tests {
         assert_ne!(&before, after, "{}", app.commands.last_status());
         app.commands.dispatch(CommandId::Undo).expect("undo");
         assert_eq!(app.commands.scene().history_state_id(), history);
+    }
+
+    #[test]
+    fn grab_pulls_the_grabbed_point_with_the_pointer_even_off_the_object() {
+        // OF-48: like Blender's Grab, the grabbed surface point follows the
+        // pointer across a camera-facing plane, including past the silhouette,
+        // instead of sliding along the surface it was picked on.
+        let mut app = Builder3dApp {
+            settings_path: repository_test_directory("of48-grab-pull").join("settings.json"),
+            ..Default::default()
+        };
+        app.commands
+            .dispatch(CommandId::AddPrimitive(PrimitiveKind::Sphere))
+            .expect("sphere");
+        app.refresh_preview();
+        app.camera.set_viewport_size(800, 600).expect("size");
+        app.frame_camera_if_pending();
+        app.commands.set_selection_indices([0]);
+        app.dispatch(CommandId::Grab);
+        let rect = egui::Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(800., 600.));
+        let center = rect.center();
+        let shift = egui::Modifiers {
+            shift: true,
+            ..Default::default()
+        };
+        let frame = |app: &mut Builder3dApp, position: egui::Pos2, phase: u8| {
+            let input = ViewportInput {
+                pointer_position: Some(position),
+                pointer_delta: if phase == 0 {
+                    Vec2::ZERO
+                } else {
+                    Vec2::new(20.0, 0.0)
+                },
+                primary_pressed: phase == 0,
+                primary_down: phase < 2,
+                primary_released: phase == 2,
+                secondary_pressed: false,
+                secondary_down: false,
+                secondary_released: false,
+                middle_pressed: false,
+                middle_down: false,
+                middle_released: false,
+                scroll_y: 0.,
+                pinch_zoom_factor: 1.,
+                escape_pressed: false,
+                focused: true,
+                modifiers: shift,
+            };
+            app.route_viewport_input(rect, 1., input, true);
+            app.refresh_preview();
+        };
+        let before = app.commands.scene().objects()[0].mesh().vertices.clone();
+        frame(&mut app, center, 0);
+        assert!(matches!(app.viewport_drag, Some(ViewportDrag::Brush(_))));
+        // Drag far to the right, well past the sphere's outline.
+        let release = center + Vec2::new(260.0, 0.0);
+        for step in 1..=13 {
+            frame(&mut app, center + Vec2::new(20.0 * step as f32, 0.0), 1);
+        }
+        frame(&mut app, release, 2);
+        let object = &app.commands.scene().objects()[0];
+        let after = &object.mesh().vertices;
+        let (moved, _) = before
+            .iter()
+            .zip(after)
+            .enumerate()
+            .map(|(index, (first, second))| {
+                let delta = subtract(*second, *first);
+                (index, dot(delta, delta))
+            })
+            .fold(
+                (0, 0.0_f32),
+                |best, item| if item.1 > best.1 { item } else { best },
+            );
+        let world = object.transform().transform_point(after[moved]);
+        let projection = app.camera.view_projection(1.0).expect("projection");
+        let ndc = projection.transform_point(world).expect("ndc");
+        let screen_x = (ndc[0] + 1.0) * 0.5 * 800.0;
+        let screen_y = (1.0 - ndc[1]) * 0.5 * 600.0;
+        assert!(
+            (screen_x - release.x).abs() < 30.0 && (screen_y - release.y).abs() < 30.0,
+            "the grabbed point lands under the pointer: ({screen_x}, {screen_y}) vs {release:?}"
+        );
     }
 
     #[test]
