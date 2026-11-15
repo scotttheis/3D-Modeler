@@ -14,18 +14,20 @@ version 0.1.1, 2026-11-13, `E:\Builder3D-RC\Builder3D-RC1.msi` (50 MB),
 **Owner batch 7** ([`owner-feedback-2026-11-14.md`](owner-feedback-2026-11-14.md),
 OF-28 to OF-58, five phases; Emboss OF-56/57 deferred by the owner).
 Phase 1 done (OF-28 to OF-45), pack
-`evidence/rebuild/captures/2026-11-14-review-phase1/`. **Phase 2 partly done,
-stopped for owner review**: OF-44 Paint and OF-47 X-ray "Done, awaiting owner
-review" (pack `evidence/rebuild/captures/2026-11-14-review-phase2/`); OF-46
-textures not started — saving textures changes the `.3dp` format, so it waits
-for the owner's choice. Open owner answers: OF-35 shade A or B; confirm the
-OF-43 reading (10 mm gap beside the original); OF-46 how textures are saved;
-OF-44 tick button label "Done" or 3D Builder's "Color".
+`evidence/rebuild/captures/2026-11-14-review-phase1/`. Phase 2: OF-44 Paint
+and OF-47 X-ray approved by the owner 2026-11-15 (pack
+`evidence/rebuild/captures/2026-11-14-review-phase2/`). Owner answers
+2026-11-15: OF-35 keep shade A as built; OF-43 confirmed (10 mm gap beside the
+original); OF-44 keep the "Done" label; OF-46 store the texture image inside
+the project file (`.3dp` format change approved), test textures in
+`C:\Users\josiph\Pictures\textures\` (owner-supplied; do not commit them).
+No open owner answers.
 
 **Known work, in order** (a session takes the first item not done):
 
-1. Phase 2 — OF-46 Material textures, once the owner has chosen how textures
-   are saved (it changes the `.3dp` format). OF-44 and OF-47 are done.
+1. Phase 2 — OF-46 Material textures (owner chose: image stored inside the
+   `.3dp`). OF-44 and OF-47 are done and approved. Phase 2 then ends with its
+   own pack and stop.
 2. Phase 3 — Sculpt and mesh tools (OF-48 to OF-54).
 3. Phase 4 — Measure ruler (OF-55).
 4. Phase 5 — MCP does everything (OF-58).
