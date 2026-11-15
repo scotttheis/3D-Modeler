@@ -1282,7 +1282,7 @@ impl Builder3dApp {
             self.active_brush = Some(brush);
             self.brush_settings_open = true;
             self.commands.set_status(format!(
-                "{} active Ã¢â‚¬â€ hold Shift and drag on a mesh",
+                "{} active — hold Shift and drag on a mesh",
                 brush.label()
             ));
         }
@@ -2977,7 +2977,7 @@ impl Builder3dApp {
                             ui.add_space(18.0);
                             ui.vertical(|ui| {
                                 ui.label(
-                                    RichText::new("CREATE  Ã¢â‚¬Â¢  REPAIR  Ã¢â‚¬Â¢  PREPARE")
+                                    RichText::new("CREATE  •  REPAIR  •  PREPARE")
                                         .small()
                                         .strong()
                                         .color(palette.accent),
@@ -4378,9 +4378,9 @@ impl Builder3dApp {
                                         ));
                                     }
                                 } else if status.phase == OperationPhase::Cancelling {
-                                    ui.add_enabled(false, egui::Button::new("CancellingÃ¢â‚¬Â¦"));
+                                    ui.add_enabled(false, egui::Button::new("Cancelling…"));
                                 } else if status.phase == OperationPhase::Committing {
-                                    ui.add_enabled(false, egui::Button::new("ApplyingÃ¢â‚¬Â¦"));
+                                    ui.add_enabled(false, egui::Button::new("Applying…"));
                                 }
                             }
                             ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
@@ -6634,13 +6634,13 @@ impl Builder3dApp {
                 for key in order_snapshot {
                     ui.horizontal(|ui| {
                         ui.label(&key);
-                        if ui.small_button("Ã¢â€ â€˜").clicked()
+                        if ui.small_button("↑").clicked()
                             && let Some(moved) = move_favorite(&next, &key, -1)
                         {
                             next = moved;
                             changed = true;
                         }
-                        if ui.small_button("Ã¢â€ â€œ").clicked()
+                        if ui.small_button("↓").clicked()
                             && let Some(moved) = move_favorite(&next, &key, 1)
                         {
                             next = moved;
