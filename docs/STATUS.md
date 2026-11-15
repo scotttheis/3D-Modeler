@@ -196,6 +196,6 @@ owner batch 7.
 
 Git: branch `rebuild/work`, see `git log` (Phase 2: `654872a` (OF-46), `344e88e` (OF-44),
 `82f4a58` (OF-47), pack `06699d2`; Phase 1: `566ba48` to `3288a55`). Tree
-snapshot: `G:\Builder3D-Rust_snapshot_20261114-193557_OF44-47-phase2` (6,924
-files, 962,870,432 bytes, counts verified; excludes `target\`). Previous:
-`G:\Builder3D-Rust_snapshot_20261114-143139_OF28-45-phase1`.
+snapshot: `G:\Builder3D-Rust_snapshot_20261115-055440_OF46-phase2` (7,033
+files, 988,238,431 bytes, counts verified; excludes `target\` and `logs\`).
+Previous: `G:\Builder3D-Rust_snapshot_20261114-193557_OF44-47-phase2`.
