@@ -193,7 +193,9 @@ impl Default for BrushSettings {
             crease_falloff: crease.falloff,
             smooth_radius_mm: smooth.radius_mm,
             smooth_strength: smooth.strength,
-            smooth_shrinkage: smooth.shrinkage,
+            // OF-50 / D9: Blender's sculpt Smooth keeps the whole movement toward
+            // the neighbour average; sharp rims are protected in the core instead.
+            smooth_shrinkage: 1.0,
             smooth_falloff: smooth.falloff,
             blob_radius_mm: blob.radius_mm,
             blob_strength: blob.strength,
@@ -622,6 +624,7 @@ impl Builder3dApp {
             ],
             ReviewState::TextureDialog => &[builder3d_core::PrimitiveKind::Cube],
             ReviewState::Grab | ReviewState::Crease => &[builder3d_core::PrimitiveKind::Sphere],
+            ReviewState::SmoothBrush => &[builder3d_core::PrimitiveKind::Cylinder],
         };
         for (index, kind) in primitives.iter().copied().enumerate() {
             self.dispatch(CommandId::AddPrimitive(kind));
@@ -804,6 +807,42 @@ impl Builder3dApp {
                 },
             };
             let _ = self.commands.apply_brush_stroke(stroke);
+        }
+        if review.state() == ReviewState::SmoothBrush {
+            self.commands.set_selection_indices([0]);
+            let top = self.commands.scene().objects().first().map(|cylinder| {
+                let vertices = &cylinder.mesh().vertices;
+                let top = vertices
+                    .iter()
+                    .map(|vertex| vertex[1])
+                    .fold(f32::MIN, f32::max);
+                let radius = vertices
+                    .iter()
+                    .map(|vertex| (vertex[0] * vertex[0] + vertex[2] * vertex[2]).sqrt())
+                    .fold(0.0_f32, f32::max);
+                (top, radius)
+            });
+            if let Some((top, radius)) = top {
+                // Three passes around the top rim.
+                let centers: Vec<[f32; 3]> = (0..48)
+                    .map(|step| {
+                        let angle = step as f32 * std::f32::consts::TAU / 16.0;
+                        [radius * angle.cos(), top, radius * angle.sin()]
+                    })
+                    .collect();
+                let settings = self.brush_settings;
+                let stroke = BrushStroke::SmoothBrush {
+                    centers_mm: centers,
+                    options: SmoothBrushOptions {
+                        radius_mm: settings.smooth_radius_mm,
+                        strength: settings.smooth_strength,
+                        shrinkage: settings.smooth_shrinkage,
+                        falloff: settings.smooth_falloff,
+                        limits: Default::default(),
+                    },
+                };
+                let _ = self.commands.apply_brush_stroke(stroke);
+            }
         }
         if review.state() == ReviewState::MergeApart {
             if let Some(id) = self

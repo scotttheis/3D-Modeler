@@ -4,7 +4,7 @@
 //! bounded, source meshes are never mutated, path inputs are capped, and the
 //! final displacement is clipped to a radius-derived safety envelope.
 
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 
 use crate::{CoreError, Mesh, MeshOperationLimits};
 
@@ -453,7 +453,11 @@ pub fn smooth_brush(
         .checked_mul(2)
         .ok_or_else(|| CoreError::MeshOperation("smooth_brush work count overflow".to_owned()))?;
     options.limits.check_work("smooth_brush", work_units)?;
-    let adjacency = vertex_adjacency(mesh);
+    // OF-50 / D9: Blender's sculpt Smooth (a Laplacian toward the neighbour
+    // average, weighted by the brush falloff), with its hard-edge rule so
+    // sparse stock shapes keep their form instead of melting: a vertex on a
+    // sharp edge only slides along that edge, and a corner stays put.
+    let adjacency = feature_neighbors(mesh);
     let source = mesh.vertices.clone();
     let mut vertices = source.clone();
     if options.strength > 0.0 {
@@ -749,6 +753,63 @@ fn vertex_adjacency(mesh: &Mesh) -> Vec<Vec<usize>> {
     adjacency
         .into_iter()
         .map(|set| set.into_iter().collect())
+        .collect()
+}
+
+/// Cosine of the angle between face normals above which an edge counts as
+/// sharp (60°): stock rims and box edges are 90°, sculpted bumps are softer.
+const SHARP_EDGE_COSINE: f32 = 0.5;
+
+/// Smoothing neighbours that respect sharp features: all neighbours on a
+/// smooth surface; the two neighbours along the edge for a vertex on one
+/// sharp edge line (including open borders); none for a corner, where one
+/// or three or more sharp edges meet.
+fn feature_neighbors(mesh: &Mesh) -> Vec<Vec<usize>> {
+    let mut edges = BTreeMap::<(u32, u32), Vec<usize>>::new();
+    for (index, face) in mesh.faces.iter().enumerate() {
+        for (first, second) in [(face[0], face[1]), (face[1], face[2]), (face[2], face[0])] {
+            edges
+                .entry((first.min(second), first.max(second)))
+                .or_default()
+                .push(index);
+        }
+    }
+    let face_normals: Vec<[f32; 3]> = mesh
+        .faces
+        .iter()
+        .map(|face| {
+            let normal = mesh.face_normal(*face);
+            let magnitude = length(normal);
+            if magnitude > 1.0e-12 {
+                scale(normal, 1.0 / magnitude)
+            } else {
+                [0.0; 3]
+            }
+        })
+        .collect();
+    let mut sharp = vec![Vec::<usize>::new(); mesh.vertex_count()];
+    for ((first, second), faces) in &edges {
+        let is_sharp = match faces.as_slice() {
+            [one, two] => dot(face_normals[*one], face_normals[*two]) < SHARP_EDGE_COSINE,
+            _ => true,
+        };
+        if is_sharp {
+            if let Some(list) = sharp.get_mut(*first as usize) {
+                list.push(*second as usize);
+            }
+            if let Some(list) = sharp.get_mut(*second as usize) {
+                list.push(*first as usize);
+            }
+        }
+    }
+    vertex_adjacency(mesh)
+        .into_iter()
+        .zip(sharp)
+        .map(|(all, sharp)| match sharp.len() {
+            0 => all,
+            2 => sharp,
+            _ => Vec::new(),
+        })
         .collect()
 }
 

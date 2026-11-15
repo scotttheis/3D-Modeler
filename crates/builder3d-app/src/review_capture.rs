@@ -12,7 +12,7 @@
 //! | Variable | Values | Default |
 //! |---|---|---|
 //! | `BUILDER3D_REVIEW_CAPTURE` | output PNG path | harness off |
-//! | `BUILDER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `resize`, `resize-drag`, `multi`, `merge`, `unselected`, `material`, `settings`, `save`, `export`, `menu`, `colors`, `mirror`, `merge-apart`, `repair`, `paste`, `align`, `paint`, `paint-picker`, `xray`, `texture`, `texture-dialog`, `grab`, `crease` | `move` |
+//! | `BUILDER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `resize`, `resize-drag`, `multi`, `merge`, `unselected`, `material`, `settings`, `save`, `export`, `menu`, `colors`, `mirror`, `merge-apart`, `repair`, `paste`, `align`, `paint`, `paint-picker`, `xray`, `texture`, `texture-dialog`, `grab`, `crease`, `smooth-brush` | `move` |
 //! | `BUILDER3D_REVIEW_TEXTURES` | `;`-separated picture paths for the `texture` states (one per object, reused in turn) | a built-in brick picture |
 //! | `BUILDER3D_REVIEW_THEME` | `light`, `dark` | `dark` |
 //! | `BUILDER3D_REVIEW_SIZE` | `normal`, `big` (Settings > Size) | `normal` |
@@ -113,6 +113,9 @@ pub(crate) enum ReviewState {
     /// One selected sphere with a Crease stroke across its top (OF-49), with
     /// the desktop's Crease settings.
     Crease,
+    /// One selected stock cylinder with a strong Smooth Brush stroke over its
+    /// top rim (OF-50), with the desktop's Smooth Brush settings.
+    SmoothBrush,
 }
 
 impl ReviewState {
@@ -145,6 +148,7 @@ impl ReviewState {
             "texture-dialog" => Some(Self::TextureDialog),
             "grab" => Some(Self::Grab),
             "crease" => Some(Self::Crease),
+            "smooth-brush" => Some(Self::SmoothBrush),
             _ => None,
         }
     }

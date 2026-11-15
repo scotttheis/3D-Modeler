@@ -2954,6 +2954,67 @@ mod tests {
     }
 
     #[test]
+    fn mcp_smooth_brush_matches_the_desktop_stroke_and_keeps_the_cylinder() {
+        // OF-50: one core function behind both; the stock cylinder keeps
+        // its height under a strong stroke over its rim.
+        let mut desktop = CommandState::default();
+        let mut mcp = CommandState::default();
+        for state in [&mut desktop, &mut mcp] {
+            state
+                .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cylinder))
+                .expect("add cylinder");
+        }
+        desktop.select_index(0);
+        let mesh = desktop.scene().objects()[0].mesh().clone();
+        let height = |mesh: &Mesh| {
+            let values = mesh.vertices.iter().map(|vertex| vertex[1]);
+            values.clone().fold(f32::MIN, f32::max) - values.fold(f32::MAX, f32::min)
+        };
+        let rim = mesh
+            .vertices
+            .iter()
+            .copied()
+            .fold([0.0_f32; 3], |best, vertex| {
+                if vertex[1] + vertex[0] > best[1] + best[0] {
+                    vertex
+                } else {
+                    best
+                }
+            });
+        let centers = vec![rim, [rim[0] - 4.0, rim[1], rim[2] + 4.0]];
+        let options = SmoothBrushOptions {
+            radius_mm: 15.0,
+            strength: 1.0,
+            shrinkage: 1.0,
+            ..SmoothBrushOptions::default()
+        };
+        assert!(
+            desktop
+                .apply_brush_stroke(BrushStroke::SmoothBrush {
+                    centers_mm: centers.clone(),
+                    options,
+                })
+                .is_ok()
+        );
+        run_mcp(
+            &mut mcp,
+            "smooth_brush",
+            serde_json::json!({
+                "index": 0,
+                "centers_mm": centers,
+                "radius_mm": 15.0,
+                "strength": 1.0,
+                "shrinkage": 1.0,
+            }),
+        );
+        assert_eq!(
+            desktop.scene().objects()[0].mesh(),
+            mcp.scene().objects()[0].mesh()
+        );
+        assert!(height(desktop.scene().objects()[0].mesh()) >= height(&mesh) * 0.97);
+    }
+
+    #[test]
     fn mcp_rename_object_matches_the_desktop_rename() {
         let (mut desktop, mut mcp) = one_cube_pair();
         let history = desktop.scene().history_state_id();

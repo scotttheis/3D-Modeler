@@ -1,7 +1,7 @@
 use builder3d_core::{
     BlobOptions, BrushDirection, BrushFalloff, BrushSymmetry, CreasePolishOptions,
     ElasticGrabOptions, Mesh, MeshOperationLimits, Scene, SceneObject, SmoothBrushOptions, blob,
-    crease_polish, elastic_grab, make_sphere, smooth_brush,
+    crease_polish, elastic_grab, make_cylinder, make_sphere, smooth_brush,
 };
 
 fn volume(mesh: &Mesh) -> f64 {
@@ -262,4 +262,82 @@ fn crease_is_gentle_bounded_and_never_folds_the_surface() {
         let dot = before[0] * after[0] + before[1] * after[1] + before[2] * after[2];
         assert!(dot > 0.0, "face {face:?} folded");
     }
+}
+
+fn extent(mesh: &Mesh, axis: usize) -> f32 {
+    let values = mesh.vertices.iter().map(|vertex| vertex[axis]);
+    values.clone().fold(f32::MIN, f32::max) - values.fold(f32::MAX, f32::min)
+}
+
+#[test]
+fn smooth_brush_keeps_a_sparse_stock_cylinder_from_melting() {
+    // OF-50 / D9: the two-ring stock cylinder used to melt. Sharp rims now
+    // only slide along themselves, so a strong stroke over the whole
+    // cylinder keeps its height, width and volume.
+    let source = make_cylinder(20.0, 40.0, 64).expect("cylinder fixture");
+    let centers: Vec<[f32; 3]> = (0..8)
+        .map(|step| {
+            let angle = step as f32 * std::f32::consts::FRAC_PI_4;
+            [
+                20.0 * angle.cos(),
+                20.0 * angle.sin(),
+                40.0 * (step % 2) as f32,
+            ]
+        })
+        .collect();
+    let result = smooth_brush(
+        &source,
+        &centers,
+        SmoothBrushOptions {
+            radius_mm: 40.0,
+            strength: 1.0,
+            ..SmoothBrushOptions::default()
+        },
+    )
+    .expect("smooth brush");
+    for axis in 0..3 {
+        let before = extent(&source, axis);
+        let after = extent(&result.mesh, axis);
+        assert!(after >= before * 0.97, "axis {axis}: {before} -> {after}");
+    }
+    assert!(volume(&result.mesh) >= volume(&source) * 0.95);
+}
+
+#[test]
+fn smooth_brush_still_evens_out_a_bumpy_surface() {
+    let mut source = make_sphere(10.0, 4).expect("sphere fixture");
+    for (index, vertex) in source.vertices.iter_mut().enumerate() {
+        let bump = if index % 3 == 0 { 1.02 } else { 0.99 };
+        for value in vertex.iter_mut() {
+            *value *= bump;
+        }
+    }
+    let roughness = |mesh: &Mesh| -> f32 {
+        mesh.vertices
+            .iter()
+            .filter(|vertex| vertex[2] > 9.5)
+            .map(|vertex| {
+                ((vertex[0] * vertex[0] + vertex[1] * vertex[1] + vertex[2] * vertex[2]).sqrt()
+                    - 10.0)
+                    .abs()
+            })
+            .sum()
+    };
+    let result = smooth_brush(
+        &source,
+        &[[0.0, 0.0, 10.0]],
+        SmoothBrushOptions {
+            radius_mm: 6.0,
+            strength: 1.0,
+            shrinkage: 1.0,
+            ..SmoothBrushOptions::default()
+        },
+    )
+    .expect("smooth brush");
+    assert!(
+        roughness(&result.mesh) < roughness(&source) * 0.8,
+        "{} -> {}",
+        roughness(&source),
+        roughness(&result.mesh)
+    );
 }
