@@ -588,7 +588,7 @@ impl Builder3dApp {
             ReviewState::MergeApart => &[builder3d_core::PrimitiveKind::Cube; 2],
             ReviewState::Repair | ReviewState::Paste => &[builder3d_core::PrimitiveKind::Cube],
             ReviewState::Align => &[builder3d_core::PrimitiveKind::Cube; 2],
-            ReviewState::Paint | ReviewState::PaintPicker => &[
+            ReviewState::Paint | ReviewState::PaintPicker | ReviewState::Xray => &[
                 builder3d_core::PrimitiveKind::Cube,
                 builder3d_core::PrimitiveKind::Sphere,
             ],
@@ -667,6 +667,27 @@ impl Builder3dApp {
                 if review.state() == ReviewState::PaintPicker {
                     mode.open_colour_picker();
                 }
+            }
+        }
+        if review.state() == ReviewState::Xray {
+            if let Some(id) = self
+                .commands
+                .scene()
+                .objects()
+                .get(1)
+                .map(|object| object.object_id().to_owned())
+            {
+                let _ = self
+                    .commands
+                    .set_object_position_by_id(&id, [-14.0, 20.0, 6.0]);
+            }
+            self.commands.set_selection_indices([0]);
+            let _ = self.commands.set_selected_color([0.29, 0.76, 0.38, 1.0]);
+            self.commands.set_selection_indices([1]);
+            let _ = self.commands.set_selected_color([0.16, 0.36, 0.90, 1.0]);
+            self.commands.set_selection_indices([0]);
+            if !self.commands.display_state().xray {
+                self.dispatch(CommandId::ToggleXray);
             }
         }
         if review.state() == ReviewState::MergeApart {

@@ -8,6 +8,7 @@ mod floor;
 mod gizmo;
 mod lighting;
 mod math;
+mod outline;
 mod picking;
 mod renderer;
 mod scene;
@@ -42,7 +43,9 @@ pub use gizmo::{
     ROTATE_RING_GAP_FACTOR, ROTATE_RING_SEGMENTS, X_AXIS_COLOR, Y_AXIS_COLOR, Z_AXIS_COLOR,
     build_gizmo, build_gizmo_with_bounds, hit_test, hit_test_with_bounds,
 };
-pub use lighting::{SELECTED_SHADE, ViewportLighting, selection_shade};
+pub use lighting::{
+    SELECTED_SHADE, ViewportLighting, XRAY_ALPHA, XRAY_PALE_MIX, selection_shade, xray_shade,
+};
 pub use math::{
     Aabb, Mat4, Ray, Vec3, add, cross, dot, normalize, perspective, ray_triangle, scale, subtract,
 };

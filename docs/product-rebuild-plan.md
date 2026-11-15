@@ -125,7 +125,7 @@ writes user settings, so it is safe while the machine is in use.
 
 ```powershell
 $env:BUILDER3D_REVIEW_CAPTURE = "evidence\rebuild\captures\multi-dark.png"
-$env:BUILDER3D_REVIEW_STATE   = "multi"    # welcome | empty | move | rotate | resize | resize-drag | multi | merge | unselected | material | settings | save | export | menu | colors | mirror | merge-apart | repair | paste | align | paint | paint-picker
+$env:BUILDER3D_REVIEW_STATE   = "multi"    # welcome | empty | move | rotate | resize | resize-drag | multi | merge | unselected | material | settings | save | export | menu | colors | mirror | merge-apart | repair | paste | align | paint | paint-picker | xray
 $env:BUILDER3D_REVIEW_THEME   = "dark"     # light | dark
 $env:BUILDER3D_REVIEW_SIZE    = "normal"   # normal | big
 $env:BUILDER3D_REVIEW_TAB     = "Insert"   # any ribbon tab

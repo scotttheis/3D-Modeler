@@ -1,7 +1,7 @@
 use std::{
     collections::{BTreeMap, HashMap},
     path::PathBuf,
-    sync::mpsc,
+    sync::{Arc, mpsc},
     time::{Duration, Instant},
 };
 
@@ -25,7 +25,7 @@ use crate::{
     },
     gizmo::{GizmoMode, build_gizmo},
     lighting::ViewportLighting,
-    math::{Mat4, subtract},
+    math::{Mat4, Vec3, subtract},
     scene::{MeshGeometry, RenderObject, RenderScene},
 };
 
@@ -282,6 +282,9 @@ pub struct ViewportRenderer {
     render_target_ledger_id: AllocationId,
     gpu_objects: HashMap<String, GpuGeometry>,
     contact_cache: ContactCueCache,
+    /// X-ray selection outline adjacency per object, keyed by the geometry
+    /// it was built from.
+    outline_cache: HashMap<String, (usize, Arc<crate::outline::OutlineEdges>)>,
     scene_reservations: Option<(u64, ViewportReservationSet)>,
 }
 
@@ -472,6 +475,7 @@ impl ViewportRenderer {
             render_target_ledger_id,
             gpu_objects: HashMap::new(),
             contact_cache: ContactCueCache::new(),
+            outline_cache: HashMap::new(),
             scene_reservations: None,
         })
     }
@@ -806,6 +810,12 @@ impl ViewportRenderer {
             scene_revision,
         )?;
         let cues = cues_for_settled_objects(cues, scene, preview_translation);
+        let outline = if options.xray {
+            self.selection_outline(scene, camera, options, use_interaction)
+        } else {
+            self.outline_cache.clear();
+            Vec::new()
+        };
         let overlay = build_overlay_vertices(
             &floor,
             &cues,
@@ -817,6 +827,7 @@ impl ViewportRenderer {
             self.height,
             scene,
             options,
+            &outline,
         )?;
         let overlay_reservation = if overlay.total_vertices() > 0 {
             let bytes = overlay.total_bytes()?;
@@ -956,11 +967,11 @@ impl ViewportRenderer {
                 depth_stencil_attachment: depth_attachment,
                 ..Default::default()
             });
-            pass.set_pipeline(if options.xray {
-                &self.mesh_xray_pipeline
-            } else {
-                &self.mesh_pipeline
-            });
+            // X-ray (OF-47): selected objects stay solid and are drawn here
+            // with everything else opaque; the others are drawn pale and
+            // see-through after the floor, so the floor cannot cover them.
+            pass.set_pipeline(&self.mesh_pipeline);
+            let mut see_through = Vec::new();
             for object in scene.objects() {
                 let Some(gpu) = self.gpu_objects.get(object.object_id()) else {
                     continue;
@@ -1016,9 +1027,15 @@ impl ViewportRenderer {
                         self.queue
                             .write_buffer(&batch.reflection_uniform, 0, &reflection_bytes);
                     }
+                    if options.xray && !selected {
+                        continue;
+                    }
                     pass.set_bind_group(0, &batch.bind_group, &[]);
                     pass.set_index_buffer(batch.index.slice(..), wgpu::IndexFormat::Uint32);
                     pass.draw_indexed(0..batch.index_count, 0, 0..1);
+                }
+                if options.xray && !selected {
+                    see_through.push(gpu);
                 }
             }
             // Wireframe: anti-aliased triangle edges over the shaded model,
@@ -1072,6 +1089,17 @@ impl ViewportRenderer {
                 pass.set_index_buffer(indices.slice(..), wgpu::IndexFormat::Uint32);
                 pass.draw_indexed(0..*count, 0, 0..1);
             }
+            if !see_through.is_empty() {
+                pass.set_pipeline(&self.mesh_xray_pipeline);
+                for gpu in see_through {
+                    pass.set_vertex_buffer(0, gpu.vertex.slice(..));
+                    for batch in &gpu.batches {
+                        pass.set_bind_group(0, &batch.bind_group, &[]);
+                        pass.set_index_buffer(batch.index.slice(..), wgpu::IndexFormat::Uint32);
+                        pass.draw_indexed(0..batch.index_count, 0, 0..1);
+                    }
+                }
+            }
             // Draw surfaces first.  Grid, contact, wireframe, and gizmo lines
             // are depth-tested over the floor so the opaque floor cannot hide
             // them when both primitives occupy the build plane.
@@ -1108,6 +1136,69 @@ impl ViewportRenderer {
             ledger: self.ledger.snapshot(),
             capture_path,
         })
+    }
+
+    /// World-space outline segments of the selected objects for X-ray.
+    /// Bounded: a mesh over the outline face limit, or an outline that
+    /// would crowd out the rest of the overlay, is drawn without one.
+    fn selection_outline(
+        &mut self,
+        scene: &RenderScene,
+        camera: &Camera,
+        options: &ViewportRenderOptions,
+        use_interaction: bool,
+    ) -> Vec<(Vec3, Vec3)> {
+        let eye = camera.position();
+        let selected = &options.selected_object_ids;
+        self.outline_cache
+            .retain(|id, _| selected.iter().any(|candidate| candidate == id));
+        let mut segments = Vec::new();
+        for object in scene.objects() {
+            if !selected.iter().any(|id| id == object.object_id()) {
+                continue;
+            }
+            let geometry = if use_interaction {
+                object.interaction_geometry()
+            } else {
+                object.full_geometry()
+            };
+            let key = std::ptr::from_ref(geometry) as usize;
+            let edges = match self.outline_cache.get(object.object_id()) {
+                Some((cached, edges)) if *cached == key => Arc::clone(edges),
+                _ => {
+                    let Some(edges) = crate::outline::OutlineEdges::build(geometry) else {
+                        continue;
+                    };
+                    let edges = Arc::new(edges);
+                    self.outline_cache
+                        .insert(object.object_id().to_owned(), (key, Arc::clone(&edges)));
+                    edges
+                }
+            };
+            let transform = object.transform();
+            let Ok(local_eye) = transform
+                .inverse()
+                .and_then(|inverse| inverse.transform_point(eye))
+            else {
+                continue;
+            };
+            let object_segments = edges.visible_segments(local_eye);
+            if segments.len() + object_segments.len() > MAX_OUTLINE_SEGMENTS {
+                continue;
+            }
+            for (start, end) in object_segments {
+                let (Ok(start), Ok(end)) = (
+                    transform.transform_point(start),
+                    transform.transform_point(end),
+                ) else {
+                    continue;
+                };
+                // Lift the line a hair toward the eye so the surface it lies
+                // on cannot hide it.
+                segments.push((toward(start, eye), toward(end, eye)));
+            }
+        }
+        segments
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -2211,8 +2302,13 @@ fn build_overlay_vertices(
     height: u32,
     scene: &RenderScene,
     options: &ViewportRenderOptions,
+    outline: &[(Vec3, Vec3)],
 ) -> Result<OverlayBuffers, ViewportError> {
     let mut lines = Vec::new();
+    for (start, end) in outline {
+        lines.push(OverlayVertex::new(*start, crate::outline::OUTLINE_COLOR));
+        lines.push(OverlayVertex::new(*end, crate::outline::OUTLINE_COLOR));
+    }
     let mut triangles = Vec::new();
     for line in floor.lines.iter().chain(&floor.front_cue) {
         let mut start_color = line.color;
@@ -2396,16 +2492,26 @@ fn color_from_rgba8(color: [u8; 4]) -> [f32; 4] {
     color.map(|channel| f32::from(channel) / 255.0)
 }
 
+/// Most outline segments in one frame (two overlay vertices each).
+const MAX_OUTLINE_SEGMENTS: usize = MAX_OVERLAY_VERTICES / 8;
+
+fn toward(point: Vec3, eye: Vec3) -> Vec3 {
+    const LIFT: f32 = 0.002;
+    [
+        point[0] + (eye[0] - point[0]) * LIFT,
+        point[1] + (eye[1] - point[1]) * LIFT,
+        point[2] + (eye[2] - point[2]) * LIFT,
+    ]
+}
+
 fn display_color(authored: [f32; 4], selected: bool, options: &ViewportRenderOptions) -> [f32; 4] {
-    let mut color = if selected {
+    if options.xray {
+        crate::xray_shade(authored, selected)
+    } else if selected {
         crate::selection_shade(authored)
     } else {
         authored
-    };
-    if options.xray {
-        color[3] = (color[3] * 0.30).clamp(0.05, 0.45);
     }
-    color
 }
 
 /// Neutral shadow tone, as in 3D Builder, for both themes.
@@ -2884,7 +2990,8 @@ mod tests {
         let selected = display_color([0.8, 0.2, 0.1, 1.0], true, &options);
         let plain = display_color([0.8, 0.2, 0.1, 1.0], false, &options);
         assert_ne!(selected, plain);
-        assert!((0.05..=0.45).contains(&selected[3]));
+        // X-ray keeps the selection solid and the rest see-through.
+        assert!((selected[3] - 1.0).abs() < f32::EPSILON);
         assert!((0.05..=0.45).contains(&plain[3]));
     }
 
@@ -3050,6 +3157,7 @@ mod tests {
             1_440,
             &scene,
             &ViewportRenderOptions::default(),
+            &[],
         )
         .expect("default floor overlay should render");
 
@@ -3133,6 +3241,7 @@ mod tests {
             600,
             &scene,
             &options,
+            &[],
         )
         .expect("overlay above");
         assert!(
@@ -3154,6 +3263,7 @@ mod tests {
             600,
             &scene,
             &options,
+            &[],
         )
         .expect("overlay below");
         assert!(without_floor.triangles.is_empty());

@@ -12,7 +12,7 @@
 //! | Variable | Values | Default |
 //! |---|---|---|
 //! | `BUILDER3D_REVIEW_CAPTURE` | output PNG path | harness off |
-//! | `BUILDER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `resize`, `resize-drag`, `multi`, `merge`, `unselected`, `material`, `settings`, `save`, `export`, `menu`, `colors`, `mirror`, `merge-apart`, `repair`, `paste`, `align`, `paint`, `paint-picker` | `move` |
+//! | `BUILDER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `resize`, `resize-drag`, `multi`, `merge`, `unselected`, `material`, `settings`, `save`, `export`, `menu`, `colors`, `mirror`, `merge-apart`, `repair`, `paste`, `align`, `paint`, `paint-picker`, `xray` | `move` |
 //! | `BUILDER3D_REVIEW_THEME` | `light`, `dark` | `dark` |
 //! | `BUILDER3D_REVIEW_SIZE` | `normal`, `big` (Settings > Size) | `normal` |
 //! | `BUILDER3D_REVIEW_TAB` | a ribbon tab label such as `Object` | `Insert` |
@@ -96,6 +96,9 @@ pub(crate) enum ReviewState {
     Paint,
     /// The `Paint` state with the colour drop-down open.
     PaintPicker,
+    /// X-ray on (OF-47) with a selected green cube and an unselected sphere
+    /// overlapping it, as in the owner's 3D Builder reference.
+    Xray,
 }
 
 impl ReviewState {
@@ -123,6 +126,7 @@ impl ReviewState {
             "align" => Some(Self::Align),
             "paint" => Some(Self::Paint),
             "paint-picker" => Some(Self::PaintPicker),
+            "xray" => Some(Self::Xray),
             _ => None,
         }
     }

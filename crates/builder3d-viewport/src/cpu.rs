@@ -192,7 +192,20 @@ pub fn render_cpu_with_options(
             &mut shaded_pixels,
         );
     }
-    for object in scene.objects() {
+    // X-ray (OF-47): selected objects are solid and drawn first, so the
+    // pale see-through ones blend over them.
+    let is_selected = |object: &crate::scene::RenderObject| {
+        options
+            .selected_object_ids
+            .iter()
+            .any(|id| id == object.object_id())
+    };
+    let mut draw_order = scene.objects().iter().collect::<Vec<_>>();
+    if options.xray {
+        draw_order.sort_by_key(|object| !is_selected(object));
+    }
+    let mut outlines = Vec::new();
+    for object in draw_order {
         let geometry = if interaction {
             object.interaction_geometry()
         } else {
@@ -206,13 +219,27 @@ pub fn render_cpu_with_options(
             .selected_object_ids
             .iter()
             .any(|id| id == object.object_id());
-        let mut color = if selected {
+        let color = if options.xray {
+            crate::xray_shade(object.color(), selected)
+        } else if selected {
             crate::selection_shade(object.color())
         } else {
             object.color()
         };
-        if options.xray {
-            color[3] = (color[3] * 0.30).clamp(0.05, 0.45);
+        let see_through = options.xray && !selected;
+        if options.xray
+            && selected
+            && let Some(edges) = crate::outline::OutlineEdges::build(geometry)
+            && let Ok(local_eye) = object_transform
+                .inverse()
+                .and_then(|inverse| inverse.transform_point(camera.position()))
+        {
+            for (start, end) in edges.visible_segments(local_eye) {
+                outlines.push((
+                    object_transform.transform_point(start)?,
+                    object_transform.transform_point(end)?,
+                ));
+            }
         }
         rasterize_geometry(
             geometry,
@@ -223,7 +250,7 @@ pub fn render_cpu_with_options(
             color,
             object,
             selected,
-            options.xray,
+            see_through,
             material_parameters,
             width,
             height,
@@ -255,6 +282,33 @@ pub fn render_cpu_with_options(
                 );
             }
         }
+    }
+    // The X-ray selection outline, on top of everything it is not behind.
+    for (first, second) in outlines {
+        let lift = |point: [f32; 3]| {
+            let eye = camera.position();
+            [
+                point[0] + (eye[0] - point[0]) * 0.002,
+                point[1] + (eye[1] - point[1]) * 0.002,
+                point[2] + (eye[2] - point[2]) * 0.002,
+            ]
+        };
+        let Some(first) = project(view_projection, lift(first), width, height) else {
+            continue;
+        };
+        let Some(second) = project(view_projection, lift(second), width, height) else {
+            continue;
+        };
+        rasterize_line(
+            first,
+            second,
+            crate::outline::OUTLINE_COLOR,
+            width,
+            height,
+            &mut rgba,
+            &depth,
+            &mut shaded_pixels,
+        );
     }
     if let Some(floor) = floor.as_ref()
         && options.grid_visible
@@ -502,12 +556,13 @@ fn rasterize_geometry(
             .map(|authored| authored.map(|channel| f32::from(channel) / 255.0))
             .unwrap_or(color);
         if authored_face_color.is_some() {
-            if selected {
-                face_color = crate::selection_shade(face_color);
-            }
-            if xray {
-                face_color[3] = (face_color[3] * 0.30).clamp(0.05, 0.45);
-            }
+            face_color = if xray {
+                crate::xray_shade(face_color, false)
+            } else if selected {
+                crate::selection_shade(face_color)
+            } else {
+                face_color
+            };
         }
         let first_normal = geometry.normal(first_index).ok_or_else(|| {
             ViewportError::InvalidInput(String::from("CPU vertex normal is unavailable"))

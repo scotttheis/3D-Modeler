@@ -527,7 +527,11 @@ mod tests {
     fn region_paint_survives_a_project_save_and_reopen() {
         let mut scene = cube_scene();
         let faces = paint_region_faces(scene.objects()[0].mesh(), 0, 0.0).unwrap_or_default();
-        assert!(scene.execute(PaintFacesCommand::faces(0, faces, RED)).is_ok());
+        assert!(
+            scene
+                .execute(PaintFacesCommand::faces(0, faces, RED))
+                .is_ok()
+        );
         let before = object_face_colors(&scene.objects()[0]);
         let bytes = match crate::save_project_bytes(&scene) {
             Ok(bytes) => bytes,

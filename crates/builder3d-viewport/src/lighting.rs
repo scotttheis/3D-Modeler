@@ -165,8 +165,41 @@ pub fn selection_shade(color: [f32; 4]) -> [f32; 4] {
     ]
 }
 
+/// How far an unselected object's colour moves toward white in X-ray.
+pub const XRAY_PALE_MIX: f32 = 0.55;
+/// Opacity factor for unselected objects in X-ray.
+pub const XRAY_ALPHA: f32 = 0.32;
+
+/// The X-ray display colour (OF-47, as in 3D Builder): a selected object
+/// stays solid in its selection colour; every other object turns pale and
+/// see-through. The GPU renderer and the CPU fallback both use this rule.
+#[must_use]
+pub fn xray_shade(color: [f32; 4], selected: bool) -> [f32; 4] {
+    if selected {
+        return selection_shade(color);
+    }
+    let pale = |channel: f32| channel + (1.0 - channel) * XRAY_PALE_MIX;
+    [
+        pale(color[0]),
+        pale(color[1]),
+        pale(color[2]),
+        (color[3] * XRAY_ALPHA).clamp(0.05, 0.45),
+    ]
+}
+
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn xray_keeps_the_selection_solid_and_makes_the_rest_pale() {
+        let blue = [0.16, 0.36, 0.90, 1.0];
+        let selected = super::xray_shade(blue, true);
+        assert_eq!(selected, super::selection_shade(blue));
+        assert!((selected[3] - 1.0).abs() < f32::EPSILON);
+        let other = super::xray_shade(blue, false);
+        assert!(other[0] > blue[0] && other[1] > blue[1] && other[2] >= blue[2]);
+        assert!((0.05..=0.45).contains(&other[3]));
+    }
+
     #[test]
     fn selection_darkens_slightly_and_keeps_the_colour_family() {
         let red = [0.8, 0.2, 0.1, 1.0];
