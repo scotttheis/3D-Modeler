@@ -117,8 +117,9 @@ pub use shell_ops::{
     hollow_mesh_with_hooks, text_emboss, text_emboss_with_hooks,
 };
 pub use simplify::{
-    DEFAULT_SIMPLIFY_MIN_FACES, SimplifyReport, SimplifyResult, simplify_mesh,
-    simplify_mesh_with_options,
+    DEFAULT_SIMPLIFY_MIN_FACES, SIMPLIFY_SHAPE_TOLERANCE, SimplifyReport, SimplifyResult,
+    simplify_mesh, simplify_mesh_by_percent, simplify_mesh_with_options,
+    simplify_target_for_percent,
 };
 pub use smooth::{
     DEFAULT_SMOOTH_MAX_ITERATIONS, SmoothReport, SmoothResult, smooth_mesh,

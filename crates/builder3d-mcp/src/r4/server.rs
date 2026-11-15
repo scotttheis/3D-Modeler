@@ -2278,7 +2278,22 @@ impl R4Server {
             }
             "simplify" => {
                 let face_count = optional_usize(args, "face_count")?;
-                let result = simplify_mesh(&source, face_count)?;
+                // OF-51: `percent` is the desktop Simplify slider (shape-guarded);
+                // `face_count` keeps the Python contract.
+                let percent = optional_usize(args, "percent")?;
+                let result = match (percent, face_count) {
+                    (Some(_), Some(_)) => {
+                        return Err(AdapterError::Validation(
+                            "give either percent or face_count, not both".to_owned(),
+                        ));
+                    }
+                    (Some(percent), None) => builder3d_core::simplify_mesh_by_percent(
+                        &source,
+                        u32::try_from(percent).unwrap_or(u32::MAX),
+                        builder3d_core::MeshOperationLimits::default(),
+                    )?,
+                    (None, face_count) => simplify_mesh(&source, face_count)?,
+                };
                 (
                     result.mesh,
                     json!({"action":action,"operation_id":id,"index":index,"object_id":object_id,"report":simplify_report(&result.report)}),

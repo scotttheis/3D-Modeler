@@ -151,6 +151,8 @@ pub(crate) enum DialogAction {
     Emboss(TextEmbossOptions),
     /// Apply a bounded constant-thickness shell.
     Hollow(HollowOptions),
+    /// Remove this percentage of the selected mesh's faces (OF-51).
+    Simplify(u32),
     /// Select a theme mode.
     Theme(ThemeMode),
     /// Select the shell size (Big doubles it).
@@ -191,6 +193,8 @@ pub(crate) struct DialogState {
     emboss_offset_x_mm: f32,
     emboss_offset_z_mm: f32,
     hollow_wall_thickness_mm: f32,
+    simplify_percent: u32,
+    selection_faces: usize,
     theme_mode: ThemeMode,
     ui_size: UiSize,
     file_type: FileType,
@@ -249,6 +253,8 @@ impl DialogState {
             emboss_offset_x_mm: 0.0,
             emboss_offset_z_mm: 0.0,
             hollow_wall_thickness_mm: 1.0,
+            simplify_percent: 10,
+            selection_faces: 0,
             theme_mode,
             ui_size: UiSize::Normal,
             file_type: FileType::Stl,
@@ -455,9 +461,10 @@ impl DialogState {
         self.theme_mode
     }
 
-    /// Settings stays alongside the viewport; its About popup remains modal.
+    /// Settings and Simplify stay alongside the viewport (Simplify so the
+    /// model can be looked at between notches); About remains modal.
     pub(crate) fn is_modal(&self) -> bool {
-        self.kind != DialogKind::Settings || self.about_open
+        !matches!(self.kind, DialogKind::Settings | DialogKind::Simplify) || self.about_open
     }
 
     #[cfg(test)]
@@ -493,6 +500,14 @@ impl DialogState {
                 .collapsible(false)
                 .resizable(false)
                 .fixed_rect(rect),
+            // Simplify drops down under the ribbon, below its button (OF-51).
+            Some(rect) if self.kind == DialogKind::Simplify => egui::Window::new(title)
+                .collapsible(false)
+                .resizable(false)
+                .movable(true)
+                .constrain(true)
+                .pivot(Align2::LEFT_TOP)
+                .default_pos(rect.left_top() + egui::vec2(8.0, 8.0)),
             _ => dialog_window(ctx, title),
         };
         let shown = window.show(ctx, |ui| {
@@ -521,6 +536,7 @@ impl DialogState {
                 DialogKind::Torus => self.torus_dialog(ui, &mut action),
                 DialogKind::Emboss => self.emboss_dialog(ui, &mut action),
                 DialogKind::Hollow => self.hollow_dialog(ui, &mut action),
+                DialogKind::Simplify => self.simplify_dialog(ui, &mut action),
             }
             if !self.message.is_empty() {
                 ui.separator();
@@ -1336,6 +1352,35 @@ impl DialogState {
         }
     }
 
+    /// Face count of the selected mesh, refreshed every frame by the shell.
+    pub(crate) fn set_selection_faces(&mut self, faces: usize) {
+        self.selection_faces = faces;
+    }
+
+    /// The Simplify window (OF-51): one slider in 10 % notches and the face
+    /// count it aims for. It stays open so another notch can follow.
+    fn simplify_dialog(&mut self, ui: &mut egui::Ui, action: &mut Option<DialogAction>) {
+        ui.label("Remove faces while keeping the shape. Each notch removes about 10 %.");
+        ui.add(
+            egui::Slider::new(&mut self.simplify_percent, 10..=90)
+                .step_by(10.0)
+                .suffix(" % fewer faces"),
+        );
+        let target = builder3d_core::simplify_target_for_percent(
+            self.selection_faces,
+            self.simplify_percent,
+        )
+        .unwrap_or(self.selection_faces);
+        ui.label(format!(
+            "Faces: {} → about {}",
+            crate::desktop_jobs::group_thousands(self.selection_faces),
+            crate::desktop_jobs::group_thousands(target)
+        ));
+        if ui.button("Simplify").clicked() {
+            *action = Some(DialogAction::Simplify(self.simplify_percent));
+        }
+    }
+
     fn title(&self) -> &'static str {
         match self.kind {
             DialogKind::OpenProject => "Open Project",
@@ -1349,6 +1394,7 @@ impl DialogState {
             DialogKind::Torus => "Edit Torus",
             DialogKind::Emboss => "Emboss",
             DialogKind::Hollow => "Hollow",
+            DialogKind::Simplify => "Simplify",
         }
     }
 }

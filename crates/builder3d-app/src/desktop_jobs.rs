@@ -6,7 +6,8 @@
 use std::path::PathBuf;
 
 use builder3d_core::{
-    Mesh, Scene, SceneSnapshot, repair_mesh, simplify_mesh, smooth_mesh, subdivide_mesh,
+    Mesh, MeshOperationLimits, Scene, SceneSnapshot, repair_mesh, simplify_mesh_by_percent,
+    smooth_mesh, subdivide_mesh,
 };
 use builder3d_platform::SlicerInfo;
 
@@ -22,7 +23,8 @@ use crate::{
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum MeshJobOperation {
     Repair,
-    Simplify,
+    /// Remove this percentage of the faces (OF-51).
+    Simplify(u32),
     Subdivide,
     Smooth,
 }
@@ -31,7 +33,7 @@ impl MeshJobOperation {
     pub(crate) const fn label(self) -> &'static str {
         match self {
             Self::Repair => "Repair",
-            Self::Simplify => "Simplify",
+            Self::Simplify(_) => "Simplify",
             Self::Subdivide => "Subdivide",
             Self::Smooth => "Smooth",
         }
@@ -138,9 +140,32 @@ where
                     let stage_count = result.report.stages.len();
                     (result.mesh, format!("{stage_count} repair stage(s)"))
                 }
-                MeshJobOperation::Simplify => {
-                    let result = simplify_mesh(&mesh, None).map_err(|error| error.to_string())?;
-                    (result.mesh, "simplification complete".to_owned())
+                MeshJobOperation::Simplify(percent) => {
+                    let result =
+                        simplify_mesh_by_percent(&mesh, percent, MeshOperationLimits::default())
+                            .map_err(|error| error.to_string())?;
+                    let report = result.report;
+                    if !report.changed {
+                        return Ok(DesktopJobResult::Unchanged {
+                            message: format!(
+                                "Simplify: this shape can't lose any faces without changing it ({} faces)",
+                                group_thousands(report.before_faces)
+                            ),
+                        });
+                    }
+                    let mut message = format!(
+                        "Simplify: {} → {} faces",
+                        group_thousands(report.before_faces),
+                        group_thousands(report.after_faces)
+                    );
+                    if report.after_faces > report.target_faces {
+                        message.push_str(" (stopped early to keep the shape)");
+                    }
+                    return Ok(DesktopJobResult::Mesh {
+                        operation,
+                        mesh: result.mesh,
+                        message,
+                    });
                 }
                 MeshJobOperation::Subdivide => {
                     let result = subdivide_mesh(&mesh).map_err(|error| error.to_string())?;
@@ -248,6 +273,19 @@ fn check_cancelled(handle: &OperationHandle) -> Result<(), String> {
     } else {
         Ok(())
     }
+}
+
+/// Writes a count with thousands separators, as the dialogs show it.
+pub(crate) fn group_thousands(value: usize) -> String {
+    let digits = value.to_string();
+    let mut grouped = String::with_capacity(digits.len() + digits.len() / 3);
+    for (index, digit) in digits.chars().enumerate() {
+        if index > 0 && (digits.len() - index).is_multiple_of(3) {
+            grouped.push(',');
+        }
+        grouped.push(digit);
+    }
+    grouped
 }
 
 #[cfg(test)]

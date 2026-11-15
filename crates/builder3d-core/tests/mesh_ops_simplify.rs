@@ -1,6 +1,6 @@
 use builder3d_core::{
-    Mesh, MeshOperationLimits, Scene, SceneObject, make_box, make_sphere, simplify_mesh,
-    simplify_mesh_with_options,
+    Mesh, MeshOperationLimits, Scene, SceneObject, make_box, make_cylinder, make_sphere,
+    simplify_mesh, simplify_mesh_by_percent, simplify_mesh_with_options,
 };
 
 #[test]
@@ -77,4 +77,50 @@ fn scene_simplify_is_atomic_and_undoable_without_replacing_object_identity() {
     assert_eq!(scene.objects()[0].mesh().face_count(), before_faces);
     scene.redo().expect("redo simplify");
     assert!(scene.objects()[0].mesh().face_count() <= 40);
+}
+
+#[test]
+fn simplify_by_percent_removes_about_that_share_and_keeps_the_shape() {
+    // OF-51: the stock 20 mm sphere used to fail on the work limit. Each
+    // slider notch removes about 10 % of the faces.
+    let source = make_sphere(20.0, 4).expect("sphere fixture");
+    for percent in [10, 50, 90] {
+        let result = simplify_mesh_by_percent(&source, percent, MeshOperationLimits::default())
+            .expect("simplify by percent");
+        let expected = source.face_count() * (100 - percent as usize) / 100;
+        assert!(result.report.changed);
+        assert!(
+            result.mesh.face_count() <= expected + 2 && result.mesh.face_count() + 4 >= expected,
+            "{percent}%: {} -> {} (expected about {expected})",
+            source.face_count(),
+            result.mesh.face_count()
+        );
+        // Still a sphere: every vertex within 1 mm of the 20 mm radius.
+        for vertex in &result.mesh.vertices {
+            let radius =
+                (vertex[0] * vertex[0] + vertex[1] * vertex[1] + vertex[2] * vertex[2]).sqrt();
+            assert!((radius - 20.0).abs() < 1.0, "{percent}%: radius {radius}");
+        }
+        assert!(result.report.after_volume_mm3 > result.report.before_volume_mm3 * 0.95);
+    }
+}
+
+#[test]
+fn simplify_by_percent_leaves_a_cube_alone_and_cuts_a_cylinder_cleanly() {
+    let cube = make_box([20.0; 3]).expect("box");
+    let result = simplify_mesh_by_percent(&cube, 10, MeshOperationLimits::default()).expect("cube");
+    assert!(!result.report.changed, "a cube has nothing to remove");
+    assert_eq!(result.mesh, cube);
+    assert!(!result.report.warnings.is_empty());
+
+    let cylinder = make_cylinder(20.0, 40.0, 64).expect("cylinder");
+    let result =
+        simplify_mesh_by_percent(&cylinder, 30, MeshOperationLimits::default()).expect("cylinder");
+    assert!(result.report.changed);
+    assert!(result.mesh.face_count() < cylinder.face_count());
+    let height = |mesh: &Mesh| {
+        let values = mesh.vertices.iter().map(|vertex| vertex[1]);
+        values.clone().fold(f32::MIN, f32::max) - values.fold(f32::MAX, f32::min)
+    };
+    assert!((height(&result.mesh) - 40.0).abs() < 0.01);
 }

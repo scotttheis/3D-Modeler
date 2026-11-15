@@ -625,6 +625,7 @@ impl Builder3dApp {
             ReviewState::TextureDialog => &[builder3d_core::PrimitiveKind::Cube],
             ReviewState::Grab | ReviewState::Crease => &[builder3d_core::PrimitiveKind::Sphere],
             ReviewState::SmoothBrush => &[builder3d_core::PrimitiveKind::Cylinder],
+            ReviewState::Simplify => &[builder3d_core::PrimitiveKind::Sphere],
         };
         for (index, kind) in primitives.iter().copied().enumerate() {
             self.dispatch(CommandId::AddPrimitive(kind));
@@ -807,6 +808,37 @@ impl Builder3dApp {
                 },
             };
             let _ = self.commands.apply_brush_stroke(stroke);
+        }
+        if review.state() == ReviewState::Simplify {
+            self.commands.set_selection_indices([0]);
+            let source = self
+                .commands
+                .scene()
+                .objects()
+                .first()
+                .map(|object| (object.object_id().to_owned(), object.mesh().clone()));
+            if let Some((id, mesh)) = source
+                && let Ok(result) = builder3d_core::simplify_mesh_by_percent(
+                    &mesh,
+                    50,
+                    builder3d_core::MeshOperationLimits::default(),
+                )
+            {
+                let generation = self.commands.document_generation();
+                let revision = self.commands.scene().revision();
+                let message = format!(
+                    "Simplify: {} \u{2192} {} faces",
+                    crate::desktop_jobs::group_thousands(result.report.before_faces),
+                    crate::desktop_jobs::group_thousands(result.report.after_faces)
+                );
+                let _ =
+                    self.commands
+                        .replace_mesh_if_current(generation, revision, &id, result.mesh);
+                self.dispatch(CommandId::Simplify);
+                if let Some(dialog) = self.dialog.as_mut() {
+                    dialog.set_message(message);
+                }
+            }
         }
         if review.state() == ReviewState::SmoothBrush {
             self.commands.set_selection_indices([0]);
@@ -1092,7 +1124,6 @@ impl Builder3dApp {
             self.finish_paint_mode(true);
         }
         let mesh_operation = match command {
-            CommandId::Simplify => Some(MeshJobOperation::Simplify),
             CommandId::Subdivide => Some(MeshJobOperation::Subdivide),
             CommandId::Smooth => Some(MeshJobOperation::Smooth),
             _ => None,
@@ -1771,7 +1802,10 @@ impl Builder3dApp {
                             Some(serde_json::json!({ "changed": true })),
                         );
                         self.commands.set_status(status);
-                        if operation == MeshJobOperation::Repair {
+                        if matches!(
+                            operation,
+                            MeshJobOperation::Repair | MeshJobOperation::Simplify(_)
+                        ) {
                             self.restore_job_dialog(&mut job, |dialog| {
                                 dialog.set_message(message);
                             });
@@ -6014,9 +6048,18 @@ impl Builder3dApp {
             }
         }
         let settings_work_area = self.settings_work_area(ctx);
+        let selection_faces = self
+            .commands
+            .scene()
+            .selection()
+            .iter()
+            .next()
+            .and_then(|index| self.commands.scene().object(*index).ok())
+            .map_or(0, |object| object.mesh().face_count());
         let Some(dialog) = self.dialog.as_mut() else {
             return;
         };
+        dialog.set_selection_faces(selection_faces);
         dialog.sync_theme_mode(self.theme_mode);
         dialog.sync_ui_size(self.ui_size);
         if let Some(action) = dialog.show_with_settings_area(ctx, Some(settings_work_area)) {
@@ -6139,6 +6182,10 @@ impl Builder3dApp {
             }
             DialogAction::Repair => {
                 self.start_mesh_job(MeshJobOperation::Repair, true);
+                return;
+            }
+            DialogAction::Simplify(percent) => {
+                self.start_mesh_job(MeshJobOperation::Simplify(percent), true);
                 return;
             }
             DialogAction::PrintPrep(bed_size_mm) => {
@@ -9129,6 +9176,67 @@ mod tests {
             app.dialog.as_ref().is_none_or(|dialog| {
                 dialog.kind() != DialogKind::PrintPrep || dialog.has_error()
             })
+        );
+        assert!(std::fs::remove_dir_all(directory).is_ok());
+    }
+
+    #[test]
+    fn simplify_window_removes_a_notch_of_faces_and_stays_open() {
+        // OF-51: Simplify opens a window with a 10 % slider; applying it
+        // runs the same core function as MCP `simplify` with `percent`.
+        let (mut app, directory) = shell_for_jobs("of51-simplify");
+        app.dispatch(CommandId::AddPrimitive(PrimitiveKind::Sphere));
+        let source = app.commands.scene().objects()[0].mesh().clone();
+        let history = app.commands.scene().history_state_id();
+        app.dispatch(CommandId::Simplify);
+        assert_eq!(
+            app.dialog.as_ref().map(DialogState::kind),
+            Some(DialogKind::Simplify)
+        );
+        app.apply_dialog_action(crate::dialogs::DialogAction::Simplify(10));
+        wait_for_desktop_job(&mut app);
+        let expected = builder3d_core::simplify_mesh_by_percent(
+            &source,
+            10,
+            builder3d_core::MeshOperationLimits::default(),
+        )
+        .expect("core simplify");
+        assert_eq!(app.commands.scene().objects()[0].mesh(), &expected.mesh);
+        assert_eq!(app.commands.scene().history_state_id(), history + 1);
+        let message = app
+            .dialog
+            .as_ref()
+            .map(|dialog| dialog.message().to_owned());
+        assert_eq!(
+            message.as_deref(),
+            Some(
+                format!(
+                    "Simplify: {} \u{2192} {} faces",
+                    crate::desktop_jobs::group_thousands(source.face_count()),
+                    crate::desktop_jobs::group_thousands(expected.mesh.face_count())
+                )
+                .as_str()
+            ),
+            "the window stays open and shows before \u{2192} after"
+        );
+        assert!(std::fs::remove_dir_all(directory).is_ok());
+    }
+
+    #[test]
+    fn simplify_on_a_cube_says_it_cannot_and_adds_no_history() {
+        let (mut app, directory) = shell_for_jobs("of51-simplify-cube");
+        app.dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube));
+        let history = app.commands.scene().history_state_id();
+        app.dispatch(CommandId::Simplify);
+        app.apply_dialog_action(crate::dialogs::DialogAction::Simplify(10));
+        wait_for_desktop_job(&mut app);
+        assert_eq!(app.commands.scene().history_state_id(), history);
+        assert!(
+            app.dialog
+                .as_ref()
+                .is_some_and(|dialog| dialog.message().contains("can't lose any faces")),
+            "{:?}",
+            app.dialog.as_ref().map(DialogState::message)
         );
         assert!(std::fs::remove_dir_all(directory).is_ok());
     }

@@ -346,6 +346,8 @@ pub enum DialogKind {
     Emboss,
     /// Enter bounded hollow parameters.
     Hollow,
+    /// Choose how much to simplify the selected mesh (OF-51).
+    Simplify,
 }
 
 /// Result of dispatching one desktop command.
@@ -961,9 +963,10 @@ impl CommandState {
             CommandId::InvertSelection => Ok(self.invert_selection()),
             CommandId::Group => self.group_selected(),
             CommandId::Ungroup => self.ungroup_selected(),
-            CommandId::Simplify => self.mutate_one_selected("Simplify", |scene, index| {
-                scene.apply_simplify(index, None).map(|(result, _)| result)
-            }),
+            CommandId::Simplify => {
+                self.first_selected("Simplify")?;
+                Ok(CommandOutcome::OpenDialog(DialogKind::Simplify))
+            }
             CommandId::Subdivide => self.mutate_one_selected("Subdivide", |scene, index| {
                 scene.apply_subdivide(index).map(|(result, _)| result)
             }),
@@ -3115,6 +3118,43 @@ mod tests {
             Some(builder3d_core::REPAIR_NOTHING_TO_FIX_MESSAGE)
         );
         assert_eq!(mcp.scene().history_state_id(), history);
+    }
+
+    #[test]
+    fn mcp_simplify_percent_matches_the_desktop_simplify_slider() {
+        // OF-51: MCP `percent` runs the desktop slider's core function.
+        let mut mcp = CommandState::default();
+        mcp.dispatch(CommandId::AddPrimitive(PrimitiveKind::Sphere))
+            .expect("sphere");
+        let source = mcp.scene().objects()[0].mesh().clone();
+        let id = mcp.scene().objects()[0].object_id().to_owned();
+        let history = mcp.scene().history_state_id();
+        let result = run_mcp_operation(
+            &mut mcp,
+            "simplify",
+            serde_json::json!({"object_id": id, "percent": 10}),
+        );
+        let expected = builder3d_core::simplify_mesh_by_percent(
+            &source,
+            10,
+            builder3d_core::MeshOperationLimits::default(),
+        )
+        .expect("core simplify");
+        assert_eq!(result["changed"], serde_json::json!(true), "{result}");
+        assert_eq!(mcp.scene().objects()[0].mesh(), &expected.mesh);
+        assert_eq!(mcp.scene().history_state_id(), history + 1);
+
+        // A cube cannot lose faces without changing: no change, no history.
+        let (_, mut cube) = one_cube_pair();
+        let id = cube.scene().objects()[0].object_id().to_owned();
+        let history = cube.scene().history_state_id();
+        let result = run_mcp_operation(
+            &mut cube,
+            "simplify",
+            serde_json::json!({"object_id": id, "percent": 10}),
+        );
+        assert_eq!(result["changed"], serde_json::json!(false), "{result}");
+        assert_eq!(cube.scene().history_state_id(), history);
     }
 
     #[test]

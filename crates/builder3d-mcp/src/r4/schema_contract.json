@@ -10184,6 +10184,21 @@
             "default": "",
             "title": "Object Id",
             "type": "string"
+          },
+          "percent": {
+            "anyOf": [
+              {
+                "maximum": 95,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Remove about this percentage of the faces, like the desktop Simplify slider (10 per notch); stops early rather than change the shape. Use instead of face_count.",
+            "title": "Percent"
           }
         },
         "title": "simplifyArguments",
