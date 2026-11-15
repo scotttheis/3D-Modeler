@@ -3,7 +3,7 @@
 The only place current status is written. Keep it to one screen. Plan:
 [`product-rebuild-plan.md`](product-rebuild-plan.md).
 
-Updated 2026-11-14. Full gate passed 2026-11-14 after Phase 1 (fmt, clippy, tests, deny, audit, MCP parity, smoke, 40-image capture board). Release exe rebuilt from the same source for the Phase 1 review pack.
+Updated 2026-11-14. Full gate passed 2026-11-14 after Phase 2's OF-44 and OF-47 (fmt, clippy, tests, deny, audit, MCP parity, smoke, 40-image capture board; the board now also takes `paint`, `paint-picker`, `xray`). Release exe rebuilt from the same source for the Phase 2 review pack.
 
 Test releases (how-to: [`packaging.md`](packaging.md)): last is **RC1**,
 version 0.1.1, 2026-11-13, `E:\Builder3D-RC\Builder3D-RC1.msi` (50 MB),
@@ -13,16 +13,19 @@ version 0.1.1, 2026-11-13, `E:\Builder3D-RC\Builder3D-RC1.msi` (50 MB),
 
 **Owner batch 7** ([`owner-feedback-2026-11-14.md`](owner-feedback-2026-11-14.md),
 OF-28 to OF-58, five phases; Emboss OF-56/57 deferred by the owner).
-**Phase 1 done, stopped for owner review** (OF-28 to OF-45, one commit each,
-all "Done, awaiting owner review"). Pack:
-`evidence/rebuild/captures/2026-11-14-review-phase1/`. Owner picks for the
-pack: OF-35 shade A or B; confirm the OF-43 reading (10 mm gap beside the
-original).
+Phase 1 done (OF-28 to OF-45), pack
+`evidence/rebuild/captures/2026-11-14-review-phase1/`. **Phase 2 partly done,
+stopped for owner review**: OF-44 Paint and OF-47 X-ray "Done, awaiting owner
+review" (pack `evidence/rebuild/captures/2026-11-14-review-phase2/`); OF-46
+textures not started — saving textures changes the `.3dp` format, so it waits
+for the owner's choice. Open owner answers: OF-35 shade A or B; confirm the
+OF-43 reading (10 mm gap beside the original); OF-46 how textures are saved;
+OF-44 tick button label "Done" or 3D Builder's "Color".
 
 **Known work, in order** (a session takes the first item not done):
 
-1. Phase 2 — Paint, Material, X-ray (OF-44, OF-46, OF-47). OF-46: stop and
-   ask first if textures would change the `.3dp` format.
+1. Phase 2 — OF-46 Material textures, once the owner has chosen how textures
+   are saved (it changes the `.3dp` format). OF-44 and OF-47 are done.
 2. Phase 3 — Sculpt and mesh tools (OF-48 to OF-54).
 3. Phase 4 — Measure ruler (OF-55).
 4. Phase 5 — MCP does everything (OF-58).
@@ -52,8 +55,9 @@ the next stop message, not guessed.
 
 ## Last review pack
 
-`evidence/rebuild/captures/2026-11-14-review-phase1/` (Phase 1), not yet
-reviewed. Before that:
+`evidence/rebuild/captures/2026-11-14-review-phase2/` (Phase 2: OF-44,
+OF-47), not yet reviewed. `evidence/rebuild/captures/2026-11-14-review-phase1/`
+(Phase 1), not yet reviewed. Before that:
 
 `evidence/rebuild/captures/2026-11-13-review-of1-9-f9/`, reviewed by the
 owner 2026-11-14. Approved: floor look, F9, resize view, OF-2 shadow, OF-6
