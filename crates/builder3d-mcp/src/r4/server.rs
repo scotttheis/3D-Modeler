@@ -513,9 +513,9 @@ impl R4Server {
             | "transform_selection"
             | "apply_actions" => self.wrapped_detail_result(name, arguments, &raw)?,
             "scene_summary" => self.scene_summary(arguments.get("fields"))?,
-            "select" | "settle" | "mirror" | "rename_object" | "set_visibility" | "align"
-            | "arrange" | "undo" | "redo" | "delete_selected" | "cut_selected" | "paste"
-            | "duplicate_selected" | "group_selected" | "ungroup_selected"
+            "select" | "settle" | "mirror" | "rename_object" | "set_visibility" | "paint"
+            | "align" | "arrange" | "undo" | "redo" | "delete_selected" | "cut_selected"
+            | "paste" | "duplicate_selected" | "group_selected" | "ungroup_selected"
             | "sample_image_color" => {
                 self.scene_summary_with_changes(None, changed_object_ids(&raw))?
             }
@@ -826,6 +826,7 @@ impl R4Server {
             "mirror" => self.mirror(args),
             "rename_object" => self.rename_object(args),
             "set_visibility" => self.set_visibility(args),
+            "paint" => self.paint(args),
             "align" => self.align(args),
             "arrange" => self.arrange(args),
             "set_color" => self.set_color(args),
@@ -1482,6 +1483,64 @@ impl R4Server {
         state.dirty |= result.changed;
         Ok(command_output(
             "set_visibility",
+            &result,
+            Some((object_id, index)),
+            None,
+        ))
+    }
+
+    /// Same core calls the desktop Paint tool uses (OF-44): coverage 1 paints
+    /// the whole object (`Scene::paint_object`); below 1 it paints the region
+    /// around `face` (`Scene::paint_region`); `faces` paints exact faces.
+    /// One undo entry per call; a paint that changes nothing is no entry.
+    fn paint(&self, args: &Map<String, Value>) -> Result<Value, AdapterError> {
+        let color = color_from(args.get("color"), "color")?;
+        let coverage = schema::number_or(args, "coverage", 1.0)?;
+        let face = match args.get("face") {
+            None | Some(Value::Null) => None,
+            Some(value) => Some(
+                value
+                    .as_u64()
+                    .and_then(|face| usize::try_from(face).ok())
+                    .ok_or_else(|| {
+                        AdapterError::Validation("face must be a face index".to_owned())
+                    })?,
+            ),
+        };
+        let faces = match args.get("faces") {
+            None | Some(Value::Null) => None,
+            Some(Value::Array(values)) => Some(
+                values
+                    .iter()
+                    .map(|value| value.as_u64().and_then(|face| usize::try_from(face).ok()))
+                    .collect::<Option<Vec<_>>>()
+                    .ok_or_else(|| {
+                        AdapterError::Validation("faces must be face indices".to_owned())
+                    })?,
+            ),
+            Some(_) => {
+                return Err(AdapterError::Validation(
+                    "faces must be an array of face indices".to_owned(),
+                ));
+            }
+        };
+        let mut state = self.lock_state()?;
+        check_expected(&state, args)?;
+        let index = target_index(&state.scene, args)?;
+        let object_id = state.scene.object(index)?.object_id().to_owned();
+        let result = match (faces, face) {
+            (Some(faces), _) => state.scene.paint_faces(index, faces, color)?,
+            (None, _) if coverage >= 1.0 => state.scene.paint_object(index, color)?,
+            (None, Some(face)) => state.scene.paint_region(index, face, coverage, color)?,
+            (None, None) => {
+                return Err(AdapterError::Validation(
+                    "face is required when coverage is below 1".to_owned(),
+                ));
+            }
+        };
+        state.dirty |= result.changed;
+        Ok(command_output(
+            "paint",
             &result,
             Some((object_id, index)),
             None,
@@ -3760,15 +3819,12 @@ mod tests {
     fn full_profile_publishes_the_fixed_catalog_with_strict_metadata() {
         let server = server(Profile::Full);
         let tools = server.tools();
-        assert_eq!(tools.len(), 62);
+        assert_eq!(tools.len(), 63);
         assert_eq!(
             tools.first().map(|tool| tool.name.as_ref()),
             Some("get_status")
         );
-        assert_eq!(
-            tools.last().map(|tool| tool.name.as_ref()),
-            Some("set_visibility")
-        );
+        assert_eq!(tools.last().map(|tool| tool.name.as_ref()), Some("paint"));
         let launch = tools.iter().find(|tool| tool.name == "launch_slicer");
         assert_eq!(
             launch

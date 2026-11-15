@@ -12,7 +12,7 @@
 //! | Variable | Values | Default |
 //! |---|---|---|
 //! | `BUILDER3D_REVIEW_CAPTURE` | output PNG path | harness off |
-//! | `BUILDER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `resize`, `resize-drag`, `multi`, `merge`, `unselected`, `material`, `settings`, `save`, `export`, `menu`, `colors`, `mirror`, `merge-apart`, `repair`, `paste`, `align` | `move` |
+//! | `BUILDER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `resize`, `resize-drag`, `multi`, `merge`, `unselected`, `material`, `settings`, `save`, `export`, `menu`, `colors`, `mirror`, `merge-apart`, `repair`, `paste`, `align`, `paint`, `paint-picker` | `move` |
 //! | `BUILDER3D_REVIEW_THEME` | `light`, `dark` | `dark` |
 //! | `BUILDER3D_REVIEW_SIZE` | `normal`, `big` (Settings > Size) | `normal` |
 //! | `BUILDER3D_REVIEW_TAB` | a ribbon tab label such as `Object` | `Insert` |
@@ -91,6 +91,11 @@ pub(crate) enum ReviewState {
     Paste,
     /// Two selected cubes with the Align dialog open.
     Align,
+    /// The Paint bar open (OF-44) over a cube with its top painted red and a
+    /// sphere painted blue, nothing selected, Coverage at 0 %.
+    Paint,
+    /// The `Paint` state with the colour drop-down open.
+    PaintPicker,
 }
 
 impl ReviewState {
@@ -116,6 +121,8 @@ impl ReviewState {
             "repair" => Some(Self::Repair),
             "paste" => Some(Self::Paste),
             "align" => Some(Self::Align),
+            "paint" => Some(Self::Paint),
+            "paint-picker" => Some(Self::PaintPicker),
             _ => None,
         }
     }

@@ -15,6 +15,7 @@ mod gltf;
 mod material;
 mod mesh;
 mod mesh_ops;
+mod paint;
 mod primitives;
 mod project;
 mod repair;
@@ -74,6 +75,10 @@ pub use mesh_ops::{
     BooleanFaceSource, BooleanOperation, BooleanOptions, BooleanReport, BooleanResult,
     MeshHealthReport, MeshOperationLimits, boolean_difference, boolean_intersection,
     boolean_operation, boolean_union, inspect_mesh,
+};
+pub use paint::{
+    FACE_PAINT_KEY, FacePaint, MAX_FACE_PAINT_COLORS, PaintFacesCommand, face_paint,
+    object_face_colors, paint_region_faces, without_face_paint,
 };
 pub use primitives::{
     DEFAULT_PRIMITIVE_RADIUS_MM, DEFAULT_PRIMITIVE_SIZE_MM, PrimitiveKind, PrimitiveMetadata,

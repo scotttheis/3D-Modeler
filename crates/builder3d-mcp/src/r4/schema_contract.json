@@ -11588,6 +11588,123 @@
         "type": "object"
       },
       "output_schema_id": "c4e458f9c57d4c836dce7e46e8c5eaccc2e4f21cfa6c7d5ed60774b491697f1d"
+    },
+    "paint": {
+      "input_schema": {
+        "properties": {
+          "color": {
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 4,
+            "minItems": 3,
+            "title": "Color",
+            "type": "array"
+          },
+          "coverage": {
+            "default": 1.0,
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Coverage",
+            "type": "number",
+            "description": "Paint coverage 0..1. 1 paints the whole object; lower values paint the region around face that shares its direction."
+          },
+          "expected_project_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Expected Project Id"
+          },
+          "expected_scene_revision": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Expected Scene Revision"
+          },
+          "face": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Face",
+            "description": "Clicked face index; required when coverage is below 1."
+          },
+          "faces": {
+            "anyOf": [
+              {
+                "items": {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Faces",
+            "description": "Exact face indices to paint instead of a coverage region."
+          },
+          "idempotency_key": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Idempotency Key"
+          },
+          "index": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Index"
+          },
+          "object_id": {
+            "default": "",
+            "title": "Object Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "color"
+        ],
+        "title": "paintArguments",
+        "type": "object"
+      },
+      "output_schema_id": "c4e458f9c57d4c836dce7e46e8c5eaccc2e4f21cfa6c7d5ed60774b491697f1d"
     }
   }
 }

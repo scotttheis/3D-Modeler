@@ -4,7 +4,7 @@ use std::{
     sync::Arc,
 };
 
-use builder3d_core::{Mesh, Scene, SceneObject, boolean_color_provenance};
+use builder3d_core::{Mesh, Scene, SceneObject};
 
 use crate::{
     ViewportError,
@@ -722,8 +722,8 @@ fn flatten_object(object: &SceneObject, scene: &mut RenderScene) -> Result<(), V
     let full = Arc::new(MeshGeometry::from_mesh(object.mesh())?);
     let target = interactive_viewport_face_target(full.face_count() as u64);
     let interaction = Arc::new(full.interaction_lod(target)?);
-    let face_colors = boolean_color_provenance(object.metadata(), object.mesh().face_count())
-        .map(|provenance| Arc::<[[u8; 4]]>::from(provenance.face_colors_rgba8()));
+    // Region paint (OF-44) or the source colours of a boolean result.
+    let face_colors = builder3d_core::object_face_colors(object).map(Arc::<[[u8; 4]]>::from);
     let mut palette_hasher = DefaultHasher::new();
     face_colors.hash(&mut palette_hasher);
     let face_color_identity = if face_colors.is_some() {

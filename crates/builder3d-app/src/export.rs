@@ -7,8 +7,8 @@
 use std::path::Path;
 
 use builder3d_core::{
-    CoreError, GltfItem, Mesh, MeshAsset, Scene, ThreeMfItem, WrlItem, boolean_color_provenance,
-    save_3mf, save_gltf, save_mesh, save_mesh_asset, save_wrl,
+    CoreError, GltfItem, Mesh, MeshAsset, Scene, ThreeMfItem, WrlItem, save_3mf, save_gltf,
+    save_mesh, save_mesh_asset, save_wrl,
 };
 use thiserror::Error;
 
@@ -171,11 +171,8 @@ fn write_objects(
                         object.name().to_owned(),
                         object.color(),
                     )?;
-                    if let Some(provenance) =
-                        boolean_color_provenance(object.metadata(), object.mesh().face_count())
-                    {
-                        item.face_colors = Some(provenance.face_colors_rgba8());
-                    }
+                    // Region paint (OF-44) or boolean source colours.
+                    item.face_colors = builder3d_core::object_face_colors(object);
                     Ok(item)
                 })
                 .collect::<Result<Vec<_>, CoreError>>()?;

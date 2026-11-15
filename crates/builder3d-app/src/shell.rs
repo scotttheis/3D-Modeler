@@ -5,6 +5,9 @@
 //! preferences, and renderer-neutral interaction cues.
 
 use crate::chrome::{CONTROL_HEIGHT, Glyph, RADIUS_CONTROL, ROW_HEIGHT};
+
+mod paint_bar;
+use paint_bar::PaintMode;
 use std::{
     collections::{BTreeSet, HashMap, HashSet},
     path::{Path, PathBuf},
@@ -376,6 +379,11 @@ pub struct Builder3dApp {
     /// a real OS dialog.
     brush_settings: BrushSettings,
     boolean_pick: Option<BooleanPick>,
+    /// Paint mode (OF-44); `None` when the Paint bar is closed.
+    paint_mode: Option<PaintMode>,
+    /// Last paint colour and coverage, kept between Paint sessions.
+    paint_color: [f32; 4],
+    paint_coverage: f32,
     viewport_gizmo_consumed: bool,
     artwork_root: PathBuf,
     artwork_cache: HashMap<PathBuf, egui::TextureHandle>,
@@ -475,6 +483,9 @@ impl Default for Builder3dApp {
             brush_settings_open: false,
             brush_settings: BrushSettings::default(),
             boolean_pick: None,
+            paint_mode: None,
+            paint_color: paint_bar::DEFAULT_PAINT_COLOR,
+            paint_coverage: 1.0,
             viewport_gizmo_consumed: false,
             artwork_root: original_asset_root(),
             artwork_cache: HashMap::new(),
@@ -577,6 +588,10 @@ impl Builder3dApp {
             ReviewState::MergeApart => &[builder3d_core::PrimitiveKind::Cube; 2],
             ReviewState::Repair | ReviewState::Paste => &[builder3d_core::PrimitiveKind::Cube],
             ReviewState::Align => &[builder3d_core::PrimitiveKind::Cube; 2],
+            ReviewState::Paint | ReviewState::PaintPicker => &[
+                builder3d_core::PrimitiveKind::Cube,
+                builder3d_core::PrimitiveKind::Sphere,
+            ],
         };
         for (index, kind) in primitives.iter().copied().enumerate() {
             self.dispatch(CommandId::AddPrimitive(kind));
@@ -628,6 +643,31 @@ impl Builder3dApp {
                 let _ = self.commands.set_selected_color(color);
             }
             self.commands.set_selection_indices([0, 2]);
+        }
+        if matches!(
+            review.state(),
+            ReviewState::Paint | ReviewState::PaintPicker
+        ) {
+            let top_face = self.commands.scene().objects().first().and_then(|cube| {
+                cube.mesh()
+                    .faces
+                    .iter()
+                    .position(|face| cube.mesh().face_normal(*face)[1] > 0.9)
+            });
+            if let Some(face) = top_face {
+                let _ = self
+                    .commands
+                    .paint_at(0, face, 0.0, [0.86, 0.16, 0.16, 1.0]);
+            }
+            let _ = self.commands.paint_at(1, 0, 1.0, [0.16, 0.36, 0.90, 1.0]);
+            self.commands.set_selection_indices(std::iter::empty());
+            self.dispatch(CommandId::Paint);
+            if let Some(mode) = self.paint_mode.as_mut() {
+                mode.coverage = 0.0;
+                if review.state() == ReviewState::PaintPicker {
+                    mode.open_colour_picker();
+                }
+            }
         }
         if review.state() == ReviewState::MergeApart {
             if let Some(id) = self
@@ -867,6 +907,15 @@ impl Builder3dApp {
     /// Dispatches one command and routes typed dialog/exit effects to the
     /// shell. This is the only command entry point used by widgets.
     pub(crate) fn dispatch(&mut self, command: CommandId) {
+        if command == CommandId::Paint {
+            self.toggle_paint_mode();
+            return;
+        }
+        // Any other command closes the Paint bar and keeps the paint;
+        // Undo and Redo work inside Paint.
+        if self.paint_mode.is_some() && !matches!(command, CommandId::Undo | CommandId::Redo) {
+            self.finish_paint_mode(true);
+        }
         let mesh_operation = match command {
             CommandId::Simplify => Some(MeshJobOperation::Simplify),
             CommandId::Subdivide => Some(MeshJobOperation::Subdivide),
@@ -897,9 +946,7 @@ impl Builder3dApp {
             self.transform_error = None;
             return;
         }
-        if matches!(command, CommandId::Material | CommandId::Paint)
-            && self.commands.selected_count() == 0
-        {
+        if command == CommandId::Material && self.commands.selected_count() == 0 {
             self.commands.set_status("Select an object to paint");
             return;
         }
@@ -970,7 +1017,7 @@ impl Builder3dApp {
             self.active_brush = Some(brush);
             self.brush_settings_open = true;
             self.commands.set_status(format!(
-                "{} active â€” hold Shift and drag on a mesh",
+                "{} active Ã¢â‚¬â€ hold Shift and drag on a mesh",
                 brush.label()
             ));
         }
@@ -1779,7 +1826,10 @@ impl Builder3dApp {
             )
             .show(ui, |ui| {
                 self.render_menu_and_utility(ui, palette);
-                if self.ribbon_expanded {
+                if self.paint_mode.is_some() {
+                    ui.add_space(2.0);
+                    self.render_paint_bar(ui, palette);
+                } else if self.ribbon_expanded {
                     ui.add_space(2.0);
                     self.render_active_tab(ui, palette);
                 }
@@ -2657,7 +2707,7 @@ impl Builder3dApp {
                             ui.add_space(18.0);
                             ui.vertical(|ui| {
                                 ui.label(
-                                    RichText::new("CREATE  â€¢  REPAIR  â€¢  PREPARE")
+                                    RichText::new("CREATE  Ã¢â‚¬Â¢  REPAIR  Ã¢â‚¬Â¢  PREPARE")
                                         .small()
                                         .strong()
                                         .color(palette.accent),
@@ -4058,9 +4108,9 @@ impl Builder3dApp {
                                         ));
                                     }
                                 } else if status.phase == OperationPhase::Cancelling {
-                                    ui.add_enabled(false, egui::Button::new("Cancellingâ€¦"));
+                                    ui.add_enabled(false, egui::Button::new("CancellingÃ¢â‚¬Â¦"));
                                 } else if status.phase == OperationPhase::Committing {
-                                    ui.add_enabled(false, egui::Button::new("Applyingâ€¦"));
+                                    ui.add_enabled(false, egui::Button::new("ApplyingÃ¢â‚¬Â¦"));
                                 }
                             }
                             ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
@@ -4285,17 +4335,28 @@ impl Builder3dApp {
                         );
                     }
                 }
-                if gizmo_mode == GizmoMode::Resize {
-                    self.paint_resize_handles(&painter, rect, palette);
-                } else {
-                    self.paint_transform_handles(&painter, rect);
-                }
                 let hover = ui.ctx().input(|input| input.pointer.hover_pos());
                 let hovering = response.hovered() && !self.interaction_blocked();
-                if let Some(icon) =
-                    self.transform_handle_cursor(rect, hover, pixels_per_point, hovering)
-                {
-                    ui.ctx().set_cursor_icon(icon);
+                if let Some(mode) = self.paint_mode {
+                    // Paint hides the move handles and shows the spray can.
+                    if hovering
+                        && !matches!(self.viewport_drag, Some(ViewportDrag::Orbit | ViewportDrag::Pan))
+                        && let Some(pointer) = hover.filter(|pointer| rect.contains(*pointer))
+                    {
+                        ui.ctx().set_cursor_icon(egui::CursorIcon::None);
+                        paint_bar::paint_spray_cursor(&painter, pointer, mode.color, palette);
+                    }
+                } else {
+                    if gizmo_mode == GizmoMode::Resize {
+                        self.paint_resize_handles(&painter, rect, palette);
+                    } else {
+                        self.paint_transform_handles(&painter, rect);
+                    }
+                    if let Some(icon) =
+                        self.transform_handle_cursor(rect, hover, pixels_per_point, hovering)
+                    {
+                        ui.ctx().set_cursor_icon(icon);
+                    }
                 }
                 self.paint_box_selection(&painter, palette);
                 if staged_review_drag {
@@ -4315,7 +4376,11 @@ impl Builder3dApp {
                     && let Some(pointer) = input.pointer_position
                     && rect.contains(pointer)
                 {
-                    self.pick_viewport_object(rect, pointer, input.modifiers);
+                    if self.paint_mode.is_some() {
+                        self.paint_click(rect, pointer);
+                    } else {
+                        self.pick_viewport_object(rect, pointer, input.modifiers);
+                    }
                 }
             });
     }
@@ -4958,6 +5023,11 @@ impl Builder3dApp {
     ) {
         let stale_transform = matches!(&self.viewport_drag, Some(ViewportDrag::Transform(drag)) if drag.snapshot.revision != self.commands.scene().revision() || &drag.snapshot.selection != self.commands.scene().selection());
         let stale_brush = matches!(&self.viewport_drag, Some(ViewportDrag::Brush(gesture)) if gesture.revision != self.commands.scene().revision());
+        if self.paint_mode.is_some() && input.escape_pressed && self.viewport_drag.is_none() {
+            self.finish_paint_mode(true);
+            self.viewport_gizmo_consumed = true;
+            return;
+        }
         if self.boolean_pick.is_some() && input.escape_pressed {
             self.boolean_pick = None;
             self.commands.set_status("Boolean pick cancelled");
@@ -5023,6 +5093,10 @@ impl Builder3dApp {
                 self.preview_mesh_override = None;
                 self.viewport_drag = self.begin_brush_gesture(rect, position, size);
                 self.viewport_gizmo_consumed = true;
+            } else if self.paint_mode.is_some() {
+                // While painting a drag turns the view; a click paints.
+                self.viewport_drag = Some(ViewportDrag::Orbit);
+                self.viewport_gizmo_consumed = false;
             } else {
                 let transform = self.begin_transform_drag(rect, position, pixels_per_point);
                 self.viewport_drag = if transform.is_some() {
@@ -6193,13 +6267,13 @@ impl Builder3dApp {
                 for key in order_snapshot {
                     ui.horizontal(|ui| {
                         ui.label(&key);
-                        if ui.small_button("â†‘").clicked()
+                        if ui.small_button("Ã¢â€ â€˜").clicked()
                             && let Some(moved) = move_favorite(&next, &key, -1)
                         {
                             next = moved;
                             changed = true;
                         }
-                        if ui.small_button("â†“").clicked()
+                        if ui.small_button("Ã¢â€ â€œ").clicked()
                             && let Some(moved) = move_favorite(&next, &key, 1)
                         {
                             next = moved;
@@ -7757,14 +7831,19 @@ mod tests {
             .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
             .expect("cube");
         app.commands.set_selection_indices(std::iter::empty());
-        for command in [CommandId::Material, CommandId::Paint] {
-            assert!(command_enabled(command, &app.commands));
-            app.dispatch(command);
-            assert!(app.dialog.is_none());
-            assert_eq!(app.commands.last_status(), "Select an object to paint");
-        }
-        app.commands.set_selection_indices([0]);
+        assert!(command_enabled(CommandId::Material, &app.commands));
+        app.dispatch(CommandId::Material);
+        assert!(app.dialog.is_none());
+        assert_eq!(app.commands.last_status(), "Select an object to paint");
+        // Paint (OF-44) needs no selection: it opens the Paint bar.
+        assert!(command_enabled(CommandId::Paint, &app.commands));
         app.dispatch(CommandId::Paint);
+        assert!(app.dialog.is_none());
+        assert!(app.paint_mode.is_some());
+        app.dispatch(CommandId::Paint);
+        assert!(app.paint_mode.is_none());
+        app.commands.set_selection_indices([0]);
+        app.dispatch(CommandId::Material);
         assert!(
             app.dialog
                 .as_ref()
@@ -8314,22 +8393,20 @@ mod tests {
     }
 
     #[test]
-    fn material_and_paint_open_the_color_dialog_and_there_is_no_color_button() {
+    fn material_opens_the_color_dialog_and_there_is_no_color_button() {
         let (mut app, directory) = shell_for_jobs("appearance-routes");
         assert!(
             app.commands
                 .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
                 .is_ok()
         );
-        for command in [CommandId::Material, CommandId::Paint] {
-            app.dispatch(command);
-            assert!(
-                app.dialog
-                    .as_ref()
-                    .is_some_and(|dialog| dialog.kind() == DialogKind::Material)
-            );
-            app.apply_dialog_action(DialogAction::Close);
-        }
+        app.dispatch(CommandId::Material);
+        assert!(
+            app.dialog
+                .as_ref()
+                .is_some_and(|dialog| dialog.kind() == DialogKind::Material)
+        );
+        app.apply_dialog_action(DialogAction::Close);
         // The owner removed the Color button (OF-45): the Paint tab has
         // Material and Paint only.
         let paint_labels = crate::commands::ribbon_spec()
@@ -9513,6 +9590,72 @@ mod tests {
         );
         app.finish_new_scene_presentation();
         assert!(app.gizmo_frame.is_none());
+    }
+
+    #[test]
+    fn paint_clicks_are_one_undo_each_and_cancel_removes_them() {
+        let mut app = Builder3dApp {
+            settings_path: repository_test_directory("of44-paint").join("settings.json"),
+            ..Default::default()
+        };
+        for _ in 0..2 {
+            app.commands
+                .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
+                .expect("cube");
+        }
+        let second = app.commands.scene().objects()[1].object_id().to_owned();
+        app.commands
+            .set_object_position_by_id(&second, [70., 0., 0.])
+            .expect("separate");
+        app.commands.deselect_all();
+        app.refresh_preview();
+        app.frame_camera_if_pending();
+        app.camera.set_viewport_size(1, 1).expect("size");
+        let rect = egui::Rect::from_min_size(egui::Pos2::ZERO, Vec2::splat(1.));
+        let a = app
+            .project_handle(app.commands.scene().objects()[0].position(), rect)
+            .expect("project")
+            .0;
+        let original = app.commands.scene().objects()[0].color();
+        let history = app.commands.scene().history_state_id();
+
+        app.dispatch(CommandId::Paint);
+        let red = [1.0, 0.0, 0.0, 1.0];
+        if let Some(mode) = app.paint_mode.as_mut() {
+            mode.color = red;
+            mode.coverage = 1.0;
+        }
+        app.paint_click(rect, a);
+        assert_eq!(app.commands.scene().objects()[0].color(), red);
+        assert_eq!(app.commands.scene().history_state_id(), history + 1);
+        // Painting is not selecting.
+        assert_eq!(app.commands.selected_count(), 0);
+        // A low-coverage click paints only part of the object.
+        if let Some(mode) = app.paint_mode.as_mut() {
+            mode.color = [0.0, 0.0, 1.0, 1.0];
+            mode.coverage = 0.0;
+        }
+        app.refresh_preview();
+        app.paint_click(rect, a);
+        let colors = builder3d_core::object_face_colors(&app.commands.scene().objects()[0])
+            .expect("region paint");
+        assert!(colors.contains(&[0, 0, 255, 255]) && colors.contains(&[255, 0, 0, 255]));
+        assert_eq!(app.commands.scene().history_state_id(), history + 2);
+        // Cancel removes both paint clicks; Paint remembers the colour.
+        app.finish_paint_mode(false);
+        assert!(app.paint_mode.is_none());
+        assert_eq!(app.commands.scene().objects()[0].color(), original);
+        assert!(builder3d_core::object_face_colors(&app.commands.scene().objects()[0]).is_none());
+        assert_eq!(app.commands.scene().history_state_id(), history);
+        assert_eq!(app.paint_color, [0.0, 0.0, 1.0, 1.0]);
+        // Done keeps the paint.
+        app.dispatch(CommandId::Paint);
+        app.refresh_preview();
+        app.paint_click(rect, a);
+        app.dispatch(CommandId::Paint);
+        assert!(app.paint_mode.is_none());
+        assert_ne!(app.commands.scene().history_state_id(), history);
+        assert!(builder3d_core::object_face_colors(&app.commands.scene().objects()[0]).is_some());
     }
 
     #[test]

@@ -1415,6 +1415,42 @@ impl Scene {
         self.execute(crate::commands::SetColorCommand::new(index, color))
     }
 
+    /// Paints a whole object one colour as one undo entry (Paint at full
+    /// coverage). Region paint and boolean source colours are cleared.
+    pub fn paint_object(
+        &mut self,
+        index: usize,
+        color: [f32; 4],
+    ) -> Result<CommandResult, CoreError> {
+        self.execute(crate::PaintFacesCommand::whole_object(index, color))
+    }
+
+    /// Paints the listed faces as one undo entry.
+    pub fn paint_faces(
+        &mut self,
+        index: usize,
+        faces: Vec<usize>,
+        color: [f32; 4],
+    ) -> Result<CommandResult, CoreError> {
+        self.execute(crate::PaintFacesCommand::faces(index, faces, color))
+    }
+
+    /// One Paint click: paints the region around `face` that `coverage`
+    /// selects (see [`crate::paint_region_faces`]) as one undo entry.
+    pub fn paint_region(
+        &mut self,
+        index: usize,
+        face: usize,
+        coverage: f32,
+        color: [f32; 4],
+    ) -> Result<CommandResult, CoreError> {
+        let faces = crate::paint_region_faces(self.object(index)?.mesh(), face, coverage)?;
+        if faces.len() == self.object(index)?.mesh().face_count() {
+            return self.paint_object(index, color);
+        }
+        self.paint_faces(index, faces, color)
+    }
+
     /// Sets one object visibility flag through an undoable command.
     pub fn set_visible(&mut self, index: usize, visible: bool) -> Result<CommandResult, CoreError> {
         self.execute(crate::commands::SetVisibilityCommand::new(index, visible))

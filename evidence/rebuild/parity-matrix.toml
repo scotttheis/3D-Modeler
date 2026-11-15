@@ -2883,17 +2883,17 @@ next_slice = "RB-08"
 
 [[feature]]
 id = "builder3d.ui.paint.paint"
-mcp_tool = ["set_color"]
+mcp_tool = ["paint"]
 area = "appearance"
-behavior = "Paint is a separate visible command using the same solid-color handler as Material."
+behavior = "Paint works like 3D Builder (OF-44, owner batch 7): a Paint bar with Cancel, Done, the chosen colour and a Coverage slider; each click on an object paints it (full coverage) or the region around the clicked face that faces the same way (lower coverage), one undo entry per click. Region colours are kept in object metadata (face_paint) and exported to 3MF. MCP paint does the same."
 python_paths = ["src/main_window.py", "src/image_color.py", "src/model_actions.py"]
 python_symbols = ["MainWindow._on_material; RIBBON_SPEC['Paint']"]
 python_tests = ["tests/test_desktop_actions.py::test_remaining_core_mesh_actions_change_the_scene"]
 rust_component_ids = ["builder3d.app.commands", "builder3d.app.image-color", "builder3d.app.desktop-adapters"]
 rust_paths = ["crates/builder3d-app/src/commands.rs", "crates/builder3d-app/src/image_color.rs", "crates/builder3d-app/src/dialogs.rs", "crates/builder3d-app/src/shell.rs"]
-rust_symbols = ["CommandId::Paint", "CommandState::set_selected_color"]
+rust_symbols = ["CommandId::Paint", "Scene::paint_region", "Scene::paint_object", "PaintFacesCommand", "paint_region_faces"]
 desktop_entry_points = ["Paint Paint"]
-contracts = ["same-handler-as-material", "separate-entry"]
+contracts = ["one-undo-per-click", "separate-entry", "desktop-mcp-same-core-call"]
 fixture = "No new fixture created in RB-00; use referenced test fixtures in the owning slice."
 implementation = "pass"
 automated = "pass"

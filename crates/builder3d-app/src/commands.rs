@@ -1272,6 +1272,33 @@ impl CommandState {
         Ok(())
     }
 
+    /// One Paint click (OF-44): paints the object at `index` (coverage 1) or
+    /// the region around `face` that `coverage` selects, as one undo entry.
+    /// MCP `paint` makes the same core call.
+    pub fn paint_at(
+        &mut self,
+        index: usize,
+        face: usize,
+        coverage: f32,
+        color: [f32; 4],
+    ) -> Result<CommandOutcome, CommandError> {
+        let result = if coverage >= 1.0 {
+            self.scene.paint_object(index, color)?
+        } else {
+            self.scene.paint_region(index, face, coverage, color)?
+        };
+        let name = self.scene.object(index)?.name().to_owned();
+        if !result.changed {
+            let message = format!("{name} already has that colour there");
+            self.status(message.clone());
+            return Ok(CommandOutcome::Noop(message));
+        }
+        self.dirty = true;
+        let message = format!("Painted {name}");
+        self.status(message.clone());
+        Ok(CommandOutcome::Applied(message))
+    }
+
     /// Commits an isolated mesh result only while its document, revision, and
     /// durable target identity still match the snapshot used by the worker.
     pub(crate) fn replace_mesh_if_current(
@@ -2673,6 +2700,58 @@ mod tests {
         }
         desktop.select_index(0);
         (desktop, mcp)
+    }
+
+    #[test]
+    fn mcp_paint_matches_the_desktop_paint_click() {
+        let (mut desktop, mut mcp) = one_cube_pair();
+        let history = desktop.scene().history_state_id();
+        let red = [1.0, 0.0, 0.0, 1.0];
+        // A low-coverage click on face 0 paints one side of the cube.
+        assert!(matches!(
+            desktop.paint_at(0, 0, 0.0, red),
+            Ok(CommandOutcome::Applied(_))
+        ));
+        let result = run_mcp(
+            &mut mcp,
+            "paint",
+            serde_json::json!({"index":0,"face":0,"coverage":0.0,"color":[1.0,0.0,0.0,1.0]}),
+        );
+        assert_eq!(
+            result["changed_object_ids"].as_array().map(Vec::len),
+            Some(1)
+        );
+        for state in [&desktop, &mcp] {
+            let colors = builder3d_core::object_face_colors(&state.scene().objects()[0])
+                .expect("region colours");
+            assert_eq!(colors.iter().filter(|c| **c == [255, 0, 0, 255]).count(), 2);
+            assert_eq!(state.scene().history_state_id(), history + 1);
+        }
+        // The same click again changes nothing on either side.
+        assert!(matches!(
+            desktop.paint_at(0, 0, 0.0, red),
+            Ok(CommandOutcome::Noop(_))
+        ));
+        run_mcp(
+            &mut mcp,
+            "paint",
+            serde_json::json!({"index":0,"face":0,"coverage":0.0,"color":[1.0,0.0,0.0,1.0]}),
+        );
+        // Full coverage paints the whole object one colour.
+        let blue = [0.0, 0.0, 1.0, 1.0];
+        assert!(desktop.paint_at(0, 3, 1.0, blue).is_ok());
+        run_mcp(
+            &mut mcp,
+            "paint",
+            serde_json::json!({"index":0,"color":[0.0,0.0,1.0,1.0]}),
+        );
+        for state in [&mut desktop, &mut mcp] {
+            assert_eq!(state.scene().objects()[0].color(), blue);
+            assert!(builder3d_core::object_face_colors(&state.scene().objects()[0]).is_none());
+            assert_eq!(state.scene().history_state_id(), history + 2);
+            assert!(state.dispatch(CommandId::Undo).is_ok());
+            assert!(builder3d_core::object_face_colors(&state.scene().objects()[0]).is_some());
+        }
     }
 
     #[test]

@@ -78,16 +78,19 @@ pub fn with_boolean_color_provenance(
     let Ok(value) = serde_json::to_value(provenance) else {
         return metadata.clone();
     };
+    fields.remove(crate::FACE_PAINT_KEY);
     fields.insert(BOOLEAN_COLOR_PROVENANCE_KEY.to_owned(), value);
     updated
 }
 
-/// Clears stale boolean face colors after a topology-changing mesh edit.
+/// Clears stale boolean face colors and region paint after a
+/// topology-changing mesh edit.
 #[must_use]
 pub fn without_boolean_color_provenance(metadata: &Value) -> Value {
     let mut updated = metadata.clone();
     if let Some(fields) = updated.as_object_mut() {
         fields.remove(BOOLEAN_COLOR_PROVENANCE_KEY);
+        fields.remove(crate::FACE_PAINT_KEY);
     }
     updated
 }

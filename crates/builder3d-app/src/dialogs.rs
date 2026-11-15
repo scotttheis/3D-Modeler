@@ -1081,47 +1081,7 @@ impl DialogState {
             "Choose a color for {} selected object(s)",
             self.selected_object_count
         ));
-        // Basic colors, as in the Python build's color dialog.
-        ui.horizontal_wrapped(|ui| {
-            ui.spacing_mut().item_spacing = egui::vec2(4.0, 4.0);
-            for swatch in MATERIAL_SWATCHES {
-                let color = egui::Color32::from_rgb(swatch[0], swatch[1], swatch[2]);
-                let (rect, response) =
-                    ui.allocate_exact_size(egui::vec2(22.0, 22.0), egui::Sense::click());
-                let chosen = self.color[..3]
-                    .iter()
-                    .zip(swatch)
-                    .all(|(value, channel)| (value * 255.0).round() as u8 == channel);
-                ui.painter().rect_filled(rect, 4.0, color);
-                ui.painter().rect_stroke(
-                    rect,
-                    4.0,
-                    egui::Stroke::new(
-                        if chosen || response.hovered() {
-                            2.0
-                        } else {
-                            1.0
-                        },
-                        ui.visuals().widgets.inactive.bg_stroke.color,
-                    ),
-                    egui::StrokeKind::Inside,
-                );
-                if response.clicked() {
-                    let alpha = self.color[3];
-                    self.color = [
-                        f32::from(swatch[0]) / 255.0,
-                        f32::from(swatch[1]) / 255.0,
-                        f32::from(swatch[2]) / 255.0,
-                        alpha,
-                    ];
-                }
-            }
-        });
-        ui.add_space(4.0);
-        let alpha = self.color[3];
-        if let Some([r, g, b]) = hsv_picker(ui, [self.color[0], self.color[1], self.color[2]]) {
-            self.color = [r, g, b, alpha];
-        }
+        color_chooser(ui, &mut self.color);
         if ui
             .button(format!(
                 "Apply color to {} selected object(s)",
@@ -1398,6 +1358,54 @@ fn native_save_picker(request: &SavePickerRequest) -> Option<PathBuf> {
 
 /// A compact saturation/value square over a hue bar, with a preview chip.
 /// Returns the new sRGB color (0..1 channels) when the user changed it.
+/// The colour swatches and the hue/saturation picker, shared by the Material
+/// dialog and the Paint bar (OF-44). Returns whether the colour changed.
+pub(crate) fn color_chooser(ui: &mut egui::Ui, color: &mut [f32; 4]) -> bool {
+    let before = *color;
+    // Basic colors, as in the Python build's color dialog.
+    ui.horizontal_wrapped(|ui| {
+        ui.spacing_mut().item_spacing = egui::vec2(4.0, 4.0);
+        for swatch in MATERIAL_SWATCHES {
+            let fill = egui::Color32::from_rgb(swatch[0], swatch[1], swatch[2]);
+            let (rect, response) =
+                ui.allocate_exact_size(egui::vec2(22.0, 22.0), egui::Sense::click());
+            let chosen = color[..3]
+                .iter()
+                .zip(swatch)
+                .all(|(value, channel)| (value * 255.0).round() as u8 == channel);
+            ui.painter().rect_filled(rect, 4.0, fill);
+            ui.painter().rect_stroke(
+                rect,
+                4.0,
+                egui::Stroke::new(
+                    if chosen || response.hovered() {
+                        2.0
+                    } else {
+                        1.0
+                    },
+                    ui.visuals().widgets.inactive.bg_stroke.color,
+                ),
+                egui::StrokeKind::Inside,
+            );
+            if response.clicked() {
+                let alpha = color[3];
+                *color = [
+                    f32::from(swatch[0]) / 255.0,
+                    f32::from(swatch[1]) / 255.0,
+                    f32::from(swatch[2]) / 255.0,
+                    alpha,
+                ];
+            }
+        }
+    });
+    ui.add_space(4.0);
+    let alpha = color[3];
+    if let Some([r, g, b]) = hsv_picker(ui, [color[0], color[1], color[2]]) {
+        *color = [r, g, b, alpha];
+    }
+    *color != before
+}
+
 fn hsv_picker(ui: &mut egui::Ui, rgb: [f32; 3]) -> Option<[f32; 3]> {
     let id = ui.scope_id().with("builder3d-hsv-picker");
     // Keep the hue while saturation or value is zero, where RGB loses it.
