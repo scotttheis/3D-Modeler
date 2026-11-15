@@ -264,6 +264,73 @@ fn crease_is_gentle_bounded_and_never_folds_the_surface() {
     }
 }
 
+#[test]
+fn crease_sharpness_makes_a_narrower_deeper_groove_that_never_folds() {
+    // OF-59: Sharpness 0 is the OF-49 crease; full Sharpness digs deeper
+    // right at the line, moves the surface well away from the line less,
+    // and still never folds the surface or crosses the line.
+    let source = make_sphere(10.0, 5).expect("sphere fixture");
+    let path: Vec<[f32; 3]> = (0..=10)
+        .map(|step| {
+            let x = -5.0 + step as f32;
+            [x, 0.0, (100.0 - x * x).sqrt()]
+        })
+        .collect();
+    let gentle_options = CreasePolishOptions {
+        radius_mm: 4.0,
+        strength: 1.0,
+        ..CreasePolishOptions::default()
+    };
+    let sharp_options = CreasePolishOptions {
+        sharpness: 1.0,
+        ..gentle_options
+    };
+    let gentle = crease_polish(&source, &path, gentle_options).expect("gentle crease");
+    let sharp = crease_polish(&source, &path, sharp_options).expect("sharp crease");
+    let sink = |mesh: &Mesh, index: usize| {
+        let radial = |v: [f32; 3]| (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]).sqrt();
+        radial(source.vertices[index]) - radial(mesh.vertices[index])
+    };
+    let (mut deepest_gentle, mut deepest_sharp) = (0.0_f32, 0.0_f32);
+    let (mut wide_gentle, mut wide_sharp) = (0.0_f32, 0.0_f32);
+    for (index, vertex) in source.vertices.iter().enumerate() {
+        if vertex[2] < 5.0 || vertex[0].abs() > 4.0 {
+            continue;
+        }
+        if vertex[1].abs() < 0.6 {
+            deepest_gentle = deepest_gentle.max(sink(&gentle.mesh, index));
+            deepest_sharp = deepest_sharp.max(sink(&sharp.mesh, index));
+        } else if (1.5..3.0).contains(&vertex[1].abs()) {
+            wide_gentle += sink(&gentle.mesh, index).max(0.0);
+            wide_sharp += sink(&sharp.mesh, index).max(0.0);
+        }
+    }
+    assert!(
+        deepest_sharp > deepest_gentle * 1.3,
+        "sharper is deeper at the line: {deepest_sharp} vs {deepest_gentle}"
+    );
+    assert!(
+        wide_sharp < wide_gentle,
+        "sharper is narrower: {wide_sharp} vs {wide_gentle}"
+    );
+    for (before, after) in source.vertices.iter().zip(&sharp.mesh.vertices) {
+        if before[1].abs() > 1.0e-4 {
+            assert!(before[1] * after[1] > 0.0, "{before:?} -> {after:?}");
+        }
+    }
+    for face in &source.faces {
+        let before = source.face_normal(*face);
+        let after = sharp.mesh.face_normal(*face);
+        let dot = before[0] * after[0] + before[1] * after[1] + before[2] * after[2];
+        assert!(dot > 0.0, "face {face:?} folded");
+    }
+    let invalid = CreasePolishOptions {
+        sharpness: 1.5,
+        ..gentle_options
+    };
+    crease_polish(&source, &path, invalid).expect_err("sharpness is 0..=1");
+}
+
 fn extent(mesh: &Mesh, axis: usize) -> f32 {
     let values = mesh.vertices.iter().map(|vertex| vertex[axis]);
     values.clone().fold(f32::MIN, f32::max) - values.fold(f32::MAX, f32::min)

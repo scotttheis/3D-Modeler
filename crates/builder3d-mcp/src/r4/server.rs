@@ -686,6 +686,7 @@ impl R4Server {
                         "strength":schema::number_or(args, "strength", 0.5)?,
                         "direction":schema::string_or(args, "direction", "inward")?,
                         "falloff":schema::string_or(args, "falloff", "smooth")?,
+                        "sharpness":schema::number_or(args, "sharpness", 0.0)?,
                     }),
                 );
             }
@@ -1169,6 +1170,7 @@ impl R4Server {
             strength: schema::number_or(args, "strength", 0.5)?,
             direction: BrushDirection::parse(&schema::string_or(args, "direction", "inward")?)?,
             falloff: BrushFalloff::parse(&schema::string_or(args, "falloff", "smooth")?)?,
+            sharpness: schema::number_or(args, "sharpness", 0.0)?,
             ..CreasePolishOptions::default()
         };
         let (result, report) = state.scene.apply_crease_polish(index, &centers, options)?;

@@ -954,6 +954,10 @@
               "title": "Radius Mm",
               "type": "number"
             },
+            "sharpness": {
+              "title": "Sharpness",
+              "type": "number"
+            },
             "strength": {
               "title": "Strength",
               "type": "number"
@@ -2810,6 +2814,10 @@
             },
             "radius_mm": {
               "title": "Radius Mm",
+              "type": "number"
+            },
+            "sharpness": {
+              "title": "Sharpness",
               "type": "number"
             },
             "strength": {
@@ -5367,6 +5375,10 @@
               "title": "Radius Mm",
               "type": "number"
             },
+            "sharpness": {
+              "title": "Sharpness",
+              "type": "number"
+            },
             "strength": {
               "title": "Strength",
               "type": "number"
@@ -6239,6 +6251,10 @@
             },
             "radius_mm": {
               "title": "Radius Mm",
+              "type": "number"
+            },
+            "sharpness": {
+              "title": "Sharpness",
               "type": "number"
             },
             "strength": {
@@ -8534,6 +8550,14 @@
             "maximum": 1000,
             "minimum": 0.1,
             "title": "Radius Mm",
+            "type": "number"
+          },
+          "sharpness": {
+            "default": 0,
+            "description": "How narrow and deep the groove is at the stroke line, like the desktop Crease Sharpness slider: 0 is the gentle crease, 1 the sharpest. The surface never folds.",
+            "maximum": 1,
+            "minimum": 0,
+            "title": "Sharpness",
             "type": "number"
           },
           "strength": {

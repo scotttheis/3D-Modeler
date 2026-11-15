@@ -161,6 +161,11 @@ pub struct CreasePolishOptions {
     pub direction: BrushDirection,
     /// Falloff curve.
     pub falloff: BrushFalloff,
+    /// How narrow and deep the groove is at the stroke line, in the
+    /// inclusive 0..=1 range (OF-59). 0 is the gentle OF-49 crease; 1 puts
+    /// the depth in a tight groove at the line and digs up to 60 % deeper.
+    /// The pinch toward the line is unchanged, so the surface never folds.
+    pub sharpness: f32,
     /// Resource policy.
     pub limits: MeshOperationLimits,
 }
@@ -172,6 +177,7 @@ impl Default for CreasePolishOptions {
             strength: 0.5,
             direction: BrushDirection::Inward,
             falloff: BrushFalloff::Smooth,
+            sharpness: 0.0,
             limits: MeshOperationLimits::default(),
         }
     }
@@ -335,6 +341,12 @@ const CREASE_DEPTH_PER_RADIUS: f32 = 0.25;
 /// Fraction of the way to the stroke line a vertex at the line's centre is
 /// pinched at full strength (at most one half, so nothing crosses the line).
 const CREASE_PINCH: f32 = 0.5;
+/// Extra depth at full sharpness, as a fraction of the gentle depth.
+const CREASE_SHARP_DEPTH_GAIN: f32 = 0.6;
+/// Exponent of the depth profile at zero sharpness (cubed falloff).
+const CREASE_DEPTH_EXPONENT: f32 = 3.0;
+/// Extra depth-profile exponent at full sharpness (narrower groove).
+const CREASE_SHARP_EXPONENT_GAIN: f32 = 4.0;
 
 /// Applies Crease Polish to a local-space stroke path.
 pub fn crease_polish(
@@ -344,6 +356,11 @@ pub fn crease_polish(
 ) -> Result<BrushResult, CoreError> {
     validate_mesh_and_limits(mesh, &options.limits, "crease_polish")?;
     validate_radius_strength(options.radius_mm, options.strength, "crease_polish")?;
+    if !(0.0..=1.0).contains(&options.sharpness) || !options.sharpness.is_finite() {
+        return Err(CoreError::MeshOperation(
+            "sharpness must be between 0 and 1".to_owned(),
+        ));
+    }
     validate_centers(centers_mm)?;
     let work_units = operation_work(mesh, centers_mm.len())?;
     options.limits.check_work("crease_polish", work_units)?;
@@ -381,7 +398,11 @@ pub fn crease_polish(
                 }
             })
             .collect();
-        let depth = options.radius_mm * CREASE_DEPTH_PER_RADIUS * options.strength;
+        let depth = options.radius_mm
+            * CREASE_DEPTH_PER_RADIUS
+            * options.strength
+            * (1.0 + CREASE_SHARP_DEPTH_GAIN * options.sharpness);
+        let depth_exponent = CREASE_DEPTH_EXPONENT + CREASE_SHARP_EXPONENT_GAIN * options.sharpness;
         let pinch = CREASE_PINCH * options.strength;
         for (index, vertex) in vertices.iter_mut().enumerate() {
             let Some((nearest, segment)) = nearest_on_path(*vertex, centers_mm) else {
@@ -402,12 +423,12 @@ pub fn crease_polish(
             }
             // Pinch along the surface only; the depth comes from the normal push.
             let tangent = subtract(toward, scale(normal, dot(toward, normal)));
-            // The depth is concentrated at the line (cubed falloff) so it reads
-            // as a crease; the pinch uses the full falloff and draws the wider
-            // surrounding surface in toward it.
+            // The depth is concentrated at the line (cubed falloff, narrower
+            // as sharpness rises) so it reads as a crease; the pinch uses the
+            // full falloff and draws the wider surrounding surface in toward it.
             let moved = add(
                 scale(tangent, pinch * weight),
-                scale(normal, sign * depth * weight * weight * weight),
+                scale(normal, sign * depth * weight.powf(depth_exponent)),
             );
             *vertex = add(*vertex, moved);
         }

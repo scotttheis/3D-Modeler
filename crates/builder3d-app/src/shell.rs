@@ -163,6 +163,7 @@ struct BrushSettings {
     crease_strength: f32,
     crease_direction: BrushDirection,
     crease_falloff: BrushFalloff,
+    crease_sharpness: f32,
     smooth_radius_mm: f32,
     smooth_strength: f32,
     smooth_shrinkage: f32,
@@ -196,6 +197,7 @@ impl Default for BrushSettings {
             crease_strength: crease.strength,
             crease_direction: crease.direction,
             crease_falloff: crease.falloff,
+            crease_sharpness: crease.sharpness,
             smooth_radius_mm: smooth.radius_mm,
             smooth_strength: smooth.strength,
             // OF-50 / D9: Blender's sculpt Smooth keeps the whole movement toward
@@ -629,7 +631,9 @@ impl Builder3dApp {
                 builder3d_core::PrimitiveKind::Cylinder,
             ],
             ReviewState::TextureDialog => &[builder3d_core::PrimitiveKind::Cube],
-            ReviewState::Grab | ReviewState::Crease => &[builder3d_core::PrimitiveKind::Sphere],
+            ReviewState::Grab | ReviewState::Crease | ReviewState::CreaseSharp => {
+                &[builder3d_core::PrimitiveKind::Sphere]
+            }
             ReviewState::SmoothBrush => &[builder3d_core::PrimitiveKind::Cylinder],
             ReviewState::Simplify => &[builder3d_core::PrimitiveKind::Sphere],
             ReviewState::Subdivide => &[builder3d_core::PrimitiveKind::Cube; 2],
@@ -780,7 +784,16 @@ impl Builder3dApp {
                 let _ = self.commands.apply_brush_stroke(stroke);
             }
         }
-        if review.state() == ReviewState::Crease {
+        if matches!(
+            review.state(),
+            ReviewState::Crease | ReviewState::CreaseSharp
+        ) {
+            if review.state() == ReviewState::CreaseSharp {
+                // OF-59: full Sharpness, with the Crease settings showing the slider.
+                self.brush_settings.crease_sharpness = 1.0;
+                self.active_brush = Some(ActiveBrush::Crease);
+                self.brush_settings_open = true;
+            }
             self.commands.set_selection_indices([0]);
             let radius = self
                 .commands
@@ -812,6 +825,7 @@ impl Builder3dApp {
                     strength: settings.crease_strength,
                     direction: settings.crease_direction,
                     falloff: settings.crease_falloff,
+                    sharpness: settings.crease_sharpness,
                     limits: Default::default(),
                 },
             };
@@ -5203,6 +5217,7 @@ impl Builder3dApp {
                     strength: settings.crease_strength,
                     direction: settings.crease_direction,
                     falloff: settings.crease_falloff,
+                    sharpness: settings.crease_sharpness,
                     limits: Default::default(),
                 },
             },
@@ -5932,6 +5947,12 @@ impl Builder3dApp {
                         ui.add(
                             egui::Slider::new(&mut settings.crease_strength, 0.0..=1.0)
                                 .text("Strength"),
+                        );
+                        // OF-59: 0 is the gentle crease; higher makes the
+                        // groove at the line narrower and deeper.
+                        ui.add(
+                            egui::Slider::new(&mut settings.crease_sharpness, 0.0..=1.0)
+                                .text("Sharpness"),
                         );
                         brush_direction_combo(
                             ui,

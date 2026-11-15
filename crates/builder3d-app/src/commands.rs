@@ -2959,6 +2959,8 @@ mod tests {
         let options = CreasePolishOptions {
             radius_mm: 6.0,
             strength: 0.8,
+            // OF-59: the Sharpness slider reaches MCP too.
+            sharpness: 0.7,
             ..CreasePolishOptions::default()
         };
         assert!(matches!(
@@ -2976,6 +2978,7 @@ mod tests {
                 "centers_mm": centers,
                 "radius_mm": 6.0,
                 "strength": 0.8,
+                "sharpness": 0.7,
             }),
         );
         assert_eq!(
