@@ -1087,6 +1087,21 @@ impl Scene {
         Ok((command_result, report))
     }
 
+    /// Even subdivision (OF-52) of the whole object (`faces` = `None`) or of
+    /// the given faces, as one undoable mesh replacement.
+    pub fn apply_subdivide_even(
+        &mut self,
+        index: usize,
+        faces: Option<&[usize]>,
+    ) -> Result<(CommandResult, crate::SubdivideReport), CoreError> {
+        let source = self.object(index)?.mesh().clone();
+        let result =
+            crate::subdivide_mesh_even(&source, faces, crate::MeshOperationLimits::default())?;
+        let report = result.report.clone();
+        let command_result = self.replace_mesh(index, result.mesh)?;
+        Ok((command_result, report))
+    }
+
     /// Smooths one object through an isolated, undoable mesh replacement.
     pub fn apply_smooth(
         &mut self,

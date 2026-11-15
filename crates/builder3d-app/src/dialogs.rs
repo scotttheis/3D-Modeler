@@ -153,6 +153,10 @@ pub(crate) enum DialogAction {
     Hollow(HollowOptions),
     /// Remove this percentage of the selected mesh's faces (OF-51).
     Simplify(u32),
+    /// Cut every face of the selected mesh into four (OF-52).
+    SubdivideWhole,
+    /// Turn the Subdivide area brush on with this size in mm, or off.
+    SubdivideArea(Option<f32>),
     /// Select a theme mode.
     Theme(ThemeMode),
     /// Select the shell size (Big doubles it).
@@ -195,6 +199,8 @@ pub(crate) struct DialogState {
     hollow_wall_thickness_mm: f32,
     simplify_percent: u32,
     selection_faces: usize,
+    subdivide_area: bool,
+    subdivide_radius_mm: f32,
     theme_mode: ThemeMode,
     ui_size: UiSize,
     file_type: FileType,
@@ -255,6 +261,8 @@ impl DialogState {
             hollow_wall_thickness_mm: 1.0,
             simplify_percent: 10,
             selection_faces: 0,
+            subdivide_area: false,
+            subdivide_radius_mm: 5.0,
             theme_mode,
             ui_size: UiSize::Normal,
             file_type: FileType::Stl,
@@ -464,7 +472,10 @@ impl DialogState {
     /// Settings and Simplify stay alongside the viewport (Simplify so the
     /// model can be looked at between notches); About remains modal.
     pub(crate) fn is_modal(&self) -> bool {
-        !matches!(self.kind, DialogKind::Settings | DialogKind::Simplify) || self.about_open
+        !matches!(
+            self.kind,
+            DialogKind::Settings | DialogKind::Simplify | DialogKind::Subdivide
+        ) || self.about_open
     }
 
     #[cfg(test)]
@@ -501,13 +512,15 @@ impl DialogState {
                 .resizable(false)
                 .fixed_rect(rect),
             // Simplify drops down under the ribbon, below its button (OF-51).
-            Some(rect) if self.kind == DialogKind::Simplify => egui::Window::new(title)
-                .collapsible(false)
-                .resizable(false)
-                .movable(true)
-                .constrain(true)
-                .pivot(Align2::LEFT_TOP)
-                .default_pos(rect.left_top() + egui::vec2(8.0, 8.0)),
+            Some(rect) if matches!(self.kind, DialogKind::Simplify | DialogKind::Subdivide) => {
+                egui::Window::new(title)
+                    .collapsible(false)
+                    .resizable(false)
+                    .movable(true)
+                    .constrain(true)
+                    .pivot(Align2::LEFT_TOP)
+                    .default_pos(rect.left_top() + egui::vec2(8.0, 8.0))
+            }
             _ => dialog_window(ctx, title),
         };
         let shown = window.show(ctx, |ui| {
@@ -537,6 +550,7 @@ impl DialogState {
                 DialogKind::Emboss => self.emboss_dialog(ui, &mut action),
                 DialogKind::Hollow => self.hollow_dialog(ui, &mut action),
                 DialogKind::Simplify => self.simplify_dialog(ui, &mut action),
+                DialogKind::Subdivide => self.subdivide_dialog(ui, &mut action),
             }
             if !self.message.is_empty() {
                 ui.separator();
@@ -1381,6 +1395,38 @@ impl DialogState {
         }
     }
 
+    /// The Subdivide window (OF-52): the whole object, or the area brushed
+    /// over with Shift+drag (the app has no face picking; the brush is how a
+    /// region is chosen, as for Normalize).
+    fn subdivide_dialog(&mut self, ui: &mut egui::Ui, action: &mut Option<DialogAction>) {
+        ui.label("Cut faces into smaller, even triangles. The shape does not change.");
+        let was_area = self.subdivide_area;
+        ui.radio_value(&mut self.subdivide_area, false, "Whole object");
+        ui.radio_value(&mut self.subdivide_area, true, "Area I brush over");
+        if self.subdivide_area {
+            ui.label("Hold Shift and drag over the model to subdivide that area.");
+            let size = ui.add(
+                egui::Slider::new(&mut self.subdivide_radius_mm, 1.0..=50.0)
+                    .suffix(" mm brush size"),
+            );
+            if !was_area || size.changed() {
+                *action = Some(DialogAction::SubdivideArea(Some(self.subdivide_radius_mm)));
+            }
+        } else {
+            if was_area {
+                *action = Some(DialogAction::SubdivideArea(None));
+            }
+            ui.label(format!(
+                "Faces: {} \u{2192} {}",
+                crate::desktop_jobs::group_thousands(self.selection_faces),
+                crate::desktop_jobs::group_thousands(self.selection_faces.saturating_mul(4))
+            ));
+            if ui.button("Subdivide").clicked() {
+                *action = Some(DialogAction::SubdivideWhole);
+            }
+        }
+    }
+
     fn title(&self) -> &'static str {
         match self.kind {
             DialogKind::OpenProject => "Open Project",
@@ -1395,6 +1441,7 @@ impl DialogState {
             DialogKind::Emboss => "Emboss",
             DialogKind::Hollow => "Hollow",
             DialogKind::Simplify => "Simplify",
+            DialogKind::Subdivide => "Subdivide",
         }
     }
 }

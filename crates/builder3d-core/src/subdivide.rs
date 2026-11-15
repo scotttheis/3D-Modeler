@@ -58,7 +58,6 @@ pub fn subdivide_mesh_with_options(
     limits.validate("subdivide")?;
     limits.check_mesh("subdivide", mesh)?;
     let source_faces = mesh.face_count();
-    let source_vertices = mesh.vertex_count();
     let expected_faces =
         source_faces
             .checked_mul(2)
@@ -117,6 +116,166 @@ pub fn subdivide_mesh_with_options(
             "subdivide could not double this mesh without unsupported edge topology".to_owned(),
         ));
     }
+    split_marked_edges(mesh, &selected, &edge_faces, face_edges, limits)
+}
+
+/// Even subdivision (OF-52): every chosen face is cut into four equal
+/// triangles at its edge midpoints, so the result has the same density
+/// everywhere (whole object: four times the faces) and the same shape.
+/// With `faces` given, only those faces are cut into four; a neighbour that
+/// would get two cut edges is cut into four as well, and one with a single
+/// cut edge is split in two, so the surface stays closed with no slivers
+/// beyond that one ring.
+pub fn subdivide_mesh_even(
+    mesh: &Mesh,
+    faces: Option<&[usize]>,
+    limits: MeshOperationLimits,
+) -> Result<SubdivideResult, CoreError> {
+    mesh.validate_non_empty()?;
+    limits.validate("subdivide")?;
+    limits.check_mesh("subdivide", mesh)?;
+    let source_faces = mesh.face_count();
+    let mut chosen = vec![faces.is_none(); source_faces];
+    if let Some(faces) = faces {
+        for face in faces {
+            let Some(flag) = chosen.get_mut(*face) else {
+                return Err(CoreError::MeshOperation(format!(
+                    "face index {face} is outside the mesh's {source_faces} faces"
+                )));
+            };
+            *flag = true;
+        }
+    }
+    if !chosen.iter().any(|flag| *flag) {
+        return Err(CoreError::MeshOperation(
+            "subdivide needs at least one face".to_owned(),
+        ));
+    }
+    let mut edge_faces = BTreeMap::<(u32, u32), Vec<usize>>::new();
+    let mut face_edges = Vec::<[(u32, u32); 3]>::with_capacity(source_faces);
+    for (face_index, face) in mesh.faces.iter().copied().enumerate() {
+        let keys = [
+            ordered_edge(face[0], face[1]),
+            ordered_edge(face[1], face[2]),
+            ordered_edge(face[2], face[0]),
+        ];
+        for key in keys {
+            edge_faces.entry(key).or_default().push(face_index);
+        }
+        face_edges.push(keys);
+    }
+    let mut marked = BTreeSet::new();
+    for (face_index, keys) in face_edges.iter().enumerate() {
+        if chosen[face_index] {
+            marked.extend(keys.iter().copied());
+        }
+    }
+    // Close the region: a face with two cut edges becomes a full split.
+    loop {
+        let mut grew = false;
+        for keys in &face_edges {
+            let cut = keys.iter().filter(|key| marked.contains(*key)).count();
+            if cut == 2 {
+                marked.extend(keys.iter().copied());
+                grew = true;
+            }
+        }
+        if !grew {
+            break;
+        }
+    }
+    let full = face_edges
+        .iter()
+        .filter(|keys| keys.iter().all(|key| marked.contains(key)))
+        .count();
+    let half = face_edges
+        .iter()
+        .filter(|keys| keys.iter().filter(|key| marked.contains(*key)).count() == 1)
+        .count();
+    let expected_faces = source_faces
+        .checked_add(full.saturating_mul(3))
+        .and_then(|faces| faces.checked_add(half))
+        .ok_or_else(|| CoreError::OperationResourceLimit {
+            operation: "subdivide".to_owned(),
+            reason: "subdivision face count overflow".to_owned(),
+        })?;
+    if expected_faces > limits.max_faces {
+        return Err(CoreError::OperationResourceLimit {
+            operation: "subdivide".to_owned(),
+            reason: format!(
+                "subdivision result needs {expected_faces} faces, above the {} face limit",
+                limits.max_faces
+            ),
+        });
+    }
+    split_marked_edges(mesh, &marked, &edge_faces, face_edges, limits)
+}
+
+/// Faces whose centre lies within `radius_mm` of a brushed path (the
+/// desktop "area I brush over" choice), in the mesh's own coordinates.
+pub fn faces_near_path(mesh: &Mesh, centers_mm: &[[f32; 3]], radius_mm: f32) -> Vec<usize> {
+    let squared = radius_mm * radius_mm;
+    mesh.faces
+        .iter()
+        .enumerate()
+        .filter_map(|(index, face)| {
+            let corners = face.map(|vertex| mesh.vertices.get(vertex as usize).copied());
+            let [Some(a), Some(b), Some(c)] = corners else {
+                return None;
+            };
+            let centre = [
+                (a[0] + b[0] + c[0]) / 3.0,
+                (a[1] + b[1] + c[1]) / 3.0,
+                (a[2] + b[2] + c[2]) / 3.0,
+            ];
+            let near = |point: [f32; 3]| {
+                let delta = [
+                    centre[0] - point[0],
+                    centre[1] - point[1],
+                    centre[2] - point[2],
+                ];
+                delta[0] * delta[0] + delta[1] * delta[1] + delta[2] * delta[2] <= squared
+            };
+            let segment_near = centers_mm.windows(2).any(|pair| {
+                let direction = [
+                    pair[1][0] - pair[0][0],
+                    pair[1][1] - pair[0][1],
+                    pair[1][2] - pair[0][2],
+                ];
+                let length = direction[0] * direction[0]
+                    + direction[1] * direction[1]
+                    + direction[2] * direction[2];
+                if length <= f32::EPSILON {
+                    return near(pair[0]);
+                }
+                let along = (((centre[0] - pair[0][0]) * direction[0]
+                    + (centre[1] - pair[0][1]) * direction[1]
+                    + (centre[2] - pair[0][2]) * direction[2])
+                    / length)
+                    .clamp(0.0, 1.0);
+                near([
+                    pair[0][0] + direction[0] * along,
+                    pair[0][1] + direction[1] * along,
+                    pair[0][2] + direction[2] * along,
+                ])
+            });
+            (segment_near || centers_mm.iter().any(|point| near(*point))).then_some(index)
+        })
+        .collect()
+}
+
+/// Splits every edge in `selected` at its midpoint and re-triangulates each
+/// face by how many of its edges were split, keeping orientation. Shared by
+/// the Python-contract doubling and the even (OF-52) modes.
+fn split_marked_edges(
+    mesh: &Mesh,
+    selected: &BTreeSet<(u32, u32)>,
+    edge_faces: &BTreeMap<(u32, u32), Vec<usize>>,
+    face_edges: Vec<[(u32, u32); 3]>,
+    limits: MeshOperationLimits,
+) -> Result<SubdivideResult, CoreError> {
+    let source_faces = mesh.face_count();
+    let source_vertices = mesh.vertex_count();
     let midpoint_count = selected.len();
     let result_vertices = source_vertices.checked_add(midpoint_count).ok_or_else(|| {
         CoreError::OperationResourceLimit {
@@ -142,7 +301,7 @@ pub fn subdivide_mesh_with_options(
 
     let mut vertices = mesh.vertices.clone();
     let mut midpoint_indices = BTreeMap::<(u32, u32), u32>::new();
-    for key in &selected {
+    for key in selected {
         let Some(first) = mesh.vertices.get(key.0 as usize) else {
             return Err(CoreError::InvalidMesh(
                 "subdivision edge references a missing first vertex".to_owned(),
@@ -167,7 +326,7 @@ pub fn subdivide_mesh_with_options(
         midpoint_indices.insert(*key, index);
     }
 
-    let mut faces = Vec::with_capacity(expected_faces);
+    let mut faces = Vec::with_capacity(source_faces * 4);
     for (face, keys) in mesh.faces.iter().copied().zip(face_edges) {
         let mab = midpoint_indices.get(&keys[0]).copied();
         let mbc = midpoint_indices.get(&keys[1]).copied();

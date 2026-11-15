@@ -2300,7 +2300,48 @@ impl R4Server {
                 )
             }
             "subdivide" => {
-                let result = subdivide_mesh(&source)?;
+                // OF-52: `mode` "whole" cuts every face into four (desktop
+                // Whole object); "area" cuts the given faces, or the faces
+                // within `radius_mm` of the `centers_mm` path (desktop brushed
+                // area). No mode keeps the Python doubling contract.
+                let mode = schema::string_or(args, "mode", "")?;
+                let result = match mode.as_str() {
+                    "" => subdivide_mesh(&source)?,
+                    "whole" => builder3d_core::subdivide_mesh_even(
+                        &source,
+                        None,
+                        builder3d_core::MeshOperationLimits::default(),
+                    )?,
+                    "area" => {
+                        let faces = match optional_usize_list(args, "face_indices")? {
+                            Some(faces) => faces,
+                            None => {
+                                let path = centers(args).map_err(|_| {
+                                    AdapterError::Validation(
+                                        "mode area needs face_indices or centers_mm".to_owned(),
+                                    )
+                                })?;
+                                let radius = schema::number_or(args, "radius_mm", 5.0)?;
+                                builder3d_core::faces_near_path(&source, &path, radius)
+                            }
+                        };
+                        if faces.is_empty() {
+                            return Err(AdapterError::Validation(
+                                "the area touches no faces of this object".to_owned(),
+                            ));
+                        }
+                        builder3d_core::subdivide_mesh_even(
+                            &source,
+                            Some(&faces),
+                            builder3d_core::MeshOperationLimits::default(),
+                        )?
+                    }
+                    other => {
+                        return Err(AdapterError::Validation(format!(
+                            "mode must be whole or area (got {other})"
+                        )));
+                    }
+                };
                 (
                     result.mesh,
                     json!({"action":action,"operation_id":id,"index":index,"object_id":object_id,"report":subdivide_report(&result.report)}),

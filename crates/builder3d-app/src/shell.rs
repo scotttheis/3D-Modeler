@@ -114,6 +114,8 @@ enum ActiveBrush {
     SmoothBrush,
     Blob,
     Normalize,
+    /// The Subdivide window's "Area I brush over" (OF-52).
+    SubdivideArea,
 }
 
 impl ActiveBrush {
@@ -135,6 +137,7 @@ impl ActiveBrush {
             Self::SmoothBrush => CommandId::SmoothBrush,
             Self::Blob => CommandId::Blob,
             Self::Normalize => CommandId::Normalize,
+            Self::SubdivideArea => CommandId::Subdivide,
         }
     }
 
@@ -145,6 +148,7 @@ impl ActiveBrush {
             Self::SmoothBrush => "Smooth Brush",
             Self::Blob => "Blob",
             Self::Normalize => "Normalize",
+            Self::SubdivideArea => "Subdivide",
         }
     }
 }
@@ -171,6 +175,7 @@ struct BrushSettings {
     normalize_target_edge_mm: f32,
     normalize_target_enabled: bool,
     normalize_max_iterations: usize,
+    subdivide_radius_mm: f32,
 }
 
 impl Default for BrushSettings {
@@ -205,6 +210,7 @@ impl Default for BrushSettings {
             normalize_target_edge_mm: 1.0,
             normalize_target_enabled: normalize.target_edge_length_mm.is_some(),
             normalize_max_iterations: normalize.max_iterations,
+            subdivide_radius_mm: 5.0,
         }
     }
 }
@@ -626,6 +632,7 @@ impl Builder3dApp {
             ReviewState::Grab | ReviewState::Crease => &[builder3d_core::PrimitiveKind::Sphere],
             ReviewState::SmoothBrush => &[builder3d_core::PrimitiveKind::Cylinder],
             ReviewState::Simplify => &[builder3d_core::PrimitiveKind::Sphere],
+            ReviewState::Subdivide => &[builder3d_core::PrimitiveKind::Cube; 2],
         };
         for (index, kind) in primitives.iter().copied().enumerate() {
             self.dispatch(CommandId::AddPrimitive(kind));
@@ -808,6 +815,36 @@ impl Builder3dApp {
                 },
             };
             let _ = self.commands.apply_brush_stroke(stroke);
+        }
+        if review.state() == ReviewState::Subdivide {
+            let limits = builder3d_core::MeshOperationLimits::default();
+            for index in 0..2 {
+                let source = self
+                    .commands
+                    .scene()
+                    .objects()
+                    .get(index)
+                    .map(|object| (object.object_id().to_owned(), object.mesh().clone()));
+                let Some((id, mesh)) = source else {
+                    continue;
+                };
+                let refined = if index == 0 {
+                    builder3d_core::subdivide_mesh(&mesh)
+                        .and_then(|once| builder3d_core::subdivide_mesh(&once.mesh))
+                        .map(|twice| twice.mesh)
+                } else {
+                    builder3d_core::subdivide_mesh_even(&mesh, None, limits).map(|even| even.mesh)
+                };
+                if let Ok(refined) = refined {
+                    let generation = self.commands.document_generation();
+                    let revision = self.commands.scene().revision();
+                    let _ = self
+                        .commands
+                        .replace_mesh_if_current(generation, revision, &id, refined);
+                }
+            }
+            self.commands.set_selection_indices([1]);
+            self.dispatch(CommandId::Subdivide);
         }
         if review.state() == ReviewState::Simplify {
             self.commands.set_selection_indices([0]);
@@ -1124,7 +1161,6 @@ impl Builder3dApp {
             self.finish_paint_mode(true);
         }
         let mesh_operation = match command {
-            CommandId::Subdivide => Some(MeshJobOperation::Subdivide),
             CommandId::Smooth => Some(MeshJobOperation::Smooth),
             _ => None,
         };
@@ -1804,7 +1840,9 @@ impl Builder3dApp {
                         self.commands.set_status(status);
                         if matches!(
                             operation,
-                            MeshJobOperation::Repair | MeshJobOperation::Simplify(_)
+                            MeshJobOperation::Repair
+                                | MeshJobOperation::Simplify(_)
+                                | MeshJobOperation::Subdivide
                         ) {
                             self.restore_job_dialog(&mut job, |dialog| {
                                 dialog.set_message(message);
@@ -5105,7 +5143,8 @@ impl Builder3dApp {
             ActiveBrush::Crease
             | ActiveBrush::SmoothBrush
             | ActiveBrush::Blob
-            | ActiveBrush::Normalize => {
+            | ActiveBrush::Normalize
+            | ActiveBrush::SubdivideArea => {
                 let last = gesture
                     .centers
                     .last()
@@ -5164,6 +5203,10 @@ impl Builder3dApp {
                     limits: Default::default(),
                 },
             },
+            ActiveBrush::SubdivideArea => BrushStroke::SubdivideArea {
+                centers_mm: gesture.centers.clone(),
+                radius_mm: settings.subdivide_radius_mm,
+            },
             ActiveBrush::Normalize => BrushStroke::Normalize {
                 centers_mm: gesture.centers.clone(),
                 options: NormalizeDensityOptions {
@@ -5209,6 +5252,22 @@ impl Builder3dApp {
                 options,
             } => normalize_face_density(&gesture.source_mesh, None, Some(&centers_mm), options)
                 .map(|result| result.mesh),
+            BrushStroke::SubdivideArea {
+                centers_mm,
+                radius_mm,
+            } => {
+                let faces =
+                    builder3d_core::faces_near_path(&gesture.source_mesh, &centers_mm, radius_mm);
+                if faces.is_empty() {
+                    return Ok(gesture.source_mesh.clone());
+                }
+                builder3d_core::subdivide_mesh_even(
+                    &gesture.source_mesh,
+                    Some(&faces),
+                    builder3d_core::MeshOperationLimits::default(),
+                )
+                .map(|result| result.mesh)
+            }
         }
     }
 
@@ -5923,6 +5982,8 @@ impl Builder3dApp {
                                 .text("Passes"),
                         );
                     }
+                    // Its brush size lives in the Subdivide window.
+                    ActiveBrush::SubdivideArea => {}
                 }
             });
         self.brush_settings_open = open;
@@ -6102,6 +6163,10 @@ impl Builder3dApp {
             return;
         }
         if matches!(action, DialogAction::Close) {
+            if self.active_brush == Some(ActiveBrush::SubdivideArea) {
+                self.active_brush = None;
+                self.viewport_drag = None;
+            }
             self.pending_overwrite = None;
             if self.pending_after_save.take().is_some() {
                 self.commands.set_status("Cancelled");
@@ -6187,6 +6252,29 @@ impl Builder3dApp {
             DialogAction::Simplify(percent) => {
                 self.start_mesh_job(MeshJobOperation::Simplify(percent), true);
                 return;
+            }
+            DialogAction::SubdivideWhole => {
+                self.start_mesh_job(MeshJobOperation::Subdivide, true);
+                return;
+            }
+            DialogAction::SubdivideArea(Some(radius_mm)) => {
+                self.brush_settings.subdivide_radius_mm = radius_mm;
+                self.viewport_drag = None;
+                self.active_brush = Some(ActiveBrush::SubdivideArea);
+                self.brush_settings_open = false;
+                self.invalidate_presentation();
+                Ok(String::from(
+                    "Subdivide: hold Shift and drag over the model to subdivide that area",
+                ))
+            }
+            DialogAction::SubdivideArea(None) => {
+                if self.active_brush == Some(ActiveBrush::SubdivideArea) {
+                    self.active_brush = None;
+                    self.viewport_drag = None;
+                    self.preview_mesh_override = None;
+                    self.invalidate_presentation();
+                }
+                Ok(String::from("Subdivide: whole object"))
             }
             DialogAction::PrintPrep(bed_size_mm) => {
                 self.start_print_prep_job(bed_size_mm);
@@ -8857,7 +8945,7 @@ mod tests {
             .map(|job| job.handle.operation_id.clone())
             .expect("first worker was scheduled");
 
-        app.dispatch(CommandId::Subdivide);
+        app.start_mesh_job(MeshJobOperation::Subdivide, false);
 
         assert!(
             app.commands
@@ -8919,7 +9007,7 @@ mod tests {
         let revision_before = app.commands.scene().revision();
         let history_before = app.commands.scene().history_state_id();
 
-        app.dispatch(CommandId::Subdivide);
+        app.start_mesh_job(MeshJobOperation::Subdivide, false);
 
         let first_id = app
             .desktop_job
@@ -8965,7 +9053,7 @@ mod tests {
                 .is_ok()
         );
         let first_mesh = app.commands.scene().objects()[0].mesh().clone();
-        app.dispatch(CommandId::Subdivide);
+        app.start_mesh_job(MeshJobOperation::Subdivide, false);
         let job_id = app
             .desktop_job
             .as_ref()
@@ -9220,6 +9308,101 @@ mod tests {
             "the window stays open and shows before \u{2192} after"
         );
         assert!(std::fs::remove_dir_all(directory).is_ok());
+    }
+
+    #[test]
+    fn subdivide_window_cuts_the_whole_object_into_four_times_the_faces() {
+        // OF-52: Whole object is an even 1-to-4 split, one Undo entry.
+        let (mut app, directory) = shell_for_jobs("of52-subdivide-whole");
+        app.dispatch(CommandId::AddPrimitive(PrimitiveKind::Sphere));
+        let faces = app.commands.scene().objects()[0].mesh().face_count();
+        let history = app.commands.scene().history_state_id();
+        app.dispatch(CommandId::Subdivide);
+        assert_eq!(
+            app.dialog.as_ref().map(DialogState::kind),
+            Some(DialogKind::Subdivide)
+        );
+        app.apply_dialog_action(crate::dialogs::DialogAction::SubdivideWhole);
+        wait_for_desktop_job(&mut app);
+        assert_eq!(
+            app.commands.scene().objects()[0].mesh().face_count(),
+            faces * 4
+        );
+        assert_eq!(app.commands.scene().history_state_id(), history + 1);
+        assert!(
+            app.dialog
+                .as_ref()
+                .is_some_and(|dialog| dialog.message().starts_with("Subdivide: ")),
+            "the window stays open with the result"
+        );
+        assert!(std::fs::remove_dir_all(directory).is_ok());
+    }
+
+    #[test]
+    fn subdivide_area_brush_refines_only_where_the_stroke_went() {
+        let mut app = Builder3dApp {
+            settings_path: repository_test_directory("of52-subdivide-area").join("settings.json"),
+            ..Default::default()
+        };
+        app.commands
+            .dispatch(CommandId::AddPrimitive(PrimitiveKind::Sphere))
+            .expect("sphere");
+        app.refresh_preview();
+        app.camera.set_viewport_size(800, 600).expect("size");
+        app.frame_camera_if_pending();
+        app.commands.set_selection_indices([0]);
+        app.dispatch(CommandId::Subdivide);
+        app.apply_dialog_action(crate::dialogs::DialogAction::SubdivideArea(Some(4.0)));
+        assert_eq!(app.active_brush, Some(ActiveBrush::SubdivideArea));
+        let faces = app.commands.scene().objects()[0].mesh().face_count();
+        let history = app.commands.scene().history_state_id();
+        let rect = egui::Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(800., 600.));
+        let center = rect.center();
+        let shift = egui::Modifiers {
+            shift: true,
+            ..Default::default()
+        };
+        let frame = |app: &mut Builder3dApp, position: egui::Pos2, phase: u8| {
+            let input = ViewportInput {
+                pointer_position: Some(position),
+                pointer_delta: if phase == 0 {
+                    Vec2::ZERO
+                } else {
+                    Vec2::new(6.0, 0.0)
+                },
+                primary_pressed: phase == 0,
+                primary_down: phase < 2,
+                primary_released: phase == 2,
+                secondary_pressed: false,
+                secondary_down: false,
+                secondary_released: false,
+                middle_pressed: false,
+                middle_down: false,
+                middle_released: false,
+                scroll_y: 0.,
+                pinch_zoom_factor: 1.,
+                escape_pressed: false,
+                focused: true,
+                modifiers: shift,
+            };
+            app.route_viewport_input(rect, 1., input, true);
+            app.refresh_preview();
+        };
+        frame(&mut app, center, 0);
+        for step in 1..=5 {
+            frame(&mut app, center + Vec2::new(6.0 * step as f32, 0.0), 1);
+        }
+        frame(&mut app, center + Vec2::new(30.0, 0.0), 2);
+        let after = app.commands.scene().objects()[0].mesh().face_count();
+        assert!(after > faces, "{}", app.commands.last_status());
+        assert!(
+            after < faces * 2,
+            "only the brushed area: {faces} -> {after}"
+        );
+        assert_eq!(app.commands.scene().history_state_id(), history + 1);
+        // Closing the window turns the area brush off.
+        app.apply_dialog_action(crate::dialogs::DialogAction::Close);
+        assert_eq!(app.active_brush, None);
     }
 
     #[test]

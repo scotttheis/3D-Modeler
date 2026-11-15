@@ -7,7 +7,7 @@ use std::path::PathBuf;
 
 use builder3d_core::{
     Mesh, MeshOperationLimits, Scene, SceneSnapshot, repair_mesh, simplify_mesh_by_percent,
-    smooth_mesh, subdivide_mesh,
+    smooth_mesh, subdivide_mesh_even,
 };
 use builder3d_platform::SlicerInfo;
 
@@ -168,8 +168,18 @@ where
                     });
                 }
                 MeshJobOperation::Subdivide => {
-                    let result = subdivide_mesh(&mesh).map_err(|error| error.to_string())?;
-                    (result.mesh, "subdivision complete".to_owned())
+                    let result = subdivide_mesh_even(&mesh, None, MeshOperationLimits::default())
+                        .map_err(|error| error.to_string())?;
+                    let message = format!(
+                        "Subdivide: {} \u{2192} {} faces",
+                        group_thousands(result.report.before_faces),
+                        group_thousands(result.report.after_faces)
+                    );
+                    return Ok(DesktopJobResult::Mesh {
+                        operation,
+                        mesh: result.mesh,
+                        message,
+                    });
                 }
                 MeshJobOperation::Smooth => {
                     let result = smooth_mesh(&mesh, 1).map_err(|error| error.to_string())?;

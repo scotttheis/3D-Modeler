@@ -126,7 +126,8 @@ pub use smooth::{
     smooth_mesh_with_options,
 };
 pub use subdivide::{
-    SubdivideReport, SubdivideResult, subdivide_mesh, subdivide_mesh_with_options,
+    SubdivideReport, SubdivideResult, faces_near_path, subdivide_mesh, subdivide_mesh_even,
+    subdivide_mesh_with_options,
 };
 pub use texture::{
     BOX_BLEND_POWER, DEFAULT_TEXTURE_TILE_MM, MAX_PROJECT_TEXTURE_BYTES, MAX_TEXTURE_SIDE_PX,

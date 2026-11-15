@@ -348,6 +348,8 @@ pub enum DialogKind {
     Hollow,
     /// Choose how much to simplify the selected mesh (OF-51).
     Simplify,
+    /// Choose whole-object or brushed-area subdivision (OF-52).
+    Subdivide,
 }
 
 /// Result of dispatching one desktop command.
@@ -457,6 +459,13 @@ pub enum BrushStroke {
         /// Bounded options.
         options: NormalizeDensityOptions,
     },
+    /// Even subdivision of the faces under a brushed path (OF-52).
+    SubdivideArea {
+        /// Local path centers.
+        centers_mm: Vec<[f32; 3]>,
+        /// Faces whose centre lies this close to the path are cut.
+        radius_mm: f32,
+    },
 }
 
 impl BrushStroke {
@@ -467,6 +476,7 @@ impl BrushStroke {
             Self::SmoothBrush { .. } => "Smooth Brush",
             Self::Blob { .. } => "Blob",
             Self::Normalize { .. } => "Normalize",
+            Self::SubdivideArea { .. } => "Subdivide",
         }
     }
 }
@@ -967,9 +977,10 @@ impl CommandState {
                 self.first_selected("Simplify")?;
                 Ok(CommandOutcome::OpenDialog(DialogKind::Simplify))
             }
-            CommandId::Subdivide => self.mutate_one_selected("Subdivide", |scene, index| {
-                scene.apply_subdivide(index).map(|(result, _)| result)
-            }),
+            CommandId::Subdivide => {
+                self.first_selected("Subdivide")?;
+                Ok(CommandOutcome::OpenDialog(DialogKind::Subdivide))
+            }
             CommandId::Smooth => self.mutate_one_selected("Smooth", |scene, index| {
                 scene.apply_smooth(index, 1).map(|(result, _)| result)
             }),
@@ -1958,6 +1969,30 @@ impl CommandState {
                 .scene
                 .apply_normalize_face_density(index, None, Some(&centers_mm), options)
                 .map(|(result, report)| (result, report.changed, report.selected_faces_after)),
+            BrushStroke::SubdivideArea {
+                centers_mm,
+                radius_mm,
+            } => {
+                let faces = builder3d_core::faces_near_path(
+                    self.scene.object(index)?.mesh(),
+                    &centers_mm,
+                    radius_mm,
+                );
+                if faces.is_empty() {
+                    return Ok(CommandOutcome::Noop(
+                        "Subdivide: the stroke touched no faces".to_owned(),
+                    ));
+                }
+                self.scene
+                    .apply_subdivide_even(index, Some(&faces))
+                    .map(|(result, report)| {
+                        (
+                            result,
+                            report.changed,
+                            report.after_faces - report.before_faces,
+                        )
+                    })
+            }
         }?;
         if !result.0.changed || !result.1 {
             return Ok(CommandOutcome::Noop(format!("{label}: no geometry change")));
@@ -3155,6 +3190,65 @@ mod tests {
         );
         assert_eq!(result["changed"], serde_json::json!(false), "{result}");
         assert_eq!(cube.scene().history_state_id(), history);
+    }
+
+    #[test]
+    fn mcp_subdivide_modes_match_the_desktop_subdivide_window() {
+        // OF-52: `mode: "whole"` is the desktop Whole object; `mode: "area"`
+        // with the same path and size is the desktop area brush.
+        let mut mcp = CommandState::default();
+        mcp.dispatch(CommandId::AddPrimitive(PrimitiveKind::Sphere))
+            .expect("sphere");
+        let source = mcp.scene().objects()[0].mesh().clone();
+        let id = mcp.scene().objects()[0].object_id().to_owned();
+        let result = run_mcp_operation(
+            &mut mcp,
+            "subdivide",
+            serde_json::json!({"object_id": id, "mode": "whole"}),
+        );
+        assert_eq!(result["changed"], serde_json::json!(true), "{result}");
+        let whole = builder3d_core::subdivide_mesh_even(
+            &source,
+            None,
+            builder3d_core::MeshOperationLimits::default(),
+        )
+        .expect("whole");
+        assert_eq!(mcp.scene().objects()[0].mesh(), &whole.mesh);
+
+        let mut desktop = CommandState::default();
+        let mut mcp = CommandState::default();
+        for state in [&mut desktop, &mut mcp] {
+            state
+                .dispatch(CommandId::AddPrimitive(PrimitiveKind::Sphere))
+                .expect("sphere");
+        }
+        desktop.select_index(0);
+        let top = desktop.scene().objects()[0]
+            .mesh()
+            .vertices
+            .iter()
+            .copied()
+            .fold([0.0_f32; 3], |best, vertex| {
+                if vertex[1] > best[1] { vertex } else { best }
+            });
+        let centers = vec![top, [top[0] + 3.0, top[1] - 0.3, top[2]]];
+        assert!(matches!(
+            desktop.apply_brush_stroke(BrushStroke::SubdivideArea {
+                centers_mm: centers.clone(),
+                radius_mm: 4.0,
+            }),
+            Ok(CommandOutcome::Applied(_))
+        ));
+        let id = mcp.scene().objects()[0].object_id().to_owned();
+        run_mcp_operation(
+            &mut mcp,
+            "subdivide",
+            serde_json::json!({"object_id": id, "mode": "area", "centers_mm": centers, "radius_mm": 4.0}),
+        );
+        assert_eq!(
+            desktop.scene().objects()[0].mesh(),
+            mcp.scene().objects()[0].mesh()
+        );
     }
 
     #[test]

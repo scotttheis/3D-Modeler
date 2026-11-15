@@ -10265,6 +10265,70 @@
             "default": "",
             "title": "Object Id",
             "type": "string"
+          },
+          "mode": {
+            "anyOf": [
+              {
+                "enum": [
+                  "whole",
+                  "area"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "whole: cut every face into four even triangles (desktop Whole object). area: cut only face_indices, or the faces within radius_mm of the centers_mm path (desktop Area I brush over). Leave out for the original doubling.",
+            "title": "Mode"
+          },
+          "face_indices": {
+            "anyOf": [
+              {
+                "items": {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "maxItems": 1000000,
+                "minItems": 1,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Face Indices"
+          },
+          "centers_mm": {
+            "anyOf": [
+              {
+                "items": {
+                  "items": {
+                    "type": "number"
+                  },
+                  "maxItems": 3,
+                  "minItems": 3,
+                  "type": "array"
+                },
+                "maxItems": 256,
+                "minItems": 1,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Centers Mm"
+          },
+          "radius_mm": {
+            "default": 5.0,
+            "exclusiveMinimum": 0,
+            "maximum": 1000,
+            "title": "Radius Mm",
+            "type": "number"
           }
         },
         "title": "subdivideArguments",
