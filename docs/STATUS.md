@@ -217,6 +217,6 @@ OF-59, `fbbfff8` OF-60, `0238ccf` OF-61; Phase 3: `e95dbd3` OF-48,
 `e9aa73d` OF-49, `7248d91` OF-50, `7432d0b` OF-51, `54b6f2a` OF-52,
 `e283f15` OF-53 findings, `114a676` OF-54; Phase 2: `654872a` (OF-46), `344e88e` (OF-44),
 `82f4a58` (OF-47), pack `06699d2`; Phase 1: `566ba48` to `3288a55`). Tree
-snapshot: `G:\Builder3D-Rust_snapshot_20261115-091718_OF48-54-phase3` (7,386
-files, 1,028,974,653 bytes, counts verified; excludes `target\` and `logs\`).
-Previous: `G:\Builder3D-Rust_snapshot_20261115-055440_OF46-phase2`.
+snapshot: `G:\Builder3D-Rust_snapshot_20261115-105503_OF59-61-followups` (7,679
+files, 1,073,352,887 bytes, counts verified; excludes `target\` and `logs\`).
+Previous: `G:\Builder3D-Rust_snapshot_20261115-091718_OF48-54-phase3`.
