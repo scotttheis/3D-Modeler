@@ -193,6 +193,8 @@ owner batch 7.
 
 ## Last recovery point
 
-Git: branch `rebuild/work`, see `git log` (Phase 1: `566ba48` (OF-28) to `3288a55` (OF-45), one commit per item; pack `0e32154`). Tree snapshot:
-`G:\Builder3D-Rust_snapshot_20261114-143139_OF28-45-phase1` (6,694 files,
-935,291,832 bytes, counts verified; excludes `target\`).
+Git: branch `rebuild/work`, see `git log` (Phase 2: `344e88e` (OF-44),
+`82f4a58` (OF-47), pack `06699d2`; Phase 1: `566ba48` to `3288a55`). Tree
+snapshot: `G:\Builder3D-Rust_snapshot_20261114-193557_OF44-47-phase2` (6,924
+files, 962,870,432 bytes, counts verified; excludes `target\`). Previous:
+`G:\Builder3D-Rust_snapshot_20261114-143139_OF28-45-phase1`.
