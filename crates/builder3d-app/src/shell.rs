@@ -186,7 +186,8 @@ impl Default for BrushSettings {
             grab_strength: 1.0,
             grab_falloff: grab.falloff,
             grab_symmetry: grab.symmetry,
-            crease_radius_mm: crease.radius_mm,
+            // OF-49: a wider default so the crease moves more of the surface around it.
+            crease_radius_mm: 8.0,
             crease_strength: crease.strength,
             crease_direction: crease.direction,
             crease_falloff: crease.falloff,
@@ -620,7 +621,7 @@ impl Builder3dApp {
                 builder3d_core::PrimitiveKind::Cylinder,
             ],
             ReviewState::TextureDialog => &[builder3d_core::PrimitiveKind::Cube],
-            ReviewState::Grab => &[builder3d_core::PrimitiveKind::Sphere],
+            ReviewState::Grab | ReviewState::Crease => &[builder3d_core::PrimitiveKind::Sphere],
         };
         for (index, kind) in primitives.iter().copied().enumerate() {
             self.dispatch(CommandId::AddPrimitive(kind));
@@ -766,6 +767,43 @@ impl Builder3dApp {
                 };
                 let _ = self.commands.apply_brush_stroke(stroke);
             }
+        }
+        if review.state() == ReviewState::Crease {
+            self.commands.set_selection_indices([0]);
+            let radius = self
+                .commands
+                .scene()
+                .objects()
+                .first()
+                .map_or(0.0, |sphere| {
+                    sphere
+                        .mesh()
+                        .vertices
+                        .iter()
+                        .map(|vertex| vertex[1])
+                        .fold(0.0_f32, f32::max)
+                });
+            // A curved stroke over the top, from front left to back right.
+            let centers: Vec<[f32; 3]> = (0..=16)
+                .map(|step| {
+                    let x = -0.6 * radius + 1.2 * radius * step as f32 / 16.0;
+                    let z = 0.3 * x;
+                    let y = (radius * radius - x * x - z * z).max(0.0).sqrt();
+                    [x, y, z]
+                })
+                .collect();
+            let settings = self.brush_settings;
+            let stroke = BrushStroke::Crease {
+                centers_mm: centers,
+                options: CreasePolishOptions {
+                    radius_mm: settings.crease_radius_mm,
+                    strength: settings.crease_strength,
+                    direction: settings.crease_direction,
+                    falloff: settings.crease_falloff,
+                    limits: Default::default(),
+                },
+            };
+            let _ = self.commands.apply_brush_stroke(stroke);
         }
         if review.state() == ReviewState::MergeApart {
             if let Some(id) = self

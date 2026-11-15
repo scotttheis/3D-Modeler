@@ -330,6 +330,12 @@ pub fn elastic_grab_mesh(
     elastic_grab(mesh, center_mm, offset_mm, options)
 }
 
+/// Crease depth at full strength, as a fraction of the brush radius.
+const CREASE_DEPTH_PER_RADIUS: f32 = 0.25;
+/// Fraction of the way to the stroke line a vertex at the line's centre is
+/// pinched at full strength (at most one half, so nothing crosses the line).
+const CREASE_PINCH: f32 = 0.5;
+
 /// Applies Crease Polish to a local-space stroke path.
 pub fn crease_polish(
     mesh: &Mesh,
@@ -341,27 +347,69 @@ pub fn crease_polish(
     validate_centers(centers_mm)?;
     let work_units = operation_work(mesh, centers_mm.len())?;
     options.limits.check_work("crease_polish", work_units)?;
+    // OF-49, modelled on Blender's Crease brush: the stroke acts once as a
+    // whole (a long stroke does not dig deeper than a short one), pushes the
+    // surface gently along the brush-area normal, and pinches the
+    // surrounding surface toward the stroke line. The pinch moves a vertex
+    // at most half-way to the line, scaled by a falloff whose slope keeps the
+    // order of vertices across the line, so the crease cannot fold over
+    // itself.
     let source = mesh.vertices.clone();
     let mut vertices = source.clone();
     let sign = if options.direction == BrushDirection::Inward {
-        1.0
-    } else {
         -1.0
+    } else {
+        1.0
     };
     if options.strength > 0.0 {
-        for center in centers_mm {
-            for vertex in &mut vertices {
-                let radial = subtract(*center, *vertex);
-                let distance = length(radial);
-                let weight = options.falloff.weight(distance / options.radius_mm);
-                let amount = distance.min(options.radius_mm * 0.5);
-                if distance > 1.0e-12 {
-                    let unit = scale(radial, 1.0 / distance);
-                    for axis in 0..3 {
-                        vertex[axis] += sign * unit[axis] * amount * weight * options.strength;
-                    }
+        let normals = vertex_normals(&source, &mesh.faces);
+        let area_normals: Vec<[f32; 3]> = centers_mm
+            .iter()
+            .map(|center| {
+                let mut sum = [0.0_f32; 3];
+                for (vertex, normal) in source.iter().zip(&normals) {
+                    let weight = options
+                        .falloff
+                        .weight(length(subtract(*vertex, *center)) / options.radius_mm);
+                    sum = add(sum, scale(*normal, weight));
                 }
+                let magnitude = length(sum);
+                if magnitude > 1.0e-12 && magnitude.is_finite() {
+                    scale(sum, 1.0 / magnitude)
+                } else {
+                    [0.0; 3]
+                }
+            })
+            .collect();
+        let depth = options.radius_mm * CREASE_DEPTH_PER_RADIUS * options.strength;
+        let pinch = CREASE_PINCH * options.strength;
+        for (index, vertex) in vertices.iter_mut().enumerate() {
+            let Some((nearest, segment)) = nearest_on_path(*vertex, centers_mm) else {
+                continue;
+            };
+            let toward = subtract(nearest, *vertex);
+            let distance = length(toward);
+            if distance >= options.radius_mm {
+                continue;
             }
+            let weight = options.falloff.weight(distance / options.radius_mm);
+            if weight <= 0.0 {
+                continue;
+            }
+            let mut normal = area_normals[segment];
+            if length(normal) <= 0.5 {
+                normal = normals[index];
+            }
+            // Pinch along the surface only; the depth comes from the normal push.
+            let tangent = subtract(toward, scale(normal, dot(toward, normal)));
+            // The depth is concentrated at the line (cubed falloff) so it reads
+            // as a crease; the pinch uses the full falloff and draws the wider
+            // surrounding surface in toward it.
+            let moved = add(
+                scale(tangent, pinch * weight),
+                scale(normal, sign * depth * weight * weight * weight),
+            );
+            *vertex = add(*vertex, moved);
         }
     }
     finish_brush(
@@ -372,7 +420,7 @@ pub fn crease_polish(
             centers: centers_mm.len(),
             radius: options.radius_mm,
             strength: options.strength,
-            maximum_displacement: options.radius_mm * 2.0,
+            maximum_displacement: options.radius_mm,
             limits: &options.limits,
         },
     )
@@ -626,6 +674,29 @@ fn finish_brush(
         },
         mesh: result,
     })
+}
+
+/// Nearest point on the stroke polyline (or the single point) and the index
+/// of the stroke centre that segment starts at.
+fn nearest_on_path(point: [f32; 3], path: &[[f32; 3]]) -> Option<([f32; 3], usize)> {
+    let first = *path.first()?;
+    let mut best = (first, 0_usize, length(subtract(point, first)));
+    for (index, pair) in path.windows(2).enumerate() {
+        let segment = subtract(pair[1], pair[0]);
+        let squared = dot(segment, segment);
+        let along = if squared > 1.0e-12 {
+            (dot(subtract(point, pair[0]), segment) / squared).clamp(0.0, 1.0)
+        } else {
+            0.0
+        };
+        let candidate = add(pair[0], scale(segment, along));
+        let distance = length(subtract(point, candidate));
+        if distance < best.2 {
+            let nearer = if along > 0.5 { index + 1 } else { index };
+            best = (candidate, nearer, distance);
+        }
+    }
+    Some((best.0, best.1))
 }
 
 fn mirrored_strokes(

@@ -2902,6 +2902,58 @@ mod tests {
     }
 
     #[test]
+    fn mcp_crease_polish_matches_the_desktop_crease_stroke() {
+        // OF-49: the reworked Crease is one core function behind both.
+        let mut desktop = CommandState::default();
+        let mut mcp = CommandState::default();
+        for state in [&mut desktop, &mut mcp] {
+            state
+                .dispatch(CommandId::AddPrimitive(PrimitiveKind::Sphere))
+                .expect("add sphere");
+        }
+        desktop.select_index(0);
+        let top = desktop.scene().objects()[0]
+            .mesh()
+            .vertices
+            .iter()
+            .copied()
+            .fold([0.0_f32; 3], |best, vertex| {
+                if vertex[1] > best[1] { vertex } else { best }
+            });
+        let centers = vec![top, [top[0] + 2.0, top[1] - 0.2, top[2]]];
+        let options = CreasePolishOptions {
+            radius_mm: 6.0,
+            strength: 0.8,
+            ..CreasePolishOptions::default()
+        };
+        assert!(matches!(
+            desktop.apply_brush_stroke(BrushStroke::Crease {
+                centers_mm: centers.clone(),
+                options,
+            }),
+            Ok(CommandOutcome::Applied(_))
+        ));
+        run_mcp(
+            &mut mcp,
+            "crease_polish",
+            serde_json::json!({
+                "index": 0,
+                "centers_mm": centers,
+                "radius_mm": 6.0,
+                "strength": 0.8,
+            }),
+        );
+        assert_eq!(
+            desktop.scene().objects()[0].mesh(),
+            mcp.scene().objects()[0].mesh()
+        );
+        assert_eq!(
+            desktop.scene().history_state_id(),
+            mcp.scene().history_state_id()
+        );
+    }
+
+    #[test]
     fn mcp_rename_object_matches_the_desktop_rename() {
         let (mut desktop, mut mcp) = one_cube_pair();
         let history = desktop.scene().history_state_id();

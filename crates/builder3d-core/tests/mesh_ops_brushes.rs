@@ -198,3 +198,68 @@ fn scene_brush_replacement_preserves_identity_and_undo() {
     assert_eq!(scene.objects()[0].mesh(), &source);
     scene.redo().expect("redo blob");
 }
+
+#[test]
+fn crease_is_gentle_bounded_and_never_folds_the_surface() {
+    // OF-49: a stroke across the top of a dense sphere. Like Blender's
+    // Crease it sinks gently, pinches the surface toward the line, and a long
+    // back-and-forth stroke digs no deeper than one pass.
+    let source = make_sphere(10.0, 4).expect("sphere fixture");
+    let path: Vec<[f32; 3]> = (0..=10)
+        .map(|step| {
+            let x = -5.0 + step as f32;
+            [x, 0.0, (100.0 - x * x).sqrt()]
+        })
+        .collect();
+    let mut long_path = path.clone();
+    for _ in 0..10 {
+        long_path.extend(path.iter().rev().copied());
+        long_path.extend(path.iter().copied());
+    }
+    let options = CreasePolishOptions {
+        radius_mm: 4.0,
+        strength: 1.0,
+        ..CreasePolishOptions::default()
+    };
+    let once = crease_polish(&source, &path, options).expect("crease");
+    let many = crease_polish(&source, &long_path, options).expect("long crease");
+    assert_eq!(once.mesh.faces, source.faces);
+    for (first, second) in once.mesh.vertices.iter().zip(&many.mesh.vertices) {
+        for axis in 0..3 {
+            assert!(
+                (first[axis] - second[axis]).abs() < 1.0e-3,
+                "repeat passes do not dig deeper: {first:?} vs {second:?}"
+            );
+        }
+    }
+    assert!(once.report.changed);
+    // Gentle: never more than a quarter of the radius deep plus the half-way pinch.
+    assert!(
+        once.report.maximum_displacement_mm <= 4.0 * 0.5 + 0.5,
+        "{}",
+        once.report.maximum_displacement_mm
+    );
+    let mut sank = false;
+    for (before, after) in source.vertices.iter().zip(&once.mesh.vertices) {
+        // Nothing crosses the stroke line (the y = 0 plane here).
+        if before[1].abs() > 1.0e-4 {
+            assert!(before[1] * after[1] > 0.0, "{before:?} -> {after:?}");
+            assert!(
+                after[1].abs() <= before[1].abs() + 1.0e-4,
+                "pinch is toward the line"
+            );
+        }
+        let radial_before =
+            (before[0] * before[0] + before[1] * before[1] + before[2] * before[2]).sqrt();
+        let radial_after = (after[0] * after[0] + after[1] * after[1] + after[2] * after[2]).sqrt();
+        sank |= radial_after < radial_before - 0.2;
+    }
+    assert!(sank, "the crease sinks into the surface");
+    // No face turns over.
+    for face in &source.faces {
+        let before = source.face_normal(*face);
+        let after = once.mesh.face_normal(*face);
+        let dot = before[0] * after[0] + before[1] * after[1] + before[2] * after[2];
+        assert!(dot > 0.0, "face {face:?} folded");
+    }
+}
