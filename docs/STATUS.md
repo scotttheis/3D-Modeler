@@ -3,7 +3,7 @@
 The only place current status is written. Keep it to one screen. Plan:
 [`product-rebuild-plan.md`](product-rebuild-plan.md).
 
-Updated 2026-11-14. Full gate passed 2026-11-14 after Phase 2's OF-44 and OF-47 (fmt, clippy, tests, deny, audit, MCP parity, smoke, 40-image capture board; the board now also takes `paint`, `paint-picker`, `xray`). Release exe rebuilt from the same source for the Phase 2 review pack.
+Updated 2026-11-15. Full gate passed 2026-11-15 after OF-46 (fmt, clippy, tests, deny, audit, MCP parity, smoke, 50-image capture board; the board now also takes `texture`, `texture-dialog`). Release exe rebuilt from the same source for the Phase 2 review pack.
 
 Test releases (how-to: [`packaging.md`](packaging.md)): last is **RC1**,
 version 0.1.1, 2026-11-13, `E:\Builder3D-RC\Builder3D-RC1.msi` (50 MB),
@@ -21,19 +21,17 @@ and OF-47 X-ray approved by the owner 2026-11-15 (pack
 original); OF-44 keep the "Done" label; OF-46 store the texture image inside
 the project file (`.3dp` format change approved), test textures in
 `C:\Users\josiph\Pictures\textures\` (owner-supplied; do not commit them).
-No open owner answers.
+OF-46 done 2026-11-15 (`654872a`), awaiting owner review; Phase 2 pack
+updated. **Stopped for owner review of OF-46.** No open owner answers.
 
 **Known work, in order** (a session takes the first item not done):
 
-1. Phase 2 — OF-46 Material textures (owner chose: image stored inside the
-   `.3dp`). OF-44 and OF-47 are done and approved. Phase 2 then ends with its
-   own pack and stop.
-2. Phase 3 — Sculpt and mesh tools (OF-48 to OF-54).
-3. Phase 4 — Measure ruler (OF-55).
-4. Phase 5 — MCP does everything (OF-58).
-5. F5 — release link reliability; F6 — reconcile the 147-row ledger
+1. Phase 3 — Sculpt and mesh tools (OF-48 to OF-54).
+2. Phase 4 — Measure ruler (OF-55).
+3. Phase 5 — MCP does everything (OF-58).
+4. F5 — release link reliability; F6 — reconcile the 148-row ledger
    (fix-first list below).
-6. Stop before RB-10 (S3). OF-56/57 (Emboss) stay deferred until the owner
+5. Stop before RB-10 (S3). OF-56/57 (Emboss) stay deferred until the owner
    brings them back.
 
 Each phase ends with its review pack and a stop for owner review, as
@@ -57,8 +55,8 @@ the next stop message, not guessed.
 
 ## Last review pack
 
-`evidence/rebuild/captures/2026-11-14-review-phase2/` (Phase 2: OF-44,
-OF-47), not yet reviewed. `evidence/rebuild/captures/2026-11-14-review-phase1/`
+`evidence/rebuild/captures/2026-11-14-review-phase2/` (Phase 2: OF-44 and
+OF-47 approved 2026-11-15; OF-46 added 2026-11-15, not yet reviewed). `evidence/rebuild/captures/2026-11-14-review-phase1/`
 (Phase 1), not yet reviewed. Before that:
 
 `evidence/rebuild/captures/2026-11-13-review-of1-9-f9/`, reviewed by the
@@ -191,11 +189,12 @@ owner batch 7.
   `BUILDER3D_REVIEW_VIEW=wireframe,xray` turns view toggles on; state
   `merge` merges a red and a blue cube; `unselected`, `material` states;
   `BUILDER3D_REVIEW_INTERACTIVE=1` stays open with isolated settings for
-  hands-on checks.
+  hands-on checks. States `texture`, `texture-dialog` take pictures from
+  `BUILDER3D_REVIEW_TEXTURES` (`;`-separated paths).
 
 ## Last recovery point
 
-Git: branch `rebuild/work`, see `git log` (Phase 2: `344e88e` (OF-44),
+Git: branch `rebuild/work`, see `git log` (Phase 2: `654872a` (OF-46), `344e88e` (OF-44),
 `82f4a58` (OF-47), pack `06699d2`; Phase 1: `566ba48` to `3288a55`). Tree
 snapshot: `G:\Builder3D-Rust_snapshot_20261114-193557_OF44-47-phase2` (6,924
 files, 962,870,432 bytes, counts verified; excludes `target\`). Previous:
