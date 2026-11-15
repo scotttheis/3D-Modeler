@@ -3,7 +3,7 @@
 The only place current status is written. Keep it to one screen. Plan:
 [`product-rebuild-plan.md`](product-rebuild-plan.md).
 
-Updated 2026-11-15. Full gate passed 2026-11-15 after the Phase 3 follow-ups OF-59 to OF-61 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board; the board now also takes `crease-sharp`, `simplify-area`, `hollow-dialog`, `hollow-error`). Release exe rebuilt from the same source for the follow-up review pack.
+Updated 2026-11-15. Full gate passed 2026-11-15 after Phase 4 OF-55 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board; the board now also takes `measure`, `measure-start`). Release exe rebuilt from the same source (3m53s) for the Phase 4 review pack.
 
 Test releases (how-to: [`packaging.md`](packaging.md)): last is **RC1**,
 version 0.1.1, 2026-11-13, `E:\Builder3D-RC\Builder3D-RC1.msi` (50 MB),
@@ -36,10 +36,15 @@ Follow-ups OF-59 to OF-61 built 2026-11-15 (`57671fb`, `fbbfff8`,
 **Owner review 2026-11-15: all three approved.** MCP `normalize_face_density`
 stays (owner: keep it in AI for possible later use). Phase 3 is closed.
 
+Phase 4 (OF-55 Measure ruler) built 2026-11-15 (`cfc96a7`), pack
+`evidence/rebuild/captures/2026-11-15-review-phase4-measure/`. Measure is now
+a click-to-click ruler with snapping; new MCP tool `measure` (catalog 66).
+**Waiting for owner review.**
+
 **Known work, in order** (a session takes the first item not done):
 
 1. Done and approved 2026-11-15: Phase 3 follow-ups OF-59 to OF-61.
-2. Phase 4 — Measure ruler (OF-55).
+2. Phase 4 — Measure ruler (OF-55): built, waiting for owner review.
 3. Phase 5 — MCP does everything (OF-58).
 4. F5 — release link reliability; F6 — reconcile the 148-row ledger
    (fix-first list below).
@@ -69,7 +74,8 @@ the next stop message, not guessed.
 
 ## Last review pack
 
-`evidence/rebuild/captures/2026-11-15-review-phase3-followups/` (OF-59 to
+`evidence/rebuild/captures/2026-11-15-review-phase4-measure/` (OF-55),
+waiting for owner review. `evidence/rebuild/captures/2026-11-15-review-phase3-followups/` (OF-59 to
 OF-61), approved by the owner 2026-11-15. `evidence/rebuild/captures/2026-11-14-review-phase3/` (Phase 3: OF-48 to
 OF-54), reviewed by the owner 2026-11-15. `evidence/rebuild/captures/2026-11-14-review-phase2/` (Phase 2: OF-44 and
 OF-47 approved 2026-11-15; OF-46 added and approved 2026-11-15). `evidence/rebuild/captures/2026-11-14-review-phase1/`
