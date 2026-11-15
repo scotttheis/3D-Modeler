@@ -263,7 +263,7 @@ impl DialogState {
             emboss_raised: true,
             emboss_offset_x_mm: 0.0,
             emboss_offset_z_mm: 0.0,
-            hollow_wall_thickness_mm: 1.0,
+            hollow_wall_thickness_mm: HollowOptions::default().wall_thickness_mm,
             simplify_percent: 10,
             simplify_area: false,
             simplify_radius_mm: 5.0,
@@ -562,9 +562,16 @@ impl DialogState {
             if !self.message.is_empty() {
                 ui.separator();
                 let color = self.message_color();
+                // OF-61: results and errors can be selected and copied.
                 egui::ScrollArea::vertical()
                     .max_height(180.0)
-                    .show(ui, |ui| ui.label(RichText::new(&self.message).color(color)));
+                    .show(ui, |ui| {
+                        ui.add(
+                            egui::Label::new(RichText::new(&self.message).color(color))
+                                .selectable(true),
+                        )
+                    });
+                copy_button(ui, "dialog-message-copy", &self.message);
             }
             match self.kind {
                 DialogKind::Settings => self.settings_footer(ui, &mut action),
@@ -1373,6 +1380,11 @@ impl DialogState {
         }
     }
 
+    /// Sets the Hollow window's wall thickness (review harness, OF-61).
+    pub(crate) fn set_hollow_wall(&mut self, wall_thickness_mm: f32) {
+        self.hollow_wall_thickness_mm = wall_thickness_mm;
+    }
+
     /// Puts the Simplify window on "Area I brush over" with this brush size
     /// and percentage (review harness, OF-60).
     pub(crate) fn set_simplify_area(&mut self, radius_mm: f32, percent: u32) {
@@ -1426,7 +1438,7 @@ impl DialogState {
         )
         .unwrap_or(self.selection_faces);
         ui.label(format!(
-            "Faces: {} → about {}",
+            "Faces: {} â†’ about {}",
             crate::desktop_jobs::group_thousands(self.selection_faces),
             crate::desktop_jobs::group_thousands(target)
         ));
@@ -1569,6 +1581,31 @@ fn native_save_picker(request: &SavePickerRequest) -> Option<PathBuf> {
         dialog = dialog.set_file_name(name);
     }
     dialog.save_file()
+}
+
+/// How long a Copy button reads "Copied" after a press, in seconds.
+const COPIED_FEEDBACK_SECONDS: f64 = 1.5;
+
+/// A small "Copy" button that puts `text` on the clipboard (OF-61) and reads
+/// "Copied" for a moment afterwards. `id_salt` keeps buttons apart.
+pub(crate) fn copy_button(ui: &mut egui::Ui, id_salt: &str, text: &str) {
+    let id = egui::Id::unique(id_salt);
+    let now = ui.input(|input| input.time);
+    let copied_at = ui.ctx().data(|data| data.get_temp::<f64>(id));
+    let recently = copied_at.is_some_and(|at| now - at < COPIED_FEEDBACK_SECONDS);
+    let label = if recently { "Copied" } else { "Copy" };
+    let response = ui
+        .small_button(label)
+        .on_hover_text("Copy this message to the clipboard");
+    if response.clicked() {
+        ui.ctx().copy_text(text.to_owned());
+        ui.ctx().data_mut(|data| data.insert_temp(id, now));
+        ui.ctx()
+            .request_repaint_after(std::time::Duration::from_secs_f64(COPIED_FEEDBACK_SECONDS));
+    } else if recently {
+        ui.ctx()
+            .request_repaint_after(std::time::Duration::from_millis(200));
+    }
 }
 
 /// A compact saturation/value square over a hue bar, with a preview chip.

@@ -11400,7 +11400,7 @@
             "type": "string"
           },
           "wall_thickness_mm": {
-            "default": 1,
+            "default": 2,
             "exclusiveMinimum": 0,
             "maximum": 50,
             "title": "Wall Thickness Mm",

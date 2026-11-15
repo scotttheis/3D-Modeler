@@ -119,7 +119,8 @@ pub struct HollowOptions {
 impl Default for HollowOptions {
     fn default() -> Self {
         Self {
-            wall_thickness_mm: 1.0,
+            // OF-61: 2 mm, the wall the owner found works on normal models.
+            wall_thickness_mm: 2.0,
             limits: MeshOperationLimits::default(),
         }
     }
@@ -424,16 +425,23 @@ fn hollow_mesh_bounded(
         )));
     }
 
-    let (inner_mesh, branch) = if let Some(planes) = convex_planes(mesh, wall)? {
-        (
-            inner_from_convex_planes(&planes, &options.limits, &mut cancel)?,
-            "convex-exact",
-        )
-    } else {
-        (
+    // The exact convex inside is tried first; a convex model with many
+    // faces (the stock sphere: 5,120) is over its budget, so it takes the
+    // grid path every other shape uses instead of failing (OF-61).
+    let convex = match convex_planes(mesh, wall)? {
+        Some(planes) => match inner_from_convex_planes(&planes, &options.limits, &mut cancel) {
+            Ok(inner) => Some(inner),
+            Err(CoreError::OperationResourceLimit { .. }) => None,
+            Err(other) => return Err(other),
+        },
+        None => None,
+    };
+    let (inner_mesh, branch) = match convex {
+        Some(inner) => (inner, "convex-exact"),
+        None => (
             voxel_inner_mesh(mesh, minimum, maximum, wall, &options.limits, &mut cancel)?,
             "concave-voxel",
-        )
+        ),
     };
     check_cancel(&mut cancel, OP_HOLLOW)?;
     let inner_health = validate_result(&inner_mesh, OP_HOLLOW, &options.limits)?;

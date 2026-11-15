@@ -3297,6 +3297,31 @@ mod tests {
     }
 
     #[test]
+    fn hollow_defaults_to_a_2_mm_wall_on_the_desktop_and_in_mcp() {
+        // OF-61: the owner's working wall is the default everywhere.
+        assert!((HollowOptions::default().wall_thickness_mm - 2.0).abs() < f32::EPSILON);
+        let mut desktop = CommandState::default();
+        let mut mcp = CommandState::default();
+        for state in [&mut desktop, &mut mcp] {
+            state
+                .dispatch(CommandId::AddPrimitive(PrimitiveKind::Sphere))
+                .expect("sphere");
+        }
+        desktop.select_index(0);
+        let message = desktop
+            .hollow_selected(HollowOptions::default().wall_thickness_mm)
+            .expect("desktop hollow");
+        assert_eq!(message, "Hollowed with a 2.0 mm wall");
+        let id = mcp.scene().objects()[0].object_id().to_owned();
+        let result = run_mcp_operation(&mut mcp, "hollow", serde_json::json!({"object_id": id}));
+        assert_eq!(result["changed"], serde_json::json!(true), "{result}");
+        assert_eq!(
+            desktop.scene().objects()[0].mesh(),
+            mcp.scene().objects()[0].mesh()
+        );
+    }
+
+    #[test]
     fn mcp_simplify_area_matches_the_desktop_simplify_area_brush() {
         // OF-60: `mode: "area"` with the same path, size and percent is the
         // desktop Simplify window's Area I brush over; one Undo entry.

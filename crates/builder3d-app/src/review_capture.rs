@@ -12,7 +12,7 @@
 //! | Variable | Values | Default |
 //! |---|---|---|
 //! | `BUILDER3D_REVIEW_CAPTURE` | output PNG path | harness off |
-//! | `BUILDER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `resize`, `resize-drag`, `multi`, `merge`, `unselected`, `material`, `settings`, `save`, `export`, `menu`, `colors`, `mirror`, `merge-apart`, `repair`, `paste`, `align`, `paint`, `paint-picker`, `xray`, `texture`, `texture-dialog`, `grab`, `crease`, `crease-sharp`, `smooth-brush`, `simplify`, `simplify-area`, `subdivide`, `hollow` | `move` |
+//! | `BUILDER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `resize`, `resize-drag`, `multi`, `merge`, `unselected`, `material`, `settings`, `save`, `export`, `menu`, `colors`, `mirror`, `merge-apart`, `repair`, `paste`, `align`, `paint`, `paint-picker`, `xray`, `texture`, `texture-dialog`, `grab`, `crease`, `crease-sharp`, `smooth-brush`, `simplify`, `simplify-area`, `subdivide`, `hollow`, `hollow-dialog`, `hollow-error` | `move` |
 //! | `BUILDER3D_REVIEW_TEXTURES` | `;`-separated picture paths for the `texture` states (one per object, reused in turn) | a built-in brick picture |
 //! | `BUILDER3D_REVIEW_THEME` | `light`, `dark` | `dark` |
 //! | `BUILDER3D_REVIEW_SIZE` | `normal`, `big` (Settings > Size) | `normal` |
@@ -132,6 +132,13 @@ pub(crate) enum ReviewState {
     /// The stock torus hollowed with a 1.5 mm wall (OF-54), nothing
     /// selected and X-ray on so the inner shell shows through.
     Hollow,
+    /// One selected stock sphere with a fresh Hollow window (OF-61: the
+    /// 2 mm default).
+    HollowDialog,
+    /// One selected stock sphere after a 1 mm Hollow that cannot be done:
+    /// the message with its Copy buttons in the window and the status bar
+    /// (OF-61).
+    HollowError,
 }
 
 impl ReviewState {
@@ -170,6 +177,8 @@ impl ReviewState {
             "simplify-area" => Some(Self::SimplifyArea),
             "subdivide" => Some(Self::Subdivide),
             "hollow" => Some(Self::Hollow),
+            "hollow-dialog" => Some(Self::HollowDialog),
+            "hollow-error" => Some(Self::HollowError),
             _ => None,
         }
     }

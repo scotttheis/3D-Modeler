@@ -2511,7 +2511,7 @@ impl R4Server {
             }
             "hollow" => {
                 let options = HollowOptions {
-                    wall_thickness_mm: schema::number_or(args, "wall_thickness_mm", 1.0)?,
+                    wall_thickness_mm: schema::number_or(args, "wall_thickness_mm", 2.0)?,
                     limits: Default::default(),
                 };
                 let result = builder3d_core::hollow_mesh_with_hooks(

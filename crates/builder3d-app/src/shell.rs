@@ -635,6 +635,9 @@ impl Builder3dApp {
             }
             ReviewState::Subdivide => &[builder3d_core::PrimitiveKind::Cube; 2],
             ReviewState::Hollow => &[builder3d_core::PrimitiveKind::Torus],
+            ReviewState::HollowDialog | ReviewState::HollowError => {
+                &[builder3d_core::PrimitiveKind::Sphere]
+            }
         };
         for (index, kind) in primitives.iter().copied().enumerate() {
             self.dispatch(CommandId::AddPrimitive(kind));
@@ -827,6 +830,24 @@ impl Builder3dApp {
                 },
             };
             let _ = self.commands.apply_brush_stroke(stroke);
+        }
+        if matches!(
+            review.state(),
+            ReviewState::HollowDialog | ReviewState::HollowError
+        ) {
+            self.commands.set_selection_indices([0]);
+            self.dispatch(CommandId::Hollow);
+            if review.state() == ReviewState::HollowError {
+                if let Some(dialog) = self.dialog.as_mut() {
+                    dialog.set_hollow_wall(1.0);
+                }
+                self.apply_dialog_action(crate::dialogs::DialogAction::Hollow(
+                    builder3d_core::HollowOptions {
+                        wall_thickness_mm: 1.0,
+                        ..Default::default()
+                    },
+                ));
+            }
         }
         if review.state() == ReviewState::Hollow {
             self.commands.set_selection_indices([0]);
@@ -4399,12 +4420,20 @@ impl Builder3dApp {
                             ui.separator();
                             ui.label(
                                 RichText::new(format!(
-                                    "Selected: {}  |  {}",
-                                    self.commands.selected_count(),
-                                    self.commands.last_status()
+                                    "Selected: {}  |",
+                                    self.commands.selected_count()
                                 ))
                                 .color(palette.muted),
                             );
+                            // OF-61: the status message can be selected and copied.
+                            let status = self.commands.last_status().to_owned();
+                            ui.add(
+                                egui::Label::new(RichText::new(&status).color(palette.muted))
+                                    .selectable(true),
+                            );
+                            if !status.is_empty() {
+                                crate::dialogs::copy_button(ui, "status-bar-copy", &status);
+                            }
                             if let Ok(Some(status)) = self.commands.operations().active_status() {
                                 ui.separator();
                                 ui.label(
