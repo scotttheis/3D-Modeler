@@ -81,7 +81,7 @@ Everything that session needs is in `3D-Modeler-packaging/` on the card:
 On the Mac the card mounts at `/Volumes/16GBMICROSD` (check `ls /Volumes`).
 
 1. Do not build on the card (FAT32: slow, no executable bits). Clone it:
-   `git clone -b rebuild/work /Volumes/16GBMICROSD/3D-Modeler-packaging/3D-Modeler ~/3D-Modeler`
+   `git -c safe.directory='*' clone -b rebuild/work /Volumes/16GBMICROSD/3D-Modeler-packaging/3D-Modeler ~/3D-Modeler`
    and work there; read its `AGENTS.md` and `docs/STATUS.md`.
 2. Tools: Xcode Command Line Tools (`xcode-select -p`; if missing,
    `xcode-select --install` opens a window the owner clicks through:
@@ -105,7 +105,9 @@ On the Mac the card mounts at `/Volumes/16GBMICROSD` (check `ls /Volumes`).
    to Applications, start it once.
 6. Bring the work back: update the "Test releases" line in
    `docs/STATUS.md`, commit, then
-   `git push /Volumes/16GBMICROSD/3D-Modeler-packaging/3D-Modeler HEAD:mac/work`.
+   `git -c safe.directory='*' push /Volumes/16GBMICROSD/3D-Modeler-packaging/3D-Modeler HEAD:mac/work`.
+   (The card does not record file owners, so Git needs `safe.directory`
+   for it, on the Mac and on Windows alike.)
    A later Windows session fetches `mac/work` from the card, fast-forwards
    `rebuild/work`, runs the full gate, copies the `.dmg` to
    `E:\3D-Modeler-RC\` and makes the `G:\` snapshot.
