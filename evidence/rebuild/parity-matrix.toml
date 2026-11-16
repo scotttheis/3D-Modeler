@@ -16,7 +16,7 @@ snapshot_exclusions = ["root target/", "root .cache/", "directory reparse points
 
 [[feature]]
 id = "builder3d.ui.shell.application_menu"
-mcp_exempt = "visual only"
+mcp_tool = ["show_screen"]
 area = "shell"
 behavior = "The icon-only hamburger opens the application menu; Builder3D returns to Welcome while retaining the in-memory scene."
 python_paths = ["src/main_window.py", "src/toolbar.py"]
@@ -421,7 +421,7 @@ next_slice = "RB-04 — Scene and precise transforms (after RB-03 visual review)
 
 [[feature]]
 id = "builder3d.ui.app.exit_dirty_guard"
-mcp_exempt = "visual only"
+mcp_tool = ["exit_app", "save_project"]
 area = "project"
 behavior = "Exit closes when clean; dirty state prompts Save/Discard/Cancel, and a failed save keeps the app open."
 python_paths = ["src/main_window.py", "src/application_services.py", "src/project_io.py"]
@@ -718,7 +718,7 @@ next_slice = "RB-04 — Scene and precise transforms (after RB-03 visual review)
 
 [[feature]]
 id = "builder3d.ui.file.native_pickers"
-mcp_exempt = "visual only"
+mcp_tool = ["open_project", "save_project_as", "import_file", "export_file"]
 area = "files"
 behavior = "Native project Open/Save, model Add, and seven-format Export pickers use appropriate filters and preserve state on cancel."
 python_paths = ["src/main_window.py"]
@@ -772,7 +772,7 @@ next_slice = "RB-04 — Scene and precise transforms (after RB-03 visual review)
 
 [[feature]]
 id = "builder3d.ui.welcome.recent_files"
-mcp_exempt = "visual only"
+mcp_tool = ["recent_files", "open_recent"]
 area = "welcome"
 behavior = "Welcome retains ten newest-first deduplicated recent projects/models across restart, dispatches successful entries, and provides safe preview fallbacks."
 python_paths = ["src/main_window.py"]
@@ -799,7 +799,7 @@ next_slice = "RB-04 — Scene and precise transforms (after RB-03 visual review)
 
 [[feature]]
 id = "builder3d.ui.welcome.recent_dispatch"
-mcp_exempt = "visual only"
+mcp_tool = ["open_recent", "recent_files"]
 area = "welcome"
 behavior = "A .3dp recent opens as a project, a model recent imports additively, missing entries are removed with a warning, and failed/corrupt/WRL opens preserve the live scene."
 python_paths = ["src/main_window.py"]
@@ -826,7 +826,7 @@ next_slice = "RB-04 — Scene and precise transforms (after RB-03 visual review)
 
 [[feature]]
 id = "builder3d.ui.welcome.recent_previews"
-mcp_exempt = "visual only"
+mcp_tool = ["recent_files", "capture_window"]
 area = "welcome"
 behavior = "Welcome loads bounded real previews in the background for visible .3dp scenes, supported models, raster recents, and embedded 3MF thumbnails, with icon fallback for unavailable previews."
 python_paths = ["src/main_window.py"]
@@ -1040,7 +1040,7 @@ next_slice = "RB-07"
 
 [[feature]]
 id = "builder3d.ui.rb06.button_audit"
-mcp_exempt = "visual only"
+mcp_tool = ["app_settings"]
 area = "shell"
 behavior = "Visible modelling, Object, Paint, View, Items, and dialog buttons have a live route, typed enablement/error handling, or a documented bounded limitation."
 python_paths = ["src/main_window.py", "src/toolbar.py", "src/viewport.py"]
@@ -1614,7 +1614,7 @@ next_slice = "RB-04"
 
 [[feature]]
 id = "builder3d.ui.items.sticky"
-mcp_exempt = "visual only"
+mcp_tool = ["set_app_settings"]
 area = "selection"
 behavior = "Sticky Selection retains selection after empty-space click; Deselect All is explicit clear."
 python_paths = ["src/main_window.py", "src/viewport.py", "src/scene.py"]
@@ -1911,7 +1911,7 @@ next_slice = "RB-04"
 
 [[feature]]
 id = "builder3d.ui.transform.units"
-mcp_exempt = "visual only"
+mcp_tool = ["set_app_settings"]
 area = "preferences"
 behavior = "Move/Resize display mm/in with 25.4 conversion; internal values stay mm; Rotate is degrees."
 python_paths = ["src/main_window.py", "src/toolbar.py", "src/constants.py"]
@@ -1938,7 +1938,7 @@ next_slice = "RB-04"
 
 [[feature]]
 id = "builder3d.ui.transform.resize_basis"
-mcp_exempt = "visual only"
+mcp_tool = ["set_app_settings"]
 area = "transforms"
 behavior = "Resize alignment toggles Grid/world axes or Object basis and appears only in Resize mode."
 python_paths = ["src/main_window.py", "src/toolbar.py", "src/gizmo.py", "src/application_services.py"]
@@ -1965,7 +1965,7 @@ next_slice = "RB-04"
 
 [[feature]]
 id = "builder3d.ui.transform.proportional_lock"
-mcp_exempt = "visual only"
+mcp_tool = ["set_app_settings", "set_transform"]
 area = "transforms"
 behavior = "Resize proportional lock scales each axis according to changed field ratio."
 python_paths = ["src/main_window.py", "src/toolbar.py", "src/gizmo.py", "src/application_services.py"]
@@ -3045,7 +3045,7 @@ next_slice = "RB-08"
 
 [[feature]]
 id = "builder3d.ui.settings.theme"
-mcp_exempt = "visual only"
+mcp_tool = ["set_app_settings"]
 area = "preferences"
 behavior = "Light/Dark applies immediately and persists; the original and Rust first-run theme are Dark."
 python_paths = ["src/main_window.py", "src/toolbar.py", "src/constants.py"]
@@ -3099,7 +3099,7 @@ next_slice = "RB-08"
 
 [[feature]]
 id = "builder3d.ui.settings.display_unit"
-mcp_exempt = "visual only"
+mcp_tool = ["set_app_settings"]
 area = "preferences"
 behavior = "Settings persists transform display units while internal values remain mm."
 python_paths = ["src/main_window.py", "src/toolbar.py", "src/constants.py"]
@@ -3153,7 +3153,7 @@ next_slice = "RB-08"
 
 [[feature]]
 id = "builder3d.ui.settings.clear_recents"
-mcp_exempt = "visual only"
+mcp_tool = ["recent_files"]
 area = "preferences"
 behavior = "Settings clears recent paths without deleting user files."
 python_paths = ["src/main_window.py", "src/toolbar.py", "src/constants.py"]
@@ -3180,7 +3180,7 @@ next_slice = "RB-08"
 
 [[feature]]
 id = "builder3d.ui.settings.about"
-mcp_exempt = "visual only"
+mcp_tool = ["show_screen", "app_settings"]
 area = "preferences"
 behavior = "About is available only from Settings, not the file menu."
 python_paths = ["src/main_window.py", "src/toolbar.py", "src/constants.py"]
@@ -3207,7 +3207,7 @@ next_slice = "RB-08"
 
 [[feature]]
 id = "builder3d.ui.ribbon.collapse_pin"
-mcp_exempt = "visual only"
+mcp_tool = ["set_app_settings", "show_screen"]
 area = "shell"
 behavior = "Click tab toggles command row; Pin keeps row open and persists."
 python_paths = ["src/main_window.py", "src/toolbar.py"]
@@ -3234,7 +3234,7 @@ next_slice = "RB-01"
 
 [[feature]]
 id = "builder3d.ui.ribbon.favorites"
-mcp_exempt = "visual only"
+mcp_tool = ["customize_ribbon"]
 area = "shell"
 behavior = "Favorites add/remove/reorder persist and overflow only when top row is tight."
 python_paths = ["src/main_window.py", "src/toolbar.py"]
@@ -3261,7 +3261,7 @@ next_slice = "RB-08"
 
 [[feature]]
 id = "builder3d.ui.ribbon.tab_order"
-mcp_exempt = "visual only"
+mcp_tool = ["customize_ribbon"]
 area = "shell"
 behavior = "Tab/Edit command order can be changed, persisted and reset per tab/defaults."
 python_paths = ["src/main_window.py", "src/toolbar.py"]
@@ -3288,7 +3288,7 @@ next_slice = "RB-08"
 
 [[feature]]
 id = "builder3d.ui.ribbon.utility_layout"
-mcp_exempt = "visual only"
+mcp_tool = ["app_settings", "capture_window"]
 area = "shell"
 behavior = "Top utility has Save/Save As/Undo/Redo and 3D Print in documented locations; hamburger alone at left."
 python_paths = ["src/main_window.py", "src/toolbar.py"]
@@ -3315,7 +3315,7 @@ next_slice = "RB-01"
 
 [[feature]]
 id = "builder3d.ui.artwork.theme_sets"
-mcp_exempt = "visual only"
+mcp_tool = ["set_app_settings", "capture_window"]
 area = "artwork"
 behavior = "Use owner transparent theme-specific artwork and exact mappings including ExRay/Subtract and Subdivide->Simplify."
 python_paths = ["src/icon_assets.py", "src/style.py", "src/branding.py"]
@@ -3342,7 +3342,7 @@ next_slice = "RB-01"
 
 [[feature]]
 id = "builder3d.audit.artwork.conflicts"
-mcp_exempt = "visual only"
+mcp_tool = ["capture_window"]
 area = "artwork"
 behavior = "Pin/Snap action PNG lookup shadows root pin.jpg/snap.png fallback; source maps Undo/Redo raster files though style guide describes generated curved arrows."
 python_paths = ["src/icon_assets.py", "src/style.py", "src/branding.py"]
@@ -3369,7 +3369,7 @@ next_slice = "RB-01"
 
 [[feature]]
 id = "builder3d.audit.theme.default_and_dark_palette"
-mcp_exempt = "visual only"
+mcp_tool = ["app_settings", "set_app_settings", "capture_window"]
 area = "appearance"
 behavior = "RB-00 found Python default Dark while Rust defaulted Light and used divergent dark tokens; RB-01 now sets Rust to Dark and copies the source tokens, with live visual review pending."
 python_paths = ["src/main_window.py", "src/image_color.py", "src/model_actions.py"]
@@ -3396,7 +3396,7 @@ next_slice = "RB-01"
 
 [[feature]]
 id = "builder3d.ui.branding.startup"
-mcp_exempt = "visual only"
+mcp_tool = ["app_settings", "capture_window"]
 area = "branding"
 behavior = "Startup applies Builder3D.ico and Builder3D.png splash; product title remains branded."
 python_paths = ["src/branding.py", "src/main.py"]
@@ -3585,7 +3585,7 @@ next_slice = "RB-04"
 
 [[feature]]
 id = "builder3d.ui.shortcut.exit"
-mcp_exempt = "visual only"
+mcp_tool = ["exit_app"]
 area = "shortcuts"
 behavior = "Ctrl+Q requests exit through dirty guard."
 python_paths = ["src/main_window.py", "src/scene.py"]
@@ -3853,7 +3853,7 @@ known_limits = ["The 2026-11-07 repair used a read-only current-reference tools/
 [[feature]]
 slice = "RB-01"
 id = "builder3d.ui.visual.theme_foundation"
-mcp_exempt = "visual only"
+mcp_tool = ["set_app_settings", "capture_window"]
 area = "appearance"
 behavior = "The shell uses the source Light and Dark tokens, platform UI font, and original Dark first-run default."
 python_paths = ["src/style.py", "src/main_window.py"]
@@ -3881,7 +3881,7 @@ next_slice = "RB-01"
 [[feature]]
 slice = "RB-01"
 id = "builder3d.ui.visual.ribbon_foundation"
-mcp_exempt = "visual only"
+mcp_tool = ["app_settings", "customize_ribbon", "capture_window"]
 area = "shell"
 behavior = "The ribbon uses the original hamburger/tabs/quick-access/print/utility order, source command-row geometry and transparent theme artwork."
 python_paths = ["src/main_window.py", "src/style.py"]
@@ -3909,7 +3909,7 @@ next_slice = "RB-01"
 [[feature]]
 slice = "RB-01"
 id = "builder3d.ui.visual.welcome_foundation"
-mcp_exempt = "visual only"
+mcp_tool = ["show_screen", "recent_files", "capture_window"]
 area = "welcome"
 behavior = "Welcome uses the original brandmark and action artwork with responsive project cards and source-matched surfaces."
 python_paths = ["src/main_window.py", "src/branding.py", "src/style.py"]
@@ -3937,7 +3937,7 @@ next_slice = "RB-01"
 [[feature]]
 slice = "RB-01"
 id = "builder3d.ui.visual.items_panel_foundation"
-mcp_exempt = "visual only"
+mcp_tool = ["scene_summary", "capture_window"]
 area = "object"
 behavior = "The right Items panel presents the source action-card hierarchy, object rows, primitive artwork, and compact panel proportions."
 python_paths = ["src/main_window.py", "src/style.py"]
@@ -3965,7 +3965,7 @@ next_slice = "RB-01"
 [[feature]]
 slice = "RB-01"
 id = "builder3d.ui.visual.transform_strip_foundation"
-mcp_exempt = "visual only"
+mcp_tool = ["set_app_settings", "set_transform", "capture_window"]
 area = "shell"
 behavior = "The shell presents contextual Move/Rotate/Resize modes and existing numeric fields in the original bottom-strip location."
 python_paths = ["src/toolbar.py", "src/main_window.py", "src/style.py"]
@@ -4127,7 +4127,7 @@ next_slice = "RB-04"
 
 [[feature]]
 id = "builder3d.ui.items.thumbnails"
-mcp_exempt = "visual only"
+mcp_tool = ["scene_summary", "capture_window"]
 area = "items"
 behavior = "Items thumbnails represent actual object geometry; hidden rows remain represented."
 python_paths = ["src/main_window.py"]

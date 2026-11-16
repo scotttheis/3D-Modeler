@@ -219,6 +219,11 @@ impl McpDesktopIntegration {
             if request.cancelled.load(Ordering::Acquire) {
                 continue;
             }
+            if request.name == "capture_window" {
+                // Answered from the screenshot callback once a frame is drawn.
+                self.start_window_capture(context, request);
+                continue;
+            }
             let result = self.call_tool(app, context, &request.name, request.arguments);
             let reply = match result {
                 Ok(result) => BridgeReply::success(result),
@@ -256,6 +261,23 @@ impl McpDesktopIntegration {
             return self.live_status(app, arguments);
         }
 
+        if self.server.is_shell_tool(name) {
+            // Settings, ribbon, screens and recent-file lists do not touch the
+            // document, so they work during a long operation; opening a file
+            // or exiting waits for it.
+            if self.active_operation.is_some() && matches!(name, "open_recent" | "exit_app") {
+                return Err(AdapterError::Busy);
+            }
+            let version = app.commands.mcp_document_version();
+            let result = self
+                .server
+                .call_shell_value(name, arguments, |args| app.call_shell_tool(name, args));
+            if result.is_ok() && name == "open_recent" {
+                app.synchronize_mcp_presentation(&version.project_id, version.revision, false);
+            }
+            return result;
+        }
+
         if self.active_operation.is_some() {
             if let Some(replay) = self.server.replay_value(name, &arguments)? {
                 return Ok(replay);
@@ -286,6 +308,68 @@ impl McpDesktopIntegration {
             Some(false) => self.call_synchronous(app, name, arguments),
             None => self.server.call_value(name, arguments),
         }
+    }
+
+    /// `capture_window` (OF-58): checks the call and the approved output path
+    /// now, then asks for a screenshot of the next frame; the callback writes
+    /// the PNG and answers the waiting MCP request itself.
+    fn start_window_capture(&self, context: &egui::Context, request: BridgeRequest) {
+        let prepared = self
+            .server
+            .prepare_shell_call("capture_window", &request.arguments)
+            .and_then(|args| {
+                let raw = args.get("path").and_then(Value::as_str).unwrap_or_default();
+                let overwrite = args
+                    .get("overwrite")
+                    .and_then(Value::as_bool)
+                    .unwrap_or(false);
+                if !Path::new(raw)
+                    .extension()
+                    .and_then(|extension| extension.to_str())
+                    .is_some_and(|extension| extension.eq_ignore_ascii_case("png"))
+                {
+                    return Err(AdapterError::Validation(
+                        "capture_window writes a .png file".to_owned(),
+                    ));
+                }
+                self.server.approved_write_path(raw, overwrite)
+            });
+        let path = match prepared {
+            Ok(path) => path,
+            Err(error) => {
+                let _ = request.response.send(BridgeReply::failure(error));
+                return;
+            }
+        };
+        let server = self.server.clone();
+        let response = request.response;
+        context.send_viewport_cmd(egui::ViewportCommand::Screenshot(
+            egui::ScreenshotCallback::new(move |image| {
+                let reply = crate::review_capture::save_png(&path, &image)
+                    .map_err(|error| {
+                        AdapterError::Internal(format!("could not write the PNG: {error}"))
+                    })
+                    .and_then(|()| {
+                        let bytes = fs::metadata(&path)
+                            .map_err(|error| AdapterError::Internal(error.to_string()))?
+                            .len();
+                        server.finish_shell_result(
+                            "capture_window",
+                            json!({
+                                "path": path.display().to_string(),
+                                "width_px": image.size[0],
+                                "height_px": image.size[1],
+                                "bytes": bytes,
+                            }),
+                        )
+                    });
+                let _ = response.send(match reply {
+                    Ok(result) => BridgeReply::success(result),
+                    Err(error) => BridgeReply::failure(error),
+                });
+            }),
+        ));
+        context.request_repaint();
     }
 
     fn live_status(&self, app: &Builder3dApp, arguments: Value) -> Result<Value, AdapterError> {
@@ -1054,6 +1138,64 @@ mod tests {
 
         drop(bridge);
         assert!(!descriptor_path.exists());
+        let _ = fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn shell_tools_route_to_the_desktop_and_capture_checks_its_path_first() {
+        let (root, descriptor_path) = temporary_descriptor();
+        fs::create_dir_all(&root).expect("root");
+        let config = R4Config::for_profile(
+            builder3d_mcp::Profile::Full,
+            builder3d_mcp::ApprovedRoots::from_paths(vec![root.clone()]).expect("roots"),
+        );
+        let bridge = McpDesktopBridge::start_at(descriptor_path.clone()).expect("start bridge");
+        let mut integration = McpDesktopIntegration {
+            server: R4Server::new(config.clone()),
+            config,
+            bridge,
+            active_operation: None,
+            stale_statuses: VecDeque::new(),
+            last_poll: Instant::now(),
+        };
+        let mut app = Builder3dApp::default();
+        let context = egui::Context::default();
+
+        // A read-only shell tool goes to the shell, not the document adapter.
+        let settings = integration
+            .call_tool(&mut app, &context, "app_settings", json!({}))
+            .expect("app settings");
+        assert_eq!(settings["about"]["product"], json!("Builder3D"));
+        assert_eq!(settings["screen"], json!("start"));
+
+        // capture_window answers bad paths at once, before any screenshot.
+        for (arguments, code) in [
+            (
+                json!({"path": root.join("shot.txt").display().to_string()}),
+                "invalid_input",
+            ),
+            (json!({"path": "C:/outside/shot.png"}), "path_policy"),
+            (json!({}), "invalid_input"),
+        ] {
+            let (sender, receiver) = mpsc::sync_channel(1);
+            integration.start_window_capture(
+                &context,
+                BridgeRequest {
+                    name: "capture_window".to_owned(),
+                    arguments,
+                    response: sender,
+                    cancelled: Arc::new(AtomicBool::new(false)),
+                },
+            );
+            let reply = receiver.try_recv().expect("immediate reply");
+            assert!(!reply.ok);
+            assert_eq!(
+                reply.error.as_ref().and_then(|error| error.get("code")),
+                Some(&json!(code))
+            );
+        }
+
+        drop(integration);
         let _ = fs::remove_dir_all(root);
     }
 

@@ -90,7 +90,7 @@ pub const CATALOG_VERSION: &str = "2026-09-25.1";
 
 /// The exact reference order.  Keep this list append-only unless the Python
 /// catalog version changes with an explicit compatibility decision.
-pub const TOOL_CATALOG: [ToolSpec; 66] = [
+pub const TOOL_CATALOG: [ToolSpec; 74] = [
     ToolSpec {
         name: "get_status",
         category: "inspection",
@@ -758,7 +758,111 @@ pub const TOOL_CATALOG: [ToolSpec; 66] = [
         long_running: false,
         profile: Profile::Observe,
     },
+    // Owner batch 7, OF-58 (D10): the MCP does everything the desktop does,
+    // including its settings, ribbon, recent files, screens, window and exit.
+    // These are carried out by the desktop shell; see `SHELL_TOOLS`.
+    ToolSpec {
+        name: "app_settings",
+        category: "application",
+        read_only: true,
+        destructive: false,
+        idempotent: true,
+        open_world: false,
+        long_running: false,
+        profile: Profile::Observe,
+    },
+    ToolSpec {
+        name: "set_app_settings",
+        category: "application",
+        read_only: false,
+        destructive: false,
+        idempotent: true,
+        open_world: false,
+        long_running: false,
+        profile: Profile::Model,
+    },
+    ToolSpec {
+        name: "customize_ribbon",
+        category: "application",
+        read_only: false,
+        destructive: false,
+        idempotent: true,
+        open_world: false,
+        long_running: false,
+        profile: Profile::Model,
+    },
+    ToolSpec {
+        name: "show_screen",
+        category: "application",
+        read_only: false,
+        destructive: false,
+        idempotent: true,
+        open_world: false,
+        long_running: false,
+        profile: Profile::Model,
+    },
+    ToolSpec {
+        name: "recent_files",
+        category: "files",
+        read_only: false,
+        destructive: false,
+        idempotent: false,
+        open_world: false,
+        long_running: false,
+        profile: Profile::Files,
+    },
+    ToolSpec {
+        name: "open_recent",
+        category: "files",
+        read_only: false,
+        destructive: false,
+        idempotent: false,
+        open_world: false,
+        long_running: false,
+        profile: Profile::Files,
+    },
+    ToolSpec {
+        name: "capture_window",
+        category: "files",
+        read_only: false,
+        destructive: false,
+        idempotent: false,
+        open_world: false,
+        long_running: false,
+        profile: Profile::Files,
+    },
+    ToolSpec {
+        name: "exit_app",
+        category: "application",
+        read_only: false,
+        destructive: true,
+        idempotent: false,
+        open_world: false,
+        long_running: false,
+        profile: Profile::Full,
+    },
 ];
+
+/// Tools carried out by the desktop shell rather than the MCP document
+/// (OF-58). The MCP crate owns their schemas and checks; the desktop bridge
+/// performs them with the same shell code its own buttons use, through
+/// `R4Server::call_shell_value`.
+pub const SHELL_TOOLS: [&str; 8] = [
+    "app_settings",
+    "set_app_settings",
+    "customize_ribbon",
+    "show_screen",
+    "recent_files",
+    "open_recent",
+    "capture_window",
+    "exit_app",
+];
+
+/// Returns whether a tool is carried out by the desktop shell.
+#[must_use]
+pub fn is_shell_tool(name: &str) -> bool {
+    SHELL_TOOLS.contains(&name)
+}
 
 /// Finds a catalog entry by its exact case-sensitive wire name.
 #[must_use]
@@ -772,7 +876,7 @@ mod tests {
 
     #[test]
     fn catalog_is_exactly_ordered_and_profile_monotonic() {
-        assert_eq!(TOOL_CATALOG.len(), 66);
+        assert_eq!(TOOL_CATALOG.len(), 74);
         assert_eq!(TOOL_CATALOG[0].name, "get_status");
         assert_eq!(TOOL_CATALOG[59].name, "launch_slicer");
         assert_eq!(TOOL_CATALOG[60].name, "rename_object");
@@ -781,6 +885,9 @@ mod tests {
         assert_eq!(TOOL_CATALOG[63].name, "apply_texture");
         assert_eq!(TOOL_CATALOG[64].name, "remove_texture");
         assert_eq!(TOOL_CATALOG[65].name, "measure");
+        assert_eq!(TOOL_CATALOG[66].name, "app_settings");
+        assert_eq!(TOOL_CATALOG[73].name, "exit_app");
+        assert!(SHELL_TOOLS.iter().all(|name| find_tool(name).is_some()));
         assert!(
             TOOL_CATALOG
                 .windows(2)
@@ -798,7 +905,7 @@ mod tests {
             .iter()
             .filter(|spec| spec.visible_in(Profile::Files))
             .count();
-        assert_eq!((observe, model, files), (8, 57, 65));
+        assert_eq!((observe, model, files), (9, 61, 72));
         assert!(Profile::Full.includes(Profile::Full));
         assert!(!Profile::Files.includes(Profile::Full));
         assert_eq!(Profile::parse(" MODEL "), Some(Profile::Model));

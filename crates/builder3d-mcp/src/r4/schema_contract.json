@@ -7835,6 +7835,523 @@
       ],
       "title": "transform_selectionOutput",
       "type": "object"
+    },
+    "d017a42f291242d40b5704c55db4645d02251aa9449dbd7055a7957a2eb04342": {
+      "additionalProperties": false,
+      "type": "object",
+      "title": "AppSettingsOutput",
+      "properties": {
+        "theme": {
+          "enum": [
+            "light",
+            "dark"
+          ],
+          "type": "string",
+          "title": "Theme"
+        },
+        "size": {
+          "enum": [
+            "normal",
+            "big"
+          ],
+          "type": "string",
+          "title": "Size"
+        },
+        "display_unit": {
+          "enum": [
+            "mm",
+            "in"
+          ],
+          "type": "string",
+          "title": "Display Unit",
+          "description": "Unit shown in the Move and Resize boxes. The model and MCP always use millimetres."
+        },
+        "default_import_unit": {
+          "enum": [
+            "um",
+            "mm",
+            "cm",
+            "m",
+            "in",
+            "ft"
+          ],
+          "type": "string",
+          "title": "Default Import Unit"
+        },
+        "sticky_selection": {
+          "type": "boolean",
+          "title": "Sticky Selection",
+          "description": "Clicking empty space keeps the selection."
+        },
+        "resize_basis": {
+          "enum": [
+            "grid",
+            "object"
+          ],
+          "type": "string",
+          "title": "Resize Basis"
+        },
+        "keep_proportions": {
+          "type": "boolean",
+          "title": "Keep Proportions"
+        },
+        "object_snapping": {
+          "type": "boolean",
+          "title": "Object Snapping"
+        },
+        "screen": {
+          "enum": [
+            "start",
+            "scene"
+          ],
+          "type": "string",
+          "title": "Screen",
+          "description": "start = the Welcome screen with recent files; scene = the 3D workspace."
+        },
+        "open_window": {
+          "anyOf": [
+            {
+              "enum": [
+                "settings",
+                "about"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Open Window"
+        },
+        "ribbon": {
+          "additionalProperties": false,
+          "type": "object",
+          "title": "RibbonState",
+          "properties": {
+            "pinned": {
+              "type": "boolean",
+              "title": "Pinned"
+            },
+            "open": {
+              "type": "boolean",
+              "title": "Open",
+              "description": "Whether the command row under the tabs is showing."
+            },
+            "active_tab": {
+              "type": "string",
+              "title": "Active Tab"
+            },
+            "favorites": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "title": "Favorites",
+              "description": "Favorite keys in strip order."
+            },
+            "tabs": {
+              "type": "array",
+              "items": {
+                "additionalProperties": false,
+                "type": "object",
+                "title": "RibbonTabState",
+                "properties": {
+                  "tab": {
+                    "type": "string",
+                    "title": "Tab"
+                  },
+                  "commands": {
+                    "type": "array",
+                    "items": {
+                      "additionalProperties": false,
+                      "type": "object",
+                      "title": "RibbonCommand",
+                      "properties": {
+                        "key": {
+                          "type": "string",
+                          "title": "Key",
+                          "description": "Favorite key, 'Tab:Label', e.g. 'Object:Duplicate'."
+                        },
+                        "label": {
+                          "type": "string",
+                          "title": "Label"
+                        },
+                        "enabled": {
+                          "type": "boolean",
+                          "title": "Enabled",
+                          "description": "Whether the button can be used right now."
+                        },
+                        "favorite": {
+                          "type": "boolean",
+                          "title": "Favorite"
+                        }
+                      },
+                      "required": [
+                        "key",
+                        "label",
+                        "enabled",
+                        "favorite"
+                      ]
+                    },
+                    "title": "Commands",
+                    "description": "In the order the ribbon shows them."
+                  }
+                },
+                "required": [
+                  "tab",
+                  "commands"
+                ]
+              },
+              "title": "Tabs"
+            }
+          },
+          "required": [
+            "pinned",
+            "open",
+            "active_tab",
+            "favorites",
+            "tabs"
+          ]
+        },
+        "recent_file_count": {
+          "type": "integer",
+          "minimum": 0,
+          "title": "Recent File Count"
+        },
+        "about": {
+          "additionalProperties": false,
+          "type": "object",
+          "title": "About",
+          "properties": {
+            "product": {
+              "type": "string",
+              "title": "Product"
+            },
+            "version": {
+              "type": "string",
+              "title": "Version"
+            },
+            "description": {
+              "type": "string",
+              "title": "Description"
+            }
+          },
+          "required": [
+            "product",
+            "version",
+            "description"
+          ]
+        },
+        "window_title": {
+          "type": "string",
+          "title": "Window Title"
+        },
+        "lighting": {
+          "additionalProperties": false,
+          "type": "object",
+          "title": "Lighting",
+          "properties": {
+            "screen_aligned": {
+              "type": "boolean",
+              "title": "Screen Aligned"
+            },
+            "azimuth_degrees": {
+              "type": "integer",
+              "minimum": -80,
+              "maximum": 80,
+              "title": "Azimuth Degrees"
+            },
+            "elevation_degrees": {
+              "type": "integer",
+              "minimum": 10,
+              "maximum": 85,
+              "title": "Elevation Degrees"
+            },
+            "intensity_percent": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 150,
+              "title": "Intensity Percent"
+            },
+            "ambient_percent": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 80,
+              "title": "Ambient Percent"
+            },
+            "specular_percent": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100,
+              "title": "Specular Percent"
+            },
+            "highlight_sharpness": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100,
+              "title": "Highlight Sharpness"
+            },
+            "contact_shadow_percent": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 200,
+              "title": "Contact Shadow Percent"
+            }
+          },
+          "required": [
+            "screen_aligned",
+            "azimuth_degrees",
+            "elevation_degrees",
+            "intensity_percent",
+            "ambient_percent",
+            "specular_percent",
+            "highlight_sharpness",
+            "contact_shadow_percent"
+          ]
+        },
+        "saved_slicer": {
+          "anyOf": [
+            {
+              "additionalProperties": false,
+              "type": "object",
+              "title": "SavedSlicer",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "title": "Path"
+                },
+                "label": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Label"
+                }
+              },
+              "required": [
+                "path"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Saved Slicer"
+        },
+        "message": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Message"
+        }
+      },
+      "required": [
+        "theme",
+        "size",
+        "display_unit",
+        "default_import_unit",
+        "sticky_selection",
+        "resize_basis",
+        "keep_proportions",
+        "object_snapping",
+        "screen",
+        "ribbon",
+        "recent_file_count",
+        "about",
+        "window_title",
+        "lighting"
+      ]
+    },
+    "f4f4e3559aedfd0d0746e41f61a91f00540745e5957121228d43cfaee003a10f": {
+      "additionalProperties": false,
+      "type": "object",
+      "title": "RecentFilesOutput",
+      "properties": {
+        "recent_files": {
+          "type": "array",
+          "items": {
+            "additionalProperties": false,
+            "type": "object",
+            "title": "RecentFile",
+            "properties": {
+              "index": {
+                "type": "integer",
+                "minimum": 0,
+                "title": "Index"
+              },
+              "path": {
+                "type": "string",
+                "title": "Path"
+              },
+              "name": {
+                "type": "string",
+                "title": "Name"
+              },
+              "kind": {
+                "enum": [
+                  "project",
+                  "model",
+                  "missing",
+                  "unsupported"
+                ],
+                "type": "string",
+                "title": "Kind"
+              }
+            },
+            "required": [
+              "index",
+              "path",
+              "name",
+              "kind"
+            ]
+          },
+          "title": "Recent Files",
+          "description": "Newest first, at most ten."
+        },
+        "removed": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "Removed"
+        },
+        "message": {
+          "type": "string",
+          "title": "Message"
+        }
+      },
+      "required": [
+        "recent_files",
+        "removed",
+        "message"
+      ]
+    },
+    "d40391dead11aaff23e1d1119b3a2a7c4cd01a6d8b225529f426ee5b4d7dceb6": {
+      "additionalProperties": false,
+      "type": "object",
+      "title": "OpenRecentOutput",
+      "properties": {
+        "path": {
+          "type": "string",
+          "title": "Path"
+        },
+        "kind": {
+          "enum": [
+            "project",
+            "model",
+            "missing"
+          ],
+          "type": "string",
+          "title": "Kind"
+        },
+        "opened": {
+          "type": "boolean",
+          "title": "Opened"
+        },
+        "message": {
+          "type": "string",
+          "title": "Message"
+        },
+        "project_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Project Id"
+        },
+        "scene_revision": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Scene Revision"
+        }
+      },
+      "required": [
+        "path",
+        "kind",
+        "opened",
+        "message"
+      ]
+    },
+    "e5bff4857153e0f580823a96277f2b29963194ae0355f481b0fd16b2e6a9c074": {
+      "additionalProperties": false,
+      "type": "object",
+      "title": "CaptureWindowOutput",
+      "properties": {
+        "path": {
+          "type": "string",
+          "title": "Path"
+        },
+        "width_px": {
+          "type": "integer",
+          "minimum": 1,
+          "title": "Width Px"
+        },
+        "height_px": {
+          "type": "integer",
+          "minimum": 1,
+          "title": "Height Px"
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "title": "Bytes"
+        }
+      },
+      "required": [
+        "path",
+        "width_px",
+        "height_px",
+        "bytes"
+      ]
+    },
+    "0b9701e97034d3e67ff35b65c4a4a5374abebf9cad0a43468479cb98b9c0caa4": {
+      "additionalProperties": false,
+      "type": "object",
+      "title": "ExitAppOutput",
+      "properties": {
+        "exiting": {
+          "type": "boolean",
+          "title": "Exiting"
+        },
+        "asked_user": {
+          "type": "boolean",
+          "title": "Asked User"
+        },
+        "message": {
+          "type": "string",
+          "title": "Message"
+        }
+      },
+      "required": [
+        "exiting",
+        "asked_user",
+        "message"
+      ]
     }
   },
   "tools": {
@@ -12726,6 +13243,553 @@
         "description": "Measure the straight distance between two ends, like the desktop Measure ruler. Each end is a point or an object; an object end is the point on its surface nearest the other end (two objects: their closest surface points, 0 when they touch). Read-only; never changes the scene."
       },
       "output_schema_id": "08c84ee8e816a42e7072a7453f1a9f85e6249da69cc0bb6685211df0b193bff9"
+    },
+    "app_settings": {
+      "input_schema": {
+        "properties": {},
+        "required": [],
+        "title": "app_settingsArguments",
+        "type": "object"
+      },
+      "output_schema_id": "d017a42f291242d40b5704c55db4645d02251aa9449dbd7055a7957a2eb04342"
+    },
+    "set_app_settings": {
+      "input_schema": {
+        "properties": {
+          "theme": {
+            "anyOf": [
+              {
+                "enum": [
+                  "light",
+                  "dark"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Theme",
+            "description": "Light or dark look, as the top-bar toggle and Settings set it."
+          },
+          "size": {
+            "anyOf": [
+              {
+                "enum": [
+                  "normal",
+                  "big"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Size",
+            "description": "Normal, or Big (everything twice the size)."
+          },
+          "display_unit": {
+            "anyOf": [
+              {
+                "enum": [
+                  "mm",
+                  "in"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Display Unit",
+            "description": "Unit shown in the Move and Resize boxes; values given to MCP stay millimetres."
+          },
+          "default_import_unit": {
+            "anyOf": [
+              {
+                "enum": [
+                  "um",
+                  "mm",
+                  "cm",
+                  "m",
+                  "in",
+                  "ft"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Default Import Unit",
+            "description": "Unit assumed for imported files that do not say."
+          },
+          "sticky_selection": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Sticky Selection",
+            "description": "Keep the selection when empty space is clicked."
+          },
+          "resize_basis": {
+            "anyOf": [
+              {
+                "enum": [
+                  "grid",
+                  "object"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Resize Basis",
+            "description": "Resize along the grid axes or the object's own axes."
+          },
+          "keep_proportions": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Keep Proportions",
+            "description": "Resize boxes change all three sizes together."
+          },
+          "ribbon_pinned": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Ribbon Pinned",
+            "description": "Keep the command row open."
+          },
+          "lighting": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "type": "object",
+                "title": "LightingChange",
+                "properties": {
+                  "screen_aligned": {
+                    "type": "boolean",
+                    "title": "Screen Aligned",
+                    "description": "Keep the key light fixed on the screen as the view turns."
+                  },
+                  "azimuth_degrees": {
+                    "type": "integer",
+                    "minimum": -80,
+                    "maximum": 80,
+                    "title": "Azimuth Degrees",
+                    "description": "Light angle across the screen; positive is to the left."
+                  },
+                  "elevation_degrees": {
+                    "type": "integer",
+                    "minimum": 10,
+                    "maximum": 85,
+                    "title": "Elevation Degrees",
+                    "description": "Light height."
+                  },
+                  "intensity_percent": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 150,
+                    "title": "Intensity Percent",
+                    "description": "Light strength."
+                  },
+                  "ambient_percent": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 80,
+                    "title": "Ambient Percent",
+                    "description": "Fill light."
+                  },
+                  "specular_percent": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100,
+                    "title": "Specular Percent",
+                    "description": "Highlight strength."
+                  },
+                  "highlight_sharpness": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100,
+                    "title": "Highlight Sharpness",
+                    "description": "Highlight sharpness."
+                  },
+                  "contact_shadow_percent": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 200,
+                    "title": "Contact Shadow Percent",
+                    "description": "Floor shadow strength."
+                  }
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Lighting",
+            "description": "Viewport light, highlight and floor shadow, as in Settings. Give only the values to change."
+          },
+          "reset_lighting": {
+            "default": false,
+            "title": "Reset Lighting",
+            "type": "boolean",
+            "description": "Put the lighting back to its defaults first."
+          },
+          "slicer": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Slicer",
+            "description": "Save this slicer for the Slicer button and launch_slicer: a key or path from discover_slicers."
+          },
+          "clear_slicer": {
+            "default": false,
+            "title": "Clear Slicer",
+            "type": "boolean",
+            "description": "Forget the saved slicer."
+          }
+        },
+        "required": [],
+        "title": "set_app_settingsArguments",
+        "type": "object"
+      },
+      "output_schema_id": "d017a42f291242d40b5704c55db4645d02251aa9449dbd7055a7957a2eb04342"
+    },
+    "customize_ribbon": {
+      "input_schema": {
+        "properties": {
+          "favorites": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Favorites",
+            "description": "The whole favorites strip, in order, as 'Tab:Label' keys (see app_settings)."
+          },
+          "add_favorite": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Add Favorite",
+            "description": "Append one 'Tab:Label' key to the favorites strip."
+          },
+          "remove_favorite": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Remove Favorite",
+            "description": "Remove one 'Tab:Label' key from the favorites strip."
+          },
+          "tab": {
+            "anyOf": [
+              {
+                "enum": [
+                  "Insert",
+                  "Object",
+                  "Edit",
+                  "Paint",
+                  "View"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Tab",
+            "description": "The tab whose command order tab_order sets or reset='tab_order' resets."
+          },
+          "tab_order": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Tab Order",
+            "description": "Command labels of tab in the new order; labels left out follow in their default order."
+          },
+          "reset": {
+            "anyOf": [
+              {
+                "enum": [
+                  "favorites",
+                  "tab_order",
+                  "all"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Reset",
+            "description": "favorites = default strip; tab_order = default order of tab; all = both, every tab."
+          }
+        },
+        "required": [],
+        "title": "customize_ribbonArguments",
+        "type": "object"
+      },
+      "output_schema_id": "d017a42f291242d40b5704c55db4645d02251aa9449dbd7055a7957a2eb04342"
+    },
+    "show_screen": {
+      "input_schema": {
+        "properties": {
+          "screen": {
+            "anyOf": [
+              {
+                "enum": [
+                  "start",
+                  "scene",
+                  "settings",
+                  "about"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Screen",
+            "description": "start = Welcome screen with recent files (the scene is kept); scene = the 3D workspace; settings / about open those windows."
+          },
+          "ribbon_tab": {
+            "anyOf": [
+              {
+                "enum": [
+                  "Insert",
+                  "Object",
+                  "Edit",
+                  "Paint",
+                  "View"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Ribbon Tab",
+            "description": "Show this ribbon tab (and open the command row)."
+          },
+          "ribbon_open": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Ribbon Open",
+            "description": "Open or fold the command row under the tabs (a pinned row stays open)."
+          }
+        },
+        "required": [],
+        "title": "show_screenArguments",
+        "type": "object"
+      },
+      "output_schema_id": "d017a42f291242d40b5704c55db4645d02251aa9449dbd7055a7957a2eb04342"
+    },
+    "recent_files": {
+      "input_schema": {
+        "properties": {
+          "action": {
+            "default": "list",
+            "enum": [
+              "list",
+              "remove",
+              "clear"
+            ],
+            "title": "Action",
+            "type": "string",
+            "description": "list, remove one entry, or clear the list. Files on disk are never touched."
+          },
+          "index": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Index",
+            "description": "Entry to remove (from list)."
+          },
+          "path": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Path",
+            "description": "Entry to remove, by its listed path."
+          }
+        },
+        "required": [],
+        "title": "recent_filesArguments",
+        "type": "object"
+      },
+      "output_schema_id": "f4f4e3559aedfd0d0746e41f61a91f00540745e5957121228d43cfaee003a10f"
+    },
+    "open_recent": {
+      "input_schema": {
+        "properties": {
+          "index": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Index",
+            "description": "Entry to open (from recent_files)."
+          },
+          "path": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Path",
+            "description": "Entry to open, by its listed path."
+          }
+        },
+        "required": [],
+        "title": "open_recentArguments",
+        "type": "object"
+      },
+      "output_schema_id": "d40391dead11aaff23e1d1119b3a2a7c4cd01a6d8b225529f426ee5b4d7dceb6"
+    },
+    "capture_window": {
+      "input_schema": {
+        "properties": {
+          "path": {
+            "minLength": 1,
+            "title": "Path",
+            "type": "string",
+            "description": "PNG file to write, inside an approved folder."
+          },
+          "overwrite": {
+            "default": false,
+            "title": "Overwrite",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "title": "capture_windowArguments",
+        "type": "object"
+      },
+      "output_schema_id": "e5bff4857153e0f580823a96277f2b29963194ae0355f481b0fd16b2e6a9c074"
+    },
+    "exit_app": {
+      "input_schema": {
+        "properties": {
+          "if_unsaved": {
+            "default": "refuse",
+            "enum": [
+              "refuse",
+              "ask",
+              "discard"
+            ],
+            "title": "If Unsaved",
+            "type": "string",
+            "description": "With unsaved changes: refuse (default; call save_project first), ask (show the desktop's save prompt to the user), or discard them."
+          }
+        },
+        "required": [],
+        "title": "exit_appArguments",
+        "type": "object"
+      },
+      "output_schema_id": "0b9701e97034d3e67ff35b65c4a4a5374abebf9cad0a43468479cb98b9c0caa4"
     }
   }
 }

@@ -2,8 +2,8 @@
 //!
 //! Every feature row in `evidence/rebuild/parity-matrix.toml` must name the MCP
 //! tool or tools that perform the desktop action (`mcp_tool = [...]`, each one
-//! in the published catalog) or be exempted as presentation only
-//! (`mcp_exempt = "visual only"`). A row with neither fails.
+//! in the published catalog). Owner decision D10 (OF-58, 2026-11-14): there are
+//! no "visual only" exemptions any more; a row without tools fails.
 
 use std::{collections::BTreeSet, fs, path::PathBuf};
 
@@ -50,7 +50,7 @@ fn ledger_rows() -> Vec<Row> {
 }
 
 #[test]
-fn every_desktop_action_has_an_mcp_tool_or_a_visual_only_exemption() {
+fn every_desktop_action_has_an_mcp_tool() {
     let catalog: BTreeSet<&str> = TOOL_CATALOG.iter().map(|spec| spec.name).collect();
     let rows = ledger_rows();
     assert!(rows.len() >= 147, "ledger rows: {}", rows.len());
@@ -64,20 +64,23 @@ fn every_desktop_action_has_an_mcp_tool_or_a_visual_only_exemption() {
                     }
                 }
             }
-            (None, Some(reason)) if reason == "visual only" => {}
-            _ => problems.push(format!(
-                "{}: needs mcp_tool = [..] or mcp_exempt = \"visual only\"",
+            (_, Some(reason)) => problems.push(format!(
+                "{}: mcp_exempt = {reason:?} is no longer allowed (D10); name its MCP tools",
                 row.id
             )),
+            _ => problems.push(format!("{}: needs mcp_tool = [..]", row.id)),
         }
     }
     assert!(problems.is_empty(), "{}", problems.join("\n"));
 }
 
 #[test]
-fn the_f12_tools_are_reachable_from_the_ledger() {
+fn the_f12_and_of58_tools_are_reachable_from_the_ledger() {
     let rows = ledger_rows();
-    for tool in ["rename_object", "set_visibility", "launch_slicer"] {
+    for tool in ["rename_object", "set_visibility", "launch_slicer"]
+        .into_iter()
+        .chain(builder3d_mcp::SHELL_TOOLS)
+    {
         assert!(
             rows.iter().any(|row| row
                 .tools

@@ -466,7 +466,6 @@ impl DialogState {
         self.prepared_print.as_ref()
     }
 
-    #[cfg(test)]
     pub(crate) const fn kind(&self) -> DialogKind {
         self.kind
     }
@@ -474,6 +473,16 @@ impl DialogState {
     #[cfg(test)]
     pub(crate) const fn theme_mode(&self) -> ThemeMode {
         self.theme_mode
+    }
+
+    /// Opens the About window over Settings, as Settings' About button does.
+    pub(crate) const fn open_about(&mut self) {
+        self.about_open = true;
+    }
+
+    /// Returns whether the About window is showing.
+    pub(crate) const fn about_is_open(&self) -> bool {
+        self.about_open
     }
 
     /// Settings and Simplify stay alongside the viewport (Simplify so the

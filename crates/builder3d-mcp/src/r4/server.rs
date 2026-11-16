@@ -330,10 +330,84 @@ impl R4Server {
     /// Calls one tool without going through JSON-RPC.  Integration tests use
     /// this same path as the stdio handler to avoid a second semantic adapter.
     pub fn call_value(&self, name: &str, arguments: Value) -> Result<Value, AdapterError> {
-        let _call_guard = self
-            .call_gate
-            .lock()
-            .map_err(|_| AdapterError::Internal("call mutex is poisoned".to_owned()))?;
+        self.call_checked(name, arguments, |spec, arguments| {
+            let result = self.dispatch(spec, arguments.clone())?;
+            self.shape_result(spec.name, &arguments, result)
+        })
+    }
+
+    /// Returns whether a published tool is carried out by the desktop shell
+    /// (settings, ribbon, recent files, screens, exit, window capture) rather
+    /// than by this adapter's document. See [`catalog::SHELL_TOOLS`].
+    #[must_use]
+    pub fn is_shell_tool(&self, name: &str) -> bool {
+        catalog::is_shell_tool(name)
+            && catalog::find_tool(name).is_some_and(|spec| spec.visible_in(self.config.profile))
+    }
+
+    /// Calls one desktop-shell tool (OF-58). The catalog, profile, argument
+    /// schema, replay and output-schema checks are exactly those of
+    /// [`Self::call_value`]; `perform` is the desktop's own implementation and
+    /// receives the normalized arguments. Only the fields declared in the
+    /// tool's output schema are returned.
+    pub fn call_shell_value(
+        &self,
+        name: &str,
+        arguments: Value,
+        perform: impl FnOnce(&Map<String, Value>) -> Result<Value, AdapterError>,
+    ) -> Result<Value, AdapterError> {
+        if !catalog::is_shell_tool(name) {
+            return Err(AdapterError::Internal(format!(
+                "{name} is not a desktop-shell tool"
+            )));
+        }
+        self.call_checked(name, arguments, |spec, arguments| {
+            let object = arguments.as_object().ok_or_else(|| {
+                AdapterError::Validation("arguments must be an object".to_owned())
+            })?;
+            let result = perform(object)?;
+            self.retain_declared_output_fields(spec.name, result)
+        })
+    }
+
+    /// Resolves a new output file under the approved roots, the same policy
+    /// `export_file` uses. Shell tools that write a file call this first.
+    pub fn approved_write_path(&self, raw: &str, overwrite: bool) -> Result<PathBuf, AdapterError> {
+        Ok(self.config.approved_roots.write_path(raw, overwrite)?)
+    }
+
+    /// First half of a deferred shell call (`capture_window`, whose result
+    /// arrives with a later frame): the catalog, profile, size and argument
+    /// schema checks of [`Self::call_value`]. Returns the normalized arguments.
+    pub fn prepare_shell_call(
+        &self,
+        name: &str,
+        arguments: &Value,
+    ) -> Result<Map<String, Value>, AdapterError> {
+        if !catalog::is_shell_tool(name) {
+            return Err(AdapterError::Internal(format!(
+                "{name} is not a desktop-shell tool"
+            )));
+        }
+        let (_, arguments) = self.checked_arguments(name, arguments)?;
+        arguments
+            .as_object()
+            .cloned()
+            .ok_or_else(|| AdapterError::Validation("arguments must be an object".to_owned()))
+    }
+
+    /// Second half of a deferred shell call: keeps the declared output fields
+    /// and applies the output-schema and size checks of [`Self::call_value`].
+    pub fn finish_shell_result(&self, name: &str, result: Value) -> Result<Value, AdapterError> {
+        let result = self.retain_declared_output_fields(name, result)?;
+        checked_result(name, result)
+    }
+
+    fn checked_arguments(
+        &self,
+        name: &str,
+        arguments: &Value,
+    ) -> Result<(ToolSpec, Value), AdapterError> {
         let spec = catalog::find_tool(name)
             .ok_or_else(|| AdapterError::NotFound(format!("unknown MCP tool: {name}")))?;
         if !spec.visible_in(self.config.profile) {
@@ -342,7 +416,7 @@ impl R4Server {
                 self.config.profile
             )));
         }
-        let argument_bytes = serde_json::to_vec(&arguments)
+        let argument_bytes = serde_json::to_vec(arguments)
             .map_err(|error| AdapterError::Validation(error.to_string()))?;
         if argument_bytes.len() > state::MAX_ARGUMENT_BYTES {
             return Err(AdapterError::Validation(format!(
@@ -351,7 +425,21 @@ impl R4Server {
             )));
         }
         let arguments =
-            schema::normalize_arguments(name, &arguments).map_err(AdapterError::Validation)?;
+            schema::normalize_arguments(name, arguments).map_err(AdapterError::Validation)?;
+        Ok((spec, arguments))
+    }
+
+    fn call_checked(
+        &self,
+        name: &str,
+        arguments: Value,
+        run: impl FnOnce(ToolSpec, Value) -> Result<Value, AdapterError>,
+    ) -> Result<Value, AdapterError> {
+        let _call_guard = self
+            .call_gate
+            .lock()
+            .map_err(|_| AdapterError::Internal("call mutex is poisoned".to_owned()))?;
+        let (spec, arguments) = self.checked_arguments(name, &arguments)?;
         let canonical_arguments = without_idempotency_key(&arguments);
         let replay_key = arguments
             .as_object()
@@ -373,21 +461,7 @@ impl R4Server {
             }
         }
 
-        let result = self.dispatch(spec, arguments.clone())?;
-        let result = self.shape_result(name, &arguments, result)?;
-        schema::validate_result(name, &result).map_err(|message| {
-            AdapterError::Internal(format!(
-                "tool {name} returned a value outside its declared output schema: {message}"
-            ))
-        })?;
-        let result_bytes = serde_json::to_vec(&result)
-            .map_err(|error| AdapterError::Internal(error.to_string()))?;
-        if result_bytes.len() > state::MAX_RESULT_BYTES {
-            return Err(AdapterError::Internal(format!(
-                "structured result exceeds {} bytes",
-                state::MAX_RESULT_BYTES
-            )));
-        }
+        let result = checked_result(name, run(spec, arguments)?)?;
         if let (Some(key), Some(fingerprint)) = (replay_key, replay_fingerprint) {
             let mut state = self.lock_state()?;
             state.replay.insert(key, fingerprint, result.clone());
@@ -877,6 +951,9 @@ impl R4Server {
             "launch_slicer" => Err(AdapterError::Internal(
                 "launch_slicer must be dispatched as a long operation".to_owned(),
             )),
+            name if catalog::is_shell_tool(name) => Err(AdapterError::Unavailable(format!(
+                "{name} is carried out by the running Builder3D desktop"
+            ))),
             _ => Err(AdapterError::NotFound(format!(
                 "tool {name} is not implemented"
             ))),
@@ -3073,6 +3150,23 @@ fn without_idempotency_key(arguments: &Value) -> Value {
     Value::Object(object)
 }
 
+fn checked_result(name: &str, result: Value) -> Result<Value, AdapterError> {
+    schema::validate_result(name, &result).map_err(|message| {
+        AdapterError::Internal(format!(
+            "tool {name} returned a value outside its declared output schema: {message}"
+        ))
+    })?;
+    let result_bytes =
+        serde_json::to_vec(&result).map_err(|error| AdapterError::Internal(error.to_string()))?;
+    if result_bytes.len() > state::MAX_RESULT_BYTES {
+        return Err(AdapterError::Internal(format!(
+            "structured result exceeds {} bytes",
+            state::MAX_RESULT_BYTES
+        )));
+    }
+    Ok(result)
+}
+
 fn validate_clipboard(objects: &[SceneObject]) -> Result<(), AdapterError> {
     if objects.len() > state::MAX_CLIPBOARD_OBJECTS {
         return Err(AdapterError::Validation(format!(
@@ -4080,15 +4174,82 @@ mod tests {
     }
 
     #[test]
+    fn shell_tools_keep_every_contract_check_and_need_the_desktop() {
+        let observe = server(Profile::Observe);
+        let server = server(Profile::Full);
+        // Without the desktop shell the document adapter cannot do them.
+        assert!(matches!(
+            server.call_value("app_settings", json!({})),
+            Err(AdapterError::Unavailable(_))
+        ));
+        assert!(server.is_shell_tool("exit_app"));
+        assert!(!server.is_shell_tool("translate"));
+        // Arguments are checked against the schema before the shell runs.
+        let mut ran = false;
+        let invalid = server.call_shell_value("set_app_settings", json!({"theme":"blue"}), |_| {
+            ran = true;
+            Ok(json!({}))
+        });
+        assert!(matches!(invalid, Err(AdapterError::Validation(_))));
+        assert!(!ran);
+        // Undeclared fields are dropped; a result outside the schema fails.
+        let result = server
+            .call_shell_value("exit_app", json!({"if_unsaved":"discard"}), |args| {
+                assert_eq!(args["if_unsaved"], json!("discard"));
+                Ok(json!({"exiting":true,"asked_user":false,"message":"bye","extra":1}))
+            })
+            .expect("exit result");
+        assert_eq!(
+            result,
+            json!({"exiting":true,"asked_user":false,"message":"bye"})
+        );
+        assert!(matches!(
+            server.call_shell_value("exit_app", json!({}), |_| Ok(json!({"exiting":true}))),
+            Err(AdapterError::Internal(_))
+        ));
+        assert!(matches!(
+            server.call_shell_value("translate", json!({}), |_| Ok(json!({}))),
+            Err(AdapterError::Internal(_))
+        ));
+        // A deferred call (capture_window) uses the same two checks.
+        assert!(
+            server
+                .prepare_shell_call("capture_window", &json!({}))
+                .is_err()
+        );
+        let args = server
+            .prepare_shell_call("capture_window", &json!({"path":"shot.png"}))
+            .expect("capture arguments");
+        assert_eq!(args.get("path"), Some(&json!("shot.png")));
+        assert!(
+            server
+                .finish_shell_result(
+                    "capture_window",
+                    json!({"path":"shot.png","width_px":0,"height_px":1,"bytes":1})
+                )
+                .is_err()
+        );
+        // Profiles still apply: exit_app is Full only, app_settings is Observe.
+        assert!(matches!(
+            observe.call_shell_value("exit_app", json!({}), |_| Ok(json!({}))),
+            Err(AdapterError::NotFound(_))
+        ));
+        assert!(observe.is_shell_tool("app_settings"));
+    }
+
+    #[test]
     fn full_profile_publishes_the_fixed_catalog_with_strict_metadata() {
         let server = server(Profile::Full);
         let tools = server.tools();
-        assert_eq!(tools.len(), 66);
+        assert_eq!(tools.len(), 74);
         assert_eq!(
             tools.first().map(|tool| tool.name.as_ref()),
             Some("get_status")
         );
-        assert_eq!(tools.last().map(|tool| tool.name.as_ref()), Some("measure"));
+        assert_eq!(
+            tools.last().map(|tool| tool.name.as_ref()),
+            Some("exit_app")
+        );
         let launch = tools.iter().find(|tool| tool.name == "launch_slicer");
         assert_eq!(
             launch
@@ -4306,7 +4467,7 @@ mod tests {
         let invalid = full.call_value("mirror", json!({"axis":"bad","index":0}));
         assert!(matches!(invalid, Err(AdapterError::Validation(_))));
         let observe = server(Profile::Observe);
-        assert_eq!(observe.tools().len(), 8);
+        assert_eq!(observe.tools().len(), 9);
         assert!(
             observe
                 .call_value("translate", json!({"index":0,"offset_mm":[1,0,0]}))

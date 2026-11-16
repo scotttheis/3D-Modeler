@@ -7,7 +7,7 @@ mod security;
 mod server;
 mod state;
 
-pub use catalog::{CATALOG_VERSION, Profile, TOOL_CATALOG, ToolSpec};
+pub use catalog::{CATALOG_VERSION, Profile, SHELL_TOOLS, TOOL_CATALOG, ToolSpec};
 pub use gateway::R4Gateway;
 pub use security::ApprovedRoots;
 pub use server::{AdapterError, R4Config, R4Document, R4Server};

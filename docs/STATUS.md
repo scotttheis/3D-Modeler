@@ -3,7 +3,7 @@
 The only place current status is written. Keep it to one screen. Plan:
 [`product-rebuild-plan.md`](product-rebuild-plan.md).
 
-Updated 2026-11-15. Full gate passed 2026-11-15 after Phase 4 OF-55 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board; the board now also takes `measure`, `measure-start`). Release exe rebuilt from the same source (3m53s) for the Phase 4 review pack.
+Updated 2026-11-15. Full gate passed 2026-11-15 after Phase 5 OF-58 (fmt, clippy, tests, deny, audit, MCP parity with no exemptions, smoke, capture board); a last small fix then passed the Fast gate. Release exe rebuilt from that source (3m49s) and driven live through the real MCP gateway for the Phase 5 review pack.
 
 Test releases (how-to: [`packaging.md`](packaging.md)): last is **RC1**,
 version 0.1.1, 2026-11-13, `E:\Builder3D-RC\Builder3D-RC1.msi` (50 MB),
@@ -43,11 +43,19 @@ a click-to-click ruler with snapping; new MCP tool `measure` (catalog 66).
 Owner's one request, Esc closes Measure in one press, done the same day.
 Phase 4 is closed.
 
+Phase 5 (OF-58, the AI does everything) built 2026-11-15, pack
+`evidence/rebuild/captures/2026-11-15-review-phase5-mcp/`. Eight new MCP
+tools (catalog 74): `app_settings`, `set_app_settings`, `customize_ribbon`,
+`show_screen`, `recent_files`, `open_recent`, `capture_window`, `exit_app`,
+carried out by the desktop shell with its own code. No "visual only" ledger
+rows remain. **Awaiting owner review.**
+
 **Known work, in order** (a session takes the first item not done):
 
 1. Done and approved 2026-11-15: Phase 3 follow-ups OF-59 to OF-61.
 2. Done and approved 2026-11-15: Phase 4 — Measure ruler (OF-55).
-3. Phase 5 — MCP does everything (OF-58).
+3. Phase 5 — MCP does everything (OF-58): built 2026-11-15, awaiting owner
+   review.
 4. F5 — release link reliability; F6 — reconcile the 148-row ledger
    (fix-first list below).
 5. Revisit the Material texture dialog (OF-46 follow-up): the owner wants to
@@ -70,13 +78,14 @@ the next stop message, not guessed.
 | `cargo test --workspace --locked --no-fail-fast` | Pass (2026-11-12, after the shadow follow-up and the MCP Merge color change) |
 | `cargo deny check` | Pass 2026-11-12 (advisories, bans, licenses, sources ok; warning: `async-executor 1.14.0` yanked, Linux accessibility path only) |
 | `cargo audit` | Pass 2026-11-12 — 0 vulnerabilities in 493 crates; 5 allowed warnings (4 unmaintained already accepted in `deny.toml`, 1 yanked as above). Tool installed 2026-11-12 |
-| MCP catalog parity check | Pass 2026-11-13 (`cargo test -p builder3d-mcp --test ledger_parity`; all 147 ledger rows map to a catalog tool or "visual only") |
+| MCP catalog parity check | Pass 2026-11-15 (`cargo test -p builder3d-mcp --test ledger_parity`; all 148 ledger rows map to catalog tools; exemptions now fail, D10) |
 | Release (fat LTO) build | `cargo build --release -p builder3d-app` passed twice on 2026-11-12 (4m50s, 3m43s); failed with LLVM out-of-memory on 2026-11-11 |
 | `review` profile build | Pass (3m56s clean build; capture verified) |
 
 ## Last review pack
 
-`evidence/rebuild/captures/2026-11-15-review-phase4-measure/` (OF-55),
+`evidence/rebuild/captures/2026-11-15-review-phase5-mcp/` (OF-58), awaiting
+owner review. `evidence/rebuild/captures/2026-11-15-review-phase4-measure/` (OF-55),
 approved by the owner 2026-11-15. `evidence/rebuild/captures/2026-11-15-review-phase3-followups/` (OF-59 to
 OF-61), approved by the owner 2026-11-15. `evidence/rebuild/captures/2026-11-14-review-phase3/` (Phase 3: OF-48 to
 OF-54), reviewed by the owner 2026-11-15. `evidence/rebuild/captures/2026-11-14-review-phase2/` (Phase 2: OF-44 and
@@ -215,6 +224,10 @@ owner batch 7.
   `BUILDER3D_REVIEW_INTERACTIVE=1` stays open with isolated settings for
   hands-on checks. States `texture`, `texture-dialog` take pictures from
   `BUILDER3D_REVIEW_TEXTURES` (`;`-separated paths).
+
+- 2026-11-15 (found during the OF-58 live run, not fixed): on a first start
+  that migrates the Python settings, the yellow "Imported supported Python
+  settings" notice is drawn over the ribbon button labels. Pre-existing.
 
 ## Last recovery point
 

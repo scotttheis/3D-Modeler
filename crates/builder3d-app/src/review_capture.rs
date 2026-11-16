@@ -424,7 +424,7 @@ fn parse_numbers<const N: usize>(value: &str) -> Option<[f32; N]> {
     <[f32; N]>::try_from(parts).ok()
 }
 
-fn save_png(path: &Path, image: &egui::ColorImage) -> Result<(), String> {
+pub(crate) fn save_png(path: &Path, image: &egui::ColorImage) -> Result<(), String> {
     if let Some(parent) = path.parent()
         && !parent.as_os_str().is_empty()
     {

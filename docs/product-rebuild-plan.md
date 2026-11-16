@@ -173,7 +173,10 @@ D1 approved by the owner on 2026-11-12. In force:
   model also changes the MCP side and adds an MCP test proving the same
   result. A desktop-only behaviour change is incomplete and fails review.
 - **Purely visual work is exempt** (floor labels, hover, shadows, captures),
-  because it does not change the model or the document. View toggles that
+  because it does not change the model or the document. *Superseded by D10
+  (2026-11-14, built as OF-58): no exemptions; app settings, ribbon, recent
+  files, screens, exit and a window picture (`capture_window`) all have MCP
+  tools, and the parity check fails any `mcp_exempt` row.* View toggles that
   MCP already exposes (`set_view`, `view_preset`, `frame_view`) must keep
   matching the desktop.
 - **Catalog growth.** The 60 tools captured from the Python build keep their

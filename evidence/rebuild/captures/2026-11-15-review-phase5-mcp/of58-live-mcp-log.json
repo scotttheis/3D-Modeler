@@ -1,0 +1,3164 @@
+{
+  "tools_listed": 74,
+  "calls": [
+    {
+      "tool": "app_settings",
+      "arguments": {},
+      "ok": true,
+      "result": {
+        "about": {
+          "description": "A reverse-engineering-informed 3D model repair and building application.",
+          "product": "Builder3D",
+          "version": "0.1.0"
+        },
+        "default_import_unit": "mm",
+        "display_unit": "mm",
+        "keep_proportions": false,
+        "lighting": {
+          "ambient_percent": 32,
+          "azimuth_degrees": 30,
+          "contact_shadow_percent": 100,
+          "elevation_degrees": 55,
+          "highlight_sharpness": 36,
+          "intensity_percent": 100,
+          "screen_aligned": true,
+          "specular_percent": 0
+        },
+        "message": null,
+        "object_snapping": true,
+        "open_window": null,
+        "recent_file_count": 0,
+        "resize_basis": "grid",
+        "ribbon": {
+          "active_tab": "Insert",
+          "favorites": [
+            "Insert:Cube",
+            "Object:Duplicate",
+            "Object:Delete",
+            "View:Reset View"
+          ],
+          "open": true,
+          "pinned": false,
+          "tabs": [
+            {
+              "commands": [
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Add/Open",
+                  "label": "Add/Open"
+                },
+                {
+                  "enabled": true,
+                  "favorite": true,
+                  "key": "Insert:Cube",
+                  "label": "Cube"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Cylinder",
+                  "label": "Cylinder"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Pyramid",
+                  "label": "Pyramid"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Cone",
+                  "label": "Cone"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Sphere",
+                  "label": "Sphere"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Torus",
+                  "label": "Torus"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Hexagon",
+                  "label": "Hexagon"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Wedge",
+                  "label": "Wedge"
+                }
+              ],
+              "tab": "Insert"
+            },
+            {
+              "commands": [
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Edit Torus",
+                  "label": "Edit Torus"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Repair",
+                  "label": "Repair"
+                },
+                {
+                  "enabled": false,
+                  "favorite": true,
+                  "key": "Object:Duplicate",
+                  "label": "Duplicate"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Copy",
+                  "label": "Copy"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Paste",
+                  "label": "Paste"
+                },
+                {
+                  "enabled": false,
+                  "favorite": true,
+                  "key": "Object:Delete",
+                  "label": "Delete"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Settle",
+                  "label": "Settle"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Mirror",
+                  "label": "Mirror"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Measure",
+                  "label": "Measure"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Align",
+                  "label": "Align"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Arrange",
+                  "label": "Arrange"
+                }
+              ],
+              "tab": "Object"
+            },
+            {
+              "commands": [
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Simplify",
+                  "label": "Simplify"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Subdivide",
+                  "label": "Subdivide"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Smooth",
+                  "label": "Smooth"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Grab",
+                  "label": "Grab"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Crease",
+                  "label": "Crease"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Smooth Brush",
+                  "label": "Smooth Brush"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Blob",
+                  "label": "Blob"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Merge",
+                  "label": "Merge"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Emboss",
+                  "label": "Emboss"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Hollow",
+                  "label": "Hollow"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Intersect",
+                  "label": "Intersect"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Subtract",
+                  "label": "Subtract"
+                }
+              ],
+              "tab": "Edit"
+            },
+            {
+              "commands": [
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Paint:Material",
+                  "label": "Material"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Paint:Paint",
+                  "label": "Paint"
+                }
+              ],
+              "tab": "Paint"
+            },
+            {
+              "commands": [
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Center View",
+                  "label": "Center View"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "View:Frame",
+                  "label": "Frame"
+                },
+                {
+                  "enabled": true,
+                  "favorite": true,
+                  "key": "View:Reset View",
+                  "label": "Reset View"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Top",
+                  "label": "Top"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Side",
+                  "label": "Side"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Grid",
+                  "label": "Grid"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Wireframe",
+                  "label": "Wireframe"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:X-Ray",
+                  "label": "X-Ray"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Snap",
+                  "label": "Snap"
+                }
+              ],
+              "tab": "View"
+            }
+          ]
+        },
+        "saved_slicer": null,
+        "screen": "start",
+        "size": "normal",
+        "sticky_selection": false,
+        "theme": "dark",
+        "window_title": "Builder3D - Untitled"
+      }
+    },
+    {
+      "tool": "set_app_settings",
+      "arguments": {
+        "theme": "light",
+        "display_unit": "in"
+      },
+      "ok": true,
+      "result": {
+        "about": {
+          "description": "A reverse-engineering-informed 3D model repair and building application.",
+          "product": "Builder3D",
+          "version": "0.1.0"
+        },
+        "default_import_unit": "mm",
+        "display_unit": "in",
+        "keep_proportions": false,
+        "lighting": {
+          "ambient_percent": 32,
+          "azimuth_degrees": 30,
+          "contact_shadow_percent": 100,
+          "elevation_degrees": 55,
+          "highlight_sharpness": 36,
+          "intensity_percent": 100,
+          "screen_aligned": true,
+          "specular_percent": 0
+        },
+        "message": "Changed theme, display unit",
+        "object_snapping": true,
+        "open_window": null,
+        "recent_file_count": 0,
+        "resize_basis": "grid",
+        "ribbon": {
+          "active_tab": "Insert",
+          "favorites": [
+            "Insert:Cube",
+            "Object:Duplicate",
+            "Object:Delete",
+            "View:Reset View"
+          ],
+          "open": true,
+          "pinned": false,
+          "tabs": [
+            {
+              "commands": [
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Add/Open",
+                  "label": "Add/Open"
+                },
+                {
+                  "enabled": true,
+                  "favorite": true,
+                  "key": "Insert:Cube",
+                  "label": "Cube"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Cylinder",
+                  "label": "Cylinder"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Pyramid",
+                  "label": "Pyramid"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Cone",
+                  "label": "Cone"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Sphere",
+                  "label": "Sphere"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Torus",
+                  "label": "Torus"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Hexagon",
+                  "label": "Hexagon"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Wedge",
+                  "label": "Wedge"
+                }
+              ],
+              "tab": "Insert"
+            },
+            {
+              "commands": [
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Edit Torus",
+                  "label": "Edit Torus"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Repair",
+                  "label": "Repair"
+                },
+                {
+                  "enabled": false,
+                  "favorite": true,
+                  "key": "Object:Duplicate",
+                  "label": "Duplicate"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Copy",
+                  "label": "Copy"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Paste",
+                  "label": "Paste"
+                },
+                {
+                  "enabled": false,
+                  "favorite": true,
+                  "key": "Object:Delete",
+                  "label": "Delete"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Settle",
+                  "label": "Settle"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Mirror",
+                  "label": "Mirror"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Measure",
+                  "label": "Measure"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Align",
+                  "label": "Align"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Arrange",
+                  "label": "Arrange"
+                }
+              ],
+              "tab": "Object"
+            },
+            {
+              "commands": [
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Simplify",
+                  "label": "Simplify"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Subdivide",
+                  "label": "Subdivide"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Smooth",
+                  "label": "Smooth"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Grab",
+                  "label": "Grab"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Crease",
+                  "label": "Crease"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Smooth Brush",
+                  "label": "Smooth Brush"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Blob",
+                  "label": "Blob"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Merge",
+                  "label": "Merge"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Emboss",
+                  "label": "Emboss"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Hollow",
+                  "label": "Hollow"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Intersect",
+                  "label": "Intersect"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Subtract",
+                  "label": "Subtract"
+                }
+              ],
+              "tab": "Edit"
+            },
+            {
+              "commands": [
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Paint:Material",
+                  "label": "Material"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Paint:Paint",
+                  "label": "Paint"
+                }
+              ],
+              "tab": "Paint"
+            },
+            {
+              "commands": [
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Center View",
+                  "label": "Center View"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "View:Frame",
+                  "label": "Frame"
+                },
+                {
+                  "enabled": true,
+                  "favorite": true,
+                  "key": "View:Reset View",
+                  "label": "Reset View"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Top",
+                  "label": "Top"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Side",
+                  "label": "Side"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Grid",
+                  "label": "Grid"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Wireframe",
+                  "label": "Wireframe"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:X-Ray",
+                  "label": "X-Ray"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Snap",
+                  "label": "Snap"
+                }
+              ],
+              "tab": "View"
+            }
+          ]
+        },
+        "saved_slicer": null,
+        "screen": "start",
+        "size": "normal",
+        "sticky_selection": false,
+        "theme": "light",
+        "window_title": "Builder3D - Untitled"
+      }
+    },
+    {
+      "tool": "add_primitive",
+      "arguments": {
+        "primitive": "cube"
+      },
+      "ok": true,
+      "result": {
+        "changed_object_ids": [
+          "58e40a63b44c453b993aefd79b3c64ad"
+        ],
+        "color": [
+          0.25,
+          0.550000011920929,
+          0.949999988079071,
+          1.0
+        ],
+        "index": 0,
+        "mesh_health": {
+          "body_count": 1,
+          "boundary_edge_loops": 0,
+          "boundary_edges": 0,
+          "degenerate_faces": 0,
+          "duplicate_faces": 0,
+          "is_volume": true,
+          "issues": [],
+          "non_manifold_edges": 0,
+          "self_intersection_status": "not checked: optional self-intersection accelerator unavailable",
+          "self_intersections": null,
+          "tiny_shells": 0,
+          "triangles": 12,
+          "valid": true,
+          "vertices": 8,
+          "watertight": true,
+          "winding_consistent": true
+        },
+        "name": "Object 1",
+        "object_id": "58e40a63b44c453b993aefd79b3c64ad",
+        "position_mm": [
+          0.0,
+          20.0,
+          0.0
+        ],
+        "project_id": "ddfedc2bfa5f4ad89357ab2e7a80bc43",
+        "rotation_deg": [
+          -0.0,
+          0.0,
+          -0.0
+        ],
+        "scene_revision": 1,
+        "size_mm": [
+          40.0,
+          40.0,
+          40.0
+        ],
+        "triangles": 12,
+        "vertices": 8,
+        "visible": true
+      }
+    },
+    {
+      "tool": "customize_ribbon",
+      "arguments": {
+        "add_favorite": "Object:Mirror"
+      },
+      "ok": true,
+      "result": {
+        "about": {
+          "description": "A reverse-engineering-informed 3D model repair and building application.",
+          "product": "Builder3D",
+          "version": "0.1.0"
+        },
+        "default_import_unit": "mm",
+        "display_unit": "in",
+        "keep_proportions": false,
+        "lighting": {
+          "ambient_percent": 32,
+          "azimuth_degrees": 30,
+          "contact_shadow_percent": 100,
+          "elevation_degrees": 55,
+          "highlight_sharpness": 36,
+          "intensity_percent": 100,
+          "screen_aligned": true,
+          "specular_percent": 0
+        },
+        "message": "Ribbon updated",
+        "object_snapping": true,
+        "open_window": null,
+        "recent_file_count": 0,
+        "resize_basis": "grid",
+        "ribbon": {
+          "active_tab": "Insert",
+          "favorites": [
+            "Insert:Cube",
+            "Object:Duplicate",
+            "Object:Delete",
+            "View:Reset View",
+            "Object:Mirror"
+          ],
+          "open": true,
+          "pinned": false,
+          "tabs": [
+            {
+              "commands": [
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Add/Open",
+                  "label": "Add/Open"
+                },
+                {
+                  "enabled": true,
+                  "favorite": true,
+                  "key": "Insert:Cube",
+                  "label": "Cube"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Cylinder",
+                  "label": "Cylinder"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Pyramid",
+                  "label": "Pyramid"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Cone",
+                  "label": "Cone"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Sphere",
+                  "label": "Sphere"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Torus",
+                  "label": "Torus"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Hexagon",
+                  "label": "Hexagon"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Wedge",
+                  "label": "Wedge"
+                }
+              ],
+              "tab": "Insert"
+            },
+            {
+              "commands": [
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Edit Torus",
+                  "label": "Edit Torus"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Repair",
+                  "label": "Repair"
+                },
+                {
+                  "enabled": false,
+                  "favorite": true,
+                  "key": "Object:Duplicate",
+                  "label": "Duplicate"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Copy",
+                  "label": "Copy"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Paste",
+                  "label": "Paste"
+                },
+                {
+                  "enabled": false,
+                  "favorite": true,
+                  "key": "Object:Delete",
+                  "label": "Delete"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Settle",
+                  "label": "Settle"
+                },
+                {
+                  "enabled": false,
+                  "favorite": true,
+                  "key": "Object:Mirror",
+                  "label": "Mirror"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Object:Measure",
+                  "label": "Measure"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Align",
+                  "label": "Align"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Arrange",
+                  "label": "Arrange"
+                }
+              ],
+              "tab": "Object"
+            },
+            {
+              "commands": [
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Simplify",
+                  "label": "Simplify"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Subdivide",
+                  "label": "Subdivide"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Smooth",
+                  "label": "Smooth"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Edit:Grab",
+                  "label": "Grab"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Edit:Crease",
+                  "label": "Crease"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Edit:Smooth Brush",
+                  "label": "Smooth Brush"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Edit:Blob",
+                  "label": "Blob"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Merge",
+                  "label": "Merge"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Emboss",
+                  "label": "Emboss"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Hollow",
+                  "label": "Hollow"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Intersect",
+                  "label": "Intersect"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Subtract",
+                  "label": "Subtract"
+                }
+              ],
+              "tab": "Edit"
+            },
+            {
+              "commands": [
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Paint:Material",
+                  "label": "Material"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Paint:Paint",
+                  "label": "Paint"
+                }
+              ],
+              "tab": "Paint"
+            },
+            {
+              "commands": [
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Center View",
+                  "label": "Center View"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "View:Frame",
+                  "label": "Frame"
+                },
+                {
+                  "enabled": true,
+                  "favorite": true,
+                  "key": "View:Reset View",
+                  "label": "Reset View"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Top",
+                  "label": "Top"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Side",
+                  "label": "Side"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Grid",
+                  "label": "Grid"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Wireframe",
+                  "label": "Wireframe"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:X-Ray",
+                  "label": "X-Ray"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Snap",
+                  "label": "Snap"
+                }
+              ],
+              "tab": "View"
+            }
+          ]
+        },
+        "saved_slicer": null,
+        "screen": "scene",
+        "size": "normal",
+        "sticky_selection": false,
+        "theme": "light",
+        "window_title": "Builder3D - Untitled *"
+      }
+    },
+    {
+      "tool": "show_screen",
+      "arguments": {
+        "screen": "scene",
+        "ribbon_tab": "Object"
+      },
+      "ok": true,
+      "result": {
+        "about": {
+          "description": "A reverse-engineering-informed 3D model repair and building application.",
+          "product": "Builder3D",
+          "version": "0.1.0"
+        },
+        "default_import_unit": "mm",
+        "display_unit": "in",
+        "keep_proportions": false,
+        "lighting": {
+          "ambient_percent": 32,
+          "azimuth_degrees": 30,
+          "contact_shadow_percent": 100,
+          "elevation_degrees": 55,
+          "highlight_sharpness": 36,
+          "intensity_percent": 100,
+          "screen_aligned": true,
+          "specular_percent": 0
+        },
+        "message": "Showing the scene; Ribbon tab shown",
+        "object_snapping": true,
+        "open_window": null,
+        "recent_file_count": 0,
+        "resize_basis": "grid",
+        "ribbon": {
+          "active_tab": "Object",
+          "favorites": [
+            "Insert:Cube",
+            "Object:Duplicate",
+            "Object:Delete",
+            "View:Reset View",
+            "Object:Mirror"
+          ],
+          "open": true,
+          "pinned": false,
+          "tabs": [
+            {
+              "commands": [
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Add/Open",
+                  "label": "Add/Open"
+                },
+                {
+                  "enabled": true,
+                  "favorite": true,
+                  "key": "Insert:Cube",
+                  "label": "Cube"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Cylinder",
+                  "label": "Cylinder"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Pyramid",
+                  "label": "Pyramid"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Cone",
+                  "label": "Cone"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Sphere",
+                  "label": "Sphere"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Torus",
+                  "label": "Torus"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Hexagon",
+                  "label": "Hexagon"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Wedge",
+                  "label": "Wedge"
+                }
+              ],
+              "tab": "Insert"
+            },
+            {
+              "commands": [
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Edit Torus",
+                  "label": "Edit Torus"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Repair",
+                  "label": "Repair"
+                },
+                {
+                  "enabled": false,
+                  "favorite": true,
+                  "key": "Object:Duplicate",
+                  "label": "Duplicate"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Copy",
+                  "label": "Copy"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Paste",
+                  "label": "Paste"
+                },
+                {
+                  "enabled": false,
+                  "favorite": true,
+                  "key": "Object:Delete",
+                  "label": "Delete"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Settle",
+                  "label": "Settle"
+                },
+                {
+                  "enabled": false,
+                  "favorite": true,
+                  "key": "Object:Mirror",
+                  "label": "Mirror"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Object:Measure",
+                  "label": "Measure"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Align",
+                  "label": "Align"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Arrange",
+                  "label": "Arrange"
+                }
+              ],
+              "tab": "Object"
+            },
+            {
+              "commands": [
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Simplify",
+                  "label": "Simplify"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Subdivide",
+                  "label": "Subdivide"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Smooth",
+                  "label": "Smooth"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Edit:Grab",
+                  "label": "Grab"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Edit:Crease",
+                  "label": "Crease"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Edit:Smooth Brush",
+                  "label": "Smooth Brush"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Edit:Blob",
+                  "label": "Blob"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Merge",
+                  "label": "Merge"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Emboss",
+                  "label": "Emboss"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Hollow",
+                  "label": "Hollow"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Intersect",
+                  "label": "Intersect"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Subtract",
+                  "label": "Subtract"
+                }
+              ],
+              "tab": "Edit"
+            },
+            {
+              "commands": [
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Paint:Material",
+                  "label": "Material"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Paint:Paint",
+                  "label": "Paint"
+                }
+              ],
+              "tab": "Paint"
+            },
+            {
+              "commands": [
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Center View",
+                  "label": "Center View"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "View:Frame",
+                  "label": "Frame"
+                },
+                {
+                  "enabled": true,
+                  "favorite": true,
+                  "key": "View:Reset View",
+                  "label": "Reset View"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Top",
+                  "label": "Top"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Side",
+                  "label": "Side"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Grid",
+                  "label": "Grid"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Wireframe",
+                  "label": "Wireframe"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:X-Ray",
+                  "label": "X-Ray"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Snap",
+                  "label": "Snap"
+                }
+              ],
+              "tab": "View"
+            }
+          ]
+        },
+        "saved_slicer": null,
+        "screen": "scene",
+        "size": "normal",
+        "sticky_selection": false,
+        "theme": "light",
+        "window_title": "Builder3D - Untitled *"
+      }
+    },
+    {
+      "tool": "capture_window",
+      "arguments": {
+        "path": "E:/Builder3D-Rust/evidence/rebuild/captures/2026-11-15-review-phase5-mcp/of58-light-object-tab.png",
+        "overwrite": true
+      },
+      "ok": true,
+      "result": {
+        "bytes": 238257,
+        "height_px": 840,
+        "path": "\\\\?\\E:\\Builder3D-Rust\\evidence\\rebuild\\captures\\2026-11-15-review-phase5-mcp\\of58-light-object-tab.png",
+        "width_px": 1280
+      }
+    },
+    {
+      "tool": "set_app_settings",
+      "arguments": {
+        "theme": "dark"
+      },
+      "ok": true,
+      "result": {
+        "about": {
+          "description": "A reverse-engineering-informed 3D model repair and building application.",
+          "product": "Builder3D",
+          "version": "0.1.0"
+        },
+        "default_import_unit": "mm",
+        "display_unit": "in",
+        "keep_proportions": false,
+        "lighting": {
+          "ambient_percent": 32,
+          "azimuth_degrees": 30,
+          "contact_shadow_percent": 100,
+          "elevation_degrees": 55,
+          "highlight_sharpness": 36,
+          "intensity_percent": 100,
+          "screen_aligned": true,
+          "specular_percent": 0
+        },
+        "message": "Changed theme",
+        "object_snapping": true,
+        "open_window": null,
+        "recent_file_count": 0,
+        "resize_basis": "grid",
+        "ribbon": {
+          "active_tab": "Object",
+          "favorites": [
+            "Insert:Cube",
+            "Object:Duplicate",
+            "Object:Delete",
+            "View:Reset View",
+            "Object:Mirror"
+          ],
+          "open": true,
+          "pinned": false,
+          "tabs": [
+            {
+              "commands": [
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Add/Open",
+                  "label": "Add/Open"
+                },
+                {
+                  "enabled": true,
+                  "favorite": true,
+                  "key": "Insert:Cube",
+                  "label": "Cube"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Cylinder",
+                  "label": "Cylinder"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Pyramid",
+                  "label": "Pyramid"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Cone",
+                  "label": "Cone"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Sphere",
+                  "label": "Sphere"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Torus",
+                  "label": "Torus"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Hexagon",
+                  "label": "Hexagon"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Wedge",
+                  "label": "Wedge"
+                }
+              ],
+              "tab": "Insert"
+            },
+            {
+              "commands": [
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Edit Torus",
+                  "label": "Edit Torus"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Repair",
+                  "label": "Repair"
+                },
+                {
+                  "enabled": false,
+                  "favorite": true,
+                  "key": "Object:Duplicate",
+                  "label": "Duplicate"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Copy",
+                  "label": "Copy"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Paste",
+                  "label": "Paste"
+                },
+                {
+                  "enabled": false,
+                  "favorite": true,
+                  "key": "Object:Delete",
+                  "label": "Delete"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Settle",
+                  "label": "Settle"
+                },
+                {
+                  "enabled": false,
+                  "favorite": true,
+                  "key": "Object:Mirror",
+                  "label": "Mirror"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Object:Measure",
+                  "label": "Measure"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Align",
+                  "label": "Align"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Arrange",
+                  "label": "Arrange"
+                }
+              ],
+              "tab": "Object"
+            },
+            {
+              "commands": [
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Simplify",
+                  "label": "Simplify"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Subdivide",
+                  "label": "Subdivide"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Smooth",
+                  "label": "Smooth"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Edit:Grab",
+                  "label": "Grab"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Edit:Crease",
+                  "label": "Crease"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Edit:Smooth Brush",
+                  "label": "Smooth Brush"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Edit:Blob",
+                  "label": "Blob"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Merge",
+                  "label": "Merge"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Emboss",
+                  "label": "Emboss"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Hollow",
+                  "label": "Hollow"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Intersect",
+                  "label": "Intersect"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Subtract",
+                  "label": "Subtract"
+                }
+              ],
+              "tab": "Edit"
+            },
+            {
+              "commands": [
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Paint:Material",
+                  "label": "Material"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Paint:Paint",
+                  "label": "Paint"
+                }
+              ],
+              "tab": "Paint"
+            },
+            {
+              "commands": [
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Center View",
+                  "label": "Center View"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "View:Frame",
+                  "label": "Frame"
+                },
+                {
+                  "enabled": true,
+                  "favorite": true,
+                  "key": "View:Reset View",
+                  "label": "Reset View"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Top",
+                  "label": "Top"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Side",
+                  "label": "Side"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Grid",
+                  "label": "Grid"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Wireframe",
+                  "label": "Wireframe"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:X-Ray",
+                  "label": "X-Ray"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Snap",
+                  "label": "Snap"
+                }
+              ],
+              "tab": "View"
+            }
+          ]
+        },
+        "saved_slicer": null,
+        "screen": "scene",
+        "size": "normal",
+        "sticky_selection": false,
+        "theme": "dark",
+        "window_title": "Builder3D - Untitled *"
+      }
+    },
+    {
+      "tool": "show_screen",
+      "arguments": {
+        "screen": "about"
+      },
+      "ok": true,
+      "result": {
+        "about": {
+          "description": "A reverse-engineering-informed 3D model repair and building application.",
+          "product": "Builder3D",
+          "version": "0.1.0"
+        },
+        "default_import_unit": "mm",
+        "display_unit": "in",
+        "keep_proportions": false,
+        "lighting": {
+          "ambient_percent": 32,
+          "azimuth_degrees": 30,
+          "contact_shadow_percent": 100,
+          "elevation_degrees": 55,
+          "highlight_sharpness": 36,
+          "intensity_percent": 100,
+          "screen_aligned": true,
+          "specular_percent": 0
+        },
+        "message": "About is open",
+        "object_snapping": true,
+        "open_window": "about",
+        "recent_file_count": 0,
+        "resize_basis": "grid",
+        "ribbon": {
+          "active_tab": "Object",
+          "favorites": [
+            "Insert:Cube",
+            "Object:Duplicate",
+            "Object:Delete",
+            "View:Reset View",
+            "Object:Mirror"
+          ],
+          "open": true,
+          "pinned": false,
+          "tabs": [
+            {
+              "commands": [
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Add/Open",
+                  "label": "Add/Open"
+                },
+                {
+                  "enabled": true,
+                  "favorite": true,
+                  "key": "Insert:Cube",
+                  "label": "Cube"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Cylinder",
+                  "label": "Cylinder"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Pyramid",
+                  "label": "Pyramid"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Cone",
+                  "label": "Cone"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Sphere",
+                  "label": "Sphere"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Torus",
+                  "label": "Torus"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Hexagon",
+                  "label": "Hexagon"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Wedge",
+                  "label": "Wedge"
+                }
+              ],
+              "tab": "Insert"
+            },
+            {
+              "commands": [
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Edit Torus",
+                  "label": "Edit Torus"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Repair",
+                  "label": "Repair"
+                },
+                {
+                  "enabled": false,
+                  "favorite": true,
+                  "key": "Object:Duplicate",
+                  "label": "Duplicate"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Copy",
+                  "label": "Copy"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Paste",
+                  "label": "Paste"
+                },
+                {
+                  "enabled": false,
+                  "favorite": true,
+                  "key": "Object:Delete",
+                  "label": "Delete"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Settle",
+                  "label": "Settle"
+                },
+                {
+                  "enabled": false,
+                  "favorite": true,
+                  "key": "Object:Mirror",
+                  "label": "Mirror"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Object:Measure",
+                  "label": "Measure"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Align",
+                  "label": "Align"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Arrange",
+                  "label": "Arrange"
+                }
+              ],
+              "tab": "Object"
+            },
+            {
+              "commands": [
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Simplify",
+                  "label": "Simplify"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Subdivide",
+                  "label": "Subdivide"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Smooth",
+                  "label": "Smooth"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Edit:Grab",
+                  "label": "Grab"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Edit:Crease",
+                  "label": "Crease"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Edit:Smooth Brush",
+                  "label": "Smooth Brush"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Edit:Blob",
+                  "label": "Blob"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Merge",
+                  "label": "Merge"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Emboss",
+                  "label": "Emboss"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Hollow",
+                  "label": "Hollow"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Intersect",
+                  "label": "Intersect"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Subtract",
+                  "label": "Subtract"
+                }
+              ],
+              "tab": "Edit"
+            },
+            {
+              "commands": [
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Paint:Material",
+                  "label": "Material"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Paint:Paint",
+                  "label": "Paint"
+                }
+              ],
+              "tab": "Paint"
+            },
+            {
+              "commands": [
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Center View",
+                  "label": "Center View"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "View:Frame",
+                  "label": "Frame"
+                },
+                {
+                  "enabled": true,
+                  "favorite": true,
+                  "key": "View:Reset View",
+                  "label": "Reset View"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Top",
+                  "label": "Top"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Side",
+                  "label": "Side"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Grid",
+                  "label": "Grid"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Wireframe",
+                  "label": "Wireframe"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:X-Ray",
+                  "label": "X-Ray"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Snap",
+                  "label": "Snap"
+                }
+              ],
+              "tab": "View"
+            }
+          ]
+        },
+        "saved_slicer": null,
+        "screen": "scene",
+        "size": "normal",
+        "sticky_selection": false,
+        "theme": "dark",
+        "window_title": "Builder3D - Untitled *"
+      }
+    },
+    {
+      "tool": "capture_window",
+      "arguments": {
+        "path": "E:/Builder3D-Rust/evidence/rebuild/captures/2026-11-15-review-phase5-mcp/of58-dark-about.png",
+        "overwrite": true
+      },
+      "ok": true,
+      "result": {
+        "bytes": 704607,
+        "height_px": 840,
+        "path": "\\\\?\\E:\\Builder3D-Rust\\evidence\\rebuild\\captures\\2026-11-15-review-phase5-mcp\\of58-dark-about.png",
+        "width_px": 1280
+      }
+    },
+    {
+      "tool": "show_screen",
+      "arguments": {
+        "screen": "start"
+      },
+      "ok": true,
+      "result": {
+        "about": {
+          "description": "A reverse-engineering-informed 3D model repair and building application.",
+          "product": "Builder3D",
+          "version": "0.1.0"
+        },
+        "default_import_unit": "mm",
+        "display_unit": "in",
+        "keep_proportions": false,
+        "lighting": {
+          "ambient_percent": 32,
+          "azimuth_degrees": 30,
+          "contact_shadow_percent": 100,
+          "elevation_degrees": 55,
+          "highlight_sharpness": 36,
+          "intensity_percent": 100,
+          "screen_aligned": true,
+          "specular_percent": 0
+        },
+        "message": "Showing the start screen",
+        "object_snapping": true,
+        "open_window": null,
+        "recent_file_count": 0,
+        "resize_basis": "grid",
+        "ribbon": {
+          "active_tab": "Object",
+          "favorites": [
+            "Insert:Cube",
+            "Object:Duplicate",
+            "Object:Delete",
+            "View:Reset View",
+            "Object:Mirror"
+          ],
+          "open": true,
+          "pinned": false,
+          "tabs": [
+            {
+              "commands": [
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Add/Open",
+                  "label": "Add/Open"
+                },
+                {
+                  "enabled": true,
+                  "favorite": true,
+                  "key": "Insert:Cube",
+                  "label": "Cube"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Cylinder",
+                  "label": "Cylinder"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Pyramid",
+                  "label": "Pyramid"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Cone",
+                  "label": "Cone"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Sphere",
+                  "label": "Sphere"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Torus",
+                  "label": "Torus"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Hexagon",
+                  "label": "Hexagon"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Wedge",
+                  "label": "Wedge"
+                }
+              ],
+              "tab": "Insert"
+            },
+            {
+              "commands": [
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Edit Torus",
+                  "label": "Edit Torus"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Repair",
+                  "label": "Repair"
+                },
+                {
+                  "enabled": false,
+                  "favorite": true,
+                  "key": "Object:Duplicate",
+                  "label": "Duplicate"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Copy",
+                  "label": "Copy"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Paste",
+                  "label": "Paste"
+                },
+                {
+                  "enabled": false,
+                  "favorite": true,
+                  "key": "Object:Delete",
+                  "label": "Delete"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Settle",
+                  "label": "Settle"
+                },
+                {
+                  "enabled": false,
+                  "favorite": true,
+                  "key": "Object:Mirror",
+                  "label": "Mirror"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Object:Measure",
+                  "label": "Measure"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Align",
+                  "label": "Align"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Arrange",
+                  "label": "Arrange"
+                }
+              ],
+              "tab": "Object"
+            },
+            {
+              "commands": [
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Simplify",
+                  "label": "Simplify"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Subdivide",
+                  "label": "Subdivide"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Smooth",
+                  "label": "Smooth"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Edit:Grab",
+                  "label": "Grab"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Edit:Crease",
+                  "label": "Crease"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Edit:Smooth Brush",
+                  "label": "Smooth Brush"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Edit:Blob",
+                  "label": "Blob"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Merge",
+                  "label": "Merge"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Emboss",
+                  "label": "Emboss"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Hollow",
+                  "label": "Hollow"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Intersect",
+                  "label": "Intersect"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Subtract",
+                  "label": "Subtract"
+                }
+              ],
+              "tab": "Edit"
+            },
+            {
+              "commands": [
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Paint:Material",
+                  "label": "Material"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Paint:Paint",
+                  "label": "Paint"
+                }
+              ],
+              "tab": "Paint"
+            },
+            {
+              "commands": [
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Center View",
+                  "label": "Center View"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "View:Frame",
+                  "label": "Frame"
+                },
+                {
+                  "enabled": true,
+                  "favorite": true,
+                  "key": "View:Reset View",
+                  "label": "Reset View"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Top",
+                  "label": "Top"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Side",
+                  "label": "Side"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Grid",
+                  "label": "Grid"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Wireframe",
+                  "label": "Wireframe"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:X-Ray",
+                  "label": "X-Ray"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Snap",
+                  "label": "Snap"
+                }
+              ],
+              "tab": "View"
+            }
+          ]
+        },
+        "saved_slicer": null,
+        "screen": "start",
+        "size": "normal",
+        "sticky_selection": false,
+        "theme": "dark",
+        "window_title": "Builder3D - Untitled *"
+      }
+    },
+    {
+      "tool": "capture_window",
+      "arguments": {
+        "path": "E:/Builder3D-Rust/evidence/rebuild/captures/2026-11-15-review-phase5-mcp/of58-dark-start.png",
+        "overwrite": true
+      },
+      "ok": true,
+      "result": {
+        "bytes": 248085,
+        "height_px": 840,
+        "path": "\\\\?\\E:\\Builder3D-Rust\\evidence\\rebuild\\captures\\2026-11-15-review-phase5-mcp\\of58-dark-start.png",
+        "width_px": 1280
+      }
+    },
+    {
+      "tool": "recent_files",
+      "arguments": {},
+      "ok": true,
+      "result": {
+        "message": "Recent files, newest first",
+        "recent_files": [],
+        "removed": []
+      }
+    },
+    {
+      "tool": "capture_window",
+      "arguments": {
+        "path": "C:/Windows/of58.png"
+      },
+      "ok": false,
+      "result": {
+        "code": "path_policy",
+        "details": {},
+        "message": "path is outside the configured approved roots: \\\\?\\C:\\Windows",
+        "retryable": false
+      }
+    },
+    {
+      "tool": "exit_app",
+      "arguments": {},
+      "ok": false,
+      "result": {
+        "code": "revision_conflict",
+        "details": {},
+        "message": "revision conflict: the current project has unsaved changes; save it first, or pass if_unsaved=ask or if_unsaved=discard",
+        "retryable": true
+      }
+    },
+    {
+      "tool": "customize_ribbon",
+      "arguments": {
+        "reset": "all"
+      },
+      "ok": true,
+      "result": {
+        "about": {
+          "description": "A reverse-engineering-informed 3D model repair and building application.",
+          "product": "Builder3D",
+          "version": "0.1.0"
+        },
+        "default_import_unit": "mm",
+        "display_unit": "in",
+        "keep_proportions": false,
+        "lighting": {
+          "ambient_percent": 32,
+          "azimuth_degrees": 30,
+          "contact_shadow_percent": 100,
+          "elevation_degrees": 55,
+          "highlight_sharpness": 36,
+          "intensity_percent": 100,
+          "screen_aligned": true,
+          "specular_percent": 0
+        },
+        "message": "Ribbon updated",
+        "object_snapping": true,
+        "open_window": null,
+        "recent_file_count": 0,
+        "resize_basis": "grid",
+        "ribbon": {
+          "active_tab": "Object",
+          "favorites": [
+            "Insert:Cube",
+            "Object:Duplicate",
+            "Object:Delete",
+            "View:Reset View"
+          ],
+          "open": true,
+          "pinned": false,
+          "tabs": [
+            {
+              "commands": [
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Add/Open",
+                  "label": "Add/Open"
+                },
+                {
+                  "enabled": true,
+                  "favorite": true,
+                  "key": "Insert:Cube",
+                  "label": "Cube"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Cylinder",
+                  "label": "Cylinder"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Pyramid",
+                  "label": "Pyramid"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Cone",
+                  "label": "Cone"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Sphere",
+                  "label": "Sphere"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Torus",
+                  "label": "Torus"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Hexagon",
+                  "label": "Hexagon"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Wedge",
+                  "label": "Wedge"
+                }
+              ],
+              "tab": "Insert"
+            },
+            {
+              "commands": [
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Edit Torus",
+                  "label": "Edit Torus"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Repair",
+                  "label": "Repair"
+                },
+                {
+                  "enabled": false,
+                  "favorite": true,
+                  "key": "Object:Duplicate",
+                  "label": "Duplicate"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Copy",
+                  "label": "Copy"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Paste",
+                  "label": "Paste"
+                },
+                {
+                  "enabled": false,
+                  "favorite": true,
+                  "key": "Object:Delete",
+                  "label": "Delete"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Settle",
+                  "label": "Settle"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Mirror",
+                  "label": "Mirror"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Object:Measure",
+                  "label": "Measure"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Align",
+                  "label": "Align"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Arrange",
+                  "label": "Arrange"
+                }
+              ],
+              "tab": "Object"
+            },
+            {
+              "commands": [
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Simplify",
+                  "label": "Simplify"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Subdivide",
+                  "label": "Subdivide"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Smooth",
+                  "label": "Smooth"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Edit:Grab",
+                  "label": "Grab"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Edit:Crease",
+                  "label": "Crease"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Edit:Smooth Brush",
+                  "label": "Smooth Brush"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Edit:Blob",
+                  "label": "Blob"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Merge",
+                  "label": "Merge"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Emboss",
+                  "label": "Emboss"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Hollow",
+                  "label": "Hollow"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Intersect",
+                  "label": "Intersect"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Subtract",
+                  "label": "Subtract"
+                }
+              ],
+              "tab": "Edit"
+            },
+            {
+              "commands": [
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Paint:Material",
+                  "label": "Material"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Paint:Paint",
+                  "label": "Paint"
+                }
+              ],
+              "tab": "Paint"
+            },
+            {
+              "commands": [
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Center View",
+                  "label": "Center View"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "View:Frame",
+                  "label": "Frame"
+                },
+                {
+                  "enabled": true,
+                  "favorite": true,
+                  "key": "View:Reset View",
+                  "label": "Reset View"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Top",
+                  "label": "Top"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Side",
+                  "label": "Side"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Grid",
+                  "label": "Grid"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Wireframe",
+                  "label": "Wireframe"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:X-Ray",
+                  "label": "X-Ray"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Snap",
+                  "label": "Snap"
+                }
+              ],
+              "tab": "View"
+            }
+          ]
+        },
+        "saved_slicer": null,
+        "screen": "start",
+        "size": "normal",
+        "sticky_selection": false,
+        "theme": "dark",
+        "window_title": "Builder3D - Untitled *"
+      }
+    },
+    {
+      "tool": "set_app_settings",
+      "arguments": {
+        "theme": "dark",
+        "display_unit": "mm"
+      },
+      "ok": true,
+      "result": {
+        "about": {
+          "description": "A reverse-engineering-informed 3D model repair and building application.",
+          "product": "Builder3D",
+          "version": "0.1.0"
+        },
+        "default_import_unit": "mm",
+        "display_unit": "mm",
+        "keep_proportions": false,
+        "lighting": {
+          "ambient_percent": 32,
+          "azimuth_degrees": 30,
+          "contact_shadow_percent": 100,
+          "elevation_degrees": 55,
+          "highlight_sharpness": 36,
+          "intensity_percent": 100,
+          "screen_aligned": true,
+          "specular_percent": 0
+        },
+        "message": "Changed display unit",
+        "object_snapping": true,
+        "open_window": null,
+        "recent_file_count": 0,
+        "resize_basis": "grid",
+        "ribbon": {
+          "active_tab": "Object",
+          "favorites": [
+            "Insert:Cube",
+            "Object:Duplicate",
+            "Object:Delete",
+            "View:Reset View"
+          ],
+          "open": true,
+          "pinned": false,
+          "tabs": [
+            {
+              "commands": [
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Add/Open",
+                  "label": "Add/Open"
+                },
+                {
+                  "enabled": true,
+                  "favorite": true,
+                  "key": "Insert:Cube",
+                  "label": "Cube"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Cylinder",
+                  "label": "Cylinder"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Pyramid",
+                  "label": "Pyramid"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Cone",
+                  "label": "Cone"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Sphere",
+                  "label": "Sphere"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Torus",
+                  "label": "Torus"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Hexagon",
+                  "label": "Hexagon"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Insert:Wedge",
+                  "label": "Wedge"
+                }
+              ],
+              "tab": "Insert"
+            },
+            {
+              "commands": [
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Edit Torus",
+                  "label": "Edit Torus"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Repair",
+                  "label": "Repair"
+                },
+                {
+                  "enabled": false,
+                  "favorite": true,
+                  "key": "Object:Duplicate",
+                  "label": "Duplicate"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Copy",
+                  "label": "Copy"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Paste",
+                  "label": "Paste"
+                },
+                {
+                  "enabled": false,
+                  "favorite": true,
+                  "key": "Object:Delete",
+                  "label": "Delete"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Settle",
+                  "label": "Settle"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Mirror",
+                  "label": "Mirror"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Object:Measure",
+                  "label": "Measure"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Align",
+                  "label": "Align"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Object:Arrange",
+                  "label": "Arrange"
+                }
+              ],
+              "tab": "Object"
+            },
+            {
+              "commands": [
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Simplify",
+                  "label": "Simplify"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Subdivide",
+                  "label": "Subdivide"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Smooth",
+                  "label": "Smooth"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Edit:Grab",
+                  "label": "Grab"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Edit:Crease",
+                  "label": "Crease"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Edit:Smooth Brush",
+                  "label": "Smooth Brush"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Edit:Blob",
+                  "label": "Blob"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Merge",
+                  "label": "Merge"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Emboss",
+                  "label": "Emboss"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Hollow",
+                  "label": "Hollow"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Intersect",
+                  "label": "Intersect"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "Edit:Subtract",
+                  "label": "Subtract"
+                }
+              ],
+              "tab": "Edit"
+            },
+            {
+              "commands": [
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Paint:Material",
+                  "label": "Material"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "Paint:Paint",
+                  "label": "Paint"
+                }
+              ],
+              "tab": "Paint"
+            },
+            {
+              "commands": [
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Center View",
+                  "label": "Center View"
+                },
+                {
+                  "enabled": false,
+                  "favorite": false,
+                  "key": "View:Frame",
+                  "label": "Frame"
+                },
+                {
+                  "enabled": true,
+                  "favorite": true,
+                  "key": "View:Reset View",
+                  "label": "Reset View"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Top",
+                  "label": "Top"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Side",
+                  "label": "Side"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Grid",
+                  "label": "Grid"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Wireframe",
+                  "label": "Wireframe"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:X-Ray",
+                  "label": "X-Ray"
+                },
+                {
+                  "enabled": true,
+                  "favorite": false,
+                  "key": "View:Snap",
+                  "label": "Snap"
+                }
+              ],
+              "tab": "View"
+            }
+          ]
+        },
+        "saved_slicer": null,
+        "screen": "start",
+        "size": "normal",
+        "sticky_selection": false,
+        "theme": "dark",
+        "window_title": "Builder3D - Untitled *"
+      }
+    },
+    {
+      "tool": "exit_app",
+      "arguments": {
+        "if_unsaved": "discard"
+      },
+      "ok": true,
+      "result": {
+        "asked_user": false,
+        "exiting": true,
+        "message": "Closing Builder3D without saving"
+      }
+    }
+  ]
+}

@@ -6,8 +6,10 @@
 
 use crate::chrome::{CONTROL_HEIGHT, Glyph, RADIUS_CONTROL, ROW_HEIGHT};
 
+mod app_tools;
 mod measure_ruler;
 mod paint_bar;
+use app_tools::{RecentOpen, recent_is_project};
 use measure_ruler::MeasureMode;
 use paint_bar::PaintMode;
 use std::{
@@ -1694,10 +1696,7 @@ impl Builder3dApp {
     fn choose_slicer(&mut self, slicer: SlicerInfo) {
         self.slicer_chooser_open = false;
         self.slicer_choices.clear();
-        self.commands
-            .preferences_mut()
-            .set_preferred_slicer(Some(slicer.path.clone()), Some(slicer.label.clone()));
-        self.persist_preferences();
+        self.apply_preferred_slicer(Some(slicer.path.clone()), Some(slicer.label.clone()));
         self.send_to_slicer(slicer);
     }
 
@@ -2211,9 +2210,7 @@ impl Builder3dApp {
             ThemeMode::Light => ThemeMode::Dark,
             ThemeMode::Dark => ThemeMode::Light,
         };
-        self.theme_mode = mode;
-        self.commands.preferences_mut().set_theme_mode(mode);
-        self.persist_preferences();
+        self.apply_theme_mode(mode);
     }
 
     fn render_menu_and_utility(&mut self, ui: &mut Ui, palette: ThemePalette) {
@@ -2432,7 +2429,7 @@ impl Builder3dApp {
         }
         if let Some(command) = menu_command {
             if command == CommandId::Builder3dMenu {
-                self.surface = WorkspaceSurface::Welcome;
+                self.show_start_screen();
             } else if command == CommandId::Exit {
                 self.request_exit();
             } else {
@@ -2719,16 +2716,13 @@ impl Builder3dApp {
                     self.ribbon_expanded = !self.ribbon_expanded;
                 }
             } else {
-                self.active_tab = tab;
-                self.ribbon_expanded = true;
-                self.artwork_cache.clear();
+                self.show_ribbon_tab(tab);
             }
         }
         active_rect
     }
 
     fn render_active_tab(&mut self, ui: &mut Ui, palette: ThemePalette) {
-        let default_items = tab_commands(self.active_tab);
         let original_items = ribbon_spec()
             .into_iter()
             .find_map(|(tab, items)| (tab == self.active_tab).then_some(items))
@@ -2741,23 +2735,7 @@ impl Builder3dApp {
                 RibbonItem::Separator => separator_positions.push(command_position),
             }
         }
-        let defaults = default_items
-            .iter()
-            .map(|command| command.label.to_owned())
-            .collect::<Vec<_>>();
-        let requested = self
-            .commands
-            .preferences()
-            .ribbon_order(self.active_tab.label())
-            .map(|values| values.to_vec())
-            .unwrap_or_default();
-        let order = normalized_tab_order(requested, &defaults);
-        let mut commands = Vec::new();
-        for label in order {
-            if let Some(command) = default_items.iter().find(|item| item.label == label) {
-                commands.push(*command);
-            }
-        }
+        let commands = self.ordered_tab_commands(self.active_tab);
         ui.horizontal(|ui| {
             ui.spacing_mut().item_spacing.x = 2.0;
             let command_width = (ui.available_width() - 38.0).max(0.0);
@@ -2958,14 +2936,7 @@ impl Builder3dApp {
             })
             .clicked()
         {
-            self.ribbon_pinned = !self.ribbon_pinned;
-            if self.ribbon_pinned {
-                self.ribbon_expanded = true;
-            }
-            self.commands
-                .preferences_mut()
-                .set_ribbon_pinned(self.ribbon_pinned);
-            self.persist_preferences();
+            self.apply_ribbon_pinned(!self.ribbon_pinned);
         }
     }
 
@@ -3381,11 +3352,7 @@ impl Builder3dApp {
                                 self.open_recent(&entry.path);
                             }
                         } else if ui.small_button("Remove").clicked() {
-                            self.commands
-                                .preferences_mut()
-                                .recent_files_mut()
-                                .remove(&entry.path);
-                            self.persist_preferences();
+                            self.remove_recent_file(&entry.path);
                             if entry.kind == RecentEntryKind::Missing {
                                 self.commands.set_status(format!(
                                     "File not found; removed recent entry: {}",
@@ -3406,39 +3373,47 @@ impl Builder3dApp {
     }
 
     fn open_recent(&mut self, path: &Path) {
-        if !path.exists() {
-            self.commands
-                .preferences_mut()
-                .recent_files_mut()
-                .remove(path);
-            self.persist_preferences();
-            self.commands.set_status(format!(
+        match self.try_open_recent(path, true) {
+            Ok(RecentOpen::Missing) => self.commands.set_status(format!(
                 "File not found; removed recent entry: {}",
                 path.display()
-            ));
-            return;
-        }
-        let is_project = path
-            .extension()
-            .and_then(|extension| extension.to_str())
-            .is_some_and(|extension| extension.eq_ignore_ascii_case("3dp"));
-        if is_project && self.commands.is_dirty() {
-            self.confirm_action = Some(PendingReplacement::OpenProject(path.to_path_buf()));
-            return;
-        }
-        let result = if is_project {
-            self.open_project(path).map(|_| ())
-        } else {
-            self.commands.import_from_path(path).map(|_| ())
-        };
-        match result {
-            Ok(()) => {
-                self.surface = WorkspaceSurface::Scene;
-                self.invalidate_presentation();
-                self.persist_preferences();
-            }
+            )),
+            Ok(_) => {}
             Err(error) => self.report_command_error(error),
         }
+    }
+
+    /// Opens one recent entry the way the Welcome list does: a missing file
+    /// is dropped from the list, a `.3dp` opens as the project (with unsaved
+    /// changes it asks first when `ask_if_dirty`, otherwise it is refused by
+    /// the caller), and a model is imported into the current scene.
+    fn try_open_recent(
+        &mut self,
+        path: &Path,
+        ask_if_dirty: bool,
+    ) -> Result<RecentOpen, CommandError> {
+        if !path.exists() {
+            self.remove_recent_file(path);
+            return Ok(RecentOpen::Missing);
+        }
+        let is_project = recent_is_project(path);
+        if is_project && self.commands.is_dirty() && ask_if_dirty {
+            self.confirm_action = Some(PendingReplacement::OpenProject(path.to_path_buf()));
+            return Ok(RecentOpen::AskedToSave);
+        }
+        if is_project {
+            self.open_project(path)?;
+        } else {
+            self.commands.import_from_path(path)?;
+        }
+        self.surface = WorkspaceSurface::Scene;
+        self.invalidate_presentation();
+        self.persist_preferences();
+        Ok(if is_project {
+            RecentOpen::Project
+        } else {
+            RecentOpen::Model
+        })
     }
 
     fn render_sidebar_action(
@@ -4065,11 +4040,7 @@ impl Builder3dApp {
                         ui.selectable_value(&mut display_unit, DisplayUnit::Inch, "in");
                     });
                 if display_unit != unit {
-                    self.commands
-                        .preferences_mut()
-                        .set_display_unit(display_unit);
-                    self.transform_signature.clear();
-                    self.persist_preferences();
+                    self.apply_display_unit(display_unit);
                 }
             });
             if let Some(error) = &self.transform_error {
@@ -6439,27 +6410,23 @@ impl Builder3dApp {
                 return;
             }
             DialogAction::DefaultImportUnit(unit) => {
-                self.commands
-                    .preferences_mut()
-                    .set_default_import_unit(unit);
+                self.apply_default_import_unit(unit);
                 let message = format!("Default import units set to {}", unit.label());
                 self.commands.set_status(message.clone());
                 Ok(message)
             }
             DialogAction::DisplayUnit(unit) => {
-                self.commands.preferences_mut().set_display_unit(unit);
-                self.transform_signature.clear();
+                self.apply_display_unit(unit);
                 let message = format!("Transform display units set to {}", unit.label());
                 self.commands.set_status(message.clone());
                 Ok(message)
             }
             DialogAction::PreparePrint(slicer, remember) => {
                 if remember {
-                    self.commands.preferences_mut().set_preferred_slicer(
+                    self.apply_preferred_slicer(
                         Some(slicer.path.clone()),
                         Some(slicer.label.clone()),
                     );
-                    self.persist_preferences();
                 }
                 self.start_print_staging_job(slicer);
                 return;
@@ -6473,16 +6440,11 @@ impl Builder3dApp {
                 match native_slicer_picker(current.as_deref()) {
                     Some(path) => match slicer_info_from_path(&path, None) {
                         Ok(slicer) => {
-                            self.commands.preferences_mut().set_preferred_slicer(
+                            self.apply_preferred_slicer(
                                 Some(slicer.path.clone()),
                                 Some(slicer.label.clone()),
                             );
-                            self.persist_preferences();
                             if let Some(dialog) = self.dialog.as_mut() {
-                                dialog.set_preferred_slicer(
-                                    Some(slicer.path.clone()),
-                                    Some(slicer.label.clone()),
-                                );
                                 dialog.set_message(format!(
                                     "Preferred slicer set to {}",
                                     slicer.label
@@ -6540,20 +6502,14 @@ impl Builder3dApp {
                 }
             }
             DialogAction::ClearPreferredSlicer => {
-                self.commands
-                    .preferences_mut()
-                    .set_preferred_slicer(None, None);
-                self.persist_preferences();
+                self.apply_preferred_slicer(None, None);
                 if let Some(dialog) = self.dialog.as_mut() {
-                    dialog.set_preferred_slicer(None, None);
                     dialog.set_message("Preferred slicer cleared.");
                 }
                 return;
             }
             DialogAction::ClearRecentFiles => {
-                self.commands.preferences_mut().recent_files_mut().clear();
-                self.invalidate_recent_previews_after_clear();
-                self.persist_preferences();
+                self.clear_recent_files();
                 if let Some(dialog) = self.dialog.as_mut() {
                     dialog.set_recent_file_count(0);
                     dialog.set_message("Recent files cleared. The source files were not changed.");
@@ -6623,22 +6579,18 @@ impl Builder3dApp {
                 self.commands.hollow_selected(options.wall_thickness_mm)
             }
             DialogAction::Theme(mode) => {
-                self.theme_mode = mode;
-                self.commands.preferences_mut().set_theme_mode(mode);
+                self.apply_theme_mode(mode);
                 Ok(String::from("Theme updated"))
             }
             DialogAction::UiSize(size) => {
-                self.ui_size = size;
-                self.commands.preferences_mut().set_ui_size(size);
+                self.apply_ui_size(size);
                 Ok(String::from(match size {
                     UiSize::Big => "Size set to Big",
                     UiSize::Normal => "Size set to Normal",
                 }))
             }
             DialogAction::ViewportLighting(lighting) => {
-                self.commands
-                    .preferences_mut()
-                    .set_viewport_lighting(lighting);
+                self.apply_viewport_lighting(lighting);
                 Ok(String::new())
             }
         };
