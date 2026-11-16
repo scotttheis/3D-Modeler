@@ -8,9 +8,14 @@ the owner says when. Until then the "no push" rule in `AGENTS.md` stands.
 - Public repository, free for others to use; not sold. The owner will turn
   on GitHub Sponsors (donations).
 - Repository and product name: **3D Modeler**.
-- Commit email (owner, 2026-11-16): `scotttheisw@gmail.com` (confirm the
-  spelling once; it must be added to the owner's GitHub account). Existing
-  commits are rewritten to it at upload time, as the owner asked.
+- Commit email (owner, 2026-11-16): `scotttheisw@gmail.com`, confirmed and
+  added to the owner's GitHub account. Set as this repository's `user.email`
+  from 2026-11-16; earlier commits are rewritten to it at upload time, as the
+  owner asked.
+- Licence: **Apache 2.0** (owner, 2026-11-16).
+- Artwork: the owner made every icon, light and dark (owner, 2026-11-16).
+- The README and disclaimer wording below is approved by the owner; use all
+  of it.
 - How to mention Microsoft 3D Builder (agreed approach, not legal advice):
   say it plainly and factually, never as a brand. README wording:
   "A free, open-source 3D modeling app for 3D printing, inspired by
@@ -22,11 +27,11 @@ the owner says when. Until then the "no push" rule in `AGENTS.md` stands.
 
 ## Open (ask the owner at upload time; do not guess)
 
-1. **Licence.** Session recommendation: Apache 2.0 (MIT is also fine).
-   Owner decides just before the upload.
-2. **Artwork origin.** Confirm the icons in
-   `crates/modeler3d-app/assets/original` are the owner's own (made by them
-   or generated for them), not copied from 3D Builder or other apps.
+1. **Linux and Mac.** Owner wants to install on a Linux box and a Mac before
+   release. Plan: build and test Linux here in WSL Ubuntu first; Mac needs a
+   Mac or GitHub's Mac build machines (free for public repositories), so it
+   can follow the upload. An unsigned Mac app shows a security warning; the
+   owner allows it once in System Settings.
 
 ## Things that become public
 
