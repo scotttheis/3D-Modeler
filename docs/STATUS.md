@@ -3,7 +3,7 @@
 The only place current status is written. Keep it to one screen. Plan:
 [`product-rebuild-plan.md`](product-rebuild-plan.md).
 
-Updated 2026-11-16. Full gate passed 2026-11-16 after OF-65 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Before that, full gate passed 2026-11-16 after Phase 6 OF-63/OF-64 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Earlier: full gate passed 2026-11-15 after Phase 5 OF-58 (fmt, clippy, tests, deny, audit, MCP parity with no exemptions, smoke, capture board); a last small fix then passed the Fast gate. Release exe rebuilt from that source (3m49s) and driven live through the real MCP gateway for the Phase 5 review pack.
+Updated 2026-11-16. F5 and F6 closed 2026-11-16 (ledger parity test passed after F6). Full gate passed 2026-11-16 after OF-65 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Before that, full gate passed 2026-11-16 after Phase 6 OF-63/OF-64 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Earlier: full gate passed 2026-11-15 after Phase 5 OF-58 (fmt, clippy, tests, deny, audit, MCP parity with no exemptions, smoke, capture board); a last small fix then passed the Fast gate. Release exe rebuilt from that source (3m49s) and driven live through the real MCP gateway for the Phase 5 review pack.
 
 Test releases (how-to: [`packaging.md`](packaging.md)): last is **RC1**,
 version 0.1.1, 2026-11-13, `E:\3D-Modeler-RC\Builder3D-RC1.msi` (50 MB),
@@ -74,8 +74,8 @@ closed.
 2. Done and approved 2026-11-15: Phase 4 — Measure ruler (OF-55).
 3. Done and approved 2026-11-16: Phase 5 — MCP does everything (OF-58).
 4. Done and approved 2026-11-16: Phase 6 — OF-63 to OF-65.
-5. F5 — release link reliability; F6 — reconcile the 148-row ledger
-   (fix-first list below).
+5. Done 2026-11-16: F5 release links and F6 ledger reconciliation (fix-first
+   list below).
 6. Revisit the Material texture dialog (OF-46 follow-up): the owner wants to
    look at its layout again; ask what to change before building.
 7. Stop before RB-10 (S3). OF-56/57 (Emboss) stay deferred until the owner
@@ -124,8 +124,8 @@ not know what it meant; explain it in the next pack.
 | F2 | Whole suite green | **Done** 2026-11-12 (`f1b581d`; re-verified after OF-1) |
 | F3 | Clippy on all targets | **Done** 2026-11-12 |
 | F4 | Baseline commit of 220+ uncommitted paths | **Done** 2026-11-12 on `rebuild/work` |
-| F5 | Release link reliability | Open — three clean release builds 2026-11-12 (third 4m05s, after the snap fix); not yet shown reliable |
-| F6 | Reconcile the 147-row feature ledger with the app | Open |
+| F5 | Release link reliability | **Done** 2026-11-16 — two consecutive forced fat-LTO release links, both clean (3m23s, 3m18s; 64 GB host), exe 21.9 MB. Plan exit met; `lto = "fat"` kept. Earlier: three clean links 2026-11-12; one LLVM out-of-memory 2026-11-11 |
+| F6 | Reconcile the 148-row feature ledger with the app | **Done** 2026-11-16 — 69 stale rows (mostly the October RB-00 audit: "no Ctrl+N", "no pan gesture", "text menu button" and so on) checked against the code and named tests and rewritten; owner approvals from this file copied in with the owner's words (`owner_quote`). Code and tests only, nothing re-driven live. Counts in the Ledger section |
 | F7 | Clear ad hoc `target/` directories (`E:` had 40 GB free) | **Done** 2026-11-12 — archived to `G:\Builder3D-Rust_target-adhoc-archive_20261112`, `target/` 91 → ~55 GB |
 | F8 | `scripts/Invoke-Gate.ps1` | **Done** 2026-11-13 — `-Tier fast\|full\|ship`; ship does not script package staging or the performance run |
 | F9 | Depth fight where meshes meet the floor | **Owner-approved 2026-11-14** ("works exactly as I asked"); done 2026-11-13 — depth bias on floor surface, shadows and text; captures `evidence/rebuild/captures/2026-11-13-f9-floor-depth/` (before/after, both themes). Dark serration gone; a faint pale dotted fringe on the rim remains and does not change with the bias or the reflection (cause not found). CPU fallback not touched |
@@ -134,12 +134,16 @@ not know what it meant; explain it in the next pack.
 | F12 | MCP 100% desktop parity (plan 3.7) | **Done** 2026-11-13 — Merge color; `rename_object` and `set_visibility` tools (catalog now 62, each with a desktop-vs-MCP test); `launch_slicer` falls back to the saved slicer; ledger `mcp_tool` / `mcp_exempt` column and parity check. Owner 2026-11-14 (D10): no "visual only" exemptions — MCP gets tools for all of them (OF-58) |
 | F13 | Run `cargo deny` and `cargo audit` | **Done** 2026-11-12 — both pass; now in the Full gate |
 
-## Ledger (`evidence/rebuild/parity-matrix.toml`, 147 features, not yet reconciled)
+## Ledger (`evidence/rebuild/parity-matrix.toml`, 148 features, reconciled 2026-11-16)
 
-Implemented 81 · partial 69 · owner-accepted 3 · visual review pending on all
-but 2. Slice history: RB-02 owner-accepted; RB-03 to RB-07 engineering recorded,
-owner review pending; RB-08 native interaction matrix pending; RB-09 schema
-parity complete, full acceptance open.
+Implementation: pass 142 · partial 5 · not applicable 1. Automated: pass 139 ·
+partial 4 · pending 5. Used live: pass 124 · pending 20. Owner-accepted 29
+(visual pass on the same 29); 119 rows wait for the owner's
+walkthroughs (S2 owner review session 2). Still partial: the five RB-01
+look rows (theme foundation, welcome, Items panel, dark palette, artwork
+conflicts) — they belong to the S1 finish, not to code gaps. Gaps found:
+no test dispatches Center View, Frame or the Snap toggle directly, and none
+covers the window-icon load.
 
 ## Owner decisions waiting (plan section 8)
 
