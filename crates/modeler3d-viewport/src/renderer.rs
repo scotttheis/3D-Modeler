@@ -18,7 +18,7 @@ use crate::{
         ledger_for_profile, plan_interaction_on_adapter,
     },
     camera::Camera,
-    cpu::{CpuRenderOptions, render_cpu_with_options, write_ppm},
+    cpu::{CpuFrame, CpuRenderOptions, render_cpu_with_options, write_ppm},
     floor::{
         ContactCueCache, DEFAULT_FLOOR_SIZE, FLOOR_SURFACE_SUBDIVISIONS, FloorGeometry,
         FloorTextMesh, build_floor, shadow_light_direction_world,
@@ -1314,6 +1314,7 @@ impl ViewportRenderer {
                 contact_shadow_color: cpu_contact_shadow_color(options.theme),
             },
         )?;
+        self.present_cpu_frame(&frame)?;
         let capture_path = if let Some(path) = capture_path {
             write_ppm(&frame, &path)?;
             Some(path.display().to_string())
@@ -1589,6 +1590,46 @@ impl ViewportRenderer {
         }
     }
 
+    /// Copies a finished CPU frame into the colour target the shell displays.
+    ///
+    /// Without this the CPU route (software-only adapters such as llvmpipe or
+    /// WARP, and GPU upload failures) drew into memory while the window kept
+    /// showing a stale or empty texture.
+    fn present_cpu_frame(&self, frame: &CpuFrame) -> Result<(), ViewportError> {
+        if frame.width != self.width || frame.height != self.height {
+            return Err(ViewportError::InvalidInput(format!(
+                "CPU frame {}x{} does not match the {}x{} viewport target",
+                frame.width, frame.height, self.width, self.height
+            )));
+        }
+        let expected = u64::from(self.width) * u64::from(self.height) * 4;
+        if frame.rgba.len() as u64 != expected {
+            return Err(ViewportError::InvalidInput(String::from(
+                "CPU frame pixel buffer has the wrong length",
+            )));
+        }
+        self.queue.write_texture(
+            wgpu::TexelCopyTextureInfo {
+                texture: &self.color_texture,
+                mip_level: 0,
+                origin: wgpu::Origin3d::ZERO,
+                aspect: wgpu::TextureAspect::All,
+            },
+            &frame.rgba,
+            wgpu::TexelCopyBufferLayout {
+                offset: 0,
+                bytes_per_row: Some(self.width * 4),
+                rows_per_image: Some(self.height),
+            },
+            wgpu::Extent3d {
+                width: self.width,
+                height: self.height,
+                depth_or_array_layers: 1,
+            },
+        );
+        Ok(())
+    }
+
     fn capture(&self, path: &PathBuf) -> Result<(), ViewportError> {
         let padded = padded_bytes_per_row(self.width)?;
         let bytes = padded.checked_mul(u64::from(self.height)).ok_or_else(|| {
@@ -1751,8 +1792,11 @@ fn create_render_targets(device: &wgpu::Device, width: u32, height: u32) -> Rend
         sample_count: 1,
         dimension: wgpu::TextureDimension::D2,
         format: wgpu::TextureFormat::Rgba8Unorm,
+        // COPY_DST: the CPU fallback uploads its finished frame here, so the
+        // shell shows the same texture whichever route drew it.
         usage: wgpu::TextureUsages::RENDER_ATTACHMENT
             | wgpu::TextureUsages::COPY_SRC
+            | wgpu::TextureUsages::COPY_DST
             | wgpu::TextureUsages::TEXTURE_BINDING,
         view_formats: &[],
     });
@@ -3285,6 +3329,58 @@ mod tests {
         AdapterKind, AdapterProfile, BackendKind, CpuProfile, DisplayRelationship, MemoryProfile,
         OsMemoryBudget,
     };
+
+    /// The CPU route must reach the texture the shell shows. Runs on whatever
+    /// adapter the host has (a GPU on the dev PC, llvmpipe under WSL); a host
+    /// with no adapter at all has nothing to present to and is skipped.
+    #[test]
+    fn cpu_frames_reach_the_displayed_colour_target() {
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .build()
+            .expect("runtime");
+        let Ok(profile) = runtime.block_on(modeler3d_platform::discover_capability_profile())
+        else {
+            return;
+        };
+        let config = RendererConfig {
+            width: 8,
+            height: 4,
+            adapter_index: None,
+            capture_path: None,
+        };
+        let Ok(renderer) = runtime.block_on(ViewportRenderer::new(&profile, &config)) else {
+            return;
+        };
+        let rgba = (0..8 * 4)
+            .flat_map(|index: u32| [index as u8 * 7, 200 - index as u8, 40, 255])
+            .collect::<Vec<_>>();
+        let frame = CpuFrame {
+            width: 8,
+            height: 4,
+            rgba: rgba.clone(),
+            triangles: 0,
+            shaded_pixels: 0,
+        };
+        renderer.present_cpu_frame(&frame).expect("upload");
+        let path =
+            std::env::temp_dir().join(format!("modeler3d-cpu-present-{}.ppm", std::process::id()));
+        renderer.capture(&path).expect("readback");
+        let ppm = std::fs::read(&path).expect("read capture");
+        let _ = std::fs::remove_file(&path);
+        let header = b"P6
+8 4
+255
+";
+        assert_eq!(&ppm[..header.len()], header);
+        let expected = rgba
+            .chunks(4)
+            .flat_map(|pixel| pixel[..3].to_vec())
+            .collect::<Vec<_>>();
+        assert_eq!(&ppm[header.len()..], expected.as_slice());
+
+        let wrong = CpuFrame { width: 4, ..frame };
+        assert!(renderer.present_cpu_frame(&wrong).is_err());
+    }
 
     #[test]
     fn uniform_bytes_match_wgsl_alignment() {
