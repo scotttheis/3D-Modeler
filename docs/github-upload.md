@@ -5,19 +5,28 @@ the owner says when. Until then the "no push" rule in `AGENTS.md` stands.
 
 ## Decided
 
-- Public repository.
-- The licence is chosen by the owner just before the upload. Do not pick one.
+- Public repository, free for others to use; not sold. The owner will turn
+  on GitHub Sponsors (donations).
+- Repository and product name: **3D Modeler**.
+- Commit email (owner, 2026-11-16): `scotttheisw@gmail.com` (confirm the
+  spelling once; it must be added to the owner's GitHub account). Existing
+  commits are rewritten to it at upload time, as the owner asked.
+- How to mention Microsoft 3D Builder (agreed approach, not legal advice):
+  say it plainly and factually, never as a brand. README wording:
+  "A free, open-source 3D modeling app for 3D printing, inspired by
+  Microsoft 3D Builder." plus, at the end, "3D Modeler is an independent
+  project. It is not affiliated with, endorsed by or sponsored by Microsoft.
+  3D Builder is a trademark of Microsoft Corporation." Do not use "3D
+  Builder" in the app name, icon, logo, window title or repository name, and
+  do not ship any Microsoft artwork, icons or screenshots.
 
 ## Open (ask the owner at upload time; do not guess)
 
-1. **Commit email.** All commits so far carry `josiph@byui.edu`, which a
-   public repository shows. Owner may use any email added to their GitHub
-   account, or GitHub's private no-reply address (Settings → Emails → "Keep
-   my email addresses private"). Changing the existing commits means
-   rewriting history; do it only with the owner's explicit yes.
-2. **Licence** (see above).
-3. **Repository name and account.** The owner creates the empty repository or
-   asks the session to create it.
+1. **Licence.** Session recommendation: Apache 2.0 (MIT is also fine).
+   Owner decides just before the upload.
+2. **Artwork origin.** Confirm the icons in
+   `crates/modeler3d-app/assets/original` are the owner's own (made by them
+   or generated for them), not copied from 3D Builder or other apps.
 
 ## Things that become public
 

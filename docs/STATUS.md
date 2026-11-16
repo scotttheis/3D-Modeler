@@ -11,7 +11,7 @@ version 0.1.1, 2026-11-13, `E:\3D-Modeler-RC\Builder3D-RC1.msi` (50 MB),
 
 ## Now
 
-**GitHub, 2026-11-16 (owner):** goal is a public repository, "almost" ready; not uploaded. Licence chosen later by the owner; commit email still to choose. Checklist and open questions: [`github-upload.md`](github-upload.md).
+**GitHub, 2026-11-16 (owner):** goal is a public repository named "3D Modeler", free to use, donations on; "almost" ready, not uploaded. Commit email chosen; licence (Apache 2.0 suggested) and artwork origin still to confirm. Checklist and open questions: [`github-upload.md`](github-upload.md).
 
 **Bug sweep 2026-11-16 (owner request before the upload):** Full gate passed (all steps, capture board 37 states × 2 themes). New test `crates/modeler3d-core/tests/malformed_inputs.rs`: about 5,000 cut-short or corrupted copies of every importable format and of `.3dp` projects; every one is refused with an error, none crashes (debug and release). Last two `expect()` calls removed from library code (`legacy_settings.rs`). No new bugs found. Still open from before: the faint pale dotted rim at the floor (F9 note) and Emboss (deferred).
 
