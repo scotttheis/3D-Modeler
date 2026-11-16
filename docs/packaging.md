@@ -131,7 +131,6 @@ Send them the `.msi` only. Tell them:
 - Code signing (owner aware; SmartScreen warning is accepted for testing).
 - A clean-PC test. `-Verify` runs on the dev PC, which already has the VC++
   runtime and the source tree. The first friend install is the real check.
-- Linux and macOS packages (`packaging/installers/` scripts exist; no
-  native package format yet).
+- Linux and macOS packages: see [`packaging-linux-mac.md`](packaging-linux-mac.md).
 - The ship-tier gate (`scripts\Invoke-Gate.ps1 -Tier ship`) still reports
   package staging as "not scripted"; it does not call this script.

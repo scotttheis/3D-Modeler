@@ -80,9 +80,11 @@ closed.
 4. Done and approved 2026-11-16: Phase 6 — OF-63 to OF-65.
 5. Done 2026-11-16: F5 release links and F6 ledger reconciliation (fix-first
    list below).
-6. Revisit the Material texture dialog (OF-46 follow-up): the owner wants to
+6. Linux and Mac test packages for the owner's own machines, before the
+   GitHub release: [`packaging-linux-mac.md`](packaging-linux-mac.md).
+7. Revisit the Material texture dialog (OF-46 follow-up): the owner wants to
    look at its layout again; ask what to change before building.
-7. Stop before RB-10 (S3). OF-56/57 (Emboss) stay deferred until the owner
+8. Stop before RB-10 (S3). OF-56/57 (Emboss) stay deferred until the owner
    brings them back.
 
 Each phase ends with its review pack and a stop for owner review, as

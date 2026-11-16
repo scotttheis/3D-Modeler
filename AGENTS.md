@@ -192,6 +192,9 @@ command to run. Take the next RC number from the "Test releases" line in
 give the owner the MSI path and the tester instructions from the doc. Stopping
 a running 3D Modeler to unlock the build is always allowed.
 
+For Linux and Mac packages (AppImage and `.dmg`), follow
+[`docs/packaging-linux-mac.md`](docs/packaging-linux-mac.md) the same way.
+
 ## Git and recovery
 
 This tree is its own Git repository. Commit in the style of the Python tree:
