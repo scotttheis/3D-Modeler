@@ -7,7 +7,15 @@ Updated 2026-11-16. F5 and F6 closed 2026-11-16 (ledger parity test passed after
 
 Test releases (how-to: [`packaging.md`](packaging.md)): last is **RC1**,
 version 0.1.1, 2026-11-13, `E:\3D-Modeler-RC\Builder3D-RC1.msi` (50 MB),
-`-Verify` passed on the dev PC. Next: RC2 / 0.1.2.
+`-Verify` passed on the dev PC. **RC2 / 0.1.2, 2026-11-16, Linux:**
+`E:\3D-Modeler-RC\3D-Modeler-0.1.2-linux-x86_64.tar.gz` (52 MB), also on the
+USB card under `3D-Modeler-packaging\linux\`; 487 tests, clippy, fmt passed in
+WSL Ubuntu 24.04; packaged app run under WSLg: insert, save, reopen through
+MCP, settings in `~/.config/Modeler3D`. Not checked: a real Linux GPU and
+desktop (WSL only has the CPU route), the AppImage (needs the owner's OK to
+download `appimagetool`). **Mac RC2: not built yet**; the USB card holds the
+source and steps ([`packaging-linux-mac.md`](packaging-linux-mac.md), "Mac
+package from the USB"). No Windows MSI for RC2. Next after RC2: RC3 / 0.1.3.
 
 ## Now
 
@@ -82,6 +90,11 @@ closed.
    list below).
 6. Linux and Mac test packages for the owner's own machines, before the
    GitHub release: [`packaging-linux-mac.md`](packaging-linux-mac.md).
+   Linux done 2026-11-16 (RC2 above); Mac waits for the owner to plug the
+   USB card into the Mac. Found and fixed on the way (all platforms): MCP
+   `frame_view` failed its output check through the gateway (nested `view`),
+   and the CPU viewport route never showed its frames (grey viewport on
+   software-only adapters).
 7. Revisit the Material texture dialog (OF-46 follow-up): the owner wants to
    look at its layout again; ask what to change before building.
 8. Stop before RB-10 (S3). OF-56/57 (Emboss) stay deferred until the owner
