@@ -4303,16 +4303,18 @@ impl Modeler3dApp {
                     .shadow(theme::floating_shadow(self.theme_mode))
                     .inner_margin(egui::Margin::symmetric(10, 8))
                     .show(ui, |ui| {
-                        // Each tab spans exactly one axis column below it
-                        // (axis letter + box), so the edges line up (OF-65).
-                        let gap = ui.spacing().item_spacing.x;
-                        let column_width = TRANSFORM_AXIS_LABEL_WIDTH + gap + TRANSFORM_FIELD_WIDTH;
+                        // Each tab sits straight above its box, the same
+                        // width, with a blank over the axis letter (OF-65).
                         ui.horizontal(|ui| {
                             for mode in [
                                 TransformPanelMode::Move,
                                 TransformPanelMode::Rotate,
                                 TransformPanelMode::Resize,
                             ] {
+                                ui.allocate_exact_size(
+                                    Vec2::new(TRANSFORM_AXIS_LABEL_WIDTH, 28.0),
+                                    egui::Sense::hover(),
+                                );
                                 let selected = mode == self.transform_panel_mode;
                                 let button = egui::Button::new(RichText::new(mode.label()).color(
                                     if selected {
@@ -4328,7 +4330,10 @@ impl Modeler3dApp {
                                 } else {
                                     Color32::TRANSPARENT
                                 });
-                                if ui.add_sized([column_width, 28.0], button).clicked() {
+                                if ui
+                                    .add_sized([TRANSFORM_FIELD_WIDTH, 28.0], button)
+                                    .clicked()
+                                {
                                     self.transform_panel_mode = mode;
                                 }
                             }
@@ -8858,7 +8863,7 @@ mod tests {
     }
 
     #[test]
-    fn transform_strip_has_no_count_and_each_tab_sits_over_its_axis_box() {
+    fn transform_strip_has_no_count_and_each_tab_is_centred_over_its_box() {
         let (mut app, directory) = shell_for_jobs("of65-transform-strip");
         app.dispatch(CommandId::AddPrimitive(modeler3d_core::PrimitiveKind::Cube));
         assert_eq!(app.commands.selected_count(), 1);
@@ -8907,13 +8912,11 @@ mod tests {
                 tab.max.x,
                 boxes[axis].max.x
             );
-            // Between two boxes sit: gap, axis letter, gap.
-            let gap = (boxes[1].min.x - boxes[0].max.x - TRANSFORM_AXIS_LABEL_WIDTH) / 2.0;
-            let column_left = boxes[axis].min.x - gap - TRANSFORM_AXIS_LABEL_WIDTH;
             assert!(
-                (tab.min.x - column_left).abs() < 0.5,
-                "{mode:?}: tab left {} vs column left {column_left}",
-                tab.min.x
+                (tab.min.x - boxes[axis].min.x).abs() < 0.5,
+                "{mode:?}: tab left {} vs box left {}",
+                tab.min.x,
+                boxes[axis].min.x
             );
         }
         assert!(std::fs::remove_dir_all(directory).is_ok());

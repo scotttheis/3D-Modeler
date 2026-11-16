@@ -61,10 +61,10 @@ MCP `frame_view` in the live app now frames with the desktop camera (same
 camera as a double-click); `app_settings` gains `settings_notice`,
 `set_app_settings` gains `dismiss_settings_notice`. **Waiting for owner
 review**; the owner may add more Phase 6 rows. OF-65 (transform strip: the
-"N selected / mm" note removed; each Move / Rotate / Resize tab exactly as wide
-as the X / Y / Z column below it) built 2026-11-16, pack
+"N selected / mm" note removed; each Move / Rotate / Resize label centred over
+its X / Y / Z box (owner follow-up)) built 2026-11-16, pack
 `evidence/rebuild/captures/2026-11-16-of65-transform-strip/`, test
-`transform_strip_has_no_count_and_each_tab_sits_over_its_axis_box`. **Waiting
+`transform_strip_has_no_count_and_each_tab_is_centred_over_its_box`. **Waiting
 for owner review.** Noticed while capturing, not changed: Rotate shows
 "-0.000 deg" for an unrotated cube's Y.
 
