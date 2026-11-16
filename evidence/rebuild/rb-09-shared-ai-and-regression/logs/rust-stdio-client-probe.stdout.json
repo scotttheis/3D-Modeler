@@ -3,7 +3,7 @@
   "closed_desktop_call": {
     "code": "desktop_unavailable",
     "details": {},
-    "message": "desktop unavailable: Builder3D desktop is unavailable or its runtime descriptor is stale; open the Rust desktop and retry",
+    "message": "desktop unavailable: 3D Modeler desktop is unavailable or its runtime descriptor is stale; open the Rust desktop and retry",
     "retryable": true
   },
   "first_tool": "get_status",

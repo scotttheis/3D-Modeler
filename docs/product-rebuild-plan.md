@@ -1,4 +1,4 @@
-# Builder3D Rust — delivery plan (v2)
+# 3D Modeler Rust — delivery plan (v2)
 
 Adopted 2026-11-12. Replaces the v1 plan, which is preserved unchanged at
 [`archive/product-rebuild-plan-v1-2026-11-10.md`](archive/product-rebuild-plan-v1-2026-11-10.md).
@@ -7,7 +7,7 @@ only when the plan itself changes.
 
 ## 1. Goal
 
-Ship the owner's Builder3D as a dependable native Rust application: the same
+Ship the owner's 3D Modeler as a dependable native Rust application: the same
 layout, artwork, interaction habits, modelling tools, file behaviour and AI
 control as the Python original at `L:\Builder3D`, with a finish that reads as
 a professional product rather than a port in progress.
@@ -34,7 +34,7 @@ v1 got the product direction right and the operating model wrong. Measured on
 | Recovery by full-tree copy | 155 snapshots on `G:\`; recent ones ~774 MB / 4,100 files each, with a full SHA-256 pass and a written receipt | Minutes of agent time and tokens per patch, for something Git does in a second |
 | Git not used | 224 uncommitted paths (184 untracked); last commit 2026-11-06 | No diff, no bisect, no cheap rollback; every review re-reads the tree |
 | Status written as prose in three places | `AGENTS.md` 14 KB, plan 100 KB, `WORK_LOG.md` 376 KB | Every session pays to read them, and they disagree |
-| Tests abandoned | `builder3d-app` tests did not compile; ten consecutive log entries end "Automated tests were not run" | Regressions found by the owner instead of by the machine |
+| Tests abandoned | `modeler3d-app` tests did not compile; ten consecutive log entries end "Automated tests were not run" | Regressions found by the owner instead of by the machine |
 | No way to see the UI | Each visual change needed a 3m42s fat-LTO build, a desktop screenshot, and the owner's eyes; temporary preview hooks were written and deleted repeatedly | The slowest, most expensive loop in the project sat on the most-iterated work |
 | Release link runs out of memory | Fat LTO failed with LLVM OOM on 2026-11-11 | Review builds made with hand-typed overrides |
 | One 8,900-line UI file | `shell.rs`, hand-painted with literal sizes | Every UI task loads the whole file; no shared control language, hence the home-made look |
@@ -118,23 +118,23 @@ Tier:      Mechanic | Implementer | Architect
 
 ### 3.5 Seeing the UI: review captures
 
-`crates/builder3d-app/src/review_capture.rs` starts the real application in a
+`crates/modeler3d-app/src/review_capture.rs` starts the real application in a
 named state, saves the window's own framebuffer to a PNG, and exits. It
 simulates no input, does not photograph the desktop, and neither reads nor
 writes user settings, so it is safe while the machine is in use.
 
 ```powershell
-$env:BUILDER3D_REVIEW_CAPTURE = "evidence\rebuild\captures\multi-dark.png"
-$env:BUILDER3D_REVIEW_STATE   = "multi"    # welcome | empty | move | rotate | resize | resize-drag | multi | merge | unselected | material | settings | save | export | menu | colors | mirror | merge-apart | repair | paste | align | paint | paint-picker | xray | texture | texture-dialog | grab | crease | crease-sharp | smooth-brush | simplify | simplify-area | subdivide | hollow | hollow-dialog | hollow-error | measure | measure-start | centre | settings-note
-$env:BUILDER3D_REVIEW_THEME   = "dark"     # light | dark
-$env:BUILDER3D_REVIEW_SIZE    = "normal"   # normal | big
-$env:BUILDER3D_REVIEW_TAB     = "Insert"   # any ribbon tab
+$env:MODELER3D_REVIEW_CAPTURE = "evidence\rebuild\captures\multi-dark.png"
+$env:MODELER3D_REVIEW_STATE   = "multi"    # welcome | empty | move | rotate | resize | resize-drag | multi | merge | unselected | material | settings | save | export | menu | colors | mirror | merge-apart | repair | paste | align | paint | paint-picker | xray | texture | texture-dialog | grab | crease | crease-sharp | smooth-brush | simplify | simplify-area | subdivide | hollow | hollow-dialog | hollow-error | measure | measure-start | centre | settings-note
+$env:MODELER3D_REVIEW_THEME   = "dark"     # light | dark
+$env:MODELER3D_REVIEW_SIZE    = "normal"   # normal | big
+$env:MODELER3D_REVIEW_TAB     = "Insert"   # any ribbon tab
 # Optional:
-$env:BUILDER3D_REVIEW_CAMERA  = "45,30,0"  # yaw,pitch (deg),distance (mm; 0 = framed)
-$env:BUILDER3D_REVIEW_POINTER = "640,40"   # rest the pointer here to show a hover state
-$env:BUILDER3D_REVIEW_VIEW    = "wireframe" # comma list: wireframe, xray
-$env:BUILDER3D_REVIEW_INTERACTIVE = "1"    # stay open with isolated settings instead of capturing
-cargo run --profile review -p builder3d-app
+$env:MODELER3D_REVIEW_CAMERA  = "45,30,0"  # yaw,pitch (deg),distance (mm; 0 = framed)
+$env:MODELER3D_REVIEW_POINTER = "640,40"   # rest the pointer here to show a hover state
+$env:MODELER3D_REVIEW_VIEW    = "wireframe" # comma list: wireframe, xray
+$env:MODELER3D_REVIEW_INTERACTIVE = "1"    # stay open with isolated settings instead of capturing
+cargo run --profile review -p modeler3d-app
 ```
 
 - Use the `review` Cargo profile for iteration (optimised, no fat LTO). Use
@@ -167,7 +167,7 @@ D1 approved by the owner on 2026-11-12. In force:
 
 - **One implementation.** A desktop action and its MCP tool call the same
   core function. Product rules (for example "Merge takes the top-most
-  object's color", OF-9) live in `builder3d-core`, never in the app or the
+  object's color", OF-9) live in `modeler3d-core`, never in the app or the
   MCP adapter alone.
 - **Same commit.** A task that changes what a desktop action does to the
   model also changes the MCP side and adds an MCP test proving the same
@@ -217,7 +217,7 @@ Status of each item is tracked in `STATUS.md`.
 
 | # | Problem | Fix | Proof |
 |---|---|---|---|
-| F1 | `builder3d-app` tests did not compile (three calls to the removed `Builder3dApp::project_handle`) | Helper restored as test-only | `cargo test --workspace --locked` runs |
+| F1 | `modeler3d-app` tests did not compile (three calls to the removed `Modeler3dApp::project_handle`) | Helper restored as test-only | `cargo test --workspace --locked` runs |
 | F2 | Tests not run since the gizmo rework | Run the whole suite; fix or quarantine-with-reason every failure | Green suite, or a named list in `STATUS.md` |
 | F3 | `cargo clippy --all-targets -- -D warnings` blocked | Follows from F1; clear what it then reports | Clean run |
 | F4 | 224 uncommitted paths, 184 untracked | Decide D1; then one baseline commit of the current tree | `git status` clean |
@@ -329,7 +329,7 @@ decided by an agent.
 | D2 | Keep fat LTO for shipping builds if it cannot link reliably | **Approved 2026-11-12:** thin LTO is acceptable if the 40 MB budget holds | — |
 | D3 | Delete the ad hoc build directories under `target/` | **Approved and done 2026-11-12** | — |
 | D4 | Viewport background in the dark theme | **Decided 2026-11-13:** a bit darker than now, but not full dark mode; before/after captures for owner approval | Unchanged |
-| D5 | `emboss_text` long-running metadata | **Decided 2026-11-13:** show progress — keep the Rust "may take a while" flag (approved difference from Python) and show a progress bar, or a Builder3D-styled working spinner when the time can't be estimated, desktop and MCP | — |
+| D5 | `emboss_text` long-running metadata | **Decided 2026-11-13:** show progress — keep the Rust "may take a while" flag (approved difference from Python) and show a progress bar, or a 3D Modeler-styled working spinner when the time can't be estimated, desktop and MCP | — |
 | D6 | MCP at 100% desktop parity, growing the catalog beyond the Python 60 where needed | **Approved 2026-11-12** | — |
 | D8 | Merge of parts that don't overlap | **Decided 2026-11-13:** group them instead of merging and show a small popup for about 4 s saying the objects were not touching; MCP returns the group with the same message | — |
 | D9 | Smoothing on sparse meshes | **Decided 2026-11-13:** match Blender's default sculpt Smooth (the brush Shift switches to); studied with item 13, the Blender brush comparison | — |

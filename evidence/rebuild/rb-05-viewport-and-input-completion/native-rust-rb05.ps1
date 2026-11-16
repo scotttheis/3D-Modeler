@@ -9,7 +9,7 @@ $script:rb05Root = (Resolve-Path (Join-Path $PSScriptRoot '')).Path
 $script:rb05FixtureRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\rb-04-scene-and-precise-transforms\native-viewport-fixtures')).Path
 $script:rb05Geometry = (Resolve-Path (Join-Path $PSScriptRoot '..\rb-04-scene-and-precise-transforms\native_rust_geometry.py')).Path
 $script:rb05Records = [System.Collections.Generic.List[object]]::new()
-$script:rb05BuildHash = (Get-FileHash -LiteralPath 'target\debug\builder3d-app.exe' -Algorithm SHA256).Hash.ToLowerInvariant()
+$script:rb05BuildHash = (Get-FileHash -LiteralPath 'target\debug\modeler3d-app.exe' -Algorithm SHA256).Hash.ToLowerInvariant()
 $script:rb05Journal = Join-Path $script:rb05Root 'rust-native-captures-final.ndjson'
 $script:rb05Results = Join-Path $script:rb05Root 'rust-native-results.json'
 $script:rb05Error = Join-Path $script:rb05Root 'rust-native-error.txt'
@@ -74,8 +74,8 @@ function Open-Rb05Project([string]$Path) {
         } catch {
             $title = ''
         }
-    } while ($title -ne "Builder3D - $expected" -and [DateTime]::UtcNow -lt $deadline)
-    if ($title -ne "Builder3D - $expected") {
+    } while ($title -ne "3D Modeler - $expected" -and [DateTime]::UtcNow -lt $deadline)
+    if ($title -ne "3D Modeler - $expected") {
         throw "Native project did not open: $expected"
     }
     Wait-Rb05Frame
@@ -209,7 +209,7 @@ function Invoke-Rb05GizmoCase([string]$Theme, [string]$Case, [string]$FixtureNam
 
 $process = $null
 try {
-    $process = Start-Process -FilePath (Join-Path (Get-Location) 'target\debug\builder3d-app.exe') -PassThru
+    $process = Start-Process -FilePath (Join-Path (Get-Location) 'target\debug\modeler3d-app.exe') -PassThru
     $script:rb03AppPid = $process.Id
     $deadline = [DateTime]::UtcNow.AddSeconds(15)
     do {

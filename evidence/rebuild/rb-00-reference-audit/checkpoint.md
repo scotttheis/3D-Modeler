@@ -14,7 +14,7 @@
 ## Pending evidence and limits
 
 - No Python or Rust tests, build, product launch, or live UI interaction was performed in RB-00.
-- Current full-window original light/dark captures are pending. The original project requires one foreground target at a time; an existing Builder3D MCP gateway/runtime was present and no safe serial UI handoff was established. That process was left untouched.
+- Current full-window original light/dark captures are pending. The original project requires one foreground target at a time; an existing 3D Modeler MCP gateway/runtime was present and no safe serial UI handoff was established. That process was left untouched.
 - Rust UI capture and owner acceptance remain pending.
 - Original `L:\Builder3D` was read-only during this audit. Its status at the 14:25 local inventory showed 69 tracked changes and 154 untracked paths; the current HEAD is recorded in the report. No source writes were made there.
 - Rust app/module maturity was not promoted. The component catalog was not edited. Existing untracked Rust work remains intact and no commit was created.

@@ -22,25 +22,25 @@ compute before scene replacement, preserving atomicity and undo history.
 
 ## Changed implementation files
 
-- `crates/builder3d-core/src/error.rs`
-- `crates/builder3d-core/src/mesh_ops.rs`
-- `crates/builder3d-core/src/transform.rs`
-- `crates/builder3d-core/src/repair.rs`
-- `crates/builder3d-core/src/simplify.rs`
-- `crates/builder3d-core/src/subdivide.rs`
-- `crates/builder3d-core/src/smooth.rs`
-- `crates/builder3d-core/src/brushes.rs`
-- `crates/builder3d-core/src/density.rs`
-- `crates/builder3d-core/src/commands.rs`
-- `crates/builder3d-core/src/scene.rs`
-- `crates/builder3d-core/src/lib.rs`
-- `crates/builder3d-core/tests/mesh_ops_booleans.rs`
-- `crates/builder3d-core/tests/mesh_ops_repair.rs`
-- `crates/builder3d-core/tests/mesh_ops_simplify.rs`
-- `crates/builder3d-core/tests/mesh_ops_subdivide.rs`
-- `crates/builder3d-core/tests/mesh_ops_smooth.rs`
-- `crates/builder3d-core/tests/mesh_ops_brushes.rs`
-- `crates/builder3d-core/tests/mesh_ops_density.rs`
+- `crates/modeler3d-core/src/error.rs`
+- `crates/modeler3d-core/src/mesh_ops.rs`
+- `crates/modeler3d-core/src/transform.rs`
+- `crates/modeler3d-core/src/repair.rs`
+- `crates/modeler3d-core/src/simplify.rs`
+- `crates/modeler3d-core/src/subdivide.rs`
+- `crates/modeler3d-core/src/smooth.rs`
+- `crates/modeler3d-core/src/brushes.rs`
+- `crates/modeler3d-core/src/density.rs`
+- `crates/modeler3d-core/src/commands.rs`
+- `crates/modeler3d-core/src/scene.rs`
+- `crates/modeler3d-core/src/lib.rs`
+- `crates/modeler3d-core/tests/mesh_ops_booleans.rs`
+- `crates/modeler3d-core/tests/mesh_ops_repair.rs`
+- `crates/modeler3d-core/tests/mesh_ops_simplify.rs`
+- `crates/modeler3d-core/tests/mesh_ops_subdivide.rs`
+- `crates/modeler3d-core/tests/mesh_ops_smooth.rs`
+- `crates/modeler3d-core/tests/mesh_ops_brushes.rs`
+- `crates/modeler3d-core/tests/mesh_ops_density.rs`
 - `Cargo.toml` and `Cargo.lock` for the pinned `manifold-csg` dependency
 
 Documentation and checkpoint evidence are under `evidence/r3a` through
@@ -71,7 +71,7 @@ The final additive snapshot is:
 
 `G:\Builder3D-Rust_snapshot_20261029-145630_R3-final`
 
-It excludes `E:\Builder3D-Rust\target`. Exact file counts, byte totals,
+It excludes `E:\3D-Modeler\target`. Exact file counts, byte totals,
 relative paths, lengths, and SHA-256 comparison are recorded in
 `verification.md`.
 

@@ -1,15 +1,15 @@
-COMMAND: cargo run -p builder3d-app --bin builder3d-app -- --smoke
-   Compiling builder3d-app v0.1.0 (E:\Builder3D-Rust\crates\builder3d-app)
+COMMAND: cargo run -p modeler3d-app --bin modeler3d-app -- --smoke
+   Compiling modeler3d-app v0.1.0 (E:\3D-Modeler\crates\modeler3d-app)
 warning: use of deprecated associated function `eframe::egui::Id::new`: Use `Id::unique` (for a globally unique id) or `IdSalt::new` (for a locally unique salt) instead
-    --> crates\builder3d-app\src\shell.rs:2708:40
+    --> crates\modeler3d-app\src\shell.rs:2708:40
      |
 2708 |             egui::Modal::new(egui::Id::new("placement-dialog")).show(ctx, |ui| {
      |                                        ^^^
      |
      = note: `#[warn(deprecated)]` on by default
 
-warning: `builder3d-app` (lib) generated 1 warning
-error: failed to remove file `E:\Builder3D-Rust\target\debug\builder3d-app.exe`
+warning: `modeler3d-app` (lib) generated 1 warning
+error: failed to remove file `E:\3D-Modeler\target\debug\modeler3d-app.exe`
 
 Caused by:
   Access is denied. (os error 5)

@@ -1,8 +1,8 @@
-    Checking builder3d-core v0.1.0 (E:\Builder3D-Rust\crates\builder3d-core)
-    Checking builder3d-viewport v0.1.0 (E:\Builder3D-Rust\crates\builder3d-viewport)
-    Checking builder3d-app v0.1.0 (E:\Builder3D-Rust\crates\builder3d-app)
+    Checking modeler3d-core v0.1.0 (E:\3D-Modeler\crates\modeler3d-core)
+    Checking modeler3d-viewport v0.1.0 (E:\3D-Modeler\crates\modeler3d-viewport)
+    Checking modeler3d-app v0.1.0 (E:\3D-Modeler\crates\modeler3d-app)
 error: large size difference between variants
-  --> crates\builder3d-app\src\shell.rs:56:1
+  --> crates\modeler3d-app\src\shell.rs:56:1
    |
 56 | / enum ViewportDrag {
 57 | |     Orbit,
@@ -22,6 +22,6 @@ help: consider boxing the large fields or introducing indirection in some other 
 59 +     Transform(Box<TransformGesture>),
    |
 
-error: could not compile `builder3d-app` (lib) due to 1 previous error
+error: could not compile `modeler3d-app` (lib) due to 1 previous error
 warning: build failed, waiting for other jobs to finish...
-error: could not compile `builder3d-app` (lib test) due to 1 previous error
+error: could not compile `modeler3d-app` (lib test) due to 1 previous error

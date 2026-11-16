@@ -32,7 +32,7 @@ outputs are not claimed as live-tested binaries.
 
 The Rust Release gateway initialized over stdio and listed all 60 tools. With no runtime descriptor, get_status returned structured retryable desktop_unavailable. The post-run official-client result is rust_stdio_client_probe-result.json, with stdout/stderr in logs/rust-stdio-client-probe.*.
 
-For optional startup, the Rust app was launched with BUILDER3D_RUNTIME_FILE pointing under a regular file, so its parent directory could not be created. MCP status reported unavailable while the normal desktop stayed usable. The official SDK still discovered 60 tools; get_status returned desktop_unavailable with retryable=true. On normal shutdown and failed-startup shutdown, owned runtime descriptor and listener were absent, app/gateway/client processes exited, and a client request after close returned desktop_unavailable.
+For optional startup, the Rust app was launched with MODELER3D_RUNTIME_FILE pointing under a regular file, so its parent directory could not be created. MCP status reported unavailable while the normal desktop stayed usable. The official SDK still discovered 60 tools; get_status returned desktop_unavailable with retryable=true. On normal shutdown and failed-startup shutdown, owned runtime descriptor and listener were absent, app/gateway/client processes exited, and a client request after close returned desktop_unavailable.
 
 The Python app’s optional startup failure and closed-client response are logged in rb09-python-optional-client.jsonl. It remained usable and shut down cleanly.
 
@@ -44,6 +44,6 @@ No bearer token, bridge secret, or credential was written to evidence. Approved 
 
 Run directory: `currpair-20261106-072716/`. The app SHA-256 was `0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a`; the Rust stdio gateway SHA-256 was `aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e`. Client logs are `logs/rust-current-live.jsonl`, `logs/rust-current-live-reopen-client.jsonl`, and `logs/rust-current-optional-failure-client.jsonl` under that run.
 
-The official Python MCP SDK 2.2.0 was used only as an MCP client to the Rust gateway; the Python Builder3D product was not launched. The client found 60 ordered tools, read and edited the live Rust document, saved it, and read the same project after the Rust GUI reopened it. The optional-startup failure session returned retryable `desktop_unavailable` while leaving the GUI usable. App PIDs 28536 and 5400 exited normally. No token or credential was recorded.
+The official Python MCP SDK 2.2.0 was used only as an MCP client to the Rust gateway; the Python 3D Modeler product was not launched. The client found 60 ordered tools, read and edited the live Rust document, saved it, and read the same project after the Rust GUI reopened it. The optional-startup failure session returned retryable `desktop_unavailable` while leaving the GUI usable. App PIDs 28536 and 5400 exited normally. No token or credential was recorded.
 
 The schema report compares current Rust live catalog data with saved Python catalog snapshots. Exact input/output schema matches were zero in each profile; schema compatibility remains unresolved. The comparison does not refresh the Python reference or perform full nested output-schema validation.

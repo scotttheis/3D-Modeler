@@ -1,6 +1,6 @@
 # R7-05 — application export workflow coverage
 
-Component: `builder3d.app.export`
+Component: `modeler3d.app.export`
 
 ## Selection
 

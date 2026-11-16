@@ -13,7 +13,7 @@ if __name__ != "__main__":
     raise SystemExit(0)
 
 sys.dont_write_bytecode = True
-ROOT = Path("E:/Builder3D-Rust/evidence/rebuild/rb-08-preferences-and-complete-shell")
+ROOT = Path("E:/3D-Modeler/evidence/rebuild/rb-08-preferences-and-complete-shell")
 RUN = ROOT / "native" / ("python-baseline-" + datetime.now().strftime("%Y%m%d-%H%M%S"))
 CAPTURES = RUN / "captures"
 SETTINGS = RUN / "settings"
@@ -220,7 +220,7 @@ try:
         about = next((item for item in QApplication.topLevelWidgets() if isinstance(item, QMessageBox) and item.isVisible()), None)
     if about is None:
         raise RuntimeError("About did not open a native message dialog")
-    capture("about-from-settings", "light", "Settings -> About", modal="About Builder3D")
+    capture("about-from-settings", "light", "Settings -> About", modal="About 3D Modeler")
     press_key(VK_RETURN)
     pause(200)
 
@@ -231,7 +231,7 @@ try:
     click_widget(clear_button)
     if window._recent_files:
         raise RuntimeError("Clear Recent Files List left recent paths in memory")
-    recent_store = QSettings("Builder3D", "Builder3D").value("recent_files", [])
+    recent_store = QSettings("3D Modeler", "3D Modeler").value("recent_files", [])
     if recent_store not in ([], None):
         raise RuntimeError(f"Clear Recent Files List did not persist the empty list: {recent_store!r}")
     actions.append({"check": "clear_recents_persists_empty", "result": recent_store})

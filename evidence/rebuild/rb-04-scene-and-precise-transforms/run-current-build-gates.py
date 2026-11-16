@@ -32,8 +32,8 @@ assert all((workspace/name).stat().st_mtime<=log_created for name in initial_sou
 stamp=datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
 artifact_dir=workspace/'target'/f'rb04-verified-build-{stamp}'
 artifact_dir.mkdir(exist_ok=False)
-measured=artifact_dir/'bloat-builder3d-app.exe'
-shutil.copyfile(workspace/'target/release/builder3d-app.exe',measured)
+measured=artifact_dir/'bloat-modeler3d-app.exe'
+shutil.copyfile(workspace/'target/release/modeler3d-app.exe',measured)
 artifacts={'bloat_app':dict(path=str(measured.relative_to(workspace)),sha256=sha(measured),bytes=measured.stat().st_size,scope='Symbol-enabled explicit app bloat artifact, not an installed package')}
 results=[]
 for entry in previous:
@@ -57,10 +57,10 @@ def run(name,command):
 record_results()
 run('fmt',['cargo','fmt','--all','--','--check'])
 run('check',['cargo','check','--workspace','--locked'])
-run('smoke',['cargo','run','-p','builder3d-app','--bin','builder3d-app','--','--smoke'])
-run('release',['cargo','build','--release','--locked','-p','builder3d-app','--bin','builder3d-app'])
-canonical=artifact_dir/'builder3d-app.exe'
-shutil.copyfile(workspace/'target/release/builder3d-app.exe',canonical)
+run('smoke',['cargo','run','-p','modeler3d-app','--bin','modeler3d-app','--','--smoke'])
+run('release',['cargo','build','--release','--locked','-p','modeler3d-app','--bin','modeler3d-app'])
+canonical=artifact_dir/'modeler3d-app.exe'
+shutil.copyfile(workspace/'target/release/modeler3d-app.exe',canonical)
 artifacts['release']=dict(path=str(canonical.relative_to(workspace)),sha256=sha(canonical),bytes=canonical.stat().st_size,scope='Ordinary locked release profile, preserved separately from bloat artifact')
 run('release-smoke',[str(canonical),'--smoke'])
 assert initial_sources==source_hashes(),'Source changed during current-build checks'

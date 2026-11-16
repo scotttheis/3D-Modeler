@@ -1,6 +1,6 @@
 # RB-03 verification record
 
-Recorded 2026-10-31 from `E:\Builder3D-Rust`. Command output is in `logs/`; the latest integrated run used the post-grid-fix source.
+Recorded 2026-10-31 from `E:\3D-Modeler`. Command output is in `logs/`; the latest integrated run used the post-grid-fix source.
 
 ## Integrated Rust workspace gates
 
@@ -12,21 +12,21 @@ Recorded 2026-10-31 from `E:\Builder3D-Rust`. Command output is in `logs/`; the 
 | `cargo clippy --workspace --all-targets --all-features --locked -- -D warnings` | Pass, exit 0 | Strict warnings denied. |
 | `cargo deny check` | Pass, exit 0 | Non-fatal duplicate `bitflags` lock-entry warning (1.3.2 and 2.13.2). |
 | `cargo metadata --locked --format-version 1 --no-deps` | Pass, exit 0 | JSON parses; five packages and five workspace members. |
-| `cargo run -p builder3d-app --bin builder3d-app -- --smoke` | Pass, exit 0 | `objects=2 selected=1 tabs=5`. |
-| `cargo build --release --locked -p builder3d-app --bin builder3d-app` | Pass, exit 0 | Release app built; binary 14,386,688 bytes, SHA-256 `de547662b3fca993d631b7ef931aaabd30c28f4f17dbfa629db4adc19949a999`. |
+| `cargo run -p modeler3d-app --bin modeler3d-app -- --smoke` | Pass, exit 0 | `objects=2 selected=1 tabs=5`. |
+| `cargo build --release --locked -p modeler3d-app --bin modeler3d-app` | Pass, exit 0 | Release app built; binary 14,386,688 bytes, SHA-256 `de547662b3fca993d631b7ef931aaabd30c28f4f17dbfa629db4adc19949a999`. |
 | `cargo bloat --release --workspace` | Pass, exit 0, with CLI warning | `--workspace` is reported unused; the command analyzed `r4_mcp.exe` (`.text` 3.8 MiB, file 4.5 MiB). |
-| `cargo bloat --release -p builder3d-app --bin builder3d-app` | Pass, exit 0 | App `.text` 11.2 MiB, file 13.7 MiB. |
+| `cargo bloat --release -p modeler3d-app --bin modeler3d-app` | Pass, exit 0 | App `.text` 11.2 MiB, file 13.7 MiB. |
 | `cargo audit --locked` | Not available | Cargo returned “no such command: audit” (exit 101); it was not installed. |
 
-The installed `cargo-bloat` CLI's `--workspace` behavior is recorded as observed; the app-specific scan measured the Builder3D executable directly.
+The installed `cargo-bloat` CLI's `--workspace` behavior is recorded as observed; the app-specific scan measured the 3D Modeler executable directly.
 
 ## Focused Rust checks
 
 - Recent-grid layout regression: one focused test passed (`logs/recent-grid-focused-test.log`).
-- `cargo test --offline --locked -p builder3d-app`: 92 passed, 0 failed (`logs/recent-grid-app-tests.log`).
+- `cargo test --offline --locked -p modeler3d-app`: 92 passed, 0 failed (`logs/recent-grid-app-tests.log`).
 - Changed app crate strict Clippy and the isolated debug rebuild passed (`logs/recent-grid-clippy.log`, `logs/recent-grid-build.log`).
 - Independent native export verification passed for all seven formats, selection/visibility cases, overwrite cancellation, transformed bounds, supported colors/names, and WRL indexed geometry (`logs/native-export-verification.log`).
-- The Rust native walkthrough used `target/rb03-recents-build/debug/builder3d-app.exe`, SHA-256 `dec750d4a6ef65a1a038fd5221f5b941b9799789ec21ec31600becd18d1cd8b1`.
+- The Rust native walkthrough used `target/rb03-recents-build/debug/modeler3d-app.exe`, SHA-256 `dec750d4a6ef65a1a038fd5221f5b941b9799789ec21ec31600becd18d1cd8b1`.
 
 ## Read-only Python reference checks
 

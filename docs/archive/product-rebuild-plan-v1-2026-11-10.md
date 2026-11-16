@@ -1,4 +1,4 @@
-# Builder3D product rebuild and parity plan
+# 3D Modeler product rebuild and parity plan
 
 Date: 2026-11-07. Status: active replacement plan; RB-02 is complete and
 owner-accepted. RB-03 through RB-07 implementation and engineering evidence are
@@ -9,7 +9,7 @@ live gate passed on its recorded build after the scoped Rust presentation-sync
 repair. On 2026-11-06, the current Rust Release app/gateway completed a live
 desktop/MCP workflow and optional-MCP failure check, including GUI reopen of a
 saved project. The official Python MCP SDK was used only as a client to the Rust
-gateway; the Python Builder3D application was not launched. On 2026-11-07 the
+gateway; the Python 3D Modeler application was not launched. On 2026-11-07 the
 designated `L:\Builder3D` reference identity was verified read-only and its
 current catalogs were captured without invoking handlers. Current Rust Release
 catalogs now match every reference input/output JSON Schema and official MCP
@@ -26,14 +26,14 @@ the three-line menu opens a dropdown. New Release captures are recorded under
 `evidence/rebuild/rb-08-preferences-and-complete-shell/owner-feedback-followup-20261109/`.
 The app is left open on the Side view for review. This follow-up does not close
 RB-08's native matrix, grant visual approval, or accept the product. The
-separate custom `emboss_text` `_meta.com.builder3d/longRunning` difference
+separate custom `emboss_text` `_meta.com.modeler3d/longRunning` difference
 is recorded without claiming owner approval.
 Per owner direction, only the splash screen should stay in front of other
 windows. The main Release window was reopened in its normal stacking order and
 verified not to stay above other apps; its earlier topmost state was a temporary
 review setting, so no source change was needed.
 
-The active Rust source/build/run workspace is `E:\Builder3D-Rust`. Use `G:\`
+The active Rust source/build/run workspace is `E:\3D-Modeler`. Use `G:\`
 as the primary additive backup destination. Removable USB copies are occasional
 one-offs unless the owner requests otherwise. `L:\Builder3D` remains the
 separate Python reference/shipping build and is not the Rust working copy.
@@ -48,7 +48,7 @@ It supersedes `docs/r8-execution-brief.md` and the R8 product-completion claims.
 Use the slice names RB-00 through RB-11 below; do not invent another numbered
 R stage or treat R1-R7 conversion coverage as proof of desktop readiness.
 
-The result is the owner's Builder3D: the recognizable layout, supplied artwork,
+The result is the owner's 3D Modeler: the recognizable layout, supplied artwork,
 interaction habits, modelling capabilities, file behavior, and AI control of
 the original Python app, implemented as a dependable native Rust application.
 Visual fidelity and working behavior are equally mandatory. Improvements follow
@@ -83,12 +83,12 @@ blocked. That conclusion is withdrawn.
 
 Concrete findings from the current code and records:
 
-- `crates/builder3d-app/src/shell.rs::draw_preview_objects` paints object-bound
+- `crates/modeler3d-app/src/shell.rs::draw_preview_objects` paints object-bound
   rectangles and picks through `preview_object_rects`. This is not an integrated
-  3D editing viewport. `builder3d-viewport::ViewportRenderer` exists separately.
+  3D editing viewport. `modeler3d-viewport::ViewportRenderer` exists separately.
 - `artwork.rs` paints simplified symbols instead of reproducing the original
   supplied artwork. The Python reference has eight Insert icons and 44 action
-  files per theme, plus `Builder3D.png`, `Builder3D.ico`, `pin.jpg`, and `snap.png`.
+  files per theme, plus `Modeler3D.png`, `Modeler3D.ico`, `pin.jpg`, and `snap.png`.
 - Rust command, format, operation, platform, and viewport modules contain useful
   implementations and tests. Their individual validation does not establish
   correct live integration, complete desktop reachability, or visual parity.
@@ -119,7 +119,7 @@ read-only. Preserve existing snapshots and all unrelated user work. No commits
 or pull requests are authorized.
 
 Resolve requirements in this order: current owner direction; accepted original
-Builder3D visuals and behavior; its current contracts and tests; historical
+3D Modeler visuals and behavior; its current contracts and tests; historical
 notes that explain those choices. Where records disagree, record the conflict
 and use a concrete comparison; do not silently select the easier behavior.
 Do not reproduce a known defect as a requirement or implement an old wishlist
@@ -410,7 +410,7 @@ This plan does not select a new protocol version, transport, or tool schema.
 
 For each implementation patch: format, focused checks/tests, changed-crate
 Clippy, native exercise of the affected workflow, catalog and evidence update.
-At integrated milestones and RB-11 run from `E:\Builder3D-Rust`:
+At integrated milestones and RB-11 run from `E:\3D-Modeler`:
 
 ```powershell
 cargo fmt --all -- --check
@@ -419,10 +419,10 @@ cargo test --workspace --locked
 cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
 cargo deny check
 cargo metadata --locked --format-version 1 --no-deps
-cargo run -p builder3d-app --bin builder3d-app -- --smoke
-cargo build --release --locked -p builder3d-app --bin builder3d-app
+cargo run -p modeler3d-app --bin modeler3d-app -- --smoke
+cargo build --release --locked -p modeler3d-app --bin modeler3d-app
 cargo bloat --release --workspace
-cargo bloat --release -p builder3d-app --bin builder3d-app
+cargo bloat --release -p modeler3d-app --bin modeler3d-app
 ```
 
 Run `cargo audit --locked` when installed; record unavailable tools and their
@@ -518,7 +518,7 @@ app over the Python fallback occurs before the owner replacement gate passes.
 ## 12. Next execution session
 
 - [x] Independent review R1 (SHOULD FIX): In `evidence/rebuild/rb-09-shared-ai-and-regression/validate_rb09_evidence.py`, compare the identity probe's complete ordered tool-name list with the established 60-tool catalog (or the recorded paired-gate ready list), rather than only checking count and uniqueness at lines 308-311. Add a focused negative check proving a renamed/substituted tool fails while the unchanged evidence passes. This verifies catalog names only, not schema compatibility. Preserve the existing scope; do not change application code or start RB-10 for this repair.
-  Resolved by comparing against the ordered `TOOL_CATALOG` in `crates/builder3d-mcp/src/r4/catalog.rs`; both the evidence validator and its focused renamed-tool check pass.
+  Resolved by comparing against the ordered `TOOL_CATALOG` in `crates/modeler3d-mcp/src/r4/catalog.rs`; both the evidence validator and its focused renamed-tool check pass.
 
 RB-07 Appearance, Jobs and Print is complete. Its report, verification,
 checkpoint, native evidence and snapshot receipt are under
@@ -551,8 +551,8 @@ Scope: RB-09 only. Re-read the plan's RB-09 acceptance row, this project's AGENT
 | cargo clippy --all-targets -- -D warnings | PASS, exit 0 |
 | cargo deny check | PASS, exit 0; 28 duplicate-version warnings and no policy errors |
 | cargo metadata --locked --format-version 1 --no-deps | PASS, exit 0 |
-| cargo test -p builder3d-mcp --locked | PASS; 19 passed, 0 failed, 0 ignored |
-| cargo run -p builder3d-app --bin builder3d-app -- --smoke | PASS; output: Builder3D shell smoke: objects=2 selected=1 tabs=5 |
+| cargo test -p modeler3d-mcp --locked | PASS; 19 passed, 0 failed, 0 ignored |
+| cargo run -p modeler3d-app --bin modeler3d-app -- --smoke | PASS; output: 3D Modeler shell smoke: objects=2 selected=1 tabs=5 |
 
 The eight results above are from the wrap-up rerun after initializing the documented BuildClang helper in the same PowerShell session. The full stdout/stderr is in ignored target/rb09-wrapup-gates. The locked Release app/MCP builds passed earlier in the gate run and are retained in evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-release-*. The workspace bloat invocation is not a workspace result; see Shortcuts.
 
@@ -562,7 +562,7 @@ The eight results above are from the wrap-up rerun after initializing the docume
 |---|---|---|
 | Real MCP client and native desktop use one live document; MCP edits appear in the GUI. | host_desktop.ps1 preflight, official Python MCP SDK live sessions using live_mcp_client.py, and the inline Python log/capture assertion (python -). | PASS on the recorded live app/gateway hashes. Both client logs identify project e5d81c5226e64f58b838d55d9395afa9 and the stable Cube/Sphere IDs; accepted interactive MCP-edit capture is present. Current hash recheck caveat is recorded under criterion 5. |
 | Cross-adapter reads/edits/history/save/reopen/revisions/replay/conflicts/files/cancel/failure atomicity. | cargo test --workspace --locked plus live Python/Rust SDK sessions and the inline Python JSONL assertion (python -). | PASS in the live records and 329-test suite. GUI/MCP history, no-op, lifecycle, failure preservation, replay/races, real cancellation, bounded failures and stale-result rejection are recorded in the walkthrough and client logs. |
-| Existing 60-tool catalog, profile and schema remain compatible. | cargo test -p builder3d-mcp --locked and compare the Python/Rust ready-event tool arrays (inline Python, python -). | PASS: 19 focused tests passed; both live SDK logs expose the same ordered 60-tool list. |
+| Existing 60-tool catalog, profile and schema remain compatible. | cargo test -p modeler3d-mcp --locked and compare the Python/Rust ready-event tool arrays (inline Python, python -). | PASS: 19 focused tests passed; both live SDK logs expose the same ordered 60-tool list. |
 | MCP can fail to start or the desktop can close without blocking ordinary GUI use; errors and cleanup are bounded. | rust_stdio_client_probe.py and the Python/Rust optional-client logs; inline Python record assertion (python -). | PASS: optional MCP leaves the GUI usable, closed Rust clients get retryable desktop_unavailable, and cleanup records show the owned descriptor/listener and processes gone. |
 | Evidence/ledgers/gates have exact outcomes and an additive snapshot is independently verified. | python evidence/rebuild/rb-09-shared-ai-and-regression/validate_rb09_evidence.py; verify_rb09_snapshot.ps1. | PASS for the evidence identity checks. The gate-time validator passed on the historical full-gate hashes. A later run failed because the validator compared current target outputs to those historical hashes; build logs show later cargo-bloat and app-restore recompiles. The current app 0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a and gateway aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e then passed a separate identity-only launch and read-only SDK probe, and the updated validator exited 0. The follow-up G: snapshot is a review snapshot, not a completion snapshot. |
 
@@ -582,7 +582,7 @@ The inline Python assertions read only the saved SDK JSONL and capture metadata.
 
 ### 5. Files created, changed, or deleted
 
-Compared E:/Builder3D-Rust with the read-only starting snapshot G:/Builder3D-Rust_snapshot_20261104-073919_RB-09-review (excluding root target, .cache and logs), the RB-09 delta contains 92 added files, 22 changed files and 0 deleted files. Each path and reason follows.
+Compared E:/3D-Modeler with the read-only starting snapshot G:/Builder3D-Rust_snapshot_20261104-073919_RB-09-review (excluding root target, .cache and logs), the RB-09 delta contains 92 added files, 22 changed files and 0 deleted files. Each path and reason follows.
 
 - `evidence/rebuild/rb-09-shared-ai-and-regression/captures/python-dark-initial.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
 - `evidence/rebuild/rb-09-shared-ai-and-regression/captures/python-dirty-confirmation.png` - live desktop capture; hash, dimensions, theme, DPI, and role are in capture-metadata.json.
@@ -677,8 +677,8 @@ Compared E:/Builder3D-Rust with the read-only starting snapshot G:/Builder3D-Rus
 - `evidence/rebuild/rb-09-shared-ai-and-regression/logs/rb09-rust-optional-client.jsonl` - raw official-SDK live MCP request/result log.
 - `evidence/rebuild/rb-09-shared-ai-and-regression/logs/rust-stdio-client-probe.exit` - official-SDK stdio/closed-desktop probe exit evidence.
 - `WORK_LOG.md` - RB-09 live run, wrap-up results, and next-boundary session record.
-- `crates/builder3d-app/src/mcp_bridge.rs` - synchronizes shell presentation after MCP scene/document commits; includes focused regressions.
-- `crates/builder3d-app/src/shell.rs` - synchronizes visible shell page after MCP document installation and replacement.
+- `crates/modeler3d-app/src/mcp_bridge.rs` - synchronizes shell presentation after MCP scene/document commits; includes focused regressions.
+- `crates/modeler3d-app/src/shell.rs` - synchronizes visible shell page after MCP document installation and replacement.
 - `docs/component-catalog.toml` - updates the existing MCP/app bridge component contract and evidence references.
 - `docs/product-rebuild-plan.md` - records RB-09 live status and this review entry.
 - `docs/rb-09-shared-ai-and-regression-handoff.md` - records the live endpoint and current artifact-identity recheck.
@@ -734,7 +734,7 @@ Compared E:/Builder3D-Rust with the read-only starting snapshot G:/Builder3D-Rus
 - `target/rb09-wrapup-gates/wrapup-metadata.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
 - `target/rb09-wrapup-gates/wrapup-smoke.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
 - `target/rb09-wrapup-gates/wrapup-test.log` - ignored wrap-up stdout/stderr/exit artifact; excluded from the G: snapshot.
-- `target/release/builder3d-app.exe` - generated Release output; current hash/size or invalid workspace-bloat target is recorded in verification.md.
+- `target/release/modeler3d-app.exe` - generated Release output; current hash/size or invalid workspace-bloat target is recorded in verification.md.
 - `target/release/r4_mcp.exe` - generated Release output; current hash/size or invalid workspace-bloat target is recorded in verification.md.
 - `target/release/r5_viewport.exe` - generated Release output; current hash/size or invalid workspace-bloat target is recorded in verification.md.
 - `.git/index.lock` - transient zero-byte lock from an interrupted status scan; removed after confirming no Git process owned it.
@@ -797,7 +797,7 @@ Deleted files: none.
 
 ### 2. Project check/test commands and results
 
-Commands ran from `E:\Builder3D-Rust` after dot-sourcing
+Commands ran from `E:\3D-Modeler` after dot-sourcing
 `scripts\Initialize-BuildClang.ps1` in the same PowerShell session.
 
 | Command | Result |
@@ -808,8 +808,8 @@ Commands ran from `E:\Builder3D-Rust` after dot-sourcing
 | `cargo clippy --workspace --all-targets --locked -- -D warnings` | PASS, exit 0 |
 | `cargo deny check` | PASS, exit 0; `advisories ok, bans ok, licenses ok, sources ok`; duplicate-version warnings remain |
 | `cargo metadata --locked --format-version 1 --no-deps` | PASS, exit 0 |
-| `cargo test -p builder3d-mcp --locked` | PASS, 19 passed, 0 failed, 0 ignored |
-| `cargo run -p builder3d-app --bin builder3d-app --locked -- --smoke` | PASS; `Builder3D shell smoke: objects=2 selected=1 tabs=5` |
+| `cargo test -p modeler3d-mcp --locked` | PASS, 19 passed, 0 failed, 0 ignored |
+| `cargo run -p modeler3d-app --bin modeler3d-app --locked -- --smoke` | PASS; `3D Modeler shell smoke: objects=2 selected=1 tabs=5` |
 | `python evidence/rebuild/rb-09-shared-ai-and-regression/validate_rb09_evidence.py` | PASS, exit 0; historical identities, 50 accepted PNGs, 2 clean scene pairs, current identities, and identity-only SDK probe verified |
 
 The first PowerShell output-filter attempt stopped while merging native stderr; the direct workspace test rerun above passed. One inline snapshot assertion initially expected comma-grouped counts; the receipt uses `3904 / 701101053`, and the corrected assertion passed. Neither was a project test failure. `cargo audit` was unavailable because `cargo-audit` is not installed. `cargo bloat` was not rerun.
@@ -820,7 +820,7 @@ The first PowerShell output-filter attempt stopped while merging native stderr; 
 |---|---|---|
 | Plan RB-09 row: desktop and MCP use the same live document; cross-adapter edits, geometry, and history match without a parallel scene. | `python -` inline assertions over `capture-metadata.json` and the saved Python/Rust client JSONL; evidence validator. | PASS in the recorded 2026-11-04 live gate. The assertions found the same project and stable object IDs; the validator verified 50 interactive capture hashes/dimensions and 2 accepted scene pairs. The paired GUI/MCP workflow was not repeated in this wrap-up. |
 | Handoff section 9: queries, edits, undo/redo, save/reopen, revisions, replay/conflicts, file policy, cancellation, and failure atomicity. | `cargo test --workspace --locked`; `python -` assertions over saved Python/Rust client JSONL. | PASS in the recorded gate and current test run: 329 tests passed, 0 failed, 0 ignored; saved logs include the listed operation and conflict paths. No new live transaction run was performed. |
-| Handoff section 9: existing 60-tool catalog/profile/schema compatibility. | `cargo test -p builder3d-mcp --locked`; `python -` comparison of saved official-client ready events. | PASS: 19 MCP tests passed, 0 failed, 0 ignored; saved client records expose the same ordered list of 60 tools. |
+| Handoff section 9: existing 60-tool catalog/profile/schema compatibility. | `cargo test -p modeler3d-mcp --locked`; `python -` comparison of saved official-client ready events. | PASS: 19 MCP tests passed, 0 failed, 0 ignored; saved client records expose the same ordered list of 60 tools. |
 | Handoff section 9: MCP unavailable without blocking normal desktop use. | `python -` assertion over `rust_stdio_client_probe-result.json` and optional-client JSONL; workspace tests. | PASS in saved evidence: closed desktop returns retryable `desktop_unavailable`; Python and Rust optional-client records exist. This was not freshly exercised against a running desktop. |
 | Handoff section 9: exact evidence outcomes and an independently verified RB-09 completion snapshot. | Evidence validator; `python -` assertion over `snapshot-receipt.md` and snapshot path. | INCOMPLETE as a full RB-09 completion criterion. The validator passes and the G: snapshot is independently verified, but its receipt explicitly labels it a review snapshot, not an RB-09 completion snapshot. No completion snapshot was created in this wrap-up. |
 | Artifact identity follow-up: explain the hash mismatch, verify current outputs separately, and pass the validator. | `Get-FileHash` for the current Release app/gateway; evidence validator; saved rebuild-log checks. | PASS: historical hashes match capture metadata, rebuild logs record later Release builds, current hashes match the identity record, and the validator exits 0. Current hashes remained `0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a` (app) and `aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e` (gateway). |
@@ -929,8 +929,8 @@ The wrap-up did not change Rust application code.
 
 | Criterion | Command run | Result |
 |---|---|---|
-| Handoff §9: native Rust desktop and MCP client observe/edit one live document; no MCP-only scene. | `node evidence/rebuild/rb-09-shared-ai-and-regression/write_current_run_manifest.mjs evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261106-072716`; full evidence validator. | PASS for the current Rust Release pair. The GUI reopened the MCP-edited saved document (82,178 bytes, project `e5d81c5226e64f58b838d55d9395afa9`, revision 25, stable Cube/Sphere IDs). This did not launch the Python Builder3D product. |
-| Handoff §9: cross-adapter reads/edits/history/save/reopen/revisions/replay/conflicts/files/cancel/failure atomicity. | `cargo test --workspace --locked --quiet`; `cargo test -p builder3d-mcp --locked`; current-run manifest writer. | PARTIAL. Automated workspace tests passed 329/329 and focused MCP tests 19/19. The current Release workflow covered a shared-document edit/save/reopen. The exhaustive live replay/conflict/cancellation/failure sequence remains supported by the historical paired gate, not a current full native rerun. |
+| Handoff §9: native Rust desktop and MCP client observe/edit one live document; no MCP-only scene. | `node evidence/rebuild/rb-09-shared-ai-and-regression/write_current_run_manifest.mjs evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261106-072716`; full evidence validator. | PASS for the current Rust Release pair. The GUI reopened the MCP-edited saved document (82,178 bytes, project `e5d81c5226e64f58b838d55d9395afa9`, revision 25, stable Cube/Sphere IDs). This did not launch the Python 3D Modeler product. |
+| Handoff §9: cross-adapter reads/edits/history/save/reopen/revisions/replay/conflicts/files/cancel/failure atomicity. | `cargo test --workspace --locked --quiet`; `cargo test -p modeler3d-mcp --locked`; current-run manifest writer. | PARTIAL. Automated workspace tests passed 329/329 and focused MCP tests 19/19. The current Release workflow covered a shared-document edit/save/reopen. The exhaustive live replay/conflict/cancellation/failure sequence remains supported by the historical paired gate, not a current full native rerun. |
 | Handoff §9: 60-tool catalog, profile, and schema contract. | `node evidence/rebuild/rb-09-shared-ai-and-regression/compare_mcp_schemas.mjs evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261106-072716`. | FAIL/PENDING: ordered names/counts match saved catalogs for observe/model/files/full (7/52/59/60), but exact input- and output-schema matches are 0 in all four profiles. No owner-approved deviation exists. |
 | Handoff §9: MCP unavailable without blocking ordinary desktop use; bounded errors and cleanup. | PowerShell assertions over `currpair-20261106-072716/current-run-manifest.json` lifecycle fields. | PASS for the current Rust Release failure run: 60 tools discovered, two client reads returned `desktop_unavailable`, the GUI remained usable, and the owned descriptor/listener/client/gateway were gone at shutdown. |
 | Handoff §9: evidence/ledgers and an independently verified additive RB-09 recovery snapshot. | `py -3.13 evidence/rebuild/rb-09-shared-ai-and-regression/validate_rb09_evidence.py`; `verify_rb09_snapshot.ps1`. | Evidence validator PASS; it verifies current Release identities and nine current capture records while reporting schema parity pending. The prior `G:\B3D_R09C_20261106` comparison returned exit 1 with exactly two regenerated JSON differences and was left untouched. New additive snapshot `G:\B3D_R09W_20261106` then verified PASS: 3991 files / 756853562 bytes each, zero missing/extra/different paths or reparse entries, and 8 critical hashes matched. It is a review/recovery snapshot, not an RB-09 completion snapshot. |
@@ -943,7 +943,7 @@ The wrap-up did not change Rust application code.
 | `cargo fmt --check` | PASS, exit 0. |
 | `cargo check --workspace --locked` | PASS, exit 0. |
 | `cargo test --workspace --locked --quiet` | PASS, 329 passed, 0 failed, 0 ignored. |
-| `cargo test -p builder3d-mcp --locked` | PASS, 19 passed, 0 failed, 0 ignored. |
+| `cargo test -p modeler3d-mcp --locked` | PASS, 19 passed, 0 failed, 0 ignored. |
 | `cargo clippy --all-targets -- -D warnings` | PASS, exit 0. |
 | `cargo deny check` | PASS, exit 0; 28 duplicate-version warnings; advisories, bans, licenses, and sources all `ok`. |
 | `git diff --check` | PASS, exit 0; line-ending normalization warnings only. |
@@ -952,7 +952,7 @@ The wrap-up did not change Rust application code.
 ### 4. Shortcuts, warnings, hard-coded limits, and untested work
 
 - The current app/gateway run is the Rust Release pair. The official Python MCP
-  SDK 2.2.0 was only a client to the Rust stdio gateway; the Python Builder3D
+  SDK 2.2.0 was only a client to the Rust stdio gateway; the Python 3D Modeler
   product was not launched and saved Python catalogs were not refreshed.
 - The comprehensive paired live workflow is historical. This wrap-up reran
   current Rust live shared-document and optional-MCP evidence, but did not repeat
@@ -1049,7 +1049,7 @@ tool result shaping, matching reference annotations, and the app bridge result
 shape. jsonschema 0.60.2 was pinned in the MCP crate and lockfile; deny.toml
 contains a version-scoped MIT-0 exception for borrow-or-share 0.2.4. Public
 tool names/order remain unchanged. The custom Rust
-_meta.com.builder3d/longRunning value for emboss_text still differs from
+_meta.com.modeler3d/longRunning value for emboss_text still differs from
 Python in model/files/full; this is disclosed, not owner-approved.
 
 Focused MCP tests passed 26/26, the focused live-result validator passed 1/1,

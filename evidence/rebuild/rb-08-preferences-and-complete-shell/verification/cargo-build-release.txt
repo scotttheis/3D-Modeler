@@ -7,7 +7,7 @@
    Compiling gpu-allocator v0.28.0
    Compiling accesskit_windows v0.35.2
    Compiling sysinfo v0.40.0
-   Compiling builder3d-core v0.1.0 (E:\Builder3D-Rust\crates\builder3d-core)
+   Compiling modeler3d-core v0.1.0 (E:\3D-Modeler\crates\modeler3d-core)
    Compiling accesskit_winit v0.34.2
    Compiling egui-winit v0.37.0
    Compiling wgpu-hal v30.0.1
@@ -15,8 +15,8 @@
    Compiling wgpu-core v30.0.1
    Compiling wgpu v30.0.1
    Compiling egui-wgpu v0.37.0
-   Compiling builder3d-platform v0.1.0 (E:\Builder3D-Rust\crates\builder3d-platform)
+   Compiling modeler3d-platform v0.1.0 (E:\3D-Modeler\crates\modeler3d-platform)
    Compiling eframe v0.37.0
-   Compiling builder3d-viewport v0.1.0 (E:\Builder3D-Rust\crates\builder3d-viewport)
-   Compiling builder3d-app v0.1.0 (E:\Builder3D-Rust\crates\builder3d-app)
+   Compiling modeler3d-viewport v0.1.0 (E:\3D-Modeler\crates\modeler3d-viewport)
+   Compiling modeler3d-app v0.1.0 (E:\3D-Modeler\crates\modeler3d-app)
     Finished `release` profile [optimized] target(s) in 3m 42s

@@ -1,6 +1,6 @@
 # RB-07 paired comparison board
 
-Links open the accepted native frames. Builder3D screenshots were captured at 1280x840 / 96 DPI in both themes. The Python native runner did not open its Print Prep report through the menu action; the report images were captured manually. Python external slicer launch is covered by the reference adapter tests, not a native screenshot.
+Links open the accepted native frames. 3D Modeler screenshots were captured at 1280x840 / 96 DPI in both themes. The Python native runner did not open its Print Prep report through the menu action; the report images were captured manually. Python external slicer launch is covered by the reference adapter tests, not a native screenshot.
 
 | Workflow | Python Light | Rust Light | Python Dark | Rust Dark | Observed result |
 |---|---|---|---|---|---|

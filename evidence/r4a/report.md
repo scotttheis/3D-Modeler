@@ -12,7 +12,7 @@ Evidence captured on 2026-10-29:
   installed Python SDK.
 - The raw pre-initialize discovery probe reported support for
   `2024-11-05`, `2025-03-26`, `2025-06-18`, `2025-11-25`, and `2026-07-28`,
-  plus the tools capability and `builder3d-rust-mcp` server identity.
+  plus the tools capability and `modeler3d-rust-mcp` server identity.
 - `cargo fmt --all -- --check`, `cargo check --workspace`, workspace tests,
   and workspace clippy with `-D warnings` passed at the completed R4 run.
 - The approved-root policy defaults to deny-all, rejects canonical paths that

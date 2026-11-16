@@ -26,7 +26,7 @@ executable without a Python runtime dependency.
 - `cargo deny check`: pass for advisories, bans, licenses, and sources. The
   existing transitive duplicate-version warnings remain informational.
 - `cargo metadata --locked --format-version 1 --no-deps`: pass.
-- `cargo bloat --release --package builder3d-app --bin builder3d-app -n 20`:
+- `cargo bloat --release --package modeler3d-app --bin modeler3d-app -n 20`:
   8.9 MiB `.text`, 11.2 MiB file; the 40 MB installed gate is measured on the
   staged package below.
 - Production Rust scan: zero forbidden `unwrap`, `expect`, `panic!`,

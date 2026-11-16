@@ -1,6 +1,6 @@
 # R6-04 snapshot verification
 
-Verified 2026-10-29 from `E:\Builder3D-Rust` after the R6-04 source,
+Verified 2026-10-29 from `E:\3D-Modeler` after the R6-04 source,
 artwork, evidence, and `WORK_LOG.md` changes.
 
 The manifest includes every visible and hidden file below the repository root

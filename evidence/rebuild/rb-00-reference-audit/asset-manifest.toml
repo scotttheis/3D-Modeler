@@ -1,4 +1,4 @@
-# Read-only provenance inventory of the original Builder3D asset tree.
+# Read-only provenance inventory of the original 3D Modeler asset tree.
 # Generated from L:\Builder3D and the recorded owner-supplied L:\Icons\LightMode inputs.
 # RB-00 inventories assets only; no original artwork was copied into the Rust product.
 
@@ -1607,7 +1607,7 @@ source_inputs = [{ path = "L:\\Icons\\LightMode\\Wireframe.png", sha256 = "2ec23
 embedded_sizes = []
 
 [[asset]]
-path = "Builder3D.ico"
+path = "Modeler3D.ico"
 source_path = "L:\\Builder3D\\assets\\Builder3D.ico"
 sha256 = "85b4c3841dc4ca8bd57525728dbd9554bc6b9918f0f1705ef39587334d6c12ed"
 bytes = 122638
@@ -1625,7 +1625,7 @@ source_inputs = []
 embedded_sizes = ["128x128", "16x16", "24x24", "256x256", "32x32", "48x48", "64x64"]
 
 [[asset]]
-path = "Builder3D.png"
+path = "Modeler3D.png"
 source_path = "L:\\Builder3D\\assets\\Builder3D.png"
 sha256 = "44bcc68aab7a4b7c78e92eab2dd2a1609dda18bb51e28b8e0d80cfd41d69162b"
 bytes = 1516309

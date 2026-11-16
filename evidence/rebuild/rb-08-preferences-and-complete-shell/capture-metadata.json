@@ -1,5 +1,5 @@
 {
-  "schema": "builder3d.native-capture-metadata/v1",
+  "schema": "modeler3d.native-capture-metadata/v1",
   "slice": "RB-08",
   "reference": {
     "executable": "L:\\Builder3D\\venv\\Scripts\\python.exe",

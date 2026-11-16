@@ -46,9 +46,9 @@
       "bloat",
       "--release",
       "-p",
-      "builder3d-app",
+      "modeler3d-app",
       "--bin",
-      "builder3d-app"
+      "modeler3d-app"
     ],
     "exit_code": 0,
     "seconds": 288.692,
@@ -110,9 +110,9 @@
       "cargo",
       "run",
       "-p",
-      "builder3d-app",
+      "modeler3d-app",
       "--bin",
-      "builder3d-app",
+      "modeler3d-app",
       "--",
       "--smoke"
     ],
@@ -128,9 +128,9 @@
       "--release",
       "--locked",
       "-p",
-      "builder3d-app",
+      "modeler3d-app",
       "--bin",
-      "builder3d-app"
+      "modeler3d-app"
     ],
     "exit_code": 0,
     "seconds": 165.251,
@@ -139,7 +139,7 @@
   {
     "name": "release-smoke",
     "command": [
-      "E:\\Builder3D-Rust\\target\\rb04-verified-build-20261031-212336\\builder3d-app.exe",
+      "E:\\3D-Modeler\\target\\rb04-verified-build-20261031-212336\\modeler3d-app.exe",
       "--smoke"
     ],
     "exit_code": 0,

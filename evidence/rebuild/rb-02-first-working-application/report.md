@@ -10,7 +10,7 @@ The walkthrough used the repository's `python_box.stl` fixture. It has local bou
 
 ## Implementation boundary
 
-- `builder3d-app` remains the application shell and authority for command dispatch. `builder3d-core` retains scene, object identity, project persistence, and history behavior.
+- `modeler3d-app` remains the application shell and authority for command dispatch. `modeler3d-core` retains scene, object identity, project persistence, and history behavior.
 - The R5 renderer is initialized from eframe's existing `wgpu` instance, adapter, device, and queue. Its shaded output is registered with egui-wgpu and displayed as a GPU texture in the existing viewport; the normal displayed frame does not read the image back through the CPU.
 - Viewport dimensions and pointer locations are converted using the live pixels-per-point value. Picking ray-tests the rendered scene and returns the durable object ID. It does not choose an object by its screen-space rectangle or a filtered render-list index.
 - Orbit, pan, and zoom route through the shared camera. A translation drag previews while held and commits one ID-based position command on release. Escape/focus loss cancels, and a no-op drag does not create history.
@@ -23,7 +23,7 @@ The representative slice is enough to retain eframe: the existing app presents a
 
 The live renderer selected the Quadro RTX 4000 on Vulkan (`DiscreteGpu`, NVIDIA driver 581.42). It rendered the walkthrough geometry without a CPU-fallback status. Runtime details are in [runtime-adapter.txt](runtime-adapter.txt). The evidence executable SHA-256 is `4b197161771239c8943fb8fc2f73d6739245145769c301c32931b01e5480da87`.
 
-Every screenshot is a GDI `CopyFromScreen` capture of the visible foreground Builder3D client rectangle. Light and Dark runs used separate app processes, closed between runs. The actual client area was 1280 x 840 logical and physical pixels at 96 DPI / 100% scale. The primary display was 2560 x 1440 physical pixels. Per-image timestamps, process IDs, dimensions, byte lengths, hashes, and build identity are recorded in [capture-metadata.toml](capture-metadata.toml).
+Every screenshot is a GDI `CopyFromScreen` capture of the visible foreground 3D Modeler client rectangle. Light and Dark runs used separate app processes, closed between runs. The actual client area was 1280 x 840 logical and physical pixels at 96 DPI / 100% scale. The primary display was 2560 x 1440 physical pixels. Per-image timestamps, process IDs, dimensions, byte lengths, hashes, and build identity are recorded in [capture-metadata.toml](capture-metadata.toml).
 
 ## Known boundaries and review items
 

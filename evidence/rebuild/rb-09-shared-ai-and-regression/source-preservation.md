@@ -2,14 +2,14 @@
 
 ## Working state
 
-- Working source: `E:\Builder3D-Rust`, branch `main` in an unborn repository. `git status --short --branch` showed the project files as untracked. Every pre-existing file is treated as owner work.
+- Working source: `E:\3D-Modeler`, branch `main` in an unborn repository. `git status --short --branch` showed the project files as untracked. Every pre-existing file is treated as owner work.
 - Python behavior reference: `L:\Builder3D`, read-only throughout RB-09.
 - No files have been staged, committed, reset, discarded, or restored from a snapshot.
 - Baseline copy: `G:\Builder3D-Rust_snapshot_20261102-141606_RB-09-baseline`; see `baseline-snapshot-receipt.md`.
 
 ## Starting processes and desktop state
 
-The starting process inspection found the existing Python MCP gateway at `L:\Builder3D\scripts\builder3d_mcp.py` (PIDs 24452 and 20392), Windows `LockApp.exe` (PID 9808), and unrelated Team Scheduler and Blender MCP processes. They were left running. No Rust Builder3D application or `r4_mcp` process was present. The lock screen owned the foreground, so no input was sent and no window was closed. Paired live desktop/MCP evidence is therefore unverified until an interactive session is available.
+The starting process inspection found the existing Python MCP gateway at `L:\Builder3D\scripts\builder3d_mcp.py` (PIDs 24452 and 20392), Windows `LockApp.exe` (PID 9808), and unrelated Team Scheduler and Blender MCP processes. They were left running. No Rust 3D Modeler application or `r4_mcp` process was present. The lock screen owned the foreground, so no input was sent and no window was closed. Paired live desktop/MCP evidence is therefore unverified until an interactive session is available.
 
 ## Reference protection
 
@@ -33,7 +33,7 @@ placed under this RB-09 evidence directory on E:. No command wrote to
 
 ## Owner path and backup direction (2026-11-03)
 
-The active Rust project remains `E:\Builder3D-Rust` for source, builds, and
+The active Rust project remains `E:\3D-Modeler` for source, builds, and
 launches. `G:\` is the primary additive recovery-backup destination. The
 current G: copy is
 `G:\Builder3D-Rust_snapshot_20261103-111729_RB-09-paused-e-primary`.

@@ -1,6 +1,6 @@
-   Compiling builder3d-platform v0.1.0 (E:\Builder3D-Rust\crates\builder3d-platform)
-   Compiling builder3d-viewport v0.1.0 (E:\Builder3D-Rust\crates\builder3d-viewport)
-   Compiling builder3d-app v0.1.0 (E:\Builder3D-Rust\crates\builder3d-app)
+   Compiling modeler3d-platform v0.1.0 (E:\3D-Modeler\crates\modeler3d-platform)
+   Compiling modeler3d-viewport v0.1.0 (E:\3D-Modeler\crates\modeler3d-viewport)
+   Compiling modeler3d-app v0.1.0 (E:\3D-Modeler\crates\modeler3d-app)
     Finished `dev` profile [unoptimized + debuginfo] target(s) in 9.43s
-     Running `target\debug\builder3d-app.exe --smoke`
-Builder3D shell smoke: objects=2 selected=1 tabs=5
+     Running `target\debug\modeler3d-app.exe --smoke`
+3D Modeler shell smoke: objects=2 selected=1 tabs=5

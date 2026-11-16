@@ -19,7 +19,7 @@ assert not missing,missing
 catalog=tomllib.loads(Path('docs/component-catalog.toml').read_text())['component'];assert len({c['id'] for c in catalog})==len(catalog)
 for c in catalog:
  for p in c['rust_paths']:assert Path(p).exists(),p
-assert 'dirty_marker_tracks_saved_checkpoint_through_undo_redo_and_branches' in Path('crates/builder3d-app/src/commands.rs').read_text()
+assert 'dirty_marker_tracks_saved_checkpoint_through_undo_redo_and_branches' in Path('crates/modeler3d-app/src/commands.rs').read_text()
 p=root/'logs/settle-tests.txt';s=p.read_text(encoding='utf-16' if p.read_bytes().startswith(b'\xff\xfe') else 'utf-8'); results=re.findall(r'test result: ok\. (\d+) passed; (\d+) failed; (\d+) ignored',s)
 meta=json.loads((root/'capture-metadata.json').read_text())
 for c in meta['captures']:assert hashlib.sha256((root/c['path']).read_bytes()).hexdigest()==c['sha256']

@@ -13,14 +13,14 @@ target identity/state, and records one undoable grouped command.
 ## Changed files
 
 - `Cargo.toml`, `Cargo.lock`
-- `crates/builder3d-core/Cargo.toml`
-- `crates/builder3d-core/src/error.rs`
-- `crates/builder3d-core/src/lib.rs`
-- `crates/builder3d-core/src/mesh_ops.rs`
-- `crates/builder3d-core/src/transform.rs`
-- `crates/builder3d-core/src/commands.rs`
-- `crates/builder3d-core/src/scene.rs`
-- `crates/builder3d-core/tests/mesh_ops_booleans.rs`
+- `crates/modeler3d-core/Cargo.toml`
+- `crates/modeler3d-core/src/error.rs`
+- `crates/modeler3d-core/src/lib.rs`
+- `crates/modeler3d-core/src/mesh_ops.rs`
+- `crates/modeler3d-core/src/transform.rs`
+- `crates/modeler3d-core/src/commands.rs`
+- `crates/modeler3d-core/src/scene.rs`
+- `crates/modeler3d-core/tests/mesh_ops_booleans.rs`
 
 ## Behavioral evidence
 
@@ -40,13 +40,13 @@ target identity/state, and records one undoable grouped command.
 - Python reference: `tests/test_mesh_ops.py -k "boolean or Conversion" -q`:
   11 passed, 72 deselected, one known `trimesh` invalid-value warning.
 - Rust: `cargo fmt --all -- --check` passed.
-- Rust: `cargo check -p builder3d-core` passed.
-- Rust: `cargo clippy -p builder3d-core --all-targets -- -D warnings` passed.
-- Rust: `cargo test -p builder3d-core` passed, including the five focused
+- Rust: `cargo check -p modeler3d-core` passed.
+- Rust: `cargo clippy -p modeler3d-core --all-targets -- -D warnings` passed.
+- Rust: `cargo test -p modeler3d-core` passed, including the five focused
   boolean tests and all existing core golden tests.
 - R3 production files have zero matches for `.unwrap()`, `.expect()`,
   `dbg!`, `todo!`, `panic!`, or `unimplemented!`. Existing panic markers in
-  `crates/builder3d-core/src/lib.rs` are confined to its pre-existing test
+  `crates/modeler3d-core/src/lib.rs` are confined to its pre-existing test
   module and were not added by this subtask.
 
 ## Snapshot
@@ -58,7 +58,7 @@ The first completed R3a copy was
 `G:\Builder3D-Rust_snapshot_20261029-142339_R3a-booleans`. After correcting
 the manifest wording in the log, the final additive R3a snapshot is
 `G:\Builder3D-Rust_snapshot_20261029-142448_R3a-booleans-final`; it excludes
-`E:\Builder3D-Rust\target`. Its exact manifest verification is recorded in
+`E:\3D-Modeler\target`. Its exact manifest verification is recorded in
 `verification.md`.
 
 ## Remaining R3 work

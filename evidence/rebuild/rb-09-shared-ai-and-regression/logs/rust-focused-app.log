@@ -1,11 +1,11 @@
 ﻿cargo :     Finished `test` profile [unoptimized + debuginfo] target(s) in 0.67s
 At line:7 char:1
-+ cargo test -p builder3d-app mcp_ 2>&1 | Out-File -FilePath (Join-Path ...
++ cargo test -p modeler3d-app mcp_ 2>&1 | Out-File -FilePath (Join-Path ...
 + ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     + CategoryInfo          : NotSpecified: (    Finished `t...get(s) in 0.67s:String) [], RemoteException
     + FullyQualifiedErrorId : NativeCommandError
  
-     Running unittests src\lib.rs (target\debug\deps\builder3d_app-d0e877bae8fe74a8.exe)
+     Running unittests src\lib.rs (target\debug\deps\modeler3d_app-d0e877bae8fe74a8.exe)
 
 running 5 tests
 test commands::tests::unrelated_mcp_operation_keeps_path_and_rejects_a_stale_path ... ok
@@ -16,7 +16,7 @@ test commands::tests::completed_mcp_open_replaces_a_same_identity_document ... o
 
 test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 159 filtered out; finished in 0.08s
 
-     Running unittests src\main.rs (target\debug\deps\builder3d_app-e006f59cda6f1535.exe)
+     Running unittests src\main.rs (target\debug\deps\modeler3d_app-e006f59cda6f1535.exe)
 
 running 0 tests
 

@@ -9,7 +9,7 @@ remain in [`product-rebuild-plan.md`](product-rebuild-plan.md).
 
 ## Historical RB-00 task (completed)
 
-RB-00 established a map of the original Builder3D's appearance and behavior,
+RB-00 established a map of the original 3D Modeler's appearance and behavior,
 recorded which Rust code can be reused, and identified implementation gaps.
 The following requirements describe that completed audit and are retained as
 historical context, not as the current session's task.
@@ -27,21 +27,21 @@ unavailable instead of substituting a blank or obscured screenshot.
 First read the complete current files, not just this handoff:
 
 1. `E:\AGENTS.md` and `E:\RustDeveloper.md`.
-2. `E:\Builder3D-Rust\AGENTS.md`.
-3. This handoff and `E:\Builder3D-Rust\docs\product-rebuild-plan.md`.
+2. `E:\3D-Modeler\AGENTS.md`.
+3. This handoff and `E:\3D-Modeler\docs\product-rebuild-plan.md`.
 4. `L:\Builder3D\AGENTS.md` and only the relevant original product material:
    `docs/ui-style-guide.md`, `docs/rust-rewrite.md`, `docs/architecture.md`,
    `docs/project-format.md`, `docs/ai-mcp.md`, `docs/testing.md`,
    `docs/mcp-modern-design.md`, `TODO.md`'s current task and work order,
    `issues.md`, `COMPLETED.md`, `src/icon_assets.py`, and the relevant source
    and test files listed below.
-5. `E:\Builder3D-Rust\WORK_LOG.md`'s latest plan-reset entry and
+5. `E:\3D-Modeler\WORK_LOG.md`'s latest plan-reset entry and
    `evidence/rebuild/00-plan-reset/`.
 6. The Rust catalog entries, implementations, tests and R8 records listed in
    “Known current state” below. Treat R8 completion language as superseded.
 
 The shared Rust guide still applies. The original project and every existing
-`G:\` snapshot are read-only. Keep the work in `E:\Builder3D-Rust`; do not
+`G:\` snapshot are read-only. Keep the work in `E:\3D-Modeler`; do not
 modify Python, reset or clean the untracked worktree, commit, or open a pull
 request. Do not redo R1-R7 conversion work. Do not use the retired R8 brief as
 an execution plan. Do not run a broad Python desktop suite under its current
@@ -67,17 +67,17 @@ rules if opening the reference app to observe it.
   disabled. Recheck status and make a fresh additive baseline before RB-00
   changes, following the current snapshot rules.
 - Catalog: 30 IDs. Core/file/mesh/MCP/renderer contracts retain their scoped
-  historical tests; `builder3d.app.shell` and
-  `builder3d.app.desktop-adapters` are `polish`, and
-  `builder3d.app.commands` is `ported`. Do not promote them from inventory or
+  historical tests; `modeler3d.app.shell` and
+  `modeler3d.app.desktop-adapters` are `polish`, and
+  `modeler3d.app.commands` is `ported`. Do not promote them from inventory or
   smoke results.
-- `crates/builder3d-app/src/shell.rs` paints rectangle previews and stores
-  rectangle hit targets. `builder3d-viewport` has a separate R5 renderer.
+- `crates/modeler3d-app/src/shell.rs` paints rectangle previews and stores
+  rectangle hit targets. `modeler3d-viewport` has a separate R5 renderer.
   Their actual integration is open work.
 - Original owner art exists: eight Insert images; 44 action images in each
-  theme; root `Builder3D.png`, `Builder3D.ico`, `pin.jpg`, and `snap.png`.
+  theme; root `Modeler3D.png`, `Modeler3D.ico`, `pin.jpg`, and `snap.png`.
   Verify the exact current manifest and mapping. Do not mistake Microsoft
-  reference-app artwork for Builder3D's own assets.
+  reference-app artwork for 3D Modeler's own assets.
 - `evidence/r8/00-baseline/python-reference.png` is a blank client area. It is
   not an acceptable appearance baseline. Inspect every capture before relying
   on it. Historical R8 tests and logs describe what they actually exercised;
@@ -92,7 +92,7 @@ rules if opening the reference app to observe it.
 
 ### 1. Record the starting state
 
-Inspect `git status --short`, relevant running Builder3D processes and the
+Inspect `git status --short`, relevant running 3D Modeler processes and the
 current working files. Preserve existing changes and sessions. Read the latest
 verified recovery receipt. Before any RB-00 file changes, create a new additive
 `G:\` snapshot with source, tests, fixtures, artwork, manifests, catalog,
@@ -227,14 +227,14 @@ fields for each feature:
 
 ```toml
 [[feature]]
-id = "builder3d.ui.example.action"
+id = "modeler3d.ui.example.action"
 area = "example"
 behavior = "Observable result and preconditions"
 python_paths = ["src/main_window.py"]
 python_symbols = ["MainWindow.example"]
 python_tests = ["tests/test_example.py::test_contract"]
-rust_component_ids = ["builder3d.app.example"]
-rust_paths = ["crates/builder3d-app/src/example.rs"]
+rust_component_ids = ["modeler3d.app.example"]
+rust_paths = ["crates/modeler3d-app/src/example.rs"]
 rust_symbols = ["ExampleCommand"]
 desktop_entry_points = ["ribbon/menu/shortcut/viewport as applicable"]
 contracts = ["result", "units", "history", "failure"]
@@ -303,15 +303,15 @@ silently roll into those implementation slices in the RB-00 handoff.
 Copy this prompt to start the next session:
 
 ```text
-Execute RB-00 only from the Builder3D Rust product rebuild plan.
+Execute RB-00 only from the 3D Modeler Rust product rebuild plan.
 
 First read E:\AGENTS.md, E:\RustDeveloper.md,
-E:\Builder3D-Rust\AGENTS.md, then the complete
-E:\Builder3D-Rust\docs\product-rebuild-handoff.md and
-E:\Builder3D-Rust\docs\product-rebuild-plan.md. Continue from the latest
+E:\3D-Modeler\AGENTS.md, then the complete
+E:\3D-Modeler\docs\product-rebuild-handoff.md and
+E:\3D-Modeler\docs\product-rebuild-plan.md. Continue from the latest
 WORK_LOG.md entry and verified checkpoint.
 
-Audit the original Builder3D at L:\Builder3D as a read-only behavior and visual
+Audit the original 3D Modeler at L:\Builder3D as a read-only behavior and visual
 reference. Produce the RB-00 feature ledger, decision reconciliation, inspected
 reference baseline, original asset provenance manifest, evidence-based Rust
 reuse/gap map, report, checkpoint and verified G:\ recovery snapshot. Inspect

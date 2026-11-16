@@ -2,7 +2,7 @@
 
 Captured from the owner's licensed 3D Builder on the Windows host (2560×1440),
 driven by scripted input with owner approval. File: a 40 mm test cube. The
-Python Builder3D also titles its window "3D Builder"; these are the Microsoft app.
+Python 3D Modeler also titles its window "3D Builder"; these are the Microsoft app.
 
 | Shots | What they show |
 |---|---|

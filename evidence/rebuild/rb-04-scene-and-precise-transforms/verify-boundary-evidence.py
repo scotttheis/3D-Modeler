@@ -14,7 +14,7 @@ for item in assets:
  assert sha(workspace/item['rust_destination'])==item['packaged_sha256'],item['rust_destination']
 matrix=tomllib.loads(read(workspace/'evidence/rebuild/parity-matrix.toml'))['feature']
 assert len({r['id'] for r in matrix})==len(matrix)
-rows=[r for r in matrix if r['next_slice']=='RB-04' or r['id'].startswith('builder3d.ui.gizmo.')]
+rows=[r for r in matrix if r['next_slice']=='RB-04' or r['id'].startswith('modeler3d.ui.gizmo.')]
 for row in rows:
  for key,base in [('rust_paths',workspace),('python_paths',reference)]:
   for name in row[key]:assert (base/name).is_file(),(row['id'],key,name)
@@ -70,7 +70,7 @@ artifacts=json.loads(read(root/'final-native-build-artifacts.json'))
 for artifact in artifacts['artifacts'].values():assert sha(workspace/artifact['path'])==artifact['sha256']
 sources={p.relative_to(workspace).as_posix():sha(p) for p in source_paths}
 assert artifacts['source_sha256']==sources
-builds={'debug':sha(workspace/'target/debug/builder3d-app.exe'),'release':artifacts['artifacts']['release']['sha256'],'bloat_app':artifacts['artifacts']['bloat_app']['sha256']}
+builds={'debug':sha(workspace/'target/debug/modeler3d-app.exe'),'release':artifacts['artifacts']['release']['sha256'],'bloat_app':artifacts['artifacts']['bloat_app']['sha256']}
 identity=dict(recorded_at=datetime.datetime.now().astimezone().isoformat(),build_sha256=builds,artifacts=artifacts['artifacts'],source_sha256=sources,native_capture_status='Current native viewport/Settle/scene verification is recorded separately; visual/owner acceptance remains pending')
 (root/'boundary-build-identity.json').write_text(json.dumps(identity,indent=2),encoding='utf-8')
 viewport=json.loads(read(root/'native-viewport-verification.json'))

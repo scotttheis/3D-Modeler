@@ -78,9 +78,9 @@
       "cargo",
       "run",
       "-p",
-      "builder3d-app",
+      "modeler3d-app",
       "--bin",
-      "builder3d-app",
+      "modeler3d-app",
       "--",
       "--smoke"
     ],
@@ -95,9 +95,9 @@
       "--release",
       "--locked",
       "-p",
-      "builder3d-app",
+      "modeler3d-app",
       "--bin",
-      "builder3d-app"
+      "modeler3d-app"
     ],
     "exit_code": 0,
     "seconds": 215.941
@@ -120,9 +120,9 @@
       "bloat",
       "--release",
       "-p",
-      "builder3d-app",
+      "modeler3d-app",
       "--bin",
-      "builder3d-app"
+      "modeler3d-app"
     ],
     "exit_code": 0,
     "seconds": 288.692

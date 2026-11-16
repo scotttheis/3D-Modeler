@@ -1,6 +1,6 @@
 # R7-08 — application view-state coverage
 
-Component: `builder3d.app.view-state`
+Component: `modeler3d.app.view-state`
 
 ## Implemented contract
 

@@ -5,10 +5,10 @@
 **Status at creation:** paired live desktop/MCP gate, gate-time evidence validation, and final independent path/size/SHA-256/reparse verification passed.
 **Snapshot directory name:** the additive live-gate recovery copy is named RB-09-complete; it records that earlier gate state and does not represent the current target identity, visual approval, owner acceptance, or overall product acceptance.
 
-- Source: E:/Builder3D-Rust at HEAD 8e2178eddb882f365369ac69e33a98398a75b4a0; RB-09 worktree changes were intentionally uncommitted and unstaged at snapshot time.
+- Source: E:/3D-Modeler at HEAD 8e2178eddb882f365369ac69e33a98398a75b4a0; RB-09 worktree changes were intentionally uncommitted and unstaged at snapshot time.
 - Destination: G:/Builder3D-Rust_snapshot_20261104-182021_RB-09-complete
 - Pre-copy G: free space: 478850187264 bytes.
-- Copy command: robocopy E:/Builder3D-Rust G:/Builder3D-Rust_snapshot_20261104-182021_RB-09-complete /E /COPY:DAT /DCOPY:DAT /XJ /XD E:/Builder3D-Rust/target E:/Builder3D-Rust/.cache E:/Builder3D-Rust/logs /R:1 /W:1 /NP /NFL /NDL
+- Copy command: robocopy E:/3D-Modeler G:/Builder3D-Rust_snapshot_20261104-182021_RB-09-complete /E /COPY:DAT /DCOPY:DAT /XJ /XD E:/3D-Modeler/target E:/3D-Modeler/.cache E:/3D-Modeler/logs /R:1 /W:1 /NP /NFL /NDL
 - Exclusions: repository-root target, .cache, and logs directories; /XJ prevents junction traversal. Nested evidence/rebuild/rb-09-shared-ai-and-regression/logs are included. No existing G: snapshot is overwritten, moved, or deleted.
 - Independent verifier: evidence/rebuild/rb-09-shared-ai-and-regression/verify_rb09_snapshot.ps1
 - Final Robocopy exit code: 001 (files copied; no failures).
@@ -31,10 +31,10 @@ The additive review snapshot G:/Builder3D-Rust_snapshot_20261104-073919_RB-09-re
 
 **Status at creation:** additive review/recovery copy; not labeled complete because the then-current evidence-validator run reported a Release app hash mismatch against the recorded live build. A later follow-up explains the rebuilds and verifies the current pair separately. This snapshot remains a review copy, not a completion snapshot.
 
-- Source: E:/Builder3D-Rust at HEAD 8e2178eddb882f365369ac69e33a98398a75b4a0, with the task-scoped RB-09/workspace files staged before commit.
+- Source: E:/3D-Modeler at HEAD 8e2178eddb882f365369ac69e33a98398a75b4a0, with the task-scoped RB-09/workspace files staged before commit.
 - Destination: G:/Builder3D-Rust_snapshot_20261104-193530_RB-09-wrapup-review
 - Pre-copy G: free space: 478198308864 bytes.
-- Copy command: robocopy E:/Builder3D-Rust G:/Builder3D-Rust_snapshot_20261104-193530_RB-09-wrapup-review /E /COPY:DAT /DCOPY:DAT /XJ /XD E:/Builder3D-Rust/target E:/Builder3D-Rust/.cache E:/Builder3D-Rust/logs /R:1 /W:1 /NP /NFL /NDL
+- Copy command: robocopy E:/3D-Modeler G:/Builder3D-Rust_snapshot_20261104-193530_RB-09-wrapup-review /E /COPY:DAT /DCOPY:DAT /XJ /XD E:/3D-Modeler/target E:/3D-Modeler/.cache E:/3D-Modeler/logs /R:1 /W:1 /NP /NFL /NDL
 - Exclusions: repository-root target, .cache, and logs; nested RB-09 evidence logs and Git metadata were included. No existing G: snapshot was overwritten, moved, or deleted.
 - Final Robocopy exit code: 001 (files copied; no failures).
 - Independent verifier: evidence/rebuild/rb-09-shared-ai-and-regression/verify_rb09_snapshot.ps1
@@ -46,10 +46,10 @@ The additive review snapshot G:/Builder3D-Rust_snapshot_20261104-073919_RB-09-re
 
 **Status:** additive review/recovery copy; independently verified; not a completion snapshot.
 
-- Source: E:/Builder3D-Rust at HEAD 53e60d6421ede93cb12f24e1f3c4502c5aec5468, with the RB-09 identity evidence and documentation updates.
+- Source: E:/3D-Modeler at HEAD 53e60d6421ede93cb12f24e1f3c4502c5aec5468, with the RB-09 identity evidence and documentation updates.
 - Destination: G:/Builder3D-Rust_snapshot_20261104-215904_RB-09-artifact-identity-review
 - Pre-copy G: free space: 477493166080 bytes.
-- Copy command: robocopy E:/Builder3D-Rust G:/Builder3D-Rust_snapshot_20261104-215904_RB-09-artifact-identity-review /E /COPY:DAT /DCOPY:DAT /XJ /XD E:/Builder3D-Rust/target E:/Builder3D-Rust/.cache E:/Builder3D-Rust/logs /R:1 /W:1 /NP /NFL /NDL
+- Copy command: robocopy E:/3D-Modeler G:/Builder3D-Rust_snapshot_20261104-215904_RB-09-artifact-identity-review /E /COPY:DAT /DCOPY:DAT /XJ /XD E:/3D-Modeler/target E:/3D-Modeler/.cache E:/3D-Modeler/logs /R:1 /W:1 /NP /NFL /NDL
 - Exclusions: repository-root target, .cache, and logs. Nested RB-09 evidence logs and Git metadata are included. No prior G: snapshot was overwritten, moved, or deleted.
 - Robocopy exit code: 001 (files copied; no failures).
 - Independent verifier: evidence/rebuild/rb-09-shared-ai-and-regression/verify_rb09_snapshot.ps1.
@@ -61,10 +61,10 @@ The additive review snapshot G:/Builder3D-Rust_snapshot_20261104-073919_RB-09-re
 ## Current Rust Release recheck snapshot (2026-11-06)
 
 - Status: new additive recovery copy of the current uncommitted E: worktree. No existing G: snapshot was overwritten, moved, or deleted.
-- Source: E:\Builder3D-Rust at HEAD f3b2d929d5d8ba0e30c447a6736c620b15ac4372; existing source changes and untracked files were preserved.
+- Source: E:\3D-Modeler at HEAD f3b2d929d5d8ba0e30c447a6736c620b15ac4372; existing source changes and untracked files were preserved.
 - Destination: G:\B3D_R09C_20261106. It did not exist before this copy; path length is 20 characters.
 - Initial copy started 2026-11-06 09:00:23 local time (America/Denver); G: free space before copy was 475358879744 bytes.
-- Copy command: `robocopy E:\Builder3D-Rust G:\B3D_R09C_20261106 /E /COPY:DAT /DCOPY:DAT /XJ /XD E:\Builder3D-Rust\target E:\Builder3D-Rust\.cache E:\Builder3D-Rust\logs /R:1 /W:1 /NP /NFL /NDL`.
+- Copy command: `robocopy E:\3D-Modeler G:\B3D_R09C_20261106 /E /COPY:DAT /DCOPY:DAT /XJ /XD E:\3D-Modeler\target E:\3D-Modeler\.cache E:\3D-Modeler\logs /R:1 /W:1 /NP /NFL /NDL`.
 - Exclusions: repository-root `target`, `.cache`, and `logs`; `/XJ` prevented junction traversal. Nested RB-09 evidence logs and `.git` metadata are included.
 - Initial Robocopy exit code: 1 (all 3991 source files copied; zero failed files). The pre-copy source manifest and first independent verification both reported 3991 files / 756835989 bytes, zero missing/extra/differing files, and zero reparse entries.
 - Final synchronization Robocopy exit code: 1 (files copied; no failures).
@@ -73,7 +73,7 @@ The additive review snapshot G:/Builder3D-Rust_snapshot_20261104-073919_RB-09-re
 
 | Critical file | SHA-256 |
 |---|---|
-| `crates/builder3d-mcp/src/r4/catalog.rs` | `116d6f1ec940c8c8b3f2fca7d2365bb1293e978f1460a39e6d0ab821a745cb62` |
+| `crates/modeler3d-mcp/src/r4/catalog.rs` | `116d6f1ec940c8c8b3f2fca7d2365bb1293e978f1460a39e6d0ab821a745cb62` |
 | `docs/component-catalog.toml` | `b65168aef87a5f3ec3367dc140be7bf63bd6bef1d7af71ed7f8f4731a0cc8aae` |
 | `evidence/rebuild/parity-matrix.toml` | `fc65b6cdae6e8a9b0ca3359b5c3697d9788f28fa5c87471dda67a7cffaa8bbb1` |
 | `evidence/rebuild/rb-09-shared-ai-and-regression/validate_rb09_evidence.py` | `cf415e90ddeaa0651b10e0d6bd01b5cb542ee67a96936db0a12cbf34371ddb2a` |
@@ -89,18 +89,18 @@ The final synchronization and independent verification use the short destination
 **Status:** additive review/recovery snapshot of the wrap-up worktree; it is not
 an RB-09 completion snapshot because schema disposition remains pending.
 
-- Source: `E:\Builder3D-Rust` at HEAD `f3b2d929d5d8ba0e30c447a6736c620b15ac4372`, preserving the existing changes and untracked files.
+- Source: `E:\3D-Modeler` at HEAD `f3b2d929d5d8ba0e30c447a6736c620b15ac4372`, preserving the existing changes and untracked files.
 - Destination: `G:\B3D_R09W_20261106` (20-character absolute path; absent before creation).
 - Created: 2026-11-06 at 11:35:42 local time. G: free space before copy: 474589401088 bytes.
-- Copy command: `robocopy E:\Builder3D-Rust G:\B3D_R09W_20261106 /E /COPY:DAT /DCOPY:DAT /XJ /XD E:\Builder3D-Rust\target E:\Builder3D-Rust\.cache E:\Builder3D-Rust\logs /R:1 /W:1 /NP /NFL /NDL`.
+- Copy command: `robocopy E:\3D-Modeler G:\B3D_R09W_20261106 /E /COPY:DAT /DCOPY:DAT /XJ /XD E:\3D-Modeler\target E:\3D-Modeler\.cache E:\3D-Modeler\logs /R:1 /W:1 /NP /NFL /NDL`.
 - Robocopy exit code: 1; 3991 files copied, 0 failed. Excluded only repository-root `target`, `.cache`, and `logs`; nested RB-09 evidence logs and Git metadata were included.
-- Independent verifier: `evidence/rebuild/rb-09-shared-ai-and-regression/verify_rb09_snapshot.ps1` with `-SourceRoot E:\Builder3D-Rust -SnapshotRoot G:\B3D_R09W_20261106`.
+- Independent verifier: `evidence/rebuild/rb-09-shared-ai-and-regression/verify_rb09_snapshot.ps1` with `-SourceRoot E:\3D-Modeler -SnapshotRoot G:\B3D_R09W_20261106`.
 - Verified source/snapshot: 3991 files / 756853562 bytes on each side; missing/extra/differing paths 0/0/0; reparse entries 0/0; verification PASS.
 - Critical SHA-256 comparison: all 8 matched:
 
 | Critical file | SHA-256 |
 |---|---|
-| `crates/builder3d-mcp/src/r4/catalog.rs` | `116d6f1ec940c8c8b3f2fca7d2365bb1293e978f1460a39e6d0ab821a745cb62` |
+| `crates/modeler3d-mcp/src/r4/catalog.rs` | `116d6f1ec940c8c8b3f2fca7d2365bb1293e978f1460a39e6d0ab821a745cb62` |
 | `docs/component-catalog.toml` | `b65168aef87a5f3ec3367dc140be7bf63bd6bef1d7af71ed7f8f4731a0cc8aae` |
 | `evidence/rebuild/parity-matrix.toml` | `fc65b6cdae6e8a9b0ca3359b5c3697d9788f28fa5c87471dda67a7cffaa8bbb1` |
 | `evidence/rebuild/rb-09-shared-ai-and-regression/validate_rb09_evidence.py` | `cf415e90ddeaa0651b10e0d6bd01b5cb542ee67a96936db0a12cbf34371ddb2a` |
@@ -120,10 +120,10 @@ Status: additive recovery copy created and verified before the first Rust source
 edits. Existing G: snapshots, including G:\B3D_R09W_20261106 and older
 snapshots, were not overwritten or changed.
 
-- Source: E:\Builder3D-Rust; destination:
+- Source: E:\3D-Modeler; destination:
   G:\Builder3D-Rust_snapshot_20261107-154700_RB-09-schema-parity-pre-edit.
 - Copy command:
-  robocopy E:\Builder3D-Rust G:\Builder3D-Rust_snapshot_20261107-154700_RB-09-schema-parity-pre-edit /E /COPY:DAT /DCOPY:DAT /XJ /XD E:\Builder3D-Rust\target E:\Builder3D-Rust\.cache E:\Builder3D-Rust\logs /R:1 /W:1 /NP /NFL /NDL.
+  robocopy E:\3D-Modeler G:\Builder3D-Rust_snapshot_20261107-154700_RB-09-schema-parity-pre-edit /E /COPY:DAT /DCOPY:DAT /XJ /XD E:\3D-Modeler\target E:\3D-Modeler\.cache E:\3D-Modeler\logs /R:1 /W:1 /NP /NFL /NDL.
 - Excluded only the repository-root target, .cache, and logs directories;
   /XJ prevented junction traversal. Git metadata and nested RB-09 evidence logs
   were included.
@@ -142,11 +142,11 @@ snapshots, were not overwritten or changed.
 
 - Status: new additive G: recovery copy; no prior snapshot was overwritten,
   moved, or deleted.
-- Source: E:\Builder3D-Rust. Destination: G:\B3D_R09S_20261107 (20-character
+- Source: E:\3D-Modeler. Destination: G:\B3D_R09S_20261107 (20-character
   destination path). G: free space before copy: 473,061,937,152 bytes.
-- Robocopy command: robocopy E:\Builder3D-Rust G:\B3D_R09S_20261107 /E
-  /COPY:DAT /DCOPY:DAT /XJ /XD E:\Builder3D-Rust\target
-  E:\Builder3D-Rust\.cache E:\Builder3D-Rust\logs /R:1 /W:1 /NP /NFL /NDL.
+- Robocopy command: robocopy E:\3D-Modeler G:\B3D_R09S_20261107 /E
+  /COPY:DAT /DCOPY:DAT /XJ /XD E:\3D-Modeler\target
+  E:\3D-Modeler\.cache E:\3D-Modeler\logs /R:1 /W:1 /NP /NFL /NDL.
   Exit code: 1 (files copied; no failures).
 - Excluded only repository-root target, .cache, and logs. /XJ prevented
   junction traversal; Git metadata and nested evidence logs were included.

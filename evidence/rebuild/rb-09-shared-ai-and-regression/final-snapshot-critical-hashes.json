@@ -1,6 +1,6 @@
 {
     "manifest_version":  1,
-    "source":  "E:\\Builder3D-Rust",
+    "source":  "E:\\3D-Modeler",
     "snapshot":  "G:\\B3D_R09S_20261107",
     "verified_after_initial_copy":  true,
     "critical_sha256_match_count":  23,
@@ -24,43 +24,43 @@
                                "source_snapshot_match":  true
                            },
                            {
-                               "path":  "crates/builder3d-mcp/Cargo.toml",
+                               "path":  "crates/modeler3d-mcp/Cargo.toml",
                                "bytes":  513,
                                "sha256":  "cf28a405f21403d658d429b8683d22de167a8efb610ad941d085bba5e29e8e02",
                                "source_snapshot_match":  true
                            },
                            {
-                               "path":  "crates/builder3d-mcp/src/r4/schema_contract.json",
+                               "path":  "crates/modeler3d-mcp/src/r4/schema_contract.json",
                                "bytes":  283565,
                                "sha256":  "d470f64a025c64f8228a3a38b01c20a4df92eaec5bf237a4dfe0a28310919b67",
                                "source_snapshot_match":  true
                            },
                            {
-                               "path":  "crates/builder3d-mcp/src/r4/catalog.rs",
+                               "path":  "crates/modeler3d-mcp/src/r4/catalog.rs",
                                "bytes":  19451,
                                "sha256":  "ed3e10b955bd2fc35740e88f6edb934f8f93f9793af152baf1ba603e2d22d128",
                                "source_snapshot_match":  true
                            },
                            {
-                               "path":  "crates/builder3d-mcp/src/r4/schema.rs",
+                               "path":  "crates/modeler3d-mcp/src/r4/schema.rs",
                                "bytes":  21398,
                                "sha256":  "9439fcc5e5520372983d866a231e6b69c21535adea60b7cf60452781309be281",
                                "source_snapshot_match":  true
                            },
                            {
-                               "path":  "crates/builder3d-mcp/src/r4/server.rs",
+                               "path":  "crates/modeler3d-mcp/src/r4/server.rs",
                                "bytes":  157214,
                                "sha256":  "a7369b320d20eafe46a0f1642fe3aad0a0ceedd40ee919036dab4745cc02f0cd",
                                "source_snapshot_match":  true
                            },
                            {
-                               "path":  "crates/builder3d-mcp/src/r4/gateway.rs",
+                               "path":  "crates/modeler3d-mcp/src/r4/gateway.rs",
                                "bytes":  13711,
                                "sha256":  "cb0c29bfd7857ec6ec96bfb0f8c1cdff55243e902925498b9546aff6ad18df5d",
                                "source_snapshot_match":  true
                            },
                            {
-                               "path":  "crates/builder3d-app/src/mcp_bridge.rs",
+                               "path":  "crates/modeler3d-app/src/mcp_bridge.rs",
                                "bytes":  39032,
                                "sha256":  "1d90d9ed1d96599086cf981dc15dc3fe7b78b6fdfd45a6e045ae4c1de200e870",
                                "source_snapshot_match":  true

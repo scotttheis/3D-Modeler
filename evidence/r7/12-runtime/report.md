@@ -1,6 +1,6 @@
 # R7-12 — platform runtime coverage
 
-Component: `builder3d.platform.runtime`
+Component: `modeler3d.platform.runtime`
 
 ## Implemented contract
 

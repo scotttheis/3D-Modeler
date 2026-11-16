@@ -1,6 +1,6 @@
     #[test]
     fn queued_ui_click_then_viewport_motion_does_not_orbit_or_change_selection() {
-        fn frame(app: &mut Builder3dApp, ctx: &egui::Context, events: Vec<egui::Event>) {
+        fn frame(app: &mut Modeler3dApp, ctx: &egui::Context, events: Vec<egui::Event>) {
             let mut output = ctx.run_ui(
                 egui::RawInput {
                     screen_rect: Some(egui::Rect::from_min_size(
@@ -14,7 +14,7 @@
             );
             output.textures_delta.clear();
         }
-        let mut app = Builder3dApp {
+        let mut app = Modeler3dApp {
             settings_path: repository_test_directory("rb04-queued-pointer").join("settings.json"),
             surface: WorkspaceSurface::Scene,
             ..Default::default()

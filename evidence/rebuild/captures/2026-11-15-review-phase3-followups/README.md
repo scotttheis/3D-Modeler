@@ -1,7 +1,7 @@
 # Review pack: owner batch 7, Phase 3 follow-ups (2026-11-15)
 
 Every image here was taken from one release build
-(`target\release\builder3d-app.exe`) with the review harness, in both themes
+(`target\release\modeler3d-app.exe`) with the review harness, in both themes
 (`-light.png`, `-dark.png`). Older images for comparison are in `before\`.
 Images show what was painted; they are not approval and do not test the
 mouse. Brushes are Shift+drag on a selected object. Open the same exe to try

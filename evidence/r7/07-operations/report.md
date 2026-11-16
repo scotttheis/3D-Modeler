@@ -1,6 +1,6 @@
 # R7-07 — application operation lifecycle coverage
 
-Component: `builder3d.app.operations`
+Component: `modeler3d.app.operations`
 
 ## Implemented contract
 

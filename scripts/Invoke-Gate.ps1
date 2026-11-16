@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Runs a Builder3D Rust gate tier (plan section 6) with one command.
+    Runs a 3D Modeler Rust gate tier (plan section 6) with one command.
 
 .DESCRIPTION
     Tiers
@@ -153,17 +153,17 @@ if ($fullScope -or $lockChanged) {
 
 # --- full-tier extras -------------------------------------------------------
 if ($fullScope) {
-    [void](Invoke-Step 'MCP catalog parity' 'cargo test -p builder3d-mcp --test ledger_parity --locked')
-    [void](Invoke-Step 'smoke' 'cargo run -p builder3d-app --bin builder3d-app --locked -- --smoke')
+    [void](Invoke-Step 'MCP catalog parity' 'cargo test -p modeler3d-mcp --test ledger_parity --locked')
+    [void](Invoke-Step 'smoke' 'cargo run -p modeler3d-app --bin modeler3d-app --locked -- --smoke')
 
     if ($SkipCaptures) {
         Skip-Step 'capture board' '-SkipCaptures'
     } else {
-        $built = Invoke-Step 'build review profile' 'cargo build --profile review -p builder3d-app --locked'
+        $built = Invoke-Step 'build review profile' 'cargo build --profile review -p modeler3d-app --locked'
         if (-not $built) {
             Skip-Step 'capture board' 'review build failed'
         } else {
-            $exe = Join-Path $root 'target\review\builder3d-app.exe'
+            $exe = Join-Path $root 'target\review\modeler3d-app.exe'
             $boardDir = Join-Path $root "evidence\rebuild\captures\gate-$stamp"
             New-Item -ItemType Directory -Force $boardDir | Out-Null
             $states = @('welcome', 'empty', 'move', 'rotate', 'resize', 'resize-drag', 'multi', 'merge', 'unselected', 'material', 'settings', 'save', 'export', 'menu', 'colors', 'mirror', 'merge-apart', 'repair', 'paste', 'align', 'paint', 'paint-picker', 'xray', 'texture', 'texture-dialog', 'grab', 'crease', 'crease-sharp', 'smooth-brush', 'simplify', 'simplify-area', 'subdivide', 'hollow', 'hollow-dialog', 'hollow-error', 'measure', 'measure-start')
@@ -174,14 +174,14 @@ if ($fullScope) {
             foreach ($theme in @('light', 'dark')) {
                 foreach ($state in $states) {
                     $png = Join-Path $boardDir "$state-$theme.png"
-                    $env:BUILDER3D_REVIEW_CAPTURE = $png
-                    $env:BUILDER3D_REVIEW_STATE = $state
-                    $env:BUILDER3D_REVIEW_THEME = $theme
+                    $env:MODELER3D_REVIEW_CAPTURE = $png
+                    $env:MODELER3D_REVIEW_STATE = $state
+                    $env:MODELER3D_REVIEW_THEME = $theme
                     & $exe | Out-Null
                     if (-not (Test-Path $png)) { $missing += "$state-$theme" }
                 }
             }
-            Remove-Item Env:BUILDER3D_REVIEW_CAPTURE, Env:BUILDER3D_REVIEW_STATE, Env:BUILDER3D_REVIEW_THEME -ErrorAction SilentlyContinue
+            Remove-Item Env:MODELER3D_REVIEW_CAPTURE, Env:MODELER3D_REVIEW_STATE, Env:MODELER3D_REVIEW_THEME -ErrorAction SilentlyContinue
             $seconds = ((Get-Date) - $started).TotalSeconds
             if ($missing.Count -eq 0) {
                 Add-Result 'capture board' 'Pass' $seconds "images only (not owner review): $boardDir"
@@ -194,9 +194,9 @@ if ($fullScope) {
 
 # --- ship-tier extras -------------------------------------------------------
 if ($Tier -eq 'ship') {
-    [void](Invoke-Step 'release build' 'cargo build --release --locked -p builder3d-app')
+    [void](Invoke-Step 'release build' 'cargo build --release --locked -p modeler3d-app')
     if (Test-CargoTool 'bloat') {
-        [void](Invoke-Step 'cargo bloat' 'cargo bloat --release -p builder3d-app --crates')
+        [void](Invoke-Step 'cargo bloat' 'cargo bloat --release -p modeler3d-app --crates')
     } else {
         Skip-Step 'cargo bloat' 'cargo-bloat is not installed'
     }

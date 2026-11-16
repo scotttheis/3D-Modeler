@@ -2,7 +2,7 @@
 
 ## Capture setup
 
-The existing Python reference was run first, closed, then the final Rust debug executable was run. The sequence used actual native windows and OS input. Builder3D client size was 1280x840 logical and physical pixels at 96 DPI / 100% display scale. The Rust native identity is SHA-256 0BF7753FE460A6A854906457F86363DDC905B455FA790760B6D9122F6F9CB0D6. Capture routes, themes, frame hashes, build identity, and PNG last-write UTC timestamps are recorded per image in capture-metadata.json.
+The existing Python reference was run first, closed, then the final Rust debug executable was run. The sequence used actual native windows and OS input. 3D Modeler client size was 1280x840 logical and physical pixels at 96 DPI / 100% display scale. The Rust native identity is SHA-256 0BF7753FE460A6A854906457F86363DDC905B455FA790760B6D9122F6F9CB0D6. Capture routes, themes, frame hashes, build identity, and PNG last-write UTC timestamps are recorded per image in capture-metadata.json.
 
 ## Appearance and image
 
@@ -22,9 +22,9 @@ Rust Light native cancellation was attempted several times, but no captured fram
 
 Python clean Print Prep reports were manually captured in both themes after the native runner's menu QAction route failed to open its report dialog. Rust captured the clean report in Light, clean and warning reports in Dark, progress, staging-ready state, slicer selection, and launch state. The report is read-only; automated tests cover fit, below-bed, height, scale, health, hidden, empty, failure, retry, and scene preservation.
 
-The Rust Bambu path staged a binary STL for the visible 40 mm cube. Independent verification found a nonzero 684-byte binary STL with 12 triangles and SHA-256 EC1B527705B8045D5748A532519BF9EAE4AD3B7DDAD6081B85C3386669A8C15C. Rust launched the installed C:\Program Files\Bambu Studio\bambu-studio.exe; the slicer showed Builder3D_Print_001.stl as 40 x 40 x 40 mm, 64,000 mm3, 12 triangles. The test process was closed after capture. Python external launch is covered by focused reference adapter tests but was not natively captured.
+The Rust Bambu path staged a binary STL for the visible 40 mm cube. Independent verification found a nonzero 684-byte binary STL with 12 triangles and SHA-256 EC1B527705B8045D5748A532519BF9EAE4AD3B7DDAD6081B85C3386669A8C15C. Rust launched the installed C:\Program Files\Bambu Studio\bambu-studio.exe; the slicer showed Modeler3D_Print_001.stl as 40 x 40 x 40 mm, 64,000 mm3, 12 triangles. The test process was closed after capture. Python external launch is covered by focused reference adapter tests but was not natively captured.
 
 ## Cleanup and disposition
 
-Builder3D and Bambu Studio test processes were closed after each native sequence. The final accepted set has 117 PNGs. 142 rejected PNGs plus their raw logs are retained under rejected/; none is used for a parity claim. See rejected-attempts.md.
+3D Modeler and Bambu Studio test processes were closed after each native sequence. The final accepted set has 117 PNGs. 142 rejected PNGs plus their raw logs are retained under rejected/; none is used for a parity claim. See rejected-attempts.md.
 

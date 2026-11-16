@@ -25,7 +25,7 @@ file contracts.
 ## Verification
 
 - `cargo fmt --all -- --check` — passed.
-- `cargo test -p builder3d-app` — 9 passed.
+- `cargo test -p modeler3d-app` — 9 passed.
 - Python reference checks from `L:\Builder3D`:
   `tests/test_desktop_actions.py`, `TestExportMesh`, and `TestMenuSpecs` — 17
   passed.

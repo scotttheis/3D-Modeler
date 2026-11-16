@@ -22,8 +22,8 @@ or platform-facing operation.
 ## Verification
 
 - `cargo fmt --all -- --check` — passed.
-- `cargo test -p builder3d-app` — 11 passed.
-- `cargo run -q -p builder3d-app --bin builder3d-app -- --smoke` — passed:
+- `cargo test -p modeler3d-app` — 11 passed.
+- `cargo run -q -p modeler3d-app --bin modeler3d-app -- --smoke` — passed:
   `objects=2 selected=1 tabs=5`.
 - Python reference project/action selectors — 40 passed.
 - Python `tests/test_setup_contract.py` was also run; 1 existing assertion

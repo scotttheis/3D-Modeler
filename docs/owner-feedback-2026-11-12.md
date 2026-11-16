@@ -14,7 +14,7 @@ starts; record approved deviations from Python parity in `STATUS.md`.
 | OF-5 | X-ray | X-ray is too extreme and makes objects disappear. It should work like 3D Builder's: objects stay readable and you can see through them. | 3D Builder | Closed by OF-47 (owner batch 7, `docs/owner-feedback-2026-11-14.md`), awaiting owner review. |
 | OF-6 | Wireframe | Wireframe should be a true wireframe like Blender's (clean edges over the model, not a shaded approximation). | Blender | Done 2026-11-12 (`fc70679`), awaiting owner review: GPU wireframe pass — anti-aliased constant-width triangle edges over the shaded model, depth-tested, every object complete (the old CPU overlay was truncated at its vertex budget); dense regions fade instead of going black. Meshes over 2 M faces get no edges (budget). Captures `evidence/rebuild/captures/2026-11-12-of6-wireframe/`. |
 | OF-7 | Paint / Color / Material | Paint, Color and Material currently do nothing. They must apply to the selection (and paint to faces/regions). | 3D Builder | Fixed 2026-11-12 (`89c1e6f`), awaiting owner review. Cause: Material, Paint and Color were disabled (greyed, silent) whenever nothing was selected, and with a selection all three opened one bare RGBA dialog whose slider rails were invisible (theme drew them white on white). Now, as in the Python build: they stay clickable whenever the scene has objects and say "Select an object to paint"; Material/Paint open a color dialog with basic swatches and an HSV picker (one undo entry); Color samples an image's average color straight from a file picker. Still open: painting individual faces/regions (no Python reference; needs the owed Paint shots). Captures `evidence/rebuild/captures/2026-11-12-of7-of8-paint-edit/`. |
-| OF-8 | Edit-mode sculpt tools | Grab, Crease and the other newer tools under Edit no longer work. Restore them. The owner liked them in the Python build and likes Blender's versions even more. | Python Builder3D, Blender | Fixed 2026-11-12 (`89c1e6f`), awaiting owner review. Cause: Grab, Crease, Smooth Brush, Blob and Normalize were disabled whenever nothing was selected (Python keeps them enabled and says "Select a mesh to use Grab"); the same invisible-slider theme bug hid their brush settings. The stroke itself (Shift+drag on the mesh, as in Python) works and commits one undo entry — now covered by a test. Not yet compared hands-on against Blender's brushes. |
+| OF-8 | Edit-mode sculpt tools | Grab, Crease and the other newer tools under Edit no longer work. Restore them. The owner liked them in the Python build and likes Blender's versions even more. | Python 3D Modeler, Blender | Fixed 2026-11-12 (`89c1e6f`), awaiting owner review. Cause: Grab, Crease, Smooth Brush, Blob and Normalize were disabled whenever nothing was selected (Python keeps them enabled and says "Select a mesh to use Grab"); the same invisible-slider theme bug hid their brush settings. The stroke itself (Shift+drag on the mesh, as in Python) works and commits one undo entry — now covered by a test. Not yet compared hands-on against Blender's brushes. |
 | OF-9 | Merge color | Merging objects should give the result one color: that of the top-most selected object in the right-hand object list. | — | Done 2026-11-12 (`38d6437`), awaiting owner review: a desktop Merge result drops per-face source colors and takes the color of the operand higher in the Items list, in the same single undo entry. MCP booleans unchanged (they name target/tool explicitly). Note: Merge still joins exactly two objects (pre-existing). Captures `evidence/rebuild/captures/2026-11-12-of9-merge-color/`. |
 
 ## Batch summary (2026-11-12)
@@ -37,8 +37,8 @@ has before/after captures in both themes. **None is owner-reviewed yet.**
 
 ### What changed, where
 
-- **Floor numbers** (`builder3d-viewport/src/floor.rs`, the renderer's
-  `floor_text` pipeline, `builder3d-app/src/floor_labels.rs`):
+- **Floor numbers** (`modeler3d-viewport/src/floor.rs`, the renderer's
+  `floor_text` pipeline, `modeler3d-app/src/floor_labels.rs`):
   - egui glyph meshes are mapped onto the floor plane in two rows: one along
     X (at z = 24) and one along Z (at x = 24).
   - Labels sit every 50 mm, the text is 5.5 mm tall, and each axis shows at
@@ -48,7 +48,7 @@ has before/after captures in both themes. **None is owner-reviewed yet.**
   - The GPU path samples egui's font atlas (`set_text_atlas`). It is
     depth-tested but does not write depth.
   - The CPU fallback paints the same mesh through egui.
-- **Resize view** (`builder3d-app/src/resize_overlay.rs`):
+- **Resize view** (`modeler3d-app/src/resize_overlay.rs`):
   - One layout drives both painting and hit-testing, so a handle responds
     exactly where it is drawn.
   - A handle whose axis points nearly at the camera (alignment above 0.8) is
@@ -66,7 +66,7 @@ has before/after captures in both themes. **None is owner-reviewed yet.**
   - Edges fade in dense regions. Meshes over 2 M faces get no edges.
   - The buffers are tracked in the resource ledger.
   - The GPU path no longer uses the truncated CPU overlay wireframe.
-- **Merge color** (`Scene::apply_boolean_with_color` in `builder3d-core`,
+- **Merge color** (`Scene::apply_boolean_with_color` in `modeler3d-core`,
   `apply_boolean_pair` in `commands.rs`):
   - The result drops the per-face colors it inherited from the two objects.
   - It takes the color of whichever object is higher in the Items list,
@@ -130,7 +130,7 @@ The owner confirmed in the app that 3 is "way better". A shadow that follows
 the moving object would be the ideal; hiding it is the accepted interim.
 1 and 2 are not yet owner-reviewed. No review captures were made.
 
-What changed (`builder3d-viewport` only):
+What changed (`modeler3d-viewport` only):
 
 - **Shape** (`floor.rs`: `silhouette_points`, `ContactCue::silhouette`):
   - The cause of the square: the shadow was projected from the 8 corners of
@@ -166,7 +166,7 @@ What changed (`builder3d-viewport` only):
   `a_moving_object_has_no_shadow_until_it_settles`. The viewport crate
   passes (48 tests), with clippy `-D warnings` and fmt clean for the crate.
   The full workspace gate was not run.
-- **Release build:** `cargo build --release -p builder3d-app` succeeded
+- **Release build:** `cargo build --release -p modeler3d-app` succeeded
   twice this session (4m50s, 3m43s). Relevant to F5.
 
 Open from this follow-up: a shadow that tracks the dragged object; holes in
@@ -219,7 +219,7 @@ Raw owner requests, in the order given.
 | OF-22 | Save dialog buttons | The save dialog has **Save** and **Cancel** on the same line. | Done 2026-11-12, awaiting owner review: Save and Cancel on one line. Test `save_dialog_offers_stl_and_3mf_with_save_and_cancel_on_one_line`. captures `evidence/rebuild/captures/2026-11-12-of20-25-settings-save-export/` |
 | OF-23 | Save default | Saving defaults to `.stl`. | Done 2026-11-12, awaiting owner review: Save writes STL by default (a name with no extension gets `.stl`). Owner decision: Save/Save As write STL or 3MF only; `.3dp` moved to Export. Save writes every object, hidden ones included, and the saved file becomes the document, so Ctrl+S rewrites it in the same format. A project opened from `.3dp` still saves back to `.3dp`. Tests `save_defaults_to_stl_keeps_hidden_objects_and_resaves_in_place`, `save_click_opens_the_file_window_for_stl_by_default`. |
 | OF-24 | Save As types | Save As offers the file type — **3MF** or **STL** — with a quick-click button for each. | Done 2026-11-12, awaiting owner review: Save and Save As show two quick-pick buttons, **STL** (default) and **3MF**. Tests `save_as_3mf_is_one_click`, `save_writes_3mf_and_rejects_export_only_formats`. captures `evidence/rebuild/captures/2026-11-12-of20-25-settings-save-export/` |
-| OF-25 | Export dialog | Export has a drop-down selector for every export file type. **Export** sits on the same line as **Cancel**; clicking Export opens the native file window (like Browse). The **Browse:** rows are removed from every save and export dialog; the file window opens from the Save / Export click. | Done 2026-11-12, awaiting owner review: Export has a File type drop-down (STL, 3MF, OBJ, PLY, glTF, GLB, VRML, Builder3D project `.3dp`) and Export beside Cancel; Export (and Save) open the native save window filtered to the chosen type. The path box and Browse… row are gone from Save and Export. Export is enabled whenever the scene has objects (selection, or every visible object). A `.3dp` export is a copy: the document path and unsaved state do not change. Test `export_has_a_type_list_and_export_beside_cancel_opening_the_file_window`, `exporting_a_project_copy_leaves_the_document_alone`. captures `evidence/rebuild/captures/2026-11-12-of20-25-settings-save-export/` |
+| OF-25 | Export dialog | Export has a drop-down selector for every export file type. **Export** sits on the same line as **Cancel**; clicking Export opens the native file window (like Browse). The **Browse:** rows are removed from every save and export dialog; the file window opens from the Save / Export click. | Done 2026-11-12, awaiting owner review: Export has a File type drop-down (STL, 3MF, OBJ, PLY, glTF, GLB, VRML, 3D Modeler project `.3dp`) and Export beside Cancel; Export (and Save) open the native save window filtered to the chosen type. The path box and Browse… row are gone from Save and Export. Export is enabled whenever the scene has objects (selection, or every visible object). A `.3dp` export is a copy: the document path and unsaved state do not change. Test `export_has_a_type_list_and_export_beside_cancel_opening_the_file_window`, `exporting_a_project_copy_leaves_the_document_alone`. captures `evidence/rebuild/captures/2026-11-12-of20-25-settings-save-export/` |
 
 Owner decisions for this batch (2026-11-12): `.3dp` is written by Export, not
 Save; Big doubles the whole app UI, not only Settings.
@@ -232,7 +232,7 @@ Notes:
   the existing narrow-window layout, not new code. Settings now stays under the
   ribbon on a short window instead of covering it.
 - The harness gained states `settings`, `save`, `export` and
-  `BUILDER3D_REVIEW_SIZE=big|normal`. There are no "before" captures: the old
+  `MODELER3D_REVIEW_SIZE=big|normal`. There are no "before" captures: the old
   build has no harness state for these dialogs.
 - Open is unchanged (path box + Browse); only Save and Export were asked for.
 - MCP parity (plan 3.7): MCP already writes STL/3MF through `export_file` and
@@ -250,6 +250,6 @@ Raw owner requests, in the order given.
 Notes:
 
 - The harness gained state `menu` (application menu open); use
-  `BUILDER3D_REVIEW_POINTER=124,220` to rest the pointer on Export. There is no
+  `MODELER3D_REVIEW_POINTER=124,220` to rest the pointer on Export. There is no
   "before" menu capture: the old build has no harness state for the menu.
 - MCP parity (plan 3.7): visual only, no tool changes.

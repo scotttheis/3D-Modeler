@@ -2,9 +2,9 @@
 
 ## Focused behavior
 
-- `cargo test -p builder3d-platform --locked`: pass; known-slicer discovery
+- `cargo test -p modeler3d-platform --locked`: pass; known-slicer discovery
   and typed launch-boundary tests pass.
-- `cargo test -p builder3d-app --locked`: pass; staged 3MF, Bambu individual
+- `cargo test -p modeler3d-app --locked`: pass; staged 3MF, Bambu individual
   STL, empty-visible-scene, and shared export-routing tests pass.
 
 ## Workspace gates
@@ -21,6 +21,6 @@ recorded here after the full R7-11 verification run.
   existing duplicate-version diagnostics remain warnings.
 - `cargo metadata --locked --format-version 1 --no-deps`: pass.
 - Catalog TOML/path validation: pass, 23 unique IDs and 150 referenced paths.
-- Native smoke: pass, `Builder3D shell smoke: objects=2 selected=1 tabs=5`.
+- Native smoke: pass, `3D Modeler shell smoke: objects=2 selected=1 tabs=5`.
 
 No commit was created. Python source and existing snapshots were not written.

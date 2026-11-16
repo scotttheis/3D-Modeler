@@ -1,6 +1,6 @@
 ﻿{
     "snapshot_path":  "G:\\B3D_RV_20261109_floorfix_pre",
-    "source_path":  "E:\\Builder3D-Rust",
+    "source_path":  "E:\\3D-Modeler",
     "created_utc":  "2026-11-09T16:06:36.1322101Z",
     "file_count":  4096,
     "byte_count":  771406618,
@@ -13,15 +13,15 @@
                          "critical_sha256_hashes_match":  true
                      },
     "critical_sha256":  {
-                            "crates/builder3d-app/src/shell.rs":  "F05E3D96F72BE01BF5F9848404AE074CAA194D71E5D122B82EEBA3052B7052D1",
+                            "crates/modeler3d-app/src/shell.rs":  "F05E3D96F72BE01BF5F9848404AE074CAA194D71E5D122B82EEBA3052B7052D1",
                             "docs/product-rebuild-plan.md":  "9831B8E5BD4489A2332C3724C77ED3BD285A6949447280F60E1068CD834B519A",
-                            "crates/builder3d-viewport/src/cpu.rs":  "F81A5648DDA30A49F865AD181BC0863396C6E779C18CF8F228657808B35E2D6F",
+                            "crates/modeler3d-viewport/src/cpu.rs":  "F81A5648DDA30A49F865AD181BC0863396C6E779C18CF8F228657808B35E2D6F",
                             "WORK_LOG.md":  "CF75C2172BE0E449A81F6985EE6E5B282D6CC9FBFBCD1651A2D096DBDF316725",
-                            "crates/builder3d-viewport/src/floor.rs":  "63DA18DD70DD9318E76773AE50B32A7EA3C186AB81264760FAFC0EC55FC2FD40",
+                            "crates/modeler3d-viewport/src/floor.rs":  "63DA18DD70DD9318E76773AE50B32A7EA3C186AB81264760FAFC0EC55FC2FD40",
                             "Cargo.lock":  "31C57A08359CC321D7568C4CD1A3CEE5F2E13D5FC73CDD86DB4C1BEB9DD78236",
-                            "crates/builder3d-viewport/src/renderer.rs":  "1AA284F122717E5FF5A2A0A8C6C9A77574C0079524A8DB63C16E0E4AB1364CCD",
-                            "crates/builder3d-app/src/theme.rs":  "49305D4C1A0F5FF5A24D3603445D7D3C991AE906DECDFA267963862BF2414FD0",
+                            "crates/modeler3d-viewport/src/renderer.rs":  "1AA284F122717E5FF5A2A0A8C6C9A77574C0079524A8DB63C16E0E4AB1364CCD",
+                            "crates/modeler3d-app/src/theme.rs":  "49305D4C1A0F5FF5A24D3603445D7D3C991AE906DECDFA267963862BF2414FD0",
                             "Cargo.toml":  "0FD8515CD7B344BA0B9202C50096A1168BCEE7CA443CBAD0FCFA18918DF35554",
-                            "crates/builder3d-viewport/src/camera.rs":  "BB5194F1A2EFE0BE2EFDD743436BBF70CEFED3FBA053E58707E3155307BA43D0"
+                            "crates/modeler3d-viewport/src/camera.rs":  "BB5194F1A2EFE0BE2EFDD743436BBF70CEFED3FBA053E58707E3155307BA43D0"
                         }
 }

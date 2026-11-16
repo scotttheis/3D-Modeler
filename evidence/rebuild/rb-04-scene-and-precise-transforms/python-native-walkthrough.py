@@ -7,9 +7,9 @@ configure_opengl_defaults()
 from src.qt_compat import QApplication,QSettings
 from PyQt6.QtCore import QTimer
 import src.desktop_adapters as adapters
-root=Path('E:/Builder3D-Rust/evidence/rebuild/rb-04-scene-and-precise-transforms')
+root=Path('E:/3D-Modeler/evidence/rebuild/rb-04-scene-and-precise-transforms')
 (root/'captures').mkdir(exist_ok=True)
-settings=QSettings('E:/Builder3D-Rust/target/rb04-python.ini',QSettings.Format.IniFormat)
+settings=QSettings('E:/3D-Modeler/target/rb04-python.ini',QSettings.Format.IniFormat)
 adapters.QSettings=lambda *args:settings
 from src.main_window import MainWindow, ObjectPanel
 from src.style import apply_style

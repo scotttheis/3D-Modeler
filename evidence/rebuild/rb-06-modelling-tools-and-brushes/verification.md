@@ -1,6 +1,6 @@
 # RB-06 verification
 
-All commands below were run from `E:\Builder3D-Rust` on 2026-11-01. The pinned
+All commands below were run from `E:\3D-Modeler` on 2026-11-01. The pinned
 build-only libclang path was set for Rust commands that compile the Qhull
 binding.
 
@@ -14,10 +14,10 @@ binding.
 | `cargo clippy --workspace --all-targets --all-features --locked -- -D warnings` | pass |
 | `cargo deny check` | pass; advisories, bans, licenses, and sources okay; existing duplicate-version warnings remain informational |
 | `cargo metadata --locked --format-version 1 --no-deps` | pass |
-| `cargo build --locked -p builder3d-app --bin builder3d-app --release` | pass |
-| `cargo bloat --release --bin builder3d-app -n 20` | pass; 11.7 MiB `.text`, 14.4 MiB reported file |
-| Debug `builder3d-app.exe --smoke` | pass; `objects=2 selected=1 tabs=5` |
-| Release `builder3d-app.exe --smoke` | pass; `objects=2 selected=1 tabs=5` |
+| `cargo build --locked -p modeler3d-app --bin modeler3d-app --release` | pass |
+| `cargo bloat --release --bin modeler3d-app -n 20` | pass; 11.7 MiB `.text`, 14.4 MiB reported file |
+| Debug `modeler3d-app.exe --smoke` | pass; `objects=2 selected=1 tabs=5` |
+| Release `modeler3d-app.exe --smoke` | pass; `objects=2 selected=1 tabs=5` |
 
 The final debug executable used by native evidence is 61,454,336 bytes with
 SHA-256 `82284b6fd85221df3a804790cafb1171c469c5cb614460cb73199068ac551d14`.

@@ -1,6 +1,6 @@
 # R7-02 — desktop selection and clipboard command coverage
 
-Component: `builder3d.app.commands.selection`
+Component: `modeler3d.app.commands.selection`
 
 ## Selection
 

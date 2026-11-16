@@ -7,7 +7,7 @@ $ErrorActionPreference = 'Stop'
 
 $script:rb06EvidenceRoot = (Resolve-Path $PSScriptRoot).Path
 $script:rb06ProjectRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..\..')).Path
-$script:rb06Executable = Join-Path $script:rb06ProjectRoot 'target\debug\builder3d-app.exe'
+$script:rb06Executable = Join-Path $script:rb06ProjectRoot 'target\debug\modeler3d-app.exe'
 $script:rb06Records = [System.Collections.Generic.List[object]]::new()
 $script:rb06BuildSha256 = (Get-FileHash -LiteralPath $script:rb06Executable -Algorithm SHA256).Hash.ToLowerInvariant()
 $script:rb06Journal = Join-Path $script:rb06EvidenceRoot 'rust-native-captures.ndjson'

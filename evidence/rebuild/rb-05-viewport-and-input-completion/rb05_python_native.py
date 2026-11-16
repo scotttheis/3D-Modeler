@@ -28,7 +28,7 @@ from src.project_io import save_project
 from src.style import apply_style
 
 
-ROOT = Path("E:/Builder3D-Rust/evidence/rebuild/rb-05-viewport-and-input-completion")
+ROOT = Path("E:/3D-Modeler/evidence/rebuild/rb-05-viewport-and-input-completion")
 CAPTURES = ROOT / "captures"
 CAPTURES.mkdir(exist_ok=True)
 FIXTURES = ROOT / "fixtures"

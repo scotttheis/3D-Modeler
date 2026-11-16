@@ -2,11 +2,11 @@
 
 ## Focused behavior
 
-- `cargo test -p builder3d-app selection_commands_cover_group_cut_and_non_history_selection --locked`: pass.
+- `cargo test -p modeler3d-app selection_commands_cover_group_cut_and_non_history_selection --locked`: pass.
 - The focused test verifies two selected primitives can be grouped and
   ungrouped, selection changes do not advance the scene revision, cut removes
   the selected objects, and paste restores them.
-- Native smoke: `Builder3D shell smoke: objects=2 selected=1 tabs=5`.
+- Native smoke: `3D Modeler shell smoke: objects=2 selected=1 tabs=5`.
 
 ## Workspace gates
 
@@ -18,7 +18,7 @@
 - `cargo deny check`: pass for advisories, bans, licenses, and sources. The
   existing duplicate-version diagnostics remain warnings.
 - `cargo metadata --locked --format-version 1 --no-deps`: pass.
-- The native application smoke command passed using the `builder3d-app` binary.
+- The native application smoke command passed using the `modeler3d-app` binary.
 - Catalog TOML/path validation passed with 13 unique IDs and all referenced
   Rust, test, and evidence paths present.
 

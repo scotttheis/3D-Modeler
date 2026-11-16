@@ -2,7 +2,7 @@
 
 ## Focused behavior
 
-- `cargo test -p builder3d-app --locked`: pass, including 25 application
+- `cargo test -p modeler3d-app --locked`: pass, including 25 application
   tests.
 - Focused transform tests pass for atomic group translation and undo, world
   bounds alignment and arrangement, Y-axis settling, one-entry mirroring,
@@ -21,6 +21,6 @@
   existing duplicate-version diagnostics remain warnings.
 - `cargo metadata --locked --format-version 1 --no-deps`: pass.
 - Catalog TOML/path validation: pass, 14 unique IDs and 80 referenced paths.
-- Native smoke: pass, `Builder3D shell smoke: objects=2 selected=1 tabs=5`.
+- Native smoke: pass, `3D Modeler shell smoke: objects=2 selected=1 tabs=5`.
 
 No commit was created. Python source and existing snapshots were not written.

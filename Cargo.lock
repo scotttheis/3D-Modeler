@@ -519,85 +519,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dc0b364ead1874514c8c2855ab558056ebfeb775653e7ae45ff72f28f8f3166c"
 
 [[package]]
-name = "builder3d-app"
-version = "0.1.0"
-dependencies = [
- "builder3d-core",
- "builder3d-mcp",
- "builder3d-platform",
- "builder3d-viewport",
- "eframe",
- "embed-resource",
- "image",
- "rfd",
- "serde",
- "serde_json",
- "sha2 0.10.9",
- "thiserror 2.0.21",
- "tokio",
- "uuid",
- "zip",
-]
-
-[[package]]
-name = "builder3d-core"
-version = "0.1.0"
-dependencies = [
- "fontdue",
- "image",
- "manifold-csg",
- "qhull",
- "quick-xml 0.42.0",
- "serde",
- "serde_json",
- "sha2 0.10.9",
- "thiserror 2.0.21",
- "uuid",
- "windows",
- "zip",
-]
-
-[[package]]
-name = "builder3d-mcp"
-version = "0.1.0"
-dependencies = [
- "builder3d-core",
- "builder3d-platform",
- "jsonschema",
- "rmcp",
- "schemars",
- "serde",
- "serde_json",
- "thiserror 2.0.21",
- "tokio",
- "uuid",
-]
-
-[[package]]
-name = "builder3d-platform"
-version = "0.1.0"
-dependencies = [
- "serde",
- "sysinfo",
- "thiserror 2.0.21",
- "wgpu",
- "windows",
-]
-
-[[package]]
-name = "builder3d-viewport"
-version = "0.1.0"
-dependencies = [
- "builder3d-core",
- "builder3d-platform",
- "image",
- "serde",
- "serde_json",
- "thiserror 2.0.21",
- "wgpu",
-]
-
-[[package]]
 name = "bumpalo"
 version = "3.20.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2256,6 +2177,85 @@ dependencies = [
  "libc",
  "wasi",
  "windows-sys 0.61.2",
+]
+
+[[package]]
+name = "modeler3d-app"
+version = "0.1.0"
+dependencies = [
+ "eframe",
+ "embed-resource",
+ "image",
+ "modeler3d-core",
+ "modeler3d-mcp",
+ "modeler3d-platform",
+ "modeler3d-viewport",
+ "rfd",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "thiserror 2.0.21",
+ "tokio",
+ "uuid",
+ "zip",
+]
+
+[[package]]
+name = "modeler3d-core"
+version = "0.1.0"
+dependencies = [
+ "fontdue",
+ "image",
+ "manifold-csg",
+ "qhull",
+ "quick-xml 0.42.0",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "thiserror 2.0.21",
+ "uuid",
+ "windows",
+ "zip",
+]
+
+[[package]]
+name = "modeler3d-mcp"
+version = "0.1.0"
+dependencies = [
+ "jsonschema",
+ "modeler3d-core",
+ "modeler3d-platform",
+ "rmcp",
+ "schemars",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.21",
+ "tokio",
+ "uuid",
+]
+
+[[package]]
+name = "modeler3d-platform"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "sysinfo",
+ "thiserror 2.0.21",
+ "wgpu",
+ "windows",
+]
+
+[[package]]
+name = "modeler3d-viewport"
+version = "0.1.0"
+dependencies = [
+ "image",
+ "modeler3d-core",
+ "modeler3d-platform",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.21",
+ "wgpu",
 ]
 
 [[package]]

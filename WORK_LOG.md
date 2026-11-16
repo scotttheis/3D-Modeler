@@ -1,4 +1,4 @@
-# Builder3D Rust work log
+# 3D Modeler Rust work log
 
 ## 2026-11-01 - RB-06 inventory and recovery baseline
 
@@ -55,8 +55,8 @@
   for system/dedicated/unified memory in one ledger, and plan CPU/GPU/hybrid
   work with granular pressure fallback.
 - Completed files: `Cargo.toml`, `Cargo.lock`,
-  `crates/builder3d-platform/Cargo.toml`,
-  `crates/builder3d-platform/src/lib.rs`, `discovery.rs`, `ledger.rs`, and
+  `crates/modeler3d-platform/Cargo.toml`,
+  `crates/modeler3d-platform/src/lib.rs`, `discovery.rs`, `ledger.rs`, and
   `routing.rs`.
 - Implementation: pinned wgpu 30.0.1, sysinfo 0.40.0, and Windows 0.62.2;
   DXGI discovery records live local/non-local budgets and output counts on
@@ -66,8 +66,8 @@
   calibration, adapter capability, and live ledger capacity and splits work at
   bounded batch boundaries before CPU fallback.
 - Verification: `cargo fmt --all -- --check`,
-  `cargo test -p builder3d-platform` (7 passed), and
-  `cargo clippy -p builder3d-platform --all-targets -- -D warnings` passed.
+  `cargo test -p modeler3d-platform` (7 passed), and
+  `cargo clippy -p modeler3d-platform --all-targets -- -D warnings` passed.
 - Measurement: no physical-device rendering measurement in this slice yet;
   the wgpu adapter/device and 30-million-face control remain the next slice.
 - Snapshot: `G:\Builder3D-Rust_snapshot_20261029-071513_R0b-platform`.
@@ -94,11 +94,11 @@
   instancing control submitting exactly 30,000,000 triangle instances; a
   bounded `rmcp` stdio `device_profile` tool; and a release report/capture.
 - Changed implementation files: `Cargo.toml`, `Cargo.lock`, `deny.toml`,
-  the five crate manifests, `crates/builder3d-platform/src/{lib,discovery,ledger,routing}.rs`,
-  `crates/builder3d-viewport/src/{lib,spike}.rs`,
-  `crates/builder3d-mcp/src/lib.rs`,
-  `crates/builder3d-mcp/src/bin/r0b_mcp.rs`, and
-  `crates/builder3d-app/src/main.rs`.
+  the five crate manifests, `crates/modeler3d-platform/src/{lib,discovery,ledger,routing}.rs`,
+  `crates/modeler3d-viewport/src/{lib,spike}.rs`,
+  `crates/modeler3d-mcp/src/lib.rs`,
+  `crates/modeler3d-mcp/src/bin/r0b_mcp.rs`, and
+  `crates/modeler3d-app/src/main.rs`.
 - Host evidence: 16 logical / 8 physical CPU cores; 68,484,825,088 total
   system-memory bytes and 40,956,624,896 available at the final run. The
   selected display-compatible adapter was the Quadro RTX 4000 on DX12 with a
@@ -123,8 +123,8 @@
   no stderr diagnostics, and exited 0. The client requested 2026-07-28 and
   rmcp negotiated 2025-11-25; do not claim full 2026-07-28 Rust SDK parity
   until the official Rust SDK supports and tests that revision.
-- Size and supply chain: final `builder3d-app.exe` is 4,698,624 bytes;
-  `cargo bloat --release -p builder3d-app --bin builder3d-app` measured a
+- Size and supply chain: final `modeler3d-app.exe` is 4,698,624 bytes;
+  `cargo bloat --release -p modeler3d-app --bin modeler3d-app` measured a
   4.5 MiB file and 3.8 MiB `.text` section, below the 40 MiB target. Tokio
   was updated from 1.48.0 to patched 1.51.6 after RustSec flagged the former.
   The new explicit `deny.toml` makes `cargo deny check` pass; it reports only
@@ -154,7 +154,7 @@
   Python reference: scene graph, validated mesh and transform types, catalog
   primitives, the shared command registry, undo/redo, and compatible `.3dp`
   project loading and saving.
-- Changed implementation: `builder3d-core` now owns validated indexed meshes,
+- Changed implementation: `modeler3d-core` now owns validated indexed meshes,
   binary STL encoding/decoding, row-major transforms, all nine reference
   primitives and bounded torus metadata, stable object IDs, nested scene
   children, selection, duplicate/group/ungroup operations, visibility/color/
@@ -164,8 +164,8 @@
   Python-compatible scene JSON/STL members for changed scenes, and saves via a
   completed temporary archive with an existing-target fallback.
 - Changed files: `Cargo.toml`, `Cargo.lock`,
-  `crates/builder3d-core/Cargo.toml`,
-  `crates/builder3d-core/src/{commands,error,lib,mesh,primitives,project,scene,transform}.rs`,
+  `crates/modeler3d-core/Cargo.toml`,
+  `crates/modeler3d-core/src/{commands,error,lib,mesh,primitives,project,scene,transform}.rs`,
   `evidence/r1/report.md`, and this log. The Python project under `L:\Builder3D`
   was not changed.
 - Verification: `cargo fmt --all -- --check`, `cargo test --workspace` (17
@@ -199,15 +199,15 @@
 - Objective: begin the first ordered R2 file-I/O slice from the Python
   reference and existing tests, covering STL, OBJ, and PLY without changing
   the Python fallback.
-- Completed implementation: builder3d-core now has bounded path and byte
+- Completed implementation: modeler3d-core now has bounded path and byte
   loading, typed mesh-format selection, binary/ASCII STL import with binary
   STL export, OBJ import/export with optional per-vertex RGB(A), and
   ASCII/binary PLY import with Python-compatible binary little-endian export.
   MeshAsset keeps file colors at the file boundary instead of changing the
   authoritative Mesh type. A primitive top-face diagonal was corrected to
   match the Python make_box triangle order.
-- Changed files: crates/builder3d-core/src/error.rs, file_io.rs, lib.rs, and
-  primitives.rs; the new crates/builder3d-core/tests/file_io_golden.rs and
+- Changed files: crates/modeler3d-core/src/error.rs, file_io.rs, lib.rs, and
+  primitives.rs; the new crates/modeler3d-core/tests/file_io_golden.rs and
   seven format fixtures; evidence/r2a/report.md; and this log. The Python
   project at L:/Builder3D was not changed.
 - Golden evidence: Python-generated binary STL (684 bytes), OBJ (425 bytes),
@@ -245,7 +245,7 @@
 - Objective: implement the next authoritative R2 format, 3MF, in the Rust
   core while preserving the Python behavior and leaving `L:\Builder3D`
   unchanged.
-- Implementation: added `builder3d-core/src/three_mf.rs` with typed 3MF
+- Implementation: added `modeler3d-core/src/three_mf.rs` with typed 3MF
   units, scene items, metadata, relationships, bounded ZIP/XML package
   loading, thumbnail-only loading, material/face-color resolution, nested
   build/component expansion, repeated-instance isolation, malformed-input
@@ -281,7 +281,7 @@
 - Objective: implement the next authoritative R2 format from section R while
   preserving the Python fallback and its file-unit behavior.
 - Implementation: added dependency-free bounded glTF 2.0/GLB 2.0 parsing and
-  export in `builder3d-core`. The new typed `CoreError::Gltf` boundary handles
+  export in `modeler3d-core`. The new typed `CoreError::Gltf` boundary handles
   JSON and GLB validation, safe embedded/data-URI and approved-directory
   external buffers, checked buffers/views/accessors including sparse and
   normalized values, index and primitive-mode validation, scene selection and
@@ -289,7 +289,7 @@
   conversion, PBR/vertex colors, and generated finite normals. Path export
   writes a self-contained GLB or one atomically replaced `.gltf` sidecar.
   `MeshFormat` now includes GLTF and GLB single-mesh bridges.
-- Changed files: `crates/builder3d-core/src/error.rs`, `file_io.rs`, `gltf.rs`,
+- Changed files: `crates/modeler3d-core/src/error.rs`, `file_io.rs`, `gltf.rs`,
   `lib.rs`; `tests/gltf_golden.rs`; the five `tests/fixtures/gltf/*` files;
   `evidence/r2c/report.md`; and `evidence/r2c/checkpoint.md`. No Python files
   were changed and no dependency was added.
@@ -299,8 +299,8 @@
   including 128/255 alpha. Rust embedded GLTF and GLB exports reopened with
   matching geometry, transforms, materials, and valid normals.
 - Verification: `cargo fmt --all`, `cargo check --workspace`,
-  `cargo test -p builder3d-core` (28 tests plus doc-test target), and
-  `cargo clippy -p builder3d-core --all-targets -- -D warnings` passed.
+  `cargo test -p modeler3d-core` (28 tests plus doc-test target), and
+  `cargo clippy -p modeler3d-core --all-targets -- -D warnings` passed.
   Python `tests/test_gltf_io.py tests/test_mesh_ops.py -q` passed 85 tests
   with two known trimesh runtime warnings; Python `tests/test_ai_commands.py
   -k gltf -q` passed 2; Python `tests/test_ai_qt_bridge.py -k glb -q` passed
@@ -329,7 +329,7 @@
   RGBA/transparency material output, indexed triangular geometry, and atomic
   path replacement. Added `.wrl` selection to `MeshFormat`; generic WRL
   import returns an explicit unsupported-format error.
-- Changed files: `crates/builder3d-core/src/error.rs`, `file_io.rs`, `lib.rs`,
+- Changed files: `crates/modeler3d-core/src/error.rs`, `file_io.rs`, `lib.rs`,
   `wrl.rs`; `tests/wrl_golden.rs`; `tests/fixtures/wrl/python_reference.wrl`;
   `evidence/r2d/report.md`; and `evidence/r2d/checkpoint.md`. No Python
   files or dependencies were changed.
@@ -338,10 +338,10 @@
   transparency, sanitized names, and final newline. Boundary tests cover
   malformed colors, shear, zero and byte limits, duplicate names, explicit
   import rejection, and preserving an existing path after failed validation.
-- Verification: focused `cargo test -p builder3d-core --test wrl_golden`
-  passed 5 tests; `cargo test -p builder3d-core` passed 33 tests plus the
-  doc-test target; `cargo check -p builder3d-core` and
-  `cargo clippy -p builder3d-core --all-targets -- -D warnings` passed.
+- Verification: focused `cargo test -p modeler3d-core --test wrl_golden`
+  passed 5 tests; `cargo test -p modeler3d-core` passed 33 tests plus the
+  doc-test target; `cargo check -p modeler3d-core` and
+  `cargo clippy -p modeler3d-core --all-targets -- -D warnings` passed.
   Python `tests/test_wrl_io.py -q` passed 4; Python AI command WRL selection
   passed 1 with 64 deselected; Python Qt bridge WRL selection passed 1 with
   13 deselected. Changed WRL library source contains no forbidden panic-style
@@ -355,7 +355,7 @@
   untouched.
 - Limitations: WRL import remains unsupported as in the Python product;
   VRML animations, textures, and other non-mesh scene features are outside
-  the Builder3D R2 scene-item contract. Final cargo-audit availability and
+  the 3D Modeler R2 scene-item contract. Final cargo-audit availability and
   workspace checks remain to be recorded.
 - Remaining R2 work: none. R2a STL/OBJ/PLY, R2b 3MF, R2c GLTF/GLB, and R2d
   WRL are complete.
@@ -396,7 +396,7 @@
   `tests/test_core_workflow.py` passed 9. No files under `L:\Builder3D` were
   modified.
 - Final backup: `G:\Builder3D-Rust_snapshot_20261029-114224_R2-final` was
-  created after this log entry with `E:\Builder3D-Rust\target` excluded.
+  created after this log entry with `E:\3D-Modeler\target` excluded.
   Robocopy exit code was 1 (files copied with no failures). Verification
   compared relative paths, byte lengths, and SHA-256 values: source and
   backup file counts and byte totals match, with zero missing, extra, or
@@ -430,7 +430,7 @@
   transformed target/tool scene booleans through one atomic undoable grouped
   command.
 - Changed files: `Cargo.toml`, `Cargo.lock`,
-  `crates/builder3d-core/Cargo.toml`, `src/error.rs`, `src/lib.rs`,
+  `crates/modeler3d-core/Cargo.toml`, `src/error.rs`, `src/lib.rs`,
   `src/mesh_ops.rs`, `src/transform.rs`, `src/commands.rs`, `src/scene.rs`,
   and `tests/mesh_ops_booleans.rs`.
 - Behavioral evidence: box union/difference/intersection volumes are
@@ -440,9 +440,9 @@
   selection, and undo/redo; and flat cut-cap regularization preserves volume.
 - Tests: Python `tests/test_mesh_ops.py -k "boolean or Conversion" -q`
   passed 11 tests (72 deselected, one known trimesh invalid-value warning).
-  Rust `cargo fmt --all -- --check`, `cargo check -p builder3d-core`,
-  `cargo clippy -p builder3d-core --all-targets -- -D warnings`, and
-  `cargo test -p builder3d-core` passed. R3 production-file forbidden-marker
+  Rust `cargo fmt --all -- --check`, `cargo check -p modeler3d-core`,
+  `cargo clippy -p modeler3d-core --all-targets -- -D warnings`, and
+  `cargo test -p modeler3d-core` passed. R3 production-file forbidden-marker
   scan returned zero matches; pre-existing test-only panic markers remain in
   `src/lib.rs`.
 - Baseline snapshot: `G:\Builder3D-Rust_snapshot_20261029-140736_R3-baseline`
@@ -470,8 +470,8 @@
   safety; and explicit operation limits. mesh_ops.rs now invokes an extended
   repair attempt only for invalid boolean operands and still clones valid
   operands directly.
-- Changed files: crates/builder3d-core/src/repair.rs,
-  crates/builder3d-core/src/mesh_ops.rs, src/lib.rs, and
+- Changed files: crates/modeler3d-core/src/repair.rs,
+  crates/modeler3d-core/src/mesh_ops.rs, src/lib.rs, and
   tests/mesh_ops_repair.rs.
 - Behavioral evidence: reversed winding repairs to a positive-volume valid
   box; a square-hole box becomes closed; duplicate/tiny shells are removed;
@@ -502,7 +502,7 @@
   filtering, compacting, work/memory/size limits, volume/deviation evidence,
   and typed warnings. Added the simplify request to the command registry and
   dispatch and added Scene::apply_simplify through ReplaceMesh history.
-- Changed files: crates/builder3d-core/src/simplify.rs,
+- Changed files: crates/modeler3d-core/src/simplify.rs,
   src/lib.rs, src/commands.rs, src/scene.rs, and
   tests/mesh_ops_simplify.rs.
 - Behavioral evidence: a subdivision-3 sphere reaches the requested 100-face
@@ -532,7 +532,7 @@
   all eight face split cases, expected-result limits, work accounting, volume
   and extent reports, and typed unsupported-topology errors. Added the
   subdivide command request/registry/dispatch and Scene::apply_subdivide.
-- Changed files: crates/builder3d-core/src/subdivide.rs,
+- Changed files: crates/modeler3d-core/src/subdivide.rs,
   src/lib.rs, src/commands.rs, src/scene.rs, and
   tests/mesh_ops_subdivide.rs.
 - Behavioral evidence: closed boxes grow from 12 to 24 faces while retaining
@@ -560,7 +560,7 @@
   half-step Laplacian updates, finite checks, displacement/volume reports, and
   iteration/work/mesh limits. Added the smooth command request/registry/
   dispatch and Scene::apply_smooth through ReplaceMesh history.
-- Changed files: crates/builder3d-core/src/smooth.rs, src/lib.rs,
+- Changed files: crates/modeler3d-core/src/smooth.rs, src/lib.rs,
   src/commands.rs, src/scene.rs, and tests/mesh_ops_smooth.rs.
 - Behavioral evidence: one iteration changes box positions while preserving
   topology and finite coordinates; zero iterations is an exact no-op; excess
@@ -590,7 +590,7 @@
   cumulative displacement; and topology-preserving Mesh replacements. Added
   four command requests/registry entries/dispatch paths and Scene methods that
   use existing history.
-- Changed files: crates/builder3d-core/src/brushes.rs, src/lib.rs,
+- Changed files: crates/modeler3d-core/src/brushes.rs, src/lib.rs,
   src/commands.rs, src/scene.rs, and tests/mesh_ops_brushes.rs.
 - Behavioral evidence: Elastic Grab symmetry mirrors centers and offsets;
   Crease Polish supports both directions; Smooth Brush retains topology and
@@ -621,7 +621,7 @@
   short-edge collapses, finite/result validation, work/topology budgets, and
   callback hooks. Added public exports, the normalize_face_density command
   request/registry/dispatch path, and an atomic Scene replacement method.
-- Changed files: crates/builder3d-core/src/density.rs, src/lib.rs,
+- Changed files: crates/modeler3d-core/src/density.rs, src/lib.rs,
   src/commands.rs, src/scene.rs, tests/mesh_ops_density.rs, and evidence/r3g.
 - Behavioral evidence: selected-region refinement increases faces without
   mutating the source; dense closed-region coarsening collapses internal
@@ -722,7 +722,7 @@
   executable with no shell or arbitrary command endpoint. Failed handoffs
   clean their owned staging directory.
 - Added focused approved-root read/write/overwrite tests and platform slicer
-  discovery tests. `builder3d-mcp` focused tests: 13 passed; platform tests: 9
+  discovery tests. `modeler3d-mcp` focused tests: 13 passed; platform tests: 9
   passed. Workspace clippy with `-D warnings` passed.
 - `emboss_text` and `hollow` remain explicit typed unsupported results because
   their Rust core operations are outside completed R3; they do not silently
@@ -786,7 +786,7 @@
   defaults uncalibrated integrated/unified parallel or memory-bound work to
   CPU while retaining GPU render/compute candidates and measured GPU wins.
 - R5 release evidence was generated by
-  `cargo run --release -p builder3d-app --bin r5_viewport --
+  `cargo run --release -p modeler3d-app --bin r5_viewport --
   --output-dir evidence/r5`. The real renderer used the NVIDIA Quadro RTX
   4000 through DX12 (driver 32.0.15.8142), rendered an 81,932-face retained
   scene at 7.106 ms resting / 0.543 ms active in the final run, and emitted a
@@ -797,7 +797,7 @@
 - Rust verification passed: `cargo fmt --all -- --check`,
   `cargo check --workspace`, `cargo test --workspace` (all workspace tests),
   `cargo clippy --workspace --all-targets --all-features -- -D warnings`,
-  `cargo deny check`, and `cargo bloat --release --package builder3d-app
+  `cargo deny check`, and `cargo bloat --release --package modeler3d-app
   --bin r5_viewport -n 20`. `cargo audit` remains unavailable because the
   installed Cargo has no audit subcommand.
 - Python reference checks ran through `L:\Builder3D\venv` with bytecode and
@@ -824,10 +824,10 @@
   `G:\Builder3D-Rust_snapshot_20261029-210220_R6-baseline`, captured before
   implementation. The authoritative R6 order is ribbon → commands → dialogs
   → theme-scoped artwork → launchers → installers.
-- Added the eframe 0.37 native shell in `builder3d-app`, with the reference
+- Added the eframe 0.37 native shell in `modeler3d-app`, with the reference
   Insert/Object/Edit/Paint/View tabs, file menu, utility Save/Undo/Redo
   controls, pin control, Items panel, status/transform strip, and a
-  renderer-neutral preview sourced from `builder3d-viewport::RenderScene`.
+  renderer-neutral preview sourced from `modeler3d-viewport::RenderScene`.
 - Added typed `CommandId`, `CommandOutcome`, `CommandError`, and
   `CommandState` boundaries. Primitive insertion, selection, copy/paste,
   duplicate, delete, undo/redo, and grid/wireframe/X-Ray toggles route through
@@ -835,7 +835,7 @@
 - Added the documented light palette and a matching dark palette. The shell
   includes a bounded `--smoke` path for native command startup verification.
 - Rust R6-01 checks passed: formatting check, `cargo check -p
-  builder3d-app`, and `cargo test -p builder3d-app` (7 tests). Python
+  modeler3d-app`, and `cargo test -p modeler3d-app` (7 tests). Python
   reference shell checks passed: `TestMenuSpecs` plus `test_desktop_actions.py`
   (15 tests), with Python bytecode/cache generation disabled.
 - Per-subtask evidence is in `evidence/r6/01-ribbon/`. The next exact task is
@@ -852,7 +852,7 @@
 - Added bounded path validation, core project save/open seams, selected-mesh
   export, repair, material color, and print-preparation summary methods.
 - Rust verification passed: `cargo fmt --all -- --check` and
-  `cargo test -p builder3d-app` (9 tests). Python reference command checks
+  `cargo test -p modeler3d-app` (9 tests). Python reference command checks
   passed: `test_desktop_actions.py`, `TestExportMesh`, and `TestMenuSpecs` (17
   tests).
 - Per-subtask evidence is in `evidence/r6/02-commands/`. The next exact task
@@ -1034,7 +1034,7 @@
 ## 2026-10-30 - R7-01 desktop model import command coverage
 
 - Continued the owner-approved conversion-first plan from the catalog's next
-  follow-up `builder3d.app.commands.coverage`. The shell remains in deferred
+  follow-up `modeler3d.app.commands.coverage`. The shell remains in deferred
   `polish`; no visual work was started.
 - Added typed `ImportModel` command/dialog routing and `ImportUnit` handling for
   STL, OBJ, PLY, glTF/GLB, and 3MF. The application reuses the existing core
@@ -1043,7 +1043,7 @@
 - Added focused Rust tests for Add/Open identity, dialog defaults, mm/cm
   import placement, atomic undo, and typed unsupported WRL rejection.
 - Updated `docs/component-catalog.toml` with the validated
-  `builder3d.app.commands.coverage` entry and R7 evidence links. Evidence is in
+  `modeler3d.app.commands.coverage` entry and R7 evidence links. Evidence is in
   `evidence/r7/01-import/`.
 - Verification passed: format check, locked workspace check, 136 locked
   workspace tests plus doctests, workspace Clippy with `-D warnings`,
@@ -1057,13 +1057,13 @@
   263 files and 1,632,683 bytes with source/snapshot counts and bytes equal,
   excluding `target`, `evidence`, and `WORK_LOG.md`.
   The next exact conversion slice is
-  `builder3d.app.commands.selection`; background import/preview and remaining
+  `modeler3d.app.commands.selection`; background import/preview and remaining
   workflow coverage remain explicitly unconverted.
 
 ## 2026-10-30 - R7-02 desktop selection and clipboard command coverage
 
 - Continued the owner-approved conversion-first plan from the catalog's next
-  follow-up `builder3d.app.commands.selection`. Shell visual polish remains
+  follow-up `modeler3d.app.commands.selection`. Shell visual polish remains
   deferred.
 - Added typed select-all, deselect-all, invert-selection, group, ungroup, and
   cut commands. Selection-only actions do not create scene-history entries;
@@ -1072,7 +1072,7 @@
 - Added functional object-panel controls and a focused test covering selection
   history isolation, group/ungroup, cut, and paste.
 - Updated `docs/component-catalog.toml` with the validated
-  `builder3d.app.commands.selection` entry and R7 evidence links. Evidence is
+  `modeler3d.app.commands.selection` entry and R7 evidence links. Evidence is
   in `evidence/r7/02-selection/`.
 - Verification passed: format check, locked workspace check, 137 locked
   workspace tests plus doctests, workspace Clippy with `-D warnings`,
@@ -1090,7 +1090,7 @@
 ## 2026-10-30 - R7-03 atomic object-transform workflows
 
 - Continued the owner-approved conversion-first plan with
-  `builder3d.app.commands.transforms`. Shell visual polish remains deferred.
+  `modeler3d.app.commands.transforms`. Shell visual polish remains deferred.
 - Added typed world-space transform services for atomic group translation,
   rotation, scaling, reflection, alignment, arrangement, settling, numeric
   position, and numeric world-size updates. The selected objects' transformed
@@ -1100,7 +1100,7 @@
   the prior per-object `Mirror`, `Align`, and `Arrange` mutations with the
   shared atomic seam. Single-selection arrange remains an explicit no-op.
 - Updated `docs/component-catalog.toml` with the validated
-  `builder3d.app.commands.transforms` entry and R7 evidence links. Evidence is
+  `modeler3d.app.commands.transforms` entry and R7 evidence links. Evidence is
   in `evidence/r7/03-transforms/`.
 - Verification passed: format check, locked workspace check, 141 locked
   workspace tests plus doctests, workspace Clippy with `-D warnings`,
@@ -1118,7 +1118,7 @@
 ## 2026-10-30 - R7-05 application export workflow coverage
 
 - Continued the owner-approved conversion-first plan with
-  `builder3d.app.export`; shell visual polish remains deferred.
+  `modeler3d.app.export`; shell visual polish remains deferred.
 - Added selected-visible export with visible-object fallback, hidden-object
   filtering, multi-object STL/OBJ/PLY concatenation, and scene-item routing
   for glTF/GLB, 3MF, and WRL. World transforms, names, colors, and mesh
@@ -1141,12 +1141,12 @@
   `WORK_LOG.md`; source and snapshot counts/bytes match.
 - No Python source, R1-R6 evidence, or existing snapshot was modified. No
   commit was created. The next exact conversion slice is
-  `builder3d.app.print-prep`.
+  `modeler3d.app.print-prep`.
 
 ## 2026-10-30 - R7-06 application print-preparation coverage
 
 - Continued the owner-approved conversion-first plan with
-  `builder3d.app.print-prep`; shell visual polish remains deferred.
+  `modeler3d.app.print-prep`; shell visual polish remains deferred.
 - Added a typed, renderer-neutral `PrintPrepReport` matching the Python
   checks: transformed X/Z bed fit, height and below-bed warnings, small/large
   scale warnings, core mesh-health/disconnected-shell warnings, and
@@ -1169,12 +1169,12 @@
   `WORK_LOG.md`; source and snapshot counts/bytes match.
 - No Python source, R1-R6 evidence, or existing snapshot was modified. No
   commit was created. The next exact conversion slice is
-  `builder3d.app.operations`.
+  `modeler3d.app.operations`.
 
 ## 2026-10-30 - R7-07 application operation lifecycle coverage
 
 - Continued the owner-approved conversion-first plan with
-  `builder3d.app.operations`; shell visual polish remains deferred.
+  `modeler3d.app.operations`; shell visual polish remains deferred.
 - Added a thread-safe, single-active desktop `OperationRegistry` with typed
   queued/running/committing/cancelling/completed/failed/cancelled phases,
   bounded progress/messages, structured results/errors, cooperative
@@ -1196,12 +1196,12 @@
   `WORK_LOG.md`; source and snapshot counts/bytes match.
 - No Python source, R1-R6 evidence, or existing snapshot was modified. No
   commit was created. The next exact conversion slice is
-  `builder3d.app.view-state`.
+  `modeler3d.app.view-state`.
 
 ## 2026-10-30 - R7-08 application view-state coverage
 
 - Continued the owner-approved conversion-first plan with
-  `builder3d.app.view-state`; shell visual polish remains deferred.
+  `modeler3d.app.view-state`; shell visual polish remains deferred.
 - Added a typed application controller over the Rust camera with complete
   validated pose state, reset/top/front/side presets, frame-all and
   frame-selected behavior with the Python empty-selection fallback, and
@@ -1222,12 +1222,12 @@
   `WORK_LOG.md`; source and snapshot counts/bytes match.
 - No Python source, R1-R6 evidence, or existing snapshot was modified. No
   commit was created. The next exact conversion slice is
-  `builder3d.app.preferences`.
+  `modeler3d.app.preferences`.
 
 ## 2026-10-30 - R7-09 application preferences and recent-file coverage
 
 - Continued the owner-approved conversion-first plan with
-  `builder3d.app.preferences`; shell visual polish remains deferred.
+  `modeler3d.app.preferences`; shell visual polish remains deferred.
 - Added pure preferences for bounded newest-first recent files, default
   ambiguous-import units, authoritative 3MF/glTF/GLB unit handling,
   mm/inch display units, ribbon pinning/favorites/order, and command-state
@@ -1247,12 +1247,12 @@
   `WORK_LOG.md`; source and snapshot counts/bytes match.
 - No Python source, R1-R6 evidence, or existing snapshot was modified. No
   commit was created. The next exact conversion slice is
-  `builder3d.app.image-color`.
+  `modeler3d.app.image-color`.
 
 ## 2026-10-30 - R7-10 application image-color coverage
 
 - Continued the owner-approved conversion-first plan with
-  `builder3d.app.image-color`; shell visual polish remains deferred.
+  `modeler3d.app.image-color`; shell visual polish remains deferred.
 - Added bounded average RGB sampling with opaque RGBA output, regular sample
   steps, encoded-size/pixel limits, typed decode/read errors, and common image
   format support through the locked `image 0.25.10` dependency (PNG, JPEG,
@@ -1273,12 +1273,12 @@
   `WORK_LOG.md`; source and snapshot counts/bytes match.
 - No Python source, R1-R6 evidence, or existing snapshot was modified. No
   commit was created. The next exact conversion slice is
-  `builder3d.platform.slicers`.
+  `modeler3d.platform.slicers`.
 
 ## 2026-10-30 - R7-11 print handoff coverage
 
 - Continued the owner-approved conversion-first plan with
-  `builder3d.platform.slicers` and `builder3d.app.print-handoff`; shell visual
+  `modeler3d.platform.slicers` and `modeler3d.app.print-handoff`; shell visual
   polish remains deferred.
 - Added explicit-object export routing and a typed application staging service
   for visible scene objects. Normal slicers receive one 3MF; Bambu Studio uses
@@ -1299,12 +1299,12 @@
   `WORK_LOG.md`; source/snapshot counts and bytes match.
 - No Python source, R1-R6 evidence, or existing snapshot was modified. No
   commit was created. The next exact conversion slice is
-  `builder3d.platform.runtime`.
+  `modeler3d.platform.runtime`.
 
 ## 2026-10-30 - R7-12 platform runtime coverage
 
 - Continued the owner-approved conversion-first plan with
-  `builder3d.platform.runtime`; shell visual polish remains deferred.
+  `modeler3d.platform.runtime`; shell visual polish remains deferred.
 - Added injected Windows/macOS/XDG runtime path selection, MCP descriptor
   override resolution, read-only process liveness through `sysinfo`, and the
   typed offscreen GUI guard. Added focused platform tests and catalog/evidence
@@ -1322,13 +1322,13 @@
   `WORK_LOG.md`; source/snapshot counts and bytes match.
 - No Python source, R1-R6 evidence, or existing snapshot was modified. No
   commit was created. The next exact conversion slice is
-  `builder3d.app.desktop-adapters`.
+  `modeler3d.app.desktop-adapters`.
 
 ## 2026-10-30 - R7-13 desktop adapters and R7 final coverage audit
 
 - Continued the owner-approved conversion-first plan with
-  `builder3d.app.signals`, `builder3d.app.desktop-adapters`,
-  `builder3d.app.entrypoint`, and `builder3d.mcp.desktop-bridge`.
+  `modeler3d.app.signals`, `modeler3d.app.desktop-adapters`,
+  `modeler3d.app.entrypoint`, and `modeler3d.mcp.desktop-bridge`.
 - Added typed callback signals, numeric suffix selection, JSON preference
   persistence, and explicit catalog mapping for the native eframe/R4
   replacements of the remaining Qt-bound desktop and AI seams. Visual fidelity
@@ -1375,7 +1375,7 @@
   baseline shows a thin five-tab ribbon, empty grid viewport, sparse Items
   panel, and no coherent welcome/recent or file/settings workflow. The native
   window was then closed before implementation.
-- Baseline verification passed: `cargo test -p builder3d-app --locked` (51
+- Baseline verification passed: `cargo test -p modeler3d-app --locked` (51
   tests plus doctests) and native smoke (`objects=2 selected=1 tabs=5`).
 - Baseline recovery snapshot: `G:\Builder3D-Rust_snapshot_20261030-114800_R8-baseline`;
   robocopy exit 1, 168 files and 1,644,529 bytes, with source/snapshot counts
@@ -1386,14 +1386,14 @@
 ## 2026-10-30 - R7-04 renderer-neutral snapping
 
 - Continued the owner-approved conversion-first plan with
-  `builder3d.viewport.snapping`. Shell visual polish remains deferred.
+  `modeler3d.viewport.snapping`. Shell visual polish remains deferred.
 - Added immutable drag-start snap snapshots, object/origin/floor landmarks,
   fixed/floor-fixed/view-scaled tolerance policies, strict nearest correction,
   and capture/release hysteresis in the Rust viewport crate.
 - Connected `CommandState::snap_selected_translation` to the shared solver;
   corrected movement is committed through the atomic transform service.
 - Updated `docs/component-catalog.toml` with the validated
-  `builder3d.viewport.snapping` entry and R7 evidence links. Evidence is in
+  `modeler3d.viewport.snapping` entry and R7 evidence links. Evidence is in
   `evidence/r7/04-snapping/`.
 - Verification passed: format check, locked workspace check, 144 locked
   workspace tests plus doctests, workspace Clippy with `-D warnings`,
@@ -1576,7 +1576,7 @@
 - Six inspected historical ribbon-strip captures were copied byte-for-byte to
   `evidence/rebuild/rb-00-reference-audit/reference/`; each is 1440x138. A
   current full-window reference capture remains pending because an existing
-  Builder3D MCP gateway/runtime was active and the original project requires
+  3D Modeler MCP gateway/runtime was active and the original project requires
   one foreground target at a time. The process was left untouched; no Python
   or Rust window was launched. The old blank Python capture is disqualified.
 - Asset inventory: 108 original files, including 104 themed icon PNGs, four
@@ -1621,7 +1621,7 @@
 - Updated `AGENTS.md` and section 12 of the rebuild plan to route the next
   session to RB-01. No application/source/assets/settings/projects or existing
   snapshots were changed. No tests/build were run and no commit was created.
-- The RB-01 execution itself remains unstarted. The existing Builder3D MCP
+- The RB-01 execution itself remains unstarted. The existing 3D Modeler MCP
   process state must be checked again before attempting live captures.
 
 ## 2026-10-30 - RB-01 Visual Foundations
@@ -1635,7 +1635,7 @@
   artwork, and the Move/Rotate/Resize presentation strip. The separate renderer
   and viewport workflows were not integrated.
 - Copied the 108 source assets byte-for-byte into
-  `crates/builder3d-app/assets/original`. The RB-01 manifest records source and
+  `crates/modeler3d-app/assets/original`. The RB-01 manifest records source and
   package destinations and all SHA-256 values. The 43,340,965-byte art set is
   1,397,925 bytes above the existing 40 MiB installed limit before the app is
   counted; no source images were changed or omitted to force the size gate.
@@ -1676,10 +1676,10 @@
   - `AGENTS.md`: `b3d8b30ce2f3149cefa34c2e6a9d2486af75d016ec7cd8aef1b82a9d487b4927`
   - `docs/product-rebuild-plan.md`: `f7fc5ae48d874c3770c2793b4b6ed937f3680af7878a7beee16129acf2f01b19`
   - `docs/rb-01-visual-foundations-handoff.md`: `078362d3b853c34f8567220303cea35f96250c581e172359cd95b06039de20fb`
-  - `crates/builder3d-app/src/artwork.rs`: `8d273687633b69a09732ee417d543f221b48d305e2cc06044fafc3072354e337`
-  - `crates/builder3d-app/src/shell.rs`: `2abe463aa64094e1833ee54ad06c24fb41b2139d43f9f480b56833f2fc36f74e`
-  - `crates/builder3d-app/src/theme.rs`: `4796af22855c673befa1ffb746ddd52fa72447281f1ad5e5c760e0ef204790c2`
-  - `crates/builder3d-app/assets/original/Builder3D.png`: `44bcc68aab7a4b7c78e92eab2dd2a1609dda18bb51e28b8e0d80cfd41d69162b`
+  - `crates/modeler3d-app/src/artwork.rs`: `8d273687633b69a09732ee417d543f221b48d305e2cc06044fafc3072354e337`
+  - `crates/modeler3d-app/src/shell.rs`: `2abe463aa64094e1833ee54ad06c24fb41b2139d43f9f480b56833f2fc36f74e`
+  - `crates/modeler3d-app/src/theme.rs`: `4796af22855c673befa1ffb746ddd52fa72447281f1ad5e5c760e0ef204790c2`
+  - `crates/modeler3d-app/assets/original/Modeler3D.png`: `44bcc68aab7a4b7c78e92eab2dd2a1609dda18bb51e28b8e0d80cfd41d69162b`
   - `evidence/rebuild/rb-01-visual-foundations/asset-manifest.toml`: `ba5ab80acae320c63b698a4c403c21eaab0579de06bc5834b2e78d484387d87e`
   - `evidence/rebuild/rb-01-visual-foundations/report.md`: `8868bdf45518ccec262decf60e06419ddc1db908dc18108f8472e4171d8702d1`
   - `evidence/rebuild/rb-01-visual-foundations/checkpoint.md`: `26315869ae3a07e630b8c685cf506a4bd5f3e4f756a36878ba0a11630a9dd5d9`
@@ -1726,8 +1726,8 @@
   - `AGENTS.md`: `b3d8b30ce2f3149cefa34c2e6a9d2486af75d016ec7cd8aef1b82a9d487b4927`
   - `docs/product-rebuild-plan.md`: `a5eff727b0787d75c7d656f9f56a40ecdef3f709bd12727ba44cb258de48e32c`
   - `docs/rb-02-first-working-application-handoff.md`: `af9be8122be43ad47f4336107a1f6f02adea3bec48d6ace9044e9510272753a0`
-  - `crates/builder3d-app/src/shell.rs`: `2abe463aa64094e1833ee54ad06c24fb41b2139d43f9f480b56833f2fc36f74e`
-  - `crates/builder3d-viewport/src/renderer.rs`: `e05f7f8934a798c7b7e186804d10fd24c4360f7c937caf4769efb2180843ff01`
+  - `crates/modeler3d-app/src/shell.rs`: `2abe463aa64094e1833ee54ad06c24fb41b2139d43f9f480b56833f2fc36f74e`
+  - `crates/modeler3d-viewport/src/renderer.rs`: `e05f7f8934a798c7b7e186804d10fd24c4360f7c937caf4769efb2180843ff01`
   - `evidence/rebuild/parity-matrix.toml`: `04d06011237a8db9fe5e233b2cdb84a0cead886f895a6a491a0173633a641fc0`
   - `evidence/rebuild/rb-02-first-working-application/checkpoint.md`: `b3a5862335c92b69e67853b6c1dab0d6ba4f752c54e5a89be12c8916b6b54cfd`
   - `WORK_LOG.md` before this receipt: `5b4e35521c85587dd74a562af032e8382e57b153356302144daa29c8c9f52071`
@@ -1751,8 +1751,8 @@
   - `AGENTS.md`: `b3d8b30ce2f3149cefa34c2e6a9d2486af75d016ec7cd8aef1b82a9d487b4927`
   - `docs/product-rebuild-plan.md`: `a5eff727b0787d75c7d656f9f56a40ecdef3f709bd12727ba44cb258de48e32c`
   - `docs/rb-02-first-working-application-handoff.md`: `af9be8122be43ad47f4336107a1f6f02adea3bec48d6ace9044e9510272753a0`
-  - `crates/builder3d-app/src/shell.rs`: `2abe463aa64094e1833ee54ad06c24fb41b2139d43f9f480b56833f2fc36f74e`
-  - `crates/builder3d-viewport/src/renderer.rs`: `e05f7f8934a798c7b7e186804d10fd24c4360f7c937caf4769efb2180843ff01`
+  - `crates/modeler3d-app/src/shell.rs`: `2abe463aa64094e1833ee54ad06c24fb41b2139d43f9f480b56833f2fc36f74e`
+  - `crates/modeler3d-viewport/src/renderer.rs`: `e05f7f8934a798c7b7e186804d10fd24c4360f7c937caf4769efb2180843ff01`
   - `evidence/rebuild/parity-matrix.toml`: `787800c8de476e9118a453dbc0fb1ffad7ce5dd8f9b01f8947910ce8edb565ec`
   - `evidence/rebuild/rb-01-visual-foundations/report.md`: `88e386aa60e84d50e39637468e9e6a002b612e4e2a77e6fd4b4502c94a023e81`
   - `evidence/rebuild/rb-01-visual-foundations/verification.md`: `3bc40969bb9a2619ff00dfc462d85749e274abeec4ddb94a87ae77f7da0e32b6`
@@ -1803,9 +1803,9 @@
   - `AGENTS.md`: `b3d8b30ce2f3149cefa34c2e6a9d2486af75d016ec7cd8aef1b82a9d487b4927`
   - `docs/product-rebuild-plan.md`: `a5eff727b0787d75c7d656f9f56a40ecdef3f709bd12727ba44cb258de48e32c`
   - `docs/rb-02-first-working-application-handoff.md`: `af9be8122be43ad47f4336107a1f6f02adea3bec48d6ace9044e9510272753a0`
-  - `crates/builder3d-app/src/shell.rs`: `2abe463aa64094e1833ee54ad06c24fb41b2139d43f9f480b56833f2fc36f74e`
-  - `crates/builder3d-app/src/theme.rs`: `4796af22855c673befa1ffb746ddd52fa72447281f1ad5e5c760e0ef204790c2`
-  - `crates/builder3d-viewport/src/renderer.rs`: `e05f7f8934a798c7b7e186804d10fd24c4360f7c937caf4769efb2180843ff01`
+  - `crates/modeler3d-app/src/shell.rs`: `2abe463aa64094e1833ee54ad06c24fb41b2139d43f9f480b56833f2fc36f74e`
+  - `crates/modeler3d-app/src/theme.rs`: `4796af22855c673befa1ffb746ddd52fa72447281f1ad5e5c760e0ef204790c2`
+  - `crates/modeler3d-viewport/src/renderer.rs`: `e05f7f8934a798c7b7e186804d10fd24c4360f7c937caf4769efb2180843ff01`
   - `evidence/rebuild/parity-matrix.toml`: `3ab637dbbf9f365e5bdf57a9d2eab737f9837d6e623c32bb6125e123fbadc2f7`
   - `evidence/rebuild/rb-01-visual-foundations/report.md`: `34607c54c11848883f0e541c0df63de7450360b7ed040554f9c9887f00dd4d57`
   - `evidence/rebuild/rb-01-visual-foundations/verification.md`: `2f998a8ecb931621da8072eb6b18b0003a1a9a34ce1608782c646e270f97da5c`
@@ -1827,7 +1827,7 @@
   captures at 1280 x 840 logical client pixels nor explicit owner approval.
 - Rechecked the one-window process gate at 18:58 MDT. The original MCP gateway
   was active: `run_mcp_windows.bat` wrapper PID 30064, venv server PID 25284,
-  and child PID 9440. No Builder3D or Rust target window was present. No process
+  and child PID 9440. No 3D Modeler or Rust target window was present. No process
   was stopped and neither app was launched.
 - Re-measured the host primary display at 2560 x 1440, 96 system DPI (100%).
   Actual target-window client sizes and per-window display scale remain unknown.
@@ -1891,7 +1891,7 @@
 
 ## 2026-10-31 - RB-01 matched live capture evidence
 
-- Built the Rust app with cargo build --package builder3d-app --locked (exit 0).
+- Built the Rust app with cargo build --package modeler3d-app --locked (exit 0).
   No automated tests were run.
 - Captured the Python reference and Rust app serially in Dark and Light at
   1280 x 840 logical client pixels. All four physical PNGs are 1280 x 840;
@@ -1927,10 +1927,10 @@
   - Cargo.lock: 910bbe012c44a8b13195081831bf8ab581e09116284bfb229f21da03a2f0960d
   - docs/product-rebuild-plan.md: 147c70ed47785f3cf550050e11a4ebd72b4cec4387a736ab3e6b8c431fd1d450
   - docs/rb-02-first-working-application-handoff.md: ad8d0d33a93d6c3c3c7bf472058bc25ac9c0fc7bbb734d1f23c51e7633b1b553
-  - crates/builder3d-app/src/lib.rs: 3e6471e163a06d58fd49d9e1b34c5390087c0e74baf7d7cae4a601b264265e33
-  - crates/builder3d-app/src/shell.rs: 2abe463aa64094e1833ee54ad06c24fb41b2139d43f9f480b56833f2fc36f74e
-  - crates/builder3d-app/src/theme.rs: 4796af22855c673befa1ffb746ddd52fa72447281f1ad5e5c760e0ef204790c2
-  - crates/builder3d-viewport/src/renderer.rs: e05f7f8934a798c7b7e186804d10fd24c4360f7c937caf4769efb2180843ff01
+  - crates/modeler3d-app/src/lib.rs: 3e6471e163a06d58fd49d9e1b34c5390087c0e74baf7d7cae4a601b264265e33
+  - crates/modeler3d-app/src/shell.rs: 2abe463aa64094e1833ee54ad06c24fb41b2139d43f9f480b56833f2fc36f74e
+  - crates/modeler3d-app/src/theme.rs: 4796af22855c673befa1ffb746ddd52fa72447281f1ad5e5c760e0ef204790c2
+  - crates/modeler3d-viewport/src/renderer.rs: e05f7f8934a798c7b7e186804d10fd24c4360f7c937caf4769efb2180843ff01
   - evidence/rebuild/parity-matrix.toml: 94ba7d7f3111d799c13b2dddd8e9fa3f27971a00d54e07e93a25800d971587a8
   - RB-01 report: 2bc0947f1ef11fa8b33d3e974a075151e21bdbdbb0f84fccba9e7d2f193c5e40
   - RB-01 verification: 6bc4f93f61478538a71c2d3f4c201ff2de0175d44b3ef4005f3e6a22f8c4a2f9
@@ -1981,8 +1981,8 @@
   setter, and texture/adapter accessors. Ordinary rendering no longer waits for
   GPU completion; explicit diagnostic capture retains its bounded readback wait.
 - Verification: `cargo fmt --all -- --check`; `cargo check -p
-  builder3d-viewport --locked`; `cargo test -p builder3d-viewport --locked`
-  (24 passed); `cargo clippy -p builder3d-viewport --all-targets --locked --
+  modeler3d-viewport --locked`; `cargo test -p modeler3d-viewport --locked`
+  (24 passed); `cargo clippy -p modeler3d-viewport --all-targets --locked --
   -D warnings` all passed.
 - Additive recovery snapshot:
   `G:\Builder3D-Rust_snapshot_20261031-095659_RB-02-01-shared-renderer`.
@@ -2002,7 +2002,7 @@
 - Added shared pointer routing for orbit, pan, zoom, exact geometry pick by durable object ID, and temporary translation-gizmo preview. A committed drag uses one ID-based position command; Escape/focus loss cancels without a scene-history entry.
 - Added the native import file picker and format filters while retaining the typed path on picker cancel and the explicit unit selector (default mm). Open/import requests frame the loaded scene.
 - Added regression coverage for stable-ID move/undo/redo, hidden/reordered occlusion picks, pointer scale mapping, camera gestures and modal capture, picker cancel, and fixture import/move/project save-reopen persistence.
-- Verification: cargo test -p builder3d-app -p builder3d-viewport --locked (66 app and 25 viewport tests passed); cargo check --workspace --locked; strict app/viewport Clippy with warnings denied; formatting applied. Native run and evidence are next.
+- Verification: cargo test -p modeler3d-app -p modeler3d-viewport --locked (66 app and 25 viewport tests passed); cargo check --workspace --locked; strict app/viewport Clippy with warnings denied; formatting applied. Native run and evidence are next.
 - Planned additive recovery snapshot: G:\Builder3D-Rust_snapshot_20261031-101417_RB-02-02-native-viewport-integration; it will include source, evidence, work log, and Git metadata; exclude only root target/, root .cache/, and reparse entries. Its Robocopy result, relative paths, file count, bytes, and path/size/SHA-256 tuples will be verified before appending the receipt.
 ### RB-02 native viewport snapshot receipt -- appended after copy
 
@@ -2015,11 +2015,11 @@
   - Cargo.toml: 90add5a7220389861e2436aa770b08c2096bec6487b0b5b2a05119c8484e9180
   - Cargo.lock: 66a38f81c099c6f2ab6a6e3380429007cf085969c6bf931212a96633a98551fb
   - WORK_LOG.md: bc84e4b25aef2c90a52bae2a0f7b081b33074612a809241885eccbde464fb458
-  - crates/builder3d-app/src/shell.rs: 56e4702c559aaca5e6e746c4e5a488ec8d91e80cd7751191bc4be6c01fadb520
-  - crates/builder3d-app/src/commands.rs: 4ab86197cce17cbc44f112e95b4e919303e679400f35859dff9316a794c91a8a
-  - crates/builder3d-app/src/dialogs.rs: 069452058573acff7f3b0bbafdd5dc2a9322893e1589b0a2acf0128f48b9c691
-  - crates/builder3d-viewport/src/renderer.rs: a1fe44004737ec1cb9ea37abddaabc2f4a9c2348db64317318c754724b6e1bbc
-  - crates/builder3d-viewport/src/picking.rs: e1a84584e3c0ceffc405070f421e15a1673b9de4500041e4da66fbc515fd33b6
+  - crates/modeler3d-app/src/shell.rs: 56e4702c559aaca5e6e746c4e5a488ec8d91e80cd7751191bc4be6c01fadb520
+  - crates/modeler3d-app/src/commands.rs: 4ab86197cce17cbc44f112e95b4e919303e679400f35859dff9316a794c91a8a
+  - crates/modeler3d-app/src/dialogs.rs: 069452058573acff7f3b0bbafdd5dc2a9322893e1589b0a2acf0128f48b9c691
+  - crates/modeler3d-viewport/src/renderer.rs: a1fe44004737ec1cb9ea37abddaabc2f4a9c2348db64317318c754724b6e1bbc
+  - crates/modeler3d-viewport/src/picking.rs: e1a84584e3c0ceffc405070f421e15a1673b9de4500041e4da66fbc515fd33b6
   - evidence/rebuild/rb-02-first-working-application/checkpoint.md: 2cf6f4f35916fa01d81e15a8cc04f8d545c4472b0837bfe6c20a1b41c6fd072c
   - .git/HEAD: 28d25bf82af4c0e2b72f50959b2beb859e3e60b9630a5e8c603dad4ddb2b6e80
 - This receipt and checkpoint update postdate the immutable snapshot. The snapshot contains the pre-receipt work-log entry and current checkpoint before this update. Existing G: snapshots were not modified.
@@ -2046,11 +2046,11 @@
   - Cargo.toml: 90add5a7220389861e2436aa770b08c2096bec6487b0b5b2a05119c8484e9180
   - Cargo.lock: 66a38f81c099c6f2ab6a6e3380429007cf085969c6bf931212a96633a98551fb
   - WORK_LOG.md (pre-receipt): e1e96061449caf50473e33e13d1ff5cb2e587de399bb0ac3817eab9c54b45f84
-  - crates/builder3d-app/src/shell.rs: b3ddba7f867dcbdaef845657e311afe06842a271e0a39958392c9712ab5124e3
-  - crates/builder3d-app/src/commands.rs: 4ab86197cce17cbc44f112e95b4e919303e679400f35859dff9316a794c91a8a
-  - crates/builder3d-app/src/dialogs.rs: 069452058573acff7f3b0bbafdd5dc2a9322893e1589b0a2acf0128f48b9c691
-  - crates/builder3d-viewport/src/renderer.rs: a1fe44004737ec1cb9ea37abddaabc2f4a9c2348db64317318c754724b6e1bbc
-  - crates/builder3d-viewport/src/picking.rs: e1a84584e3c0ceffc405070f421e15a1673b9de4500041e4da66fbc515fd33b6
+  - crates/modeler3d-app/src/shell.rs: b3ddba7f867dcbdaef845657e311afe06842a271e0a39958392c9712ab5124e3
+  - crates/modeler3d-app/src/commands.rs: 4ab86197cce17cbc44f112e95b4e919303e679400f35859dff9316a794c91a8a
+  - crates/modeler3d-app/src/dialogs.rs: 069452058573acff7f3b0bbafdd5dc2a9322893e1589b0a2acf0128f48b9c691
+  - crates/modeler3d-viewport/src/renderer.rs: a1fe44004737ec1cb9ea37abddaabc2f4a9c2348db64317318c754724b6e1bbc
+  - crates/modeler3d-viewport/src/picking.rs: e1a84584e3c0ceffc405070f421e15a1673b9de4500041e4da66fbc515fd33b6
   - evidence/rebuild/parity-matrix.toml (pre-receipt): d75a7608a74d17894ea2a926db8f9fc1b3cc7b24f9e5b394bef13a3d4c66676f
   - evidence/rebuild/rb-02-first-working-application/checkpoint.md (pre-receipt): dfee3116c40c2f4ddb4e957665f3c1c318db09f1d3dd72d6a84c4f8e73cb445c
   - evidence/rebuild/rb-02-first-working-application/capture-metadata.toml: 4cbd9f3e2f47ac41739ec1428a983b6f4b523b2cb1a913a4f6300a56b1f18f59
@@ -2113,9 +2113,9 @@
   - `docs/rb-03-lifecycle-and-file-completion-handoff.md`: `4096af2d79c9be994e7f46638cee675f6fb442e9f1acb6af5cbd6e7d18b379c7`
   - `evidence/rebuild/parity-matrix.toml`: `eb042c2d061d9286b88b2a8b7378c9434fd42890ffd59ebc1ae24d9675eb8f8c`
   - `evidence/rebuild/rb-02-first-working-application/checkpoint.md`: `0fcd55591673aeafda28831cf4b2a1377cf465a9726ceb04fcc2088bd2c57a6b`
-  - `crates/builder3d-core/src/project.rs`: `e666f43b618369222293a9a4a8a2902241e39e25736b82f6bb03bc6d09637767`
-  - `crates/builder3d-app/src/commands.rs`: `4ab86197cce17cbc44f112e95b4e919303e679400f35859dff9316a794c91a8a`
-  - `crates/builder3d-app/src/shell.rs`: `b3ddba7f867dcbdaef845657e311afe06842a271e0a39958392c9712ab5124e3`
+  - `crates/modeler3d-core/src/project.rs`: `e666f43b618369222293a9a4a8a2902241e39e25736b82f6bb03bc6d09637767`
+  - `crates/modeler3d-app/src/commands.rs`: `4ab86197cce17cbc44f112e95b4e919303e679400f35859dff9316a794c91a8a`
+  - `crates/modeler3d-app/src/shell.rs`: `b3ddba7f867dcbdaef845657e311afe06842a271e0a39958392c9712ab5124e3`
 - Exact next subtask: complete `.3dp` lifecycle/safety and its native Save,
   Discard, Cancel and picker flows before moving to model imports/units. The
   RB-03 audit checkpoint is in the same evidence directory.
@@ -2133,9 +2133,9 @@
   and object fields, geometry, schema migration/rejection, validation errors,
   and exact bytes for an untouched current Python archive.
 - Verification passed: `cargo fmt --all -- --check`; `cargo test --offline
-  --locked -p builder3d-core -p builder3d-app` (74 app and 81 core tests);
+  --locked -p modeler3d-core -p modeler3d-app` (74 app and 81 core tests);
   strict changed-crate Clippy with `-D warnings`; and
-  `cargo build --offline --locked -p builder3d-app --bin builder3d-app`.
+  `cargo build --offline --locked -p modeler3d-app --bin modeler3d-app`.
 - The visible Rust app was exercised using an isolated `LOCALAPPDATA` profile
   at 1280 x 840 client pixels, 96 DPI / 100% scale. New, Save As, Save, Open,
   and dirty New/Open/Exit Save-Discard-Cancel paths were exercised, including
@@ -2174,11 +2174,11 @@
   - `evidence/rebuild/parity-matrix.toml`: `3a86c1abd6aea5b459fc683392ea249ac119e21fd6dc7d7366a2bb8b88aee690`
   - `evidence/rebuild/rb-03-lifecycle-and-file-completion/checkpoint.md` (pre-receipt): `ca72caf2909f6791d79b537deba87ab9f2db52626853a06c41ad729667a25f35`
   - `evidence/rebuild/rb-03-lifecycle-and-file-completion/requirement-test-map.md`: `be51b488d64040aaa1f5d450f11e400acfef7749d6c2a38c167cdf7fd97bf1a8`
-  - `crates/builder3d-core/src/project.rs`: `cbac8d8d250d1532891fc6e170a34e4cd519fcbe2c8d58e8ae66a25a43eddff7`
-  - `crates/builder3d-core/tests/project_golden.rs`: `28577b83dbe38767c3bd2722bc13a74932335d25b593ef5a1b4cd90b22752dea`
-  - `crates/builder3d-app/src/commands.rs`: `c07a87e48e1ca2da7bdbe5775060f561fae6269b34890c7ef638fa2898f5e2c4`
-  - `crates/builder3d-app/src/dialogs.rs`: `431c7d14a9545dc8b077a117ecc5990d2fb3102cf4a6449615e622181d009256`
-  - `crates/builder3d-app/src/shell.rs`: `26bce3ccd8df690265d31edc4efdc96df39f1021824f602e29342621e9253f3d`
+  - `crates/modeler3d-core/src/project.rs`: `cbac8d8d250d1532891fc6e170a34e4cd519fcbe2c8d58e8ae66a25a43eddff7`
+  - `crates/modeler3d-core/tests/project_golden.rs`: `28577b83dbe38767c3bd2722bc13a74932335d25b593ef5a1b4cd90b22752dea`
+  - `crates/modeler3d-app/src/commands.rs`: `c07a87e48e1ca2da7bdbe5775060f561fae6269b34890c7ef638fa2898f5e2c4`
+  - `crates/modeler3d-app/src/dialogs.rs`: `431c7d14a9545dc8b077a117ecc5990d2fb3102cf4a6449615e622181d009256`
+  - `crates/modeler3d-app/src/shell.rs`: `26bce3ccd8df690265d31edc4efdc96df39f1021824f602e29342621e9253f3d`
 - This receipt and the checkpoint update postdate the immutable snapshot. It
   contains the pre-receipt work-log entry and checkpoint; all included files
   matched at copy time.
@@ -2193,7 +2193,7 @@
   own units. Existing import loading keeps STL/OBJ/PLY on the chosen/default
   unit and leaves authoritative 3MF/glTF/GLB loader conversion unchanged.
 - Generated Python reference fixtures under
-  crates/builder3d-core/tests/fixtures/imports/: two-object glTF and GLB with
+  crates/modeler3d-core/tests/fixtures/imports/: two-object glTF and GLB with
   sidecars, and a two-object 3MF declared in centimetres. Focused calls to the
   read-only Python reference loaders verified object names, colors, extents,
   transforms, and declared-unit restoration.
@@ -2204,9 +2204,9 @@
   successful recent recording, and malformed/unsupported import preservation
   of scene, selection, path, dirty state, history, and recents.
 - Verification passed: cargo fmt --all -- --check; cargo test --offline --locked
-  -p builder3d-app (80 tests); cargo clippy --offline --locked -p builder3d-app
+  -p modeler3d-app (80 tests); cargo clippy --offline --locked -p modeler3d-app
   --all-targets --all-features -- -D warnings; cargo build --offline --locked
-  -p builder3d-app --bin builder3d-app; and parity TOML parse/unique-ID check
+  -p modeler3d-app --bin modeler3d-app; and parity TOML parse/unique-ID check
   (129 feature IDs).
 - Native attempt: the app process/window was present and PrintWindow captured
   its 1280 x 840 client. The current session returned no foreground window,
@@ -2235,13 +2235,13 @@
   - evidence/rebuild/parity-matrix.toml: b05806802324f21eac43f3f2e869284cb0a069767be3e5061e57fac7732af392
   - evidence/rebuild/rb-03-lifecycle-and-file-completion/checkpoint.md (pre-receipt): 4b4a3d13c46aadc4f8bc9000927e3f23c1c4b65ad1d4ff5ed62286d0c122f189
   - evidence/rebuild/rb-03-lifecycle-and-file-completion/requirement-test-map.md: 08d8b0e3fe6253f173445c7e98a129c4c0375f710c2bbc589ca8ffcee633ddf8
-  - crates/builder3d-app/src/commands.rs: f6f314e9f6d7462a921bab6674697d760b2e5b3b9f19bd527cab68397ac4b421
-  - crates/builder3d-app/src/preferences.rs: bb98c527b49133663dfa86d16d53cc366ce9d346e311144734f1c804669ad5
-  - crates/builder3d-app/src/dialogs.rs: a81e26a4a745a7e8f728b2b21b1bf4ede3543d4412c68cd71d28fb160791ad8b
-  - crates/builder3d-core/tests/fixtures/imports/README.md: c28fbda96eb10e000724156bda2b58d67c95f62488c59eaa87a5c25bfaa7abeb
-  - crates/builder3d-core/tests/fixtures/imports/python_multi_object.gltf: 3258784e59dddb07630ca01b26df1c4222dc9e5c7d3310e5f2fc7b9104b58fbb
-  - crates/builder3d-core/tests/fixtures/imports/python_multi_object.glb: 688e0f61b597c7badd8f2d622e6cbcc0fc49862f03d3fd9c3221e2d302dc9bbb
-  - crates/builder3d-core/tests/fixtures/imports/python_multi_object_cm.3mf: f5c8ea614505befb0c29b8b0e266e74b9bfb503cf097a0eb4ad7f1c0b77b2563
+  - crates/modeler3d-app/src/commands.rs: f6f314e9f6d7462a921bab6674697d760b2e5b3b9f19bd527cab68397ac4b421
+  - crates/modeler3d-app/src/preferences.rs: bb98c527b49133663dfa86d16d53cc366ce9d346e311144734f1c804669ad5
+  - crates/modeler3d-app/src/dialogs.rs: a81e26a4a745a7e8f728b2b21b1bf4ede3543d4412c68cd71d28fb160791ad8b
+  - crates/modeler3d-core/tests/fixtures/imports/README.md: c28fbda96eb10e000724156bda2b58d67c95f62488c59eaa87a5c25bfaa7abeb
+  - crates/modeler3d-core/tests/fixtures/imports/python_multi_object.gltf: 3258784e59dddb07630ca01b26df1c4222dc9e5c7d3310e5f2fc7b9104b58fbb
+  - crates/modeler3d-core/tests/fixtures/imports/python_multi_object.glb: 688e0f61b597c7badd8f2d622e6cbcc0fc49862f03d3fd9c3221e2d302dc9bbb
+  - crates/modeler3d-core/tests/fixtures/imports/python_multi_object_cm.3mf: f5c8ea614505befb0c29b8b0e266e74b9bfb503cf097a0eb4ad7f1c0b77b2563
 - This receipt and the updated checkpoint postdate the immutable snapshot. The snapshot contains the pre-receipt work log and checkpoint; all included files matched at copy time.
 
 ## 2026-10-31 - RB-03 export implementation and verification
@@ -2262,7 +2262,7 @@
   unchanged and that current scene state remains intact. Native RFD Save dialogs
   keep their OS overwrite confirmation. Extensionless export names default to
   `.stl`; explicit supported extensions retain their format.
-- Added `crates/builder3d-app/examples/rb03_export_fixture.rs` to reproduce a
+- Added `crates/modeler3d-app/examples/rb03_export_fixture.rs` to reproduce a
   two-object fixture under `target/rb03-export-fixture`. Python 3.11.9 from the
   reference virtual environment reopened STL/OBJ/PLY/3MF/glTF/GLB through the
   read-only `L:\Builder3D` loaders. Geometry, names, dimensions, transforms,
@@ -2275,8 +2275,8 @@
   limitation is documented: it reads the subset emitted by this writer, not
   arbitrary VRML documents.
 - Verification passed: `cargo fmt --all -- --check`; `cargo test --offline
-  --locked -p builder3d-app` (84 tests); `cargo clippy --offline --locked
-  -p builder3d-app --all-targets --all-features -- -D warnings`; the fixture
+  --locked -p modeler3d-app` (84 tests); `cargo clippy --offline --locked
+  -p modeler3d-app --all-targets --all-features -- -D warnings`; the fixture
   generator; the Python reference-reader script; and the independent WRL
   subset-reader script. The default-target app build could not replace the
   executable because the earlier walkthrough window still holds it open; the
@@ -2308,11 +2308,11 @@
   - evidence/rebuild/parity-matrix.toml: fb7fd2a265579c58187d73ab8eb97cc8d14bd3dca8a25b17a98ae59e29420a64
   - evidence/rebuild/rb-03-lifecycle-and-file-completion/checkpoint.md (pre-receipt): 73a208a802968f172538458a71f7fd52012f1d9c7404cb44fe0e9be903577df9
   - evidence/rebuild/rb-03-lifecycle-and-file-completion/requirement-test-map.md: ff78cc5fa799ff4cfdcb7b36cc3915ce98792a02669316d061c177713878442e
-  - crates/builder3d-app/src/commands.rs: 5d8f11e5a416315f787ee7c425f592cca94e1aae16e36d9688569f713a2870ad
-  - crates/builder3d-app/src/dialogs.rs: bd019a0d41dacc068c4a6b103c327e92fa37d6660f89b014728a22770289eac6
-  - crates/builder3d-app/src/shell.rs: 0f13528d7cd2a58702f1e041b575ad4c2a3aab2b72bfcd4faa82d782b8a17905
-  - crates/builder3d-app/src/export.rs: 8344a98015964432c840f5c3bd26696744ed59986ea250033f6b7f7c647ac776
-  - crates/builder3d-app/examples/rb03_export_fixture.rs: 355d76a355d147e026ece27c8297f32207c050acd9391a4b2c265f1c3b335bda
+  - crates/modeler3d-app/src/commands.rs: 5d8f11e5a416315f787ee7c425f592cca94e1aae16e36d9688569f713a2870ad
+  - crates/modeler3d-app/src/dialogs.rs: bd019a0d41dacc068c4a6b103c327e92fa37d6660f89b014728a22770289eac6
+  - crates/modeler3d-app/src/shell.rs: 0f13528d7cd2a58702f1e041b575ad4c2a3aab2b72bfcd4faa82d782b8a17905
+  - crates/modeler3d-app/src/export.rs: 8344a98015964432c840f5c3bd26696744ed59986ea250033f6b7f7c647ac776
+  - crates/modeler3d-app/examples/rb03_export_fixture.rs: 355d76a355d147e026ece27c8297f32207c050acd9391a4b2c265f1c3b335bda
   - evidence/rebuild/rb-03-lifecycle-and-file-completion/verify_python_reference_exports.py: 6a4843c1453c0999f566adcacc69e4c81add1d05f88affdccc53050bae7712d0
   - evidence/rebuild/rb-03-lifecycle-and-file-completion/verify_wrl_subset.py: 17a80aea260d8eb617bb80faec64c3829b4344dddf66a83ac5d5db083cb1fd34
 - This receipt and the updated checkpoint postdate the immutable snapshot. They record its pre-receipt state and do not modify the snapshot.
@@ -2320,10 +2320,10 @@
 
 - Added bounded newest-first recent behavior coverage for ten-entry persistence and settings reload. Exact duplicate paths move to the front, successful project/model paths are recorded, and persisted paths are normalized on load.
 - Recent .3dp entries dispatch through validated project Open; model entries dispatch through the additive import command. Missing paths are removed and reported. Corrupt project and WRL import failures preserve the live scene, project path, dirty flag, history, and recent list. WRL remains a reference recent entry, but importing it still reports unsupported.
-- Added crates/builder3d-app/src/recent_preview.rs and welcome texture caching. Image and mesh preview decoding runs on one background worker; generation checks discard stale queued results. Visible .3dp scenes and STL/OBJ/PLY/3MF/glTF/GLB imports render bounded 64 x 64 isometric thumbnails. Raster recents and embedded 3MF image thumbnails use the existing 64 MiB / 16 Mi-pixel bounds. Hidden-only projects and missing, unsupported, corrupt, or undecodable entries keep the file-type icon.
+- Added crates/modeler3d-app/src/recent_preview.rs and welcome texture caching. Image and mesh preview decoding runs on one background worker; generation checks discard stale queued results. Visible .3dp scenes and STL/OBJ/PLY/3MF/glTF/GLB imports render bounded 64 x 64 isometric thumbnails. Raster recents and embedded 3MF image thumbnails use the existing 64 MiB / 16 Mi-pixel bounds. Hidden-only projects and missing, unsupported, corrupt, or undecodable entries keep the file-type icon.
 - Added shell/prefs tests for restart persistence, project/model dispatch, missing removal, corrupt project and WRL preservation; preview tests cover visible/hidden project data, all six import formats, generated raster/embedded-3MF PNGs, and fallback states.
 - The first focused test run failed because the selected Python current-project fixture intentionally marks its only object hidden. That matches the reference preview filter. The test now verifies that hidden-only fallback and generates a visible .3dp fixture for the preview-success case.
-- Final focused verification passed: cargo fmt --all -- --check; cargo test --offline --locked -p builder3d-app (90 tests); cargo clippy --offline --locked -p builder3d-app --all-targets --all-features -- -D warnings. The parity and component catalogs parsed with 139 unique feature IDs and 31 unique component IDs, and recent-row evidence/source paths exist.
+- Final focused verification passed: cargo fmt --all -- --check; cargo test --offline --locked -p modeler3d-app (90 tests); cargo clippy --offline --locked -p modeler3d-app --all-targets --all-features -- -D warnings. The parity and component catalogs parsed with 139 unique feature IDs and 31 unique component IDs, and recent-row evidence/source paths exist.
 - Native restart persistence, recent dispatch/removal/error interactions, visible tile previews, and paired Light/Dark comparison are not claimed as passed. The active Windows session has no usable foreground input window. The prior lifecycle native walkthrough remains valid; import/export and recent UI walkthroughs are pending.
 - Planned additive recovery snapshot: G:\Builder3D-Rust_snapshot_20261031-<time>_RB-03-recents. It includes Git metadata, code, tests, docs, fixtures, and evidence, excluding repository-root target/, repository-root .cache/, and reparse entries. Append copy and source/snapshot comparison receipt after verification.
 ### RB-03 recent/preview recovery snapshot receipt
@@ -2343,12 +2343,12 @@
   - evidence/rebuild/parity-matrix.toml: 103fa1116fbe7de85320dad1e2bedf04c743691456cc1879de9e1b09e3bd729e
   - evidence/rebuild/rb-03-lifecycle-and-file-completion/checkpoint.md (pre-receipt): e420104260981a9f79b9ee28bc15a40753ecdc670e64ddbeaaa93b832ae1c489
   - evidence/rebuild/rb-03-lifecycle-and-file-completion/requirement-test-map.md: adbdf38b4995662b76ff3b9129d6a34af1284fbffb813ca0c11ef7c8faec1b2e
-  - crates/builder3d-app/src/lib.rs: a15587e5e4768e46202e3748a296547b2bcc817375aedbfbb9078649ef57a5ad
-  - crates/builder3d-app/src/commands.rs: 5d8f11e5a416315f787ee7c425f592cca94e1aae16e36d9688569f713a2870ad
-  - crates/builder3d-app/src/preferences.rs: 05c69efda0d7213b5894b7d9f9199dee97239eaefd786f7005389ff0d9361bc6
-  - crates/builder3d-app/src/ui_state.rs: 56e637ea90725a5f749f8c836e53b2c3059bb45cd36e23e45c2979aff77e9096
-  - crates/builder3d-app/src/shell.rs: 2a2fa172f2b2507a9ab8c6e4b6640bcbd0bd9f6c98feb0556c15cb127a0ba375
-  - crates/builder3d-app/src/recent_preview.rs: bcf3e104d7b7528f48a249a8f6aa7e84396b4c79388aeee701c219c3b57aaf71
+  - crates/modeler3d-app/src/lib.rs: a15587e5e4768e46202e3748a296547b2bcc817375aedbfbb9078649ef57a5ad
+  - crates/modeler3d-app/src/commands.rs: 5d8f11e5a416315f787ee7c425f592cca94e1aae16e36d9688569f713a2870ad
+  - crates/modeler3d-app/src/preferences.rs: 05c69efda0d7213b5894b7d9f9199dee97239eaefd786f7005389ff0d9361bc6
+  - crates/modeler3d-app/src/ui_state.rs: 56e637ea90725a5f749f8c836e53b2c3059bb45cd36e23e45c2979aff77e9096
+  - crates/modeler3d-app/src/shell.rs: 2a2fa172f2b2507a9ab8c6e4b6640bcbd0bd9f6c98feb0556c15cb127a0ba375
+  - crates/modeler3d-app/src/recent_preview.rs: bcf3e104d7b7528f48a249a8f6aa7e84396b4c79388aeee701c219c3b57aaf71
 - This receipt and the checkpoint update postdate the immutable snapshot. They record its pre-receipt state and do not modify the snapshot.
 
 ## 2026-10-31 - RB-03 integrated verification and remaining native evidence
@@ -2365,7 +2365,7 @@
   (227 passed, 0 failed), strict workspace Clippy, `cargo deny check`, locked
   metadata generation/JSON parsing, and the release app build.
 - The exact default-target smoke command could not replace
-  `target/debug/builder3d-app.exe` because lifecycle window PID 3208 holds it
+  `target/debug/modeler3d-app.exe` because lifecycle window PID 3208 holds it
   open. The smoke passed using `target/rb03-recents-build` and reported
   `objects=2 selected=1 tabs=5`. `cargo deny` passed with a non-fatal duplicate
   `bitflags` lock-entry warning. `cargo audit` is not installed.
@@ -2373,13 +2373,13 @@
   `--workspace` is unused and analyzed only the default `r0b_mcp` executable.
   Additional bloat scans passed for every workspace binary: `r0b_mcp` 3.6 MiB
   `.text` / 4.1 MiB file, `r4_mcp` 3.8 / 4.5 MiB, `r5_viewport` 4.0 / 4.7
-  MiB, and `builder3d-app` 11.2 / 13.7 MiB.
+  MiB, and `modeler3d-app` 11.2 / 13.7 MiB.
 - Read-only Python reference tests passed: 35 project/3MF/glTF/WRL tests and
   3 focused unitless-import tests. Python 3.12.10 ran with bytecode and pytest
   cache disabled; all test temporary data remained under the Rust workspace's
   ignored `target/`, and `L:\Builder3D` stayed unchanged.
 - The updated debug executable used for the recent-preview/savepoint attempt is
-  `target/rb03-recents-build/debug/builder3d-app.exe`, SHA-256
+  `target/rb03-recents-build/debug/modeler3d-app.exe`, SHA-256
   `9d079c6c81ea7a2b28d48055cb2656167ea8f283c3355b3eddfdc579720acf5e`.
   The window remained visible, but Windows Default Lock Screen owned the
   foreground and `SetForegroundWindow` returned false. No native import,
@@ -2439,7 +2439,7 @@
   - Cargo.toml: e979ca898876a5abf5770b4ae55c7c6e4ecaa68d8bb6d695d896c87cf8d75cf2
   - Cargo.lock: 0286e32ea60066b420f2b3c103aa66844492a6aafb4465d479974e3b0444fd2b
   - WORK_LOG.md (pre-receipt): 22b4614351768e71beb502ec3fb657e1510fc47dd5e5cec7b9370cf82fe3dd8c
-  - crates/builder3d-app/src/commands.rs: 26c4cd4b23091c2f32f7e8ba508f326a4cfc8f9bf08e91dc5020adf472af6499
+  - crates/modeler3d-app/src/commands.rs: 26c4cd4b23091c2f32f7e8ba508f326a4cfc8f9bf08e91dc5020adf472af6499
   - evidence/rebuild/parity-matrix.toml: e5ec7335ba454e5023f63c4b9e0d42bb8b4b70d1b6ea533fc0b5d8d2d894ba6d
   - evidence/rebuild/rb-03-lifecycle-and-file-completion/checkpoint.md (pre-receipt): 93170e9976f8f86ee1f85a997935bc6224b2304351e135641c8feed44dfe9205
   - evidence/rebuild/rb-03-lifecycle-and-file-completion/verification.md: 2144d688a636941792c9fa325f1f79908597e332737bff29da1da02d0ea3d7f3
@@ -2461,7 +2461,7 @@
 - The old Python UI was visibly operated for New/Save As/dirty prompts, project save/open, Add/Open, unitless imports in mm/in, 3MF/glTF/GLB import, picker cancel, malformed input, the shared Export Mesh picker, successful no-selection 3MF, overwrite prompt/cancel, recent dispatch, and missing/corrupt/WRL recent errors. The old app's native picker/message-box appearance and two-column wireframe recent tiles are recorded alongside Rust's in-app dialogs and compact recent cards.
 - A second Python export-picker replay for each format was blocked when Windows locked the desktop; `GetForegroundWindow` returned 0. No input or capture was claimed while locked. Only the Python process started for the failed attempt was stopped. The original Python QSettings were restored (Light theme; no recent-files or default-import-unit key), and its Git status matches the 116-line pre-capture status baseline. The Python source remains unchanged.
 - Rust native import/unit and seven-format export journeys, selection/visibility cases, cancellation/failure handling, restart-persisted recents, previews, and recent failures were exercised. Independent verification passed for all seven output formats. The native visible saved-checkpoint undo/redo/new-branch and complete filesystem-error sequences remain partial; their focused automated coverage passes.
-- Latest integrated gates: `cargo fmt --all -- --check`, workspace check, 228 workspace tests, strict workspace Clippy, `cargo deny check`, locked metadata (five packages), isolated smoke (`objects=2 selected=1 tabs=5`), release build, and both prescribed bloat commands passed. `cargo deny` logged a duplicate `bitflags` warning. `cargo bloat --release --workspace` ignored the `--workspace` argument and analyzed `r4_mcp.exe`; app-specific bloat measured Builder3D at 11.2 MiB `.text` / 13.7 MiB file. `cargo audit --locked` is unavailable (`no such command`). Exact logs are under the RB-03 evidence folder.
+- Latest integrated gates: `cargo fmt --all -- --check`, workspace check, 228 workspace tests, strict workspace Clippy, `cargo deny check`, locked metadata (five packages), isolated smoke (`objects=2 selected=1 tabs=5`), release build, and both prescribed bloat commands passed. `cargo deny` logged a duplicate `bitflags` warning. `cargo bloat --release --workspace` ignored the `--workspace` argument and analyzed `r4_mcp.exe`; app-specific bloat measured 3D Modeler at 11.2 MiB `.text` / 13.7 MiB file. `cargo audit --locked` is unavailable (`no such command`). Exact logs are under the RB-03 evidence folder.
 - `evidence/rebuild/parity-matrix.toml` now keeps implementation/automation, native interaction, visual review, and owner acceptance distinct for 32 RB-03 rows. Visual and owner states remain pending until owner review; no visual pass is claimed. The review report and checkpoint are updated, and no RB-04 implementation started.
 - Planned additive review snapshot: `G:\Builder3D-Rust_snapshot_20261031-165222_RB-03-review`. It will include Git metadata, source, manifests, tests, docs, logs, and captures; exclude repository-root `target/`, repository-root `.cache/`, and reparse entries. Append exact copy/verification receipts after copying.
 
@@ -2477,7 +2477,7 @@
   - Cargo.toml: e979ca898876a5abf5770b4ae55c7c6e4ecaa68d8bb6d695d896c87cf8d75cf2
   - Cargo.lock: 0286e32ea60066b420f2b3c103aa66844492a6aafb4465d479974e3b0444fd2b
   - WORK_LOG.md (pre-receipt): 697e6051e45aff3d255b66a667ab25b0d456793d5a832d741cb5e957c1cae077
-  - crates/builder3d-app/src/commands.rs: 26c4cd4b23091c2f32f7e8ba508f326a4cfc8f9bf08e91dc5020adf472af6499
+  - crates/modeler3d-app/src/commands.rs: 26c4cd4b23091c2f32f7e8ba508f326a4cfc8f9bf08e91dc5020adf472af6499
   - evidence/rebuild/parity-matrix.toml: b8d4812cefafea80a9c1dca4ec4fcb6099541c828c6735bd259743e04f11ccff
   - evidence/rebuild/rb-03-lifecycle-and-file-completion/checkpoint.md (pre-receipt): c689b11b3e3db3ec1620969410a2f035ef0cda45d2d2df730465225e2ecafa66
   - evidence/rebuild/rb-03-lifecycle-and-file-completion/verification.md: f7b7027404f2299b690adeabf78497f42afeeb2ea0874ac279b05eca440266d5
@@ -2533,8 +2533,8 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/report.md`: `5e41b02096a3f0ffd854a30e8a95c0dbe5ceef82d42355c5b9a6b58ff92c19e2`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/checkpoint.md`: `97585395a82f26874aaace788b2eb1e46b8402d5d8f8acaef78b2ccd58046b92`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/verification.md`: `bd514517f4b7b2b04ec3e1ac95c20df705bf486a80abe85252ec0dbde9a986f1`
-  - `crates/builder3d-app/src/rotation.rs`: `7e93584dd28270382f13565bfaba28b6ea8b6b7789c5209aaff58c6a72d50e06`
-  - `crates/builder3d-app/src/transforms.rs`: `1e1c752d845de82c99b505baa53ff3ee0ef20347f22db7805da8712ad4ca1b73`
+  - `crates/modeler3d-app/src/rotation.rs`: `7e93584dd28270382f13565bfaba28b6ea8b6b7789c5209aaff58c6a72d50e06`
+  - `crates/modeler3d-app/src/transforms.rs`: `1e1c752d845de82c99b505baa53ff3ee0ef20347f22db7805da8712ad4ca1b73`
   - `AGENTS.md`: `79ca023e8ef8cc3d49700956dd25643d79ae57958567f221e8f0278908078d2c`
   - `Cargo.toml`: `e979ca898876a5abf5770b4ae55c7c6e4ecaa68d8bb6d695d896c87cf8d75cf2`
   - `Cargo.lock`: `0286e32ea60066b420f2b3c103aa66844492a6aafb4465d479974e3b0444fd2b`
@@ -2544,11 +2544,11 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/parity-matrix.toml`: `c1a8729cc047e6b51fd60bad83678e9735801c90ccb78b9cfd689ede7e7179eb`
   - `evidence/rebuild/rb-03-lifecycle-and-file-completion/checkpoint.md`: `e7b4cfbe204a37bf4d878ec097b159d5e9e89a66a2464b79216b541db25964cf`
   - `evidence/rebuild/rb-03-lifecycle-and-file-completion/requirement-test-map.md`: `e03765801daa74cc500f5948c15065de0e013e7398491c2f18f325cc71c875da`
-  - `crates/builder3d-core/src/project.rs`: `cbac8d8d250d1532891fc6e170a34e4cd519fcbe2c8d58e8ae66a25a43eddff7`
-  - `crates/builder3d-core/tests/project_golden.rs`: `28577b83dbe38767c3bd2722bc13a74932335d25b593ef5a1b4cd90b22752dea`
-  - `crates/builder3d-app/src/commands.rs`: `5a3e1fd6b032879cc55232284e4a522bf60f489d6ee02f7f7d501495dbf75bf1`
-  - `crates/builder3d-app/src/dialogs.rs`: `bd019a0d41dacc068c4a6b103c327e92fa37d6660f89b014728a22770289eac6`
-  - `crates/builder3d-app/src/shell.rs`: `73c5ed71c956f6c947b18e0bf1fdb2251bc3e0da8ac27269ce80a1b8966a571c`
+  - `crates/modeler3d-core/src/project.rs`: `cbac8d8d250d1532891fc6e170a34e4cd519fcbe2c8d58e8ae66a25a43eddff7`
+  - `crates/modeler3d-core/tests/project_golden.rs`: `28577b83dbe38767c3bd2722bc13a74932335d25b593ef5a1b4cd90b22752dea`
+  - `crates/modeler3d-app/src/commands.rs`: `5a3e1fd6b032879cc55232284e4a522bf60f489d6ee02f7f7d501495dbf75bf1`
+  - `crates/modeler3d-app/src/dialogs.rs`: `bd019a0d41dacc068c4a6b103c327e92fa37d6660f89b014728a22770289eac6`
+  - `crates/modeler3d-app/src/shell.rs`: `73c5ed71c956f6c947b18e0bf1fdb2251bc3e0da8ac27269ce80a1b8966a571c`
 
 The receipt postdates the immutable snapshot. Only WORK_LOG.md and the RB-04 checkpoint are expected to differ afterward.
 
@@ -2557,7 +2557,7 @@ Post-receipt comparison: 1092 included paths in each tree; no missing or extra p
 ## 2026-10-31 — RB-04 exact Settle engineering repair
 
 - Repaired and enabled the retained oracle: the first failure was the single-object case, before the group case ran. Python uses post-multiplied object rotation for a single target and world composition for groups. Rust now matches both unchanged expected matrices and both support-normal fixtures. Settle and Measure use scene order; Align/Arrange retain user anchor order.
-- Added bounded adapter-neutral placement_rotation in builder3d-core using pinned qhull-rs revision 62e810ccf93b458470f03cae6ef4df26023d2260. The released wrapper's pointer print and scaled-buffer index assertion were demonstrated only in the disposable probe; the accepted dependency removes that print and uses safe point_id lookup. Resource/nonfinite validation and the core panic boundary preserve the model on failure. No temporary-file capture is used.
+- Added bounded adapter-neutral placement_rotation in modeler3d-core using pinned qhull-rs revision 62e810ccf93b458470f03cae6ef4df26023d2260. The released wrapper's pointer print and scaled-buffer index assertion were demonstrated only in the disposable probe; the accepted dependency removes that print and uses safe point_id lookup. Resource/nonfinite validation and the core panic boundary preserve the model on failure. No temporary-file capture is used.
 - Added a verified Windows build-only libclang helper under scripts/ and docs/building.md. It uses a pinned/hash-checked wheel and DLL under ignored target/, sets only process LIBCLANG_PATH, installs nothing globally, and adds no product Python/libclang runtime dependency. Native QHull and MIT wrapper notices are included unchanged in package staging. Source Git whitelist is narrow and the dependency is revision-pinned.
 - Current gates: 239 workspace tests passed, 0 failed, 0 ignored; changed-crate strict Clippy, fmt and deny passed. Logs and exact exit codes are in settle-gate-results.json. The earlier 235-pass/one-ignored checkpoint remains a historical recovery record, not current test status.
 - Windows locked before the new Python single/group Settle Light/Dark replay; foreground was zero and no input/capture was accepted. Asked asynchronously for unlock and continued independent code work. Final Settle before/after/undo/redo captures remain pending. RB-03 pending review states and Python source remain unchanged; nothing staged or committed.
@@ -2572,7 +2572,7 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
 - Source and snapshot: 1,122 files / 165,302,826 bytes each; relative-path differences 0; size/SHA-256 differences 0; reparse entries 0 in each tree. Root target/, .cache/ and reparse entries excluded. Source, Git metadata, tests, documentation and evidence included.
 - This is an interim RB-04 recovery point, not slice completion. Continue with identity-safe grouped previews and Rotate/Resize before RB-05; native Settle replay remains pending while Windows is locked.
 - Pre-receipt recovery-critical SHA-256 values:
-  - `crates/builder3d-core/src/placement.rs`: `87c767a0e97adf72e422a340f92cb00c4a6194361128261395b4377e1218b8a6`
+  - `crates/modeler3d-core/src/placement.rs`: `87c767a0e97adf72e422a340f92cb00c4a6194361128261395b4377e1218b8a6`
   - `scripts/Initialize-BuildClang.ps1`: `73856cc160105f1a9c00bf845b14e29a3002dfdf6ba3efc5aed2742ed43a3d3f`
   - `docs/building.md`: `750a226f595466b2e5fc15f4fb453fe284c4c7f199dd9632e3e90233ec44495a`
   - `packaging/licenses/QHULL-COPYING.txt`: `106d55c931fd6a84822e5345d900273d059f1c27310d02567ccb313c5d18c55d`
@@ -2580,8 +2580,8 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/report.md`: `81ce83acf828fc25070c074d52ed342966a894111bb7a8fc077c85c7e87b4618`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/checkpoint.md`: `67c3792cb34ce5cccc07e39f37436e70ad459e5adc760fcd0569cfe58453d406`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/verification.md`: `ef02ef955e39a3611841a4a34882d99d4a43f4cc7b1a50a255cd7789bc16a74e`
-  - `crates/builder3d-app/src/rotation.rs`: `7e93584dd28270382f13565bfaba28b6ea8b6b7789c5209aaff58c6a72d50e06`
-  - `crates/builder3d-app/src/transforms.rs`: `6fd1bb2e1a6fb725921c536a4836b290626fd0f9db871f26266cda718f49a1c8`
+  - `crates/modeler3d-app/src/rotation.rs`: `7e93584dd28270382f13565bfaba28b6ea8b6b7789c5209aaff58c6a72d50e06`
+  - `crates/modeler3d-app/src/transforms.rs`: `6fd1bb2e1a6fb725921c536a4836b290626fd0f9db871f26266cda718f49a1c8`
   - `AGENTS.md`: `986ba68a9e458b5c5bc9a7c9122e4a741d3dfc5f35228b431a2bc974c7f45a1b`
   - `Cargo.toml`: `d51c5bfb69d2e0cdf88fc252d58baafc54c99a926bef7e84074a44b8154e98ba`
   - `Cargo.lock`: `9cb2d94bb7ceb84f614228b7e79b060e08e46a10253573ca424f70dbf7459f2a`
@@ -2591,11 +2591,11 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/parity-matrix.toml`: `d4223bbf399a7b0d57f2f2074fca3f1c3a2209e6b162ec1e5da0eb5541cf73bb`
   - `evidence/rebuild/rb-03-lifecycle-and-file-completion/checkpoint.md`: `e7b4cfbe204a37bf4d878ec097b159d5e9e89a66a2464b79216b541db25964cf`
   - `evidence/rebuild/rb-03-lifecycle-and-file-completion/requirement-test-map.md`: `e03765801daa74cc500f5948c15065de0e013e7398491c2f18f325cc71c875da`
-  - `crates/builder3d-core/src/project.rs`: `cbac8d8d250d1532891fc6e170a34e4cd519fcbe2c8d58e8ae66a25a43eddff7`
-  - `crates/builder3d-core/tests/project_golden.rs`: `28577b83dbe38767c3bd2722bc13a74932335d25b593ef5a1b4cd90b22752dea`
-  - `crates/builder3d-app/src/commands.rs`: `39f583c70c453b921c1a727874736f3d6f62648af2e948c748ace51a91b2735e`
-  - `crates/builder3d-app/src/dialogs.rs`: `bd019a0d41dacc068c4a6b103c327e92fa37d6660f89b014728a22770289eac6`
-  - `crates/builder3d-app/src/shell.rs`: `73c5ed71c956f6c947b18e0bf1fdb2251bc3e0da8ac27269ce80a1b8966a571c`
+  - `crates/modeler3d-core/src/project.rs`: `cbac8d8d250d1532891fc6e170a34e4cd519fcbe2c8d58e8ae66a25a43eddff7`
+  - `crates/modeler3d-core/tests/project_golden.rs`: `28577b83dbe38767c3bd2722bc13a74932335d25b593ef5a1b4cd90b22752dea`
+  - `crates/modeler3d-app/src/commands.rs`: `39f583c70c453b921c1a727874736f3d6f62648af2e948c748ace51a91b2735e`
+  - `crates/modeler3d-app/src/dialogs.rs`: `bd019a0d41dacc068c4a6b103c327e92fa37d6660f89b014728a22770289eac6`
+  - `crates/modeler3d-app/src/shell.rs`: `73c5ed71c956f6c947b18e0bf1fdb2251bc3e0da8ac27269ce80a1b8966a571c`
 
 The receipt postdates the immutable snapshot. Only WORK_LOG.md and the RB-04 checkpoint are expected to differ afterward.
 
@@ -2615,10 +2615,10 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
 - Source and snapshot: 1,139 files / 165,729,202 bytes each; relative-path differences 0; size/SHA-256 differences 0; reparse entries 0 in each tree. Root target/, .cache/ and reparse entries excluded. Source, Git metadata, tests, documentation and evidence included.
 - This is an interim RB-04 recovery point, not slice completion. Continue with mixed-selection numeric and stable selection/focus before RB-05; final native transform replay remains pending while Windows is locked.
 - Pre-receipt recovery-critical SHA-256 values:
-  - `crates/builder3d-core/src/placement.rs`: `87c767a0e97adf72e422a340f92cb00c4a6194361128261395b4377e1218b8a6`
-  - `crates/builder3d-app/src/transform_gesture.rs`: `b7bd3fee78090c11eb2362fa6a21960d4fc6dc0a36d8e32b6aa24411208a8887`
-  - `crates/builder3d-app/src/gesture_tests.rs`: `69294ee5530b8e02d68ecfbd5a99ff377424b6dbfdde991b3c964e2f2ba5942e`
-  - `crates/builder3d-viewport/src/scene.rs`: `68cd984b002793be27e19ad62596ae8c25761fcda6dc362ca0a46b430d7eac0d`
+  - `crates/modeler3d-core/src/placement.rs`: `87c767a0e97adf72e422a340f92cb00c4a6194361128261395b4377e1218b8a6`
+  - `crates/modeler3d-app/src/transform_gesture.rs`: `b7bd3fee78090c11eb2362fa6a21960d4fc6dc0a36d8e32b6aa24411208a8887`
+  - `crates/modeler3d-app/src/gesture_tests.rs`: `69294ee5530b8e02d68ecfbd5a99ff377424b6dbfdde991b3c964e2f2ba5942e`
+  - `crates/modeler3d-viewport/src/scene.rs`: `68cd984b002793be27e19ad62596ae8c25761fcda6dc362ca0a46b430d7eac0d`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/gesture-oracle.json`: `a093e6129c0ea8db88e167a0fafd8629c92ba63544ded89574e47355b57fd843`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/viewport-transforms.md`: `1c4fde4097aadcc278829cd7c36bdecd8fbeb96ce6a4867b626447245fc1b8ea`
   - `scripts/Initialize-BuildClang.ps1`: `73856cc160105f1a9c00bf845b14e29a3002dfdf6ba3efc5aed2742ed43a3d3f`
@@ -2628,8 +2628,8 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/report.md`: `dc0441b6b3183c6ec2cbb3c29b5ce0af3f1f470d900ae83f10b5af2ab8a49960`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/checkpoint.md`: `17db734f61d08f4b81f66c637b20b2ed28bae4bf343c0d120df56f46c3c8229d`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/verification.md`: `d74894148541519ac8786b2199b21fe98bdeb936efc6c4a0b333b68455371b83`
-  - `crates/builder3d-app/src/rotation.rs`: `dc9c80002d7aa507e88d48fab024158b4cb3eff0638c6f179f6fcc450aba5484`
-  - `crates/builder3d-app/src/transforms.rs`: `b9550eaf8a99e14e81d8d00653a10c636fe8c26ea17948120c9b586ce185fa79`
+  - `crates/modeler3d-app/src/rotation.rs`: `dc9c80002d7aa507e88d48fab024158b4cb3eff0638c6f179f6fcc450aba5484`
+  - `crates/modeler3d-app/src/transforms.rs`: `b9550eaf8a99e14e81d8d00653a10c636fe8c26ea17948120c9b586ce185fa79`
   - `AGENTS.md`: `986ba68a9e458b5c5bc9a7c9122e4a741d3dfc5f35228b431a2bc974c7f45a1b`
   - `Cargo.toml`: `d51c5bfb69d2e0cdf88fc252d58baafc54c99a926bef7e84074a44b8154e98ba`
   - `Cargo.lock`: `9cb2d94bb7ceb84f614228b7e79b060e08e46a10253573ca424f70dbf7459f2a`
@@ -2639,11 +2639,11 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/parity-matrix.toml`: `6a03d4586adafebe761dbdc74f3973bc71a792622bc502ca540c27cbf9b42c77`
   - `evidence/rebuild/rb-03-lifecycle-and-file-completion/checkpoint.md`: `e7b4cfbe204a37bf4d878ec097b159d5e9e89a66a2464b79216b541db25964cf`
   - `evidence/rebuild/rb-03-lifecycle-and-file-completion/requirement-test-map.md`: `e03765801daa74cc500f5948c15065de0e013e7398491c2f18f325cc71c875da`
-  - `crates/builder3d-core/src/project.rs`: `cbac8d8d250d1532891fc6e170a34e4cd519fcbe2c8d58e8ae66a25a43eddff7`
-  - `crates/builder3d-core/tests/project_golden.rs`: `28577b83dbe38767c3bd2722bc13a74932335d25b593ef5a1b4cd90b22752dea`
-  - `crates/builder3d-app/src/commands.rs`: `b4932e48fb13edd53931a515e94311c7809eaf9e62feb8c3b19b97560aa135e9`
-  - `crates/builder3d-app/src/dialogs.rs`: `bd019a0d41dacc068c4a6b103c327e92fa37d6660f89b014728a22770289eac6`
-  - `crates/builder3d-app/src/shell.rs`: `6cfcf1e9ddcfd0d555ca79b504f1e564ec3473f23ba0c236e37bf24b869a1f7d`
+  - `crates/modeler3d-core/src/project.rs`: `cbac8d8d250d1532891fc6e170a34e4cd519fcbe2c8d58e8ae66a25a43eddff7`
+  - `crates/modeler3d-core/tests/project_golden.rs`: `28577b83dbe38767c3bd2722bc13a74932335d25b593ef5a1b4cd90b22752dea`
+  - `crates/modeler3d-app/src/commands.rs`: `b4932e48fb13edd53931a515e94311c7809eaf9e62feb8c3b19b97560aa135e9`
+  - `crates/modeler3d-app/src/dialogs.rs`: `bd019a0d41dacc068c4a6b103c327e92fa37d6660f89b014728a22770289eac6`
+  - `crates/modeler3d-app/src/shell.rs`: `6cfcf1e9ddcfd0d555ca79b504f1e564ec3473f23ba0c236e37bf24b869a1f7d`
 
 The receipt postdates the immutable snapshot. Only WORK_LOG.md and the RB-04 checkpoint are expected to differ afterward.
 
@@ -2663,13 +2663,13 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
 - Source and snapshot: 1,158 files / 166,156,771 bytes each; relative-path differences 0; size/SHA-256 differences 0; reparse entries 0 in each tree. Root target/, .cache/ and reparse entries excluded. Source, Git metadata, tests, documentation and evidence included.
 - This is an interim RB-04 recovery point, not slice completion. Continue the focused grouped recent-preview audit, then integrated boundary checks and final native evidence; Windows remains locked. RB-05 has not begun.
 - Pre-receipt recovery-critical SHA-256 values:
-  - `crates/builder3d-core/src/placement.rs`: `87c767a0e97adf72e422a340f92cb00c4a6194361128261395b4377e1218b8a6`
-  - `crates/builder3d-app/src/transform_gesture.rs`: `b7bd3fee78090c11eb2362fa6a21960d4fc6dc0a36d8e32b6aa24411208a8887`
-  - `crates/builder3d-app/src/gesture_tests.rs`: `0f9116e0b2555a3aa45a4f3be5f88c030d9fa81cf50dc10f99fee06eb240074e`
+  - `crates/modeler3d-core/src/placement.rs`: `87c767a0e97adf72e422a340f92cb00c4a6194361128261395b4377e1218b8a6`
+  - `crates/modeler3d-app/src/transform_gesture.rs`: `b7bd3fee78090c11eb2362fa6a21960d4fc6dc0a36d8e32b6aa24411208a8887`
+  - `crates/modeler3d-app/src/gesture_tests.rs`: `0f9116e0b2555a3aa45a4f3be5f88c030d9fa81cf50dc10f99fee06eb240074e`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/numeric-selection.md`: `2ff3d42317e8cf6487d7767e4bc258a810216d45466f0e7efad0e58038036e37`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/numeric-selection-oracle.json`: `13f72c05c129a3f8bf4005c38f70f10c617a17009ac4c60739219abe5e114852`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/placement-oracle.json`: `4da2aa0e86abff0610caa45171f952d4d95ac44b11e869341a25e52ba368ad66`
-  - `crates/builder3d-viewport/src/scene.rs`: `68cd984b002793be27e19ad62596ae8c25761fcda6dc362ca0a46b430d7eac0d`
+  - `crates/modeler3d-viewport/src/scene.rs`: `68cd984b002793be27e19ad62596ae8c25761fcda6dc362ca0a46b430d7eac0d`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/gesture-oracle.json`: `a093e6129c0ea8db88e167a0fafd8629c92ba63544ded89574e47355b57fd843`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/viewport-transforms.md`: `1c4fde4097aadcc278829cd7c36bdecd8fbeb96ce6a4867b626447245fc1b8ea`
   - `scripts/Initialize-BuildClang.ps1`: `73856cc160105f1a9c00bf845b14e29a3002dfdf6ba3efc5aed2742ed43a3d3f`
@@ -2679,8 +2679,8 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/report.md`: `f60e34f1573fdda44b5d82a706436d613eb37d39efc62ab390ddd81daf9c592f`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/checkpoint.md`: `79643ad79afa7b907d0aa6394bc57ab27f861147eac22761acdd14e7aa84d769`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/verification.md`: `e4352b32a15367cafcc567df931cc8567a465a6f02392c7d83285a72b502f36c`
-  - `crates/builder3d-app/src/rotation.rs`: `dc9c80002d7aa507e88d48fab024158b4cb3eff0638c6f179f6fcc450aba5484`
-  - `crates/builder3d-app/src/transforms.rs`: `dcbe4eebf97af53ba391c9a5d9070713a7737a9047b5d5f7089876de4a721861`
+  - `crates/modeler3d-app/src/rotation.rs`: `dc9c80002d7aa507e88d48fab024158b4cb3eff0638c6f179f6fcc450aba5484`
+  - `crates/modeler3d-app/src/transforms.rs`: `dcbe4eebf97af53ba391c9a5d9070713a7737a9047b5d5f7089876de4a721861`
   - `AGENTS.md`: `986ba68a9e458b5c5bc9a7c9122e4a741d3dfc5f35228b431a2bc974c7f45a1b`
   - `Cargo.toml`: `d51c5bfb69d2e0cdf88fc252d58baafc54c99a926bef7e84074a44b8154e98ba`
   - `Cargo.lock`: `9cb2d94bb7ceb84f614228b7e79b060e08e46a10253573ca424f70dbf7459f2a`
@@ -2690,11 +2690,11 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/parity-matrix.toml`: `03adb39857fd17d10040255b928eabbc11f23dad34cc2ec0e9a522e0024e9306`
   - `evidence/rebuild/rb-03-lifecycle-and-file-completion/checkpoint.md`: `e7b4cfbe204a37bf4d878ec097b159d5e9e89a66a2464b79216b541db25964cf`
   - `evidence/rebuild/rb-03-lifecycle-and-file-completion/requirement-test-map.md`: `e03765801daa74cc500f5948c15065de0e013e7398491c2f18f325cc71c875da`
-  - `crates/builder3d-core/src/project.rs`: `cbac8d8d250d1532891fc6e170a34e4cd519fcbe2c8d58e8ae66a25a43eddff7`
-  - `crates/builder3d-core/tests/project_golden.rs`: `28577b83dbe38767c3bd2722bc13a74932335d25b593ef5a1b4cd90b22752dea`
-  - `crates/builder3d-app/src/commands.rs`: `83fda1cc946b4c6fbfb4c73cd6076551654c9efab013ec0c29674a9ca673e0e1`
-  - `crates/builder3d-app/src/dialogs.rs`: `bd019a0d41dacc068c4a6b103c327e92fa37d6660f89b014728a22770289eac6`
-  - `crates/builder3d-app/src/shell.rs`: `bbefe90648b096e85f2ff4b03c747e9ead9f772ba9b80b746815cf72ec5b7586`
+  - `crates/modeler3d-core/src/project.rs`: `cbac8d8d250d1532891fc6e170a34e4cd519fcbe2c8d58e8ae66a25a43eddff7`
+  - `crates/modeler3d-core/tests/project_golden.rs`: `28577b83dbe38767c3bd2722bc13a74932335d25b593ef5a1b4cd90b22752dea`
+  - `crates/modeler3d-app/src/commands.rs`: `83fda1cc946b4c6fbfb4c73cd6076551654c9efab013ec0c29674a9ca673e0e1`
+  - `crates/modeler3d-app/src/dialogs.rs`: `bd019a0d41dacc068c4a6b103c327e92fa37d6660f89b014728a22770289eac6`
+  - `crates/modeler3d-app/src/shell.rs`: `bbefe90648b096e85f2ff4b03c747e9ead9f772ba9b80b746815cf72ec5b7586`
 
 The receipt postdates the immutable snapshot. Only WORK_LOG.md and the RB-04 checkpoint are expected to differ afterward.
 
@@ -2714,15 +2714,15 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
 - Source and snapshot: 1,161 files / 166,182,342 bytes each; relative-path differences 0; size/SHA-256 differences 0; reparse entries 0 in each tree. Root target/, .cache/ and reparse entries excluded. Source, Git metadata, tests, documentation and evidence included.
 - This is an interim RB-04 recovery point, not slice completion. Continue integrated boundary checks and final native evidence; Windows remains locked. RB-05 has not begun.
 - Pre-receipt recovery-critical SHA-256 values:
-  - `crates/builder3d-core/src/placement.rs`: `87c767a0e97adf72e422a340f92cb00c4a6194361128261395b4377e1218b8a6`
-  - `crates/builder3d-app/src/transform_gesture.rs`: `b7bd3fee78090c11eb2362fa6a21960d4fc6dc0a36d8e32b6aa24411208a8887`
-  - `crates/builder3d-app/src/gesture_tests.rs`: `0f9116e0b2555a3aa45a4f3be5f88c030d9fa81cf50dc10f99fee06eb240074e`
-  - `crates/builder3d-app/src/recent_preview.rs`: `5d4afde3bc674011a77f50ff95119de000563bf3cb1ab0a7d22b8c0223166051`
+  - `crates/modeler3d-core/src/placement.rs`: `87c767a0e97adf72e422a340f92cb00c4a6194361128261395b4377e1218b8a6`
+  - `crates/modeler3d-app/src/transform_gesture.rs`: `b7bd3fee78090c11eb2362fa6a21960d4fc6dc0a36d8e32b6aa24411208a8887`
+  - `crates/modeler3d-app/src/gesture_tests.rs`: `0f9116e0b2555a3aa45a4f3be5f88c030d9fa81cf50dc10f99fee06eb240074e`
+  - `crates/modeler3d-app/src/recent_preview.rs`: `5d4afde3bc674011a77f50ff95119de000563bf3cb1ab0a7d22b8c0223166051`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/rb03-preserved-status-check.json`: `6d35b75b8a9f952b12c07a80e7e0604cd685614b38d441e35c37357e4f3bd62a`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/numeric-selection.md`: `2ff3d42317e8cf6487d7767e4bc258a810216d45466f0e7efad0e58038036e37`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/numeric-selection-oracle.json`: `13f72c05c129a3f8bf4005c38f70f10c617a17009ac4c60739219abe5e114852`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/placement-oracle.json`: `4da2aa0e86abff0610caa45171f952d4d95ac44b11e869341a25e52ba368ad66`
-  - `crates/builder3d-viewport/src/scene.rs`: `68cd984b002793be27e19ad62596ae8c25761fcda6dc362ca0a46b430d7eac0d`
+  - `crates/modeler3d-viewport/src/scene.rs`: `68cd984b002793be27e19ad62596ae8c25761fcda6dc362ca0a46b430d7eac0d`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/gesture-oracle.json`: `a093e6129c0ea8db88e167a0fafd8629c92ba63544ded89574e47355b57fd843`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/viewport-transforms.md`: `1c4fde4097aadcc278829cd7c36bdecd8fbeb96ce6a4867b626447245fc1b8ea`
   - `scripts/Initialize-BuildClang.ps1`: `73856cc160105f1a9c00bf845b14e29a3002dfdf6ba3efc5aed2742ed43a3d3f`
@@ -2732,8 +2732,8 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/report.md`: `ec0e69109c541a8dc95ebd25a6ec0ba1d97e65ee4af9ae1ccca25c327ffb35fc`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/checkpoint.md`: `576d54e48415de8454c448af7174c6b96e1b1f9a572c3255af1e22a65b5514d0`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/verification.md`: `a19d8a66c9018f26ca4b65100ffbd3c0b6433158f029aaf4228b605cc47336de`
-  - `crates/builder3d-app/src/rotation.rs`: `dc9c80002d7aa507e88d48fab024158b4cb3eff0638c6f179f6fcc450aba5484`
-  - `crates/builder3d-app/src/transforms.rs`: `dcbe4eebf97af53ba391c9a5d9070713a7737a9047b5d5f7089876de4a721861`
+  - `crates/modeler3d-app/src/rotation.rs`: `dc9c80002d7aa507e88d48fab024158b4cb3eff0638c6f179f6fcc450aba5484`
+  - `crates/modeler3d-app/src/transforms.rs`: `dcbe4eebf97af53ba391c9a5d9070713a7737a9047b5d5f7089876de4a721861`
   - `AGENTS.md`: `986ba68a9e458b5c5bc9a7c9122e4a741d3dfc5f35228b431a2bc974c7f45a1b`
   - `Cargo.toml`: `d51c5bfb69d2e0cdf88fc252d58baafc54c99a926bef7e84074a44b8154e98ba`
   - `Cargo.lock`: `9cb2d94bb7ceb84f614228b7e79b060e08e46a10253573ca424f70dbf7459f2a`
@@ -2743,11 +2743,11 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/parity-matrix.toml`: `03adb39857fd17d10040255b928eabbc11f23dad34cc2ec0e9a522e0024e9306`
   - `evidence/rebuild/rb-03-lifecycle-and-file-completion/checkpoint.md`: `e7b4cfbe204a37bf4d878ec097b159d5e9e89a66a2464b79216b541db25964cf`
   - `evidence/rebuild/rb-03-lifecycle-and-file-completion/requirement-test-map.md`: `e03765801daa74cc500f5948c15065de0e013e7398491c2f18f325cc71c875da`
-  - `crates/builder3d-core/src/project.rs`: `cbac8d8d250d1532891fc6e170a34e4cd519fcbe2c8d58e8ae66a25a43eddff7`
-  - `crates/builder3d-core/tests/project_golden.rs`: `28577b83dbe38767c3bd2722bc13a74932335d25b593ef5a1b4cd90b22752dea`
-  - `crates/builder3d-app/src/commands.rs`: `83fda1cc946b4c6fbfb4c73cd6076551654c9efab013ec0c29674a9ca673e0e1`
-  - `crates/builder3d-app/src/dialogs.rs`: `bd019a0d41dacc068c4a6b103c327e92fa37d6660f89b014728a22770289eac6`
-  - `crates/builder3d-app/src/shell.rs`: `bbefe90648b096e85f2ff4b03c747e9ead9f772ba9b80b746815cf72ec5b7586`
+  - `crates/modeler3d-core/src/project.rs`: `cbac8d8d250d1532891fc6e170a34e4cd519fcbe2c8d58e8ae66a25a43eddff7`
+  - `crates/modeler3d-core/tests/project_golden.rs`: `28577b83dbe38767c3bd2722bc13a74932335d25b593ef5a1b4cd90b22752dea`
+  - `crates/modeler3d-app/src/commands.rs`: `83fda1cc946b4c6fbfb4c73cd6076551654c9efab013ec0c29674a9ca673e0e1`
+  - `crates/modeler3d-app/src/dialogs.rs`: `bd019a0d41dacc068c4a6b103c327e92fa37d6660f89b014728a22770289eac6`
+  - `crates/modeler3d-app/src/shell.rs`: `bbefe90648b096e85f2ff4b03c747e9ead9f772ba9b80b746815cf72ec5b7586`
 
 The receipt postdates the immutable snapshot. Only WORK_LOG.md and the RB-04 checkpoint are expected to differ afterward.
 
@@ -2785,10 +2785,10 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
 - Source and snapshot: 1,237 files / 173,413,983 bytes each; relative-path differences 0; size/SHA-256 differences 0; reparse entries 0 in each tree. Root target/, .cache/ and reparse entries excluded. Source, Git metadata, tests, documentation and evidence included.
 - This is an interim RB-04 recovery point, not slice completion. Native Settle is verified; Windows is unlocked. Continue the remaining full RB-04 native transform/scene/focus evidence before RB-05.
 - Pre-receipt recovery-critical SHA-256 values:
-  - `crates/builder3d-core/src/placement.rs`: `87c767a0e97adf72e422a340f92cb00c4a6194361128261395b4377e1218b8a6`
-  - `crates/builder3d-app/src/transform_gesture.rs`: `ea55e0dc69e5bce2807271f2b89b5dbbde4e7638f4490447baabc275b52f7b50`
-  - `crates/builder3d-app/src/gesture_tests.rs`: `fd4f0e70b65dcc9c1c0aaa45e8479e7d3372b9738366395d7172544237e2dc93`
-  - `crates/builder3d-app/src/recent_preview.rs`: `5d4afde3bc674011a77f50ff95119de000563bf3cb1ab0a7d22b8c0223166051`
+  - `crates/modeler3d-core/src/placement.rs`: `87c767a0e97adf72e422a340f92cb00c4a6194361128261395b4377e1218b8a6`
+  - `crates/modeler3d-app/src/transform_gesture.rs`: `ea55e0dc69e5bce2807271f2b89b5dbbde4e7638f4490447baabc275b52f7b50`
+  - `crates/modeler3d-app/src/gesture_tests.rs`: `fd4f0e70b65dcc9c1c0aaa45e8479e7d3372b9738366395d7172544237e2dc93`
+  - `crates/modeler3d-app/src/recent_preview.rs`: `5d4afde3bc674011a77f50ff95119de000563bf3cb1ab0a7d22b8c0223166051`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/native-settle-verification.json`: `8be55d25bfbcbe6a124c4e39ee75dafd60df2aac8a335dc4c7ec138037f3bcd2`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/python-settle-results.json`: `b4d32acb5cf8af18bb458db7dd52e0865b02301deb3b342b64df59715c8c3e96`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/native_desktop_guard.py`: `ab64c435ba857d1c415dd3eb56292f0600b26a66cd8c99fc91d23eaff8dd1ad0`
@@ -2797,7 +2797,7 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/numeric-selection.md`: `e7a1f4bd2b897ebd72f92a0d627fd9df91597ef838966de34bc78bc80f2585ad`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/numeric-selection-oracle.json`: `13f72c05c129a3f8bf4005c38f70f10c617a17009ac4c60739219abe5e114852`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/placement-oracle.json`: `4da2aa0e86abff0610caa45171f952d4d95ac44b11e869341a25e52ba368ad66`
-  - `crates/builder3d-viewport/src/scene.rs`: `68cd984b002793be27e19ad62596ae8c25761fcda6dc362ca0a46b430d7eac0d`
+  - `crates/modeler3d-viewport/src/scene.rs`: `68cd984b002793be27e19ad62596ae8c25761fcda6dc362ca0a46b430d7eac0d`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/gesture-oracle.json`: `a093e6129c0ea8db88e167a0fafd8629c92ba63544ded89574e47355b57fd843`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/viewport-transforms.md`: `f34082f746b68512e9393889e807292638d848063af0d317e3d174bc1f90b3d6`
   - `scripts/Initialize-BuildClang.ps1`: `73856cc160105f1a9c00bf845b14e29a3002dfdf6ba3efc5aed2742ed43a3d3f`
@@ -2807,8 +2807,8 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/report.md`: `42089fb0f16d830925835315515505e899c029a91d864329fc183f5e7380e509`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/checkpoint.md`: `01bf81388b59918354195a62b7178662d51c09a8195d152a3b06ed331ff949df`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/verification.md`: `1f8cec516f1655e3bbe9f869e9e4ce1196412bc43c5e698e1f10ca1e308405b7`
-  - `crates/builder3d-app/src/rotation.rs`: `dc9c80002d7aa507e88d48fab024158b4cb3eff0638c6f179f6fcc450aba5484`
-  - `crates/builder3d-app/src/transforms.rs`: `dcbe4eebf97af53ba391c9a5d9070713a7737a9047b5d5f7089876de4a721861`
+  - `crates/modeler3d-app/src/rotation.rs`: `dc9c80002d7aa507e88d48fab024158b4cb3eff0638c6f179f6fcc450aba5484`
+  - `crates/modeler3d-app/src/transforms.rs`: `dcbe4eebf97af53ba391c9a5d9070713a7737a9047b5d5f7089876de4a721861`
   - `AGENTS.md`: `986ba68a9e458b5c5bc9a7c9122e4a741d3dfc5f35228b431a2bc974c7f45a1b`
   - `Cargo.toml`: `d51c5bfb69d2e0cdf88fc252d58baafc54c99a926bef7e84074a44b8154e98ba`
   - `Cargo.lock`: `9cb2d94bb7ceb84f614228b7e79b060e08e46a10253573ca424f70dbf7459f2a`
@@ -2818,11 +2818,11 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/parity-matrix.toml`: `88af89d940f22db9e8a939f2c93e3c34aac864257e6fbf73f3a3c0cb33df6384`
   - `evidence/rebuild/rb-03-lifecycle-and-file-completion/checkpoint.md`: `e7b4cfbe204a37bf4d878ec097b159d5e9e89a66a2464b79216b541db25964cf`
   - `evidence/rebuild/rb-03-lifecycle-and-file-completion/requirement-test-map.md`: `e03765801daa74cc500f5948c15065de0e013e7398491c2f18f325cc71c875da`
-  - `crates/builder3d-core/src/project.rs`: `cbac8d8d250d1532891fc6e170a34e4cd519fcbe2c8d58e8ae66a25a43eddff7`
-  - `crates/builder3d-core/tests/project_golden.rs`: `28577b83dbe38767c3bd2722bc13a74932335d25b593ef5a1b4cd90b22752dea`
-  - `crates/builder3d-app/src/commands.rs`: `f095c3fd5f92c2858341fdff111cdde83f544c7cd808fb86556b2511f07aab9f`
-  - `crates/builder3d-app/src/dialogs.rs`: `bd019a0d41dacc068c4a6b103c327e92fa37d6660f89b014728a22770289eac6`
-  - `crates/builder3d-app/src/shell.rs`: `4ff26703670e3deae24ae122c151b6b8fd427882be1f9d222abe74c5ddfb3c99`
+  - `crates/modeler3d-core/src/project.rs`: `cbac8d8d250d1532891fc6e170a34e4cd519fcbe2c8d58e8ae66a25a43eddff7`
+  - `crates/modeler3d-core/tests/project_golden.rs`: `28577b83dbe38767c3bd2722bc13a74932335d25b593ef5a1b4cd90b22752dea`
+  - `crates/modeler3d-app/src/commands.rs`: `f095c3fd5f92c2858341fdff111cdde83f544c7cd808fb86556b2511f07aab9f`
+  - `crates/modeler3d-app/src/dialogs.rs`: `bd019a0d41dacc068c4a6b103c327e92fa37d6660f89b014728a22770289eac6`
+  - `crates/modeler3d-app/src/shell.rs`: `4ff26703670e3deae24ae122c151b6b8fd427882be1f9d222abe74c5ddfb3c99`
 
 The receipt postdates the immutable snapshot. Only WORK_LOG.md and the RB-04 checkpoint are expected to differ afterward.
 
@@ -2839,10 +2839,10 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
 - Source and snapshot: 1,413 files / 192,760,764 bytes each; relative-path differences 0; size/SHA-256 differences 0; reparse entries 0 in each tree. Root target/, .cache/ and reparse entries excluded. Source, Git metadata, tests, documentation and evidence included.
 - This is an interim RB-04 recovery point, not slice completion. Native Settle and initial Move/Rotate saved results are verified; inch untouched-axis precision is repaired. Windows is unlocked. Continue the remaining full RB-04 native transform/scene/focus evidence before RB-05.
 - Pre-receipt recovery-critical SHA-256 values:
-  - `crates/builder3d-core/src/placement.rs`: `87c767a0e97adf72e422a340f92cb00c4a6194361128261395b4377e1218b8a6`
-  - `crates/builder3d-app/src/transform_gesture.rs`: `128d0a8f5033ce4df1875d5c1dc84c63731650ae8f1d5b902b2d3d54f510e3bc`
-  - `crates/builder3d-app/src/gesture_tests.rs`: `fd4f0e70b65dcc9c1c0aaa45e8479e7d3372b9738366395d7172544237e2dc93`
-  - `crates/builder3d-app/src/recent_preview.rs`: `5d4afde3bc674011a77f50ff95119de000563bf3cb1ab0a7d22b8c0223166051`
+  - `crates/modeler3d-core/src/placement.rs`: `87c767a0e97adf72e422a340f92cb00c4a6194361128261395b4377e1218b8a6`
+  - `crates/modeler3d-app/src/transform_gesture.rs`: `128d0a8f5033ce4df1875d5c1dc84c63731650ae8f1d5b902b2d3d54f510e3bc`
+  - `crates/modeler3d-app/src/gesture_tests.rs`: `fd4f0e70b65dcc9c1c0aaa45e8479e7d3372b9738366395d7172544237e2dc93`
+  - `crates/modeler3d-app/src/recent_preview.rs`: `5d4afde3bc674011a77f50ff95119de000563bf3cb1ab0a7d22b8c0223166051`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/native-settle-verification.json`: `8be55d25bfbcbe6a124c4e39ee75dafd60df2aac8a335dc4c7ec138037f3bcd2`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/python-settle-results.json`: `b4d32acb5cf8af18bb458db7dd52e0865b02301deb3b342b64df59715c8c3e96`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/native_desktop_guard.py`: `ab64c435ba857d1c415dd3eb56292f0600b26a66cd8c99fc91d23eaff8dd1ad0`
@@ -2851,7 +2851,7 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/numeric-selection.md`: `e7a1f4bd2b897ebd72f92a0d627fd9df91597ef838966de34bc78bc80f2585ad`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/numeric-selection-oracle.json`: `13f72c05c129a3f8bf4005c38f70f10c617a17009ac4c60739219abe5e114852`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/placement-oracle.json`: `4da2aa0e86abff0610caa45171f952d4d95ac44b11e869341a25e52ba368ad66`
-  - `crates/builder3d-viewport/src/scene.rs`: `68cd984b002793be27e19ad62596ae8c25761fcda6dc362ca0a46b430d7eac0d`
+  - `crates/modeler3d-viewport/src/scene.rs`: `68cd984b002793be27e19ad62596ae8c25761fcda6dc362ca0a46b430d7eac0d`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/gesture-oracle.json`: `a093e6129c0ea8db88e167a0fafd8629c92ba63544ded89574e47355b57fd843`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/viewport-transforms.md`: `f34082f746b68512e9393889e807292638d848063af0d317e3d174bc1f90b3d6`
   - `scripts/Initialize-BuildClang.ps1`: `73856cc160105f1a9c00bf845b14e29a3002dfdf6ba3efc5aed2742ed43a3d3f`
@@ -2861,8 +2861,8 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/report.md`: `42089fb0f16d830925835315515505e899c029a91d864329fc183f5e7380e509`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/checkpoint.md`: `e6eb0b3f2fdf502e32fff4d9df19eeb047781f356d0ae13671308b2c19cad50e`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/verification.md`: `1f8cec516f1655e3bbe9f869e9e4ce1196412bc43c5e698e1f10ca1e308405b7`
-  - `crates/builder3d-app/src/rotation.rs`: `dc9c80002d7aa507e88d48fab024158b4cb3eff0638c6f179f6fcc450aba5484`
-  - `crates/builder3d-app/src/transforms.rs`: `dcbe4eebf97af53ba391c9a5d9070713a7737a9047b5d5f7089876de4a721861`
+  - `crates/modeler3d-app/src/rotation.rs`: `dc9c80002d7aa507e88d48fab024158b4cb3eff0638c6f179f6fcc450aba5484`
+  - `crates/modeler3d-app/src/transforms.rs`: `dcbe4eebf97af53ba391c9a5d9070713a7737a9047b5d5f7089876de4a721861`
   - `AGENTS.md`: `986ba68a9e458b5c5bc9a7c9122e4a741d3dfc5f35228b431a2bc974c7f45a1b`
   - `Cargo.toml`: `d51c5bfb69d2e0cdf88fc252d58baafc54c99a926bef7e84074a44b8154e98ba`
   - `Cargo.lock`: `9cb2d94bb7ceb84f614228b7e79b060e08e46a10253573ca424f70dbf7459f2a`
@@ -2872,11 +2872,11 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/parity-matrix.toml`: `88af89d940f22db9e8a939f2c93e3c34aac864257e6fbf73f3a3c0cb33df6384`
   - `evidence/rebuild/rb-03-lifecycle-and-file-completion/checkpoint.md`: `e7b4cfbe204a37bf4d878ec097b159d5e9e89a66a2464b79216b541db25964cf`
   - `evidence/rebuild/rb-03-lifecycle-and-file-completion/requirement-test-map.md`: `e03765801daa74cc500f5948c15065de0e013e7398491c2f18f325cc71c875da`
-  - `crates/builder3d-core/src/project.rs`: `cbac8d8d250d1532891fc6e170a34e4cd519fcbe2c8d58e8ae66a25a43eddff7`
-  - `crates/builder3d-core/tests/project_golden.rs`: `28577b83dbe38767c3bd2722bc13a74932335d25b593ef5a1b4cd90b22752dea`
-  - `crates/builder3d-app/src/commands.rs`: `f095c3fd5f92c2858341fdff111cdde83f544c7cd808fb86556b2511f07aab9f`
-  - `crates/builder3d-app/src/dialogs.rs`: `bd019a0d41dacc068c4a6b103c327e92fa37d6660f89b014728a22770289eac6`
-  - `crates/builder3d-app/src/shell.rs`: `9b272d4c76385b45ce24220f540dbbbfff9134867b729e9b28ef1819f419e350`
+  - `crates/modeler3d-core/src/project.rs`: `cbac8d8d250d1532891fc6e170a34e4cd519fcbe2c8d58e8ae66a25a43eddff7`
+  - `crates/modeler3d-core/tests/project_golden.rs`: `28577b83dbe38767c3bd2722bc13a74932335d25b593ef5a1b4cd90b22752dea`
+  - `crates/modeler3d-app/src/commands.rs`: `f095c3fd5f92c2858341fdff111cdde83f544c7cd808fb86556b2511f07aab9f`
+  - `crates/modeler3d-app/src/dialogs.rs`: `bd019a0d41dacc068c4a6b103c327e92fa37d6660f89b014728a22770289eac6`
+  - `crates/modeler3d-app/src/shell.rs`: `9b272d4c76385b45ce24220f540dbbbfff9134867b729e9b28ef1819f419e350`
 
 The receipt postdates the immutable snapshot. Only WORK_LOG.md and the RB-04 checkpoint are expected to differ afterward.
 
@@ -2893,10 +2893,10 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
 - Source and snapshot: 1,532 files / 208,234,310 bytes each; relative-path differences 0; size/SHA-256 differences 0; reparse entries 0 in each tree. Root target/, .cache/ and reparse entries excluded. Source, Git metadata, tests, documentation and evidence included.
 - This is an interim RB-04 recovery point, not slice completion. Native Settle and all22 viewport and current Settle saved results are verified; inch untouched-axis precision is repaired. Windows is unlocked. Continue the remaining full RB-04 native transform/scene/focus evidence before RB-05.
 - Pre-receipt recovery-critical SHA-256 values:
-  - `crates/builder3d-core/src/placement.rs`: `87c767a0e97adf72e422a340f92cb00c4a6194361128261395b4377e1218b8a6`
-  - `crates/builder3d-app/src/transform_gesture.rs`: `128d0a8f5033ce4df1875d5c1dc84c63731650ae8f1d5b902b2d3d54f510e3bc`
-  - `crates/builder3d-app/src/gesture_tests.rs`: `fd4f0e70b65dcc9c1c0aaa45e8479e7d3372b9738366395d7172544237e2dc93`
-  - `crates/builder3d-app/src/recent_preview.rs`: `5d4afde3bc674011a77f50ff95119de000563bf3cb1ab0a7d22b8c0223166051`
+  - `crates/modeler3d-core/src/placement.rs`: `87c767a0e97adf72e422a340f92cb00c4a6194361128261395b4377e1218b8a6`
+  - `crates/modeler3d-app/src/transform_gesture.rs`: `128d0a8f5033ce4df1875d5c1dc84c63731650ae8f1d5b902b2d3d54f510e3bc`
+  - `crates/modeler3d-app/src/gesture_tests.rs`: `fd4f0e70b65dcc9c1c0aaa45e8479e7d3372b9738366395d7172544237e2dc93`
+  - `crates/modeler3d-app/src/recent_preview.rs`: `5d4afde3bc674011a77f50ff95119de000563bf3cb1ab0a7d22b8c0223166051`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/native-settle-verification.json`: `6aeaf2e2c80392ccfd60869b54696db8940a1d34cf49f4dd945998a7b0005a2a`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/python-settle-results.json`: `b4d32acb5cf8af18bb458db7dd52e0865b02301deb3b342b64df59715c8c3e96`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/native_desktop_guard.py`: `ab64c435ba857d1c415dd3eb56292f0600b26a66cd8c99fc91d23eaff8dd1ad0`
@@ -2905,7 +2905,7 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/numeric-selection.md`: `e7a1f4bd2b897ebd72f92a0d627fd9df91597ef838966de34bc78bc80f2585ad`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/numeric-selection-oracle.json`: `13f72c05c129a3f8bf4005c38f70f10c617a17009ac4c60739219abe5e114852`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/placement-oracle.json`: `4da2aa0e86abff0610caa45171f952d4d95ac44b11e869341a25e52ba368ad66`
-  - `crates/builder3d-viewport/src/scene.rs`: `68cd984b002793be27e19ad62596ae8c25761fcda6dc362ca0a46b430d7eac0d`
+  - `crates/modeler3d-viewport/src/scene.rs`: `68cd984b002793be27e19ad62596ae8c25761fcda6dc362ca0a46b430d7eac0d`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/gesture-oracle.json`: `a093e6129c0ea8db88e167a0fafd8629c92ba63544ded89574e47355b57fd843`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/viewport-transforms.md`: `f34082f746b68512e9393889e807292638d848063af0d317e3d174bc1f90b3d6`
   - `scripts/Initialize-BuildClang.ps1`: `73856cc160105f1a9c00bf845b14e29a3002dfdf6ba3efc5aed2742ed43a3d3f`
@@ -2915,8 +2915,8 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/report.md`: `42089fb0f16d830925835315515505e899c029a91d864329fc183f5e7380e509`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/checkpoint.md`: `015781a6cd60a6e5d211073fb82260bb9951ece631c4e1a3b6738ecd971c7bd4`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/verification.md`: `1f8cec516f1655e3bbe9f869e9e4ce1196412bc43c5e698e1f10ca1e308405b7`
-  - `crates/builder3d-app/src/rotation.rs`: `dc9c80002d7aa507e88d48fab024158b4cb3eff0638c6f179f6fcc450aba5484`
-  - `crates/builder3d-app/src/transforms.rs`: `dcbe4eebf97af53ba391c9a5d9070713a7737a9047b5d5f7089876de4a721861`
+  - `crates/modeler3d-app/src/rotation.rs`: `dc9c80002d7aa507e88d48fab024158b4cb3eff0638c6f179f6fcc450aba5484`
+  - `crates/modeler3d-app/src/transforms.rs`: `dcbe4eebf97af53ba391c9a5d9070713a7737a9047b5d5f7089876de4a721861`
   - `AGENTS.md`: `986ba68a9e458b5c5bc9a7c9122e4a741d3dfc5f35228b431a2bc974c7f45a1b`
   - `Cargo.toml`: `d51c5bfb69d2e0cdf88fc252d58baafc54c99a926bef7e84074a44b8154e98ba`
   - `Cargo.lock`: `9cb2d94bb7ceb84f614228b7e79b060e08e46a10253573ca424f70dbf7459f2a`
@@ -2926,11 +2926,11 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/parity-matrix.toml`: `88af89d940f22db9e8a939f2c93e3c34aac864257e6fbf73f3a3c0cb33df6384`
   - `evidence/rebuild/rb-03-lifecycle-and-file-completion/checkpoint.md`: `e7b4cfbe204a37bf4d878ec097b159d5e9e89a66a2464b79216b541db25964cf`
   - `evidence/rebuild/rb-03-lifecycle-and-file-completion/requirement-test-map.md`: `e03765801daa74cc500f5948c15065de0e013e7398491c2f18f325cc71c875da`
-  - `crates/builder3d-core/src/project.rs`: `cbac8d8d250d1532891fc6e170a34e4cd519fcbe2c8d58e8ae66a25a43eddff7`
-  - `crates/builder3d-core/tests/project_golden.rs`: `28577b83dbe38767c3bd2722bc13a74932335d25b593ef5a1b4cd90b22752dea`
-  - `crates/builder3d-app/src/commands.rs`: `f095c3fd5f92c2858341fdff111cdde83f544c7cd808fb86556b2511f07aab9f`
-  - `crates/builder3d-app/src/dialogs.rs`: `bd019a0d41dacc068c4a6b103c327e92fa37d6660f89b014728a22770289eac6`
-  - `crates/builder3d-app/src/shell.rs`: `9b272d4c76385b45ce24220f540dbbbfff9134867b729e9b28ef1819f419e350`
+  - `crates/modeler3d-core/src/project.rs`: `cbac8d8d250d1532891fc6e170a34e4cd519fcbe2c8d58e8ae66a25a43eddff7`
+  - `crates/modeler3d-core/tests/project_golden.rs`: `28577b83dbe38767c3bd2722bc13a74932335d25b593ef5a1b4cd90b22752dea`
+  - `crates/modeler3d-app/src/commands.rs`: `f095c3fd5f92c2858341fdff111cdde83f544c7cd808fb86556b2511f07aab9f`
+  - `crates/modeler3d-app/src/dialogs.rs`: `bd019a0d41dacc068c4a6b103c327e92fa37d6660f89b014728a22770289eac6`
+  - `crates/modeler3d-app/src/shell.rs`: `9b272d4c76385b45ce24220f540dbbbfff9134867b729e9b28ef1819f419e350`
 
 The receipt postdates the immutable snapshot. Only WORK_LOG.md and the RB-04 checkpoint are expected to differ afterward.
 
@@ -2947,10 +2947,10 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
 - Source and snapshot: 1,953 files / 248,474,302 bytes each; relative-path differences 0; size/SHA-256 differences 0; reparse entries 0 in each tree. Root target/, .cache/ and reparse entries excluded. Source, Git metadata, tests, documentation and evidence included.
 - This is an interim RB-04 recovery point, not slice completion. Native transforms and all74 expanded reference scene results are verified; corresponding Rust scene replay is next. Windows is unlocked. Continue the remaining full RB-04 native transform/scene/focus evidence before RB-05.
 - Pre-receipt recovery-critical SHA-256 values:
-  - `crates/builder3d-core/src/placement.rs`: `87c767a0e97adf72e422a340f92cb00c4a6194361128261395b4377e1218b8a6`
-  - `crates/builder3d-app/src/transform_gesture.rs`: `128d0a8f5033ce4df1875d5c1dc84c63731650ae8f1d5b902b2d3d54f510e3bc`
-  - `crates/builder3d-app/src/gesture_tests.rs`: `fd4f0e70b65dcc9c1c0aaa45e8479e7d3372b9738366395d7172544237e2dc93`
-  - `crates/builder3d-app/src/recent_preview.rs`: `5d4afde3bc674011a77f50ff95119de000563bf3cb1ab0a7d22b8c0223166051`
+  - `crates/modeler3d-core/src/placement.rs`: `87c767a0e97adf72e422a340f92cb00c4a6194361128261395b4377e1218b8a6`
+  - `crates/modeler3d-app/src/transform_gesture.rs`: `128d0a8f5033ce4df1875d5c1dc84c63731650ae8f1d5b902b2d3d54f510e3bc`
+  - `crates/modeler3d-app/src/gesture_tests.rs`: `fd4f0e70b65dcc9c1c0aaa45e8479e7d3372b9738366395d7172544237e2dc93`
+  - `crates/modeler3d-app/src/recent_preview.rs`: `5d4afde3bc674011a77f50ff95119de000563bf3cb1ab0a7d22b8c0223166051`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/native-settle-verification.json`: `6aeaf2e2c80392ccfd60869b54696db8940a1d34cf49f4dd945998a7b0005a2a`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/python-settle-results.json`: `b4d32acb5cf8af18bb458db7dd52e0865b02301deb3b342b64df59715c8c3e96`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/native_desktop_guard.py`: `ab64c435ba857d1c415dd3eb56292f0600b26a66cd8c99fc91d23eaff8dd1ad0`
@@ -2959,7 +2959,7 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/numeric-selection.md`: `e7a1f4bd2b897ebd72f92a0d627fd9df91597ef838966de34bc78bc80f2585ad`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/numeric-selection-oracle.json`: `13f72c05c129a3f8bf4005c38f70f10c617a17009ac4c60739219abe5e114852`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/placement-oracle.json`: `4da2aa0e86abff0610caa45171f952d4d95ac44b11e869341a25e52ba368ad66`
-  - `crates/builder3d-viewport/src/scene.rs`: `68cd984b002793be27e19ad62596ae8c25761fcda6dc362ca0a46b430d7eac0d`
+  - `crates/modeler3d-viewport/src/scene.rs`: `68cd984b002793be27e19ad62596ae8c25761fcda6dc362ca0a46b430d7eac0d`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/gesture-oracle.json`: `a093e6129c0ea8db88e167a0fafd8629c92ba63544ded89574e47355b57fd843`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/viewport-transforms.md`: `f34082f746b68512e9393889e807292638d848063af0d317e3d174bc1f90b3d6`
   - `scripts/Initialize-BuildClang.ps1`: `73856cc160105f1a9c00bf845b14e29a3002dfdf6ba3efc5aed2742ed43a3d3f`
@@ -2969,8 +2969,8 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/report.md`: `42089fb0f16d830925835315515505e899c029a91d864329fc183f5e7380e509`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/checkpoint.md`: `4db6cbd0938f3cd65ac36a3401e889880251e6ee830c7fcff0fc722d2e618818`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/verification.md`: `1f8cec516f1655e3bbe9f869e9e4ce1196412bc43c5e698e1f10ca1e308405b7`
-  - `crates/builder3d-app/src/rotation.rs`: `dc9c80002d7aa507e88d48fab024158b4cb3eff0638c6f179f6fcc450aba5484`
-  - `crates/builder3d-app/src/transforms.rs`: `dcbe4eebf97af53ba391c9a5d9070713a7737a9047b5d5f7089876de4a721861`
+  - `crates/modeler3d-app/src/rotation.rs`: `dc9c80002d7aa507e88d48fab024158b4cb3eff0638c6f179f6fcc450aba5484`
+  - `crates/modeler3d-app/src/transforms.rs`: `dcbe4eebf97af53ba391c9a5d9070713a7737a9047b5d5f7089876de4a721861`
   - `AGENTS.md`: `986ba68a9e458b5c5bc9a7c9122e4a741d3dfc5f35228b431a2bc974c7f45a1b`
   - `Cargo.toml`: `d51c5bfb69d2e0cdf88fc252d58baafc54c99a926bef7e84074a44b8154e98ba`
   - `Cargo.lock`: `9cb2d94bb7ceb84f614228b7e79b060e08e46a10253573ca424f70dbf7459f2a`
@@ -2980,11 +2980,11 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/parity-matrix.toml`: `88af89d940f22db9e8a939f2c93e3c34aac864257e6fbf73f3a3c0cb33df6384`
   - `evidence/rebuild/rb-03-lifecycle-and-file-completion/checkpoint.md`: `e7b4cfbe204a37bf4d878ec097b159d5e9e89a66a2464b79216b541db25964cf`
   - `evidence/rebuild/rb-03-lifecycle-and-file-completion/requirement-test-map.md`: `e03765801daa74cc500f5948c15065de0e013e7398491c2f18f325cc71c875da`
-  - `crates/builder3d-core/src/project.rs`: `cbac8d8d250d1532891fc6e170a34e4cd519fcbe2c8d58e8ae66a25a43eddff7`
-  - `crates/builder3d-core/tests/project_golden.rs`: `28577b83dbe38767c3bd2722bc13a74932335d25b593ef5a1b4cd90b22752dea`
-  - `crates/builder3d-app/src/commands.rs`: `f095c3fd5f92c2858341fdff111cdde83f544c7cd808fb86556b2511f07aab9f`
-  - `crates/builder3d-app/src/dialogs.rs`: `bd019a0d41dacc068c4a6b103c327e92fa37d6660f89b014728a22770289eac6`
-  - `crates/builder3d-app/src/shell.rs`: `9b272d4c76385b45ce24220f540dbbbfff9134867b729e9b28ef1819f419e350`
+  - `crates/modeler3d-core/src/project.rs`: `cbac8d8d250d1532891fc6e170a34e4cd519fcbe2c8d58e8ae66a25a43eddff7`
+  - `crates/modeler3d-core/tests/project_golden.rs`: `28577b83dbe38767c3bd2722bc13a74932335d25b593ef5a1b4cd90b22752dea`
+  - `crates/modeler3d-app/src/commands.rs`: `f095c3fd5f92c2858341fdff111cdde83f544c7cd808fb86556b2511f07aab9f`
+  - `crates/modeler3d-app/src/dialogs.rs`: `bd019a0d41dacc068c4a6b103c327e92fa37d6660f89b014728a22770289eac6`
+  - `crates/modeler3d-app/src/shell.rs`: `9b272d4c76385b45ce24220f540dbbbfff9134867b729e9b28ef1819f419e350`
 
 The receipt postdates the immutable snapshot. Only WORK_LOG.md and the RB-04 checkpoint are expected to differ afterward.
 
@@ -3001,10 +3001,10 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
 - Source and snapshot: 1,982 files / 253,458,359 bytes each; relative-path differences 0; size/SHA-256 differences 0; reparse entries 0 in each tree. Root target/, .cache/ and reparse entries excluded. Source, Git metadata, tests, documentation and evidence included.
 - This is an interim RB-04 recovery point, not slice completion. Native transforms and all74 expanded reference scene results are verified; corresponding Rust scene replay is next. Windows is unlocked. Continue the remaining full RB-04 native transform/scene/focus evidence before RB-05.
 - Pre-receipt recovery-critical SHA-256 values:
-  - `crates/builder3d-core/src/placement.rs`: `87c767a0e97adf72e422a340f92cb00c4a6194361128261395b4377e1218b8a6`
-  - `crates/builder3d-app/src/transform_gesture.rs`: `128d0a8f5033ce4df1875d5c1dc84c63731650ae8f1d5b902b2d3d54f510e3bc`
-  - `crates/builder3d-app/src/gesture_tests.rs`: `fd4f0e70b65dcc9c1c0aaa45e8479e7d3372b9738366395d7172544237e2dc93`
-  - `crates/builder3d-app/src/recent_preview.rs`: `5d4afde3bc674011a77f50ff95119de000563bf3cb1ab0a7d22b8c0223166051`
+  - `crates/modeler3d-core/src/placement.rs`: `87c767a0e97adf72e422a340f92cb00c4a6194361128261395b4377e1218b8a6`
+  - `crates/modeler3d-app/src/transform_gesture.rs`: `128d0a8f5033ce4df1875d5c1dc84c63731650ae8f1d5b902b2d3d54f510e3bc`
+  - `crates/modeler3d-app/src/gesture_tests.rs`: `fd4f0e70b65dcc9c1c0aaa45e8479e7d3372b9738366395d7172544237e2dc93`
+  - `crates/modeler3d-app/src/recent_preview.rs`: `5d4afde3bc674011a77f50ff95119de000563bf3cb1ab0a7d22b8c0223166051`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/native-settle-verification.json`: `6aeaf2e2c80392ccfd60869b54696db8940a1d34cf49f4dd945998a7b0005a2a`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/python-settle-results.json`: `b4d32acb5cf8af18bb458db7dd52e0865b02301deb3b342b64df59715c8c3e96`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/native_desktop_guard.py`: `ab64c435ba857d1c415dd3eb56292f0600b26a66cd8c99fc91d23eaff8dd1ad0`
@@ -3013,7 +3013,7 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/numeric-selection.md`: `e7a1f4bd2b897ebd72f92a0d627fd9df91597ef838966de34bc78bc80f2585ad`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/numeric-selection-oracle.json`: `13f72c05c129a3f8bf4005c38f70f10c617a17009ac4c60739219abe5e114852`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/placement-oracle.json`: `4da2aa0e86abff0610caa45171f952d4d95ac44b11e869341a25e52ba368ad66`
-  - `crates/builder3d-viewport/src/scene.rs`: `68cd984b002793be27e19ad62596ae8c25761fcda6dc362ca0a46b430d7eac0d`
+  - `crates/modeler3d-viewport/src/scene.rs`: `68cd984b002793be27e19ad62596ae8c25761fcda6dc362ca0a46b430d7eac0d`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/gesture-oracle.json`: `a093e6129c0ea8db88e167a0fafd8629c92ba63544ded89574e47355b57fd843`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/viewport-transforms.md`: `f34082f746b68512e9393889e807292638d848063af0d317e3d174bc1f90b3d6`
   - `scripts/Initialize-BuildClang.ps1`: `73856cc160105f1a9c00bf845b14e29a3002dfdf6ba3efc5aed2742ed43a3d3f`
@@ -3023,8 +3023,8 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/report.md`: `42089fb0f16d830925835315515505e899c029a91d864329fc183f5e7380e509`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/checkpoint.md`: `b23852a5ed2484f345dd8ed1afdbbaf27c0c5b7de60654007a598b139f0fcd5a`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/verification.md`: `1f8cec516f1655e3bbe9f869e9e4ce1196412bc43c5e698e1f10ca1e308405b7`
-  - `crates/builder3d-app/src/rotation.rs`: `dc9c80002d7aa507e88d48fab024158b4cb3eff0638c6f179f6fcc450aba5484`
-  - `crates/builder3d-app/src/transforms.rs`: `dcbe4eebf97af53ba391c9a5d9070713a7737a9047b5d5f7089876de4a721861`
+  - `crates/modeler3d-app/src/rotation.rs`: `dc9c80002d7aa507e88d48fab024158b4cb3eff0638c6f179f6fcc450aba5484`
+  - `crates/modeler3d-app/src/transforms.rs`: `dcbe4eebf97af53ba391c9a5d9070713a7737a9047b5d5f7089876de4a721861`
   - `AGENTS.md`: `986ba68a9e458b5c5bc9a7c9122e4a741d3dfc5f35228b431a2bc974c7f45a1b`
   - `Cargo.toml`: `d51c5bfb69d2e0cdf88fc252d58baafc54c99a926bef7e84074a44b8154e98ba`
   - `Cargo.lock`: `9cb2d94bb7ceb84f614228b7e79b060e08e46a10253573ca424f70dbf7459f2a`
@@ -3034,11 +3034,11 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/parity-matrix.toml`: `88af89d940f22db9e8a939f2c93e3c34aac864257e6fbf73f3a3c0cb33df6384`
   - `evidence/rebuild/rb-03-lifecycle-and-file-completion/checkpoint.md`: `e7b4cfbe204a37bf4d878ec097b159d5e9e89a66a2464b79216b541db25964cf`
   - `evidence/rebuild/rb-03-lifecycle-and-file-completion/requirement-test-map.md`: `e03765801daa74cc500f5948c15065de0e013e7398491c2f18f325cc71c875da`
-  - `crates/builder3d-core/src/project.rs`: `cbac8d8d250d1532891fc6e170a34e4cd519fcbe2c8d58e8ae66a25a43eddff7`
-  - `crates/builder3d-core/tests/project_golden.rs`: `28577b83dbe38767c3bd2722bc13a74932335d25b593ef5a1b4cd90b22752dea`
-  - `crates/builder3d-app/src/commands.rs`: `f095c3fd5f92c2858341fdff111cdde83f544c7cd808fb86556b2511f07aab9f`
-  - `crates/builder3d-app/src/dialogs.rs`: `bd019a0d41dacc068c4a6b103c327e92fa37d6660f89b014728a22770289eac6`
-  - `crates/builder3d-app/src/shell.rs`: `9b272d4c76385b45ce24220f540dbbbfff9134867b729e9b28ef1819f419e350`
+  - `crates/modeler3d-core/src/project.rs`: `cbac8d8d250d1532891fc6e170a34e4cd519fcbe2c8d58e8ae66a25a43eddff7`
+  - `crates/modeler3d-core/tests/project_golden.rs`: `28577b83dbe38767c3bd2722bc13a74932335d25b593ef5a1b4cd90b22752dea`
+  - `crates/modeler3d-app/src/commands.rs`: `f095c3fd5f92c2858341fdff111cdde83f544c7cd808fb86556b2511f07aab9f`
+  - `crates/modeler3d-app/src/dialogs.rs`: `bd019a0d41dacc068c4a6b103c327e92fa37d6660f89b014728a22770289eac6`
+  - `crates/modeler3d-app/src/shell.rs`: `9b272d4c76385b45ce24220f540dbbbfff9134867b729e9b28ef1819f419e350`
 
 The receipt postdates the immutable snapshot. Only WORK_LOG.md and the RB-04 checkpoint are expected to differ afterward.
 
@@ -3057,16 +3057,16 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
 - Source and snapshot: 2,030 files / 256,937,298 bytes each; relative-path differences 0; size/SHA-256 differences 0; reparse entries 0 in each tree. Root target/, .cache/ and reparse entries excluded. Source, Git metadata, tests, documentation and evidence included.
 - This is an interim RB-04 recovery point, not slice completion. Native transforms and all74 expanded reference scene results are verified; corresponding Rust scene replay is next. Windows is unlocked. Continue the remaining full RB-04 native transform/scene/focus evidence before RB-05.
 - Pre-receipt recovery-critical SHA-256 values:
-  - `crates/builder3d-app/src/lib.rs`: `c2befb366c9464a279ffa4c35cddef7b9679fc84b3dcd7b2c61460f0d00e48b9`
-  - `crates/builder3d-app/src/packaging.rs`: `8b92ce7fe3fb6964ec95a95ef17f3ed6c8d58435452f7b3960d1cfdb85750768`
+  - `crates/modeler3d-app/src/lib.rs`: `c2befb366c9464a279ffa4c35cddef7b9679fc84b3dcd7b2c61460f0d00e48b9`
+  - `crates/modeler3d-app/src/packaging.rs`: `8b92ce7fe3fb6964ec95a95ef17f3ed6c8d58435452f7b3960d1cfdb85750768`
   - `packaging/licenses/BOOST-LICENSE-1.0.txt`: `c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566`
   - `packaging/licenses/CLIPBOARD-NOTICE.txt`: `3ff9c3d1a7b57637e92d9442a032953bc9b0d17357fb892ee6b85b2ffcabf84b`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/clipboard-native-fix.md`: `72ebb969905bb73675ad9d8f253b6038b6afabcaa4ce2f36bf7b764487e990ff`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/clipboard-complete-gate-results.json`: `fdca31492a10e7ae2bd633f226c8dd395b01ca9828cdfa8dcf8159b7b10361e1`
-  - `crates/builder3d-core/src/placement.rs`: `87c767a0e97adf72e422a340f92cb00c4a6194361128261395b4377e1218b8a6`
-  - `crates/builder3d-app/src/transform_gesture.rs`: `128d0a8f5033ce4df1875d5c1dc84c63731650ae8f1d5b902b2d3d54f510e3bc`
-  - `crates/builder3d-app/src/gesture_tests.rs`: `fd4f0e70b65dcc9c1c0aaa45e8479e7d3372b9738366395d7172544237e2dc93`
-  - `crates/builder3d-app/src/recent_preview.rs`: `5d4afde3bc674011a77f50ff95119de000563bf3cb1ab0a7d22b8c0223166051`
+  - `crates/modeler3d-core/src/placement.rs`: `87c767a0e97adf72e422a340f92cb00c4a6194361128261395b4377e1218b8a6`
+  - `crates/modeler3d-app/src/transform_gesture.rs`: `128d0a8f5033ce4df1875d5c1dc84c63731650ae8f1d5b902b2d3d54f510e3bc`
+  - `crates/modeler3d-app/src/gesture_tests.rs`: `fd4f0e70b65dcc9c1c0aaa45e8479e7d3372b9738366395d7172544237e2dc93`
+  - `crates/modeler3d-app/src/recent_preview.rs`: `5d4afde3bc674011a77f50ff95119de000563bf3cb1ab0a7d22b8c0223166051`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/native-settle-verification.json`: `6aeaf2e2c80392ccfd60869b54696db8940a1d34cf49f4dd945998a7b0005a2a`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/python-settle-results.json`: `b4d32acb5cf8af18bb458db7dd52e0865b02301deb3b342b64df59715c8c3e96`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/native_desktop_guard.py`: `ab64c435ba857d1c415dd3eb56292f0600b26a66cd8c99fc91d23eaff8dd1ad0`
@@ -3075,7 +3075,7 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/numeric-selection.md`: `e7a1f4bd2b897ebd72f92a0d627fd9df91597ef838966de34bc78bc80f2585ad`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/numeric-selection-oracle.json`: `13f72c05c129a3f8bf4005c38f70f10c617a17009ac4c60739219abe5e114852`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/placement-oracle.json`: `4da2aa0e86abff0610caa45171f952d4d95ac44b11e869341a25e52ba368ad66`
-  - `crates/builder3d-viewport/src/scene.rs`: `68cd984b002793be27e19ad62596ae8c25761fcda6dc362ca0a46b430d7eac0d`
+  - `crates/modeler3d-viewport/src/scene.rs`: `68cd984b002793be27e19ad62596ae8c25761fcda6dc362ca0a46b430d7eac0d`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/gesture-oracle.json`: `a093e6129c0ea8db88e167a0fafd8629c92ba63544ded89574e47355b57fd843`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/viewport-transforms.md`: `f34082f746b68512e9393889e807292638d848063af0d317e3d174bc1f90b3d6`
   - `scripts/Initialize-BuildClang.ps1`: `73856cc160105f1a9c00bf845b14e29a3002dfdf6ba3efc5aed2742ed43a3d3f`
@@ -3085,8 +3085,8 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/report.md`: `42089fb0f16d830925835315515505e899c029a91d864329fc183f5e7380e509`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/checkpoint.md`: `2104bb6a030b9f725c2ef4a0d5a81f9701a6078a52bb000c9cc759ed61d36a1e`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/verification.md`: `1f8cec516f1655e3bbe9f869e9e4ce1196412bc43c5e698e1f10ca1e308405b7`
-  - `crates/builder3d-app/src/rotation.rs`: `dc9c80002d7aa507e88d48fab024158b4cb3eff0638c6f179f6fcc450aba5484`
-  - `crates/builder3d-app/src/transforms.rs`: `dcbe4eebf97af53ba391c9a5d9070713a7737a9047b5d5f7089876de4a721861`
+  - `crates/modeler3d-app/src/rotation.rs`: `dc9c80002d7aa507e88d48fab024158b4cb3eff0638c6f179f6fcc450aba5484`
+  - `crates/modeler3d-app/src/transforms.rs`: `dcbe4eebf97af53ba391c9a5d9070713a7737a9047b5d5f7089876de4a721861`
   - `AGENTS.md`: `986ba68a9e458b5c5bc9a7c9122e4a741d3dfc5f35228b431a2bc974c7f45a1b`
   - `Cargo.toml`: `ee87e4c1e28a4b4a17af12d5cb352235d590d621eb01bdff2c4b0a02226b2c65`
   - `Cargo.lock`: `fc3b23fa69d04bfc9e349413d0d24bcc919e4a3706cab72a02940a9ce43f96fe`
@@ -3096,11 +3096,11 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/parity-matrix.toml`: `88af89d940f22db9e8a939f2c93e3c34aac864257e6fbf73f3a3c0cb33df6384`
   - `evidence/rebuild/rb-03-lifecycle-and-file-completion/checkpoint.md`: `e7b4cfbe204a37bf4d878ec097b159d5e9e89a66a2464b79216b541db25964cf`
   - `evidence/rebuild/rb-03-lifecycle-and-file-completion/requirement-test-map.md`: `e03765801daa74cc500f5948c15065de0e013e7398491c2f18f325cc71c875da`
-  - `crates/builder3d-core/src/project.rs`: `cbac8d8d250d1532891fc6e170a34e4cd519fcbe2c8d58e8ae66a25a43eddff7`
-  - `crates/builder3d-core/tests/project_golden.rs`: `28577b83dbe38767c3bd2722bc13a74932335d25b593ef5a1b4cd90b22752dea`
-  - `crates/builder3d-app/src/commands.rs`: `f095c3fd5f92c2858341fdff111cdde83f544c7cd808fb86556b2511f07aab9f`
-  - `crates/builder3d-app/src/dialogs.rs`: `bd019a0d41dacc068c4a6b103c327e92fa37d6660f89b014728a22770289eac6`
-  - `crates/builder3d-app/src/shell.rs`: `0313536ffad1613a84a1ed16a2b068ca525f2a5f27e8155e1fddcbd41936390f`
+  - `crates/modeler3d-core/src/project.rs`: `cbac8d8d250d1532891fc6e170a34e4cd519fcbe2c8d58e8ae66a25a43eddff7`
+  - `crates/modeler3d-core/tests/project_golden.rs`: `28577b83dbe38767c3bd2722bc13a74932335d25b593ef5a1b4cd90b22752dea`
+  - `crates/modeler3d-app/src/commands.rs`: `f095c3fd5f92c2858341fdff111cdde83f544c7cd808fb86556b2511f07aab9f`
+  - `crates/modeler3d-app/src/dialogs.rs`: `bd019a0d41dacc068c4a6b103c327e92fa37d6660f89b014728a22770289eac6`
+  - `crates/modeler3d-app/src/shell.rs`: `0313536ffad1613a84a1ed16a2b068ca525f2a5f27e8155e1fddcbd41936390f`
 
 The receipt postdates the immutable snapshot. Only WORK_LOG.md and the RB-04 checkpoint are expected to differ afterward.
 
@@ -3117,16 +3117,16 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
 - Source and snapshot: 2,142 files / 274,240,850 bytes each; relative-path differences 0; size/SHA-256 differences 0; reparse entries 0 in each tree. Root target/, .cache/ and reparse entries excluded. Source, Git metadata, tests, documentation and evidence included.
 - This is an interim RB-04 recovery point, not slice completion. Native transforms and all74 expanded reference scene results are verified; corresponding Rust scene replay is next. Windows is unlocked. Continue the remaining full RB-04 native transform/scene/focus evidence before RB-05.
 - Pre-receipt recovery-critical SHA-256 values:
-  - `crates/builder3d-app/src/lib.rs`: `c2befb366c9464a279ffa4c35cddef7b9679fc84b3dcd7b2c61460f0d00e48b9`
-  - `crates/builder3d-app/src/packaging.rs`: `8b92ce7fe3fb6964ec95a95ef17f3ed6c8d58435452f7b3960d1cfdb85750768`
+  - `crates/modeler3d-app/src/lib.rs`: `c2befb366c9464a279ffa4c35cddef7b9679fc84b3dcd7b2c61460f0d00e48b9`
+  - `crates/modeler3d-app/src/packaging.rs`: `8b92ce7fe3fb6964ec95a95ef17f3ed6c8d58435452f7b3960d1cfdb85750768`
   - `packaging/licenses/BOOST-LICENSE-1.0.txt`: `c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566`
   - `packaging/licenses/CLIPBOARD-NOTICE.txt`: `3ff9c3d1a7b57637e92d9442a032953bc9b0d17357fb892ee6b85b2ffcabf84b`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/clipboard-native-fix.md`: `72ebb969905bb73675ad9d8f253b6038b6afabcaa4ce2f36bf7b764487e990ff`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/clipboard-complete-gate-results.json`: `fdca31492a10e7ae2bd633f226c8dd395b01ca9828cdfa8dcf8159b7b10361e1`
-  - `crates/builder3d-core/src/placement.rs`: `87c767a0e97adf72e422a340f92cb00c4a6194361128261395b4377e1218b8a6`
-  - `crates/builder3d-app/src/transform_gesture.rs`: `128d0a8f5033ce4df1875d5c1dc84c63731650ae8f1d5b902b2d3d54f510e3bc`
-  - `crates/builder3d-app/src/gesture_tests.rs`: `fd4f0e70b65dcc9c1c0aaa45e8479e7d3372b9738366395d7172544237e2dc93`
-  - `crates/builder3d-app/src/recent_preview.rs`: `5d4afde3bc674011a77f50ff95119de000563bf3cb1ab0a7d22b8c0223166051`
+  - `crates/modeler3d-core/src/placement.rs`: `87c767a0e97adf72e422a340f92cb00c4a6194361128261395b4377e1218b8a6`
+  - `crates/modeler3d-app/src/transform_gesture.rs`: `128d0a8f5033ce4df1875d5c1dc84c63731650ae8f1d5b902b2d3d54f510e3bc`
+  - `crates/modeler3d-app/src/gesture_tests.rs`: `fd4f0e70b65dcc9c1c0aaa45e8479e7d3372b9738366395d7172544237e2dc93`
+  - `crates/modeler3d-app/src/recent_preview.rs`: `5d4afde3bc674011a77f50ff95119de000563bf3cb1ab0a7d22b8c0223166051`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/native-settle-verification.json`: `6aeaf2e2c80392ccfd60869b54696db8940a1d34cf49f4dd945998a7b0005a2a`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/python-settle-results.json`: `b4d32acb5cf8af18bb458db7dd52e0865b02301deb3b342b64df59715c8c3e96`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/native_desktop_guard.py`: `ab64c435ba857d1c415dd3eb56292f0600b26a66cd8c99fc91d23eaff8dd1ad0`
@@ -3135,7 +3135,7 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/numeric-selection.md`: `e7a1f4bd2b897ebd72f92a0d627fd9df91597ef838966de34bc78bc80f2585ad`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/numeric-selection-oracle.json`: `13f72c05c129a3f8bf4005c38f70f10c617a17009ac4c60739219abe5e114852`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/placement-oracle.json`: `4da2aa0e86abff0610caa45171f952d4d95ac44b11e869341a25e52ba368ad66`
-  - `crates/builder3d-viewport/src/scene.rs`: `68cd984b002793be27e19ad62596ae8c25761fcda6dc362ca0a46b430d7eac0d`
+  - `crates/modeler3d-viewport/src/scene.rs`: `68cd984b002793be27e19ad62596ae8c25761fcda6dc362ca0a46b430d7eac0d`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/gesture-oracle.json`: `a093e6129c0ea8db88e167a0fafd8629c92ba63544ded89574e47355b57fd843`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/viewport-transforms.md`: `f34082f746b68512e9393889e807292638d848063af0d317e3d174bc1f90b3d6`
   - `scripts/Initialize-BuildClang.ps1`: `73856cc160105f1a9c00bf845b14e29a3002dfdf6ba3efc5aed2742ed43a3d3f`
@@ -3145,8 +3145,8 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/report.md`: `42089fb0f16d830925835315515505e899c029a91d864329fc183f5e7380e509`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/checkpoint.md`: `0a794a8cd27d8603a5218e23727ffc40ba6d8e45c0e7ad8c999c3b7eec47ebd2`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/verification.md`: `1f8cec516f1655e3bbe9f869e9e4ce1196412bc43c5e698e1f10ca1e308405b7`
-  - `crates/builder3d-app/src/rotation.rs`: `dc9c80002d7aa507e88d48fab024158b4cb3eff0638c6f179f6fcc450aba5484`
-  - `crates/builder3d-app/src/transforms.rs`: `dcbe4eebf97af53ba391c9a5d9070713a7737a9047b5d5f7089876de4a721861`
+  - `crates/modeler3d-app/src/rotation.rs`: `dc9c80002d7aa507e88d48fab024158b4cb3eff0638c6f179f6fcc450aba5484`
+  - `crates/modeler3d-app/src/transforms.rs`: `dcbe4eebf97af53ba391c9a5d9070713a7737a9047b5d5f7089876de4a721861`
   - `AGENTS.md`: `986ba68a9e458b5c5bc9a7c9122e4a741d3dfc5f35228b431a2bc974c7f45a1b`
   - `Cargo.toml`: `ee87e4c1e28a4b4a17af12d5cb352235d590d621eb01bdff2c4b0a02226b2c65`
   - `Cargo.lock`: `fc3b23fa69d04bfc9e349413d0d24bcc919e4a3706cab72a02940a9ce43f96fe`
@@ -3156,11 +3156,11 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/parity-matrix.toml`: `88af89d940f22db9e8a939f2c93e3c34aac864257e6fbf73f3a3c0cb33df6384`
   - `evidence/rebuild/rb-03-lifecycle-and-file-completion/checkpoint.md`: `e7b4cfbe204a37bf4d878ec097b159d5e9e89a66a2464b79216b541db25964cf`
   - `evidence/rebuild/rb-03-lifecycle-and-file-completion/requirement-test-map.md`: `e03765801daa74cc500f5948c15065de0e013e7398491c2f18f325cc71c875da`
-  - `crates/builder3d-core/src/project.rs`: `cbac8d8d250d1532891fc6e170a34e4cd519fcbe2c8d58e8ae66a25a43eddff7`
-  - `crates/builder3d-core/tests/project_golden.rs`: `28577b83dbe38767c3bd2722bc13a74932335d25b593ef5a1b4cd90b22752dea`
-  - `crates/builder3d-app/src/commands.rs`: `f095c3fd5f92c2858341fdff111cdde83f544c7cd808fb86556b2511f07aab9f`
-  - `crates/builder3d-app/src/dialogs.rs`: `bd019a0d41dacc068c4a6b103c327e92fa37d6660f89b014728a22770289eac6`
-  - `crates/builder3d-app/src/shell.rs`: `0313536ffad1613a84a1ed16a2b068ca525f2a5f27e8155e1fddcbd41936390f`
+  - `crates/modeler3d-core/src/project.rs`: `cbac8d8d250d1532891fc6e170a34e4cd519fcbe2c8d58e8ae66a25a43eddff7`
+  - `crates/modeler3d-core/tests/project_golden.rs`: `28577b83dbe38767c3bd2722bc13a74932335d25b593ef5a1b4cd90b22752dea`
+  - `crates/modeler3d-app/src/commands.rs`: `f095c3fd5f92c2858341fdff111cdde83f544c7cd808fb86556b2511f07aab9f`
+  - `crates/modeler3d-app/src/dialogs.rs`: `bd019a0d41dacc068c4a6b103c327e92fa37d6660f89b014728a22770289eac6`
+  - `crates/modeler3d-app/src/shell.rs`: `0313536ffad1613a84a1ed16a2b068ca525f2a5f27e8155e1fddcbd41936390f`
 
 The receipt postdates the immutable snapshot. Only WORK_LOG.md and the RB-04 checkpoint are expected to differ afterward.
 
@@ -3177,16 +3177,16 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
 - Source and snapshot: 2,158 files / 275,488,838 bytes each; relative-path differences 0; size/SHA-256 differences 0; reparse entries 0 in each tree. Root target/, .cache/ and reparse entries excluded. Source, Git metadata, tests, documentation and evidence included.
 - This is an interim RB-04 recovery point, not slice completion. Native transforms and all74 expanded reference scene results are verified; corresponding Rust scene replay is next. Windows is unlocked. Continue the remaining full RB-04 native transform/scene/focus evidence before RB-05.
 - Pre-receipt recovery-critical SHA-256 values:
-  - `crates/builder3d-app/src/lib.rs`: `c2befb366c9464a279ffa4c35cddef7b9679fc84b3dcd7b2c61460f0d00e48b9`
-  - `crates/builder3d-app/src/packaging.rs`: `8b92ce7fe3fb6964ec95a95ef17f3ed6c8d58435452f7b3960d1cfdb85750768`
+  - `crates/modeler3d-app/src/lib.rs`: `c2befb366c9464a279ffa4c35cddef7b9679fc84b3dcd7b2c61460f0d00e48b9`
+  - `crates/modeler3d-app/src/packaging.rs`: `8b92ce7fe3fb6964ec95a95ef17f3ed6c8d58435452f7b3960d1cfdb85750768`
   - `packaging/licenses/BOOST-LICENSE-1.0.txt`: `c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566`
   - `packaging/licenses/CLIPBOARD-NOTICE.txt`: `3ff9c3d1a7b57637e92d9442a032953bc9b0d17357fb892ee6b85b2ffcabf84b`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/clipboard-native-fix.md`: `72ebb969905bb73675ad9d8f253b6038b6afabcaa4ce2f36bf7b764487e990ff`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/clipboard-complete-gate-results.json`: `fdca31492a10e7ae2bd633f226c8dd395b01ca9828cdfa8dcf8159b7b10361e1`
-  - `crates/builder3d-core/src/placement.rs`: `87c767a0e97adf72e422a340f92cb00c4a6194361128261395b4377e1218b8a6`
-  - `crates/builder3d-app/src/transform_gesture.rs`: `128d0a8f5033ce4df1875d5c1dc84c63731650ae8f1d5b902b2d3d54f510e3bc`
-  - `crates/builder3d-app/src/gesture_tests.rs`: `fd4f0e70b65dcc9c1c0aaa45e8479e7d3372b9738366395d7172544237e2dc93`
-  - `crates/builder3d-app/src/recent_preview.rs`: `5d4afde3bc674011a77f50ff95119de000563bf3cb1ab0a7d22b8c0223166051`
+  - `crates/modeler3d-core/src/placement.rs`: `87c767a0e97adf72e422a340f92cb00c4a6194361128261395b4377e1218b8a6`
+  - `crates/modeler3d-app/src/transform_gesture.rs`: `128d0a8f5033ce4df1875d5c1dc84c63731650ae8f1d5b902b2d3d54f510e3bc`
+  - `crates/modeler3d-app/src/gesture_tests.rs`: `fd4f0e70b65dcc9c1c0aaa45e8479e7d3372b9738366395d7172544237e2dc93`
+  - `crates/modeler3d-app/src/recent_preview.rs`: `5d4afde3bc674011a77f50ff95119de000563bf3cb1ab0a7d22b8c0223166051`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/native-settle-verification.json`: `6aeaf2e2c80392ccfd60869b54696db8940a1d34cf49f4dd945998a7b0005a2a`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/python-settle-results.json`: `b4d32acb5cf8af18bb458db7dd52e0865b02301deb3b342b64df59715c8c3e96`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/native_desktop_guard.py`: `ab64c435ba857d1c415dd3eb56292f0600b26a66cd8c99fc91d23eaff8dd1ad0`
@@ -3195,7 +3195,7 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/numeric-selection.md`: `e7a1f4bd2b897ebd72f92a0d627fd9df91597ef838966de34bc78bc80f2585ad`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/numeric-selection-oracle.json`: `13f72c05c129a3f8bf4005c38f70f10c617a17009ac4c60739219abe5e114852`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/placement-oracle.json`: `4da2aa0e86abff0610caa45171f952d4d95ac44b11e869341a25e52ba368ad66`
-  - `crates/builder3d-viewport/src/scene.rs`: `68cd984b002793be27e19ad62596ae8c25761fcda6dc362ca0a46b430d7eac0d`
+  - `crates/modeler3d-viewport/src/scene.rs`: `68cd984b002793be27e19ad62596ae8c25761fcda6dc362ca0a46b430d7eac0d`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/gesture-oracle.json`: `a093e6129c0ea8db88e167a0fafd8629c92ba63544ded89574e47355b57fd843`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/viewport-transforms.md`: `f34082f746b68512e9393889e807292638d848063af0d317e3d174bc1f90b3d6`
   - `scripts/Initialize-BuildClang.ps1`: `73856cc160105f1a9c00bf845b14e29a3002dfdf6ba3efc5aed2742ed43a3d3f`
@@ -3205,8 +3205,8 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/report.md`: `42089fb0f16d830925835315515505e899c029a91d864329fc183f5e7380e509`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/checkpoint.md`: `0c48b46eaef8154a802744478efe123eceea5161e32d73702b587600bed35a5b`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/verification.md`: `1f8cec516f1655e3bbe9f869e9e4ce1196412bc43c5e698e1f10ca1e308405b7`
-  - `crates/builder3d-app/src/rotation.rs`: `dc9c80002d7aa507e88d48fab024158b4cb3eff0638c6f179f6fcc450aba5484`
-  - `crates/builder3d-app/src/transforms.rs`: `dcbe4eebf97af53ba391c9a5d9070713a7737a9047b5d5f7089876de4a721861`
+  - `crates/modeler3d-app/src/rotation.rs`: `dc9c80002d7aa507e88d48fab024158b4cb3eff0638c6f179f6fcc450aba5484`
+  - `crates/modeler3d-app/src/transforms.rs`: `dcbe4eebf97af53ba391c9a5d9070713a7737a9047b5d5f7089876de4a721861`
   - `AGENTS.md`: `986ba68a9e458b5c5bc9a7c9122e4a741d3dfc5f35228b431a2bc974c7f45a1b`
   - `Cargo.toml`: `ee87e4c1e28a4b4a17af12d5cb352235d590d621eb01bdff2c4b0a02226b2c65`
   - `Cargo.lock`: `fc3b23fa69d04bfc9e349413d0d24bcc919e4a3706cab72a02940a9ce43f96fe`
@@ -3216,11 +3216,11 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/parity-matrix.toml`: `88af89d940f22db9e8a939f2c93e3c34aac864257e6fbf73f3a3c0cb33df6384`
   - `evidence/rebuild/rb-03-lifecycle-and-file-completion/checkpoint.md`: `e7b4cfbe204a37bf4d878ec097b159d5e9e89a66a2464b79216b541db25964cf`
   - `evidence/rebuild/rb-03-lifecycle-and-file-completion/requirement-test-map.md`: `e03765801daa74cc500f5948c15065de0e013e7398491c2f18f325cc71c875da`
-  - `crates/builder3d-core/src/project.rs`: `cbac8d8d250d1532891fc6e170a34e4cd519fcbe2c8d58e8ae66a25a43eddff7`
-  - `crates/builder3d-core/tests/project_golden.rs`: `28577b83dbe38767c3bd2722bc13a74932335d25b593ef5a1b4cd90b22752dea`
-  - `crates/builder3d-app/src/commands.rs`: `f095c3fd5f92c2858341fdff111cdde83f544c7cd808fb86556b2511f07aab9f`
-  - `crates/builder3d-app/src/dialogs.rs`: `b6768aa9fe967a138bb1595fd4eb6413b8dfca867c2377dc19f2d070c18575f4`
-  - `crates/builder3d-app/src/shell.rs`: `db3dab8be4efd8dfda71b616bbc146e30b90f4ed98b38ba916b997188db9652c`
+  - `crates/modeler3d-core/src/project.rs`: `cbac8d8d250d1532891fc6e170a34e4cd519fcbe2c8d58e8ae66a25a43eddff7`
+  - `crates/modeler3d-core/tests/project_golden.rs`: `28577b83dbe38767c3bd2722bc13a74932335d25b593ef5a1b4cd90b22752dea`
+  - `crates/modeler3d-app/src/commands.rs`: `f095c3fd5f92c2858341fdff111cdde83f544c7cd808fb86556b2511f07aab9f`
+  - `crates/modeler3d-app/src/dialogs.rs`: `b6768aa9fe967a138bb1595fd4eb6413b8dfca867c2377dc19f2d070c18575f4`
+  - `crates/modeler3d-app/src/shell.rs`: `db3dab8be4efd8dfda71b616bbc146e30b90f4ed98b38ba916b997188db9652c`
 
 The receipt postdates the immutable snapshot. Only WORK_LOG.md and the RB-04 checkpoint are expected to differ afterward.
 
@@ -3235,16 +3235,16 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
 - Source and snapshot: 2,217 files / 285,213,539 bytes each; relative-path differences 0; size/SHA-256 differences 0; reparse entries 0 in each tree. Root target/, .cache/ and reparse entries excluded. Source, Git metadata, tests, documentation and evidence included.
 - This is an interim RB-04 recovery point, not slice completion. Native transforms and all74 expanded reference scene results are verified; corresponding Rust scene replay is next. Windows is unlocked. Continue the remaining full RB-04 native transform/scene/focus evidence before RB-05.
 - Pre-receipt recovery-critical SHA-256 values:
-  - `crates/builder3d-app/src/lib.rs`: `c2befb366c9464a279ffa4c35cddef7b9679fc84b3dcd7b2c61460f0d00e48b9`
-  - `crates/builder3d-app/src/packaging.rs`: `8b92ce7fe3fb6964ec95a95ef17f3ed6c8d58435452f7b3960d1cfdb85750768`
+  - `crates/modeler3d-app/src/lib.rs`: `c2befb366c9464a279ffa4c35cddef7b9679fc84b3dcd7b2c61460f0d00e48b9`
+  - `crates/modeler3d-app/src/packaging.rs`: `8b92ce7fe3fb6964ec95a95ef17f3ed6c8d58435452f7b3960d1cfdb85750768`
   - `packaging/licenses/BOOST-LICENSE-1.0.txt`: `c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566`
   - `packaging/licenses/CLIPBOARD-NOTICE.txt`: `3ff9c3d1a7b57637e92d9442a032953bc9b0d17357fb892ee6b85b2ffcabf84b`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/clipboard-native-fix.md`: `72ebb969905bb73675ad9d8f253b6038b6afabcaa4ce2f36bf7b764487e990ff`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/clipboard-complete-gate-results.json`: `fdca31492a10e7ae2bd633f226c8dd395b01ca9828cdfa8dcf8159b7b10361e1`
-  - `crates/builder3d-core/src/placement.rs`: `87c767a0e97adf72e422a340f92cb00c4a6194361128261395b4377e1218b8a6`
-  - `crates/builder3d-app/src/transform_gesture.rs`: `128d0a8f5033ce4df1875d5c1dc84c63731650ae8f1d5b902b2d3d54f510e3bc`
-  - `crates/builder3d-app/src/gesture_tests.rs`: `fd4f0e70b65dcc9c1c0aaa45e8479e7d3372b9738366395d7172544237e2dc93`
-  - `crates/builder3d-app/src/recent_preview.rs`: `5d4afde3bc674011a77f50ff95119de000563bf3cb1ab0a7d22b8c0223166051`
+  - `crates/modeler3d-core/src/placement.rs`: `87c767a0e97adf72e422a340f92cb00c4a6194361128261395b4377e1218b8a6`
+  - `crates/modeler3d-app/src/transform_gesture.rs`: `128d0a8f5033ce4df1875d5c1dc84c63731650ae8f1d5b902b2d3d54f510e3bc`
+  - `crates/modeler3d-app/src/gesture_tests.rs`: `fd4f0e70b65dcc9c1c0aaa45e8479e7d3372b9738366395d7172544237e2dc93`
+  - `crates/modeler3d-app/src/recent_preview.rs`: `5d4afde3bc674011a77f50ff95119de000563bf3cb1ab0a7d22b8c0223166051`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/native-settle-verification.json`: `6aeaf2e2c80392ccfd60869b54696db8940a1d34cf49f4dd945998a7b0005a2a`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/python-settle-results.json`: `b4d32acb5cf8af18bb458db7dd52e0865b02301deb3b342b64df59715c8c3e96`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/native_desktop_guard.py`: `ab64c435ba857d1c415dd3eb56292f0600b26a66cd8c99fc91d23eaff8dd1ad0`
@@ -3253,7 +3253,7 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/numeric-selection.md`: `e7a1f4bd2b897ebd72f92a0d627fd9df91597ef838966de34bc78bc80f2585ad`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/numeric-selection-oracle.json`: `13f72c05c129a3f8bf4005c38f70f10c617a17009ac4c60739219abe5e114852`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/placement-oracle.json`: `4da2aa0e86abff0610caa45171f952d4d95ac44b11e869341a25e52ba368ad66`
-  - `crates/builder3d-viewport/src/scene.rs`: `68cd984b002793be27e19ad62596ae8c25761fcda6dc362ca0a46b430d7eac0d`
+  - `crates/modeler3d-viewport/src/scene.rs`: `68cd984b002793be27e19ad62596ae8c25761fcda6dc362ca0a46b430d7eac0d`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/gesture-oracle.json`: `a093e6129c0ea8db88e167a0fafd8629c92ba63544ded89574e47355b57fd843`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/viewport-transforms.md`: `f34082f746b68512e9393889e807292638d848063af0d317e3d174bc1f90b3d6`
   - `scripts/Initialize-BuildClang.ps1`: `73856cc160105f1a9c00bf845b14e29a3002dfdf6ba3efc5aed2742ed43a3d3f`
@@ -3263,8 +3263,8 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/report.md`: `42089fb0f16d830925835315515505e899c029a91d864329fc183f5e7380e509`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/checkpoint.md`: `23e66da95aa6d88d7421df65c6d8e135afa7c7626655b8b4458650e2e07b8b5e`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/verification.md`: `1f8cec516f1655e3bbe9f869e9e4ce1196412bc43c5e698e1f10ca1e308405b7`
-  - `crates/builder3d-app/src/rotation.rs`: `dc9c80002d7aa507e88d48fab024158b4cb3eff0638c6f179f6fcc450aba5484`
-  - `crates/builder3d-app/src/transforms.rs`: `dcbe4eebf97af53ba391c9a5d9070713a7737a9047b5d5f7089876de4a721861`
+  - `crates/modeler3d-app/src/rotation.rs`: `dc9c80002d7aa507e88d48fab024158b4cb3eff0638c6f179f6fcc450aba5484`
+  - `crates/modeler3d-app/src/transforms.rs`: `dcbe4eebf97af53ba391c9a5d9070713a7737a9047b5d5f7089876de4a721861`
   - `AGENTS.md`: `986ba68a9e458b5c5bc9a7c9122e4a741d3dfc5f35228b431a2bc974c7f45a1b`
   - `Cargo.toml`: `ee87e4c1e28a4b4a17af12d5cb352235d590d621eb01bdff2c4b0a02226b2c65`
   - `Cargo.lock`: `fc3b23fa69d04bfc9e349413d0d24bcc919e4a3706cab72a02940a9ce43f96fe`
@@ -3274,11 +3274,11 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/parity-matrix.toml`: `88af89d940f22db9e8a939f2c93e3c34aac864257e6fbf73f3a3c0cb33df6384`
   - `evidence/rebuild/rb-03-lifecycle-and-file-completion/checkpoint.md`: `e7b4cfbe204a37bf4d878ec097b159d5e9e89a66a2464b79216b541db25964cf`
   - `evidence/rebuild/rb-03-lifecycle-and-file-completion/requirement-test-map.md`: `e03765801daa74cc500f5948c15065de0e013e7398491c2f18f325cc71c875da`
-  - `crates/builder3d-core/src/project.rs`: `cbac8d8d250d1532891fc6e170a34e4cd519fcbe2c8d58e8ae66a25a43eddff7`
-  - `crates/builder3d-core/tests/project_golden.rs`: `28577b83dbe38767c3bd2722bc13a74932335d25b593ef5a1b4cd90b22752dea`
-  - `crates/builder3d-app/src/commands.rs`: `f095c3fd5f92c2858341fdff111cdde83f544c7cd808fb86556b2511f07aab9f`
-  - `crates/builder3d-app/src/dialogs.rs`: `b6768aa9fe967a138bb1595fd4eb6413b8dfca867c2377dc19f2d070c18575f4`
-  - `crates/builder3d-app/src/shell.rs`: `db3dab8be4efd8dfda71b616bbc146e30b90f4ed98b38ba916b997188db9652c`
+  - `crates/modeler3d-core/src/project.rs`: `cbac8d8d250d1532891fc6e170a34e4cd519fcbe2c8d58e8ae66a25a43eddff7`
+  - `crates/modeler3d-core/tests/project_golden.rs`: `28577b83dbe38767c3bd2722bc13a74932335d25b593ef5a1b4cd90b22752dea`
+  - `crates/modeler3d-app/src/commands.rs`: `f095c3fd5f92c2858341fdff111cdde83f544c7cd808fb86556b2511f07aab9f`
+  - `crates/modeler3d-app/src/dialogs.rs`: `b6768aa9fe967a138bb1595fd4eb6413b8dfca867c2377dc19f2d070c18575f4`
+  - `crates/modeler3d-app/src/shell.rs`: `db3dab8be4efd8dfda71b616bbc146e30b90f4ed98b38ba916b997188db9652c`
 
 The receipt postdates the immutable snapshot. Only WORK_LOG.md and the RB-04 checkpoint are expected to differ afterward.
 
@@ -3293,16 +3293,16 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
 - Source and snapshot: 2,390 files / 319,276,341 bytes each; relative-path differences 0; size/SHA-256 differences 0; reparse entries 0 in each tree. Root target/, .cache/ and reparse entries excluded. Source, Git metadata, tests, documentation and evidence included.
 - This is an interim RB-04 recovery point, not slice completion. Native transforms and all74 expanded reference scene results are verified; Rust Light37 and Dark generic28 cases pass; Dark manual and pointer-batch investigation are next. Windows is unlocked. Continue the remaining full RB-04 native transform/scene/focus evidence before RB-05.
 - Pre-receipt recovery-critical SHA-256 values:
-  - `crates/builder3d-app/src/lib.rs`: `c2befb366c9464a279ffa4c35cddef7b9679fc84b3dcd7b2c61460f0d00e48b9`
-  - `crates/builder3d-app/src/packaging.rs`: `8b92ce7fe3fb6964ec95a95ef17f3ed6c8d58435452f7b3960d1cfdb85750768`
+  - `crates/modeler3d-app/src/lib.rs`: `c2befb366c9464a279ffa4c35cddef7b9679fc84b3dcd7b2c61460f0d00e48b9`
+  - `crates/modeler3d-app/src/packaging.rs`: `8b92ce7fe3fb6964ec95a95ef17f3ed6c8d58435452f7b3960d1cfdb85750768`
   - `packaging/licenses/BOOST-LICENSE-1.0.txt`: `c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566`
   - `packaging/licenses/CLIPBOARD-NOTICE.txt`: `3ff9c3d1a7b57637e92d9442a032953bc9b0d17357fb892ee6b85b2ffcabf84b`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/clipboard-native-fix.md`: `72ebb969905bb73675ad9d8f253b6038b6afabcaa4ce2f36bf7b764487e990ff`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/clipboard-complete-gate-results.json`: `fdca31492a10e7ae2bd633f226c8dd395b01ca9828cdfa8dcf8159b7b10361e1`
-  - `crates/builder3d-core/src/placement.rs`: `87c767a0e97adf72e422a340f92cb00c4a6194361128261395b4377e1218b8a6`
-  - `crates/builder3d-app/src/transform_gesture.rs`: `128d0a8f5033ce4df1875d5c1dc84c63731650ae8f1d5b902b2d3d54f510e3bc`
-  - `crates/builder3d-app/src/gesture_tests.rs`: `fd4f0e70b65dcc9c1c0aaa45e8479e7d3372b9738366395d7172544237e2dc93`
-  - `crates/builder3d-app/src/recent_preview.rs`: `5d4afde3bc674011a77f50ff95119de000563bf3cb1ab0a7d22b8c0223166051`
+  - `crates/modeler3d-core/src/placement.rs`: `87c767a0e97adf72e422a340f92cb00c4a6194361128261395b4377e1218b8a6`
+  - `crates/modeler3d-app/src/transform_gesture.rs`: `128d0a8f5033ce4df1875d5c1dc84c63731650ae8f1d5b902b2d3d54f510e3bc`
+  - `crates/modeler3d-app/src/gesture_tests.rs`: `fd4f0e70b65dcc9c1c0aaa45e8479e7d3372b9738366395d7172544237e2dc93`
+  - `crates/modeler3d-app/src/recent_preview.rs`: `5d4afde3bc674011a77f50ff95119de000563bf3cb1ab0a7d22b8c0223166051`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/native-settle-verification.json`: `6aeaf2e2c80392ccfd60869b54696db8940a1d34cf49f4dd945998a7b0005a2a`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/python-settle-results.json`: `b4d32acb5cf8af18bb458db7dd52e0865b02301deb3b342b64df59715c8c3e96`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/native_desktop_guard.py`: `ab64c435ba857d1c415dd3eb56292f0600b26a66cd8c99fc91d23eaff8dd1ad0`
@@ -3311,7 +3311,7 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/numeric-selection.md`: `e7a1f4bd2b897ebd72f92a0d627fd9df91597ef838966de34bc78bc80f2585ad`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/numeric-selection-oracle.json`: `13f72c05c129a3f8bf4005c38f70f10c617a17009ac4c60739219abe5e114852`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/placement-oracle.json`: `4da2aa0e86abff0610caa45171f952d4d95ac44b11e869341a25e52ba368ad66`
-  - `crates/builder3d-viewport/src/scene.rs`: `68cd984b002793be27e19ad62596ae8c25761fcda6dc362ca0a46b430d7eac0d`
+  - `crates/modeler3d-viewport/src/scene.rs`: `68cd984b002793be27e19ad62596ae8c25761fcda6dc362ca0a46b430d7eac0d`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/gesture-oracle.json`: `a093e6129c0ea8db88e167a0fafd8629c92ba63544ded89574e47355b57fd843`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/viewport-transforms.md`: `f34082f746b68512e9393889e807292638d848063af0d317e3d174bc1f90b3d6`
   - `scripts/Initialize-BuildClang.ps1`: `73856cc160105f1a9c00bf845b14e29a3002dfdf6ba3efc5aed2742ed43a3d3f`
@@ -3321,8 +3321,8 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/report.md`: `42089fb0f16d830925835315515505e899c029a91d864329fc183f5e7380e509`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/checkpoint.md`: `323155afe4ba498bd824a5c966125cb5d2bf0f0636f8146abd38bc8c8057d951`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/verification.md`: `1f8cec516f1655e3bbe9f869e9e4ce1196412bc43c5e698e1f10ca1e308405b7`
-  - `crates/builder3d-app/src/rotation.rs`: `dc9c80002d7aa507e88d48fab024158b4cb3eff0638c6f179f6fcc450aba5484`
-  - `crates/builder3d-app/src/transforms.rs`: `dcbe4eebf97af53ba391c9a5d9070713a7737a9047b5d5f7089876de4a721861`
+  - `crates/modeler3d-app/src/rotation.rs`: `dc9c80002d7aa507e88d48fab024158b4cb3eff0638c6f179f6fcc450aba5484`
+  - `crates/modeler3d-app/src/transforms.rs`: `dcbe4eebf97af53ba391c9a5d9070713a7737a9047b5d5f7089876de4a721861`
   - `AGENTS.md`: `986ba68a9e458b5c5bc9a7c9122e4a741d3dfc5f35228b431a2bc974c7f45a1b`
   - `Cargo.toml`: `ee87e4c1e28a4b4a17af12d5cb352235d590d621eb01bdff2c4b0a02226b2c65`
   - `Cargo.lock`: `fc3b23fa69d04bfc9e349413d0d24bcc919e4a3706cab72a02940a9ce43f96fe`
@@ -3332,11 +3332,11 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/parity-matrix.toml`: `88af89d940f22db9e8a939f2c93e3c34aac864257e6fbf73f3a3c0cb33df6384`
   - `evidence/rebuild/rb-03-lifecycle-and-file-completion/checkpoint.md`: `e7b4cfbe204a37bf4d878ec097b159d5e9e89a66a2464b79216b541db25964cf`
   - `evidence/rebuild/rb-03-lifecycle-and-file-completion/requirement-test-map.md`: `e03765801daa74cc500f5948c15065de0e013e7398491c2f18f325cc71c875da`
-  - `crates/builder3d-core/src/project.rs`: `cbac8d8d250d1532891fc6e170a34e4cd519fcbe2c8d58e8ae66a25a43eddff7`
-  - `crates/builder3d-core/tests/project_golden.rs`: `28577b83dbe38767c3bd2722bc13a74932335d25b593ef5a1b4cd90b22752dea`
-  - `crates/builder3d-app/src/commands.rs`: `f095c3fd5f92c2858341fdff111cdde83f544c7cd808fb86556b2511f07aab9f`
-  - `crates/builder3d-app/src/dialogs.rs`: `b6768aa9fe967a138bb1595fd4eb6413b8dfca867c2377dc19f2d070c18575f4`
-  - `crates/builder3d-app/src/shell.rs`: `db3dab8be4efd8dfda71b616bbc146e30b90f4ed98b38ba916b997188db9652c`
+  - `crates/modeler3d-core/src/project.rs`: `cbac8d8d250d1532891fc6e170a34e4cd519fcbe2c8d58e8ae66a25a43eddff7`
+  - `crates/modeler3d-core/tests/project_golden.rs`: `28577b83dbe38767c3bd2722bc13a74932335d25b593ef5a1b4cd90b22752dea`
+  - `crates/modeler3d-app/src/commands.rs`: `f095c3fd5f92c2858341fdff111cdde83f544c7cd808fb86556b2511f07aab9f`
+  - `crates/modeler3d-app/src/dialogs.rs`: `b6768aa9fe967a138bb1595fd4eb6413b8dfca867c2377dc19f2d070c18575f4`
+  - `crates/modeler3d-app/src/shell.rs`: `db3dab8be4efd8dfda71b616bbc146e30b90f4ed98b38ba916b997188db9652c`
 
 The receipt postdates the immutable snapshot. Only WORK_LOG.md and the RB-04 checkpoint are expected to differ afterward.
 
@@ -3351,16 +3351,16 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
 - Source and snapshot: 2,492 files / 350,193,766 bytes each; relative-path differences 0; size/SHA-256 differences 0; reparse entries 0 in each tree. Root target/, .cache/ and reparse entries excluded. Source, Git metadata, tests, documentation and evidence included.
 - This is an interim RB-04 recovery point, not slice completion. Native transforms and all74 expanded reference scene results are verified; all74 Rust scene/22viewport/4Settle/8pick states now verified; final visual inspection and completed-slice receipt are next. Windows is unlocked. Continue the remaining full RB-04 native transform/scene/focus evidence before RB-05.
 - Pre-receipt recovery-critical SHA-256 values:
-  - `crates/builder3d-app/src/lib.rs`: `c2befb366c9464a279ffa4c35cddef7b9679fc84b3dcd7b2c61460f0d00e48b9`
-  - `crates/builder3d-app/src/packaging.rs`: `8b92ce7fe3fb6964ec95a95ef17f3ed6c8d58435452f7b3960d1cfdb85750768`
+  - `crates/modeler3d-app/src/lib.rs`: `c2befb366c9464a279ffa4c35cddef7b9679fc84b3dcd7b2c61460f0d00e48b9`
+  - `crates/modeler3d-app/src/packaging.rs`: `8b92ce7fe3fb6964ec95a95ef17f3ed6c8d58435452f7b3960d1cfdb85750768`
   - `packaging/licenses/BOOST-LICENSE-1.0.txt`: `c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566`
   - `packaging/licenses/CLIPBOARD-NOTICE.txt`: `3ff9c3d1a7b57637e92d9442a032953bc9b0d17357fb892ee6b85b2ffcabf84b`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/clipboard-native-fix.md`: `72ebb969905bb73675ad9d8f253b6038b6afabcaa4ce2f36bf7b764487e990ff`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/clipboard-complete-gate-results.json`: `fdca31492a10e7ae2bd633f226c8dd395b01ca9828cdfa8dcf8159b7b10361e1`
-  - `crates/builder3d-core/src/placement.rs`: `87c767a0e97adf72e422a340f92cb00c4a6194361128261395b4377e1218b8a6`
-  - `crates/builder3d-app/src/transform_gesture.rs`: `128d0a8f5033ce4df1875d5c1dc84c63731650ae8f1d5b902b2d3d54f510e3bc`
-  - `crates/builder3d-app/src/gesture_tests.rs`: `fd4f0e70b65dcc9c1c0aaa45e8479e7d3372b9738366395d7172544237e2dc93`
-  - `crates/builder3d-app/src/recent_preview.rs`: `5d4afde3bc674011a77f50ff95119de000563bf3cb1ab0a7d22b8c0223166051`
+  - `crates/modeler3d-core/src/placement.rs`: `87c767a0e97adf72e422a340f92cb00c4a6194361128261395b4377e1218b8a6`
+  - `crates/modeler3d-app/src/transform_gesture.rs`: `128d0a8f5033ce4df1875d5c1dc84c63731650ae8f1d5b902b2d3d54f510e3bc`
+  - `crates/modeler3d-app/src/gesture_tests.rs`: `fd4f0e70b65dcc9c1c0aaa45e8479e7d3372b9738366395d7172544237e2dc93`
+  - `crates/modeler3d-app/src/recent_preview.rs`: `5d4afde3bc674011a77f50ff95119de000563bf3cb1ab0a7d22b8c0223166051`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/native-settle-verification.json`: `6aeaf2e2c80392ccfd60869b54696db8940a1d34cf49f4dd945998a7b0005a2a`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/python-settle-results.json`: `b4d32acb5cf8af18bb458db7dd52e0865b02301deb3b342b64df59715c8c3e96`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/native_desktop_guard.py`: `ab64c435ba857d1c415dd3eb56292f0600b26a66cd8c99fc91d23eaff8dd1ad0`
@@ -3369,7 +3369,7 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/numeric-selection.md`: `393e44655f81755bf26eaf7949b6a7e3c6fa3b35836f5ae8b9b090c934dbe99b`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/numeric-selection-oracle.json`: `13f72c05c129a3f8bf4005c38f70f10c617a17009ac4c60739219abe5e114852`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/placement-oracle.json`: `4da2aa0e86abff0610caa45171f952d4d95ac44b11e869341a25e52ba368ad66`
-  - `crates/builder3d-viewport/src/scene.rs`: `68cd984b002793be27e19ad62596ae8c25761fcda6dc362ca0a46b430d7eac0d`
+  - `crates/modeler3d-viewport/src/scene.rs`: `68cd984b002793be27e19ad62596ae8c25761fcda6dc362ca0a46b430d7eac0d`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/gesture-oracle.json`: `a093e6129c0ea8db88e167a0fafd8629c92ba63544ded89574e47355b57fd843`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/viewport-transforms.md`: `0e2e7f1dd232a320153c4e51027d97ff99c3a36fa27b8df00b4e37a3e35cb0d0`
   - `scripts/Initialize-BuildClang.ps1`: `73856cc160105f1a9c00bf845b14e29a3002dfdf6ba3efc5aed2742ed43a3d3f`
@@ -3379,8 +3379,8 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/report.md`: `8df99a70fc5eabbfa8084cf88a98875dc4f22895d02a2699ba03de90bac4ac6c`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/checkpoint.md`: `be0dd211868f4c227a9e8008de26dca4e7a87a6adf87c7a41e3934c794844cd1`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/verification.md`: `088711b3cdb2b7ae7d952bf61e565d14af599e545d3992baedffd0b5ccca3e90`
-  - `crates/builder3d-app/src/rotation.rs`: `dc9c80002d7aa507e88d48fab024158b4cb3eff0638c6f179f6fcc450aba5484`
-  - `crates/builder3d-app/src/transforms.rs`: `dcbe4eebf97af53ba391c9a5d9070713a7737a9047b5d5f7089876de4a721861`
+  - `crates/modeler3d-app/src/rotation.rs`: `dc9c80002d7aa507e88d48fab024158b4cb3eff0638c6f179f6fcc450aba5484`
+  - `crates/modeler3d-app/src/transforms.rs`: `dcbe4eebf97af53ba391c9a5d9070713a7737a9047b5d5f7089876de4a721861`
   - `AGENTS.md`: `2253e20aed7056e2cae9af43c5cc5791fdd5235d2ba202ab7e12b9f6d441f763`
   - `Cargo.toml`: `ee87e4c1e28a4b4a17af12d5cb352235d590d621eb01bdff2c4b0a02226b2c65`
   - `Cargo.lock`: `fc3b23fa69d04bfc9e349413d0d24bcc919e4a3706cab72a02940a9ce43f96fe`
@@ -3390,11 +3390,11 @@ Planned additive RB-04 progress recovery snapshot (slice incomplete): `G:\Builde
   - `evidence/rebuild/parity-matrix.toml`: `df6a92058c77cf9480cd749fdd63aa2491d2f5d795004846dcbf5104fcc20a16`
   - `evidence/rebuild/rb-03-lifecycle-and-file-completion/checkpoint.md`: `e7b4cfbe204a37bf4d878ec097b159d5e9e89a66a2464b79216b541db25964cf`
   - `evidence/rebuild/rb-03-lifecycle-and-file-completion/requirement-test-map.md`: `e03765801daa74cc500f5948c15065de0e013e7398491c2f18f325cc71c875da`
-  - `crates/builder3d-core/src/project.rs`: `cbac8d8d250d1532891fc6e170a34e4cd519fcbe2c8d58e8ae66a25a43eddff7`
-  - `crates/builder3d-core/tests/project_golden.rs`: `28577b83dbe38767c3bd2722bc13a74932335d25b593ef5a1b4cd90b22752dea`
-  - `crates/builder3d-app/src/commands.rs`: `f095c3fd5f92c2858341fdff111cdde83f544c7cd808fb86556b2511f07aab9f`
-  - `crates/builder3d-app/src/dialogs.rs`: `b6768aa9fe967a138bb1595fd4eb6413b8dfca867c2377dc19f2d070c18575f4`
-  - `crates/builder3d-app/src/shell.rs`: `db3dab8be4efd8dfda71b616bbc146e30b90f4ed98b38ba916b997188db9652c`
+  - `crates/modeler3d-core/src/project.rs`: `cbac8d8d250d1532891fc6e170a34e4cd519fcbe2c8d58e8ae66a25a43eddff7`
+  - `crates/modeler3d-core/tests/project_golden.rs`: `28577b83dbe38767c3bd2722bc13a74932335d25b593ef5a1b4cd90b22752dea`
+  - `crates/modeler3d-app/src/commands.rs`: `f095c3fd5f92c2858341fdff111cdde83f544c7cd808fb86556b2511f07aab9f`
+  - `crates/modeler3d-app/src/dialogs.rs`: `b6768aa9fe967a138bb1595fd4eb6413b8dfca867c2377dc19f2d070c18575f4`
+  - `crates/modeler3d-app/src/shell.rs`: `db3dab8be4efd8dfda71b616bbc146e30b90f4ed98b38ba916b997188db9652c`
 
 The receipt postdates the immutable snapshot. Only WORK_LOG.md and the RB-04 checkpoint are expected to differ afterward.
 
@@ -3433,16 +3433,16 @@ Planned additive completed RB-04 implementation and evidence recovery snapshot (
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/visual-inspection.md`: `cebf5c387a9a641fde37ef144d8eb0570f85a78785aad1aa658016e01c409a4e`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/final-native-build-artifacts.json`: `c31625b1a815bab878bca98a3721dbaec78caccbdb34706838950f76630fc1d6`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/final-native-gate-results.json`: `4353e8fe241675263356884182d68639c326cd82d1add99c6e5b447e64f41ff0`
-  - `crates/builder3d-app/src/lib.rs`: `c2befb366c9464a279ffa4c35cddef7b9679fc84b3dcd7b2c61460f0d00e48b9`
-  - `crates/builder3d-app/src/packaging.rs`: `8b92ce7fe3fb6964ec95a95ef17f3ed6c8d58435452f7b3960d1cfdb85750768`
+  - `crates/modeler3d-app/src/lib.rs`: `c2befb366c9464a279ffa4c35cddef7b9679fc84b3dcd7b2c61460f0d00e48b9`
+  - `crates/modeler3d-app/src/packaging.rs`: `8b92ce7fe3fb6964ec95a95ef17f3ed6c8d58435452f7b3960d1cfdb85750768`
   - `packaging/licenses/BOOST-LICENSE-1.0.txt`: `c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566`
   - `packaging/licenses/CLIPBOARD-NOTICE.txt`: `3ff9c3d1a7b57637e92d9442a032953bc9b0d17357fb892ee6b85b2ffcabf84b`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/clipboard-native-fix.md`: `72ebb969905bb73675ad9d8f253b6038b6afabcaa4ce2f36bf7b764487e990ff`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/clipboard-complete-gate-results.json`: `fdca31492a10e7ae2bd633f226c8dd395b01ca9828cdfa8dcf8159b7b10361e1`
-  - `crates/builder3d-core/src/placement.rs`: `87c767a0e97adf72e422a340f92cb00c4a6194361128261395b4377e1218b8a6`
-  - `crates/builder3d-app/src/transform_gesture.rs`: `128d0a8f5033ce4df1875d5c1dc84c63731650ae8f1d5b902b2d3d54f510e3bc`
-  - `crates/builder3d-app/src/gesture_tests.rs`: `fd4f0e70b65dcc9c1c0aaa45e8479e7d3372b9738366395d7172544237e2dc93`
-  - `crates/builder3d-app/src/recent_preview.rs`: `5d4afde3bc674011a77f50ff95119de000563bf3cb1ab0a7d22b8c0223166051`
+  - `crates/modeler3d-core/src/placement.rs`: `87c767a0e97adf72e422a340f92cb00c4a6194361128261395b4377e1218b8a6`
+  - `crates/modeler3d-app/src/transform_gesture.rs`: `128d0a8f5033ce4df1875d5c1dc84c63731650ae8f1d5b902b2d3d54f510e3bc`
+  - `crates/modeler3d-app/src/gesture_tests.rs`: `fd4f0e70b65dcc9c1c0aaa45e8479e7d3372b9738366395d7172544237e2dc93`
+  - `crates/modeler3d-app/src/recent_preview.rs`: `5d4afde3bc674011a77f50ff95119de000563bf3cb1ab0a7d22b8c0223166051`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/native-settle-verification.json`: `6aeaf2e2c80392ccfd60869b54696db8940a1d34cf49f4dd945998a7b0005a2a`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/python-settle-results.json`: `b4d32acb5cf8af18bb458db7dd52e0865b02301deb3b342b64df59715c8c3e96`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/native_desktop_guard.py`: `ab64c435ba857d1c415dd3eb56292f0600b26a66cd8c99fc91d23eaff8dd1ad0`
@@ -3451,7 +3451,7 @@ Planned additive completed RB-04 implementation and evidence recovery snapshot (
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/numeric-selection.md`: `393e44655f81755bf26eaf7949b6a7e3c6fa3b35836f5ae8b9b090c934dbe99b`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/numeric-selection-oracle.json`: `13f72c05c129a3f8bf4005c38f70f10c617a17009ac4c60739219abe5e114852`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/placement-oracle.json`: `4da2aa0e86abff0610caa45171f952d4d95ac44b11e869341a25e52ba368ad66`
-  - `crates/builder3d-viewport/src/scene.rs`: `68cd984b002793be27e19ad62596ae8c25761fcda6dc362ca0a46b430d7eac0d`
+  - `crates/modeler3d-viewport/src/scene.rs`: `68cd984b002793be27e19ad62596ae8c25761fcda6dc362ca0a46b430d7eac0d`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/gesture-oracle.json`: `a093e6129c0ea8db88e167a0fafd8629c92ba63544ded89574e47355b57fd843`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/viewport-transforms.md`: `0e2e7f1dd232a320153c4e51027d97ff99c3a36fa27b8df00b4e37a3e35cb0d0`
   - `scripts/Initialize-BuildClang.ps1`: `73856cc160105f1a9c00bf845b14e29a3002dfdf6ba3efc5aed2742ed43a3d3f`
@@ -3461,8 +3461,8 @@ Planned additive completed RB-04 implementation and evidence recovery snapshot (
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/report.md`: `916aa1cdc908e20ff1469422c32ad8c21b450d3ef680d27a14c8bbb8035aecdc`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/checkpoint.md`: `bfdcd9b7fd3772f25dca78cee95c7284eb6aecbb4be2feef3375c10038316740`
   - `evidence/rebuild/rb-04-scene-and-precise-transforms/verification.md`: `088711b3cdb2b7ae7d952bf61e565d14af599e545d3992baedffd0b5ccca3e90`
-  - `crates/builder3d-app/src/rotation.rs`: `dc9c80002d7aa507e88d48fab024158b4cb3eff0638c6f179f6fcc450aba5484`
-  - `crates/builder3d-app/src/transforms.rs`: `dcbe4eebf97af53ba391c9a5d9070713a7737a9047b5d5f7089876de4a721861`
+  - `crates/modeler3d-app/src/rotation.rs`: `dc9c80002d7aa507e88d48fab024158b4cb3eff0638c6f179f6fcc450aba5484`
+  - `crates/modeler3d-app/src/transforms.rs`: `dcbe4eebf97af53ba391c9a5d9070713a7737a9047b5d5f7089876de4a721861`
   - `AGENTS.md`: `2253e20aed7056e2cae9af43c5cc5791fdd5235d2ba202ab7e12b9f6d441f763`
   - `Cargo.toml`: `ee87e4c1e28a4b4a17af12d5cb352235d590d621eb01bdff2c4b0a02226b2c65`
   - `Cargo.lock`: `fc3b23fa69d04bfc9e349413d0d24bcc919e4a3706cab72a02940a9ce43f96fe`
@@ -3472,11 +3472,11 @@ Planned additive completed RB-04 implementation and evidence recovery snapshot (
   - `evidence/rebuild/parity-matrix.toml`: `df6a92058c77cf9480cd749fdd63aa2491d2f5d795004846dcbf5104fcc20a16`
   - `evidence/rebuild/rb-03-lifecycle-and-file-completion/checkpoint.md`: `e7b4cfbe204a37bf4d878ec097b159d5e9e89a66a2464b79216b541db25964cf`
   - `evidence/rebuild/rb-03-lifecycle-and-file-completion/requirement-test-map.md`: `e03765801daa74cc500f5948c15065de0e013e7398491c2f18f325cc71c875da`
-  - `crates/builder3d-core/src/project.rs`: `cbac8d8d250d1532891fc6e170a34e4cd519fcbe2c8d58e8ae66a25a43eddff7`
-  - `crates/builder3d-core/tests/project_golden.rs`: `28577b83dbe38767c3bd2722bc13a74932335d25b593ef5a1b4cd90b22752dea`
-  - `crates/builder3d-app/src/commands.rs`: `f095c3fd5f92c2858341fdff111cdde83f544c7cd808fb86556b2511f07aab9f`
-  - `crates/builder3d-app/src/dialogs.rs`: `b6768aa9fe967a138bb1595fd4eb6413b8dfca867c2377dc19f2d070c18575f4`
-  - `crates/builder3d-app/src/shell.rs`: `db3dab8be4efd8dfda71b616bbc146e30b90f4ed98b38ba916b997188db9652c`
+  - `crates/modeler3d-core/src/project.rs`: `cbac8d8d250d1532891fc6e170a34e4cd519fcbe2c8d58e8ae66a25a43eddff7`
+  - `crates/modeler3d-core/tests/project_golden.rs`: `28577b83dbe38767c3bd2722bc13a74932335d25b593ef5a1b4cd90b22752dea`
+  - `crates/modeler3d-app/src/commands.rs`: `f095c3fd5f92c2858341fdff111cdde83f544c7cd808fb86556b2511f07aab9f`
+  - `crates/modeler3d-app/src/dialogs.rs`: `b6768aa9fe967a138bb1595fd4eb6413b8dfca867c2377dc19f2d070c18575f4`
+  - `crates/modeler3d-app/src/shell.rs`: `db3dab8be4efd8dfda71b616bbc146e30b90f4ed98b38ba916b997188db9652c`
 
 The receipt postdates the immutable snapshot. Only WORK_LOG.md and the RB-04 checkpoint are expected to differ afterward.
 
@@ -3593,7 +3593,7 @@ Completed the current Rust appearance/material/image, native job lifecycle, prin
 
 Rust workspace tests passed: 301; focused tests passed: app 150, core 88, platform 15, viewport 34. Python focused reference tests passed: 103. The full Python reference suite reported 785 passed, one existing K:\builder3D.png machine-path assertion failure, and two existing trimesh warnings. All ten documented Rust gates passed; cargo audit was not installed. Exact logs are in evidence/rebuild/rb-07-appearance-jobs-and-print/.
 
-Accepted paired/native evidence contains 117 PNGs: Python 34 (17 per theme), Rust Builder3D 82 (40 Light / 42 Dark), and one real Bambu Studio frame. Rust Dark and Python Light/Dark native Cancel terminals are confirmed; Rust Light Cancel was attempted but not confirmed, and is documented without claiming success. The actual installed Bambu Studio opened the validated 684-byte, 12-triangle Rust staged STL. Debug executable SHA-256 is 0BF7753FE460A6A854906457F86363DDC905B455FA790760B6D9122F6F9CB0D6; release SHA-256 is E26C37DE652B6434727AE7F6396012CDF4AA911299857B621D336AFB4DA38448.
+Accepted paired/native evidence contains 117 PNGs: Python 34 (17 per theme), Rust 3D Modeler 82 (40 Light / 42 Dark), and one real Bambu Studio frame. Rust Dark and Python Light/Dark native Cancel terminals are confirmed; Rust Light Cancel was attempted but not confirmed, and is documented without claiming success. The actual installed Bambu Studio opened the validated 684-byte, 12-triangle Rust staged STL. Debug executable SHA-256 is 0BF7753FE460A6A854906457F86363DDC905B455FA790760B6D9122F6F9CB0D6; release SHA-256 is E26C37DE652B6434727AE7F6396012CDF4AA911299857B621D336AFB4DA38448.
 
 Additive RB-07 baseline: G:\Builder3D-Rust_snapshot_20261101-132912_RB-07-baseline. Final verified snapshot: G:\Builder3D-Rust_snapshot_20261101-162515_RB-07-complete; see the RB-07 snapshot receipt. Visual review and owner acceptance remain pending. **Next slice: RB-08; implementation has not started.**
 
@@ -3603,11 +3603,11 @@ Prepared `docs/rb-08-preferences-and-complete-shell-handoff.md` with the RB-08 s
 
 ## RB-09 shared AI and regression handoff (2026-11-02)
 
-The owner reported that the interface and floor are still missing, and directed the work to continue to RB-09. Added `docs/rb-09-shared-ai-and-regression-handoff.md`, updated the current continuation pointers in `AGENTS.md`, `docs/product-rebuild-plan.md`, and the legacy RB-04-through-RB-11 handoff, and marked the RB-08 handoff/report/checkpoint as historical and still open. RB-08 automated checks remain recorded, while its Rust native matrix and completion snapshot are pending; the owner direction permits RB-09 without retroactively accepting RB-08. Source inspection confirmed the key RB-09 gap: `R4Server::new` creates an independent MCP `Scene`, while `builder3d-app` owns the live `CommandState` and does not currently depend on `builder3d-mcp`. The new handoff captures the shared-document, history, revision, replay, file, cancellation, optional-service, real-client, native evidence, and snapshot requirements. Read `E:\MCP_DESIGN_GUIDE.md` and checked the linked current official MCP 2026-07-28 and Rust SDK references. This was documentation and source inspection only: no implementation or tests were run; no G: snapshot was created; `L:\Builder3D` was not modified; nothing was staged or committed.
+The owner reported that the interface and floor are still missing, and directed the work to continue to RB-09. Added `docs/rb-09-shared-ai-and-regression-handoff.md`, updated the current continuation pointers in `AGENTS.md`, `docs/product-rebuild-plan.md`, and the legacy RB-04-through-RB-11 handoff, and marked the RB-08 handoff/report/checkpoint as historical and still open. RB-08 automated checks remain recorded, while its Rust native matrix and completion snapshot are pending; the owner direction permits RB-09 without retroactively accepting RB-08. Source inspection confirmed the key RB-09 gap: `R4Server::new` creates an independent MCP `Scene`, while `modeler3d-app` owns the live `CommandState` and does not currently depend on `modeler3d-mcp`. The new handoff captures the shared-document, history, revision, replay, file, cancellation, optional-service, real-client, native evidence, and snapshot requirements. Read `E:\MCP_DESIGN_GUIDE.md` and checked the linked current official MCP 2026-07-28 and Rust SDK references. This was documentation and source inspection only: no implementation or tests were run; no G: snapshot was created; `L:\Builder3D` was not modified; nothing was staged or committed.
 
 ## RB-09 shared-document implementation and native-gate handoff (2026-11-02)
 
-Implemented the RB-09 Rust desktop/MCP integration in the existing `E:\Builder3D-Rust` worktree. `Builder3dApp` owns the authenticated loopback bridge and dispatches synchronous R4 calls on the UI owner thread using the exact live scene/history. Long calls use bounded isolated scene copies and one checked core commit against project identity, generation, revision, and path baselines. The stdio executable now exposes the existing fixed 60-tool MCP catalog through `R4Gateway`, validates the desktop runtime descriptor and status identity, and returns a structured unavailable error when the desktop is absent. Added dirty project guards, serialized idempotency/revision dispatch, bridge request limits/authentication/cleanup, and scene snapshot history tests. Rust source was unchanged after the Release app and MCP binaries were built.
+Implemented the RB-09 Rust desktop/MCP integration in the existing `E:\3D-Modeler` worktree. `Modeler3dApp` owns the authenticated loopback bridge and dispatches synchronous R4 calls on the UI owner thread using the exact live scene/history. Long calls use bounded isolated scene copies and one checked core commit against project identity, generation, revision, and path baselines. The stdio executable now exposes the existing fixed 60-tool MCP catalog through `R4Gateway`, validates the desktop runtime descriptor and status identity, and returns a structured unavailable error when the desktop is absent. Added dirty project guards, serialized idempotency/revision dispatch, bridge request limits/authentication/cleanup, and scene snapshot history tests. Rust source was unchanged after the Release app and MCP binaries were built.
 
 Focused results: 19 MCP library tests, 5 app bridge/shared-document tests, and 3 core snapshot commit/history tests passed. The locked Rust workspace passed 327 tests. Twelve focused Python catalog/bridge/gateway/SDK tests passed using the existing `L:\Builder3D` Python 3.12.10 venv; all scratch output was directed to the RB-09 evidence folder on E:. The format, workspace check/test, all-target/all-feature Clippy, cargo-deny, metadata, app smoke, Release app/MCP builds, and both cargo-bloat commands exited 0. The TOML/catalog/evidence-reference/JSON/NDJSON validator passed. `cargo deny check` emitted 28 duplicate-crate warnings and no advisory warnings. `cargo bloat --release --workspace` warned that `--workspace` is unused, so it is not counted as full workspace size coverage; the explicit app report passed with 12.7 MiB `.text` and 15.4 MiB reported file size. `cargo audit` is unavailable. Exact outputs are in `evidence/rebuild/rb-09-shared-ai-and-regression/verification.md` and `logs/`.
 
@@ -3619,7 +3619,7 @@ At final process inspection Windows `LockApp.exe` PID 9808 still owned the inter
 
 ## Active Rust path and backup policy update (2026-11-03)
 
-The owner confirmed that future Builder3D Rust work, builds, and launches should use `E:\Builder3D-Rust`. `G:\` is the primary additive recovery-backup destination; removable USB copies are occasional one-offs unless the owner requests otherwise. The USB copy at `L:\Builder3D-Rust_snapshot_20261103-103227_RB-09-paused` remains a one-time recovery copy, not a working tree. Its copy and SHA-256 verification are recorded in `evidence/rebuild/rb-09-shared-ai-and-regression/usb-backup-receipt.md`. `L:\Builder3D` remains the separate read-only Python reference/shipping build.
+The owner confirmed that future 3D Modeler Rust work, builds, and launches should use `E:\3D-Modeler`. `G:\` is the primary additive recovery-backup destination; removable USB copies are occasional one-offs unless the owner requests otherwise. The USB copy at `L:\Builder3D-Rust_snapshot_20261103-103227_RB-09-paused` remains a one-time recovery copy, not a working tree. Its copy and SHA-256 verification are recorded in `evidence/rebuild/rb-09-shared-ai-and-regression/usb-backup-receipt.md`. `L:\Builder3D` remains the separate read-only Python reference/shipping build.
 
 Updated the root and Rust project instructions, build guide, current product plan, RB-09 handoff/checkpoint, and source-preservation/report notes to make the E: working path and backup policy explicit while retaining historical G: receipts and Python-reference paths. The paused RB-09 native gate remains pending; RB-10 has not started. The follow-up primary G: snapshot is `G:\Builder3D-Rust_snapshot_20261103-111729_RB-09-paused-e-primary`; see `primary-backup-receipt.md` for its exact verification.
 
@@ -3640,10 +3640,10 @@ paused and unverified.
 - `cargo deny check`: pass, exit 0; 27 duplicate-crate warning headers;
   final summary `advisories ok, bans ok, licenses ok, sources ok`.
 - `cargo metadata --locked --format-version 1 --no-deps`: pass, exit 0.
-- `cargo run -p builder3d-app --bin builder3d-app -- --smoke`: pass, exit 0;
-  output `Builder3D shell smoke: objects=2 selected=1 tabs=5`.
-- `cargo build --release --locked -p builder3d-app --bin builder3d-app` and
-  `cargo build --release --locked -p builder3d-mcp --bin r4_mcp`: both pass,
+- `cargo run -p modeler3d-app --bin modeler3d-app -- --smoke`: pass, exit 0;
+  output `3D Modeler shell smoke: objects=2 selected=1 tabs=5`.
+- `cargo build --release --locked -p modeler3d-app --bin modeler3d-app` and
+  `cargo build --release --locked -p modeler3d-mcp --bin r4_mcp`: both pass,
   exit 0. Current files are 16,152,576 and 1,649,664 bytes; their hashes are
   respectively `C6BF15935F66DDE3047DDA886724E935ED781BADDB31DA8D6742EB4973C507C7`
   and `A1DBA8751C5A15CAFBF6E26FAC8DB0B8A96F8464BF750AC62336F573B729545B`.
@@ -3652,7 +3652,7 @@ paused and unverified.
   `Initialize-BuildClang.ps1` in the same PowerShell session it exited 0, but
   cargo-bloat warned that `--workspace` is unused and analyzed
   `target\release\r5_viewport.exe`; it is not a workspace-size result.
-- `cargo bloat --release -p builder3d-app --bin builder3d-app`: pass, exit 0;
+- `cargo bloat --release -p modeler3d-app --bin modeler3d-app`: pass, exit 0;
   12.7 MiB `.text`, 15.4 MiB reported executable size.
 - `cargo audit --locked` was not run: `cargo-audit` is not installed.
 - `python evidence/rebuild/rb-09-shared-ai-and-regression/validate_rb09_evidence.py`:
@@ -3666,7 +3666,7 @@ paused and unverified.
 
 - Criterion: Rust source/build/run root and Release artifacts are on E:.
   Command: `git rev-parse --show-toplevel` plus `Test-Path` for the Release app
-  and MCP executables. Result: pass; root is `E:/Builder3D-Rust` and both
+  and MCP executables. Result: pass; root is `E:/3D-Modeler` and both
   executables exist under `target\release`.
 - Criterion: active guidance names E: as the Rust worktree, G: as primary
   backup, USB as occasional, and L: as the read-only Python reference.
@@ -3676,7 +3676,7 @@ paused and unverified.
 - Criterion: the paused-state G: backup matched the E: tree at verification
   time, excluding
   root `target`, `.cache`, and `logs`. Command:
-  `verify_rb09_snapshot.ps1 -SourceRoot E:\Builder3D-Rust -SnapshotRoot G:\Builder3D-Rust_snapshot_20261103-111729_RB-09-paused-e-primary`.
+  `verify_rb09_snapshot.ps1 -SourceRoot E:\3D-Modeler -SnapshotRoot G:\Builder3D-Rust_snapshot_20261103-111729_RB-09-paused-e-primary`.
   Result: pass; 3,291 files / 584,916,627 bytes on both sides, zero missing,
   extra, size/hash-different, or reparse entries. This check preceded the
   review entry and commit; the post-review snapshot receipt is recorded below.
@@ -3697,7 +3697,7 @@ paused and unverified.
   search. Result: automated tests pass (327/327); live cross-adapter flows stay
   unverified, so the criterion is not met.
 - Criterion (RB-09 plan): the fixed 60-tool catalog remains compatible.
-  Commands: `cargo test -p builder3d-mcp --lib --locked --quiet`, the evidence
+  Commands: `cargo test -p modeler3d-mcp --lib --locked --quiet`, the evidence
   validator, and the official-client probe. Result: pass for the catalog and
   closed-desktop protocol path; the focused MCP tests pass 19/19 and the client
   lists 60 tools. This does not prove live forwarding.
@@ -3792,13 +3792,13 @@ not an RB-09 completion snapshot.
 
 ## RB-09 live desktop/MCP verification (2026-11-04)
 
-Completed the paired Python/Rust live desktop and MCP sequence from E:/Builder3D-Rust. The host helper confirmed the Default desktop was active and interactive before each input and capture; LockApp did not own the session. Edge?s 24-hour YouTube video stayed in the background as a keep-awake aid only. No Windows power or lock settings changed.
+Completed the paired Python/Rust live desktop and MCP sequence from E:/3D-Modeler. The host helper confirmed the Default desktop was active and interactive before each input and capture; LockApp did not own the session. Edge?s 24-hour YouTube video stayed in the background as a keep-awake aid only. No Windows power or lock settings changed.
 
 The initial Rust live run found a scoped Welcome-to-Scene presentation defect: MCP opened/edited the document but the GUI stayed on Welcome. Updated shell presentation synchronization after MCP installs/commits and project replacement, then added two app regression tests. The repaired live run showed the Scene and updated viewport/Items immediately.
 
 The official Python MCP SDK 2.2.0 exercised the real Python and Rust app bridges. Project e5d81c5226e64f58b838d55d9395afa9 and stable Cube/Sphere IDs matched. GUI/MCP history, no-op behavior, Save/close/reopen/New/Open, dirty protection, denied/invalid files, failure atomicity, idempotency replay, expected-revision conflicts, competing clients, long-operation progress/cancel/failure/stale results, optional startup, closed-desktop responses, and shutdown cleanup passed. The Python initial capture is revision 4 with the Cube blue; the shared fixture was later saved at revision 23 with the Cube gold after a Python MCP edit. This difference is explicit in the paired board.
 
-Post-repair gates passed: cargo fmt --all -- --check; cargo test -p builder3d-app mcp_ (7/7); cargo test --workspace --locked (329/329); cargo clippy --all-targets -- -D warnings; locked Release app and gateway builds. Full logs are in evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-*. The official SDK post-run probe also passed against the current gateway with all 60 tools and structured desktop_unavailable while closed. The evidence validator passed with 50 capture hashes/dimensions, two clean Light/Dark pairs, ten fixture hashes, 96 Rust sources, and valid TOML/JSON/NDJSON references.
+Post-repair gates passed: cargo fmt --all -- --check; cargo test -p modeler3d-app mcp_ (7/7); cargo test --workspace --locked (329/329); cargo clippy --all-targets -- -D warnings; locked Release app and gateway builds. Full logs are in evidence/rebuild/rb-09-shared-ai-and-regression/logs/postfix-*. The official SDK post-run probe also passed against the current gateway with all 60 tools and structured desktop_unavailable while closed. The evidence validator passed with 50 capture hashes/dimensions, two clean Light/Dark pairs, ten fixture hashes, 96 Rust sources, and valid TOML/JSON/NDJSON references.
 
 Restored L:/Builder3D external QSettings exactly to object_snapping_enabled=true, ribbon_favorites=[], theme_mode=dark and removed the test-created recent_files key. The Python reference source tree remained untouched. The Rust live app/gateway and optional-failure app were closed; no runtime listener or descriptor remained. The uncommitted E: worktree remains intact.
 
@@ -3818,7 +3818,7 @@ Reran from the E: project root after sourcing `scripts/Initialize-BuildClang.ps1
 test-result records), `cargo clippy --all-targets -- -D warnings`,
 `cargo deny check` (28 duplicate-version warnings, no policy errors), locked
 metadata, focused MCP tests (19 passed), and app smoke. Every command exited 0;
-smoke output was `Builder3D shell smoke: objects=2 selected=1 tabs=5`.
+smoke output was `3D Modeler shell smoke: objects=2 selected=1 tabs=5`.
 
 The evidence-record audit passed criteria 1-4: matching live project/object IDs
 and accepted interactive capture; cross-adapter edits/history/lifecycle,
@@ -3875,14 +3875,14 @@ historical live role was compared to the current target path.
 
 The ignored wrap-up logs show the cargo bloat --release --workspace
 invocation warned that --workspace was unused while rebuilding
-builder3d-mcp and builder3d-app; the app restore log records another completed
+modeler3d-mcp and modeler3d-app; the app restore log records another completed
 Release build. Copies and hashes are retained under
 evidence/rebuild/rb-09-shared-ai-and-regression/logs/identity-recheck-*.
 Current target hashes are app
 0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a and gateway
 aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e.
 
-With the host helper confirming the active Default desktop and Builder3D
+With the host helper confirming the active Default desktop and 3D Modeler
 foreground, the current Release app ran as PID 8516 and was captured at
 1296x879. The official Python MCP SDK 2.2.0 listed 60 tools; its only tool
 call, read-only get_status, succeeded with app_state=ready, profile=full,
@@ -3928,17 +3928,17 @@ Verdict: PASS WITH FIXES. Reviewed 53e60d6421ede93cb12f24e1f3c4502c5aec5468..f3b
 
 SHOULD FIX R1: validate_rb09_evidence.py:308-311 checks only 60 unique tool names. An in-memory substitution of operation_status with nonexistent_review_probe still satisfies these predicates. Compare the complete ordered list against the established catalog or recorded paired-gate list, and add a negative renamed-tool check. Queued at the top of plan section 12. No application or validator implementation was changed by this review.
 
-Fresh checks: cargo test --workspace --locked (329 passed, zero failed/ignored), cargo clippy --all-targets -- -D warnings, cargo fmt --check, cargo deny check, and the RB-09 evidence validator all passed. Logs are under ignored target/independent-review-*. The first shell attempt stopped on PowerShell native-stderr handling; the direct rerun with Continue completed successfully. Dependency duplicate warnings remain; no policy errors. Current Release app launched as PID 21848, with title Builder3D - Untitled and nonzero native window handle; left open for the owner. This is launch verification, not an interactive workflow acceptance test.
+Fresh checks: cargo test --workspace --locked (329 passed, zero failed/ignored), cargo clippy --all-targets -- -D warnings, cargo fmt --check, cargo deny check, and the RB-09 evidence validator all passed. Logs are under ignored target/independent-review-*. The first shell attempt stopped on PowerShell native-stderr handling; the direct rerun with Continue completed successfully. Dependency duplicate warnings remain; no policy errors. Current Release app launched as PID 21848, with title 3D Modeler - Untitled and nonzero native window handle; left open for the owner. This is launch verification, not an interactive workflow acceptance test.
 
 Review notes accurately distinguish the historical paired workflow from the current identity-only probe, and disclose the pending completion snapshot. Not independently repeated: paired desktop/MCP mutations, visual/owner acceptance, real Linux/macOS or alternate GPU checks, recovery snapshot hash verification, audit, size/performance gates. Review scope does not close RB-08/RB-09 acceptance gaps or authorize RB-10. No commits created. Review marker reviewed-1 will identify the reviewed HEAD; plan/log review additions remain uncommitted.
 
 ## 2026-11-05 - reviewed-1 ordered MCP tool-name verification
 
 - Scope: fix the SHOULD FIX finding in the RB-09 evidence validator only; no Rust application code changed and RB-10 was not started.
-- The validator now extracts the ordered 60-name `TOOL_CATALOG` from `crates/builder3d-mcp/src/r4/catalog.rs` and compares the identity probe's complete list against it. This verifies names and order only; it does not verify tool schemas.
+- The validator now extracts the ordered 60-name `TOOL_CATALOG` from `crates/modeler3d-mcp/src/r4/catalog.rs` and compares the identity probe's complete list against it. This verifies names and order only; it does not verify tool schemas.
 - Focused regression: `python evidence/rebuild/rb-09-shared-ai-and-regression/validate_rb09_evidence.py --tool-name-self-test` passed; the established list was accepted and a renamed tool was rejected.
 - Evidence validation: `python evidence/rebuild/rb-09-shared-ai-and-regression/validate_rb09_evidence.py` passed, including the 50 accepted capture hashes/dimensions, 2 paired scene records, 10 fixture hashes, and 96-file Rust source manifest.
-- Post-change launch: no Builder3D instance was running before launch. Started `target/release/builder3d-app.exe` from this workspace as PID 40272; `Builder3D - Untitled` had a nonzero window handle and responded. Left the app open. This is a launch check, not an interactive acceptance test.
+- Post-change launch: no 3D Modeler instance was running before launch. Started `target/release/modeler3d-app.exe` from this workspace as PID 40272; `3D Modeler - Untitled` had a nonzero window handle and responded. Left the app open. This is a launch check, not an interactive acceptance test.
 - RB-08's native matrix and completion snapshot remain pending. The recorded paired RB-09 workflow was not repeated; the identity-only probe does not close RB-09 acceptance, the interface/floor parity gaps, visual review, owner acceptance, or overall product acceptance. No RB-10 work started.
 - Changed files: `evidence/rebuild/rb-09-shared-ai-and-regression/validate_rb09_evidence.py`, `docs/product-rebuild-plan.md`, and `WORK_LOG.md`.
 - Recovery snapshot: `G:\Builder3D-Rust_snapshot_20261105-143636_RB-09-R1`, created 2026-11-05 14:36:36 local time. Robocopy exit 1; 3,933 included files and 701,519,434 bytes. Independent verification found identical relative-path sets and byte counts, zero path/size mismatches, and matching SHA-256 for 12 recovery-critical files. The copied HEAD and `reviewed-1` tag both match `f3b2d929d5d8ba0e30c447a6736c620b15ac4372`. Excluded `target/`; no other cache directories or reparse points were present. This receipt was appended after copying, so the snapshot predates this receipt.
@@ -3946,7 +3946,7 @@ Review notes accurately distinguish the historical paired workflow from the curr
 
 ## 2026-11-06 - current Rust Release RB-09 recheck
 
-Scope: continue RB-09 on the current Rust Release build, update only records supported by this evidence, and stop before RB-10. The historical Python/Rust paired workflow remains tied to its earlier recorded build. This continuation did not launch the Python Builder3D product or modify Rust application source.
+Scope: continue RB-09 on the current Rust Release build, update only records supported by this evidence, and stop before RB-10. The historical Python/Rust paired workflow remains tied to its earlier recorded build. This continuation did not launch the Python 3D Modeler product or modify Rust application source.
 
 The current Rust Release app and gateway hashes were 0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a and aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e. The official Python MCP SDK 2.2.0 was used only as a stdio client to the Rust gateway. All four profile counts and ordered names matched the saved Python catalogs (7/52/59/60).
 
@@ -3966,12 +3966,12 @@ Re-read the workspace and project hard rules, the RB-09 plan row and section 12,
 and handoff sections 5, 7, and 9. The current Release app/gateway hashes remain
 `0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a` and
 `aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e`. No
-Builder3D app/gateway process was running after the checks; PID 40272 was absent.
+3D Modeler app/gateway process was running after the checks; PID 40272 was absent.
 No app launch or UI interaction was performed during this wrap-up.
 
 `cargo fmt --check`, `cargo check --workspace --locked`,
 `cargo test --workspace --locked --quiet` (329 passed, 0 failed/ignored),
-`cargo test -p builder3d-mcp --locked` (19 passed, 0 failed/ignored),
+`cargo test -p modeler3d-mcp --locked` (19 passed, 0 failed/ignored),
 `cargo clippy --all-targets -- -D warnings`, and `cargo deny check` all exited 0.
 Cargo Deny reported 28 duplicate-version warnings and `advisories ok, bans ok,
 licenses ok, sources ok`. The evidence-validator name self-test, full validator,
@@ -4011,7 +4011,7 @@ The previously verified read-only R1 snapshot and incomplete `143410` attempt
 remain untouched; `G:\B3D_R09C_20261106` was also left untouched.
 ## 2026-11-07 - RB-09 schema-parity repair
 
-Continued only the schema-parity repair in E:\Builder3D-Rust and stopped before RB-10. Inspected Git status and Builder3D processes first; retained the existing tracked changes and untracked files. No stage, commit, push, reset, restore, or older-snapshot modification occurred.
+Continued only the schema-parity repair in E:\3D-Modeler and stopped before RB-10. Inspected Git status and 3D Modeler processes first; retained the existing tracked changes and untracked files. No stage, commit, push, reset, restore, or older-snapshot modification occurred.
 
 Confirmed the designated L:\Builder3D reference read-only at Git HEAD 3a0160a95c55f68ce9f1e89d17c792816ac001df, Python 3.12.10, and MCP SDK 2.2.0. Captured current tools/list catalogs with the official SDK; did not launch the Python product or invoke handlers. A post-capture check retained the same 223-entry Git status/hash and 21 behavior-critical source hashes. The Python runtime accepts and drops unknown root input fields and rejects an unknown nested apply_actions.args field; Rust now matches both.
 
@@ -4025,11 +4025,11 @@ The rebuilt Release GUI/app SHA-256 is 0e874b6fb06d9b6cb5e70517ca35856d3a8304975
 
 The pre-edit G: snapshot and additional G:\B3D_R09S_20261107 recovery copy are recorded in evidence/rebuild/rb-09-shared-ai-and-regression/snapshot-receipt.md. The pre-edit copy was verified before source edits at 3,743 files / 755,179,156 bytes with 17 critical SHA-256 matches. The additional copy's initial check passed at 4,078 files / 766,744,485 bytes with 23 critical hash matches. After synchronizing its evidence updates, final verification passed at 4,079 files / 766,761,893 bytes on both sides, with zero missing/extra/different paths or reparse entries and no SHA-256 differences across included files. The receipt and summary of this final check postdate the snapshot. G:\B3D_R09W_20261106 and all older snapshots were left untouched.
 
-The schema criterion is complete. One custom emboss_text _meta.com.builder3d/longRunning difference remains disclosed without owner approval. RB-08 native evidence, the interface/floor gaps, visual review, owner acceptance, overall product acceptance, and full RB-09 acceptance remain pending. RB-10 has not started.
+The schema criterion is complete. One custom emboss_text _meta.com.modeler3d/longRunning difference remains disclosed without owner approval. RB-08 native evidence, the interface/floor gaps, visual review, owner acceptance, overall product acceptance, and full RB-09 acceptance remain pending. RB-10 has not started.
 
 ## 2026-11-09 - Owner visual feedback follow-up
 
-Continued the owner's visual follow-up in `E:\Builder3D-Rust` and stopped before RB-10. Compared the supplied 3D Builder floor screenshot and saved Python shell captures. The Python reference was not launched or modified.
+Continued the owner's visual follow-up in `E:\3D-Modeler` and stopped before RB-10. Compared the supplied 3D Builder floor screenshot and saved Python shell captures. The Python reference was not launched or modified.
 
 Before the camera source edit, created the additive recovery snapshot `G:\B3D_RV_20261109_floorfix_pre`. It contains 4,096 files / 771,406,618 bytes (root `target` excluded to match the recovery-copy policy); source and snapshot counts and bytes match, and all 10 critical SHA-256 comparisons match. The receipt is `evidence/rebuild/rb-08-preferences-and-complete-shell/owner-feedback-followup-20261109/recovery-snapshot.json`. The existing `G:\B3D_RV_20261109` and older snapshots remain untouched.
 
@@ -4058,8 +4058,8 @@ the opening/reset yaw to 0 degrees to align the axes with the reference. The
 product plan summary now records the updated floor treatment.
 
 Verification: `cargo fmt --all -- --check`,
-`cargo check --locked -p builder3d-viewport -p builder3d-app`, and
-`cargo build --release --locked -p builder3d-app` passed. No tests or GUI run
+`cargo check --locked -p modeler3d-viewport -p modeler3d-app`, and
+`cargo build --release --locked -p modeler3d-app` passed. No tests or GUI run
 were performed.
 
 Recovery snapshot: `G:\B3D_RV_20261109-102620_floorlabels`. Robocopy exited 1
@@ -4101,8 +4101,8 @@ the cue cache's scene revision and bounds in sync.
 Verification: `cargo fmt --all -- --check`, `git diff --check`,
 `cargo check --workspace --locked`,
 `cargo clippy --workspace --all-targets --all-features --locked -- -D warnings`,
-and `cargo build --release --locked -p builder3d-app` passed. The Release app
-opened as PID 22264 with a responsive `Builder3D - Untitled` window. Tests were
+and `cargo build --release --locked -p modeler3d-app` passed. The Release app
+opened as PID 22264 with a responsive `3D Modeler - Untitled` window. Tests were
 not run.
 
 Recovery snapshot: `G:\Builder3D-Rust_snapshot_20261109-131628_contact-cue-refresh`.
@@ -4136,7 +4136,7 @@ legacy scalar preference parser. It is now loaded directly as a JSON object,
 with an unsupported-value warning and the normal default fallback.
 
 Verification: the Release app build passed and is open as PID 27100 with a
-responsive `Builder3D - Untitled` window. All 36 `builder3d-viewport` tests and
+responsive `3D Modeler - Untitled` window. All 36 `modeler3d-viewport` tests and
 the app preference round-trip test passed. The full workspace run reached the
 app tests: 162 passed and four failed in existing placement-height and camera
 preset expectations; none exercised lighting. Those unrelated expectations
@@ -4158,8 +4158,8 @@ Pointer input over the panel is kept out of the viewport gesture handler. The
 restore button now applies the 3D Builder-style defaults.
 
 Verification: `rustfmt --edition 2024 --check` passed; all 39
-`builder3d-viewport` tests and 8 Settings/dialog tests passed; the Release build
-in `target/lighting-review` passed; `builder3d-app.exe --smoke` passed; and
+`modeler3d-viewport` tests and 8 Settings/dialog tests passed; the Release build
+in `target/lighting-review` passed; `modeler3d-app.exe --smoke` passed; and
 `git diff --check` passed. The review window is open as PID 23560 and responding.
 No full workspace suite or screenshot-based visual review was run. No G: snapshot
 was created because workspace instructions require explicit authorization for G:
@@ -4168,7 +4168,7 @@ writes. Owner visual review remains pending.
 ## 2026-11-10 - Add bounded UI and viewport diagnostics
 
 Added a standard-library logger at the platform log path
-(`%LOCALAPPDATA%\Builder3D\logs\builder3d.log` on Windows). It records startup,
+(`%LOCALAPPDATA%\Modeler3D\logs\modeler3d.log` on Windows). It records startup,
 viewport, scene-preview, and optional MCP errors, CPU fallback transitions,
 slow viewport/UI frames, and unhandled panic backtraces. The current log is
 bounded at 2 MiB and retains one rotated file. Normal frames do not write files;
@@ -4182,9 +4182,9 @@ shadow overlays are bounded. No freeze was reproduced during the idle launch;
 the watchdog is intended to capture timing if the problem recurs during use.
 
 Verification: `cargo fmt --all -- --check`, `cargo check --locked -p
-builder3d-app`, `cargo clippy --locked -p builder3d-app --all-targets -- -D
-warnings`, the two `diagnostics::tests`, and all 39 `builder3d-viewport` tests
-passed. The Release app build took 3m39s, `builder3d-app.exe --smoke` passed,
+modeler3d-app`, `cargo clippy --locked -p modeler3d-app --all-targets -- -D
+warnings`, the two `diagnostics::tests`, and all 39 `modeler3d-viewport` tests
+passed. The Release app build took 3m39s, `modeler3d-app.exe --smoke` passed,
 and the visible Release window (PID 41788) remained responsive through 20 seconds
 of idle. The initial startup log recorded the Quadro RTX 4000 on Vulkan.
 No interactive reproduction of the owner's freeze or full workspace suite was
@@ -4206,7 +4206,7 @@ showing that a focused text field does not prevent a mouse gesture over the
 viewport.
 
 Verification: the five `viewport_` app tests, `cargo fmt --all -- --check`,
-Clippy with warnings denied, the optimized app build, and `builder3d-app.exe
+Clippy with warnings denied, the optimized app build, and `modeler3d-app.exe
 --smoke` passed. In the visible Release app (PID 26192), native left-button
 drags in both empty viewport space and on the model visibly orbited the camera;
 the model's transform fields stayed at zero during the surface drag. Added a
@@ -4227,7 +4227,7 @@ use fixed world-axis coordinates instead of offsets from `camera.center()`,
 so right-button pan moves them across the view with the floor grid. Added the
 `floor_scale_labels_remain_world_anchored_when_camera_pans` regression.
 
-Verification: all 40 `builder3d-viewport` tests passed; formatting and focused
+Verification: all 40 `modeler3d-viewport` tests passed; formatting and focused
 Clippy passed; the optimized app build and shell smoke passed. A visible
 Release right-drag moved the floor grid and its labels together, and the app
 remained responsive. Before/after captures and SHA-256 values are recorded in
@@ -4247,13 +4247,13 @@ appended after the snapshot; the snapshot remains untouched.
 
 Move handles now use one camera-facing arrow per world axis. Each shaft starts just outside the selected object's near face and ends in a compact 12-facet head with a subtle graphite outline. X/Y/Z colors stay unchanged, and drawing and hit-testing share the same axis segment geometry. The focused geometry assertion now covers outward-facing handles.
 
-Verification: `cargo fmt --check -p builder3d-viewport`, `cargo check --locked -p builder3d-app`, and `cargo clippy --locked -p builder3d-viewport --all-targets -- -D warnings` passed. Automated tests were not run.
+Verification: `cargo fmt --check -p modeler3d-viewport`, `cargo check --locked -p modeler3d-app`, and `cargo clippy --locked -p modeler3d-viewport --all-targets -- -D warnings` passed. Automated tests were not run.
 
-The existing Release window (PID 20188) still has an unsaved `Untitled *` scene and locks `target/release/builder3d-app.exe`. I left it open; the Release rebuild could not replace the executable (`Access is denied`). The updated source is not live in that process. The pre-change window capture is `target/gizmo-arrow-open-app.png` and is not visual acceptance evidence. No G: snapshot was created because workspace-root instructions require explicit authorization for backup writes.
+The existing Release window (PID 20188) still has an unsaved `Untitled *` scene and locks `target/release/modeler3d-app.exe`. I left it open; the Release rebuild could not replace the executable (`Access is denied`). The updated source is not live in that process. The pre-change window capture is `target/gizmo-arrow-open-app.png` and is not visual acceptance evidence. No G: snapshot was created because workspace-root instructions require explicit authorization for backup writes.
 
 ### Reload follow-up
 
-The standard Release build now succeeds (`cargo build --release --locked -p builder3d-app`, 3m42s), and the refreshed app was launched as PID 12228. It starts as `Builder3D - Untitled`. The Windows foreground is currently `Windows Default Lock Screen`, so no further input or screenshot was sent. The app remains open for review; select a model after unlocking to display its gizmo.
+The standard Release build now succeeds (`cargo build --release --locked -p modeler3d-app`, 3m42s), and the refreshed app was launched as PID 12228. It starts as `3D Modeler - Untitled`. The Windows foreground is currently `Windows Default Lock Screen`, so no further input or screenshot was sent. The app remains open for review; select a model after unlocking to display its gizmo.
 
 ### Arrow-tip clipping follow-up
 
@@ -4261,11 +4261,11 @@ The egui gizmo overlay now clips line segments and arrowhead triangles against
 the camera frustum before perspective division. This prevents geometry that
 crosses the near plane from stretching into viewport-wide streaks.
 
-Verification: `cargo fmt --check -p builder3d-app`,
-`cargo check --locked -p builder3d-app`, and
-`cargo clippy --locked -p builder3d-app -- -D warnings` passed. The optimized
+Verification: `cargo fmt --check -p modeler3d-app`,
+`cargo check --locked -p modeler3d-app`, and
+`cargo clippy --locked -p modeler3d-app -- -D warnings` passed. The optimized
 Release build succeeded, and the refreshed app is open as PID 19108. It starts
-as `Builder3D - Untitled`; select a model to see the gizmo. Automated tests
+as `3D Modeler - Untitled`; select a model to see the gizmo. Automated tests
 were not run.
 
 ## 2026-11-11 - Bound Move gizmos in screen space
@@ -4281,12 +4281,12 @@ three arrows without viewport streaks in
 `target/gizmo-preview-after-fixed-v3.png`. The preview-only startup hook was
 removed before the final build.
 
-Verification: `cargo fmt --check -p builder3d-app`,
-`cargo check --locked -p builder3d-app`,
-`cargo clippy --locked -p builder3d-app -- -D warnings`, the Debug build, and
+Verification: `cargo fmt --check -p modeler3d-app`,
+`cargo check --locked -p modeler3d-app`,
+`cargo clippy --locked -p modeler3d-app -- -D warnings`, the Debug build, and
 the optimized Release build passed. Automated tests were not run. The previous
 Release process had exited before the refreshed standard Release app was
-launched as PID 42268 (`Builder3D - Untitled`).
+launched as PID 42268 (`3D Modeler - Untitled`).
 
 ## 2026-11-11 - Enlarge zoom-stable Move arrows
 
@@ -4295,21 +4295,21 @@ world-space geometry and hit testing. The shaft, outline, and arrowhead grow
 together, while camera-scaled world lengths keep the target the same size as
 the view zoom changes. Rotate and Resize handles keep their existing size.
 
-Verification: `cargo fmt --check -p builder3d-app -p builder3d-viewport`,
-`cargo check --locked -p builder3d-app`,
-`cargo clippy --locked -p builder3d-app -- -D warnings`, and the optimized
+Verification: `cargo fmt --check -p modeler3d-app -p modeler3d-viewport`,
+`cargo check --locked -p modeler3d-app`,
+`cargo clippy --locked -p modeler3d-app -- -D warnings`, and the optimized
 Release build passed. The pinned `Initialize-BuildClang.ps1` script supplied
 libclang for Cargo. The refreshed Release window is open as PID 27132
-(`Builder3D - Untitled`); add or select a model to view the arrows. Automated
+(`3D Modeler - Untitled`); add or select a model to view the arrows. Automated
 tests were not run.
 
 Follow-up: shortened the Move shaft to one arrowhead length and adjusted its
 world-space tip and hit geometry to match the new visible endpoint.
 
-Verification: formatting, `cargo check --locked -p builder3d-app`,
-`cargo clippy --locked -p builder3d-app -- -D warnings`, and the optimized
+Verification: formatting, `cargo check --locked -p modeler3d-app`,
+`cargo clippy --locked -p modeler3d-app -- -D warnings`, and the optimized
 Release build passed. Automated tests were not run. The refreshed app is open
-as PID 36688 (`Builder3D - Untitled`); add or select a model to view the arrows.
+as PID 36688 (`3D Modeler - Untitled`); add or select a model to view the arrows.
 
 ## 2026-11-11 - Add arrow grips to Rotate and Resize
 
@@ -4319,15 +4319,15 @@ two consecutive arrowheads for a barbed look; corner grips remain. Picking
 covers the visible arrow length, and resize starts preserve the pointer offset
 so grabbing an arrow away from its face does not jump the model.
 
-Verification: formatting, `cargo check --locked -p builder3d-app`, and
-`cargo clippy --locked -p builder3d-app -- -D warnings` passed. The optimized
+Verification: formatting, `cargo check --locked -p modeler3d-app`, and
+`cargo clippy --locked -p modeler3d-app -- -D warnings` passed. The optimized
 Release build passed to the isolated output
-`target/gizmo-arrow-review/release/builder3d-app.exe`. The standard Release
+`target/gizmo-arrow-review/release/modeler3d-app.exe`. The standard Release
 window (PID 36688) has an unsaved `Untitled *` scene and was left open. No
 refreshed window was launched. Automated tests were not run.
 
 A subsequent check confirmed PID 36688 was still using
-`target/release/builder3d-app.exe`, so the standard Release executable remains
+`target/release/modeler3d-app.exe`, so the standard Release executable remains
 untouched until that unsaved window closes. The isolated review executable is
 the updated build for now.
 
@@ -4335,6 +4335,14 @@ the updated build for now.
 
 Move, Resize, and Rotate handles now share outlined shafts and faceted arrowheads, with axis-color, hover, and active-drag emphasis. Move and Resize picking follows the painted screen-space geometry with pixels-per-point scaling. Resize face and corner drags preserve the initial pointer offset.
 
-Visual review captures are in `target/gizmo-review-final-move.png`, `target/gizmo-review-final-resize.png`, `target/gizmo-review-final-rotate.png`, and `target/gizmo-review-hover-resize.png`. The updated review app is running as PID 40424 from `target/release/builder3d-app.exe`, with an unsaved Untitled cube, left open for owner review.
+Visual review captures are in `target/gizmo-review-final-move.png`, `target/gizmo-review-final-resize.png`, `target/gizmo-review-final-rotate.png`, and `target/gizmo-review-hover-resize.png`. The updated review app is running as PID 40424 from `target/release/modeler3d-app.exe`, with an unsaved Untitled cube, left open for owner review.
 
-Verification: `cargo fmt --all -- --check`, `git diff --check`, `cargo check --locked -p builder3d-app`, and `cargo clippy --locked -p builder3d-app --lib -- -D warnings` passed. The default fat-LTO Release link failed with LLVM out-of-memory; the review build succeeded with LTO disabled and 16 codegen units. `cargo clippy --all-targets` remains blocked by pre-existing test references to the removed `Builder3dApp::project_handle`. Automated tests were not run. Product acceptance status is unchanged.
+Verification: `cargo fmt --all -- --check`, `git diff --check`, `cargo check --locked -p modeler3d-app`, and `cargo clippy --locked -p modeler3d-app --lib -- -D warnings` passed. The default fat-LTO Release link failed with LLVM out-of-memory; the review build succeeded with LTO disabled and 16 codegen units. `cargo clippy --all-targets` remains blocked by pre-existing test references to the removed `Modeler3dApp::project_handle`. Automated tests were not run. Product acceptance status is unchanged.
+
+## 2026-11-16 - Rename the app to 3D Modeler
+
+Owner decision: the app is renamed from Builder3D to 3D Modeler. Display name "3D Modeler"; program file, crates, settings folder, environment variables and MCP server use `Modeler3D` / `modeler3d` (as Microsoft did with 3D Builder / `Builder3D.exe`). Settings start fresh; old records were renamed too. The places that keep the old name are listed in the "Name" section of `AGENTS.md`.
+
+Pre-rename snapshot `G:\Builder3D-Rust_snapshot_20261116-094924_pre-rename-3D-Modeler`: 8,624 files and 1,216,896,280 bytes matched the source exactly (`target` excluded).
+
+Done by script over 844 text files and 23 file/folder names, then hand fixes where a program-file name was needed. Recorded hashes and byte counts inside older evidence receipts describe the files as they were before the rename. Two old logs with mixed encoding (`evidence/rebuild/rb-03-lifecycle-and-file-completion/logs/cargo-clippy-workspace.log`, `cargo-test-workspace.log`) and binary captures were left as they were.

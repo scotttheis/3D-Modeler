@@ -2,7 +2,7 @@
 
 ## Focused behavior
 
-- `cargo test -p builder3d-app --locked`: pass, 28 application tests.
+- `cargo test -p modeler3d-app --locked`: pass, 28 application tests.
 - The export tests verify selected-visible precedence, visible fallback,
   hidden-object rejection, multi-object glTF routing and reopen, and typed
   unsupported-extension rejection.
@@ -21,6 +21,6 @@
 - `cargo metadata --locked --format-version 1 --no-deps`: pass.
 - Catalog TOML/path validation: pass, 16 unique IDs and all referenced paths
   present.
-- Native smoke: pass, `Builder3D shell smoke: objects=2 selected=1 tabs=5`.
+- Native smoke: pass, `3D Modeler shell smoke: objects=2 selected=1 tabs=5`.
 
 No commit was created. Python source and existing snapshots were not written.

@@ -2,13 +2,13 @@
 
 ## Focused behavior
 
-- `cargo test -p builder3d-app --locked`: pass, 20 tests.
+- `cargo test -p modeler3d-app --locked`: pass, 20 tests.
 - The import tests load the Python STL fixture, verify reference placement,
   verify centimetre scaling, select the imported object, and undo the whole
   import as one history transition.
 - Unsupported WRL import returns a typed error with zero objects, zero scene
   revision, and no dirty state.
-- Native smoke: `Builder3D shell smoke: objects=2 selected=1 tabs=5`.
+- Native smoke: `3D Modeler shell smoke: objects=2 selected=1 tabs=5`.
 
 ## Workspace gates
 

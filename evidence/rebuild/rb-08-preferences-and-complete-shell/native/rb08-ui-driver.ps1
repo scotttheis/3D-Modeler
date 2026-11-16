@@ -56,8 +56,8 @@ function Get-Rb08TargetWindows {
 
 function Set-Rb08MainClientSize([int]$ClientWidth,[int]$ClientHeight) {
     if ($ClientWidth -le 0 -or $ClientHeight -le 0) { throw 'Client dimensions must be positive.' }
-    $matches = @(Get-Rb08TargetWindows | Where-Object { $_.Title -like 'Builder3D - *' })
-    if ($matches.Count -ne 1) { throw "Expected one Builder3D main window, found $($matches.Count)." }
+    $matches = @(Get-Rb08TargetWindows | Where-Object { $_.Title -like '3D Modeler - *' })
+    if ($matches.Count -ne 1) { throw "Expected one 3D Modeler main window, found $($matches.Count)." }
     $h = [IntPtr]$matches[0].Handle
     $outer = New-Object Rb08NativeUi+RECT
     $client = New-Object Rb08NativeUi+RECT
@@ -79,8 +79,8 @@ function Set-Rb08MainClientSize([int]$ClientWidth,[int]$ClientHeight) {
 }
 
 function Set-Rb08MainMaximized {
-    $matches = @(Get-Rb08TargetWindows | Where-Object { $_.Title -like 'Builder3D - *' })
-    if ($matches.Count -ne 1) { throw "Expected one Builder3D main window, found $($matches.Count)." }
+    $matches = @(Get-Rb08TargetWindows | Where-Object { $_.Title -like '3D Modeler - *' })
+    if ($matches.Count -ne 1) { throw "Expected one 3D Modeler main window, found $($matches.Count)." }
     $h = [IntPtr]$matches[0].Handle
     [void][Rb08NativeUi]::ShowWindowAsync($h,3)
     Start-Sleep -Milliseconds 500
@@ -158,8 +158,8 @@ function Capture-Rb08Foreground([string]$RelativePath) {
 function Capture-Rb08MainClient([string]$RelativePath) {
     if ($script:rb08TargetPid -le 0) { throw 'Set the RB-08 target PID first.' }
     $null = Get-Rb08VerifiedForeground
-    $matches = @(Get-Rb08TargetWindows | Where-Object { $_.Title -like 'Builder3D - *' })
-    if ($matches.Count -ne 1) { throw "Expected one Builder3D main window, found $($matches.Count)." }
+    $matches = @(Get-Rb08TargetWindows | Where-Object { $_.Title -like '3D Modeler - *' })
+    if ($matches.Count -ne 1) { throw "Expected one 3D Modeler main window, found $($matches.Count)." }
     $h = [IntPtr]$matches[0].Handle
     if ($h -ne [Rb08NativeUi]::GetForegroundWindow()) { throw 'Main window is not the verified foreground window.' }
     [uint32]$owner = 0

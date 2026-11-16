@@ -11,11 +11,11 @@ selection evidence.
 
 ## Changed files
 
-- crates/builder3d-core/src/subdivide.rs
-- crates/builder3d-core/src/lib.rs
-- crates/builder3d-core/src/commands.rs
-- crates/builder3d-core/src/scene.rs
-- crates/builder3d-core/tests/mesh_ops_subdivide.rs
+- crates/modeler3d-core/src/subdivide.rs
+- crates/modeler3d-core/src/lib.rs
+- crates/modeler3d-core/src/commands.rs
+- crates/modeler3d-core/src/scene.rs
+- crates/modeler3d-core/tests/mesh_ops_subdivide.rs
 
 ## Behavioral evidence
 
@@ -30,8 +30,8 @@ selection evidence.
 
 - Python: tests/test_chunk7.py -k Subdivide -q: 1 passed, 32 deselected.
 - Rust: tests/mesh_ops_subdivide.rs: 4 passed.
-- Rust: cargo fmt --all -- --check, cargo check -p builder3d-core, and
-  cargo clippy -p builder3d-core --all-targets -- -D warnings passed.
+- Rust: cargo fmt --all -- --check, cargo check -p modeler3d-core, and
+  cargo clippy -p modeler3d-core --all-targets -- -D warnings passed.
 - New subdivision/simplification/repair/boolean production files contain zero
   forbidden panic-style or debugging markers.
 
@@ -39,7 +39,7 @@ selection evidence.
 
 R3d snapshot:
 G:\Builder3D-Rust_snapshot_20261029-143911_R3d-subdivide
-It excludes E:\Builder3D-Rust\target. Exact verification is in
+It excludes E:\3D-Modeler\target. Exact verification is in
 verification.md.
 
 ## Remaining R3 work

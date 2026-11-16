@@ -1,8 +1,8 @@
 # R3 final snapshot verification
 
 - Snapshot: `G:\Builder3D-Rust_snapshot_20261029-145630_R3-final`
-- Source root: `E:\Builder3D-Rust`
-- Excluded directory: `E:\Builder3D-Rust\target`
+- Source root: `E:\3D-Modeler`
+- Excluded directory: `E:\3D-Modeler\target`
 - Source file count: SOURCE_COUNT=0000000216
 - Backup file count: BACKUP_COUNT=0000000216
 - Source bytes: SOURCE_BYTES=0002119500

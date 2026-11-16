@@ -1,17 +1,17 @@
    Compiling bindgen v0.72.1
    Compiling qhull-sys v0.4.1 (https://github.com/LucaCiucci/qhull-rs.git?rev=62e810ccf93b458470f03cae6ef4df26023d2260#62e810cc)
    Compiling qhull v0.4.1 (https://github.com/LucaCiucci/qhull-rs.git?rev=62e810ccf93b458470f03cae6ef4df26023d2260#62e810cc)
-   Compiling builder3d-core v0.1.0 (E:\Builder3D-Rust\crates\builder3d-core)
-   Compiling builder3d-viewport v0.1.0 (E:\Builder3D-Rust\crates\builder3d-viewport)
-   Compiling builder3d-mcp v0.1.0 (E:\Builder3D-Rust\crates\builder3d-mcp)
-   Compiling builder3d-app v0.1.0 (E:\Builder3D-Rust\crates\builder3d-app)
+   Compiling modeler3d-core v0.1.0 (E:\3D-Modeler\crates\modeler3d-core)
+   Compiling modeler3d-viewport v0.1.0 (E:\3D-Modeler\crates\modeler3d-viewport)
+   Compiling modeler3d-mcp v0.1.0 (E:\3D-Modeler\crates\modeler3d-mcp)
+   Compiling modeler3d-app v0.1.0 (E:\3D-Modeler\crates\modeler3d-app)
     Finished `release` profile [optimized + debuginfo] target(s) in 6m 17s
-    Analyzing target\release\builder3d-app.exe
+    Analyzing target\release\modeler3d-app.exe
 
  File  .text    Size          Crate Name
  0.4%   0.5% 79.3KiB regex_automata regex_automata::meta::strategy::new
- 0.3%   0.4% 65.4KiB  builder3d_app builder3d_app::shell::impl$5::ui
- 0.3%   0.3% 51.3KiB  builder3d_app builder3d_app::shell::Builder3dApp::new
+ 0.3%   0.4% 65.4KiB  modeler3d_app modeler3d_app::shell::impl$5::ui
+ 0.3%   0.3% 51.3KiB  modeler3d_app modeler3d_app::shell::Modeler3dApp::new
  0.2%   0.3% 48.3KiB       wgpu_hal wgpu_hal::vulkan::Instance::expose_adapter
  0.2%   0.3% 47.6KiB         epaint epaint::text::text_layout::layout
  0.2%   0.3% 44.7KiB           egui egui::context::ContextImpl::begin_pass
@@ -22,10 +22,10 @@
  0.2%   0.2% 40.1KiB      wgpu_core wgpu_core::command::render::encode_render_pass
  0.2%   0.2% 39.8KiB           naga naga::valid::Validator::validate_impl
  0.2%   0.2% 35.6KiB           naga naga::back::spv::BlockContext::write_ray_query_function
- 0.2%   0.2% 35.3KiB  builder3d_mcp builder3d_mcp::r4::server::R4Server::dispatch_sync
+ 0.2%   0.2% 35.3KiB  modeler3d_mcp modeler3d_mcp::r4::server::R4Server::dispatch_sync
  0.2%   0.2% 34.7KiB      egui_wgpu egui_wgpu::winit::Painter::paint_and_update_textures
  0.2%   0.2% 34.3KiB    referencing referencing::registry::build::crawl_owned_schema
- 0.2%   0.2% 33.9KiB  builder3d_app builder3d_app::shell::impl$4::render_viewport::closure$0
+ 0.2%   0.2% 33.9KiB  modeler3d_app modeler3d_app::shell::impl$4::render_viewport::closure$0
  0.2%   0.2% 33.9KiB          image image::io::image_reader_type::ImageReader<alloc::io::buffered::bufreader::BufReader<std::fs::File> >::make_decoder<alloc::io::buffered::bufreader::BufReader<std::fs::File> >
  0.2%   0.2% 33.3KiB           naga naga::front::wgsl::lower::Lowerer::call_builtin
  0.2%   0.2% 31.9KiB          image image::io::image_reader_type::ImageReader<core::io::cursor::Cursor<ref$<slice2$<u8> > > >::make_decoder<core::io::cursor::Cursor<ref$<slice2$<u8> > > >

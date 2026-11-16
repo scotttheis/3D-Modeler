@@ -4,7 +4,7 @@
   "client": {
     "method": "official Python MCP SDK 2.2.0 over stdio; tools/list only",
     "python_version": "3.12.10",
-    "rust_binary": "E:\\Builder3D-Rust\\target\\release\\r4_mcp.exe",
+    "rust_binary": "E:\\3D-Modeler\\target\\release\\r4_mcp.exe",
     "rust_binary_sha256": "636171b58800915de87fc8ad26814498279919ea80341076a344c208757da370",
     "sdk_package": "mcp",
     "sdk_version": "2.2.0",
@@ -16,11 +16,11 @@
   "tools": [
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "inspection",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "observe"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "inspection",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "observe"
       },
       "annotations": {
         "destructiveHint": false,
@@ -28,7 +28,7 @@
         "openWorldHint": false,
         "readOnlyHint": true
       },
-      "description": "Builder3D get_status command",
+      "description": "3D Modeler get_status command",
       "inputSchema": {
         "properties": {},
         "title": "get_statusArguments",
@@ -331,11 +331,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "inspection",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "observe"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "inspection",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "observe"
       },
       "annotations": {
         "destructiveHint": false,
@@ -343,7 +343,7 @@
         "openWorldHint": false,
         "readOnlyHint": true
       },
-      "description": "Builder3D operation_status command",
+      "description": "3D Modeler operation_status command",
       "inputSchema": {
         "properties": {
           "operation_id": {
@@ -546,11 +546,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "operations",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "operations",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": false,
@@ -558,7 +558,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D cancel_operation command",
+      "description": "3D Modeler cancel_operation command",
       "inputSchema": {
         "properties": {
           "operation_id": {
@@ -761,11 +761,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "inspection",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "observe"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "inspection",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "observe"
       },
       "annotations": {
         "destructiveHint": false,
@@ -773,7 +773,7 @@
         "openWorldHint": false,
         "readOnlyHint": true
       },
-      "description": "Builder3D scene_summary command",
+      "description": "3D Modeler scene_summary command",
       "inputSchema": {
         "properties": {
           "fields": {
@@ -1313,11 +1313,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "inspection",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "observe"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "inspection",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "observe"
       },
       "annotations": {
         "destructiveHint": false,
@@ -1325,7 +1325,7 @@
         "openWorldHint": false,
         "readOnlyHint": true
       },
-      "description": "Builder3D print_check command",
+      "description": "3D Modeler print_check command",
       "inputSchema": {
         "properties": {
           "bed_size_mm": {
@@ -1425,11 +1425,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "inspection",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "observe"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "inspection",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "observe"
       },
       "annotations": {
         "destructiveHint": false,
@@ -1437,7 +1437,7 @@
         "openWorldHint": false,
         "readOnlyHint": true
       },
-      "description": "Builder3D scene_changes command",
+      "description": "3D Modeler scene_changes command",
       "inputSchema": {
         "properties": {
           "fields": {
@@ -2002,11 +2002,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "transforms",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "transforms",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": false,
@@ -2014,7 +2014,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D apply_actions command",
+      "description": "3D Modeler apply_actions command",
       "inputSchema": {
         "$defs": {
           "SetColorAction": {
@@ -2863,11 +2863,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "creation",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "creation",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": false,
@@ -2875,7 +2875,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D add_primitive command",
+      "description": "3D Modeler add_primitive command",
       "inputSchema": {
         "properties": {
           "dimensions_mm": {
@@ -3671,11 +3671,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "mesh",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "mesh",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": false,
@@ -3683,7 +3683,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D set_torus_parameters command",
+      "description": "3D Modeler set_torus_parameters command",
       "inputSchema": {
         "properties": {
           "expected_project_id": {
@@ -4536,11 +4536,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "mesh",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "mesh",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": false,
@@ -4548,7 +4548,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D elastic_grab command",
+      "description": "3D Modeler elastic_grab command",
       "inputSchema": {
         "properties": {
           "center_mm": {
@@ -5390,11 +5390,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "mesh",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "mesh",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": false,
@@ -5402,7 +5402,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D crease_polish command",
+      "description": "3D Modeler crease_polish command",
       "inputSchema": {
         "properties": {
           "centers_mm": {
@@ -6233,11 +6233,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "mesh",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "mesh",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": false,
@@ -6245,7 +6245,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D smooth_brush command",
+      "description": "3D Modeler smooth_brush command",
       "inputSchema": {
         "properties": {
           "centers_mm": {
@@ -7074,11 +7074,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "mesh",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "mesh",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": false,
@@ -7086,7 +7086,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D blob command",
+      "description": "3D Modeler blob command",
       "inputSchema": {
         "properties": {
           "centers_mm": {
@@ -7917,11 +7917,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "mesh",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": true,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "mesh",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": true,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": false,
@@ -7929,7 +7929,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D normalize_face_density command",
+      "description": "3D Modeler normalize_face_density command",
       "inputSchema": {
         "properties": {
           "centers_mm": {
@@ -8257,11 +8257,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "selection",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "selection",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": false,
@@ -8269,7 +8269,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D select command",
+      "description": "3D Modeler select command",
       "inputSchema": {
         "properties": {
           "expected_project_id": {
@@ -8864,11 +8864,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "transforms",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "transforms",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": false,
@@ -8876,7 +8876,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D set_snapping command",
+      "description": "3D Modeler set_snapping command",
       "inputSchema": {
         "properties": {
           "enabled": {
@@ -8981,11 +8981,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "transforms",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "transforms",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": false,
@@ -8993,7 +8993,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D translate command",
+      "description": "3D Modeler translate command",
       "inputSchema": {
         "properties": {
           "expected_project_id": {
@@ -9882,11 +9882,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "transforms",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "transforms",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": false,
@@ -9894,7 +9894,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D set_transform command",
+      "description": "3D Modeler set_transform command",
       "inputSchema": {
         "properties": {
           "expected_project_id": {
@@ -10823,11 +10823,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "transforms",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "transforms",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": false,
@@ -10835,7 +10835,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D transform_selection command",
+      "description": "3D Modeler transform_selection command",
       "inputSchema": {
         "properties": {
           "expected_project_id": {
@@ -11603,11 +11603,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "transforms",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "transforms",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": false,
@@ -11615,7 +11615,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D snap_translate command",
+      "description": "3D Modeler snap_translate command",
       "inputSchema": {
         "properties": {
           "axis": {
@@ -12394,11 +12394,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "transforms",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "transforms",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": false,
@@ -12406,7 +12406,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D settle command",
+      "description": "3D Modeler settle command",
       "inputSchema": {
         "properties": {
           "expected_project_id": {
@@ -12987,11 +12987,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "transforms",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "transforms",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": false,
@@ -12999,7 +12999,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D mirror command",
+      "description": "3D Modeler mirror command",
       "inputSchema": {
         "properties": {
           "axis": {
@@ -13592,11 +13592,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "transforms",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "transforms",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": false,
@@ -13604,7 +13604,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D align command",
+      "description": "3D Modeler align command",
       "inputSchema": {
         "properties": {
           "axis": {
@@ -14221,11 +14221,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "transforms",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "transforms",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": false,
@@ -14233,7 +14233,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D arrange command",
+      "description": "3D Modeler arrange command",
       "inputSchema": {
         "properties": {
           "axis": {
@@ -14846,11 +14846,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "appearance",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "appearance",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": false,
@@ -14858,7 +14858,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D set_color command",
+      "description": "3D Modeler set_color command",
       "inputSchema": {
         "properties": {
           "color": {
@@ -15747,11 +15747,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "inspection",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "observe"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "inspection",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "observe"
       },
       "annotations": {
         "destructiveHint": false,
@@ -15759,7 +15759,7 @@
         "openWorldHint": false,
         "readOnlyHint": true
       },
-      "description": "Builder3D mesh_health command",
+      "description": "3D Modeler mesh_health command",
       "inputSchema": {
         "properties": {
           "index": {
@@ -16011,11 +16011,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "mesh",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": true,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "mesh",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": true,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": false,
@@ -16023,7 +16023,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D repair command",
+      "description": "3D Modeler repair command",
       "inputSchema": {
         "properties": {
           "expected_project_id": {
@@ -16277,11 +16277,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "mesh",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": true,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "mesh",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": true,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": false,
@@ -16289,7 +16289,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D simplify command",
+      "description": "3D Modeler simplify command",
       "inputSchema": {
         "properties": {
           "expected_project_id": {
@@ -16555,11 +16555,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "mesh",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": true,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "mesh",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": true,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": false,
@@ -16567,7 +16567,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D subdivide command",
+      "description": "3D Modeler subdivide command",
       "inputSchema": {
         "properties": {
           "expected_project_id": {
@@ -16819,11 +16819,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "mesh",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": true,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "mesh",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": true,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": false,
@@ -16831,7 +16831,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D smooth command",
+      "description": "3D Modeler smooth command",
       "inputSchema": {
         "properties": {
           "expected_project_id": {
@@ -17090,11 +17090,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "history",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "history",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": false,
@@ -17102,7 +17102,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D undo command",
+      "description": "3D Modeler undo command",
       "inputSchema": {
         "properties": {
           "expected_project_id": {
@@ -17665,11 +17665,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "history",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "history",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": false,
@@ -17677,7 +17677,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D redo command",
+      "description": "3D Modeler redo command",
       "inputSchema": {
         "properties": {
           "expected_project_id": {
@@ -18240,11 +18240,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "organization",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "organization",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": true,
@@ -18252,7 +18252,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D delete_selected command",
+      "description": "3D Modeler delete_selected command",
       "inputSchema": {
         "properties": {
           "expected_project_id": {
@@ -18815,11 +18815,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "organization",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "organization",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": false,
@@ -18827,7 +18827,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D copy_selected command",
+      "description": "3D Modeler copy_selected command",
       "inputSchema": {
         "properties": {
           "expected_project_id": {
@@ -18943,11 +18943,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "organization",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "organization",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": true,
@@ -18955,7 +18955,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D cut_selected command",
+      "description": "3D Modeler cut_selected command",
       "inputSchema": {
         "properties": {
           "expected_project_id": {
@@ -19518,11 +19518,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "organization",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "organization",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": false,
@@ -19530,7 +19530,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D paste command",
+      "description": "3D Modeler paste command",
       "inputSchema": {
         "properties": {
           "expected_project_id": {
@@ -20093,11 +20093,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "organization",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "organization",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": false,
@@ -20105,7 +20105,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D duplicate_selected command",
+      "description": "3D Modeler duplicate_selected command",
       "inputSchema": {
         "properties": {
           "expected_project_id": {
@@ -20668,11 +20668,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "organization",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "organization",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": false,
@@ -20680,7 +20680,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D group_selected command",
+      "description": "3D Modeler group_selected command",
       "inputSchema": {
         "properties": {
           "expected_project_id": {
@@ -21243,11 +21243,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "organization",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "organization",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": false,
@@ -21255,7 +21255,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D ungroup_selected command",
+      "description": "3D Modeler ungroup_selected command",
       "inputSchema": {
         "properties": {
           "expected_project_id": {
@@ -21818,11 +21818,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "mesh",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": true,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "mesh",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": true,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": true,
@@ -21830,7 +21830,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D boolean_merge command",
+      "description": "3D Modeler boolean_merge command",
       "inputSchema": {
         "properties": {
           "expected_project_id": {
@@ -22078,11 +22078,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "mesh",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": true,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "mesh",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": true,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": true,
@@ -22090,7 +22090,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D boolean_subtract command",
+      "description": "3D Modeler boolean_subtract command",
       "inputSchema": {
         "properties": {
           "expected_project_id": {
@@ -22338,11 +22338,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "mesh",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": true,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "mesh",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": true,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": true,
@@ -22350,7 +22350,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D boolean_intersect command",
+      "description": "3D Modeler boolean_intersect command",
       "inputSchema": {
         "properties": {
           "expected_project_id": {
@@ -22598,11 +22598,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "mesh",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": true,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "mesh",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": true,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": false,
@@ -22610,7 +22610,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D emboss_text command",
+      "description": "3D Modeler emboss_text command",
       "inputSchema": {
         "properties": {
           "depth_mm": {
@@ -22903,11 +22903,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "mesh",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": true,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "mesh",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": true,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": true,
@@ -22915,7 +22915,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D hollow command",
+      "description": "3D Modeler hollow command",
       "inputSchema": {
         "properties": {
           "expected_project_id": {
@@ -23164,11 +23164,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "view",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "observe"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "view",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "observe"
       },
       "annotations": {
         "destructiveHint": false,
@@ -23176,7 +23176,7 @@
         "openWorldHint": false,
         "readOnlyHint": true
       },
-      "description": "Builder3D view_state command",
+      "description": "3D Modeler view_state command",
       "inputSchema": {
         "properties": {},
         "title": "view_stateArguments",
@@ -23308,11 +23308,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "view",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "view",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": false,
@@ -23320,7 +23320,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D set_view command",
+      "description": "3D Modeler set_view command",
       "inputSchema": {
         "properties": {
           "center_mm": {
@@ -23574,11 +23574,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "view",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "view",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": false,
@@ -23586,7 +23586,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D frame_view command",
+      "description": "3D Modeler frame_view command",
       "inputSchema": {
         "properties": {
           "expected_project_id": {
@@ -23754,11 +23754,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "view",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "view",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": false,
@@ -23766,7 +23766,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D orbit_view command",
+      "description": "3D Modeler orbit_view command",
       "inputSchema": {
         "properties": {
           "expected_project_id": {
@@ -23939,11 +23939,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "view",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "view",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": false,
@@ -23951,7 +23951,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D pan_view command",
+      "description": "3D Modeler pan_view command",
       "inputSchema": {
         "properties": {
           "expected_project_id": {
@@ -24122,11 +24122,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "view",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "view",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": false,
@@ -24134,7 +24134,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D zoom_view command",
+      "description": "3D Modeler zoom_view command",
       "inputSchema": {
         "properties": {
           "expected_project_id": {
@@ -24302,11 +24302,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "view",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "view",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": false,
@@ -24314,7 +24314,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D view_preset command",
+      "description": "3D Modeler view_preset command",
       "inputSchema": {
         "properties": {
           "expected_project_id": {
@@ -24486,11 +24486,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "project",
-        "com.builder3d/launchProfile": "model",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "model"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "project",
+        "com.modeler3d/launchProfile": "model",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "model"
       },
       "annotations": {
         "destructiveHint": true,
@@ -24498,7 +24498,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Builder3D new_project command",
+      "description": "3D Modeler new_project command",
       "inputSchema": {
         "properties": {
           "expected_project_id": {

@@ -2,10 +2,10 @@
 
 ## Focused behavior
 
-- `cargo test -p builder3d-app --locked`: pass, 38 application tests.
+- `cargo test -p modeler3d-app --locked`: pass, 38 application tests.
 - View-state tests cover validated camera state, reset/named presets,
   selected/all framing, empty-scene stability, and display state.
-- `cargo test -p builder3d-viewport --locked`: pass, 22 viewport tests,
+- `cargo test -p modeler3d-viewport --locked`: pass, 22 viewport tests,
   including complete camera-state validation.
 
 ## Workspace gates
@@ -20,6 +20,6 @@
 - `cargo metadata --locked --format-version 1 --no-deps`: pass.
 - Catalog TOML/path validation: pass, 19 unique IDs and all referenced paths
   present.
-- Native smoke: pass, `Builder3D shell smoke: objects=2 selected=1 tabs=5`.
+- Native smoke: pass, `3D Modeler shell smoke: objects=2 selected=1 tabs=5`.
 
 No commit was created. Python source and existing snapshots were not written.

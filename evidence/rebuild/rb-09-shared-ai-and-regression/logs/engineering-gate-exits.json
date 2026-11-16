@@ -37,20 +37,20 @@
         "warning":  null
     },
     {
-        "command":  "cargo run -p builder3d-app --bin builder3d-app -- --smoke",
+        "command":  "cargo run -p modeler3d-app --bin modeler3d-app -- --smoke",
         "status":  "pass",
         "exit_code":  0,
         "summary":  "2 objects, 1 selected, 5 tabs",
         "warning":  null
     },
     {
-        "command":  "cargo build --release --locked -p builder3d-app --bin builder3d-app",
+        "command":  "cargo build --release --locked -p modeler3d-app --bin modeler3d-app",
         "status":  "pass",
         "exit_code":  0,
         "warning":  null
     },
     {
-        "command":  "cargo build --release --locked -p builder3d-mcp --bin r4_mcp",
+        "command":  "cargo build --release --locked -p modeler3d-mcp --bin r4_mcp",
         "status":  "pass",
         "exit_code":  0,
         "warning":  null
@@ -62,7 +62,7 @@
         "warning":  "cargo-bloat 0.12.1 warns --workspace is unused; not a whole-workspace report"
     },
     {
-        "command":  "cargo bloat --release -p builder3d-app --bin builder3d-app",
+        "command":  "cargo bloat --release -p modeler3d-app --bin modeler3d-app",
         "status":  "pass",
         "exit_code":  0,
         "summary":  "12.7 MiB .text; 15.4 MiB reported executable",

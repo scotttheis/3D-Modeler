@@ -1,9 +1,9 @@
-﻿COMMAND=cargo build --offline --locked --target-dir target/rb03-recents-build -p builder3d-app --bin builder3d-app
-cargo :    Compiling builder3d-app v0.1.0 (E:\Builder3D-Rust\crates\builder3d-app)
+﻿COMMAND=cargo build --offline --locked --target-dir target/rb03-recents-build -p modeler3d-app --bin modeler3d-app
+cargo :    Compiling modeler3d-app v0.1.0 (E:\3D-Modeler\crates\modeler3d-app)
 At line:2 char:274
 + ...  utf8; $out=cargo build --offline --locked --target-dir target/rb03-r ...
 +                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: (   Compiling bu...\builder3d-app):String) [], RemoteException
+    + CategoryInfo          : NotSpecified: (   Compiling bu...\modeler3d-app):String) [], RemoteException
     + FullyQualifiedErrorId : NativeCommandError
  
     Finished `dev` profile [unoptimized + debuginfo] target(s) in 7.78s

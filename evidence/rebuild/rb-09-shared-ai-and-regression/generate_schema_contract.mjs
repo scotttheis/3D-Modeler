@@ -8,7 +8,7 @@ const runRoot = resolve(
 );
 const capturePath = join(runRoot, "python-full.json");
 const outputPath = resolve(
-  "crates/builder3d-mcp/src/r4/schema_contract.json",
+  "crates/modeler3d-mcp/src/r4/schema_contract.json",
 );
 const captureBytes = readFileSync(capturePath);
 const capture = JSON.parse(captureBytes.toString("utf8"));

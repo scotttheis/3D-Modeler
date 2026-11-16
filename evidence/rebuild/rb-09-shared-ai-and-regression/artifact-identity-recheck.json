@@ -39,11 +39,11 @@
     "app_restore_evidence_copy": "logs/identity-recheck-restore-release-app.stderr.log",
     "app_restore_evidence_sha256": "2cc7bceede4eb078c7b0f16df092801e123686fbf925eb572d5e59bf28b45375",
     "app_restore_evidence_bytes": 140,
-    "summary": "The cargo-bloat --workspace invocation warned that --workspace was unused and recompiled builder3d-mcp and builder3d-app. The subsequent app restore log records another Release rebuild of builder3d-app. These later builds replaced the target/release outputs; they do not change the historical hashes recorded for the paired live gate."
+    "summary": "The cargo-bloat --workspace invocation warned that --workspace was unused and recompiled modeler3d-mcp and modeler3d-app. The subsequent app restore log records another Release rebuild of modeler3d-app. These later builds replaced the target/release outputs; they do not change the historical hashes recorded for the paired live gate."
   },
   "release_artifacts": {
     "rust_app": {
-      "path": "target/release/builder3d-app.exe",
+      "path": "target/release/modeler3d-app.exe",
       "sha256": "0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a",
       "bytes": 16172032,
       "last_write_local": "2026-11-04T19:02:08.4679254-07:00",
@@ -54,10 +54,10 @@
       },
       "process": {
         "pid": 8516,
-        "executable_path": "E:\\Builder3D-Rust\\target\\release\\builder3d-app.exe",
+        "executable_path": "E:\\3D-Modeler\\target\\release\\modeler3d-app.exe",
         "started_at_local": "2026-11-04T21:41:12.5455145-07:00",
         "window_handle": 655598,
-        "window_title": "Builder3D - Untitled",
+        "window_title": "3D Modeler - Untitled",
         "exited_after_close": true
       }
     },
@@ -79,8 +79,8 @@
     "input_desktop": "Default",
     "session_state": 0,
     "lockapp_owned_session": false,
-    "foreground_process": "builder3d-app",
-    "window_title": "Builder3D - Untitled",
+    "foreground_process": "modeler3d-app",
+    "window_title": "3D Modeler - Untitled",
     "screen_px": [2560, 1440],
     "outer_window_px": [1296, 879],
     "client_area_px": [1280, 840],
@@ -114,7 +114,7 @@
     "png_dimensions_px": [1296, 879],
     "captured_at_local": "2026-11-04T21:42:02.9584495-07:00",
     "host_desktop_interactive": true,
-    "foreground_title": "Builder3D - Untitled",
+    "foreground_title": "3D Modeler - Untitled",
     "role": "identity_only_not_a_live_gate_pair"
   },
   "cleanup": {

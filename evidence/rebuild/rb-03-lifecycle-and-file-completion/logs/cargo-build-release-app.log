@@ -1,7 +1,7 @@
-﻿COMMAND=cargo build --release --locked -p builder3d-app --bin builder3d-app
+﻿COMMAND=cargo build --release --locked -p modeler3d-app --bin modeler3d-app
 cargo :    Compiling thiserror v2.0.21
 At line:2 char:248
-+ ... ildOutput = cargo build --release --locked -p builder3d-app --bin bui ...
++ ... ildOutput = cargo build --release --locked -p modeler3d-app --bin bui ...
 +                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     + CategoryInfo          : NotSpecified: (   Compiling thiserror v2.0.21:String) [], RemoteException
     + FullyQualifiedErrorId : NativeCommandError
@@ -106,12 +106,12 @@ At line:2 char:248
    Compiling egui-winit v0.37.0
    Compiling gpu-allocator v0.28.0
    Compiling sysinfo v0.40.0
-   Compiling builder3d-core v0.1.0 (E:\Builder3D-Rust\crates\builder3d-core)
+   Compiling modeler3d-core v0.1.0 (E:\3D-Modeler\crates\modeler3d-core)
    Compiling wgpu-core-deps-windows-linux-android v30.0.1
-   Compiling builder3d-platform v0.1.0 (E:\Builder3D-Rust\crates\builder3d-platform)
+   Compiling modeler3d-platform v0.1.0 (E:\3D-Modeler\crates\modeler3d-platform)
    Compiling egui-wgpu v0.37.0
    Compiling eframe v0.37.0
-   Compiling builder3d-viewport v0.1.0 (E:\Builder3D-Rust\crates\builder3d-viewport)
-   Compiling builder3d-app v0.1.0 (E:\Builder3D-Rust\crates\builder3d-app)
+   Compiling modeler3d-viewport v0.1.0 (E:\3D-Modeler\crates\modeler3d-viewport)
+   Compiling modeler3d-app v0.1.0 (E:\3D-Modeler\crates\modeler3d-app)
     Finished `release` profile [optimized] target(s) in 3m 51s
 EXIT_CODE=0

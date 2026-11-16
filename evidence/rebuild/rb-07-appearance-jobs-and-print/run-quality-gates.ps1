@@ -1,4 +1,4 @@
-Set-Location 'E:\Builder3D-Rust'
+Set-Location 'E:\3D-Modeler'
 . .\scripts\Initialize-BuildClang.ps1
 $ErrorActionPreference = 'Continue'
 
@@ -23,9 +23,9 @@ Invoke-Rb07Gate 'cargo-test-workspace' { cargo test --workspace --locked }
 Invoke-Rb07Gate 'cargo-clippy' { cargo clippy --workspace --all-targets --all-features --locked -- -D warnings }
 Invoke-Rb07Gate 'cargo-deny' { cargo deny check }
 Invoke-Rb07Gate 'cargo-metadata' { cargo metadata --locked --format-version 1 --no-deps }
-Invoke-Rb07Gate 'cargo-smoke' { cargo run -p builder3d-app --bin builder3d-app -- --smoke }
-Invoke-Rb07Gate 'cargo-build-release' { cargo build --release --locked -p builder3d-app --bin builder3d-app }
+Invoke-Rb07Gate 'cargo-smoke' { cargo run -p modeler3d-app --bin modeler3d-app -- --smoke }
+Invoke-Rb07Gate 'cargo-build-release' { cargo build --release --locked -p modeler3d-app --bin modeler3d-app }
 Invoke-Rb07Gate 'cargo-bloat-workspace' { cargo bloat --release --workspace }
-Invoke-Rb07Gate 'cargo-bloat-app' { cargo bloat --release -p builder3d-app --bin builder3d-app }
+Invoke-Rb07Gate 'cargo-bloat-app' { cargo bloat --release -p modeler3d-app --bin modeler3d-app }
 
 Write-Host "Results: $resultsPath"

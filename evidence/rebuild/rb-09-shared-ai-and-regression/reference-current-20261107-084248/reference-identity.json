@@ -1,7 +1,7 @@
 {
     "captured_local":  "2026-11-07T08:44:28.9386810-07:00",
     "designated_reference":  "L:\\Builder3D",
-    "designated_by":  "E:\\AGENTS.md and E:\\Builder3D-Rust\\AGENTS.md",
+    "designated_by":  "E:\\AGENTS.md and E:\\3D-Modeler\\AGENTS.md",
     "git_branch":  "main",
     "git_head":  "3a0160a95c55f68ce9f1e89d17c792816ac001df",
     "git_worktree_dirty":  true,
@@ -82,7 +82,7 @@
                               "sha256":  "2611721323a3ab57f957415f3340fa51f8d5cdc809aacb1f880f3d7482b9bb36"
                           },
                           {
-                              "path":  "scripts/builder3d_mcp.py",
+                              "path":  "scripts/modeler3d_mcp.py",
                               "bytes":  53080,
                               "last_write":  "2026-09-28T08:02:52.0000000-06:00",
                               "sha256":  "7dd9b935ee4ee7b498ee3e7e994067ba0dbbad6804d75fe0d7dae64d01923489"

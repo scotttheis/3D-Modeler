@@ -1,7 +1,7 @@
-# Builder3D Rust rewrite: R3 execution plan
+# 3D Modeler Rust rewrite: R3 execution plan
 
 This document is the persistent execution checklist for completing the R3
-mesh-operation stage in `E:\Builder3D-Rust`. It does not replace or override
+mesh-operation stage in `E:\3D-Modeler`. It does not replace or override
 the workspace rules, project `AGENTS.md` files, `E:\RustDeveloper.md`, or the
 authoritative order in section R of `L:\Builder3D\TODO.md`.
 
@@ -23,14 +23,14 @@ modified.
 
 Before changing code:
 
-1. Recheck `git status` from `E:\Builder3D-Rust`.
+1. Recheck `git status` from `E:\3D-Modeler`.
 2. Do not reset, checkout, delete, overwrite unrelated work, or commit.
 3. Read in full:
    - `E:\AGENTS.md`
-   - `E:\Builder3D-Rust\AGENTS.md`
+   - `E:\3D-Modeler\AGENTS.md`
    - `L:\Builder3D\AGENTS.md`, if applicable
    - `E:\RustDeveloper.md`
-   - `E:\Builder3D-Rust\WORK_LOG.md`
+   - `E:\3D-Modeler\WORK_LOG.md`
    - `L:\Builder3D\docs\rust-rewrite.md`
    - section R of `L:\Builder3D\TODO.md`
 4. Identify the exact R3 order from section R and do not invent a different
@@ -64,7 +64,7 @@ complete only after every listed operation and its integration tests are done.
 For every R3 operation:
 
 - Implement real Rust behavior, not a stub, placeholder, or test-only path.
-- Integrate with the existing `builder3d-core` mesh, scene, command, history,
+- Integrate with the existing `modeler3d-core` mesh, scene, command, history,
   and resource-budget architecture.
 - Preserve Python behavior for object identity, names, colors, metadata,
   transforms, visibility, selection, no-op detection, failure behavior, and
@@ -131,7 +131,7 @@ subtask is genuinely complete:
    - remaining R3 subtasks; and
    - next exact action.
 6. Create a new additive, timestamped snapshot on `G:\`.
-7. Exclude `E:\Builder3D-Rust\target`.
+7. Exclude `E:\3D-Modeler\target`.
 8. Do not modify existing snapshots.
 9. Verify the snapshot with source/backup file counts, byte totals, relative
    paths, and hashes; record missing, extra, and mismatched files.
@@ -147,7 +147,7 @@ record the blocker clearly before asking for direction.
 ## Final R3 verification
 
 After every R3 operation is complete, run all of the following from
-`E:\Builder3D-Rust`:
+`E:\3D-Modeler`:
 
 ```powershell
 cargo fmt --all -- --check
@@ -166,8 +166,8 @@ from `L:\Builder3D` again and record warnings separately from failures.
 
 Only after all R3 implementation and final verification work is complete:
 
-1. Create a new timestamped backup of `E:\Builder3D-Rust` on `G:\`.
-2. Exclude `E:\Builder3D-Rust\target`.
+1. Create a new timestamped backup of `E:\3D-Modeler` on `G:\`.
+2. Exclude `E:\3D-Modeler\target`.
 3. Do not modify existing snapshots.
 4. Verify that the backup exists.
 5. Compare source and backup file counts and byte totals.

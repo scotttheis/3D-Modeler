@@ -1,5 +1,5 @@
 ﻿$ErrorActionPreference = 'Stop'
-$projectRoot = 'E:\Builder3D-Rust'
+$projectRoot = 'E:\3D-Modeler'
 $evidenceRoot = Join-Path $projectRoot 'evidence\rebuild\rb-08-preferences-and-complete-shell\native'
 . (Join-Path $projectRoot 'evidence\rebuild\rb-04-scene-and-precise-transforms\native-ui-helper.ps1')
 $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
@@ -41,7 +41,7 @@ try {
     if ($ownerPid -eq 0) { throw 'Python reference target window did not become ready' }
     $script:rb03AppPid = $ownerPid
     $info = Get-Rb03WindowInfo $handle
-    if ($info.Title -notlike 'Builder3D - *') { throw "Unexpected Python window title: $($info.Title)" }
+    if ($info.Title -notlike '3D Modeler - *') { throw "Unexpected Python window title: $($info.Title)" }
     if ($info.ClientWidth -ne 1280 -or $info.ClientHeight -ne 840 -or $info.Dpi -ne 96) {
         throw "Unexpected reference baseline dimensions: $($info.ClientWidth)x$($info.ClientHeight), DPI $($info.Dpi)"
     }

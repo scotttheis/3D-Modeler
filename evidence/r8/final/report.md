@@ -8,7 +8,7 @@
 Date: 2026-10-30
 
 R8 is complete at the documented native eframe boundary. The Rust shell now
-presents the major Builder3D workflows coherently over the existing typed
+presents the major 3D Modeler workflows coherently over the existing typed
 command, core, viewport, platform, and print seams:
 
 - welcome/recent/new/open/save/save-as/import/export lifecycle with bounded

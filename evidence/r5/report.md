@@ -15,7 +15,7 @@ R5 is complete in the authoritative order from section R of
 
 ## Delivered
 
-- `builder3d-viewport` now has a real indexed wgpu renderer with color/depth
+- `modeler3d-viewport` now has a real indexed wgpu renderer with color/depth
   attachments, WGSL mesh lighting, floor/gizmo/contact overlays, bounded
   staging/readback, DX12/Vulkan adapter matching, and a deterministic CPU
   rasterizer fallback.
@@ -71,7 +71,7 @@ Captures: `viewport-resting.ppm`, `30m-control.ppm`, and
   allowance and duplicate transitive `hashbrown`/`syn` warnings.
 - `cargo audit` could not run because this Cargo installation has no audit
   subcommand.
-- `cargo bloat --release --package builder3d-app --bin r5_viewport -n 20`
+- `cargo bloat --release --package modeler3d-app --bin r5_viewport -n 20`
   passed: 4.0 MiB `.text`, 4.7 MiB executable.
 - Python reference checks through `L:\Builder3D\venv` ran with
   `PYTHONDONTWRITEBYTECODE=1` and `-p no:cacheprovider`: 11 gizmo/math tests,

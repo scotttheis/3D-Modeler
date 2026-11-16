@@ -5,10 +5,10 @@
 ## Capture environment and build identity
 
 - Windows 11 Enterprise; primary display 2560 × 1440 at 100% scale. Python and Rust client areas were 1280 × 840 physical/logical pixels at 96 DPI.
-- Python reference: `L:\Builder3D\venv\Scripts\pythonw.exe -m src`, Python 3.12.10. It ran with an isolated `LOCALAPPDATA` and temp directory under `E:\Builder3D-Rust\target\rb03-python-profile`.
+- Python reference: `L:\Builder3D\venv\Scripts\pythonw.exe -m src`, Python 3.12.10. It ran with an isolated `LOCALAPPDATA` and temp directory under `E:\3D-Modeler\target\rb03-python-profile`.
 - The Python reference source remained read-only. Its post-walkthrough Git status exactly matches the saved pre-capture baseline (116 lines). Original Qt settings were restored: `theme_mode=light`; `recent_files` absent; `default_import_unit` absent.
-- Rust native capture executable: `target\rb03-recents-build\debug\builder3d-app.exe`, SHA-256 `dec750d4a6ef65a1a038fd5221f5b941b9799789ec21ec31600becd18d1cd8b1`. Release executable: `target\release\builder3d-app.exe`, SHA-256 `de547662b3fca993d631b7ef931aaabd30c28f4f17dbfa629db4adc19949a999`.
-- The two applications were captured sequentially; no Builder3D Python and Rust windows overlapped. `capture-metadata.toml` records themes, dimensions, paths, and the paired image list.
+- Rust native capture executable: `target\rb03-recents-build\debug\modeler3d-app.exe`, SHA-256 `dec750d4a6ef65a1a038fd5221f5b941b9799789ec21ec31600becd18d1cd8b1`. Release executable: `target\release\modeler3d-app.exe`, SHA-256 `de547662b3fca993d631b7ef931aaabd30c28f4f17dbfa629db4adc19949a999`.
+- The two applications were captured sequentially; no 3D Modeler Python and Rust windows overlapped. `capture-metadata.toml` records themes, dimensions, paths, and the paired image list.
 
 ## Visible workflow results
 

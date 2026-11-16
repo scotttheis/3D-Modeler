@@ -18,7 +18,7 @@
  M requirements-lock.txt
  M requirements.txt
  M run_windows.bat
- M scripts/builder3d_mcp.py
+ M scripts/modeler3d_mcp.py
  M scripts/check_posix_wheels.py
  M scripts/run_pure_tests.ps1
  M scripts/verify_setup.py

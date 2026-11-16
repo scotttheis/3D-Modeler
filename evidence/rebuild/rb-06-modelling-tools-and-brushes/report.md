@@ -2,7 +2,7 @@
 
 Date: 2026-11-01  
 Reference: `L:\Builder3D` (read-only)  
-Rust project: `E:\Builder3D-Rust`
+Rust project: `E:\3D-Modeler`
 
 RB-06 is complete at its implementation, automated-test, and native-interaction
 boundary. The work stops before RB-07. Visual review and owner acceptance remain

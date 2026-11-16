@@ -1,45 +1,45 @@
-    Checking builder3d-core v0.1.0 (E:\Builder3D-Rust\crates\builder3d-core)
-    Checking builder3d-viewport v0.1.0 (E:\Builder3D-Rust\crates\builder3d-viewport)
-    Checking builder3d-app v0.1.0 (E:\Builder3D-Rust\crates\builder3d-app)
+    Checking modeler3d-core v0.1.0 (E:\3D-Modeler\crates\modeler3d-core)
+    Checking modeler3d-viewport v0.1.0 (E:\3D-Modeler\crates\modeler3d-viewport)
+    Checking modeler3d-app v0.1.0 (E:\3D-Modeler\crates\modeler3d-app)
 error: field assignment outside of initializer for an instance created with Default::default()
-    --> crates\builder3d-app\src\shell.rs:4407:9
+    --> crates\modeler3d-app\src\shell.rs:4407:9
      |
 4407 |         app.settings_path = repository_test_directory("rb04-handle-click").join("settings.json");
      |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
      |
-note: consider initializing the variable with `shell::Builder3dApp { settings_path: repository_test_directory("rb04-handle-click").join("settings.json"), ..Default::default() }` and removing relevant reassignments
-    --> crates\builder3d-app\src\shell.rs:4406:9
+note: consider initializing the variable with `shell::Modeler3dApp { settings_path: repository_test_directory("rb04-handle-click").join("settings.json"), ..Default::default() }` and removing relevant reassignments
+    --> crates\modeler3d-app\src\shell.rs:4406:9
      |
-4406 |         let mut app = Builder3dApp::default();
+4406 |         let mut app = Modeler3dApp::default();
      |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
      = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#field_reassign_with_default
      = note: `-D clippy::field-reassign-with-default` implied by `-D warnings`
      = help: to override `-D warnings` add `#[allow(clippy::field_reassign_with_default)]`
 
 error: field assignment outside of initializer for an instance created with Default::default()
-    --> crates\builder3d-app\src\shell.rs:4511:9
+    --> crates\modeler3d-app\src\shell.rs:4511:9
      |
 4511 |         app.settings_path = repository_test_directory("rb04-numeric").join("settings.json");
      |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
      |
-note: consider initializing the variable with `shell::Builder3dApp { settings_path: repository_test_directory("rb04-numeric").join("settings.json"), ..Default::default() }` and removing relevant reassignments
-    --> crates\builder3d-app\src\shell.rs:4510:9
+note: consider initializing the variable with `shell::Modeler3dApp { settings_path: repository_test_directory("rb04-numeric").join("settings.json"), ..Default::default() }` and removing relevant reassignments
+    --> crates\modeler3d-app\src\shell.rs:4510:9
      |
-4510 |         let mut app = Builder3dApp::default();
+4510 |         let mut app = Modeler3dApp::default();
      |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
      = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#field_reassign_with_default
 
 error: field assignment outside of initializer for an instance created with Default::default()
-    --> crates\builder3d-app\src\shell.rs:4562:9
+    --> crates\modeler3d-app\src\shell.rs:4562:9
      |
 4562 |         app.settings_path = repository_test_directory("rb04-focus").join("settings.json");
      |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
      |
-note: consider initializing the variable with `shell::Builder3dApp { settings_path: repository_test_directory("rb04-focus").join("settings.json"), ..Default::default() }` and removing relevant reassignments
-    --> crates\builder3d-app\src\shell.rs:4561:9
+note: consider initializing the variable with `shell::Modeler3dApp { settings_path: repository_test_directory("rb04-focus").join("settings.json"), ..Default::default() }` and removing relevant reassignments
+    --> crates\modeler3d-app\src\shell.rs:4561:9
      |
-4561 |         let mut app = Builder3dApp::default();
+4561 |         let mut app = Modeler3dApp::default();
      |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
      = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#field_reassign_with_default
 
-error: could not compile `builder3d-app` (lib test) due to 3 previous errors
+error: could not compile `modeler3d-app` (lib test) due to 3 previous errors

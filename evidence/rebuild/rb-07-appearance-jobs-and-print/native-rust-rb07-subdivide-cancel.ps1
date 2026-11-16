@@ -6,7 +6,7 @@ $projectRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..\..')).Path
 . (Join-Path $projectRoot 'evidence\rebuild\rb-04-scene-and-precise-transforms\native-ui-helper.ps1')
 
 $fixture = Join-Path $evidenceRoot 'fixtures\slow-job-closed-cube-heavy.ply'
-$executable = Join-Path $projectRoot 'target\debug\builder3d-app.exe'
+$executable = Join-Path $projectRoot 'target\debug\modeler3d-app.exe'
 $journalPath = Join-Path $evidenceRoot 'rust-subdivide-cancel-attempt3-captures.ndjson'
 $resultsPath = Join-Path $evidenceRoot 'rust-subdivide-cancel-attempt3-results.json'
 $captureRows = [System.Collections.Generic.List[object]]::new()
@@ -111,8 +111,8 @@ function Close-Rb07SubdivisionApp {
 }
 
 try {
-    if (Get-Process -Name builder3d-app -ErrorAction SilentlyContinue) {
-        throw 'A Rust Builder3D app is already open; refusing overlapping native input'
+    if (Get-Process -Name modeler3d-app -ErrorAction SilentlyContinue) {
+        throw 'A Rust 3D Modeler app is already open; refusing overlapping native input'
     }
     if ((Test-Path -LiteralPath $journalPath) -or (Test-Path -LiteralPath $resultsPath)) {
         throw 'Refusing to overwrite existing Subdivide cancellation evidence'

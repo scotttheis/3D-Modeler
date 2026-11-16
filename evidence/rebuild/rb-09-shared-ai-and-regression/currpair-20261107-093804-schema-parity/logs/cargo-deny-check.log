@@ -1,5 +1,5 @@
 warning[duplicate]: found 2 duplicate entries for crate 'bit-set'
-   ┌─ E:\Builder3D-Rust/Cargo.lock:36:1
+   ┌─ E:\3D-Modeler/Cargo.lock:36:1
    │  
 36 │ ╭ bit-set 0.8.0 registry+https://github.com/rust-lang/crates.io-index
 37 │ │ bit-set 0.10.0 registry+https://github.com/rust-lang/crates.io-index
@@ -8,21 +8,21 @@ warning[duplicate]: found 2 duplicate entries for crate 'bit-set'
    ├ bit-set v0.8.0
      └── fancy-regex v0.19.2
          └── jsonschema v0.60.2
-             └── builder3d-mcp v0.1.0
-                 └── builder3d-app v0.1.0
+             └── modeler3d-mcp v0.1.0
+                 └── modeler3d-app v0.1.0
    ├ bit-set v0.10.0
      ├── naga v30.0.1
      │   ├── wgpu-core v30.0.1
      │   │   └── wgpu v30.0.1
-     │   │       ├── builder3d-platform v0.1.0
-     │   │       │   ├── builder3d-app v0.1.0
-     │   │       │   ├── builder3d-mcp v0.1.0
-     │   │       │   │   └── builder3d-app v0.1.0 (*)
-     │   │       │   └── builder3d-viewport v0.1.0
-     │   │       │       └── builder3d-app v0.1.0 (*)
-     │   │       ├── builder3d-viewport v0.1.0 (*)
+     │   │       ├── modeler3d-platform v0.1.0
+     │   │       │   ├── modeler3d-app v0.1.0
+     │   │       │   ├── modeler3d-mcp v0.1.0
+     │   │       │   │   └── modeler3d-app v0.1.0 (*)
+     │   │       │   └── modeler3d-viewport v0.1.0
+     │   │       │       └── modeler3d-app v0.1.0 (*)
+     │   │       ├── modeler3d-viewport v0.1.0 (*)
      │   │       ├── eframe v0.37.0
-     │   │       │   └── builder3d-app v0.1.0 (*)
+     │   │       │   └── modeler3d-app v0.1.0 (*)
      │   │       └── egui-wgpu v0.37.0
      │   │           └── eframe v0.37.0 (*)
      │   ├── wgpu-hal v30.0.1
@@ -43,7 +43,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'bit-set'
      └── wgpu-hal v30.0.1 (*)
 
 warning[duplicate]: found 2 duplicate entries for crate 'bit-vec'
-   ┌─ E:\Builder3D-Rust/Cargo.lock:38:1
+   ┌─ E:\3D-Modeler/Cargo.lock:38:1
    │  
 38 │ ╭ bit-vec 0.8.0 registry+https://github.com/rust-lang/crates.io-index
 39 │ │ bit-vec 0.9.1 registry+https://github.com/rust-lang/crates.io-index
@@ -53,22 +53,22 @@ warning[duplicate]: found 2 duplicate entries for crate 'bit-vec'
      └── bit-set v0.8.0
          └── fancy-regex v0.19.2
              └── jsonschema v0.60.2
-                 └── builder3d-mcp v0.1.0
-                     └── builder3d-app v0.1.0
+                 └── modeler3d-mcp v0.1.0
+                     └── modeler3d-app v0.1.0
    ├ bit-vec v0.9.1
      ├── bit-set v0.10.0
      │   ├── naga v30.0.1
      │   │   ├── wgpu-core v30.0.1
      │   │   │   └── wgpu v30.0.1
-     │   │   │       ├── builder3d-platform v0.1.0
-     │   │   │       │   ├── builder3d-app v0.1.0
-     │   │   │       │   ├── builder3d-mcp v0.1.0
-     │   │   │       │   │   └── builder3d-app v0.1.0 (*)
-     │   │   │       │   └── builder3d-viewport v0.1.0
-     │   │   │       │       └── builder3d-app v0.1.0 (*)
-     │   │   │       ├── builder3d-viewport v0.1.0 (*)
+     │   │   │       ├── modeler3d-platform v0.1.0
+     │   │   │       │   ├── modeler3d-app v0.1.0
+     │   │   │       │   ├── modeler3d-mcp v0.1.0
+     │   │   │       │   │   └── modeler3d-app v0.1.0 (*)
+     │   │   │       │   └── modeler3d-viewport v0.1.0
+     │   │   │       │       └── modeler3d-app v0.1.0 (*)
+     │   │   │       ├── modeler3d-viewport v0.1.0 (*)
      │   │   │       ├── eframe v0.37.0
-     │   │   │       │   └── builder3d-app v0.1.0 (*)
+     │   │   │       │   └── modeler3d-app v0.1.0 (*)
      │   │   │       └── egui-wgpu v0.37.0
      │   │   │           └── eframe v0.37.0 (*)
      │   │   ├── wgpu-hal v30.0.1
@@ -90,7 +90,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'bit-vec'
      └── wgpu-core v30.0.1 (*)
 
 warning[duplicate]: found 2 duplicate entries for crate 'bitflags'
-   ┌─ E:\Builder3D-Rust/Cargo.lock:40:1
+   ┌─ E:\3D-Modeler/Cargo.lock:40:1
    │  
 40 │ ╭ bitflags 1.3.2 registry+https://github.com/rust-lang/crates.io-index
 41 │ │ bitflags 2.13.2 registry+https://github.com/rust-lang/crates.io-index
@@ -102,7 +102,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'bitflags'
      │       ├── accesskit_winit v0.34.2
      │       │   └── egui-winit v0.37.0
      │       │       └── eframe v0.37.0
-     │       │           └── builder3d-app v0.1.0
+     │       │           └── modeler3d-app v0.1.0
      │       ├── eframe v0.37.0 (*)
      │       ├── egui-wgpu v0.37.0
      │       │   └── eframe v0.37.0 (*)
@@ -117,7 +117,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'bitflags'
      │       ├── accesskit_winit v0.34.2
      │       │   └── egui-winit v0.37.0
      │       │       └── eframe v0.37.0
-     │       │           └── builder3d-app v0.1.0
+     │       │           └── modeler3d-app v0.1.0
      │       ├── eframe v0.37.0 (*)
      │       ├── egui-wgpu v0.37.0
      │       │   └── eframe v0.37.0 (*)
@@ -125,12 +125,12 @@ warning[duplicate]: found 2 duplicate entries for crate 'bitflags'
      ├── bindgen v0.72.1
      │   └── (build) qhull-sys v0.4.1
      │       └── qhull v0.4.1
-     │           └── builder3d-core v0.1.0
-     │               ├── builder3d-app v0.1.0 (*)
-     │               ├── builder3d-mcp v0.1.0
-     │               │   └── builder3d-app v0.1.0 (*)
-     │               └── builder3d-viewport v0.1.0
-     │                   └── builder3d-app v0.1.0 (*)
+     │           └── modeler3d-core v0.1.0
+     │               ├── modeler3d-app v0.1.0 (*)
+     │               ├── modeler3d-mcp v0.1.0
+     │               │   └── modeler3d-app v0.1.0 (*)
+     │               └── modeler3d-viewport v0.1.0
+     │                   └── modeler3d-app v0.1.0 (*)
      ├── calloop v0.13.0
      │   ├── calloop-wayland-source v0.3.0
      │   │   └── smithay-client-toolkit v0.19.2
@@ -145,7 +145,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'bitflags'
      │   └── smithay-client-toolkit v0.20.0 (*)
      ├── dispatch2 v0.3.1
      │   └── rfd v0.17.2
-     │       └── builder3d-app v0.1.0 (*)
+     │       └── modeler3d-app v0.1.0 (*)
      ├── egui v0.37.0
      │   ├── eframe v0.37.0 (*)
      │   ├── egui-wgpu v0.37.0 (*)
@@ -160,11 +160,11 @@ warning[duplicate]: found 2 duplicate entries for crate 'bitflags'
      ├── naga v30.0.1
      │   ├── wgpu-core v30.0.1
      │   │   └── wgpu v30.0.1
-     │   │       ├── builder3d-platform v0.1.0
-     │   │       │   ├── builder3d-app v0.1.0 (*)
-     │   │       │   ├── builder3d-mcp v0.1.0 (*)
-     │   │       │   └── builder3d-viewport v0.1.0 (*)
-     │   │       ├── builder3d-viewport v0.1.0 (*)
+     │   │       ├── modeler3d-platform v0.1.0
+     │   │       │   ├── modeler3d-app v0.1.0 (*)
+     │   │       │   ├── modeler3d-mcp v0.1.0 (*)
+     │   │       │   └── modeler3d-viewport v0.1.0 (*)
+     │   │       ├── modeler3d-viewport v0.1.0 (*)
      │   │       ├── eframe v0.37.0 (*)
      │   │       └── egui-wgpu v0.37.0 (*)
      │   ├── wgpu-hal v30.0.1
@@ -186,8 +186,8 @@ warning[duplicate]: found 2 duplicate entries for crate 'bitflags'
      │   └── winit v0.30.13 (*)
      ├── nix v0.31.3
      │   └── zip v9.1.3
-     │       ├── builder3d-app v0.1.0 (*)
-     │       └── builder3d-core v0.1.0 (*)
+     │       ├── modeler3d-app v0.1.0 (*)
+     │       └── modeler3d-core v0.1.0 (*)
      ├── objc2-app-kit v0.2.2
      │   ├── accesskit_macos v0.27.2
      │   │   └── accesskit_winit v0.34.2 (*)
@@ -224,7 +224,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'bitflags'
      │   │   └── wgpu-hal v30.0.1 (*)
      │   ├── objc2-io-kit v0.3.2
      │   │   └── sysinfo v0.40.0
-     │   │       └── builder3d-platform v0.1.0 (*)
+     │   │       └── modeler3d-platform v0.1.0 (*)
      │   ├── objc2-quartz-core v0.3.2 (*)
      │   ├── objc2-ui-kit v0.3.2 (*)
      │   ├── raw-window-metal v1.1.0 (*)
@@ -249,7 +249,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'bitflags'
      ├── png v0.18.1
      │   └── image v0.25.10
      │       ├── arboard v3.7.0 (*)
-     │       ├── builder3d-app v0.1.0 (*)
+     │       ├── modeler3d-app v0.1.0 (*)
      │       └── eframe v0.37.0 (*)
      ├── redox_syscall v0.5.18
      │   └── parking_lot_core v0.9.12
@@ -259,7 +259,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'bitflags'
      │           ├── epaint v0.37.0 (*)
      │           ├── referencing v0.60.2
      │           │   └── jsonschema v0.60.2
-     │           │       └── builder3d-mcp v0.1.0 (*)
+     │           │       └── modeler3d-mcp v0.1.0 (*)
      │           ├── wgpu v30.0.1 (*)
      │           ├── wgpu-core v30.0.1 (*)
      │           └── wgpu-hal v30.0.1 (*)
@@ -381,7 +381,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'bitflags'
          └── winit v0.30.13 (*)
 
 warning[duplicate]: found 2 duplicate entries for crate 'block2'
-   ┌─ E:\Builder3D-Rust/Cargo.lock:43:1
+   ┌─ E:\3D-Modeler/Cargo.lock:43:1
    │  
 43 │ ╭ block2 0.5.1 registry+https://github.com/rust-lang/crates.io-index
 44 │ │ block2 0.6.2 registry+https://github.com/rust-lang/crates.io-index
@@ -393,7 +393,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'block2'
      │   │   └── accesskit_winit v0.34.2
      │   │       └── egui-winit v0.37.0
      │   │           └── eframe v0.37.0
-     │   │               └── builder3d-app v0.1.0
+     │   │               └── modeler3d-app v0.1.0
      │   ├── accesskit_macos v0.27.2
      │   │   └── accesskit_winit v0.34.2 (*)
      │   ├── objc2-app-kit v0.2.2
@@ -412,10 +412,10 @@ warning[duplicate]: found 2 duplicate entries for crate 'block2'
    ├ block2 v0.6.2
      ├── dispatch2 v0.3.1
      │   └── rfd v0.17.2
-     │       └── builder3d-app v0.1.0
+     │       └── modeler3d-app v0.1.0
      ├── egui-winit v0.37.0
      │   └── eframe v0.37.0
-     │       └── builder3d-app v0.1.0 (*)
+     │       └── modeler3d-app v0.1.0 (*)
      ├── objc2-app-kit v0.3.2
      │   ├── arboard v3.7.0
      │   │   └── egui-winit v0.37.0 (*)
@@ -432,13 +432,13 @@ warning[duplicate]: found 2 duplicate entries for crate 'block2'
      │   │   │   ├── raw-window-metal v1.1.0
      │   │   │   │   └── wgpu-hal v30.0.1
      │   │   │   │       ├── wgpu v30.0.1
-     │   │   │   │       │   ├── builder3d-platform v0.1.0
-     │   │   │   │       │   │   ├── builder3d-app v0.1.0 (*)
-     │   │   │   │       │   │   ├── builder3d-mcp v0.1.0
-     │   │   │   │       │   │   │   └── builder3d-app v0.1.0 (*)
-     │   │   │   │       │   │   └── builder3d-viewport v0.1.0
-     │   │   │   │       │   │       └── builder3d-app v0.1.0 (*)
-     │   │   │   │       │   ├── builder3d-viewport v0.1.0 (*)
+     │   │   │   │       │   ├── modeler3d-platform v0.1.0
+     │   │   │   │       │   │   ├── modeler3d-app v0.1.0 (*)
+     │   │   │   │       │   │   ├── modeler3d-mcp v0.1.0
+     │   │   │   │       │   │   │   └── modeler3d-app v0.1.0 (*)
+     │   │   │   │       │   │   └── modeler3d-viewport v0.1.0
+     │   │   │   │       │   │       └── modeler3d-app v0.1.0 (*)
+     │   │   │   │       │   ├── modeler3d-viewport v0.1.0 (*)
      │   │   │   │       │   ├── eframe v0.37.0 (*)
      │   │   │   │       │   └── egui-wgpu v0.37.0
      │   │   │   │       │       └── eframe v0.37.0 (*)
@@ -465,7 +465,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'block2'
      └── wgpu-hal v30.0.1 (*)
 
 warning[duplicate]: found 2 duplicate entries for crate 'calloop'
-   ┌─ E:\Builder3D-Rust/Cargo.lock:58:1
+   ┌─ E:\3D-Modeler/Cargo.lock:58:1
    │  
 58 │ ╭ calloop 0.13.0 registry+https://github.com/rust-lang/crates.io-index
 59 │ │ calloop 0.14.5 registry+https://github.com/rust-lang/crates.io-index
@@ -478,7 +478,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'calloop'
      │           ├── accesskit_winit v0.34.2
      │           │   └── egui-winit v0.37.0
      │           │       └── eframe v0.37.0
-     │           │           └── builder3d-app v0.1.0
+     │           │           └── modeler3d-app v0.1.0
      │           ├── eframe v0.37.0 (*)
      │           ├── egui-wgpu v0.37.0
      │           │   └── eframe v0.37.0 (*)
@@ -491,11 +491,11 @@ warning[duplicate]: found 2 duplicate entries for crate 'calloop'
      │       └── smithay-clipboard v0.7.3
      │           └── egui-winit v0.37.0
      │               └── eframe v0.37.0
-     │                   └── builder3d-app v0.1.0
+     │                   └── modeler3d-app v0.1.0
      └── smithay-client-toolkit v0.20.0 (*)
 
 warning[duplicate]: found 2 duplicate entries for crate 'calloop-wayland-source'
-   ┌─ E:\Builder3D-Rust/Cargo.lock:60:1
+   ┌─ E:\3D-Modeler/Cargo.lock:60:1
    │  
 60 │ ╭ calloop-wayland-source 0.3.0 registry+https://github.com/rust-lang/crates.io-index
 61 │ │ calloop-wayland-source 0.4.1 registry+https://github.com/rust-lang/crates.io-index
@@ -507,7 +507,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'calloop-wayland-source'
              ├── accesskit_winit v0.34.2
              │   └── egui-winit v0.37.0
              │       └── eframe v0.37.0
-             │           └── builder3d-app v0.1.0
+             │           └── modeler3d-app v0.1.0
              ├── eframe v0.37.0 (*)
              ├── egui-wgpu v0.37.0
              │   └── eframe v0.37.0 (*)
@@ -517,10 +517,10 @@ warning[duplicate]: found 2 duplicate entries for crate 'calloop-wayland-source'
          └── smithay-clipboard v0.7.3
              └── egui-winit v0.37.0
                  └── eframe v0.37.0
-                     └── builder3d-app v0.1.0
+                     └── modeler3d-app v0.1.0
 
 warning[duplicate]: found 2 duplicate entries for crate 'foldhash'
-    ┌─ E:\Builder3D-Rust/Cargo.lock:126:1
+    ┌─ E:\3D-Modeler/Cargo.lock:126:1
     │  
 126 │ ╭ foldhash 0.1.5 registry+https://github.com/rust-lang/crates.io-index
 127 │ │ foldhash 0.2.0 registry+https://github.com/rust-lang/crates.io-index
@@ -529,33 +529,33 @@ warning[duplicate]: found 2 duplicate entries for crate 'foldhash'
     ├ foldhash v0.1.5
       └── hashbrown v0.15.5
           ├── fontdue v0.9.5
-          │   └── builder3d-core v0.1.0
-          │       ├── builder3d-app v0.1.0
-          │       ├── builder3d-mcp v0.1.0
-          │       │   └── builder3d-app v0.1.0 (*)
-          │       └── builder3d-viewport v0.1.0
-          │           └── builder3d-app v0.1.0 (*)
+          │   └── modeler3d-core v0.1.0
+          │       ├── modeler3d-app v0.1.0
+          │       ├── modeler3d-mcp v0.1.0
+          │       │   └── modeler3d-app v0.1.0 (*)
+          │       └── modeler3d-viewport v0.1.0
+          │           └── modeler3d-app v0.1.0 (*)
           └── petgraph v0.8.3
               └── tree_magic_mini v3.2.2
                   └── wl-clipboard-rs v0.9.5
                       └── arboard v3.7.0
                           └── egui-winit v0.37.0
                               └── eframe v0.37.0
-                                  └── builder3d-app v0.1.0 (*)
+                                  └── modeler3d-app v0.1.0 (*)
     ├ foldhash v0.2.0
       ├── hashbrown v0.16.1
       │   └── gpu-allocator v0.28.0
       │       └── wgpu-hal v30.0.1
       │           ├── wgpu v30.0.1
-      │           │   ├── builder3d-platform v0.1.0
-      │           │   │   ├── builder3d-app v0.1.0
-      │           │   │   ├── builder3d-mcp v0.1.0
-      │           │   │   │   └── builder3d-app v0.1.0 (*)
-      │           │   │   └── builder3d-viewport v0.1.0
-      │           │   │       └── builder3d-app v0.1.0 (*)
-      │           │   ├── builder3d-viewport v0.1.0 (*)
+      │           │   ├── modeler3d-platform v0.1.0
+      │           │   │   ├── modeler3d-app v0.1.0
+      │           │   │   ├── modeler3d-mcp v0.1.0
+      │           │   │   │   └── modeler3d-app v0.1.0 (*)
+      │           │   │   └── modeler3d-viewport v0.1.0
+      │           │   │       └── modeler3d-app v0.1.0 (*)
+      │           │   ├── modeler3d-viewport v0.1.0 (*)
       │           │   ├── eframe v0.37.0
-      │           │   │   └── builder3d-app v0.1.0 (*)
+      │           │   │   └── modeler3d-app v0.1.0 (*)
       │           │   └── egui-wgpu v0.37.0
       │           │       └── eframe v0.37.0 (*)
       │           ├── wgpu-core v30.0.1
@@ -606,7 +606,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'foldhash'
           │   │           └── arboard v3.7.0
           │   │               └── egui-winit v0.37.0 (*)
           │   ├── rmcp v3.8.0
-          │   │   └── builder3d-mcp v0.1.0 (*)
+          │   │   └── modeler3d-mcp v0.1.0 (*)
           │   ├── toml_edit v0.25.17+spec-1.1.0
           │   │   └── proc-macro-crate v3.5.0
           │   │       ├── num_enum_derive v0.7.6
@@ -651,16 +651,16 @@ warning[duplicate]: found 2 duplicate entries for crate 'foldhash'
           │   │               └── zbus_xml v5.2.1 (*)
           │   ├── wgpu-core v30.0.1 (*)
           │   └── zip v9.1.3
-          │       ├── builder3d-app v0.1.0 (*)
-          │       └── builder3d-core v0.1.0
-          │           ├── builder3d-app v0.1.0 (*)
-          │           ├── builder3d-mcp v0.1.0 (*)
-          │           └── builder3d-viewport v0.1.0 (*)
+          │       ├── modeler3d-app v0.1.0 (*)
+          │       └── modeler3d-core v0.1.0
+          │           ├── modeler3d-app v0.1.0 (*)
+          │           ├── modeler3d-mcp v0.1.0 (*)
+          │           └── modeler3d-viewport v0.1.0 (*)
           ├── naga v30.0.1 (*)
           ├── naga-types v30.0.1 (*)
           ├── referencing v0.60.2
           │   └── jsonschema v0.60.2
-          │       └── builder3d-mcp v0.1.0 (*)
+          │       └── modeler3d-mcp v0.1.0 (*)
           ├── vello_cpu v0.2.0
           │   └── epaint v0.37.0
           │       ├── egui v0.37.0
@@ -673,7 +673,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'foldhash'
           └── wgpu-hal v30.0.1 (*)
 
 warning[duplicate]: found 2 duplicate entries for crate 'getrandom'
-    ┌─ E:\Builder3D-Rust/Cargo.lock:146:1
+    ┌─ E:\3D-Modeler/Cargo.lock:146:1
     │  
 146 │ ╭ getrandom 0.3.4 registry+https://github.com/rust-lang/crates.io-index
 147 │ │ getrandom 0.4.3 registry+https://github.com/rust-lang/crates.io-index
@@ -682,7 +682,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'getrandom'
     ├ getrandom v0.3.4
       ├── ahash v0.8.12
       │   ├── eframe v0.37.0
-      │   │   └── builder3d-app v0.1.0
+      │   │   └── modeler3d-app v0.1.0
       │   ├── egui v0.37.0
       │   │   ├── eframe v0.37.0 (*)
       │   │   ├── egui-wgpu v0.37.0
@@ -694,8 +694,8 @@ warning[duplicate]: found 2 duplicate entries for crate 'getrandom'
       │   │   ├── egui v0.37.0 (*)
       │   │   └── egui-wgpu v0.37.0 (*)
       │   ├── jsonschema v0.60.2
-      │   │   └── builder3d-mcp v0.1.0
-      │   │       └── builder3d-app v0.1.0 (*)
+      │   │   └── modeler3d-mcp v0.1.0
+      │   │       └── modeler3d-app v0.1.0 (*)
       │   ├── jsonschema-value v0.60.2
       │   │   └── jsonschema v0.60.2 (*)
       │   ├── referencing v0.60.2
@@ -717,7 +717,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'getrandom'
       │       │       ├── accesskit_winit v0.34.2
       │       │       │   └── egui-winit v0.37.0
       │       │       │       └── eframe v0.37.0
-      │       │       │           └── builder3d-app v0.1.0
+      │       │       │           └── modeler3d-app v0.1.0
       │       │       ├── eframe v0.37.0 (*)
       │       │       ├── egui-wgpu v0.37.0
       │       │       │   └── eframe v0.37.0 (*)
@@ -725,23 +725,23 @@ warning[duplicate]: found 2 duplicate entries for crate 'getrandom'
       │       ├── cmake v0.1.58
       │       │   └── (build) manifold-csg-sys v3.5.105
       │       │       └── manifold-csg v0.4.1
-      │       │           └── builder3d-core v0.1.0
-      │       │               ├── builder3d-app v0.1.0 (*)
-      │       │               ├── builder3d-mcp v0.1.0
-      │       │               │   └── builder3d-app v0.1.0 (*)
-      │       │               └── builder3d-viewport v0.1.0
-      │       │                   └── builder3d-app v0.1.0 (*)
+      │       │           └── modeler3d-core v0.1.0
+      │       │               ├── modeler3d-app v0.1.0 (*)
+      │       │               ├── modeler3d-mcp v0.1.0
+      │       │               │   └── modeler3d-app v0.1.0 (*)
+      │       │               └── modeler3d-viewport v0.1.0
+      │       │                   └── modeler3d-app v0.1.0 (*)
       │       ├── (build) iana-time-zone-haiku v0.1.2
       │       │   └── iana-time-zone v0.1.65
       │       │       └── chrono v0.4.45
       │       │           ├── rmcp v3.8.0
-      │       │           │   └── builder3d-mcp v0.1.0 (*)
+      │       │           │   └── modeler3d-mcp v0.1.0 (*)
       │       │           └── schemars v1.0.4
-      │       │               ├── builder3d-mcp v0.1.0 (*)
+      │       │               ├── modeler3d-mcp v0.1.0 (*)
       │       │               └── rmcp v3.8.0 (*)
       │       ├── (build) qhull-sys v0.4.1
       │       │   └── qhull v0.4.1
-      │       │       └── builder3d-core v0.1.0 (*)
+      │       │       └── modeler3d-core v0.1.0 (*)
       │       └── (build) wayland-backend v0.3.17
       │           ├── calloop-wayland-source v0.3.0
       │           │   └── smithay-client-toolkit v0.19.2
@@ -751,7 +751,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'getrandom'
       │           │       └── smithay-clipboard v0.7.3
       │           │           └── egui-winit v0.37.0 (*)
       │           ├── rfd v0.17.2
-      │           │   └── builder3d-app v0.1.0 (*)
+      │           │   └── modeler3d-app v0.1.0 (*)
       │           ├── smithay-client-toolkit v0.19.2 (*)
       │           ├── smithay-client-toolkit v0.20.0 (*)
       │           ├── smithay-clipboard v0.7.3 (*)
@@ -831,17 +831,17 @@ warning[duplicate]: found 2 duplicate entries for crate 'getrandom'
       │   │       ├── eframe v0.37.0 (*)
       │   │       ├── egui-wgpu v0.37.0 (*)
       │   │       └── egui-winit v0.37.0 (*)
-      │   ├── builder3d-app v0.1.0 (*)
-      │   ├── builder3d-core v0.1.0 (*)
-      │   ├── builder3d-mcp v0.1.0 (*)
+      │   ├── modeler3d-app v0.1.0 (*)
+      │   ├── modeler3d-core v0.1.0 (*)
+      │   ├── modeler3d-mcp v0.1.0 (*)
       │   ├── rmcp v3.8.0 (*)
       │   └── zbus v5.19.0 (*)
       └── zip v9.1.3
-          ├── builder3d-app v0.1.0 (*)
-          └── builder3d-core v0.1.0 (*)
+          ├── modeler3d-app v0.1.0 (*)
+          └── modeler3d-core v0.1.0 (*)
 
 warning[duplicate]: found 3 duplicate entries for crate 'hashbrown'
-    ┌─ E:\Builder3D-Rust/Cargo.lock:157:1
+    ┌─ E:\3D-Modeler/Cargo.lock:157:1
     │  
 157 │ ╭ hashbrown 0.15.5 registry+https://github.com/rust-lang/crates.io-index
 158 │ │ hashbrown 0.16.1 registry+https://github.com/rust-lang/crates.io-index
@@ -850,32 +850,32 @@ warning[duplicate]: found 3 duplicate entries for crate 'hashbrown'
     │  
     ├ hashbrown v0.15.5
       ├── fontdue v0.9.5
-      │   └── builder3d-core v0.1.0
-      │       ├── builder3d-app v0.1.0
-      │       ├── builder3d-mcp v0.1.0
-      │       │   └── builder3d-app v0.1.0 (*)
-      │       └── builder3d-viewport v0.1.0
-      │           └── builder3d-app v0.1.0 (*)
+      │   └── modeler3d-core v0.1.0
+      │       ├── modeler3d-app v0.1.0
+      │       ├── modeler3d-mcp v0.1.0
+      │       │   └── modeler3d-app v0.1.0 (*)
+      │       └── modeler3d-viewport v0.1.0
+      │           └── modeler3d-app v0.1.0 (*)
       └── petgraph v0.8.3
           └── tree_magic_mini v3.2.2
               └── wl-clipboard-rs v0.9.5
                   └── arboard v3.7.0
                       └── egui-winit v0.37.0
                           └── eframe v0.37.0
-                              └── builder3d-app v0.1.0 (*)
+                              └── modeler3d-app v0.1.0 (*)
     ├ hashbrown v0.16.1
       └── gpu-allocator v0.28.0
           └── wgpu-hal v30.0.1
               ├── wgpu v30.0.1
-              │   ├── builder3d-platform v0.1.0
-              │   │   ├── builder3d-app v0.1.0
-              │   │   ├── builder3d-mcp v0.1.0
-              │   │   │   └── builder3d-app v0.1.0 (*)
-              │   │   └── builder3d-viewport v0.1.0
-              │   │       └── builder3d-app v0.1.0 (*)
-              │   ├── builder3d-viewport v0.1.0 (*)
+              │   ├── modeler3d-platform v0.1.0
+              │   │   ├── modeler3d-app v0.1.0
+              │   │   ├── modeler3d-mcp v0.1.0
+              │   │   │   └── modeler3d-app v0.1.0 (*)
+              │   │   └── modeler3d-viewport v0.1.0
+              │   │       └── modeler3d-app v0.1.0 (*)
+              │   ├── modeler3d-viewport v0.1.0 (*)
               │   ├── eframe v0.37.0
-              │   │   └── builder3d-app v0.1.0 (*)
+              │   │   └── modeler3d-app v0.1.0 (*)
               │   └── egui-wgpu v0.37.0
               │       └── eframe v0.37.0 (*)
               ├── wgpu-core v30.0.1
@@ -895,7 +895,7 @@ warning[duplicate]: found 3 duplicate entries for crate 'hashbrown'
       │   │       └── accesskit_winit v0.34.2
       │   │           └── egui-winit v0.37.0
       │   │               └── eframe v0.37.0
-      │   │                   └── builder3d-app v0.1.0
+      │   │                   └── modeler3d-app v0.1.0
       │   ├── accesskit_ios v0.2.2
       │   │   └── accesskit_winit v0.34.2 (*)
       │   ├── accesskit_macos v0.27.2
@@ -909,13 +909,13 @@ warning[duplicate]: found 3 duplicate entries for crate 'hashbrown'
       │   ├── naga v30.0.1
       │   │   ├── wgpu-core v30.0.1
       │   │   │   └── wgpu v30.0.1
-      │   │   │       ├── builder3d-platform v0.1.0
-      │   │   │       │   ├── builder3d-app v0.1.0 (*)
-      │   │   │       │   ├── builder3d-mcp v0.1.0
-      │   │   │       │   │   └── builder3d-app v0.1.0 (*)
-      │   │   │       │   └── builder3d-viewport v0.1.0
-      │   │   │       │       └── builder3d-app v0.1.0 (*)
-      │   │   │       ├── builder3d-viewport v0.1.0 (*)
+      │   │   │       ├── modeler3d-platform v0.1.0
+      │   │   │       │   ├── modeler3d-app v0.1.0 (*)
+      │   │   │       │   ├── modeler3d-mcp v0.1.0
+      │   │   │       │   │   └── modeler3d-app v0.1.0 (*)
+      │   │   │       │   └── modeler3d-viewport v0.1.0
+      │   │   │       │       └── modeler3d-app v0.1.0 (*)
+      │   │   │       ├── modeler3d-viewport v0.1.0 (*)
       │   │   │       ├── eframe v0.37.0 (*)
       │   │   │       └── egui-wgpu v0.37.0
       │   │   │           └── eframe v0.37.0 (*)
@@ -948,7 +948,7 @@ warning[duplicate]: found 3 duplicate entries for crate 'hashbrown'
       │   │           └── arboard v3.7.0
       │   │               └── egui-winit v0.37.0 (*)
       │   ├── rmcp v3.8.0
-      │   │   └── builder3d-mcp v0.1.0 (*)
+      │   │   └── modeler3d-mcp v0.1.0 (*)
       │   ├── toml_edit v0.25.17+spec-1.1.0
       │   │   └── proc-macro-crate v3.5.0
       │   │       ├── num_enum_derive v0.7.6
@@ -993,16 +993,16 @@ warning[duplicate]: found 3 duplicate entries for crate 'hashbrown'
       │   │               └── zbus_xml v5.2.1 (*)
       │   ├── wgpu-core v30.0.1 (*)
       │   └── zip v9.1.3
-      │       ├── builder3d-app v0.1.0 (*)
-      │       └── builder3d-core v0.1.0
-      │           ├── builder3d-app v0.1.0 (*)
-      │           ├── builder3d-mcp v0.1.0 (*)
-      │           └── builder3d-viewport v0.1.0 (*)
+      │       ├── modeler3d-app v0.1.0 (*)
+      │       └── modeler3d-core v0.1.0
+      │           ├── modeler3d-app v0.1.0 (*)
+      │           ├── modeler3d-mcp v0.1.0 (*)
+      │           └── modeler3d-viewport v0.1.0 (*)
       ├── naga v30.0.1 (*)
       ├── naga-types v30.0.1 (*)
       ├── referencing v0.60.2
       │   └── jsonschema v0.60.2
-      │       └── builder3d-mcp v0.1.0 (*)
+      │       └── modeler3d-mcp v0.1.0 (*)
       ├── vello_cpu v0.2.0
       │   └── epaint v0.37.0
       │       ├── egui v0.37.0
@@ -1015,7 +1015,7 @@ warning[duplicate]: found 3 duplicate entries for crate 'hashbrown'
       └── wgpu-hal v30.0.1 (*)
 
 warning[duplicate]: found 2 duplicate entries for crate 'itertools'
-    ┌─ E:\Builder3D-Rust/Cargo.lock:169:1
+    ┌─ E:\3D-Modeler/Cargo.lock:169:1
     │  
 169 │ ╭ itertools 0.13.0 registry+https://github.com/rust-lang/crates.io-index
 170 │ │ itertools 0.15.0 registry+https://github.com/rust-lang/crates.io-index
@@ -1025,23 +1025,23 @@ warning[duplicate]: found 2 duplicate entries for crate 'itertools'
       └── bindgen v0.72.1
           └── (build) qhull-sys v0.4.1
               └── qhull v0.4.1
-                  └── builder3d-core v0.1.0
-                      ├── builder3d-app v0.1.0
-                      ├── builder3d-mcp v0.1.0
-                      │   └── builder3d-app v0.1.0 (*)
-                      └── builder3d-viewport v0.1.0
-                          └── builder3d-app v0.1.0 (*)
+                  └── modeler3d-core v0.1.0
+                      ├── modeler3d-app v0.1.0
+                      ├── modeler3d-mcp v0.1.0
+                      │   └── modeler3d-app v0.1.0 (*)
+                      └── modeler3d-viewport v0.1.0
+                          └── modeler3d-app v0.1.0 (*)
     ├ itertools v0.15.0
       └── egui v0.37.0
           ├── eframe v0.37.0
-          │   └── builder3d-app v0.1.0
+          │   └── modeler3d-app v0.1.0
           ├── egui-wgpu v0.37.0
           │   └── eframe v0.37.0 (*)
           └── egui-winit v0.37.0
               └── eframe v0.37.0 (*)
 
 warning[duplicate]: found 2 duplicate entries for crate 'jni-sys'
-    ┌─ E:\Builder3D-Rust/Cargo.lock:174:1
+    ┌─ E:\3D-Modeler/Cargo.lock:174:1
     │  
 174 │ ╭ jni-sys 0.3.1 registry+https://github.com/rust-lang/crates.io-index
 175 │ │ jni-sys 0.4.1 registry+https://github.com/rust-lang/crates.io-index
@@ -1054,7 +1054,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'jni-sys'
       │   │       ├── accesskit_winit v0.34.2
       │   │       │   └── egui-winit v0.37.0
       │   │       │       └── eframe v0.37.0
-      │   │       │           └── builder3d-app v0.1.0
+      │   │       │           └── modeler3d-app v0.1.0
       │   │       ├── eframe v0.37.0 (*)
       │   │       ├── egui-wgpu v0.37.0
       │   │       │   └── eframe v0.37.0 (*)
@@ -1065,13 +1065,13 @@ warning[duplicate]: found 2 duplicate entries for crate 'jni-sys'
           ├── ndk v0.9.0 (*)
           └── wgpu-hal v30.0.1
               ├── wgpu v30.0.1
-              │   ├── builder3d-platform v0.1.0
-              │   │   ├── builder3d-app v0.1.0 (*)
-              │   │   ├── builder3d-mcp v0.1.0
-              │   │   │   └── builder3d-app v0.1.0 (*)
-              │   │   └── builder3d-viewport v0.1.0
-              │   │       └── builder3d-app v0.1.0 (*)
-              │   ├── builder3d-viewport v0.1.0 (*)
+              │   ├── modeler3d-platform v0.1.0
+              │   │   ├── modeler3d-app v0.1.0 (*)
+              │   │   ├── modeler3d-mcp v0.1.0
+              │   │   │   └── modeler3d-app v0.1.0 (*)
+              │   │   └── modeler3d-viewport v0.1.0
+              │   │       └── modeler3d-app v0.1.0 (*)
+              │   ├── modeler3d-viewport v0.1.0 (*)
               │   ├── eframe v0.37.0 (*)
               │   └── egui-wgpu v0.37.0 (*)
               ├── wgpu-core v30.0.1
@@ -1091,7 +1091,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'jni-sys'
       │           ├── accesskit_winit v0.34.2
       │           │   └── egui-winit v0.37.0
       │           │       └── eframe v0.37.0
-      │           │           └── builder3d-app v0.1.0
+      │           │           └── modeler3d-app v0.1.0
       │           ├── eframe v0.37.0 (*)
       │           ├── egui-wgpu v0.37.0
       │           │   └── eframe v0.37.0 (*)
@@ -1105,13 +1105,13 @@ warning[duplicate]: found 2 duplicate entries for crate 'jni-sys'
               ├── ndk v0.9.0 (*)
               └── wgpu-hal v30.0.1
                   ├── wgpu v30.0.1
-                  │   ├── builder3d-platform v0.1.0
-                  │   │   ├── builder3d-app v0.1.0 (*)
-                  │   │   ├── builder3d-mcp v0.1.0
-                  │   │   │   └── builder3d-app v0.1.0 (*)
-                  │   │   └── builder3d-viewport v0.1.0
-                  │   │       └── builder3d-app v0.1.0 (*)
-                  │   ├── builder3d-viewport v0.1.0 (*)
+                  │   ├── modeler3d-platform v0.1.0
+                  │   │   ├── modeler3d-app v0.1.0 (*)
+                  │   │   ├── modeler3d-mcp v0.1.0
+                  │   │   │   └── modeler3d-app v0.1.0 (*)
+                  │   │   └── modeler3d-viewport v0.1.0
+                  │   │       └── modeler3d-app v0.1.0 (*)
+                  │   ├── modeler3d-viewport v0.1.0 (*)
                   │   ├── eframe v0.37.0 (*)
                   │   └── egui-wgpu v0.37.0 (*)
                   ├── wgpu-core v30.0.1
@@ -1126,7 +1126,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'jni-sys'
                       └── wgpu-core v30.0.1 (*)
 
 warning[duplicate]: found 2 duplicate entries for crate 'linux-raw-sys'
-    ┌─ E:\Builder3D-Rust/Cargo.lock:190:1
+    ┌─ E:\3D-Modeler/Cargo.lock:190:1
     │  
 190 │ ╭ linux-raw-sys 0.4.15 registry+https://github.com/rust-lang/crates.io-index
 191 │ │ linux-raw-sys 0.12.1 registry+https://github.com/rust-lang/crates.io-index
@@ -1141,7 +1141,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'linux-raw-sys'
           │   │           ├── accesskit_winit v0.34.2
           │   │           │   └── egui-winit v0.37.0
           │   │           │       └── eframe v0.37.0
-          │   │           │           └── builder3d-app v0.1.0
+          │   │           │           └── modeler3d-app v0.1.0
           │   │           ├── eframe v0.37.0 (*)
           │   │           ├── egui-wgpu v0.37.0
           │   │           │   └── eframe v0.37.0 (*)
@@ -1160,7 +1160,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'linux-raw-sys'
           │   │       │   └── accesskit_winit v0.34.2
           │   │       │       └── egui-winit v0.37.0
           │   │       │           └── eframe v0.37.0
-          │   │       │               └── builder3d-app v0.1.0
+          │   │       │               └── modeler3d-app v0.1.0
           │   │       ├── atspi-common v0.13.0
           │   │       │   ├── accesskit_atspi_common v0.21.1
           │   │       │   │   └── accesskit_unix v0.24.1 (*)
@@ -1208,7 +1208,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'linux-raw-sys'
           │   ├── calloop-wayland-source v0.3.0 (*)
           │   ├── calloop-wayland-source v0.4.1 (*)
           │   ├── rfd v0.17.2
-          │   │   └── builder3d-app v0.1.0 (*)
+          │   │   └── modeler3d-app v0.1.0 (*)
           │   ├── smithay-client-toolkit v0.19.2 (*)
           │   ├── smithay-client-toolkit v0.20.0 (*)
           │   ├── smithay-clipboard v0.7.3 (*)
@@ -1261,7 +1261,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'linux-raw-sys'
           └── zbus v5.19.0 (*)
 
 warning[duplicate]: found 2 duplicate entries for crate 'miniz_oxide'
-    ┌─ E:\Builder3D-Rust/Cargo.lock:202:1
+    ┌─ E:\3D-Modeler/Cargo.lock:202:1
     │  
 202 │ ╭ miniz_oxide 0.8.9 registry+https://github.com/rust-lang/crates.io-index
 203 │ │ miniz_oxide 0.9.1 registry+https://github.com/rust-lang/crates.io-index
@@ -1273,8 +1273,8 @@ warning[duplicate]: found 2 duplicate entries for crate 'miniz_oxide'
               ├── arboard v3.7.0
               │   └── egui-winit v0.37.0
               │       └── eframe v0.37.0
-              │           └── builder3d-app v0.1.0
-              ├── builder3d-app v0.1.0 (*)
+              │           └── modeler3d-app v0.1.0
+              ├── modeler3d-app v0.1.0 (*)
               └── eframe v0.37.0 (*)
     ├ miniz_oxide v0.9.1
       └── flate2 v1.1.10
@@ -1283,22 +1283,22 @@ warning[duplicate]: found 2 duplicate entries for crate 'miniz_oxide'
           │       ├── arboard v3.7.0
           │       │   └── egui-winit v0.37.0
           │       │       └── eframe v0.37.0
-          │       │           └── builder3d-app v0.1.0
-          │       ├── builder3d-app v0.1.0 (*)
+          │       │           └── modeler3d-app v0.1.0
+          │       ├── modeler3d-app v0.1.0 (*)
           │       └── eframe v0.37.0 (*)
           ├── tiff v0.11.3
           │   └── image v0.25.10 (*)
           └── zip v9.1.3
-              ├── builder3d-app v0.1.0 (*)
-              └── builder3d-core v0.1.0
-                  ├── builder3d-app v0.1.0 (*)
-                  ├── builder3d-mcp v0.1.0
-                  │   └── builder3d-app v0.1.0 (*)
-                  └── builder3d-viewport v0.1.0
-                      └── builder3d-app v0.1.0 (*)
+              ├── modeler3d-app v0.1.0 (*)
+              └── modeler3d-core v0.1.0
+                  ├── modeler3d-app v0.1.0 (*)
+                  ├── modeler3d-mcp v0.1.0
+                  │   └── modeler3d-app v0.1.0 (*)
+                  └── modeler3d-viewport v0.1.0
+                      └── modeler3d-app v0.1.0 (*)
 
 warning[duplicate]: found 2 duplicate entries for crate 'nom'
-    ┌─ E:\Builder3D-Rust/Cargo.lock:213:1
+    ┌─ E:\3D-Modeler/Cargo.lock:213:1
     │  
 213 │ ╭ nom 7.1.3 registry+https://github.com/rust-lang/crates.io-index
 214 │ │ nom 8.0.0 registry+https://github.com/rust-lang/crates.io-index
@@ -1309,22 +1309,22 @@ warning[duplicate]: found 2 duplicate entries for crate 'nom'
           └── bindgen v0.72.1
               └── (build) qhull-sys v0.4.1
                   └── qhull v0.4.1
-                      └── builder3d-core v0.1.0
-                          ├── builder3d-app v0.1.0
-                          ├── builder3d-mcp v0.1.0
-                          │   └── builder3d-app v0.1.0 (*)
-                          └── builder3d-viewport v0.1.0
-                              └── builder3d-app v0.1.0 (*)
+                      └── modeler3d-core v0.1.0
+                          ├── modeler3d-app v0.1.0
+                          ├── modeler3d-mcp v0.1.0
+                          │   └── modeler3d-app v0.1.0 (*)
+                          └── modeler3d-viewport v0.1.0
+                              └── modeler3d-app v0.1.0 (*)
     ├ nom v8.0.0
       └── tree_magic_mini v3.2.2
           └── wl-clipboard-rs v0.9.5
               └── arboard v3.7.0
                   └── egui-winit v0.37.0
                       └── eframe v0.37.0
-                          └── builder3d-app v0.1.0
+                          └── modeler3d-app v0.1.0
 
 warning[duplicate]: found 2 duplicate entries for crate 'objc2'
-    ┌─ E:\Builder3D-Rust/Cargo.lock:227:1
+    ┌─ E:\3D-Modeler/Cargo.lock:227:1
     │  
 227 │ ╭ objc2 0.5.3 registry+https://github.com/rust-lang/crates.io-index
 228 │ │ objc2 0.6.5 registry+https://github.com/rust-lang/crates.io-index
@@ -1335,7 +1335,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'objc2'
       │   └── accesskit_winit v0.34.2
       │       └── egui-winit v0.37.0
       │           └── eframe v0.37.0
-      │               └── builder3d-app v0.1.0
+      │               └── modeler3d-app v0.1.0
       ├── accesskit_macos v0.27.2
       │   └── accesskit_winit v0.34.2 (*)
       ├── block2 v0.5.1
@@ -1363,11 +1363,11 @@ warning[duplicate]: found 2 duplicate entries for crate 'objc2'
       ├── arboard v3.7.0
       │   └── egui-winit v0.37.0
       │       └── eframe v0.37.0
-      │           └── builder3d-app v0.1.0
+      │           └── modeler3d-app v0.1.0
       ├── block2 v0.6.2
       │   ├── dispatch2 v0.3.1
       │   │   └── rfd v0.17.2
-      │   │       └── builder3d-app v0.1.0 (*)
+      │   │       └── modeler3d-app v0.1.0 (*)
       │   ├── egui-winit v0.37.0 (*)
       │   ├── objc2-app-kit v0.3.2
       │   │   ├── arboard v3.7.0 (*)
@@ -1384,13 +1384,13 @@ warning[duplicate]: found 2 duplicate entries for crate 'objc2'
       │   │   │   │   ├── raw-window-metal v1.1.0
       │   │   │   │   │   └── wgpu-hal v30.0.1
       │   │   │   │   │       ├── wgpu v30.0.1
-      │   │   │   │   │       │   ├── builder3d-platform v0.1.0
-      │   │   │   │   │       │   │   ├── builder3d-app v0.1.0 (*)
-      │   │   │   │   │       │   │   ├── builder3d-mcp v0.1.0
-      │   │   │   │   │       │   │   │   └── builder3d-app v0.1.0 (*)
-      │   │   │   │   │       │   │   └── builder3d-viewport v0.1.0
-      │   │   │   │   │       │   │       └── builder3d-app v0.1.0 (*)
-      │   │   │   │   │       │   ├── builder3d-viewport v0.1.0 (*)
+      │   │   │   │   │       │   ├── modeler3d-platform v0.1.0
+      │   │   │   │   │       │   │   ├── modeler3d-app v0.1.0 (*)
+      │   │   │   │   │       │   │   ├── modeler3d-mcp v0.1.0
+      │   │   │   │   │       │   │   │   └── modeler3d-app v0.1.0 (*)
+      │   │   │   │   │       │   │   └── modeler3d-viewport v0.1.0
+      │   │   │   │   │       │   │       └── modeler3d-app v0.1.0 (*)
+      │   │   │   │   │       │   ├── modeler3d-viewport v0.1.0 (*)
       │   │   │   │   │       │   ├── eframe v0.37.0 (*)
       │   │   │   │   │       │   └── egui-wgpu v0.37.0
       │   │   │   │   │       │       └── eframe v0.37.0 (*)
@@ -1429,7 +1429,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'objc2'
       │   ├── objc2-foundation v0.3.2 (*)
       │   ├── objc2-io-kit v0.3.2
       │   │   └── sysinfo v0.40.0
-      │   │       └── builder3d-platform v0.1.0 (*)
+      │   │       └── modeler3d-platform v0.1.0 (*)
       │   ├── objc2-quartz-core v0.3.2 (*)
       │   ├── objc2-ui-kit v0.3.2 (*)
       │   ├── raw-window-metal v1.1.0 (*)
@@ -1446,7 +1446,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'objc2'
       └── wgpu-hal v30.0.1 (*)
 
 warning[duplicate]: found 2 duplicate entries for crate 'objc2-app-kit'
-    ┌─ E:\Builder3D-Rust/Cargo.lock:229:1
+    ┌─ E:\3D-Modeler/Cargo.lock:229:1
     │  
 229 │ ╭ objc2-app-kit 0.2.2 registry+https://github.com/rust-lang/crates.io-index
 230 │ │ objc2-app-kit 0.3.2 registry+https://github.com/rust-lang/crates.io-index
@@ -1457,7 +1457,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'objc2-app-kit'
       │   └── accesskit_winit v0.34.2
       │       └── egui-winit v0.37.0
       │           └── eframe v0.37.0
-      │               └── builder3d-app v0.1.0
+      │               └── modeler3d-app v0.1.0
       └── winit v0.30.13
           ├── accesskit_winit v0.34.2 (*)
           ├── eframe v0.37.0 (*)
@@ -1468,14 +1468,14 @@ warning[duplicate]: found 2 duplicate entries for crate 'objc2-app-kit'
       ├── arboard v3.7.0
       │   └── egui-winit v0.37.0
       │       └── eframe v0.37.0
-      │           └── builder3d-app v0.1.0
+      │           └── modeler3d-app v0.1.0
       ├── eframe v0.37.0 (*)
       ├── egui-winit v0.37.0 (*)
       └── rfd v0.17.2
-          └── builder3d-app v0.1.0 (*)
+          └── modeler3d-app v0.1.0 (*)
 
 warning[duplicate]: found 2 duplicate entries for crate 'objc2-foundation'
-    ┌─ E:\Builder3D-Rust/Cargo.lock:234:1
+    ┌─ E:\3D-Modeler/Cargo.lock:234:1
     │  
 234 │ ╭ objc2-foundation 0.2.2 registry+https://github.com/rust-lang/crates.io-index
 235 │ │ objc2-foundation 0.3.2 registry+https://github.com/rust-lang/crates.io-index
@@ -1486,7 +1486,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'objc2-foundation'
       │   └── accesskit_winit v0.34.2
       │       └── egui-winit v0.37.0
       │           └── eframe v0.37.0
-      │               └── builder3d-app v0.1.0
+      │               └── modeler3d-app v0.1.0
       ├── accesskit_macos v0.27.2
       │   └── accesskit_winit v0.34.2 (*)
       ├── objc2-app-kit v0.2.2
@@ -1505,7 +1505,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'objc2-foundation'
       ├── arboard v3.7.0
       │   └── egui-winit v0.37.0
       │       └── eframe v0.37.0
-      │           └── builder3d-app v0.1.0
+      │           └── modeler3d-app v0.1.0
       ├── eframe v0.37.0 (*)
       ├── egui-winit v0.37.0 (*)
       ├── objc2-app-kit v0.3.2
@@ -1513,19 +1513,19 @@ warning[duplicate]: found 2 duplicate entries for crate 'objc2-foundation'
       │   ├── eframe v0.37.0 (*)
       │   ├── egui-winit v0.37.0 (*)
       │   └── rfd v0.17.2
-      │       └── builder3d-app v0.1.0 (*)
+      │       └── modeler3d-app v0.1.0 (*)
       ├── objc2-metal v0.3.2
       │   ├── objc2-quartz-core v0.3.2
       │   │   ├── raw-window-metal v1.1.0
       │   │   │   └── wgpu-hal v30.0.1
       │   │   │       ├── wgpu v30.0.1
-      │   │   │       │   ├── builder3d-platform v0.1.0
-      │   │   │       │   │   ├── builder3d-app v0.1.0 (*)
-      │   │   │       │   │   ├── builder3d-mcp v0.1.0
-      │   │   │       │   │   │   └── builder3d-app v0.1.0 (*)
-      │   │   │       │   │   └── builder3d-viewport v0.1.0
-      │   │   │       │   │       └── builder3d-app v0.1.0 (*)
-      │   │   │       │   ├── builder3d-viewport v0.1.0 (*)
+      │   │   │       │   ├── modeler3d-platform v0.1.0
+      │   │   │       │   │   ├── modeler3d-app v0.1.0 (*)
+      │   │   │       │   │   ├── modeler3d-mcp v0.1.0
+      │   │   │       │   │   │   └── modeler3d-app v0.1.0 (*)
+      │   │   │       │   │   └── modeler3d-viewport v0.1.0
+      │   │   │       │   │       └── modeler3d-app v0.1.0 (*)
+      │   │   │       │   ├── modeler3d-viewport v0.1.0 (*)
       │   │   │       │   ├── eframe v0.37.0 (*)
       │   │   │       │   └── egui-wgpu v0.37.0
       │   │   │       │       └── eframe v0.37.0 (*)
@@ -1549,7 +1549,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'objc2-foundation'
       └── wgpu-hal v30.0.1 (*)
 
 warning[duplicate]: found 2 duplicate entries for crate 'objc2-ui-kit'
-    ┌─ E:\Builder3D-Rust/Cargo.lock:239:1
+    ┌─ E:\3D-Modeler/Cargo.lock:239:1
     │  
 239 │ ╭ objc2-ui-kit 0.2.2 registry+https://github.com/rust-lang/crates.io-index
 240 │ │ objc2-ui-kit 0.3.2 registry+https://github.com/rust-lang/crates.io-index
@@ -1560,7 +1560,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'objc2-ui-kit'
       │   └── accesskit_winit v0.34.2
       │       └── egui-winit v0.37.0
       │           └── eframe v0.37.0
-      │               └── builder3d-app v0.1.0
+      │               └── modeler3d-app v0.1.0
       └── winit v0.30.13
           ├── accesskit_winit v0.34.2 (*)
           ├── eframe v0.37.0 (*)
@@ -1570,10 +1570,10 @@ warning[duplicate]: found 2 duplicate entries for crate 'objc2-ui-kit'
     ├ objc2-ui-kit v0.3.2
       └── egui-winit v0.37.0
           └── eframe v0.37.0
-              └── builder3d-app v0.1.0
+              └── modeler3d-app v0.1.0
 
 warning[duplicate]: found 2 duplicate entries for crate 'pollster'
-    ┌─ E:\Builder3D-Rust/Cargo.lock:266:1
+    ┌─ E:\3D-Modeler/Cargo.lock:266:1
     │  
 266 │ ╭ pollster 0.4.0 registry+https://github.com/rust-lang/crates.io-index
 267 │ │ pollster 1.0.1 registry+https://github.com/rust-lang/crates.io-index
@@ -1581,13 +1581,13 @@ warning[duplicate]: found 2 duplicate entries for crate 'pollster'
     │  
     ├ pollster v0.4.0
       └── rfd v0.17.2
-          └── builder3d-app v0.1.0
+          └── modeler3d-app v0.1.0
     ├ pollster v1.0.1
       └── eframe v0.37.0
-          └── builder3d-app v0.1.0
+          └── modeler3d-app v0.1.0
 
 warning[duplicate]: found 2 duplicate entries for crate 'quick-xml'
-    ┌─ E:\Builder3D-Rust/Cargo.lock:280:1
+    ┌─ E:\3D-Modeler/Cargo.lock:280:1
     │  
 280 │ ╭ quick-xml 0.41.0 registry+https://github.com/rust-lang/crates.io-index
 281 │ │ quick-xml 0.42.0 registry+https://github.com/rust-lang/crates.io-index
@@ -1600,7 +1600,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'quick-xml'
           │       ├── accesskit_winit v0.34.2
           │       │   └── egui-winit v0.37.0
           │       │       └── eframe v0.37.0
-          │       │           └── builder3d-app v0.1.0
+          │       │           └── modeler3d-app v0.1.0
           │       ├── eframe v0.37.0 (*)
           │       ├── egui-wgpu v0.37.0
           │       │   └── eframe v0.37.0 (*)
@@ -1614,7 +1614,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'quick-xml'
           │   ├── calloop-wayland-source v0.4.1
           │   │   └── smithay-client-toolkit v0.20.0 (*)
           │   ├── rfd v0.17.2
-          │   │   └── builder3d-app v0.1.0 (*)
+          │   │   └── modeler3d-app v0.1.0 (*)
           │   ├── smithay-client-toolkit v0.19.2 (*)
           │   ├── smithay-client-toolkit v0.20.0 (*)
           │   ├── wayland-cursor v0.31.14
@@ -1650,15 +1650,15 @@ warning[duplicate]: found 2 duplicate entries for crate 'quick-xml'
           ├── wayland-protocols-plasma v0.3.12 (*)
           └── wayland-protocols-wlr v0.3.12 (*)
     ├ quick-xml v0.42.0
-      └── builder3d-core v0.1.0
-          ├── builder3d-app v0.1.0
-          ├── builder3d-mcp v0.1.0
-          │   └── builder3d-app v0.1.0 (*)
-          └── builder3d-viewport v0.1.0
-              └── builder3d-app v0.1.0 (*)
+      └── modeler3d-core v0.1.0
+          ├── modeler3d-app v0.1.0
+          ├── modeler3d-mcp v0.1.0
+          │   └── modeler3d-app v0.1.0 (*)
+          └── modeler3d-viewport v0.1.0
+              └── modeler3d-app v0.1.0 (*)
 
 warning[duplicate]: found 2 duplicate entries for crate 'r-efi'
-    ┌─ E:\Builder3D-Rust/Cargo.lock:283:1
+    ┌─ E:\3D-Modeler/Cargo.lock:283:1
     │  
 283 │ ╭ r-efi 5.3.0 registry+https://github.com/rust-lang/crates.io-index
 284 │ │ r-efi 6.0.0 registry+https://github.com/rust-lang/crates.io-index
@@ -1668,7 +1668,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'r-efi'
       └── getrandom v0.3.4
           ├── ahash v0.8.12
           │   ├── eframe v0.37.0
-          │   │   └── builder3d-app v0.1.0
+          │   │   └── modeler3d-app v0.1.0
           │   ├── egui v0.37.0
           │   │   ├── eframe v0.37.0 (*)
           │   │   ├── egui-wgpu v0.37.0
@@ -1680,8 +1680,8 @@ warning[duplicate]: found 2 duplicate entries for crate 'r-efi'
           │   │   ├── egui v0.37.0 (*)
           │   │   └── egui-wgpu v0.37.0 (*)
           │   ├── jsonschema v0.60.2
-          │   │   └── builder3d-mcp v0.1.0
-          │   │       └── builder3d-app v0.1.0 (*)
+          │   │   └── modeler3d-mcp v0.1.0
+          │   │       └── modeler3d-app v0.1.0 (*)
           │   ├── jsonschema-value v0.60.2
           │   │   └── jsonschema v0.60.2 (*)
           │   ├── referencing v0.60.2
@@ -1704,7 +1704,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'r-efi'
           │       │       ├── accesskit_winit v0.34.2
           │       │       │   └── egui-winit v0.37.0
           │       │       │       └── eframe v0.37.0
-          │       │       │           └── builder3d-app v0.1.0
+          │       │       │           └── modeler3d-app v0.1.0
           │       │       ├── eframe v0.37.0 (*)
           │       │       ├── egui-wgpu v0.37.0
           │       │       │   └── eframe v0.37.0 (*)
@@ -1712,23 +1712,23 @@ warning[duplicate]: found 2 duplicate entries for crate 'r-efi'
           │       ├── cmake v0.1.58
           │       │   └── (build) manifold-csg-sys v3.5.105
           │       │       └── manifold-csg v0.4.1
-          │       │           └── builder3d-core v0.1.0
-          │       │               ├── builder3d-app v0.1.0 (*)
-          │       │               ├── builder3d-mcp v0.1.0
-          │       │               │   └── builder3d-app v0.1.0 (*)
-          │       │               └── builder3d-viewport v0.1.0
-          │       │                   └── builder3d-app v0.1.0 (*)
+          │       │           └── modeler3d-core v0.1.0
+          │       │               ├── modeler3d-app v0.1.0 (*)
+          │       │               ├── modeler3d-mcp v0.1.0
+          │       │               │   └── modeler3d-app v0.1.0 (*)
+          │       │               └── modeler3d-viewport v0.1.0
+          │       │                   └── modeler3d-app v0.1.0 (*)
           │       ├── (build) iana-time-zone-haiku v0.1.2
           │       │   └── iana-time-zone v0.1.65
           │       │       └── chrono v0.4.45
           │       │           ├── rmcp v3.8.0
-          │       │           │   └── builder3d-mcp v0.1.0 (*)
+          │       │           │   └── modeler3d-mcp v0.1.0 (*)
           │       │           └── schemars v1.0.4
-          │       │               ├── builder3d-mcp v0.1.0 (*)
+          │       │               ├── modeler3d-mcp v0.1.0 (*)
           │       │               └── rmcp v3.8.0 (*)
           │       ├── (build) qhull-sys v0.4.1
           │       │   └── qhull v0.4.1
-          │       │       └── builder3d-core v0.1.0 (*)
+          │       │       └── modeler3d-core v0.1.0 (*)
           │       └── (build) wayland-backend v0.3.17
           │           ├── calloop-wayland-source v0.3.0
           │           │   └── smithay-client-toolkit v0.19.2
@@ -1738,7 +1738,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'r-efi'
           │           │       └── smithay-clipboard v0.7.3
           │           │           └── egui-winit v0.37.0 (*)
           │           ├── rfd v0.17.2
-          │           │   └── builder3d-app v0.1.0 (*)
+          │           │   └── modeler3d-app v0.1.0 (*)
           │           ├── smithay-client-toolkit v0.19.2 (*)
           │           ├── smithay-client-toolkit v0.20.0 (*)
           │           ├── smithay-clipboard v0.7.3 (*)
@@ -1818,17 +1818,17 @@ warning[duplicate]: found 2 duplicate entries for crate 'r-efi'
           │   │       ├── eframe v0.37.0 (*)
           │   │       ├── egui-wgpu v0.37.0 (*)
           │   │       └── egui-winit v0.37.0 (*)
-          │   ├── builder3d-app v0.1.0 (*)
-          │   ├── builder3d-core v0.1.0 (*)
-          │   ├── builder3d-mcp v0.1.0 (*)
+          │   ├── modeler3d-app v0.1.0 (*)
+          │   ├── modeler3d-core v0.1.0 (*)
+          │   ├── modeler3d-mcp v0.1.0 (*)
           │   ├── rmcp v3.8.0 (*)
           │   └── zbus v5.19.0 (*)
           └── zip v9.1.3
-              ├── builder3d-app v0.1.0 (*)
-              └── builder3d-core v0.1.0 (*)
+              ├── modeler3d-app v0.1.0 (*)
+              └── modeler3d-core v0.1.0 (*)
 
 warning[duplicate]: found 3 duplicate entries for crate 'redox_syscall'
-    ┌─ E:\Builder3D-Rust/Cargo.lock:289:1
+    ┌─ E:\3D-Modeler/Cargo.lock:289:1
     │  
 289 │ ╭ redox_syscall 0.4.1 registry+https://github.com/rust-lang/crates.io-index
 290 │ │ redox_syscall 0.5.18 registry+https://github.com/rust-lang/crates.io-index
@@ -1840,7 +1840,7 @@ warning[duplicate]: found 3 duplicate entries for crate 'redox_syscall'
           ├── accesskit_winit v0.34.2
           │   └── egui-winit v0.37.0
           │       └── eframe v0.37.0
-          │           └── builder3d-app v0.1.0
+          │           └── modeler3d-app v0.1.0
           ├── eframe v0.37.0 (*)
           ├── egui-wgpu v0.37.0
           │   └── eframe v0.37.0 (*)
@@ -1851,7 +1851,7 @@ warning[duplicate]: found 3 duplicate entries for crate 'redox_syscall'
               ├── arboard v3.7.0
               │   └── egui-winit v0.37.0
               │       └── eframe v0.37.0
-              │           └── builder3d-app v0.1.0
+              │           └── modeler3d-app v0.1.0
               ├── eframe v0.37.0 (*)
               ├── epaint v0.37.0
               │   ├── egui v0.37.0
@@ -1862,15 +1862,15 @@ warning[duplicate]: found 3 duplicate entries for crate 'redox_syscall'
               │   └── egui-wgpu v0.37.0 (*)
               ├── referencing v0.60.2
               │   └── jsonschema v0.60.2
-              │       └── builder3d-mcp v0.1.0
-              │           └── builder3d-app v0.1.0 (*)
+              │       └── modeler3d-mcp v0.1.0
+              │           └── modeler3d-app v0.1.0 (*)
               ├── wgpu v30.0.1
-              │   ├── builder3d-platform v0.1.0
-              │   │   ├── builder3d-app v0.1.0 (*)
-              │   │   ├── builder3d-mcp v0.1.0 (*)
-              │   │   └── builder3d-viewport v0.1.0
-              │   │       └── builder3d-app v0.1.0 (*)
-              │   ├── builder3d-viewport v0.1.0 (*)
+              │   ├── modeler3d-platform v0.1.0
+              │   │   ├── modeler3d-app v0.1.0 (*)
+              │   │   ├── modeler3d-mcp v0.1.0 (*)
+              │   │   └── modeler3d-viewport v0.1.0
+              │   │       └── modeler3d-app v0.1.0 (*)
+              │   ├── modeler3d-viewport v0.1.0 (*)
               │   ├── eframe v0.37.0 (*)
               │   └── egui-wgpu v0.37.0 (*)
               ├── wgpu-core v30.0.1
@@ -1893,14 +1893,14 @@ warning[duplicate]: found 3 duplicate entries for crate 'redox_syscall'
                   ├── accesskit_winit v0.34.2
                   │   └── egui-winit v0.37.0
                   │       └── eframe v0.37.0
-                  │           └── builder3d-app v0.1.0
+                  │           └── modeler3d-app v0.1.0
                   ├── eframe v0.37.0 (*)
                   ├── egui-wgpu v0.37.0
                   │   └── eframe v0.37.0 (*)
                   └── egui-winit v0.37.0 (*)
 
 warning[duplicate]: found 2 duplicate entries for crate 'rustc-hash'
-    ┌─ E:\Builder3D-Rust/Cargo.lock:302:1
+    ┌─ E:\3D-Modeler/Cargo.lock:302:1
     │  
 302 │ ╭ rustc-hash 1.1.0 registry+https://github.com/rust-lang/crates.io-index
 303 │ │ rustc-hash 2.1.3 registry+https://github.com/rust-lang/crates.io-index
@@ -1910,15 +1910,15 @@ warning[duplicate]: found 2 duplicate entries for crate 'rustc-hash'
       ├── naga v30.0.1
       │   ├── wgpu-core v30.0.1
       │   │   └── wgpu v30.0.1
-      │   │       ├── builder3d-platform v0.1.0
-      │   │       │   ├── builder3d-app v0.1.0
-      │   │       │   ├── builder3d-mcp v0.1.0
-      │   │       │   │   └── builder3d-app v0.1.0 (*)
-      │   │       │   └── builder3d-viewport v0.1.0
-      │   │       │       └── builder3d-app v0.1.0 (*)
-      │   │       ├── builder3d-viewport v0.1.0 (*)
+      │   │       ├── modeler3d-platform v0.1.0
+      │   │       │   ├── modeler3d-app v0.1.0
+      │   │       │   ├── modeler3d-mcp v0.1.0
+      │   │       │   │   └── modeler3d-app v0.1.0 (*)
+      │   │       │   └── modeler3d-viewport v0.1.0
+      │   │       │       └── modeler3d-app v0.1.0 (*)
+      │   │       ├── modeler3d-viewport v0.1.0 (*)
       │   │       ├── eframe v0.37.0
-      │   │       │   └── builder3d-app v0.1.0 (*)
+      │   │       │   └── modeler3d-app v0.1.0 (*)
       │   │       └── egui-wgpu v0.37.0
       │   │           └── eframe v0.37.0 (*)
       │   ├── wgpu-hal v30.0.1
@@ -1949,19 +1949,19 @@ warning[duplicate]: found 2 duplicate entries for crate 'rustc-hash'
       ├── bindgen v0.72.1
       │   └── (build) qhull-sys v0.4.1
       │       └── qhull v0.4.1
-      │           └── builder3d-core v0.1.0
-      │               ├── builder3d-app v0.1.0
-      │               ├── builder3d-mcp v0.1.0
-      │               │   └── builder3d-app v0.1.0 (*)
-      │               └── builder3d-viewport v0.1.0
-      │                   └── builder3d-app v0.1.0 (*)
+      │           └── modeler3d-core v0.1.0
+      │               ├── modeler3d-app v0.1.0
+      │               ├── modeler3d-mcp v0.1.0
+      │               │   └── modeler3d-app v0.1.0 (*)
+      │               └── modeler3d-viewport v0.1.0
+      │                   └── modeler3d-app v0.1.0 (*)
       └── type-map v0.5.1
           └── egui-wgpu v0.37.0
               └── eframe v0.37.0
-                  └── builder3d-app v0.1.0 (*)
+                  └── modeler3d-app v0.1.0 (*)
 
 warning[duplicate]: found 2 duplicate entries for crate 'rustix'
-    ┌─ E:\Builder3D-Rust/Cargo.lock:305:1
+    ┌─ E:\3D-Modeler/Cargo.lock:305:1
     │  
 305 │ ╭ rustix 0.38.44 registry+https://github.com/rust-lang/crates.io-index
 306 │ │ rustix 1.1.6 registry+https://github.com/rust-lang/crates.io-index
@@ -1975,7 +1975,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'rustix'
       │   │           ├── accesskit_winit v0.34.2
       │   │           │   └── egui-winit v0.37.0
       │   │           │       └── eframe v0.37.0
-      │   │           │           └── builder3d-app v0.1.0
+      │   │           │           └── modeler3d-app v0.1.0
       │   │           ├── eframe v0.37.0 (*)
       │   │           ├── egui-wgpu v0.37.0
       │   │           │   └── eframe v0.37.0 (*)
@@ -1993,7 +1993,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'rustix'
       │   │       │   └── accesskit_winit v0.34.2
       │   │       │       └── egui-winit v0.37.0
       │   │       │           └── eframe v0.37.0
-      │   │       │               └── builder3d-app v0.1.0
+      │   │       │               └── modeler3d-app v0.1.0
       │   │       ├── atspi-common v0.13.0
       │   │       │   ├── accesskit_atspi_common v0.21.1
       │   │       │   │   └── accesskit_unix v0.24.1 (*)
@@ -2041,7 +2041,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'rustix'
       │   ├── calloop-wayland-source v0.3.0 (*)
       │   ├── calloop-wayland-source v0.4.1 (*)
       │   ├── rfd v0.17.2
-      │   │   └── builder3d-app v0.1.0 (*)
+      │   │   └── modeler3d-app v0.1.0 (*)
       │   ├── smithay-client-toolkit v0.19.2 (*)
       │   ├── smithay-client-toolkit v0.20.0 (*)
       │   ├── smithay-clipboard v0.7.3 (*)
@@ -2094,7 +2094,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'rustix'
       └── zbus v5.19.0 (*)
 
 warning[duplicate]: found 2 duplicate entries for crate 'shlex'
-    ┌─ E:\Builder3D-Rust/Cargo.lock:324:1
+    ┌─ E:\3D-Modeler/Cargo.lock:324:1
     │  
 324 │ ╭ shlex 1.3.0 registry+https://github.com/rust-lang/crates.io-index
 325 │ │ shlex 2.0.1 registry+https://github.com/rust-lang/crates.io-index
@@ -2104,12 +2104,12 @@ warning[duplicate]: found 2 duplicate entries for crate 'shlex'
       └── bindgen v0.72.1
           └── (build) qhull-sys v0.4.1
               └── qhull v0.4.1
-                  └── builder3d-core v0.1.0
-                      ├── builder3d-app v0.1.0
-                      ├── builder3d-mcp v0.1.0
-                      │   └── builder3d-app v0.1.0 (*)
-                      └── builder3d-viewport v0.1.0
-                          └── builder3d-app v0.1.0 (*)
+                  └── modeler3d-core v0.1.0
+                      ├── modeler3d-app v0.1.0
+                      ├── modeler3d-mcp v0.1.0
+                      │   └── modeler3d-app v0.1.0 (*)
+                      └── modeler3d-viewport v0.1.0
+                          └── modeler3d-app v0.1.0 (*)
     ├ shlex v2.0.1
       └── cc v1.10.0
           ├── (build) android-activity v0.6.1
@@ -2117,7 +2117,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'shlex'
           │       ├── accesskit_winit v0.34.2
           │       │   └── egui-winit v0.37.0
           │       │       └── eframe v0.37.0
-          │       │           └── builder3d-app v0.1.0
+          │       │           └── modeler3d-app v0.1.0
           │       ├── eframe v0.37.0 (*)
           │       ├── egui-wgpu v0.37.0
           │       │   └── eframe v0.37.0 (*)
@@ -2125,23 +2125,23 @@ warning[duplicate]: found 2 duplicate entries for crate 'shlex'
           ├── cmake v0.1.58
           │   └── (build) manifold-csg-sys v3.5.105
           │       └── manifold-csg v0.4.1
-          │           └── builder3d-core v0.1.0
-          │               ├── builder3d-app v0.1.0 (*)
-          │               ├── builder3d-mcp v0.1.0
-          │               │   └── builder3d-app v0.1.0 (*)
-          │               └── builder3d-viewport v0.1.0
-          │                   └── builder3d-app v0.1.0 (*)
+          │           └── modeler3d-core v0.1.0
+          │               ├── modeler3d-app v0.1.0 (*)
+          │               ├── modeler3d-mcp v0.1.0
+          │               │   └── modeler3d-app v0.1.0 (*)
+          │               └── modeler3d-viewport v0.1.0
+          │                   └── modeler3d-app v0.1.0 (*)
           ├── (build) iana-time-zone-haiku v0.1.2
           │   └── iana-time-zone v0.1.65
           │       └── chrono v0.4.45
           │           ├── rmcp v3.8.0
-          │           │   └── builder3d-mcp v0.1.0 (*)
+          │           │   └── modeler3d-mcp v0.1.0 (*)
           │           └── schemars v1.0.4
-          │               ├── builder3d-mcp v0.1.0 (*)
+          │               ├── modeler3d-mcp v0.1.0 (*)
           │               └── rmcp v3.8.0 (*)
           ├── (build) qhull-sys v0.4.1
           │   └── qhull v0.4.1
-          │       └── builder3d-core v0.1.0 (*)
+          │       └── modeler3d-core v0.1.0 (*)
           └── (build) wayland-backend v0.3.17
               ├── calloop-wayland-source v0.3.0
               │   └── smithay-client-toolkit v0.19.2
@@ -2151,7 +2151,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'shlex'
               │       └── smithay-clipboard v0.7.3
               │           └── egui-winit v0.37.0 (*)
               ├── rfd v0.17.2
-              │   └── builder3d-app v0.1.0 (*)
+              │   └── modeler3d-app v0.1.0 (*)
               ├── smithay-client-toolkit v0.19.2 (*)
               ├── smithay-client-toolkit v0.20.0 (*)
               ├── smithay-clipboard v0.7.3 (*)
@@ -2200,7 +2200,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'shlex'
               └── wl-clipboard-rs v0.9.5 (*)
 
 warning[duplicate]: found 2 duplicate entries for crate 'smithay-client-toolkit'
-    ┌─ E:\Builder3D-Rust/Cargo.lock:335:1
+    ┌─ E:\3D-Modeler/Cargo.lock:335:1
     │  
 335 │ ╭ smithay-client-toolkit 0.19.2 registry+https://github.com/rust-lang/crates.io-index
 336 │ │ smithay-client-toolkit 0.20.0 registry+https://github.com/rust-lang/crates.io-index
@@ -2211,7 +2211,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'smithay-client-toolkit'
           ├── accesskit_winit v0.34.2
           │   └── egui-winit v0.37.0
           │       └── eframe v0.37.0
-          │           └── builder3d-app v0.1.0
+          │           └── modeler3d-app v0.1.0
           ├── eframe v0.37.0 (*)
           ├── egui-wgpu v0.37.0
           │   └── eframe v0.37.0 (*)
@@ -2220,10 +2220,10 @@ warning[duplicate]: found 2 duplicate entries for crate 'smithay-client-toolkit'
       └── smithay-clipboard v0.7.3
           └── egui-winit v0.37.0
               └── eframe v0.37.0
-                  └── builder3d-app v0.1.0
+                  └── modeler3d-app v0.1.0
 
 warning[duplicate]: found 2 duplicate entries for crate 'syn'
-    ┌─ E:\Builder3D-Rust/Cargo.lock:345:1
+    ┌─ E:\3D-Modeler/Cargo.lock:345:1
     │  
 345 │ ╭ syn 2.0.119 registry+https://github.com/rust-lang/crates.io-index
 346 │ │ syn 3.0.9 registry+https://github.com/rust-lang/crates.io-index
@@ -2233,12 +2233,12 @@ warning[duplicate]: found 2 duplicate entries for crate 'syn'
       ├── bindgen v0.72.1
       │   └── (build) qhull-sys v0.4.1
       │       └── qhull v0.4.1
-      │           └── builder3d-core v0.1.0
-      │               ├── builder3d-app v0.1.0
-      │               ├── builder3d-mcp v0.1.0
-      │               │   └── builder3d-app v0.1.0 (*)
-      │               └── builder3d-viewport v0.1.0
-      │                   └── builder3d-app v0.1.0 (*)
+      │           └── modeler3d-core v0.1.0
+      │               ├── modeler3d-app v0.1.0
+      │               ├── modeler3d-mcp v0.1.0
+      │               │   └── modeler3d-app v0.1.0 (*)
+      │               └── modeler3d-viewport v0.1.0
+      │                   └── modeler3d-app v0.1.0 (*)
       ├── enumflags2_derive v0.7.12
       │   └── enumflags2 v0.7.12
       │       ├── atspi-common v0.13.0
@@ -2247,7 +2247,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'syn'
       │       │   │       └── accesskit_winit v0.34.2
       │       │   │           └── egui-winit v0.37.0
       │       │   │               └── eframe v0.37.0
-      │       │   │                   └── builder3d-app v0.1.0 (*)
+      │       │   │                   └── modeler3d-app v0.1.0 (*)
       │       │   ├── atspi v0.29.0
       │       │   │   └── accesskit_unix v0.24.1 (*)
       │       │   └── atspi-proxies v0.13.0
@@ -2296,11 +2296,11 @@ warning[duplicate]: found 2 duplicate entries for crate 'syn'
       │               ├── ndk v0.9.0 (*)
       │               └── wgpu-hal v30.0.1
       │                   ├── wgpu v30.0.1
-      │                   │   ├── builder3d-platform v0.1.0
-      │                   │   │   ├── builder3d-app v0.1.0 (*)
-      │                   │   │   ├── builder3d-mcp v0.1.0 (*)
-      │                   │   │   └── builder3d-viewport v0.1.0 (*)
-      │                   │   ├── builder3d-viewport v0.1.0 (*)
+      │                   │   ├── modeler3d-platform v0.1.0
+      │                   │   │   ├── modeler3d-app v0.1.0 (*)
+      │                   │   │   ├── modeler3d-mcp v0.1.0 (*)
+      │                   │   │   └── modeler3d-viewport v0.1.0 (*)
+      │                   │   ├── modeler3d-viewport v0.1.0 (*)
       │                   │   ├── eframe v0.37.0 (*)
       │                   │   └── egui-wgpu v0.37.0 (*)
       │                   ├── wgpu-core v30.0.1
@@ -2327,9 +2327,9 @@ warning[duplicate]: found 2 duplicate entries for crate 'syn'
       │   └── bindgen v0.72.1 (*)
       ├── schemars_derive v1.0.4
       │   └── schemars v1.0.4
-      │       ├── builder3d-mcp v0.1.0 (*)
+      │       ├── modeler3d-mcp v0.1.0 (*)
       │       └── rmcp v3.8.0
-      │           └── builder3d-mcp v0.1.0 (*)
+      │           └── modeler3d-mcp v0.1.0 (*)
       ├── serde_derive v1.0.228
       │   └── serde v1.0.228
       │       ├── accesskit_atspi_common v0.21.1 (*)
@@ -2345,7 +2345,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'syn'
       │       │   │   ├── egui v0.37.0 (*)
       │       │   │   └── egui-wgpu v0.37.0 (*)
       │       │   ├── jsonschema v0.60.2
-      │       │   │   └── builder3d-mcp v0.1.0 (*)
+      │       │   │   └── modeler3d-mcp v0.1.0 (*)
       │       │   ├── jsonschema-value v0.60.2
       │       │   │   └── jsonschema v0.60.2 (*)
       │       │   ├── referencing v0.60.2
@@ -2353,11 +2353,11 @@ warning[duplicate]: found 2 duplicate entries for crate 'syn'
       │       │   └── winit v0.30.13 (*)
       │       ├── atspi-common v0.13.0 (*)
       │       ├── atspi-proxies v0.13.0 (*)
-      │       ├── builder3d-app v0.1.0 (*)
-      │       ├── builder3d-core v0.1.0 (*)
-      │       ├── builder3d-mcp v0.1.0 (*)
-      │       ├── builder3d-platform v0.1.0 (*)
-      │       ├── builder3d-viewport v0.1.0 (*)
+      │       ├── modeler3d-app v0.1.0 (*)
+      │       ├── modeler3d-core v0.1.0 (*)
+      │       ├── modeler3d-mcp v0.1.0 (*)
+      │       ├── modeler3d-platform v0.1.0 (*)
+      │       ├── modeler3d-viewport v0.1.0 (*)
       │       ├── chrono v0.4.45
       │       │   ├── rmcp v3.8.0 (*)
       │       │   └── schemars v1.0.4 (*)
@@ -2415,12 +2415,12 @@ warning[duplicate]: found 2 duplicate entries for crate 'syn'
       │       ├── wgpu-hal v30.0.1 (*)
       │       ├── windows v0.62.2
       │       │   ├── accesskit_windows v0.35.2 (*)
-      │       │   ├── builder3d-core v0.1.0 (*)
-      │       │   ├── builder3d-platform v0.1.0 (*)
+      │       │   ├── modeler3d-core v0.1.0 (*)
+      │       │   ├── modeler3d-platform v0.1.0 (*)
       │       │   ├── gpu-allocator v0.28.0
       │       │   │   └── wgpu-hal v30.0.1 (*)
       │       │   ├── sysinfo v0.40.0
-      │       │   │   └── builder3d-platform v0.1.0 (*)
+      │       │   │   └── modeler3d-platform v0.1.0 (*)
       │       │   └── wgpu-hal v30.0.1 (*)
       │       ├── windows-collections v0.3.2
       │       │   └── windows v0.62.2 (*)
@@ -2445,7 +2445,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'syn'
                       └── image v0.25.10
                           ├── arboard v3.7.0
                           │   └── egui-winit v0.37.0 (*)
-                          ├── builder3d-app v0.1.0 (*)
+                          ├── modeler3d-app v0.1.0 (*)
                           └── eframe v0.37.0 (*)
     ├ syn v3.0.9
       ├── async-recursion v1.2.0
@@ -2454,7 +2454,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'syn'
       │       │   └── accesskit_winit v0.34.2
       │       │       └── egui-winit v0.37.0
       │       │           └── eframe v0.37.0
-      │       │               └── builder3d-app v0.1.0
+      │       │               └── modeler3d-app v0.1.0
       │       ├── atspi-common v0.13.0
       │       │   ├── accesskit_atspi_common v0.21.1
       │       │   │   └── accesskit_unix v0.24.1 (*)
@@ -2499,7 +2499,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'syn'
       │       ├── image v0.25.10
       │       │   ├── arboard v3.7.0
       │       │   │   └── egui-winit v0.37.0 (*)
-      │       │   ├── builder3d-app v0.1.0 (*)
+      │       │   ├── modeler3d-app v0.1.0 (*)
       │       │   └── eframe v0.37.0 (*)
       │       ├── peniko v0.6.1 (*)
       │       ├── read-fonts v0.41.0 (*)
@@ -2507,13 +2507,13 @@ warning[duplicate]: found 2 duplicate entries for crate 'syn'
       │       ├── vello_common v0.2.0 (*)
       │       ├── vello_cpu v0.2.0 (*)
       │       ├── wgpu v30.0.1
-      │       │   ├── builder3d-platform v0.1.0
-      │       │   │   ├── builder3d-app v0.1.0 (*)
-      │       │   │   ├── builder3d-mcp v0.1.0
-      │       │   │   │   └── builder3d-app v0.1.0 (*)
-      │       │   │   └── builder3d-viewport v0.1.0
-      │       │   │       └── builder3d-app v0.1.0 (*)
-      │       │   ├── builder3d-viewport v0.1.0 (*)
+      │       │   ├── modeler3d-platform v0.1.0
+      │       │   │   ├── modeler3d-app v0.1.0 (*)
+      │       │   │   ├── modeler3d-mcp v0.1.0
+      │       │   │   │   └── modeler3d-app v0.1.0 (*)
+      │       │   │   └── modeler3d-viewport v0.1.0
+      │       │   │       └── modeler3d-app v0.1.0 (*)
+      │       │   ├── modeler3d-viewport v0.1.0 (*)
       │       │   ├── eframe v0.37.0 (*)
       │       │   └── egui-wgpu v0.37.0 (*)
       │       ├── wgpu-core v30.0.1
@@ -2545,7 +2545,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'syn'
       │   ├── darling v0.24.1
       │   │   └── rmcp-macros v3.8.0
       │   │       └── rmcp v3.8.0
-      │   │           └── builder3d-mcp v0.1.0 (*)
+      │   │           └── modeler3d-mcp v0.1.0 (*)
       │   └── darling_macro v0.24.1
       │       └── darling v0.24.1 (*)
       ├── darling_macro v0.24.1 (*)
@@ -2569,7 +2569,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'syn'
       │           │   │   ├── egui-wgpu v0.37.0 (*)
       │           │   │   ├── epaint v0.37.0 (*)
       │           │   │   ├── jsonschema v0.60.2
-      │           │   │   │   └── builder3d-mcp v0.1.0 (*)
+      │           │   │   │   └── modeler3d-mcp v0.1.0 (*)
       │           │   │   ├── jsonschema-value v0.60.2
       │           │   │   │   └── jsonschema v0.60.2 (*)
       │           │   │   ├── referencing v0.60.2
@@ -2586,20 +2586,20 @@ warning[duplicate]: found 2 duplicate entries for crate 'syn'
       │           │   │       ├── cmake v0.1.58
       │           │   │       │   └── (build) manifold-csg-sys v3.5.105
       │           │   │       │       └── manifold-csg v0.4.1
-      │           │   │       │           └── builder3d-core v0.1.0
-      │           │   │       │               ├── builder3d-app v0.1.0 (*)
-      │           │   │       │               ├── builder3d-mcp v0.1.0 (*)
-      │           │   │       │               └── builder3d-viewport v0.1.0 (*)
+      │           │   │       │           └── modeler3d-core v0.1.0
+      │           │   │       │               ├── modeler3d-app v0.1.0 (*)
+      │           │   │       │               ├── modeler3d-mcp v0.1.0 (*)
+      │           │   │       │               └── modeler3d-viewport v0.1.0 (*)
       │           │   │       ├── (build) iana-time-zone-haiku v0.1.2
       │           │   │       │   └── iana-time-zone v0.1.65
       │           │   │       │       └── chrono v0.4.45
       │           │   │       │           ├── rmcp v3.8.0 (*)
       │           │   │       │           └── schemars v1.0.4
-      │           │   │       │               ├── builder3d-mcp v0.1.0 (*)
+      │           │   │       │               ├── modeler3d-mcp v0.1.0 (*)
       │           │   │       │               └── rmcp v3.8.0 (*)
       │           │   │       ├── (build) qhull-sys v0.4.1
       │           │   │       │   └── qhull v0.4.1
-      │           │   │       │       └── builder3d-core v0.1.0 (*)
+      │           │   │       │       └── modeler3d-core v0.1.0 (*)
       │           │   │       └── (build) wayland-backend v0.3.17
       │           │   │           ├── calloop-wayland-source v0.3.0
       │           │   │           │   └── smithay-client-toolkit v0.19.2
@@ -2609,7 +2609,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'syn'
       │           │   │           │       └── smithay-clipboard v0.7.3
       │           │   │           │           └── egui-winit v0.37.0 (*)
       │           │   │           ├── rfd v0.17.2
-      │           │   │           │   └── builder3d-app v0.1.0 (*)
+      │           │   │           │   └── modeler3d-app v0.1.0 (*)
       │           │   │           ├── smithay-client-toolkit v0.19.2 (*)
       │           │   │           ├── smithay-client-toolkit v0.20.0 (*)
       │           │   │           ├── smithay-clipboard v0.7.3 (*)
@@ -2675,14 +2675,14 @@ warning[duplicate]: found 2 duplicate entries for crate 'syn'
       │           │   │   │   ├── accesskit_windows v0.35.2 (*)
       │           │   │   │   ├── accesskit_winit v0.34.2 (*)
       │           │   │   │   └── egui v0.37.0 (*)
-      │           │   │   ├── builder3d-app v0.1.0 (*)
-      │           │   │   ├── builder3d-core v0.1.0 (*)
-      │           │   │   ├── builder3d-mcp v0.1.0 (*)
+      │           │   │   ├── modeler3d-app v0.1.0 (*)
+      │           │   │   ├── modeler3d-core v0.1.0 (*)
+      │           │   │   ├── modeler3d-mcp v0.1.0 (*)
       │           │   │   ├── rmcp v3.8.0 (*)
       │           │   │   └── zbus v5.19.0 (*)
       │           │   └── zip v9.1.3
-      │           │       ├── builder3d-app v0.1.0 (*)
-      │           │       └── builder3d-core v0.1.0 (*)
+      │           │       ├── modeler3d-app v0.1.0 (*)
+      │           │       └── modeler3d-core v0.1.0 (*)
       │           ├── glow v0.17.0
       │           │   └── wgpu-hal v30.0.1 (*)
       │           ├── iana-time-zone v0.1.65 (*)
@@ -2720,11 +2720,11 @@ warning[duplicate]: found 2 duplicate entries for crate 'syn'
       ├── thiserror-impl v2.0.21
       │   └── thiserror v2.0.21
       │       ├── android-activity v0.6.1 (*)
-      │       ├── builder3d-app v0.1.0 (*)
-      │       ├── builder3d-core v0.1.0 (*)
-      │       ├── builder3d-mcp v0.1.0 (*)
-      │       ├── builder3d-platform v0.1.0 (*)
-      │       ├── builder3d-viewport v0.1.0 (*)
+      │       ├── modeler3d-app v0.1.0 (*)
+      │       ├── modeler3d-core v0.1.0 (*)
+      │       ├── modeler3d-mcp v0.1.0 (*)
+      │       ├── modeler3d-platform v0.1.0 (*)
+      │       ├── modeler3d-viewport v0.1.0 (*)
       │       ├── egui-wgpu v0.37.0 (*)
       │       ├── gpu-allocator v0.28.0
       │       │   └── wgpu-hal v30.0.1 (*)
@@ -2749,8 +2749,8 @@ warning[duplicate]: found 2 duplicate entries for crate 'syn'
       │       └── wl-clipboard-rs v0.9.5 (*)
       ├── tokio-macros v2.7.2
       │   └── tokio v1.51.6
-      │       ├── builder3d-app v0.1.0 (*)
-      │       ├── builder3d-mcp v0.1.0 (*)
+      │       ├── modeler3d-app v0.1.0 (*)
+      │       ├── modeler3d-mcp v0.1.0 (*)
       │       ├── rmcp v3.8.0 (*)
       │       ├── tokio-util v0.7.19
       │       │   └── rmcp v3.8.0 (*)
@@ -2798,7 +2798,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'syn'
           └── zvariant_derive v5.15.1 (*)
 
 warning[duplicate]: found 2 duplicate entries for crate 'thiserror'
-    ┌─ E:\Builder3D-Rust/Cargo.lock:349:1
+    ┌─ E:\3D-Modeler/Cargo.lock:349:1
     │  
 349 │ ╭ thiserror 1.0.69 registry+https://github.com/rust-lang/crates.io-index
 350 │ │ thiserror 2.0.21 registry+https://github.com/rust-lang/crates.io-index
@@ -2812,7 +2812,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'thiserror'
       │   │           ├── accesskit_winit v0.34.2
       │   │           │   └── egui-winit v0.37.0
       │   │           │       └── eframe v0.37.0
-      │   │           │           └── builder3d-app v0.1.0
+      │   │           │           └── modeler3d-app v0.1.0
       │   │           ├── eframe v0.37.0 (*)
       │   │           ├── egui-wgpu v0.37.0
       │   │           │   └── eframe v0.37.0 (*)
@@ -2830,30 +2830,30 @@ warning[duplicate]: found 2 duplicate entries for crate 'thiserror'
       │       ├── accesskit_winit v0.34.2
       │       │   └── egui-winit v0.37.0
       │       │       └── eframe v0.37.0
-      │       │           └── builder3d-app v0.1.0
+      │       │           └── modeler3d-app v0.1.0
       │       ├── eframe v0.37.0 (*)
       │       ├── egui-wgpu v0.37.0
       │       │   └── eframe v0.37.0 (*)
       │       └── egui-winit v0.37.0 (*)
-      ├── builder3d-app v0.1.0 (*)
-      ├── builder3d-core v0.1.0
-      │   ├── builder3d-app v0.1.0 (*)
-      │   ├── builder3d-mcp v0.1.0
-      │   │   └── builder3d-app v0.1.0 (*)
-      │   └── builder3d-viewport v0.1.0
-      │       └── builder3d-app v0.1.0 (*)
-      ├── builder3d-mcp v0.1.0 (*)
-      ├── builder3d-platform v0.1.0
-      │   ├── builder3d-app v0.1.0 (*)
-      │   ├── builder3d-mcp v0.1.0 (*)
-      │   └── builder3d-viewport v0.1.0 (*)
-      ├── builder3d-viewport v0.1.0 (*)
+      ├── modeler3d-app v0.1.0 (*)
+      ├── modeler3d-core v0.1.0
+      │   ├── modeler3d-app v0.1.0 (*)
+      │   ├── modeler3d-mcp v0.1.0
+      │   │   └── modeler3d-app v0.1.0 (*)
+      │   └── modeler3d-viewport v0.1.0
+      │       └── modeler3d-app v0.1.0 (*)
+      ├── modeler3d-mcp v0.1.0 (*)
+      ├── modeler3d-platform v0.1.0
+      │   ├── modeler3d-app v0.1.0 (*)
+      │   ├── modeler3d-mcp v0.1.0 (*)
+      │   └── modeler3d-viewport v0.1.0 (*)
+      ├── modeler3d-viewport v0.1.0 (*)
       ├── egui-wgpu v0.37.0 (*)
       ├── gpu-allocator v0.28.0
       │   └── wgpu-hal v30.0.1
       │       ├── wgpu v30.0.1
-      │       │   ├── builder3d-platform v0.1.0 (*)
-      │       │   ├── builder3d-viewport v0.1.0 (*)
+      │       │   ├── modeler3d-platform v0.1.0 (*)
+      │       │   ├── modeler3d-viewport v0.1.0 (*)
       │       │   ├── eframe v0.37.0 (*)
       │       │   └── egui-wgpu v0.37.0 (*)
       │       ├── wgpu-core v30.0.1
@@ -2869,7 +2869,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'thiserror'
       ├── jni v0.22.4
       │   └── android-activity v0.6.1 (*)
       ├── manifold-csg v0.4.1
-      │   └── builder3d-core v0.1.0 (*)
+      │   └── modeler3d-core v0.1.0 (*)
       ├── naga v30.0.1
       │   ├── wgpu-core v30.0.1 (*)
       │   ├── wgpu-hal v30.0.1 (*)
@@ -2886,9 +2886,9 @@ warning[duplicate]: found 2 duplicate entries for crate 'thiserror'
       │       ├── wgpu-hal v30.0.1 (*)
       │       └── wgpu-naga-bridge v30.0.1 (*)
       ├── qhull v0.4.1
-      │   └── builder3d-core v0.1.0 (*)
+      │   └── modeler3d-core v0.1.0 (*)
       ├── rmcp v3.8.0
-      │   └── builder3d-mcp v0.1.0 (*)
+      │   └── modeler3d-mcp v0.1.0 (*)
       ├── smithay-client-toolkit v0.20.0
       │   └── smithay-clipboard v0.7.3
       │       └── egui-winit v0.37.0 (*)
@@ -2907,7 +2907,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'thiserror'
               └── egui-winit v0.37.0 (*)
 
 warning[duplicate]: found 2 duplicate entries for crate 'thiserror-impl'
-    ┌─ E:\Builder3D-Rust/Cargo.lock:351:1
+    ┌─ E:\3D-Modeler/Cargo.lock:351:1
     │  
 351 │ ╭ thiserror-impl 1.0.69 registry+https://github.com/rust-lang/crates.io-index
 352 │ │ thiserror-impl 2.0.21 registry+https://github.com/rust-lang/crates.io-index
@@ -2922,7 +2922,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'thiserror-impl'
           │   │           ├── accesskit_winit v0.34.2
           │   │           │   └── egui-winit v0.37.0
           │   │           │       └── eframe v0.37.0
-          │   │           │           └── builder3d-app v0.1.0
+          │   │           │           └── modeler3d-app v0.1.0
           │   │           ├── eframe v0.37.0 (*)
           │   │           ├── egui-wgpu v0.37.0
           │   │           │   └── eframe v0.37.0 (*)
@@ -2941,30 +2941,30 @@ warning[duplicate]: found 2 duplicate entries for crate 'thiserror-impl'
           │       ├── accesskit_winit v0.34.2
           │       │   └── egui-winit v0.37.0
           │       │       └── eframe v0.37.0
-          │       │           └── builder3d-app v0.1.0
+          │       │           └── modeler3d-app v0.1.0
           │       ├── eframe v0.37.0 (*)
           │       ├── egui-wgpu v0.37.0
           │       │   └── eframe v0.37.0 (*)
           │       └── egui-winit v0.37.0 (*)
-          ├── builder3d-app v0.1.0 (*)
-          ├── builder3d-core v0.1.0
-          │   ├── builder3d-app v0.1.0 (*)
-          │   ├── builder3d-mcp v0.1.0
-          │   │   └── builder3d-app v0.1.0 (*)
-          │   └── builder3d-viewport v0.1.0
-          │       └── builder3d-app v0.1.0 (*)
-          ├── builder3d-mcp v0.1.0 (*)
-          ├── builder3d-platform v0.1.0
-          │   ├── builder3d-app v0.1.0 (*)
-          │   ├── builder3d-mcp v0.1.0 (*)
-          │   └── builder3d-viewport v0.1.0 (*)
-          ├── builder3d-viewport v0.1.0 (*)
+          ├── modeler3d-app v0.1.0 (*)
+          ├── modeler3d-core v0.1.0
+          │   ├── modeler3d-app v0.1.0 (*)
+          │   ├── modeler3d-mcp v0.1.0
+          │   │   └── modeler3d-app v0.1.0 (*)
+          │   └── modeler3d-viewport v0.1.0
+          │       └── modeler3d-app v0.1.0 (*)
+          ├── modeler3d-mcp v0.1.0 (*)
+          ├── modeler3d-platform v0.1.0
+          │   ├── modeler3d-app v0.1.0 (*)
+          │   ├── modeler3d-mcp v0.1.0 (*)
+          │   └── modeler3d-viewport v0.1.0 (*)
+          ├── modeler3d-viewport v0.1.0 (*)
           ├── egui-wgpu v0.37.0 (*)
           ├── gpu-allocator v0.28.0
           │   └── wgpu-hal v30.0.1
           │       ├── wgpu v30.0.1
-          │       │   ├── builder3d-platform v0.1.0 (*)
-          │       │   ├── builder3d-viewport v0.1.0 (*)
+          │       │   ├── modeler3d-platform v0.1.0 (*)
+          │       │   ├── modeler3d-viewport v0.1.0 (*)
           │       │   ├── eframe v0.37.0 (*)
           │       │   └── egui-wgpu v0.37.0 (*)
           │       ├── wgpu-core v30.0.1
@@ -2980,7 +2980,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'thiserror-impl'
           ├── jni v0.22.4
           │   └── android-activity v0.6.1 (*)
           ├── manifold-csg v0.4.1
-          │   └── builder3d-core v0.1.0 (*)
+          │   └── modeler3d-core v0.1.0 (*)
           ├── naga v30.0.1
           │   ├── wgpu-core v30.0.1 (*)
           │   ├── wgpu-hal v30.0.1 (*)
@@ -2997,9 +2997,9 @@ warning[duplicate]: found 2 duplicate entries for crate 'thiserror-impl'
           │       ├── wgpu-hal v30.0.1 (*)
           │       └── wgpu-naga-bridge v30.0.1 (*)
           ├── qhull v0.4.1
-          │   └── builder3d-core v0.1.0 (*)
+          │   └── modeler3d-core v0.1.0 (*)
           ├── rmcp v3.8.0
-          │   └── builder3d-mcp v0.1.0 (*)
+          │   └── modeler3d-mcp v0.1.0 (*)
           ├── smithay-client-toolkit v0.20.0
           │   └── smithay-clipboard v0.7.3
           │       └── egui-winit v0.37.0 (*)
@@ -3018,7 +3018,7 @@ warning[duplicate]: found 2 duplicate entries for crate 'thiserror-impl'
                   └── egui-winit v0.37.0 (*)
 
 warning[duplicate]: found 3 duplicate entries for crate 'windows-sys'
-    ┌─ E:\Builder3D-Rust/Cargo.lock:425:1
+    ┌─ E:\3D-Modeler/Cargo.lock:425:1
     │  
 425 │ ╭ windows-sys 0.52.0 registry+https://github.com/rust-lang/crates.io-index
 426 │ │ windows-sys 0.59.0 registry+https://github.com/rust-lang/crates.io-index
@@ -3030,7 +3030,7 @@ warning[duplicate]: found 3 duplicate entries for crate 'windows-sys'
           ├── accesskit_winit v0.34.2
           │   └── egui-winit v0.37.0
           │       └── eframe v0.37.0
-          │           └── builder3d-app v0.1.0
+          │           └── modeler3d-app v0.1.0
           ├── eframe v0.37.0 (*)
           ├── egui-wgpu v0.37.0
           │   └── eframe v0.37.0 (*)
@@ -3044,7 +3044,7 @@ warning[duplicate]: found 3 duplicate entries for crate 'windows-sys'
           │   │           ├── accesskit_winit v0.34.2
           │   │           │   └── egui-winit v0.37.0
           │   │           │       └── eframe v0.37.0
-          │   │           │           └── builder3d-app v0.1.0
+          │   │           │           └── modeler3d-app v0.1.0
           │   │           ├── eframe v0.37.0 (*)
           │   │           ├── egui-wgpu v0.37.0
           │   │           │   └── eframe v0.37.0 (*)
@@ -3058,7 +3058,7 @@ warning[duplicate]: found 3 duplicate entries for crate 'windows-sys'
       ├── arboard v3.7.0
       │   └── egui-winit v0.37.0
       │       └── eframe v0.37.0
-      │           └── builder3d-app v0.1.0
+      │           └── modeler3d-app v0.1.0
       ├── async-io v2.6.0
       │   ├── async-process v2.5.0
       │   │   └── zbus v5.19.0
@@ -3122,7 +3122,7 @@ warning[duplicate]: found 3 duplicate entries for crate 'windows-sys'
       │   │   │   ├── calloop-wayland-source v0.3.0 (*)
       │   │   │   ├── calloop-wayland-source v0.4.1 (*)
       │   │   │   ├── rfd v0.17.2
-      │   │   │   │   └── builder3d-app v0.1.0 (*)
+      │   │   │   │   └── modeler3d-app v0.1.0 (*)
       │   │   │   ├── smithay-client-toolkit v0.19.2 (*)
       │   │   │   ├── smithay-client-toolkit v0.20.0 (*)
       │   │   │   ├── smithay-clipboard v0.7.3 (*)
@@ -3177,22 +3177,22 @@ warning[duplicate]: found 3 duplicate entries for crate 'windows-sys'
       │       └── async-signal v0.2.14 (*)
       ├── mio v1.2.4
       │   └── tokio v1.51.6
-      │       ├── builder3d-app v0.1.0 (*)
-      │       ├── builder3d-mcp v0.1.0
-      │       │   └── builder3d-app v0.1.0 (*)
+      │       ├── modeler3d-app v0.1.0 (*)
+      │       ├── modeler3d-mcp v0.1.0
+      │       │   └── modeler3d-app v0.1.0 (*)
       │       ├── rmcp v3.8.0
-      │       │   └── builder3d-mcp v0.1.0 (*)
+      │       │   └── modeler3d-mcp v0.1.0 (*)
       │       ├── tokio-util v0.7.19
       │       │   └── rmcp v3.8.0 (*)
       │       └── wasm-bindgen-futures v0.4.79
       │           ├── rfd v0.17.2 (*)
       │           ├── wgpu v30.0.1
-      │           │   ├── builder3d-platform v0.1.0
-      │           │   │   ├── builder3d-app v0.1.0 (*)
-      │           │   │   ├── builder3d-mcp v0.1.0 (*)
-      │           │   │   └── builder3d-viewport v0.1.0
-      │           │   │       └── builder3d-app v0.1.0 (*)
-      │           │   ├── builder3d-viewport v0.1.0 (*)
+      │           │   ├── modeler3d-platform v0.1.0
+      │           │   │   ├── modeler3d-app v0.1.0 (*)
+      │           │   │   ├── modeler3d-mcp v0.1.0 (*)
+      │           │   │   └── modeler3d-viewport v0.1.0
+      │           │   │       └── modeler3d-app v0.1.0 (*)
+      │           │   ├── modeler3d-viewport v0.1.0 (*)
       │           │   ├── eframe v0.37.0 (*)
       │           │   └── egui-wgpu v0.37.0 (*)
       │           └── winit v0.30.13 (*)
@@ -3215,14 +3215,14 @@ warning[duplicate]: found 3 duplicate entries for crate 'windows-sys'
       │   └── walkdir v2.5.0 (*)
       ├── zbus v5.19.0 (*)
       └── zip v9.1.3
-          ├── builder3d-app v0.1.0 (*)
-          └── builder3d-core v0.1.0
-              ├── builder3d-app v0.1.0 (*)
-              ├── builder3d-mcp v0.1.0 (*)
-              └── builder3d-viewport v0.1.0 (*)
+          ├── modeler3d-app v0.1.0 (*)
+          └── modeler3d-core v0.1.0
+              ├── modeler3d-app v0.1.0 (*)
+              ├── modeler3d-mcp v0.1.0 (*)
+              └── modeler3d-viewport v0.1.0 (*)
 
 warning[yanked]: detected yanked crate (try `cargo update -p async-executor`)
-   ┌─ E:\Builder3D-Rust/Cargo.lock:22:1
+   ┌─ E:\3D-Modeler/Cargo.lock:22:1
    │
 22 │ async-executor 1.14.0 registry+https://github.com/rust-lang/crates.io-index
    │ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ yanked version
@@ -3232,7 +3232,7 @@ warning[yanked]: detected yanked crate (try `cargo update -p async-executor`)
      │   └── accesskit_winit v0.34.2
      │       └── egui-winit v0.37.0
      │           └── eframe v0.37.0
-     │               └── builder3d-app v0.1.0
+     │               └── modeler3d-app v0.1.0
      └── zbus v5.19.0
          ├── accesskit_unix v0.24.1 (*)
          ├── atspi-common v0.13.0

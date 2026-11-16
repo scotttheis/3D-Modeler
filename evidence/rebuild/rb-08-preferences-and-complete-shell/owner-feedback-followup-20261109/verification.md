@@ -22,13 +22,13 @@
 
 ## Checks
 
-- `cargo test -p builder3d-viewport near_build_floor_stays_inside_projection_for_an_empty_scene --locked` — passed.
-- `cargo test -p builder3d-app mcp_bridge::tests::loopback_bridge_authenticates_queues_and_removes_only_its_descriptor --locked -- --exact` — passed. The first workspace run had one loopback connection reset; this isolated test and the repeat workspace run passed.
+- `cargo test -p modeler3d-viewport near_build_floor_stays_inside_projection_for_an_empty_scene --locked` — passed.
+- `cargo test -p modeler3d-app mcp_bridge::tests::loopback_bridge_authenticates_queues_and_removes_only_its_descriptor --locked -- --exact` — passed. The first workspace run had one loopback connection reset; this isolated test and the repeat workspace run passed.
 - `cargo test --workspace --locked` — passed on retry.
 - `cargo clippy --workspace --all-targets --all-features --locked -- -D warnings` — passed.
 - `cargo fmt --all -- --check` — passed.
 - `cargo deny check` — passed; it reported duplicate-version warnings and a yanked locked crate, with advisories, bans, licenses, and sources passing.
-- `cargo build --release -p builder3d-app --bin builder3d-app --locked` — passed. The Release GUI launched and remained responsive.
+- `cargo build --release -p modeler3d-app --bin modeler3d-app --locked` — passed. The Release GUI launched and remained responsive.
 
 ## Window stacking follow-up
 

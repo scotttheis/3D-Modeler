@@ -1,0 +1,25 @@
+[package]
+name = "modeler3d-app"
+version = "0.1.0"
+edition = "2024"
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+modeler3d-core.workspace = true
+modeler3d-mcp.workspace = true
+modeler3d-platform.workspace = true
+modeler3d-viewport.workspace = true
+eframe.workspace = true
+image.workspace = true
+rfd.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+uuid.workspace = true
+zip.workspace = true
+
+[build-dependencies]
+embed-resource = "=3.0.12"

@@ -1,6 +1,6 @@
 # R7-10 — application image-color sampling coverage
 
-Component: `builder3d.app.image-color`
+Component: `modeler3d.app.image-color`
 
 ## Implemented contract
 

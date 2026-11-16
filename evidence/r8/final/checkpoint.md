@@ -12,7 +12,7 @@
 - Catalog audit passed: unique IDs, existing references, complete Python
   module/support-script coverage, and no planned/polish R8 entries.
 - Optional checks: cargo-audit unavailable; cargo-bloat completed for the
-  required invocation and for the `builder3d-app` package target.
+  required invocation and for the `modeler3d-app` package target.
 - Final recovery snapshot: `G:\Builder3D-Rust_snapshot_20261030-123828_R8-final`;
   robocopy exit 1, with 169 files and 1,730,290 bytes in both source and
   snapshot after the required exclusions.

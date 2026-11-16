@@ -1,8 +1,8 @@
 COMMAND: cargo test --workspace --locked
-   Compiling builder3d-app v0.1.0 (E:\Builder3D-Rust\crates\builder3d-app)
+   Compiling modeler3d-app v0.1.0 (E:\3D-Modeler\crates\modeler3d-app)
  
     Finished `test` profile [unoptimized + debuginfo] target(s) in 7.56s
-     Running unittests src\lib.rs (target\debug\deps\builder3d_app-bf2aa2c97dc4dca9.exe)
+     Running unittests src\lib.rs (target\debug\deps\modeler3d_app-bf2aa2c97dc4dca9.exe)
 
 running 92 tests
 test artwork::tests::theme_artwork_is_scoped_and_not_shared_raster_data ... ok
@@ -100,7 +100,7 @@ test shell::tests::typed_save_as_overwrite_cancel_keeps_the_existing_project_and
 
 test result: ok. 92 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.42s
 
-     Running unittests src\main.rs (target\debug\deps\builder3d_app-074d67fc43093a19.exe)
+     Running unittests src\main.rs (target\debug\deps\modeler3d_app-074d67fc43093a19.exe)
 
 running 0 tests
 
@@ -112,7 +112,7 @@ running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-     Running unittests src\lib.rs (target\debug\deps\builder3d_core-a29fd32885cd663d.exe)
+     Running unittests src\lib.rs (target\debug\deps\modeler3d_core-a29fd32885cd663d.exe)
 
 running 9 tests
 test tests::command_registry_dispatches_primitives ... ok
@@ -277,7 +277,7 @@ test wrl_path_export_is_atomic_when_validation_fails ... ok
 
 test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-     Running unittests src\lib.rs (target\debug\deps\builder3d_mcp-b263818ba46c8b96.exe)
+     Running unittests src\lib.rs (target\debug\deps\modeler3d_mcp-b263818ba46c8b96.exe)
 
 running 14 tests
 test r4::catalog::tests::catalog_is_exactly_ordered_and_profile_monotonic ... ok
@@ -309,7 +309,7 @@ running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-     Running unittests src\lib.rs (target\debug\deps\builder3d_platform-926110473f44fe48.exe)
+     Running unittests src\lib.rs (target\debug\deps\modeler3d_platform-926110473f44fe48.exe)
 
 running 15 tests
 test discovery::tests::unknown_native_memory_keeps_system_budget_visible ... ok
@@ -330,7 +330,7 @@ test runtime::tests::process_liveness_rejects_zero_and_finds_current_process ...
 
 test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.95s
 
-     Running unittests src\lib.rs (target\debug\deps\builder3d_viewport-1313efd2301b8ba1.exe)
+     Running unittests src\lib.rs (target\debug\deps\modeler3d_viewport-1313efd2301b8ba1.exe)
 
 running 26 tests
 test adaptive::tests::controller_switches_only_the_display_tier ... ok
@@ -362,31 +362,31 @@ test spike::tests::summary_uses_bounded_percentiles ... ok
 
 test result: ok. 26 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-   Doc-tests builder3d_app
+   Doc-tests modeler3d_app
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-   Doc-tests builder3d_core
+   Doc-tests modeler3d_core
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-   Doc-tests builder3d_mcp
+   Doc-tests modeler3d_mcp
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-   Doc-tests builder3d_platform
+   Doc-tests modeler3d_platform
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-   Doc-tests builder3d_viewport
+   Doc-tests modeler3d_viewport
 
 running 0 tests
 

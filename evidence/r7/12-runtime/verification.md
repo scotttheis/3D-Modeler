@@ -2,7 +2,7 @@
 
 ## Focused behavior
 
-- `cargo test -p builder3d-platform --locked`: pass, 15 platform tests.
+- `cargo test -p modeler3d-platform --locked`: pass, 15 platform tests.
 - Tests cover Windows and XDG path policy, descriptor override precedence,
   current-process discovery, invalid process IDs, and case-insensitive
   offscreen rejection.
@@ -21,6 +21,6 @@ recorded here after the full R7-12 verification run.
   existing duplicate-version diagnostics remain warnings.
 - `cargo metadata --locked --format-version 1 --no-deps`: pass.
 - Catalog TOML/path validation: pass, 24 unique IDs and 156 referenced paths.
-- Native smoke: pass, `Builder3D shell smoke: objects=2 selected=1 tabs=5`.
+- Native smoke: pass, `3D Modeler shell smoke: objects=2 selected=1 tabs=5`.
 
 No commit was created. Python source and existing snapshots were not written.

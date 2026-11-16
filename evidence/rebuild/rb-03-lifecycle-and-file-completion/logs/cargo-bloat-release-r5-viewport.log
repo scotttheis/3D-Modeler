@@ -1,9 +1,9 @@
-﻿COMMAND=cargo bloat --release -p builder3d-app --bin r5_viewport
-cargo :    Compiling builder3d-app v0.1.0 (E:\Builder3D-Rust\crates\builder3d-app)
+﻿COMMAND=cargo bloat --release -p modeler3d-app --bin r5_viewport
+cargo :    Compiling modeler3d-app v0.1.0 (E:\3D-Modeler\crates\modeler3d-app)
 At line:2 char:245
-+ ... oatOutput = cargo bloat --release -p builder3d-app --bin r5_viewport  ...
++ ... oatOutput = cargo bloat --release -p modeler3d-app --bin r5_viewport  ...
 +                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: (   Compiling bu...\builder3d-app):String) [], RemoteException
+    + CategoryInfo          : NotSpecified: (   Compiling bu...\modeler3d-app):String) [], RemoteException
     + FullyQualifiedErrorId : NativeCommandError
  
     Finished `release` profile [optimized + debuginfo] target(s) in 1m 27s

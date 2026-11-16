@@ -19,7 +19,7 @@ async def main() -> None:
         raise RuntimeError("RB09_MCP_COMMAND and RB09_CATALOG_OUTPUT are required")
 
     arguments = json.loads(os.environ.get("RB09_MCP_ARGUMENTS", "[]"))
-    profile = os.environ.get("BUILDER3D_MCP_PROFILE", "full")
+    profile = os.environ.get("MODELER3D_MCP_PROFILE", "full")
     label = os.environ.get("RB09_CATALOG_LABEL", "unspecified")
     server = StdioServerParameters(
         command=command,

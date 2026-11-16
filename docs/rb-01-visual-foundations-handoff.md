@@ -14,7 +14,7 @@ blocker. After the gate passes, follow the
 
 ## 1. Goal and boundaries
 
-RB-01 establishes the original Builder3D visual direction in the current Rust application and gets the owner’s approval before broader application work. It covers original artwork and branding, theme tokens, fonts and control states, ribbon and panel proportions, Welcome cards, and the transform strip in Light and Dark.
+RB-01 establishes the original 3D Modeler visual direction in the current Rust application and gets the owner’s approval before broader application work. It covers original artwork and branding, theme tokens, fonts and control states, ribbon and panel proportions, Welcome cards, and the transform strip in Light and Dark.
 
 Keep the existing Rust workspace and eframe as the first implementation path. The workspace pins eframe 0.37.0. Do not prototype another UI toolkit. A toolkit change requires a measured comparison and the owner decision described by the rebuild plan.
 
@@ -25,7 +25,7 @@ RB-01 is a visual slice. Do not begin the RB-02 New/Cube/import/edit/save workfl
 Before making changes, read:
 
 1. `E:\AGENTS.md` and `E:\RustDeveloper.md`.
-2. `E:\Builder3D-Rust\AGENTS.md`.
+2. `E:\3D-Modeler\AGENTS.md`.
 3. `docs/product-rebuild-plan.md` and `docs/product-rebuild-handoff.md`.
 4. The latest `WORK_LOG.md` entry, this document, and:
    - `evidence/rebuild/rb-00-reference-audit/checkpoint.md`
@@ -33,7 +33,7 @@ Before making changes, read:
    - `evidence/rebuild/parity-matrix.toml`
    - `evidence/rebuild/rb-00-reference-audit/asset-manifest.toml`
 5. The original read-only reference material in `L:\Builder3D`, especially its `AGENTS.md`, `docs/ui-style-guide.md`, `src/main_window.py`, `src/style.py`, `src/icon_assets.py`, and the dated owner decisions in `WORK_LOG.md`.
-6. Rust presentation seams and their tests: `crates/builder3d-app/src/shell.rs`, `theme.rs`, `artwork.rs`, `Cargo.toml`, relevant component catalog entries, and focused app/theme/artwork tests.
+6. Rust presentation seams and their tests: `crates/modeler3d-app/src/shell.rs`, `theme.rs`, `artwork.rs`, `Cargo.toml`, relevant component catalog entries, and focused app/theme/artwork tests.
 
 The shared Rust practices in `E:\RustDeveloper.md` remain in force. Preserve all existing untracked Rust work. Do not clean, reset, stage, or commit the workspace.
 
@@ -69,13 +69,13 @@ Record each capture’s source, date, window/surface, state, theme, logical dime
 
 The plan lists 100%, 125%, 150%, and 200% scaling, ordinary/maximized layouts, and monitor moves. Check configurations available without changing machine-wide settings. Record unavailable configurations as untested; RB-01 does not close the later full scale review.
 
-When safe live capture is impossible, do not stop or kill an existing Builder3D/MCP process and do not launch a concurrent target. Finish independent source/artwork work, record the process and reason, and leave live capture, matching, and acceptance pending. No historical or model-generated image can substitute for a live capture.
+When safe live capture is impossible, do not stop or kill an existing Modeler3D/MCP process and do not launch a concurrent target. Finish independent source/artwork work, record the process and reason, and leave live capture, matching, and acceptance pending. No historical or model-generated image can substitute for a live capture.
 
 ## 5. Visual work in the Rust app
 
 Implement only the visual foundations in the existing eframe app:
 
-- Package the original Builder3D branding and theme artwork needed for the selected screens.
+- Package the original 3D Modeler branding and theme artwork needed for the selected screens.
 - Match Light and Dark color tokens, typography, spacing, border treatment, and enabled/hover/pressed/disabled/focus states.
 - Match the top utility row, icon-only menu trigger, ribbon tabs and command row, pin/collapse and favorites presentation, and panel proportions.
 - Design the Welcome cards and recent-file presentation, Items-panel appearance, and Move/Rotate/Resize strip.
@@ -91,7 +91,7 @@ Important source facts to reconcile in the design board:
 - The source maps Undo/Redo PNGs while older text describes generated arrows. The root `pin.jpg` and `snap.png` fallback paths are shadowed by the mapped themed Pin/Snap PNGs.
 - The owner accepted the default metric floor without the projected contact cue on 2026-10-02. RB-01 records the shell appearance; it does not integrate the viewport renderer or change this decision.
 
-Do not promote `builder3d.app.shell` or `builder3d.app.desktop-adapters` beyond their current catalog state. Update catalog facts only if source inspection proves a factual correction.
+Do not promote `modeler3d.app.shell` or `modeler3d.app.desktop-adapters` beyond their current catalog state. Update catalog facts only if source inspection proves a factual correction.
 
 ## 6. Comparison and verification
 

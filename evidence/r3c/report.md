@@ -11,11 +11,11 @@ the source is already at or below the target.
 
 ## Changed files
 
-- crates/builder3d-core/src/simplify.rs
-- crates/builder3d-core/src/lib.rs
-- crates/builder3d-core/src/commands.rs
-- crates/builder3d-core/src/scene.rs
-- crates/builder3d-core/tests/mesh_ops_simplify.rs
+- crates/modeler3d-core/src/simplify.rs
+- crates/modeler3d-core/src/lib.rs
+- crates/modeler3d-core/src/commands.rs
+- crates/modeler3d-core/src/scene.rs
+- crates/modeler3d-core/tests/mesh_ops_simplify.rs
 
 ## Behavioral evidence
 
@@ -32,8 +32,8 @@ the source is already at or below the target.
 
 - Python: tests/test_chunk7.py -k Simplify -q: 2 passed, 31 deselected.
 - Rust: tests/mesh_ops_simplify.rs: 5 passed.
-- Rust: cargo fmt --all -- --check, cargo check -p builder3d-core, and
-  cargo clippy -p builder3d-core --all-targets -- -D warnings passed.
+- Rust: cargo fmt --all -- --check, cargo check -p modeler3d-core, and
+  cargo clippy -p modeler3d-core --all-targets -- -D warnings passed.
 - New simplifier/repair/boolean production files contain zero forbidden
   panic-style or debugging markers.
 
@@ -41,7 +41,7 @@ the source is already at or below the target.
 
 R3c snapshot:
 G:\Builder3D-Rust_snapshot_20261029-143659_R3c-simplify
-It excludes E:\Builder3D-Rust\target. Exact verification is in
+It excludes E:\3D-Modeler\target. Exact verification is in
 verification.md.
 
 ## Remaining R3 work

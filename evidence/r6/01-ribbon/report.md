@@ -12,7 +12,7 @@ theme-scoped artwork, launchers, and installers.
 - Added the reference file menu labels, separators, utility Save/Undo/Redo
   controls, ribbon pin control, and light/dark shell mode toggle.
 - Added the Items panel and a renderer-neutral viewport preview fed by
-  `builder3d-viewport::RenderScene`; the shell does not mutate core geometry.
+  `modeler3d-viewport::RenderScene`; the shell does not mutate core geometry.
 - Added typed `CommandId`, `CommandOutcome`, `CommandError`, and
   `CommandState` boundaries. Primitive insertion, selection, copy/paste,
   duplicate, delete, undo/redo, and display toggles are already routed through
@@ -23,8 +23,8 @@ theme-scoped artwork, launchers, and installers.
 ## Verification
 
 - `cargo fmt --all -- --check` — passed.
-- `cargo check -p builder3d-app` — passed.
-- `cargo test -p builder3d-app` — 7 passed.
+- `cargo check -p modeler3d-app` — passed.
+- `cargo test -p modeler3d-app` — 7 passed.
 - Python reference checks from `L:\Builder3D`:
   `tests/test_project_files.py::TestMenuSpecs` and
   `tests/test_desktop_actions.py` — 15 passed.

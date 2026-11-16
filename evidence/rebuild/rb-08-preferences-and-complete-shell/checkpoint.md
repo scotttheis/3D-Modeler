@@ -8,7 +8,7 @@ accepted.
 
 ## Current verified state
 
-- Source remains the current `E:\Builder3D-Rust` worktree. No files are staged,
+- Source remains the current `E:\3D-Modeler` worktree. No files are staged,
   committed, reset, restored from RB-07, or discarded.
 - The pre-edit RB-08 snapshot on G: is
   `G:\Builder3D-Rust_snapshot_20261102-085830_RB-08-baseline`; its receipt
@@ -21,7 +21,7 @@ accepted.
   workspace tests pass 314. Twelve focused Python reference tests pass.
   Verification records all ten documented gate command results and the
   `cargo audit` availability limit.
-- The Release app is `target\release\builder3d-app.exe`, SHA-256
+- The Release app is `target\release\modeler3d-app.exe`, SHA-256
   `db406708cf19efe9ed62c3c53d02684dc49c4458d44c59bd940e6bc45ca81f75`,
   15,653,888 bytes. Its isolated settings file imported Dark theme, snapping,
   and ribbon preferences from the existing registry values.

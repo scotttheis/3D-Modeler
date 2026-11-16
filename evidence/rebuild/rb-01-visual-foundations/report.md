@@ -5,9 +5,9 @@
 
 ## Scope and result
 
-This slice updates the existing eframe shell's visual foundations using the read-only Python Builder3D source, its style guide, and the RB-00 asset inventory. The app remains on eframe 0.37.0. The changes cover the original Light and Dark palettes, platform UI font setup, ribbon geometry and artwork, Welcome and Items presentation, and the contextual Move/Rotate/Resize strip.
+This slice updates the existing eframe shell's visual foundations using the read-only Python 3D Modeler source, its style guide, and the RB-00 asset inventory. The app remains on eframe 0.37.0. The changes cover the original Light and Dark palettes, platform UI font setup, ribbon geometry and artwork, Welcome and Items presentation, and the contextual Move/Rotate/Resize strip.
 
-Serial live captures of the read-only Python Builder3D reference and the Rust eframe app were completed in Light and Dark at 1280 x 840 logical client pixels. The background MCP gateway remained active but had no target UI window; it was not stopped. All four client sizes and per-window DPI were measured, and the 1:1 comparison images were inspected. The captured state is the empty Welcome screen with Insert active. Owner review remains pending; no visual acceptance is claimed and RB-02 has not started.
+Serial live captures of the read-only Python 3D Modeler reference and the Rust eframe app were completed in Light and Dark at 1280 x 840 logical client pixels. The background MCP gateway remained active but had no target UI window; it was not stopped. All four client sizes and per-window DPI were measured, and the 1:1 comparison images were inspected. The captured state is the empty Welcome screen with Insert active. Owner review remains pending; no visual acceptance is claimed and RB-02 has not started.
 
 ## Visual decisions implemented
 
@@ -16,7 +16,7 @@ Serial live captures of the read-only Python Builder3D reference and the Rust ef
 - On Windows the shell loads Segoe UI from the system font directory when present. Platform fallbacks are provided for macOS and Linux. The eframe sizes map the source's 9.5 pt general control text to 12.7 logical points, with the source's 13 pt ribbon tabs represented at 17 logical points.
 - The command row follows the source's 91 px height, 46 px icons, 3 px group dividers, 8 px button radius, and 5 px icon/text lift. Command button widths use measured labels with the source's 66-104 px bounds.
 - The top row keeps the hamburger at the left, the five ribbon tabs, compact favorites with width-aware overflow, 3D Print, and icon-only Save, Save As, Undo, and Redo controls in the source order. Utilities use 36 px hit boxes. The existing tab toggle and persisted Pin behavior remain in place.
-- The Welcome surface uses the original Builder3D brandmark and original New Scene/Open artwork. Recent entries use responsive cards and source icons; generated mesh thumbnails are still not implemented.
+- The Welcome surface uses the original 3D Modeler brandmark and original New Scene/Open artwork. Recent entries use responsive cards and source icons; generated mesh thumbnails are still not implemented.
 - The Items panel uses source primitive artwork for matching shapes and keeps the action card and list in the existing panel. The panel's current Rust layout uses a 236 px default width within its existing 210-250 px range; live proportion comparison is pending.
 - The bottom contextual strip presents Move, Rotate, and Resize selection states and uses the existing numeric-transform commands. This is a shell presentation cue; it does not integrate the 3D renderer or add viewport gizmos.
 - Supplied transparent artwork is decoded as RGBA without changing its stored bytes. The selected theme chooses the matching action and Insert directories. The Rust shell and staged native package resolve assets inside the Rust product tree; they do not load from `L:\Builder3D`.
@@ -25,7 +25,7 @@ The command mapping preserves the source's `ExRay.png`, `Subtract.png`, and `Sim
 
 ## Artwork provenance and package-size conflict
 
-The RB-00 manifest describes 108 files: 44 action images per theme, eight Insert images per theme, and four shared branding/legacy files. All 108 were copied unchanged into `crates/builder3d-app/assets/original`. The RB-01 manifest retains the source path, original facts, theme, logical action, dimensions, format, and alpha treatment, and adds the Rust/package destinations and source/package hashes.
+The RB-00 manifest describes 108 files: 44 action images per theme, eight Insert images per theme, and four shared branding/legacy files. All 108 were copied unchanged into `crates/modeler3d-app/assets/original`. The RB-01 manifest retains the source path, original facts, theme, logical action, dimensions, format, and alpha treatment, and adds the Rust/package destinations and source/package hashes.
 
 Those source assets total **43,340,965 bytes**. The existing installed-package limit is **41,943,040 bytes (40 MiB)**, so the original artwork alone exceeds it by **1,397,925 bytes** before the executable, launchers, or installers are counted. The 15 MiB archive limit is also unverified. I have not resized, recompressed, removed, or substituted source art, and I did not run package staging. This conflict must be resolved through a later packaging decision while retaining the original files and provenance.
 
@@ -43,7 +43,7 @@ The captures do not show a selected scene, populated object list, transform stri
 
 ## Verification and limitations
 
-The current build command, cargo build --package builder3d-app --locked, exited 0. Earlier RB-01 records document successful formatting, workspace check, and library Clippy checks; those commands were not rerun in this capture session. No automated tests were run. All four live captures and both side-by-side images were opened and visually inspected. Their measured dimensions and hashes are recorded in capture-metadata.toml.
+The current build command, cargo build --package modeler3d-app --locked, exited 0. Earlier RB-01 records document successful formatting, workspace check, and library Clippy checks; those commands were not rerun in this capture session. No automated tests were run. All four live captures and both side-by-side images were opened and visually inspected. Their measured dimensions and hashes are recorded in capture-metadata.toml.
 
 No New, Cube creation, native import, shaded viewport, exact pick, gizmo move, undo, or save/reopen interaction was exercised. The Rust Settings dialog was used to select Light; persistence across restart was not checked. No package staging was attempted. L:\Builder3D remained read-only. Both target apps were closed after capture; the background MCP gateway remained running. Temporary isolated profiles and dialog diagnostics remain under the ignored project target directory and are excluded from the recovery snapshot.
 

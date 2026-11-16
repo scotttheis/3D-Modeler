@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=3D Modeler
+Comment=Private native 3D Modeler mesh editor
+Exec=Modeler3D %U
+Icon=modeler3d
+Terminal=false
+Categories=Graphics;Engineering;
+StartupNotify=true

@@ -1,5 +1,5 @@
     Finished `test` profile [unoptimized + debuginfo] target(s) in 0.58s
-     Running unittests src\lib.rs (target\debug\deps\builder3d_mcp-ab9bddde4abe851a.exe)
+     Running unittests src\lib.rs (target\debug\deps\modeler3d_mcp-ab9bddde4abe851a.exe)
 
 running 1 test
 test r4::schema::tests::captured_release_success_results_match_reference_output_schemas_when_supplied ... ok

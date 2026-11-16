@@ -1,13 +1,13 @@
 # R8 baseline verification
 
-All commands were run from `E:\Builder3D-Rust` before the first R8 source
+All commands were run from `E:\3D-Modeler` before the first R8 source
 change.
 
 | Check | Result |
 |---|---|
-| `cargo test -p builder3d-app --locked` | PASS — 51 unit tests, doctests pass |
-| `cargo run -p builder3d-app --locked -- --smoke` | PASS — `objects=2 selected=1 tabs=5` |
-| Native launch | PASS — `builder3d-app.exe` opened a responsive `Builder3D` window |
+| `cargo test -p modeler3d-app --locked` | PASS — 51 unit tests, doctests pass |
+| `cargo run -p modeler3d-app --locked -- --smoke` | PASS — `objects=2 selected=1 tabs=5` |
+| Native launch | PASS — `modeler3d-app.exe` opened a responsive `3D Modeler` window |
 | Python source/snapshots | unchanged; Python was used only as the read-only oracle |
 
 The first failed desktop screenshot capture was not used as evidence; the

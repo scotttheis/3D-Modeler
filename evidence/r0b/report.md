@@ -1,4 +1,4 @@
-# Builder3D Rust R0b spike
+# 3D Modeler Rust R0b spike
 
 This is measured spike evidence, not a production-readiness claim.
 

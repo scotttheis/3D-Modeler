@@ -11,10 +11,10 @@ cleanup, tiny-shell removal, safe compaction, and bounded planar cleanup.
 
 ## Changed files
 
-- crates/builder3d-core/src/mesh_ops.rs
-- crates/builder3d-core/src/repair.rs
-- crates/builder3d-core/src/lib.rs
-- crates/builder3d-core/tests/mesh_ops_repair.rs
+- crates/modeler3d-core/src/mesh_ops.rs
+- crates/modeler3d-core/src/repair.rs
+- crates/modeler3d-core/src/lib.rs
+- crates/modeler3d-core/tests/mesh_ops_repair.rs
 
 ## Behavioral evidence
 
@@ -38,8 +38,8 @@ cleanup, tiny-shell removal, safe compaction, and bounded planar cleanup.
   trimesh invalid-value warning.
 - Python: tests/test_chunk7.py -k Repair -q: 3 passed, 30 deselected.
 - Rust: focused boolean and repair suites: 10 passed.
-- Rust: cargo fmt --all -- --check, cargo check -p builder3d-core, and
-  cargo clippy -p builder3d-core --all-targets -- -D warnings passed.
+- Rust: cargo fmt --all -- --check, cargo check -p modeler3d-core, and
+  cargo clippy -p modeler3d-core --all-targets -- -D warnings passed.
 - New production operation files contain zero .unwrap(), .expect(),
   dbg!, todo!, panic!, or unimplemented! matches.
 
@@ -47,7 +47,7 @@ cleanup, tiny-shell removal, safe compaction, and bounded planar cleanup.
 
 The R3b snapshot is
 G:\Builder3D-Rust_snapshot_20261029-143343_R3b-repair; it excludes
-E:\Builder3D-Rust\target. Exact path, byte, and SHA-256 verification is in
+E:\3D-Modeler\target. Exact path, byte, and SHA-256 verification is in
 verification.md.
 
 ## Remaining R3 work

@@ -30,7 +30,7 @@ def sha256(path: Path) -> str:
 
 async def capture_profile(binary: Path, profile: str) -> list[dict[str, Any]]:
     environment = os.environ.copy()
-    environment["BUILDER3D_MCP_PROFILE"] = profile
+    environment["MODELER3D_MCP_PROFILE"] = profile
     server = StdioServerParameters(
         command=str(binary),
         args=[],

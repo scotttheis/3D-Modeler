@@ -1,6 +1,6 @@
 # R7-06 — application print-preparation coverage
 
-Component: `builder3d.app.print-prep`
+Component: `modeler3d.app.print-prep`
 
 ## Implemented contract
 

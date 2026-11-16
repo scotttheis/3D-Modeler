@@ -1,6 +1,6 @@
 # R7-03 — atomic object-transform workflows
 
-Component: `builder3d.app.commands.transforms`
+Component: `modeler3d.app.commands.transforms`
 
 ## Selection
 

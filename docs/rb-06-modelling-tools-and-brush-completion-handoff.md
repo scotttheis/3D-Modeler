@@ -5,7 +5,7 @@ Prepared 2026-11-01 for a fresh implementation session.
 ## Objective and stop boundary
 
 Complete the entire **RB-06 — Modelling tools** slice in the existing
-`E:\Builder3D-Rust` worktree. Finish the implementation, repair every broken
+`E:\3D-Modeler` worktree. Finish the implementation, repair every broken
 button and control discovered in the affected shell, run focused and full
 tests, perform sequential paired Python/Rust native verification, update the
 feature ledger and documentation, and create a verified additive recovery
@@ -118,10 +118,10 @@ existing MCP surface and should not expand protocol scope.
 
 The current Rust surface is intentionally not proof of completion. Start with
 read-only inspection of `ribbon_spec()` and `file_menu_spec()` in
-`crates/builder3d-app/src/commands.rs`, the shell dispatch in
-`crates/builder3d-app/src/shell.rs`, dialog actions in
-`crates/builder3d-app/src/dialogs.rs`, and the operation modules in
-`crates/builder3d-core`.
+`crates/modeler3d-app/src/commands.rs`, the shell dispatch in
+`crates/modeler3d-app/src/shell.rs`, dialog actions in
+`crates/modeler3d-app/src/dialogs.rs`, and the operation modules in
+`crates/modeler3d-core`.
 
 The current visible RB-06 inventory includes these semantic commands:
 
@@ -183,14 +183,14 @@ Relevant starting points are:
 
 The Rust starting points are:
 
-- `crates/builder3d-app/src/commands.rs`, `shell.rs`, `dialogs.rs`,
+- `crates/modeler3d-app/src/commands.rs`, `shell.rs`, `dialogs.rs`,
   `operations.rs` and `ui_state.rs` for semantic dispatch, enabled-state
   logic, dialogs, status/errors, favorites and duplicate entry points;
-- `crates/builder3d-core/src/primitives.rs`, `scene.rs`, `mesh_ops.rs`,
+- `crates/modeler3d-core/src/primitives.rs`, `scene.rs`, `mesh_ops.rs`,
   `repair.rs`, `simplify.rs`, `subdivide.rs`, `smooth.rs`, `brushes.rs`,
   `density.rs` and `shell_ops.rs` for portable geometry and history; and
 - the matching integration tests under
-  `crates/builder3d-core/tests/`, plus the existing native harness patterns in
+  `crates/modeler3d-core/tests/`, plus the existing native harness patterns in
   `evidence/rebuild/rb-05-viewport-and-input-completion/`.
 
 The old R3 mesh implementation is reusable evidence, not a new stage to
@@ -448,14 +448,14 @@ defect. Run focused tests in the owning crates, including the mesh operation
 integration tests listed by `docs/component-catalog.toml`:
 
 ```text
-crates/builder3d-core/tests/mesh_ops_booleans.rs
-crates/builder3d-core/tests/mesh_ops_repair.rs
-crates/builder3d-core/tests/mesh_ops_simplify.rs
-crates/builder3d-core/tests/mesh_ops_subdivide.rs
-crates/builder3d-core/tests/mesh_ops_smooth.rs
-crates/builder3d-core/tests/mesh_ops_brushes.rs
-crates/builder3d-core/tests/mesh_ops_density.rs
-crates/builder3d-core/tests/mesh_ops_shell.rs
+crates/modeler3d-core/tests/mesh_ops_booleans.rs
+crates/modeler3d-core/tests/mesh_ops_repair.rs
+crates/modeler3d-core/tests/mesh_ops_simplify.rs
+crates/modeler3d-core/tests/mesh_ops_subdivide.rs
+crates/modeler3d-core/tests/mesh_ops_smooth.rs
+crates/modeler3d-core/tests/mesh_ops_brushes.rs
+crates/modeler3d-core/tests/mesh_ops_density.rs
+crates/modeler3d-core/tests/mesh_ops_shell.rs
 ```
 
 Use assertions about user outcomes: geometry and report values, selection,
@@ -466,7 +466,7 @@ Then run the locked integrated gates from a fresh PowerShell session or record
 the exact environment used:
 
 ```powershell
-cd E:\Builder3D-Rust
+cd E:\3D-Modeler
 . .\scripts\Initialize-BuildClang.ps1
 cargo fmt --all
 cargo check --workspace --locked
@@ -475,9 +475,9 @@ cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
 cargo fmt --all -- --check
 cargo deny check
 cargo metadata --locked --format-version 1 --no-deps
-cargo build --locked -p builder3d-app --bin builder3d-app
-cargo build --locked -p builder3d-app --bin builder3d-app --release
-cargo bloat --release --bin builder3d-app -n 20
+cargo build --locked -p modeler3d-app --bin modeler3d-app
+cargo build --locked -p modeler3d-app --bin modeler3d-app --release
+cargo bloat --release --bin modeler3d-app -n 20
 ```
 
 Run debug and release `--smoke` checks with isolated writable application
@@ -627,4 +627,4 @@ boundary rather than silently expanding the slice.
 
 ## Short activation prompt
 
-Read and follow `E:\Builder3D-Rust\docs\rb-06-modelling-tools-and-brush-completion-handoff.md`. Complete all RB-06 work, repair every non-working button, run tests and paired native evidence, update docs, make a verified additive G: snapshot, and stop before RB-07. Keep Python read-only and do not stage or commit.
+Read and follow `E:\3D-Modeler\docs\rb-06-modelling-tools-and-brush-completion-handoff.md`. Complete all RB-06 work, repair every non-working button, run tests and paired native evidence, update docs, make a verified additive G: snapshot, and stop before RB-07. Keep Python read-only and do not stage or commit.

@@ -5,7 +5,7 @@ Visual review and owner acceptance remain pending.
 
 | Requirement | Rust implementation / automated evidence | Native evidence |
 |---|---|---|
-| Primitive insertion and editable Torus | `CommandState::add_primitive`, `edit_torus_selected`, Torus metadata tests in `crates/builder3d-app/src/commands.rs`; bounded dialog tests in `dialogs.rs` | `torus-dialog`, `torus-hole-preview`, `torus-applied` in both themes |
+| Primitive insertion and editable Torus | `CommandState::add_primitive`, `edit_torus_selected`, Torus metadata tests in `crates/modeler3d-app/src/commands.rs`; bounded dialog tests in `dialogs.rs` | `torus-dialog`, `torus-hole-preview`, `torus-applied` in both themes |
 | Repair and typed failure | `Scene::repair_selected`, repair integration tests, command error/status paths | `object-tab`, `repair-dialog` in both themes; corrupted-mesh repair result remains automated-only |
 | Simplify/Subdivide/Smooth | core mesh-operation tests and command history tests | `simplify-result`, `subdivide-result`, `smooth-result` in both themes |
 | Persistent Grab/Crease/Smooth Brush/Blob | `BrushStroke`, `apply_brush_stroke`, shell `ActiveBrush`/`BrushGesture`, persistent-mode tests | active, before, and Shift-stroke-after records for each brush in both themes |

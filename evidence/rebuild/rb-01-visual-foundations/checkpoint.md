@@ -6,7 +6,7 @@
 - **Host:** Primary display 2560 × 1440 physical pixels; work area 2560 × 1392. Per-window DPI was 96.
 - **Serial workflow:** Python Dark, Python Light, Rust Dark, Rust Light, with each app closed before the next session. Background MCP gateway left running and untouched.
 - **Isolation:** Python QSettings and runtime paths and Rust app-data paths were isolated. The L:\Builder3D source and user settings were not modified.
-- **Build:** cargo build --package builder3d-app --locked succeeded. No tests were run.
+- **Build:** cargo build --package modeler3d-app --locked succeeded. No tests were run.
 - **Review findings:** The comparisons show different Welcome alignment and Recent layout, the right panel is present only in Python's captured Welcome state, and the Rust hamburger appears as an outlined square. See capture-board.md.
 - **Limitations:** New/Cube, native import, shaded viewport, exact pick, gizmo move, undo, and save/reopen were not exercised. No selected-scene or transform-strip state was captured.
 - **Approval gate:** RB-02 is not started. Await owner review of the matched images and explicit approval before proceeding.

@@ -1,8 +1,8 @@
 # R2c continuation checkpoint
 
 - Completed subtask: R2c GLTF/GLB file I/O.
-- Changed files: `crates/builder3d-core/src/{error,file_io,gltf,lib}.rs`,
-  `crates/builder3d-core/tests/gltf_golden.rs`, five GLTF fixtures, and
+- Changed files: `crates/modeler3d-core/src/{error,file_io,gltf,lib}.rs`,
+  `crates/modeler3d-core/tests/gltf_golden.rs`, five GLTF fixtures, and
   `evidence/r2c/report.md`.
 - Checks passed: core Rust tests (28), core Clippy with `-D warnings`,
   workspace check/format, Python GLTF/mesh tests (85), Python AI GLTF tests

@@ -2,7 +2,7 @@
 
 ## Automated gates
 
-All gates were run from `E:\Builder3D-Rust` after initializing the pinned build-only libclang environment.
+All gates were run from `E:\3D-Modeler` after initializing the pinned build-only libclang environment.
 
 | Check | Result |
 |---|---|
@@ -50,7 +50,7 @@ The regression `floor_scale_labels_remain_world_anchored_when_camera_pans`
 checks that all label values and world positions remain unchanged after a
 camera pan. The focused viewport suite passed: 40 passed, 0 failed.
 `cargo fmt --all -- --check` and viewport Clippy with warnings denied passed.
-The optimized app build and `builder3d-app.exe --smoke` passed
+The optimized app build and `modeler3d-app.exe --smoke` passed
 (`objects=2 selected=1 tabs=5`).
 
 In the visible Release app (PID 20188), a right-button drag in the empty scene

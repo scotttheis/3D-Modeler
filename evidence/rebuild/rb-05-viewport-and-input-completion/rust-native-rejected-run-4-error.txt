@@ -1,5 +1,5 @@
 ﻿Cannot index into a null array.
-At E:\Builder3D-Rust\evidence\rebuild\rb-05-viewport-and-input-completion\native-rust-rb05.ps1:144 char:5
+At E:\3D-Modeler\evidence\rebuild\rb-05-viewport-and-input-completion\native-rust-rb05.ps1:144 char:5
 +     Set-Rb05Pointer $Start[0] $Start[1]
 +     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     + CategoryInfo          : InvalidOperation: (:) [], RuntimeException

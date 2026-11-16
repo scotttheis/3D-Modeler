@@ -30,7 +30,7 @@
     "journal": "python-native-results.json"
   },
   "rust_native": {
-    "executable": "target/debug/builder3d-app.exe",
+    "executable": "target/debug/modeler3d-app.exe",
     "rustc": "1.99.1",
     "accepted_records": 52,
     "records_per_theme": 26,
@@ -46,7 +46,7 @@
     "hashes_recorded_in": ["python-native-results.json", "rust-native-results.json"]
   },
   "release_artifact": {
-    "path": "target/release/builder3d-app.exe",
+    "path": "target/release/modeler3d-app.exe",
     "bytes": 15006720,
     "sha256": "ddd70cb0e6a560d9395db51dc857187b3011e4f895e943e424567be6a65e0908",
     "smoke": "pass",

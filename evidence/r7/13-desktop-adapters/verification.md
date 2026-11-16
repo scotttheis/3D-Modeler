@@ -2,10 +2,10 @@
 
 ## Focused behavior
 
-- `cargo test -p builder3d-app --locked`: pass; 51 application tests cover
+- `cargo test -p modeler3d-app --locked`: pass; 51 application tests cover
   typed signals, numeric suffix selection, preference persistence/validation,
   and the existing native shell/dialog contracts.
-- `cargo test -p builder3d-mcp --locked`: pass; R4 server, security, replay,
+- `cargo test -p modeler3d-mcp --locked`: pass; R4 server, security, replay,
   and operation lifecycle tests remain green.
 
 ## Workspace gates
@@ -24,7 +24,7 @@ recorded here after the full R7-13 verification run.
 - Catalog TOML/path and coverage audit: pass, 29 IDs; all 41 product Python
   modules and all 19 reference/support scripts are mapped, with 197 referenced
   Rust/test/evidence paths. No `planned` or `polish` catalog statuses remain.
-- Native smoke: pass, `Builder3D shell smoke: objects=2 selected=1 tabs=5`.
+- Native smoke: pass, `3D Modeler shell smoke: objects=2 selected=1 tabs=5`.
 - `cargo audit`: skipped because the command is not installed in this
   environment.
 

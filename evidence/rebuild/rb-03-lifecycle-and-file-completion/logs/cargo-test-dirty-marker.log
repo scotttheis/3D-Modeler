@@ -1,20 +1,20 @@
-﻿COMMAND=cargo test --offline --locked -p builder3d-app dirty_marker_tracks_saved_checkpoint_through_undo_redo_and_branches
-cargo :    Compiling builder3d-app v0.1.0 (E:\Builder3D-Rust\crates\builder3d-app)
+﻿COMMAND=cargo test --offline --locked -p modeler3d-app dirty_marker_tracks_saved_checkpoint_through_undo_redo_and_branches
+cargo :    Compiling modeler3d-app v0.1.0 (E:\3D-Modeler\crates\modeler3d-app)
 At line:2 char:275
-+ ...  utf8; $out=cargo test --offline --locked -p builder3d-app dirty_mark ...
++ ...  utf8; $out=cargo test --offline --locked -p modeler3d-app dirty_mark ...
 +                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: (   Compiling bu...\builder3d-app):String) [], RemoteException
+    + CategoryInfo          : NotSpecified: (   Compiling bu...\modeler3d-app):String) [], RemoteException
     + FullyQualifiedErrorId : NativeCommandError
  
     Finished `test` profile [unoptimized + debuginfo] target(s) in 8.62s
-     Running unittests src\lib.rs (target\debug\deps\builder3d_app-3fb98efe45212e0b.exe)
+     Running unittests src\lib.rs (target\debug\deps\modeler3d_app-3fb98efe45212e0b.exe)
 
 running 1 test
 test commands::tests::dirty_marker_tracks_saved_checkpoint_through_undo_redo_and_branches ... ok
 
 test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 90 filtered out; finished in 0.03s
 
-     Running unittests src\main.rs (target\debug\deps\builder3d_app-d417a2496a61304c.exe)
+     Running unittests src\main.rs (target\debug\deps\modeler3d_app-d417a2496a61304c.exe)
 
 running 0 tests
 

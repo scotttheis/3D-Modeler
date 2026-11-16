@@ -25,7 +25,7 @@ function Capture-Rb04State([string]$Theme,[string]$Action,[string]$Fixture) {
  if(($Theme -eq 'light' -and $looksDark) -or ($Theme -eq 'dark' -and -not $looksDark)){throw 'Capture theme does not match the requested theme; frame is not accepted'}
  $record|Add-Member Theme $Theme;$record|Add-Member Action $Action;$record|Add-Member Fixture $Fixture
  $record|Add-Member CapturedAt ([DateTimeOffset]::Now.ToString('o'))
- $record|Add-Member BuildSha256 ((Get-FileHash -LiteralPath 'target/debug/builder3d-app.exe' -Algorithm SHA256).Hash.ToLowerInvariant())
+ $record|Add-Member BuildSha256 ((Get-FileHash -LiteralPath 'target/debug/modeler3d-app.exe' -Algorithm SHA256).Hash.ToLowerInvariant())
  $journal="$script:rb04EvidenceRoot/rust-current-native-captures.ndjson"
  ConvertTo-Json -InputObject $record -Depth 6 -Compress | Add-Content -LiteralPath $journal -Encoding UTF8
  return $record
@@ -38,7 +38,7 @@ function Open-Rb04Project([string]$Path) {
  Invoke-Rb03Click 585 405;Invoke-Rb03Keys '^a';Invoke-Rb04Text $Path;Invoke-Rb03Click 484 460
  $expected=[IO.Path]::GetFileName($Path)
  $deadline=[DateTime]::UtcNow.AddSeconds(12)
- while((Get-Rb03WindowInfo (Activate-Rb03App)).Title -ne "Builder3D - $expected" -or -not (Test-Rb04RootReady)){
+ while((Get-Rb03WindowInfo (Activate-Rb03App)).Title -ne "3D Modeler - $expected" -or -not (Test-Rb04RootReady)){
   if([DateTime]::UtcNow -ge $deadline){throw "Open did not complete for $expected; no scene input sent"}
   Start-Sleep -Milliseconds 150
  }
@@ -68,17 +68,17 @@ function Select-Rb04SceneIndices([int[]]$Indices,[string]$Kind,[int]$Count){
  throw 'Ordered Items selection did not visibly complete; no model action sent'
 }
 function Save-Rb04State([string]$Name) {
- $path="E:/Builder3D-Rust/$script:rb04EvidenceRoot/native-scene-states/$Name.3dp"
+ $path="E:/3D-Modeler/$script:rb04EvidenceRoot/native-scene-states/$Name.3dp"
  if(Test-Path -LiteralPath $path){throw "Native evidence destination exists: $path"}
  Invoke-Rb03Click 1174 35;Wait-Rb04Frame;Assert-Rb04FileDialog
  Invoke-Rb03Click 585 405;Invoke-Rb03Keys '^a';Invoke-Rb04Text $path;Invoke-Rb03Click 483 460
  Wait-Rb04Frame
  $deadline=[DateTime]::UtcNow.AddSeconds(10)
- while(((-not(Test-Path -LiteralPath $path)) -or (Get-Rb03WindowInfo (Activate-Rb03App)).Title -ne "Builder3D - $Name.3dp") -and [DateTime]::UtcNow -lt $deadline){
+ while(((-not(Test-Path -LiteralPath $path)) -or (Get-Rb03WindowInfo (Activate-Rb03App)).Title -ne "3D Modeler - $Name.3dp") -and [DateTime]::UtcNow -lt $deadline){
   if(-not [Rb03UiNative]::Available()){throw 'Desktop unavailable while waiting for native Save As; no input sent'}
   Start-Sleep -Milliseconds 200
  }
- if((-not(Test-Path -LiteralPath $path)) -or (Get-Rb03WindowInfo (Activate-Rb03App)).Title -ne "Builder3D - $Name.3dp"){throw "Native Save As did not finish $path"}
+ if((-not(Test-Path -LiteralPath $path)) -or (Get-Rb03WindowInfo (Activate-Rb03App)).Title -ne "3D Modeler - $Name.3dp"){throw "Native Save As did not finish $path"}
  return $path
 }
 function Assert-Rb04FileDialog {
@@ -97,7 +97,7 @@ function Assert-Rb04FileDialog {
  if(-not $ready){throw 'Native path dialog is not visibly ready; no path text sent'}
 }
 function Invoke-Rb04SettleCase([string]$Theme,[int]$Count) {
- $fixture="E:/Builder3D-Rust/$script:rb04EvidenceRoot/settle-$Count-before.3dp"
+ $fixture="E:/3D-Modeler/$script:rb04EvidenceRoot/settle-$Count-before.3dp"
  Open-Rb04Project $fixture;Invoke-Rb03Keys '^a';Wait-Rb04Frame
  Capture-Rb04State $Theme "settle-$Count-before" $fixture
  Invoke-Rb03Click 465 128;Capture-Rb04State $Theme "settle-$Count-after" $fixture
@@ -106,7 +106,7 @@ function Invoke-Rb04SettleCase([string]$Theme,[int]$Count) {
  $name="rust-$Theme-settle-$Count-redo";$version=2
  while(Test-Path -LiteralPath "$PSScriptRoot/native-scene-states/$name.3dp"){$name="rust-$Theme-settle-$Count-redo-v$version";$version++}
  $saved=Save-Rb04State $name
- @{theme=$Theme;count=$Count;saved=$saved;build_sha256=(Get-FileHash target/debug/builder3d-app.exe).Hash.ToLowerInvariant()}|ConvertTo-Json -Compress|Add-Content -LiteralPath "$PSScriptRoot/rust-settle-output-routes.ndjson" -Encoding UTF8
+ @{theme=$Theme;count=$Count;saved=$saved;build_sha256=(Get-FileHash target/debug/modeler3d-app.exe).Hash.ToLowerInvariant()}|ConvertTo-Json -Compress|Add-Content -LiteralPath "$PSScriptRoot/rust-settle-output-routes.ndjson" -Encoding UTF8
 }
 function Set-Rb04Pointer([int]$X,[int]$Y) {
  $h=Activate-Rb03App;$info=Get-Rb03WindowInfo $h

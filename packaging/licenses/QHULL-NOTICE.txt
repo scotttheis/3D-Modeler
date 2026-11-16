@@ -1,4 +1,4 @@
-Builder3D includes the unmodified Qhull native library through qhull-rs.
+3D Modeler includes the unmodified Qhull native library through qhull-rs.
 Original Qhull source is available at https://www.qhull.org/ and
 https://github.com/qhull/qhull . Its copyright and redistribution conditions
 are reproduced in QHULL-COPYING.txt.
@@ -6,4 +6,4 @@ are reproduced in QHULL-COPYING.txt.
 The MIT-licensed Rust wrapper is pinned to revision
 62e810ccf93b458470f03cae6ef4df26023d2260 of
 https://github.com/LucaCiucci/qhull-rs . Its license is reproduced in
-QHULL-RS-LICENSE.txt. Builder3D has not modified the native Qhull source.
+QHULL-RS-LICENSE.txt. 3D Modeler has not modified the native Qhull source.

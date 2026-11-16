@@ -1,4 +1,4 @@
-﻿COMMAND=cargo run --target-dir target/rb03-recents-build -p builder3d-app --bin builder3d-app -- --smoke
+﻿COMMAND=cargo run --target-dir target/rb03-recents-build -p modeler3d-app --bin modeler3d-app -- --smoke
 cargo :     Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.15s
 At line:2 char:262
 + ...  utf8; $out=cargo run --target-dir target/rb03-recents-build -p build ...
@@ -6,6 +6,6 @@ At line:2 char:262
     + CategoryInfo          : NotSpecified: (    Finished `d...get(s) in 1.15s:String) [], RemoteException
     + FullyQualifiedErrorId : NativeCommandError
  
-     Running `target/rb03-recents-build\debug\builder3d-app.exe --smoke`
-Builder3D shell smoke: objects=2 selected=1 tabs=5
+     Running `target/rb03-recents-build\debug\modeler3d-app.exe --smoke`
+3D Modeler shell smoke: objects=2 selected=1 tabs=5
 EXIT_CODE=0

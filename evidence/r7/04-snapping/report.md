@@ -1,6 +1,6 @@
 # R7-04 — renderer-neutral snapping
 
-Component: `builder3d.viewport.snapping`
+Component: `modeler3d.viewport.snapping`
 
 ## Selection
 

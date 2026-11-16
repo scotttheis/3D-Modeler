@@ -1,9 +1,9 @@
-﻿COMMAND=cargo clippy --offline --locked -p builder3d-app --all-targets --all-features -- -D warnings
-cargo :     Checking builder3d-app v0.1.0 (E:\Builder3D-Rust\crates\builder3d-app)
+﻿COMMAND=cargo clippy --offline --locked -p modeler3d-app --all-targets --all-features -- -D warnings
+cargo :     Checking modeler3d-app v0.1.0 (E:\3D-Modeler\crates\modeler3d-app)
 At line:2 char:674
-+ ...  utf8; $out=cargo clippy --offline --locked -p builder3d-app --all-ta ...
++ ...  utf8; $out=cargo clippy --offline --locked -p modeler3d-app --all-ta ...
 +                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: (    Checking bu...\builder3d-app):String) [], RemoteException
+    + CategoryInfo          : NotSpecified: (    Checking bu...\modeler3d-app):String) [], RemoteException
     + FullyQualifiedErrorId : NativeCommandError
  
     Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.42s

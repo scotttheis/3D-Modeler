@@ -6,17 +6,17 @@
 
 ## Dark pair
 
-![Python Builder3D on the left and Rust eframe on the right, Dark theme, 1:1 client pixels](captures/comparison-dark-python-left-rust-right.png)
+![Python 3D Modeler on the left and Rust eframe on the right, Dark theme, 1:1 client pixels](captures/comparison-dark-python-left-rust-right.png)
 
-- [Python Builder3D Dark capture](captures/python-dark-client-1280x840.png)
+- [Python 3D Modeler Dark capture](captures/python-dark-client-1280x840.png)
 - [Rust eframe Dark capture](captures/rust-dark-client-1280x840.png)
 - [1:1 side-by-side comparison](captures/comparison-dark-python-left-rust-right.png)
 
 ## Light pair
 
-![Python Builder3D on the left and Rust eframe on the right, Light theme, 1:1 client pixels](captures/comparison-light-python-left-rust-right.png)
+![Python 3D Modeler on the left and Rust eframe on the right, Light theme, 1:1 client pixels](captures/comparison-light-python-left-rust-right.png)
 
-- [Python Builder3D Light capture](captures/python-light-client-1280x840.png)
+- [Python 3D Modeler Light capture](captures/python-light-client-1280x840.png)
 - [Rust eframe Light capture](captures/rust-light-client-1280x840.png)
 - [1:1 side-by-side comparison](captures/comparison-light-python-left-rust-right.png)
 
@@ -33,7 +33,7 @@ The host primary display is 2560 × 1440 physical pixels with a 2560 × 1392 wor
 
 ## Observed differences in this state
 
-- Python places the Builder3D title and action cards toward the left and shows its right-side selection/action and Items panels.
+- Python places the 3D Modeler title and action cards toward the left and shows its right-side selection/action and Items panels.
 - Rust centers its brand and New Scene/Open Project cards, then shows a full-width empty Recent area. The matching right-side panel is not visible in this Rust Welcome state.
 - The Python hamburger uses three horizontal lines. The Rust capture shows a small outlined square in that position.
 - Both apps show the Insert ribbon and the same empty Welcome intent. Their ribbon spacing, proportions, title placement, panel presentation, and empty Recent treatment differ. Regional tolerances and owner acceptance are not assigned yet.

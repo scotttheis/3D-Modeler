@@ -1,6 +1,6 @@
 # Packaging a Windows test release (MSI)
 
-How to turn the current source into an installable `Builder3D-RCn.msi` that
+How to turn the current source into an installable `3D-Modeler-RCn.msi` that
 someone else can run on their PC. The owner only asks for "a release
 candidate" (or similar); the session does every step below itself and reports
 the MSI path. The last release number is on the "Test releases" line in
@@ -20,14 +20,14 @@ the MSI path. The last release number is on the "Test releases" line in
 From PowerShell (any directory):
 
 ```powershell
-E:\Builder3D-Rust\packaging\msi\Build-Msi.ps1 -Version 0.1.2 -Name Builder3D-RC2 -Build -Verify
+E:\3D-Modeler\packaging\msi\Build-Msi.ps1 -Version 0.1.2 -Name 3D-Modeler-RC2 -Build -Verify
 ```
 
-- `-Build` stops a running Builder3D (it locks the release exe; the owner
+- `-Build` stops a running 3D Modeler (it locks the release exe; the owner
   allows this), runs `scripts\Initialize-BuildClang.ps1`, then
-  `cargo build --release -p builder3d-app --locked` (~4 min, fat LTO).
+  `cargo build --release -p modeler3d-app --locked` (~4 min, fat LTO).
 - Then it stages the app, runs `--smoke` on the staged copy and builds the MSI
-  into `E:\Builder3D-RC\` (outside the repo, so `E:` and `target\` stay clean).
+  into `E:\3D-Modeler-RC\` (outside the repo, so `E:` and `target\` stay clean).
 - `-Verify` silently installs the MSI on this PC, checks files and shortcuts,
   runs `--smoke` and opens the real window for 8 s, then silently uninstalls
   and checks nothing is left behind. It fails loudly at the first problem.
@@ -42,7 +42,7 @@ field, so an MSI with the same three numbers will not replace the old one.
 A higher version upgrades the previous install in place (`MajorUpgrade`);
 a lower one is refused.
 
-Never change the `UpgradeCode` in `packaging/msi/Builder3D.wxs`. It is what
+Never change the `UpgradeCode` in `packaging/msi/Modeler3D.wxs`. It is what
 ties every candidate together as "the same product".
 
 ## What the MSI does
@@ -50,12 +50,12 @@ ties every candidate together as "the same product".
 | Item | Choice |
 |---|---|
 | Scope | Per-user. No administrator rights, no UAC prompt |
-| Install folder | `%LOCALAPPDATA%\Programs\Builder3D` |
-| App settings | `%LOCALAPPDATA%\Builder3D` (written by the app, kept on uninstall). Do not install into this folder |
-| Shortcuts | Start menu and desktop, both "Builder3D", with the app icon |
-| Wizard | WixUI_Minimal: one screen with the notice from `packaging/msi/License.rtf`, then progress, then a "Launch Builder3D" checkbox |
-| Contents | `Builder3D.exe`, `assets\original\` (artwork the app loads at startup), `licenses\`, and the VC++ runtime DLLs `msvcp140.dll`, `vcruntime140.dll`, `vcruntime140_1.dll` copied app-local so a PC without the VC++ redistributable still runs it |
-| Uninstall | Settings > Apps > Builder3D > Uninstall, or `msiexec /x Builder3D-RCn.msi` |
+| Install folder | `%LOCALAPPDATA%\Programs\Modeler3D` |
+| App settings | `%LOCALAPPDATA%\Modeler3D` (written by the app, kept on uninstall). Do not install into this folder |
+| Shortcuts | Start menu and desktop, both "3D Modeler", with the app icon |
+| Wizard | WixUI_Minimal: one screen with the notice from `packaging/msi/License.rtf`, then progress, then a "Launch 3D Modeler" checkbox |
+| Contents | `Modeler3D.exe`, `assets\original\` (artwork the app loads at startup), `licenses\`, and the VC++ runtime DLLs `msvcp140.dll`, `vcruntime140.dll`, `vcruntime140_1.dll` copied app-local so a PC without the VC++ redistributable still runs it |
+| Uninstall | Settings > Apps > 3D Modeler > Uninstall, or `msiexec /x 3D-Modeler-RCn.msi` |
 
 The exe needs the `assets\original` folder beside it. On the dev PC it falls
 back to the source tree, which hides a missing folder; on any other PC the
@@ -66,7 +66,7 @@ If the exe's DLL imports change (for example a new C++ dependency), recheck
 them and add any new runtime DLL to the `.wxs`:
 
 ```powershell
-& "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\*\bin\Hostx64\x64\dumpbin.exe" /dependents E:\Builder3D-Rust\target\release\builder3d-app.exe
+& "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\*\bin\Hostx64\x64\dumpbin.exe" /dependents E:\3D-Modeler\target\release\modeler3d-app.exe
 ```
 
 ## One-time setup on a new build machine
@@ -92,7 +92,7 @@ Send them the `.msi` only. Tell them:
 
 1. Double-click it. Windows shows "Windows protected your PC" because the
    file is not code-signed: click **More info**, then **Run anyway**.
-2. Accept the notice, click Install, leave "Launch Builder3D" ticked.
+2. Accept the notice, click Install, leave "Launch 3D Modeler" ticked.
 3. Requirements: 64-bit Windows 10 or 11. No GPU is needed; the app falls
    back to its CPU renderer.
 
@@ -101,9 +101,9 @@ Send them the `.msi` only. Tell them:
 - **libclang:** the release build fails with "Unable to find libclang"
   unless `scripts\Initialize-BuildClang.ps1` was dot-sourced in the same
   PowerShell session. `-Build` does this.
-- **Locked exe:** a running Builder3D stops Cargo replacing the release exe.
+- **Locked exe:** a running 3D Modeler stops Cargo replacing the release exe.
   `-Build` stops it.
-- **Size budget:** `builder3d-app.exe --package <dir>` enforces the S3 budget
+- **Size budget:** `modeler3d-app.exe --package <dir>` enforces the S3 budget
   (40 MB installed, 15 MB archive) and currently fails at ~64 MB, mostly the
   1254 px action-icon PNGs (~32 MB). The MSI script therefore stages the same
   layout itself. When the icons are reduced (an owner decision in S3),
@@ -115,7 +115,7 @@ Send them the `.msi` only. Tell them:
   Windows. PowerShell does not wait for a windowed exe unless its output is
   piped, so script calls such as `--smoke` end in `| Write-Host` to get a real
   `$LASTEXITCODE`. Diagnostics always go to
-  `%LOCALAPPDATA%\Builder3D\logs\builder3d.log`; `Builder3D.exe --console`
+  `%LOCALAPPDATA%\Modeler3D\logs\modeler3d.log`; `Modeler3D.exe --console`
   also shows them live in a console window.
 - **WiX source rules:** no `--` inside XML comments; keep `License.rtf`
   plain ASCII (code page 1252); one versioned file per `<Component>`; do not

@@ -1,6 +1,6 @@
 FEATURES 142 UNIQUE_IDS 142 RB03_ROWS 32
 RB03_IMPL_AUTO 32 INTERACTIVE {'pass': 30, 'partial': 2, 'pending': 0, 'fail': 0} VISUAL {'pass': 0, 'partial': 0, 'pending': 32, 'fail': 0} OWNER_PENDING 32
-MISSING_RB03_EVIDENCE [('builder3d.ui.history.dirty_marker', 'crates/builder3d-app/src/commands.rs::dirty_marker_tracks_saved_checkpoint_through_undo_redo_and_branches')]
+MISSING_RB03_EVIDENCE [('modeler3d.ui.history.dirty_marker', 'crates/modeler3d-app/src/commands.rs::dirty_marker_tracks_saved_checkpoint_through_undo_redo_and_branches')]
 COMPONENT_TOML 31
 CAPTURE_META_PAIRS 26 CAPTURE_FILES 52 STATUS captures_inspected_owner_visual_review_pending
 HTML_SECTIONS 26 HTML_IMAGES 52

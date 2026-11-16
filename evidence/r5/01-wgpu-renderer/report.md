@@ -2,7 +2,7 @@
 
 Status: complete.
 
-`crates/builder3d-viewport/src/renderer.rs` implements an indexed wgpu mesh
+`crates/modeler3d-viewport/src/renderer.rs` implements an indexed wgpu mesh
 pipeline, depth attachment, real scene uniforms, floor/gizmo overlay passes,
 staging/readback capture, adapter/backend matching, and a bounded CPU fallback.
 The R5 executable exercised the DX12 Quadro RTX 4000 path and wrote

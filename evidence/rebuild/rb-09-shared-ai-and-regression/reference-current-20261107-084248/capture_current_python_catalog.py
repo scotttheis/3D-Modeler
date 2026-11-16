@@ -26,7 +26,7 @@ sys.path.insert(0, str(REFERENCE_ROOT))
 
 from mcp.server.mcpserver import MCPServer  # noqa: E402
 from mcp.types import ToolAnnotations  # noqa: E402
-from scripts import builder3d_mcp as gateway  # noqa: E402
+from scripts import modeler3d_mcp as gateway  # noqa: E402
 from scripts.mcp_catalog import (  # noqa: E402
     CATALOG_VERSION,
     PROFILES,
@@ -54,11 +54,11 @@ def _build_server(profile: str) -> MCPServer:
                 openWorldHint=spec.open_world,
             ),
             meta={
-                "com.builder3d/catalogVersion": CATALOG_VERSION,
-                "com.builder3d/category": spec.category,
-                "com.builder3d/profile": spec.profile,
-                "com.builder3d/launchProfile": profile,
-                "com.builder3d/longRunning": spec.long_running,
+                "com.modeler3d/catalogVersion": CATALOG_VERSION,
+                "com.modeler3d/category": spec.category,
+                "com.modeler3d/profile": spec.profile,
+                "com.modeler3d/launchProfile": profile,
+                "com.modeler3d/longRunning": spec.long_running,
             },
             structured_output=True,
         )(function)

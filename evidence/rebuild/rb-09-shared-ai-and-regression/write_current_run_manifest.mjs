@@ -99,9 +99,9 @@ const manifest = {
   run_id: "currpair-20261106-072716",
   recorded_utc: "2026-11-06",
   scope:
-    "Current Rust Release desktop/MCP workflow and optional-bridge failure check. The Python Builder3D product was not launched; the official Python MCP SDK was used only as a client for the Rust stdio gateway.",
+    "Current Rust Release desktop/MCP workflow and optional-bridge failure check. The Python 3D Modeler product was not launched; the official Python MCP SDK was used only as a client for the Rust stdio gateway.",
   rust_release: {
-    app_path: "target/release/builder3d-app.exe",
+    app_path: "target/release/modeler3d-app.exe",
     app_sha256:
       "0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a",
     gateway_path: "target/release/r4_mcp.exe",
@@ -134,7 +134,7 @@ const manifest = {
     paired_release_gateway_exited_after_client_close: true,
     gui_reopened_saved_path:
       "fixtures/approved/rust-current-live-saved.3dp",
-    gui_reopen_title: "Builder3D - rust-current-live-saved.3dp",
+    gui_reopen_title: "3D Modeler - rust-current-live-saved.3dp",
     gui_reopen_status: finalStatus,
     normal_shutdown_descriptor_removed: true,
     normal_shutdown_listener_removed: true,
@@ -208,7 +208,7 @@ const manifest = {
       "captures/rust-current-live-gui-reopened-after-restart-retry2.png",
       "first reopen screenshot attempt",
       "rejected",
-      "Another foreground window covered Builder3D during capture; do not use it as Builder3D visual evidence.",
+      "Another foreground window covered 3D Modeler during capture; do not use it as 3D Modeler visual evidence.",
     ),
     imageInfo(
       "captures/rust-current-optional-gui-new-scene.png",

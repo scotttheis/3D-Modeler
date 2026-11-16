@@ -29,7 +29,7 @@ async def main():
     gateway = Path("target/release/r4_mcp.exe").resolve()
     log_path = Path("evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261107-100537-schema-parity-final/logs/rebuilt-app-probe-cleanup.jsonl")
     environment = os.environ.copy()
-    environment["BUILDER3D_MCP_PROFILE"] = "full"
+    environment["MODELER3D_MCP_PROFILE"] = "full"
     async with Client(StdioServerParameters(command=str(gateway), args=[], env=environment)) as client:
         for operation_id in OPERATIONS:
             for attempt in range(100):

@@ -25,13 +25,13 @@
     }
   ],
   "automated_fixture_contracts": [
-    "crates/builder3d-core/tests/mesh_ops_booleans.rs",
-    "crates/builder3d-core/tests/mesh_ops_brushes.rs",
-    "crates/builder3d-core/tests/mesh_ops_density.rs",
-    "crates/builder3d-core/tests/mesh_ops_repair.rs",
-    "crates/builder3d-core/tests/mesh_ops_shell.rs",
-    "crates/builder3d-core/tests/mesh_ops_simplify.rs",
-    "crates/builder3d-core/tests/mesh_ops_smooth.rs",
-    "crates/builder3d-core/tests/mesh_ops_subdivide.rs"
+    "crates/modeler3d-core/tests/mesh_ops_booleans.rs",
+    "crates/modeler3d-core/tests/mesh_ops_brushes.rs",
+    "crates/modeler3d-core/tests/mesh_ops_density.rs",
+    "crates/modeler3d-core/tests/mesh_ops_repair.rs",
+    "crates/modeler3d-core/tests/mesh_ops_shell.rs",
+    "crates/modeler3d-core/tests/mesh_ops_simplify.rs",
+    "crates/modeler3d-core/tests/mesh_ops_smooth.rs",
+    "crates/modeler3d-core/tests/mesh_ops_subdivide.rs"
   ]
 }

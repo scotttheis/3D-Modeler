@@ -3,10 +3,10 @@
 - **Objective:** continue the owner-approved conversion-first plan with the
   next command-surface follow-up, without entering shell polish.
 - **Completed:** implemented and tested
-  `builder3d.app.commands.selection`; updated the component catalog and R7
+  `modeler3d.app.commands.selection`; updated the component catalog and R7
   evidence.
-- **Changed source:** `crates/builder3d-app/src/commands.rs` and
-  `crates/builder3d-app/src/shell.rs`.
+- **Changed source:** `crates/modeler3d-app/src/commands.rs` and
+  `crates/modeler3d-app/src/shell.rs`.
 - **Changed documentation/evidence:**
   `docs/component-catalog.toml` and `evidence/r7/02-selection/`.
 - **Checks:** formatting, workspace check/tests, clippy, cargo-deny, metadata,
@@ -21,7 +21,7 @@
   — 263 files and 1,639,456 bytes, created after this checkpoint and
   verified with matching source/snapshot counts and bytes; `target`,
   `evidence`, and `WORK_LOG.md` were excluded.
-- **Next conversion slice:** `builder3d.app.commands.transforms`, covering
+- **Next conversion slice:** `modeler3d.app.commands.transforms`, covering
   the remaining object-transform workflow before print-preparation and
   background workflow gaps.
 - **Recovery/continuation:** after the final snapshot, reread this checkpoint,

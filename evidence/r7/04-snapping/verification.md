@@ -2,10 +2,10 @@
 
 ## Focused behavior
 
-- `cargo test -p builder3d-viewport snapping --locked`: pass, 3 focused
+- `cargo test -p modeler3d-viewport snapping --locked`: pass, 3 focused
   snapping tests.
-- `cargo test -p builder3d-app --locked`: pass, 25 application tests.
-- `cargo clippy -p builder3d-viewport -p builder3d-app --all-targets --all-features --locked -- -D warnings`: pass.
+- `cargo test -p modeler3d-app --locked`: pass, 25 application tests.
+- `cargo clippy -p modeler3d-viewport -p modeler3d-app --all-targets --all-features --locked -- -D warnings`: pass.
 
 ## Workspace gates
 
@@ -19,6 +19,6 @@
 - `cargo metadata --locked --format-version 1 --no-deps`: pass.
 - Catalog TOML/path validation: pass, 15 unique IDs and all referenced paths
   present.
-- Native smoke: pass, `Builder3D shell smoke: objects=2 selected=1 tabs=5`.
+- Native smoke: pass, `3D Modeler shell smoke: objects=2 selected=1 tabs=5`.
 
 No commit was created. Python source and existing snapshots were not written.

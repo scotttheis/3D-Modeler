@@ -36,7 +36,7 @@ client_px = [1280, 840]
 physical_client_px = [1280, 840]
 window_dpi = 96
 display_scale_percent = 100
-executable = "target\\debug\\builder3d-app.exe"
+executable = "target\\debug\\modeler3d-app.exe"
 executable_bytes = 58634752
 executable_sha256 = "D1639A6561A3E73A0C3D5F85D4076BAA51DA760A9800E866D2B9613BE759719B"
 source_hashes = { app_lib_rs = "3E6471E163A06D58FD49D9E1B34C5390087C0E74BAF7D7CAE4A601B264265E33", shell_rs = "2ABE463AA64094E1833EE54AD06C24FB41B2139D43F9F480B56833F2FC36F74E", theme_rs = "4796AF22855C673BEFA1FFB746DDD52FA72447281F1AD5E5C760E0EF204790C2", cargo_toml = "E6D742EB4FE2D7B0A1E227C229F6EF13261369C0D3747F87DD891D2C5FACD98B", cargo_lock = "910BBE012C44A8B13195081831BF8AB581E09116284BFB229F21DA03A2F0960D" }
@@ -59,12 +59,12 @@ owner_review = "pending"
 rb_02_started = false
 
 [[live_capture]]
-application = "Python Builder3D"
+application = "Python 3D Modeler"
 theme = "Dark"
 captured_at_local = "2026-10-31T07:55:58.4859383-06:00"
 pid = 7388
 window_handle = "0xA90C3C"
-window_title = "Builder3D - Untitled"
+window_title = "3D Modeler - Untitled"
 window_dpi = 96
 display_scale_percent = 100
 client_logical_px = [1280, 840]
@@ -77,12 +77,12 @@ bytes = 59120
 sha256 = "2846C63CDC73D8B711B93A0F41832BD6451A0A2239328AB7C481FA7A041ABE01"
 
 [[live_capture]]
-application = "Python Builder3D"
+application = "Python 3D Modeler"
 theme = "Light"
 captured_at_local = "2026-10-31T07:58:52.8850201-06:00"
 pid = 40168
 window_handle = "0x16D0F68"
-window_title = "Builder3D - Untitled"
+window_title = "3D Modeler - Untitled"
 window_dpi = 96
 display_scale_percent = 100
 client_logical_px = [1280, 840]
@@ -101,7 +101,7 @@ theme = "Dark"
 captured_at_local = "2026-10-31T08:00:13.3893002-06:00"
 pid = 28528
 window_handle = "0xF40C9E"
-window_title = "Builder3D"
+window_title = "3D Modeler"
 window_dpi = 96
 display_scale_percent = 100
 client_logical_px = [1280, 840]
@@ -119,7 +119,7 @@ theme = "Light"
 captured_at_local = "2026-10-31T08:02:11.9380739-06:00"
 pid = 28528
 window_handle = "0xF40C9E"
-window_title = "Builder3D"
+window_title = "3D Modeler"
 window_dpi = 96
 display_scale_percent = 100
 client_logical_px = [1280, 840]
@@ -158,7 +158,7 @@ server_child_pid = 24544
 server_command = "L:\\Builder3D\\venv\\Scripts\\python.exe ... L:\\Builder3D\\scripts\\builder3d_mcp.py"
 processes_stopped = false
 final_recheck_local_time = "2026-10-30 15:44 MDT"
-builder3d_windows_launched = false
+modeler3d_windows_launched = false
 
 [[historical_capture]]
 file = "../rb-00-reference-audit/reference/original-insert-dark-1440x138-2026-10-20.png"
@@ -192,7 +192,7 @@ server_child_pid = 9440
 wrapper_command = "L:\\Builder3D\\run_mcp_windows.bat"
 server_executable = "L:\\Builder3D\\venv\\Scripts\\python.exe"
 processes_stopped = false
-builder3d_windows_launched = false
+modeler3d_windows_launched = false
 rust_target_processes = []
 target_window_handles = []
 host_primary_display_physical_px = [2560, 1440]

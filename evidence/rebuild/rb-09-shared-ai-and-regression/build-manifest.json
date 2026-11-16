@@ -2,7 +2,7 @@
   "slice": "RB-09",
   "build_date": "2026-11-04",
   "source_tree": {
-    "path": "E:/Builder3D-Rust",
+    "path": "E:/3D-Modeler",
     "git_head": null,
     "branch": "main",
     "repository_state": "unborn repository; untracked files preserved; no stage, commit, reset, clean, or snapshot restore",
@@ -11,12 +11,12 @@
     "manifest_algorithm": "Sort crates/**/*.rs by project-relative POSIX path; update SHA-256 with UTF-8 path, NUL, the raw 32-byte SHA-256 digest of file contents, NUL.",
     "rust_sources_unchanged_after_final_release_build": true,
     "scoped_source_repairs": [
-      "crates/builder3d-app/src/shell.rs",
-      "crates/builder3d-app/src/mcp_bridge.rs"
+      "crates/modeler3d-app/src/shell.rs",
+      "crates/modeler3d-app/src/mcp_bridge.rs"
     ],
     "source_hashes": {
-      "crates/builder3d-app/src/shell.rs": "d87918a59ec55c354295c4d70bd3e22b2e9086cbe904e354aa36b06e9a1a59ad",
-      "crates/builder3d-app/src/mcp_bridge.rs": "8da97ae29fc5fef3875eb28070c97dec05af3bc1258a3d4eb36b00da7f23a176"
+      "crates/modeler3d-app/src/shell.rs": "d87918a59ec55c354295c4d70bd3e22b2e9086cbe904e354aa36b06e9a1a59ad",
+      "crates/modeler3d-app/src/mcp_bridge.rs": "8da97ae29fc5fef3875eb28070c97dec05af3bc1258a3d4eb36b00da7f23a176"
     }
   },
   "toolchain": {
@@ -30,22 +30,22 @@
   "builds": [
     {
       "role": "live Rust app",
-      "command": "cargo build --release -p builder3d-app --locked",
+      "command": "cargo build --release -p modeler3d-app --locked",
       "exit_code": 0,
-      "binary": "target/release/builder3d-app.exe",
+      "binary": "target/release/modeler3d-app.exe",
       "size_bytes": 16172032,
       "sha256": "d680cf0ba8e4c8bf7d5ccd1536bf7d5720987d676a1a0946c6c3505b613b0cb9"
     },
     {
       "role": "live Rust MCP gateway during paired sequence",
-      "command": "cargo build --release -p builder3d-mcp --bin r4_mcp --locked",
+      "command": "cargo build --release -p modeler3d-mcp --bin r4_mcp --locked",
       "exit_code": 0,
       "binary": "target/release/r4_mcp.exe",
       "sha256": "a1dba8751c5a15cafbf6e26fac8db0b8a96f8464bf750ac62336f573b729545b"
     },
     {
       "role": "current post-run Rust MCP gateway",
-      "command": "cargo build --release -p builder3d-mcp --bin r4_mcp --locked",
+      "command": "cargo build --release -p modeler3d-mcp --bin r4_mcp --locked",
       "exit_code": 0,
       "binary": "target/release/r4_mcp.exe",
       "size_bytes": 1649664,
@@ -70,7 +70,7 @@
       "log_prefix": "logs/postfix-cargo-fmt"
     },
     {
-      "command": "cargo test -p builder3d-app mcp_",
+      "command": "cargo test -p modeler3d-app mcp_",
       "exit_code": 0,
       "passed": 7,
       "failed": 0,
@@ -90,12 +90,12 @@
       "log_prefix": "logs/postfix-cargo-clippy"
     },
     {
-      "command": "cargo build --release -p builder3d-app --locked",
+      "command": "cargo build --release -p modeler3d-app --locked",
       "exit_code": 0,
       "log_prefix": "logs/postfix-release-app"
     },
     {
-      "command": "cargo build --release -p builder3d-mcp --bin r4_mcp --locked",
+      "command": "cargo build --release -p modeler3d-mcp --bin r4_mcp --locked",
       "exit_code": 0,
       "log_prefix": "logs/postfix-release-mcp"
     }

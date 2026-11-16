@@ -17,9 +17,9 @@
 ## Verification
 
 - `cargo fmt --all -- --check` — passed.
-- `cargo test -p builder3d-app` — 13 passed, including both-theme catalog
+- `cargo test -p modeler3d-app` — 13 passed, including both-theme catalog
   validation and scoped-artwork tests.
-- `cargo run -q -p builder3d-app --bin builder3d-app -- --smoke` — passed.
+- `cargo run -q -p modeler3d-app --bin modeler3d-app -- --smoke` — passed.
 - Python reference icon/theme/ribbon selectors — 119 passed, 32 deselected.
 
 The next ordered task is R6-05 launchers.

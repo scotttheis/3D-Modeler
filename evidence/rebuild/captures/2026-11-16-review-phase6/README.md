@@ -1,7 +1,7 @@
 # Review pack: owner batch 7, Phase 6 — fixes before F5 (2026-11-16)
 
 Every image here was taken from one `review`-profile build
-(`target\review\builder3d-app.exe`) with the review harness, in both themes
+(`target\review\modeler3d-app.exe`) with the review harness, in both themes
 (`-light.png`, `-dark.png`). Images show what was painted; they are not
 approval and do not test the mouse. Open the release exe to try it by hand.
 

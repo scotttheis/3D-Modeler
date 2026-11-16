@@ -1,11 +1,11 @@
 [workspace]
 resolver = "2"
 members = [
-    "crates/builder3d-core",
-    "crates/builder3d-platform",
-    "crates/builder3d-mcp",
-    "crates/builder3d-viewport",
-    "crates/builder3d-app",
+    "crates/modeler3d-core",
+    "crates/modeler3d-platform",
+    "crates/modeler3d-mcp",
+    "crates/modeler3d-viewport",
+    "crates/modeler3d-app",
 ]
 
 [workspace.package]
@@ -16,11 +16,11 @@ license = "Unlicense"
 publish = false
 
 [workspace.dependencies]
-builder3d-core = { path = "crates/builder3d-core" }
-builder3d-platform = { path = "crates/builder3d-platform" }
-builder3d-mcp = { path = "crates/builder3d-mcp" }
-builder3d-viewport = { path = "crates/builder3d-viewport" }
-builder3d-app = { path = "crates/builder3d-app" }
+modeler3d-core = { path = "crates/modeler3d-core" }
+modeler3d-platform = { path = "crates/modeler3d-platform" }
+modeler3d-mcp = { path = "crates/modeler3d-mcp" }
+modeler3d-viewport = { path = "crates/modeler3d-viewport" }
+modeler3d-app = { path = "crates/modeler3d-app" }
 eframe = { version = "=0.37.0", default-features = false, features = ["accesskit", "clipboard", "default_fonts", "wayland", "wgpu", "x11"] }
 image = { version = "=0.25.10", default-features = false, features = ["bmp", "gif", "jpeg", "png", "pnm", "tga", "tiff", "webp"] }
 fontdue = "=0.9.5"

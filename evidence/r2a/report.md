@@ -6,7 +6,7 @@ This slice implements the first ordered R2 formats from the Python reference:
 STL, OBJ, and PLY. The Python tree at L:/Builder3D was read and executed only
 as the temporary behavioral reference; it was not modified.
 
-The Rust boundary is in builder3d-core. It provides bounded path and byte
+The Rust boundary is in modeler3d-core. It provides bounded path and byte
 loading, binary/ASCII STL import with binary STL export, OBJ import/export with
 optional per-vertex RGB(A), and ASCII/binary PLY import with binary
 little-endian export. File colors remain in MeshAsset instead of changing the

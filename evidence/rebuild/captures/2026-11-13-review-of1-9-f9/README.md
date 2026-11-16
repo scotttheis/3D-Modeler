@@ -1,7 +1,7 @@
 # Review pack: F9 and OF-1 to OF-9 (2026-11-13)
 
 One build, one capture set. Every image was taken from the same release exe
-(`target\release\builder3d-app.exe`, built 2026-11-13 15:22 from the source
+(`target\release\modeler3d-app.exe`, built 2026-11-13 15:22 from the source
 at `21f13ee`; `cargo build --release` reports it current) using the review
 harness (plan section 3.5). Each file exists as `-light.png` and `-dark.png`.
 

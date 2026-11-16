@@ -13,7 +13,7 @@ foreach($spec in $specs){
  $name=$spec.name
  if($Cases.Count -gt 0 -and $name -notin $Cases){continue}
  if($name -in @('mirror-y','align-z-max','arrange-z-gap5','mirror-cancel','arrange-invalid-cancel','measure','health-warning','health-repair','units-only')){continue}
- $fixture="E:/Builder3D-Rust/$script:rb04EvidenceRoot/$($spec.fixture)"
+ $fixture="E:/3D-Modeler/$script:rb04EvidenceRoot/$($spec.fixture)"
  Open-Rb04Project $fixture
  if($sticky){Invoke-Rb03Click 1065 435;$sticky=$false}
  $count=if($spec.kind -eq 'unhealthy'){1}elseif($spec.kind -eq 'group'){2}else{3}
@@ -83,6 +83,6 @@ foreach($spec in $specs){
   Invoke-Rb03Keys '^z';Capture-Rb04State $Theme "scene-$name-undo" $fixture;Save-Rb04State "$prefix-undo"
   Invoke-Rb03Keys '^y';Capture-Rb04State $Theme "scene-$name-redo" $fixture;Save-Rb04State "$prefix-redo"
  }
- @{theme=$Theme;case=$name;prefix=$prefix;fixture=$fixture;build_sha256=(Get-FileHash target/debug/builder3d-app.exe).Hash.ToLowerInvariant()}|ConvertTo-Json -Compress|Add-Content -LiteralPath "$PSScriptRoot/rust-scene-output-routes.ndjson" -Encoding UTF8
+ @{theme=$Theme;case=$name;prefix=$prefix;fixture=$fixture;build_sha256=(Get-FileHash target/debug/modeler3d-app.exe).Hash.ToLowerInvariant()}|ConvertTo-Json -Compress|Add-Content -LiteralPath "$PSScriptRoot/rust-scene-output-routes.ndjson" -Encoding UTF8
  Write-Output "COMPLETED $Theme scene-$name"
 }

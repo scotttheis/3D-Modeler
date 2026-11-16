@@ -5,10 +5,10 @@
 - **Completed:** added typed signals, numeric value selection, JSON preference
   persistence, and catalog/evidence mapping for the native eframe/R4
   replacements of the Qt-bound modules.
-- **Changed source:** `crates/builder3d-app/src/signals.rs`,
-  `crates/builder3d-app/src/numeric_controls.rs`,
-  `crates/builder3d-app/src/preferences.rs`,
-  `crates/builder3d-app/src/commands.rs`, `crates/builder3d-app/src/lib.rs`,
+- **Changed source:** `crates/modeler3d-app/src/signals.rs`,
+  `crates/modeler3d-app/src/numeric_controls.rs`,
+  `crates/modeler3d-app/src/preferences.rs`,
+  `crates/modeler3d-app/src/commands.rs`, `crates/modeler3d-app/src/lib.rs`,
   plus the component catalog/evidence.
 - **Recovery baseline:**
   `G:\Builder3D-Rust_snapshot_20261030-100800_R7-13-desktop-adapters-baseline`

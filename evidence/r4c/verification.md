@@ -1,7 +1,7 @@
 # R4c snapshot verification
 
 Snapshot: `G:\Builder3D-Rust_snapshot_20261029-155900_R4c-behavior-final`
-Source: `E:\Builder3D-Rust`
+Source: `E:\3D-Modeler`
 Excluded: every `target\` directory
 
 | Check | Source | Snapshot |

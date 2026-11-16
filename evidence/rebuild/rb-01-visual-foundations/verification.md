@@ -7,8 +7,8 @@
 
 | Check | Result |
 | --- | --- |
-| Rust app build | cargo build --package builder3d-app --locked; exit 0 |
-| Rust executable | target/debug/builder3d-app.exe; SHA-256 D1639A6561A3E73A0C3D5F85D4076BAA51DA760A9800E866D2B9613BE759719B |
+| Rust app build | cargo build --package modeler3d-app --locked; exit 0 |
+| Rust executable | target/debug/modeler3d-app.exe; SHA-256 D1639A6561A3E73A0C3D5F85D4076BAA51DA760A9800E866D2B9613BE759719B |
 | Python runtime | Python 3.12.10 from the existing L:\Builder3D venv |
 | Python source identity | main.py, main_window.py, style.py, toolbar.py, and icon_assets.py hashes recorded in capture-metadata.toml |
 | Client-area measurements | All four windows measured at 1280 × 840 logical and physical pixels |

@@ -5,14 +5,14 @@
     {
       "id": "torus",
       "implementation": ["CommandState::add_primitive", "CommandState::edit_torus_selected", "DialogKind::TorusPreview"],
-      "automated": ["crates/builder3d-app/src/commands.rs", "crates/builder3d-app/src/dialogs.rs"],
+      "automated": ["crates/modeler3d-app/src/commands.rs", "crates/modeler3d-app/src/dialogs.rs"],
       "native_records": ["torus-dialog", "torus-hole-preview", "torus-applied"],
       "status": "pass"
     },
     {
       "id": "repair",
       "implementation": ["Scene::repair_selected", "CommandId::Repair"],
-      "automated": ["crates/builder3d-core/tests/mesh_ops_repair.rs"],
+      "automated": ["crates/modeler3d-core/tests/mesh_ops_repair.rs"],
       "native_records": ["repair-dialog"],
       "status": "pass",
       "native_limit": "corrupted-mesh result is automated-only"
@@ -27,36 +27,36 @@
     {
       "id": "persistent-brushes",
       "implementation": ["ActiveBrush", "BrushGesture", "BrushStroke::Grab", "BrushStroke::Crease", "BrushStroke::SmoothBrush", "BrushStroke::Blob"],
-      "automated": ["crates/builder3d-app/src/shell.rs", "crates/builder3d-core/tests/mesh_ops_brushes.rs"],
+      "automated": ["crates/modeler3d-app/src/shell.rs", "crates/modeler3d-core/tests/mesh_ops_brushes.rs"],
       "native_records": ["brush-grab-active", "grab-stroke-before", "grab-stroke-after", "brush-crease-active", "crease-stroke-before", "crease-stroke-after", "brush-smooth-brush-active", "smooth-brush-stroke-before", "smooth-brush-stroke-after", "brush-blob-active", "blob-stroke-before", "blob-stroke-after"],
       "status": "pass"
     },
     {
       "id": "normalize",
       "implementation": ["BrushStroke::Normalize", "NormalizeDensityOptions"],
-      "automated": ["crates/builder3d-core/tests/mesh_ops_density.rs", "crates/builder3d-app/src/shell.rs"],
+      "automated": ["crates/modeler3d-core/tests/mesh_ops_density.rs", "crates/modeler3d-app/src/shell.rs"],
       "native_records": ["brush-normalize-active", "normalize-stroke-before", "normalize-stroke-after"],
       "status": "pass"
     },
     {
       "id": "booleans",
       "implementation": ["CommandState::apply_boolean_pair", "BooleanPick", "CommandId::Merge", "CommandId::Intersect", "CommandId::Subtract"],
-      "automated": ["merge_dispatches_boolean_union_and_consumes_the_tool_object", "crates/builder3d-core/tests/mesh_ops_booleans.rs", "crates/builder3d-app/src/shell.rs"],
+      "automated": ["merge_dispatches_boolean_union_and_consumes_the_tool_object", "crates/modeler3d-core/tests/mesh_ops_booleans.rs", "crates/modeler3d-app/src/shell.rs"],
       "native_records": ["merge-picker", "merge-picker-cancel", "boolean-two-selection", "merge-complete", "intersect-complete", "subtract-complete"],
       "status": "pass"
     },
     {
       "id": "emboss-hollow",
       "implementation": ["DialogKind::Emboss", "DialogKind::Hollow", "Scene::emboss_text_selected", "Scene::hollow_selected"],
-      "automated": ["crates/builder3d-core/tests/mesh_ops_shell.rs"],
+      "automated": ["crates/modeler3d-core/tests/mesh_ops_shell.rs"],
       "native_records": ["emboss-dialog", "hollow-dialog"],
       "status": "pass",
       "native_limit": "dialog reachability and cancel are native; successful apply is covered by tests"
     },
     {
       "id": "button-audit",
-      "implementation": ["CommandDescriptor enablement", "Builder3dApp::dispatch", "Items actions", "View commands", "Paint/Material route"],
-      "automated": ["crates/builder3d-app/src/commands.rs", "crates/builder3d-app/src/shell.rs"],
+      "implementation": ["CommandDescriptor enablement", "Modeler3dApp::dispatch", "Items actions", "View commands", "Paint/Material route"],
+      "automated": ["crates/modeler3d-app/src/commands.rs", "crates/modeler3d-app/src/shell.rs"],
       "native_records": ["object-tab", "paint-tab", "material-dialog", "view-toggles", "items-actions"],
       "status": "pass",
       "known_limit": "richer paint editing remains outside RB-06"

@@ -1,7 +1,7 @@
 # R7-13 — desktop adapter and entrypoint coverage
 
-Components: `builder3d.app.signals`, `builder3d.app.desktop-adapters`,
-`builder3d.app.entrypoint`, and `builder3d.mcp.desktop-bridge`
+Components: `modeler3d.app.signals`, `modeler3d.app.desktop-adapters`,
+`modeler3d.app.entrypoint`, and `modeler3d.mcp.desktop-bridge`
 
 ## Implemented contract
 

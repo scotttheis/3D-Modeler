@@ -4,8 +4,8 @@
 
 - Added native Windows PowerShell, Linux shell, and macOS command installers
   plus guarded uninstall scripts. Default destinations are private user roots:
-  `%LOCALAPPDATA%\\Builder3D`, `$HOME/.local/opt/builder3d`, and
-  `$HOME/Applications/Builder3D`.
+  `%LOCALAPPDATA%\\Modeler3D`, `$HOME/.local/opt/modeler3d`, and
+  `$HOME/Applications/Modeler3D`.
 - Windows scripts pass PowerShell parsing. POSIX scripts use quoted paths,
   reject broad system roots, and uninstaller paths must match their private
   default before removal. No installer or launcher invokes Python.
@@ -32,8 +32,8 @@ Archive SHA-256:
 ## Verification
 
 - `cargo fmt --all -- --check` — passed.
-- `cargo test -p builder3d-app` — 17 passed.
-- `cargo clippy -p builder3d-app --all-targets --all-features -- -D warnings` —
+- `cargo test -p modeler3d-app` — 17 passed.
+- `cargo clippy -p modeler3d-app --all-targets --all-features -- -D warnings` —
   passed.
 - Native `--package` staging — passed with both size gates.
 - PowerShell installer parsing — 2 files, 0 parse errors.

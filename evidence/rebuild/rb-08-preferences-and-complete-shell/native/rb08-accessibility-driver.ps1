@@ -4,8 +4,8 @@ Add-Type -AssemblyName UIAutomationTypes
 
 function Get-Rb08AutomationRoot {
     if ($script:rb08TargetPid -le 0) { throw 'Set the RB-08 target PID first.' }
-    $main = @(Get-Rb08TargetWindows | Where-Object { $_.Title -like 'Builder3D - *' })
-    if ($main.Count -ne 1) { throw "Expected one Builder3D main window, found $($main.Count)." }
+    $main = @(Get-Rb08TargetWindows | Where-Object { $_.Title -like '3D Modeler - *' })
+    if ($main.Count -ne 1) { throw "Expected one 3D Modeler main window, found $($main.Count)." }
     return [System.Windows.Automation.AutomationElement]::FromHandle([IntPtr]$main[0].Handle)
 }
 
@@ -36,8 +36,8 @@ function Invoke-Rb08NamedControlClick {
     if ($bounds.IsEmpty -or $bounds.Width -le 0 -or $bounds.Height -le 0) {
         throw "Accessible control '$Name' has no visible bounds."
     }
-    $main = @(Get-Rb08TargetWindows | Where-Object { $_.Title -like 'Builder3D - *' })
-    if ($main.Count -ne 1) { throw "Expected one Builder3D main window, found $($main.Count)." }
+    $main = @(Get-Rb08TargetWindows | Where-Object { $_.Title -like '3D Modeler - *' })
+    if ($main.Count -ne 1) { throw "Expected one 3D Modeler main window, found $($main.Count)." }
     $x = [int][Math]::Round($bounds.X + ($bounds.Width / 2) - $main[0].Left)
     $y = [int][Math]::Round($bounds.Y + ($bounds.Height / 2) - $main[0].Top)
     Invoke-Rb08ForegroundClick -X $x -Y $y

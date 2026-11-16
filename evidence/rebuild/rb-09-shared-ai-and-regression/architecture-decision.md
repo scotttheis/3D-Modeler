@@ -5,7 +5,7 @@ Date: 2026-11-02
 ## Decision
 
 Keep `CommandState` and its `Scene` as the desktop document owner. Run the MCP
-catalog and semantic handlers from `builder3d-mcp`, but route a local client
+catalog and semantic handlers from `modeler3d-mcp`, but route a local client
 through an authenticated loopback bridge owned by the Rust desktop. The bridge
 listener parses requests off-thread and queues bounded requests to the eframe
 owner thread; only that thread may attach a document to the adapter or commit
@@ -58,7 +58,7 @@ GUI use.
 
 - A second long-lived MCP scene is not authoritative and would split undo,
   dirty state, and UI rendering.
-- Direct worker mutation of `Builder3dApp` or its widgets violates eframe
+- Direct worker mutation of `Modeler3dApp` or its widgets violates eframe
   thread ownership and the stale-result protections already used by desktop
   jobs.
 - Cloning the desktop scene for every synchronous request would lose core

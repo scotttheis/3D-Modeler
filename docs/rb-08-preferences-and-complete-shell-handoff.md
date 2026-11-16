@@ -39,7 +39,7 @@ close or accept RB-08. Continue under
 
 Start from the current worktree at:
 
-    E:\Builder3D-Rust
+    E:\3D-Modeler
 
 The preceding slice has a verified immutable completion snapshot:
 
@@ -47,7 +47,7 @@ The preceding slice has a verified immutable completion snapshot:
 
 Receipt:
 
-    E:\Builder3D-Rust\evidence\rebuild\rb-07-appearance-jobs-and-print\snapshot-receipt.md
+    E:\3D-Modeler\evidence\rebuild\rb-07-appearance-jobs-and-print\snapshot-receipt.md
 
 Final receipt-inclusive verification measured 2,874 files and 574,294,626
 bytes in both source and snapshot, with zero missing or extra paths, size
@@ -114,13 +114,13 @@ work, and this handoff does not grant acceptance.
 Read the current versions of:
 
 1. E:\AGENTS.md and E:\RustDeveloper.md.
-2. E:\Builder3D-Rust\AGENTS.md.
-3. E:\Builder3D-Rust\docs\product-rebuild-plan.md, especially the RB slice
+2. E:\3D-Modeler\AGENTS.md.
+3. E:\3D-Modeler\docs\product-rebuild-plan.md, especially the RB slice
    table, design/asset contract, functional inventory, evidence and verification
    requirements.
 4. This handoff and the RB-07 report, verification, checkpoint, initial button
    ledger, requirement-test map and snapshot receipt.
-5. E:\Builder3D-Rust\WORK_LOG.md,
+5. E:\3D-Modeler\WORK_LOG.md,
    docs\component-catalog.toml and
    evidence\rebuild\parity-matrix.toml.
 6. The current Rust settings, shell, dialog, command, UI-state, theme and
@@ -193,14 +193,14 @@ native reachability and persisted results before changing them.
 
 | Rust seam | Existing behavior to inspect |
 | --- | --- |
-| crates/builder3d-app/src/preferences.rs | JSON load/save and recovery boundary; defaults; recent paths; theme; default import/display units; favorites, pin and tab order; normalization. Existing fields do not include a preferred-slicer setting. |
-| crates/builder3d-app/src/ui_state.rs | Favorite normalization/movement, command ordering and recent entry semantics. |
-| crates/builder3d-app/src/dialogs.rs | Settings currently exposes Theme, Default units for ambiguous imports, Transform display units and Done. Confirm native behavior and compare missing preferred-slicer, Clear Recents and About routes before implementation. |
-| crates/builder3d-app/src/shell.rs | Settings initialization and warning recovery; preference persistence; ribbon, overflow and customizer; shortcut dispatch; dialogs/menus; recent preview worker and welcome surface. |
-| crates/builder3d-app/src/commands.rs | Semantic command dispatch and reference ribbon specification/order. |
-| crates/builder3d-app/src/recent_preview.rs | Bounded preview loading and safe fallback for unsupported, missing or corrupt recents. |
-| crates/builder3d-app/src/theme.rs and artwork.rs | Theme palette, original artwork mapping and light/dark rendering. |
-| crates/builder3d-app/src/numeric_controls.rs | Unit parsing and display conversion; preserve mm as the internal unit. |
+| crates/modeler3d-app/src/preferences.rs | JSON load/save and recovery boundary; defaults; recent paths; theme; default import/display units; favorites, pin and tab order; normalization. Existing fields do not include a preferred-slicer setting. |
+| crates/modeler3d-app/src/ui_state.rs | Favorite normalization/movement, command ordering and recent entry semantics. |
+| crates/modeler3d-app/src/dialogs.rs | Settings currently exposes Theme, Default units for ambiguous imports, Transform display units and Done. Confirm native behavior and compare missing preferred-slicer, Clear Recents and About routes before implementation. |
+| crates/modeler3d-app/src/shell.rs | Settings initialization and warning recovery; preference persistence; ribbon, overflow and customizer; shortcut dispatch; dialogs/menus; recent preview worker and welcome surface. |
+| crates/modeler3d-app/src/commands.rs | Semantic command dispatch and reference ribbon specification/order. |
+| crates/modeler3d-app/src/recent_preview.rs | Bounded preview loading and safe fallback for unsupported, missing or corrupt recents. |
+| crates/modeler3d-app/src/theme.rs and artwork.rs | Theme palette, original artwork mapping and light/dark rendering. |
+| crates/modeler3d-app/src/numeric_controls.rs | Unit parsing and display conversion; preserve mm as the internal unit. |
 
 The current Settings source already has theme and unit controls. The preferences
 type already persists theme, units, favorites, pin/order, recents and snapping.
@@ -248,7 +248,7 @@ autonomously; do not stop for routine design or test decisions.
 
 Add tests for the actual behavior being changed, then run the current workspace
 suite. At the integrated milestone, run the product-plan commands from
-E:\Builder3D-Rust:
+E:\3D-Modeler:
 
     cargo fmt --all -- --check
     cargo check --workspace --locked
@@ -256,10 +256,10 @@ E:\Builder3D-Rust:
     cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
     cargo deny check
     cargo metadata --locked --format-version 1 --no-deps
-    cargo run -p builder3d-app --bin builder3d-app -- --smoke
-    cargo build --release --locked -p builder3d-app --bin builder3d-app
+    cargo run -p modeler3d-app --bin modeler3d-app -- --smoke
+    cargo build --release --locked -p modeler3d-app --bin modeler3d-app
     cargo bloat --release --workspace
-    cargo bloat --release -p builder3d-app --bin builder3d-app
+    cargo bloat --release -p modeler3d-app --bin modeler3d-app
 
 Run cargo audit --locked when it is installed; record when it is unavailable.
 Record the exact command, exit result, test counts, warnings and skipped checks.
@@ -312,7 +312,7 @@ native behavior.
 
 Use this evidence directory:
 
-    E:\Builder3D-Rust\evidence\rebuild\rb-08-preferences-and-complete-shell\
+    E:\3D-Modeler\evidence\rebuild\rb-08-preferences-and-complete-shell\
 
 Keep it focused and parallel to the RB-07 evidence. Include:
 

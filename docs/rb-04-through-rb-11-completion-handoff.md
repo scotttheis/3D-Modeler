@@ -1,4 +1,4 @@
-# Builder3D Rust continuation handoff: RB-04 through project completion
+# 3D Modeler Rust continuation handoff: RB-04 through project completion
 
 > Current continuation (2026-11-02): [complete RB-09 Shared AI and Regression](rb-09-shared-ai-and-regression-handoff.md), then stop before RB-10. The RB-04 assignment below is historical; the product plan and current RB-09 handoff own execution.
 
@@ -15,7 +15,7 @@ Prepared 2026-10-31 for a fresh implementation session.
 ## Immediate objective
 
 Complete the entire **RB-04 — Scene and precise transforms** slice in the
-existing `E:\Builder3D-Rust` workspace. RB-04 is the next full slice in the
+existing `E:\3D-Modeler` workspace. RB-04 is the next full slice in the
 current product rebuild plan. After RB-04 and its evidence, verification, and
 recovery snapshot are complete, stop before implementing RB-05. The rest of
 the roadmap is included below so the project can continue to RB-11 without
@@ -29,7 +29,7 @@ accepted.
 
 ## Current state
 
-- Rust workspace: `E:\Builder3D-Rust`; Python product/reference:
+- Rust workspace: `E:\3D-Modeler`; Python product/reference:
   `L:\Builder3D`. Keep the Python tree read-only. The Python application remains
   the temporary shipping fallback until the project replacement gate passes.
 - RB-03 lifecycle, import/export, units, recents, and previews have their
@@ -92,7 +92,7 @@ row rather than letting it disappear between the plan and tests.
 
 ## How to resume
 
-1. From `E:\Builder3D-Rust`, read `E:\AGENTS.md`, `E:\RustDeveloper.md`,
+1. From `E:\3D-Modeler`, read `E:\AGENTS.md`, `E:\RustDeveloper.md`,
    `AGENTS.md`, `WORK_LOG.md`, this handoff, and the RB-03 checkpoint. Check
    `git status`; preserve the current untracked files.
 2. Read `docs/product-rebuild-plan.md` sections 4, 6, 8, 9, 10, and 11;
@@ -222,7 +222,7 @@ specific gap.
 
 ## Fresh-session prompt
 
-Read and follow `E:\Builder3D-Rust\docs\rb-04-through-rb-11-completion-handoff.md`.
+Read and follow `E:\3D-Modeler\docs\rb-04-through-rb-11-completion-handoff.md`.
 Complete the full RB-04 slice from `docs/product-rebuild-plan.md`: Items,
 selection/sticky selection, visibility, naming, duplicate/delete, grouping,
 clipboard, precise Move/Rotate/Resize, settle, mirror, measure, align, and

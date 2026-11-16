@@ -1,7 +1,7 @@
 # R2d continuation checkpoint
 
 - Completed subtask: R2d WRL export and generic `.wrl` format integration.
-- Changed files: `crates/builder3d-core/src/error.rs`, `file_io.rs`, `lib.rs`,
+- Changed files: `crates/modeler3d-core/src/error.rs`, `file_io.rs`, `lib.rs`,
   `wrl.rs`; `tests/wrl_golden.rs`; `tests/fixtures/wrl/python_reference.wrl`;
   `evidence/r2d/report.md`.
 - Tests/checks passed: 5 focused Rust WRL tests, 33 core Rust tests,

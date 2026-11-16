@@ -1,4 +1,4 @@
-"""Reopen RB-03 exports with the read-only Python Builder3D reference."""
+"""Reopen RB-03 exports with the read-only Python 3D Modeler reference."""
 
 from __future__ import annotations
 

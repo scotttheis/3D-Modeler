@@ -4,7 +4,7 @@
 
 R2c ports the Python `src/gltf_io.py` boundary without changing
 `L:\Builder3D`. The Rust core now owns bounded glTF 2.0 and GLB 2.0 parsing
-and export, with metres converted to the Builder3D millimetre model boundary.
+and export, with metres converted to the 3D Modeler millimetre model boundary.
 
 Implemented behavior includes:
 
@@ -43,15 +43,15 @@ attributes, PBR colors, and alpha mode selection.
 
 - `cargo fmt --all`
 - `cargo check --workspace`
-- `cargo test -p builder3d-core` — 28 tests plus doc-test target passed
-- `cargo clippy -p builder3d-core --all-targets -- -D warnings`
+- `cargo test -p modeler3d-core` — 28 tests plus doc-test target passed
+- `cargo clippy -p modeler3d-core --all-targets -- -D warnings`
 - `L:\Builder3D\venv\Scripts\python.exe -m pytest tests/test_gltf_io.py tests/test_mesh_ops.py -q` — 85 passed, 2 known trimesh runtime warnings
 - `... -m pytest tests/test_ai_commands.py -k gltf -q` — 2 passed
 - `... -m pytest tests/test_ai_qt_bridge.py -k glb -q` — 1 passed
 
 ## Limits and intentional boundaries
 
-The parser is geometry/material focused like the current Builder3D import
+The parser is geometry/material focused like the current 3D Modeler import
 boundary. Animations, skins, morph targets, textures/UV sampling, and vendor
 extensions are not represented in `GltfItem`; unsupported primitive modes are
 rejected with `CoreError::Gltf`. The exporter emits a single binary buffer,

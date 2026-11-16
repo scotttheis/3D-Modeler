@@ -1,2 +1,2 @@
-    Checking builder3d-app v0.1.0 (E:\Builder3D-Rust\crates\builder3d-app)
+    Checking modeler3d-app v0.1.0 (E:\3D-Modeler\crates\modeler3d-app)
     Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.30s

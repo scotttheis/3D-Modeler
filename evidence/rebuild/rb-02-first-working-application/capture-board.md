@@ -1,6 +1,6 @@
 # RB-02 Capture Board
 
-All images below are inspected direct desktop captures from the visible Rust `Builder3D` window. Each PNG is the 1280 x 840 client rectangle, captured with GDI `CopyFromScreen`; each window reported 96 DPI / 100% scale, was restored and visible, and had foreground title `Builder3D`. Full timestamps, process IDs, file sizes, and SHA-256 values are in [capture-metadata.toml](capture-metadata.toml).
+All images below are inspected direct desktop captures from the visible Rust `3D Modeler` window. Each PNG is the 1280 x 840 client rectangle, captured with GDI `CopyFromScreen`; each window reported 96 DPI / 100% scale, was restored and visible, and had foreground title `3D Modeler`. Full timestamps, process IDs, file sizes, and SHA-256 values are in [capture-metadata.toml](capture-metadata.toml).
 
 The interactive workflow was captured Light first and its processes were closed before the Dark workflow was opened. The separate startup Welcome captures were collected earlier in the order Dark then Light, with each process closed before the next was opened. No target app windows overlapped. These images document the Rust RB-02 workflow, while the matched Python/Rust theme comparisons remain in the separate [RB-01 capture board](../rb-01-visual-foundations/capture-board.md).
 
@@ -26,6 +26,6 @@ The initial import captures show the 40 mm cube occluding the much smaller fixtu
 
 | Light | Dark |
 |---|---|
-| ![Light project reopened in Builder3D](captures/rust-light-reopened-client-1280x840.png) | ![Dark project reopened in Builder3D](captures/rust-dark-reopened-client-1280x840.png) |
+| ![Light project reopened in 3D Modeler](captures/rust-light-reopened-client-1280x840.png) | ![Dark project reopened in 3D Modeler](captures/rust-dark-reopened-client-1280x840.png) |
 
 Owner accepted this Light/Dark baseline for now; visual fine-tuning may happen later.

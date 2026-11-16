@@ -2,7 +2,7 @@
 
 ## Focused behavior
 
-- `cargo test -p builder3d-app --locked`: pass, 44 application tests.
+- `cargo test -p modeler3d-app --locked`: pass, 44 application tests.
 - Image-color tests cover average RGB/opaque alpha, regular sampling steps,
   typed missing-path errors, and bounded invalid input. The decoder feature
   set covers the Python helper's common formats.
@@ -19,6 +19,6 @@
 - `cargo metadata --locked --format-version 1 --no-deps`: pass.
 - Catalog TOML/path validation: pass, 21 unique IDs and all referenced paths
   present.
-- Native smoke: pass, `Builder3D shell smoke: objects=2 selected=1 tabs=5`.
+- Native smoke: pass, `3D Modeler shell smoke: objects=2 selected=1 tabs=5`.
 
 No commit was created. Python source and existing snapshots were not written.

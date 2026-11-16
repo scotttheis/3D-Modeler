@@ -2,10 +2,10 @@
 
 - **Objective:** port the application transform service's atomic world-space
   workflows without beginning visual polish.
-- **Completed:** implemented `builder3d.app.commands.transforms`, updated the
+- **Completed:** implemented `modeler3d.app.commands.transforms`, updated the
   command dispatch, catalog, and evidence.
-- **Changed source:** `crates/builder3d-app/src/transforms.rs`,
-  `crates/builder3d-app/src/commands.rs`, and `crates/builder3d-app/src/lib.rs`.
+- **Changed source:** `crates/modeler3d-app/src/transforms.rs`,
+  `crates/modeler3d-app/src/commands.rs`, and `crates/modeler3d-app/src/lib.rs`.
 - **Changed documentation/evidence:**
   `docs/component-catalog.toml` and `evidence/r7/03-transforms/`.
 - **Checks:** format, locked workspace check/tests (141 tests plus doctests),
@@ -20,7 +20,7 @@
   — 264 files and 1,658,729 bytes, recorded after the final gate with
   matching source/snapshot counts and bytes; `target`, `evidence`, and
   `WORK_LOG.md` were excluded.
-- **Next conversion slice:** `builder3d.viewport.snapping`.
+- **Next conversion slice:** `modeler3d.viewport.snapping`.
 - **Recovery/continuation:** reread this checkpoint, `WORK_LOG.md`, current Git
   status, and the workspace instructions after the final snapshot. Do not
   modify the Python checkout or existing snapshots.

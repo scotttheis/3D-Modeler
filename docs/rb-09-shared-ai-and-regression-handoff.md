@@ -10,7 +10,7 @@ Run `currpair-20261106-072716` used app SHA-256
 `0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a` and
 gateway SHA-256 `aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e`.
 The official Python MCP SDK 2.2.0 was used only as a client to the Rust stdio
-gateway; the Python Builder3D product was not launched and the saved Python
+gateway; the Python 3D Modeler product was not launched and the saved Python
 catalog snapshots were not refreshed. The Rust desktop reopened the saved
 project at revision 25 with the stable Cube/Sphere IDs visible in the viewport
 and Items panel. A separate optional-MCP failure run kept the Rust GUI usable,
@@ -24,7 +24,7 @@ approved deviations. Keep that RB-09 contract gap open. The saved-project
 run, schema comparison, logs, captures, and final snapshot receipt are the
 current evidence.
 
-The active Rust source/build/run copy is `E:\Builder3D-Rust`. Use `G:\` as
+The active Rust source/build/run copy is `E:\3D-Modeler`. Use `G:\` as
 the primary additive backup destination. Removable USB copies are occasional
 one-offs unless the owner requests otherwise; the current one-off copy is
 recorded in
@@ -131,7 +131,7 @@ was removed.
 The full recursive comparison and final Release result evidence are indexed in
 schema-parity-run-manifest.json. The official Tools specification and Rust SDK
 were checked; the protocol uses Draft 2020-12. One Rust custom
-_meta.com.builder3d/longRunning value for emboss_text remains true while the
+_meta.com.modeler3d/longRunning value for emboss_text remains true while the
 reference reports false. The comparator records this in three profiles,
 separately from schemas and official ToolAnnotations; no owner approval is
 claimed.
@@ -156,7 +156,7 @@ The current Release app/gateway hashes,
 0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a and
 aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e, were
 verified before and after a separate launch. Host preflight confirmed the
-active Default desktop and Builder3D foreground. An official Python MCP SDK
+active Default desktop and 3D Modeler foreground. An official Python MCP SDK
 2.2.0 client listed 60 tools and its read-only get_status call returned
 app_state=ready, dirty=false, and scene revision 0. The app/gateway processes
 and runtime descriptor were absent after shutdown. This was an identity check,
@@ -186,7 +186,7 @@ RB-10 as part of this handoff.
 ## 1. Objective and owner direction
 
 Complete the RB-09 row in [the product rebuild plan](product-rebuild-plan.md):
-the desktop and MCP must inspect and edit the same live Builder3D document,
+the desktop and MCP must inspect and edit the same live 3D Modeler document,
 using the existing public MCP catalog and preserving revision, replay, file,
 cancellation, history, and optional-MCP reliability contracts.
 
@@ -235,7 +235,7 @@ just because it exists.
 
 ## 3. Verified starting point (2026-11-03 historical state)
 
-Work from the current `E:\Builder3D-Rust` tree. Inspect `git status`, process
+Work from the current `E:\3D-Modeler` tree. Inspect `git status`, process
 state, and current source again at session start. The tree is intentionally
 uncommitted and currently appears as untracked project files; preserve it.
 Do not stage, commit, reset, discard, or restore/overwrite it from a snapshot.
@@ -269,7 +269,7 @@ its checkpoint recorded PID 27176 and Windows LockApp PID 9808 at the time.
 These are historical observations, not current process state. Do not send
 input to or close a window until its current identity and owner are verified.
 
-Owner direction on 2026-11-03: treat `E:\Builder3D-Rust` as the only active
+Owner direction on 2026-11-03: treat `E:\3D-Modeler` as the only active
 Rust project tree, `G:\` as primary backup, and USB as an occasional one-off
 backup destination. The current paused checkpoint and latest G: backup are
 listed in `evidence/rebuild/rb-09-shared-ai-and-regression/checkpoint.md`.
@@ -279,17 +279,17 @@ listed in `evidence/rebuild/rb-09-shared-ai-and-regression/checkpoint.md`.
 Reuse the current typed Rust catalog, server safety, and desktop command
 behavior. Do not assume the current MCP tests prove app integration:
 
-- `builder3d-app` owns `CommandState` and `Builder3dApp`; the command state
+- `modeler3d-app` owns `CommandState` and `Modeler3dApp`; the command state
   contains the desktop's scene, dirty/project state, clipboard, operation
   registry, preferences, and display state. The app crate does not currently
-  depend on `builder3d-mcp`.
-- `builder3d-mcp` has an ordered 60-tool `TOOL_CATALOG`, strict schemas,
+  depend on `modeler3d-mcp`.
+- `modeler3d-mcp` has an ordered 60-tool `TOOL_CATALOG`, strict schemas,
   profiles, approved-root checks, expected project/revision validation,
   replay retention, and operation status/cancellation. Existing MCP tests
   verify the server/catalog behavior but do not prove the running desktop and
   server share a live document.
 - `R4Server::new` constructs a default `R4State` with a new independent
-  `builder3d_core::Scene`. The `r4_mcp` binary serves that R4 instance over
+  `modeler3d_core::Scene`. The `r4_mcp` binary serves that R4 instance over
   stdio. This proves the server can edit its own scene; it does not connect
   that scene to the running desktop. A second MCP-owned scene or cloned scene
   without a shared command/history boundary fails RB-09.
@@ -437,7 +437,7 @@ the owner. Add:
 Update the existing MCP catalog/server/desktop-bridge components in
 `docs/component-catalog.toml`; add a component only for a real new module and
 update stable symbols, tests, contracts, and evidence paths. Update the
-`builder3d.mcp.catalog_and_parity` row and any directly affected parity rows in
+`modeler3d.mcp.catalog_and_parity` row and any directly affected parity rows in
 `evidence/rebuild/parity-matrix.toml`; distinguish implementation,
 automated, interactive, visual, and owner-acceptance states. Append exact
 results and next slice to `WORK_LOG.md`. If a Rust-facing MCP contract document
@@ -472,14 +472,14 @@ slice or RB-11 acceptance closure.
 
 ## 10. Fresh-session prompt
 
-    Continue only the RB-09 schema-parity repair in E:\Builder3D-Rust; stop
+    Continue only the RB-09 schema-parity repair in E:\3D-Modeler; stop
     before RB-10. Read E:\AGENTS.md, E:\RustDeveloper.md,
     E:\MCP_DESIGN_GUIDE.md, this workspace's AGENTS.md,
     docs/product-rebuild-plan.md, and this handoff before changing an MCP
     interface or schema. Read the project's MCP contract, architecture, and
     testing documents listed in handoff section 2, and verify protocol/SDK
     assumptions against current official MCP sources. Inspect Git status and
-    Builder3D processes first, and preserve all existing changes and untracked
+    3D Modeler processes first, and preserve all existing changes and untracked
     files. Do not stage, commit,
     push, reset, or restore from a snapshot unless I explicitly ask.
 

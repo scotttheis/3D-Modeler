@@ -4,7 +4,7 @@
 - Scope: live core-backed behavior, typed security policy, replay/context
   protection, bounded async operations, clipboard/image limits, and real
   platform slicer handoff.
-- Focused Rust tests: 13 `builder3d-mcp` tests and 9 `builder3d-platform`
+- Focused Rust tests: 13 `modeler3d-mcp` tests and 9 `modeler3d-platform`
   tests passed.
 - Production marker scan found only test-module `expect` calls; no production
   `unwrap(`, `expect(`, `panic!`, `todo!`, `unimplemented!`, or `dbg!` paths.

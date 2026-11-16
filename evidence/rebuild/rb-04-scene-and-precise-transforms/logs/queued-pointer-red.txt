@@ -1,6 +1,6 @@
-   Compiling builder3d-app v0.1.0 (E:\Builder3D-Rust\crates\builder3d-app)
+   Compiling modeler3d-app v0.1.0 (E:\3D-Modeler\crates\modeler3d-app)
     Finished `test` profile [unoptimized + debuginfo] target(s) in 7.99s
-     Running unittests src\lib.rs (target\debug\deps\builder3d_app-a73e628187a00bbe.exe)
+     Running unittests src\lib.rs (target\debug\deps\modeler3d_app-a73e628187a00bbe.exe)
 
 running 1 test
 test shell::tests::queued_ui_click_then_viewport_motion_does_not_orbit_or_change_selection ... ok

@@ -1,10 +1,10 @@
 # R7-01 — desktop model import command coverage
 
-Component: `builder3d.app.commands.coverage`
+Component: `modeler3d.app.commands.coverage`
 
 ## Selection
 
-The catalog identified `builder3d.app.commands.coverage` as the next follow-up
+The catalog identified `modeler3d.app.commands.coverage` as the next follow-up
 from the ported application command surface. The shell entry remains `polish`
 and was not expanded. The first concrete coverage gap was the Insert tab's
 `Add/Open` action: before this slice it opened the project dialog and could not

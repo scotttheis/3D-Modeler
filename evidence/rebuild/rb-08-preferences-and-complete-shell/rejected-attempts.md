@@ -1,7 +1,7 @@
 # Rejected Native Attempts
 
 - **Rust initial presentation, 2026-11-02.** The release process was verified as
-  PID 27176 (`builder3d-app.exe`) with window `Builder3D - Untitled`, but the
+  PID 27176 (`modeler3d-app.exe`) with window `3D Modeler - Untitled`, but the
   foreground process was Windows `LockApp` PID 9808 (`Windows Default Lock
   Screen`). The runner refused its first foreground capture. A later PID- and
   hit-test-verified activation click was intercepted by the lock screen; no

@@ -8,7 +8,7 @@ keeps that contract and returns a typed unsupported-format error for import.
 
 ## Implemented behavior
 
-- Writes VRML 2.0 UTF-8 with Builder3D millimetre coordinates.
+- Writes VRML 2.0 UTF-8 with 3D Modeler millimetre coordinates.
 - Exports each scene item as a `Transform`/`Shape` pair with translation,
   rotation, non-uniform scale, sanitized unique `DEF` names, comments, and
   indexed triangular geometry.
@@ -31,10 +31,10 @@ transform fields, names, colors, transparency, and final newline.
 ## Verification
 
 - `cargo fmt --all`
-- `cargo check -p builder3d-core`
-- `cargo test -p builder3d-core --test wrl_golden` — 5 passed
-- `cargo test -p builder3d-core` — 33 tests plus doc-test target passed
-- `cargo clippy -p builder3d-core --all-targets -- -D warnings`
+- `cargo check -p modeler3d-core`
+- `cargo test -p modeler3d-core --test wrl_golden` — 5 passed
+- `cargo test -p modeler3d-core` — 33 tests plus doc-test target passed
+- `cargo clippy -p modeler3d-core --all-targets -- -D warnings`
 - Python `tests/test_wrl_io.py -q` — 4 passed
 - Python `tests/test_ai_commands.py -k wrl -q` — 1 passed, 64 deselected
 - Python `tests/test_ai_qt_bridge.py -k wrl -q` — 1 passed, 13 deselected

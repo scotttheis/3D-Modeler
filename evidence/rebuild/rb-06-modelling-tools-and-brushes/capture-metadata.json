@@ -2,7 +2,7 @@
   "schema_version": 1,
   "slice": "RB-06",
   "reference_root": "L:\\Builder3D",
-  "rust_root": "E:\\Builder3D-Rust",
+  "rust_root": "E:\\3D-Modeler",
   "themes": ["light", "dark"],
   "logical_client_size": [1280, 840],
   "physical_capture_size": [1280, 840],
@@ -25,7 +25,7 @@
     "records": 72,
     "records_by_theme": {"light": 36, "dark": 36},
     "accepted_pngs": 72,
-    "debug_executable": "target/debug/builder3d-app.exe",
+    "debug_executable": "target/debug/modeler3d-app.exe",
     "debug_executable_bytes": 61454336,
     "debug_executable_sha256": "82284b6fd85221df3a804790cafb1171c469c5cb614460cb73199068ac551d14"
   },

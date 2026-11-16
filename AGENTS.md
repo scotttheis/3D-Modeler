@@ -1,8 +1,8 @@
-# Builder3D Rust Workspace Rules
+# 3D Modeler Rust Workspace Rules
 
 ## Mission
 
-Port Builder3D to Rust without changing its product behavior. The intended
+Port 3D Modeler to Rust without changing its product behavior. The intended
 end state is a Rust-only product. During the migration, the Python build at
 `L:\Builder3D` remains the temporary shipping fallback and behavioral
 reference until a stage gate in `L:\Builder3D\docs\rust-rewrite.md` replaces
@@ -10,13 +10,39 @@ it; it is not a permanent second implementation.
 
 This workspace also follows the shared Rust development practices in
 `E:\RustDeveloper.md`. The project-specific rules below adapt those practices
-to Builder3D's cross-platform, contract-preserving rewrite.
+to 3D Modeler's cross-platform, contract-preserving rewrite.
+
+## Name
+
+The product is **3D Modeler** (renamed from Builder3D on 2026-11-16, owner
+decision). Use "3D Modeler" wherever a person reads the name: window titles,
+dialogs, the installer, shortcuts and documents. Names a person does not read
+cannot start with a digit, so they use `Modeler3D` / `modeler3d`: the program
+file `Modeler3D.exe`, the crates `modeler3d-*`, the settings folder
+`%LOCALAPPDATA%\Modeler3D`, environment variables `MODELER3D_*` and the MCP
+server `modeler3d-rust-mcp`. This mirrors Microsoft's 3D Builder, whose
+program file is `Builder3D.exe`.
+
+The old name stays in exactly these places, on purpose:
+
+- `L:\Builder3D`, the Python reference build, which is a real folder and is
+  still called Builder3D.
+- Backups on `G:\` made before the rename (`G:\Builder3D-Rust_snapshot_*`).
+  New snapshots are named `G:\3D-Modeler_snapshot_*`.
+- The shipped RC1 files (`Builder3D-RC1.msi`, `Builder3D-RC1.zip`).
+- The `.3dp` format marker (`PROJECT_FORMAT = "Builder3D"`), so every existing
+  project file still opens and the Python build can still read new ones.
+- The Python build's own settings location read by
+  `modeler3d-platform/src/legacy_settings.rs`.
+
+Settings were not carried over from `%LOCALAPPDATA%\Builder3D` (owner
+decision: start fresh).
 
 ## Active project path and backups
 
-- The active Rust source, build, and run copy is `E:\Builder3D-Rust`. Start
+- The active Rust source, build, and run copy is `E:\3D-Modeler`. Start
   project commands there and launch the Release app from
-  `target\release\builder3d-app.exe` under this workspace. Do not work from a
+  `target\release\modeler3d-app.exe` under this workspace. Do not work from a
   G: snapshot or removable-media copy.
 - Use `G:\` as the primary destination for additive Rust recovery snapshots.
   Never overwrite or rotate existing snapshots.
@@ -94,8 +120,8 @@ Standing boundaries:
   adapter, memory-topology, driver, display, and OS budget available at
   runtime, then choose a workload route from that profile. Do not use a
   vendor-name heuristic as the resource policy.
-- `builder3d-platform` owns capability discovery and platform-specific GPU
-  budget/power/display queries. `builder3d-viewport` and long-running core
+- `modeler3d-platform` owns capability discovery and platform-specific GPU
+  budget/power/display queries. `modeler3d-viewport` and long-running core
   jobs consume a capability profile and a workload plan; they do not each
   invent their own CPU/GPU rules. A central resource ledger accounts for
   authoritative meshes, staging buffers, render targets, caches, undo data,
@@ -158,7 +184,7 @@ following [`docs/packaging.md`](docs/packaging.md). Do not hand the owner a
 command to run. Take the next RC number from the "Test releases" line in
 `docs/STATUS.md`, build with `-Build -Verify`, update that line, commit, and
 give the owner the MSI path and the tester instructions from the doc. Stopping
-a running Builder3D to unlock the build is always allowed.
+a running 3D Modeler to unlock the build is always allowed.
 
 ## Git and recovery
 
@@ -173,8 +199,8 @@ pass. A subtask is complete only after its code or documentation is verified,
 its recovery snapshot exists, and its checkpoint is written.
 
 - Before the first implementation subtask, create a baseline snapshot of
-  `E:\Builder3D-Rust` under a new, timestamped directory on `G:\`, using a
-  name such as `G:\Builder3D-Rust_snapshot_20261029-143000_R0b-baseline`.
+  `E:\3D-Modeler` under a new, timestamped directory on `G:\`, using a
+  name such as `G:\3D-Modeler_snapshot_20261029-143000_R0b-baseline`.
   Never overwrite an existing snapshot and never modify the existing
   `Builder3D_snapshot_*` backup folders.
 - After every completed slice (not every patch; see plan section 3.6), create

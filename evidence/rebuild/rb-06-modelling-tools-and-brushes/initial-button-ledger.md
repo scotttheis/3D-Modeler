@@ -2,7 +2,7 @@
 
 Date: 2026-11-01  
 Reference: `L:\Builder3D` (read-only)  
-Rust project: `E:\Builder3D-Rust`
+Rust project: `E:\3D-Modeler`
 
 This is the pre-implementation inventory required by the RB-06 handoff. The
 reference routes were read from `src/main_window.py`, `src/viewport.py`, and
@@ -21,7 +21,7 @@ the related mesh-operation tests. Rust routes were inspected before edits.
 | Edit / Emboss, Hollow | typed editor and worker | typed dialogs and core path | Apply/Cancel/error path must be observable and non-destructive on failure. |
 | Paint / Material, Paint, Color | material/color editor | shared Material dialog | Basic reachability and explicit error handling are required at the RB-06 boundary. |
 | View / Center, Frame, Reset, Top, Side, Grid, Wireframe, X-Ray | camera/display commands | implemented command paths | Must remain reachable while brush/picker modes are active and must not create mesh history. |
-| Favorites / overflow command buttons | persisted command IDs | calls `Builder3dApp::dispatch` | Must use the same enablement and mode routes as ribbon buttons. |
+| Favorites / overflow command buttons | persisted command IDs | calls `Modeler3dApp::dispatch` | Must use the same enablement and mode routes as ribbon buttons. |
 | Items / health `!` and action buttons | health report, Repair, Copy/Cut/Paste/Duplicate/Delete | health row repair plus actions | Every visible action must either mutate through a real route or show a typed error. |
 | Dialog / Apply, Cancel, close, Escape | modal accept/reject | egui dialog actions | Torus Cancel must restore its render preview; every Apply must report errors in-place. |
 

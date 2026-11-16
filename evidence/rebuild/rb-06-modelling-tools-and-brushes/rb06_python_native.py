@@ -22,14 +22,14 @@ if __name__ != "__main__":
 
 sys.dont_write_bytecode = True
 
-ROOT = Path("E:/Builder3D-Rust/evidence/rebuild/rb-06-modelling-tools-and-brushes")
+ROOT = Path("E:/3D-Modeler/evidence/rebuild/rb-06-modelling-tools-and-brushes")
 CAPTURES = ROOT / "captures"
 FIXTURES = ROOT / "fixtures"
 RESULTS = ROOT / "python-native-results.json"
 CAPTURES.mkdir(exist_ok=True)
 FIXTURES.mkdir(exist_ok=True)
 
-RB05_ROOT = Path("E:/Builder3D-Rust/evidence/rebuild/rb-05-viewport-and-input-completion")
+RB05_ROOT = Path("E:/3D-Modeler/evidence/rebuild/rb-05-viewport-and-input-completion")
 sys.path.insert(0, str(RB05_ROOT))
 from native_desktop_guard import require_default_desktop  # noqa: E402
 

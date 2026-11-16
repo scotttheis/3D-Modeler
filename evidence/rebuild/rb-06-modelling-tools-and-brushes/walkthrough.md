@@ -28,7 +28,7 @@ Command:
 & .\evidence\rebuild\rb-06-modelling-tools-and-brushes\native-rust-rb06.ps1
 ```
 
-The harness launched `target\debug\builder3d-app.exe`, changed theme through the
+The harness launched `target\debug\modeler3d-app.exe`, changed theme through the
 native UI, and sent actual OS pointer, keyboard, Shift-drag, and Escape input.
 For each theme it exercised the Torus editor; all five persistent brushes;
 Simplify, Subdivide, Smooth, and Normalize; Boolean picker/cancel and exact-two
@@ -41,7 +41,7 @@ target after the replay.
 Every Rust record contains client dimensions, DPI, screen origin, input route,
 PNG SHA-256, and the executable SHA-256. The final run contains one executable
 identity only. The accepted image set contains 78 PNGs: six Python reference
-images and 72 Rust images. No `builder3d-app` process remained after capture.
+images and 72 Rust images. No `modeler3d-app` process remained after capture.
 
 The first two boolean replays are retained only in the rejection history: they
 selected three visible objects in the evidence harness, and one later Subtract

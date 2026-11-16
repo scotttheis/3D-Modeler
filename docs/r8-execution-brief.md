@@ -1,4 +1,4 @@
-# Builder3D Rust R8 Execution Brief
+# 3D Modeler Rust R8 Execution Brief
 
 > RETIRED 2026-10-30 by owner direction. Historical record only; do not execute
 > this brief or its fresh-session prompt. Use
@@ -8,14 +8,14 @@
 > as scoped evidence; they do not establish application readiness.
 
 This document is the working brief for a fresh session that completes the
-post-conversion R8 phase of the Builder3D Rust rewrite. It is intentionally
+post-conversion R8 phase of the 3D Modeler Rust rewrite. It is intentionally
 self-contained so the session prompt can stay short and the context can be
 reconstructed from one file.
 
 ## 1. Objective
 
 Complete R8 as the native product-polish and UI-parity phase after R7's
-conversion-first coverage work. The result should be a usable native Builder3D
+conversion-first coverage work. The result should be a usable native 3D Modeler
 application whose shell and workflows are recognizably equivalent to the
 original Python application, while continuing to use the Rust core, command,
 viewport, platform, and MCP seams already implemented.
@@ -34,12 +34,12 @@ brief should be updated before implementation continues.
 
 ## 2. Workspace and behavioral oracle
 
-- Rust rewrite: `E:\Builder3D-Rust`
+- Rust rewrite: `E:\3D-Modeler`
 - Python reference/fallback: `L:\Builder3D`
 - Rewrite plan: `L:\Builder3D\docs\rust-rewrite.md`
-- Rust component catalog: `E:\Builder3D-Rust\docs\component-catalog.toml`
-- Rust progress log: `E:\Builder3D-Rust\WORK_LOG.md`
-- R7 evidence: `E:\Builder3D-Rust\evidence\r7\`
+- Rust component catalog: `E:\3D-Modeler\docs\component-catalog.toml`
+- Rust progress log: `E:\3D-Modeler\WORK_LOG.md`
+- R7 evidence: `E:\3D-Modeler\evidence\r7\`
 - Recovery snapshots: `G:\Builder3D-Rust_snapshot_*`
 
 The Python tree is a read-only behavioral and visual oracle. It remains the
@@ -53,11 +53,11 @@ Before taking action, read these completely:
 
 1. `E:\AGENTS.md`
 2. `E:\RustDeveloper.md`
-3. `E:\Builder3D-Rust\AGENTS.md`
+3. `E:\3D-Modeler\AGENTS.md`
 4. `L:\Builder3D\AGENTS.md`, if present
 5. `L:\Builder3D\docs\rust-rewrite.md`
 6. This brief
-7. `E:\Builder3D-Rust\docs\component-catalog.toml`
+7. `E:\3D-Modeler\docs\component-catalog.toml`
 8. The latest R7 section in `WORK_LOG.md` and the latest applicable evidence
    checkpoint
 
@@ -82,7 +82,7 @@ The R7 result included:
 - `cargo fmt`, workspace check, Clippy with `-D warnings`, cargo-deny,
   locked metadata, catalog/coverage validation, and native smoke passed.
 - Native smoke output:
-  `Builder3D shell smoke: objects=2 selected=1 tabs=5`
+  `3D Modeler shell smoke: objects=2 selected=1 tabs=5`
 - `cargo audit` was not available on that machine and was recorded as skipped.
 - No Python source, existing snapshot, or commit was changed.
 
@@ -90,10 +90,10 @@ The R7 entries most directly targeted by R8 are currently `ported` because
 their semantic shell contracts exist but their native presentation is not yet
 at parity:
 
-- `builder3d.app.shell`
-- `builder3d.app.commands`
-- `builder3d.app.desktop-adapters`
-- `builder3d.mcp.desktop-bridge`
+- `modeler3d.app.shell`
+- `modeler3d.app.commands`
+- `modeler3d.app.desktop-adapters`
+- `modeler3d.mcp.desktop-bridge`
 
 Do not blindly promote these entries. Promote them only after the corresponding
 R8 workflow and evidence are real.
@@ -286,7 +286,7 @@ For every new or materially changed component:
 - list the Python oracle paths without editing them;
 - list focused tests;
 - add report, verification, and checkpoint evidence under
-  `E:\Builder3D-Rust\evidence\r8\<slice>\`;
+  `E:\3D-Modeler\evidence\r8\<slice>\`;
 - describe contracts and user-visible behavior;
 - record intentional toolkit substitutions or post-R8 boundaries explicitly;
 - never mark a component validated solely because it compiles.
@@ -301,7 +301,7 @@ The final R8 catalog audit must verify:
 
 ## 9. Verification matrix
 
-Run from `E:\Builder3D-Rust`:
+Run from `E:\3D-Modeler`:
 
 ```powershell
 cargo fmt --all -- --check
@@ -310,7 +310,7 @@ cargo test --workspace --locked
 cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
 cargo deny check
 cargo metadata --locked --format-version 1 --no-deps
-cargo run -p builder3d-app --bin builder3d-app -- --smoke
+cargo run -p modeler3d-app --bin modeler3d-app -- --smoke
 ```
 
 Also run, when installed and relevant:
@@ -346,14 +346,14 @@ R8 is complete only when all of the following are true:
 Use this short prompt after opening a new session:
 
 ```text
-Complete all of R8 for the Builder3D Rust rewrite.
+Complete all of R8 for the 3D Modeler Rust rewrite.
 
 First read and follow the workspace/project instructions, then read the complete
 R8 execution brief at:
 
-E:\Builder3D-Rust\docs\r8-execution-brief.md
+E:\3D-Modeler\docs\r8-execution-brief.md
 
-Work in E:\Builder3D-Rust using L:\Builder3D only as a read-only behavioral and
+Work in E:\3D-Modeler using L:\Builder3D only as a read-only behavioral and
 visual oracle. R7 conversion coverage is complete; do not redo R1–R7. Follow
 the brief's snapshot, catalog, evidence, testing, UI-parity, and no-commit rules.
 Complete the native eframe shell and user workflows, not just a demo. Launch the

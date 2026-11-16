@@ -1,4 +1,4 @@
-"""Capture current Release MCP results from a live Builder3D desktop."""
+"""Capture current Release MCP results from a live 3D Modeler desktop."""
 
 from __future__ import annotations
 
@@ -75,7 +75,7 @@ async def main(gateway: Path, fixture: Path, output: Path) -> None:
         raise RuntimeError(f"refusing to overwrite existing log: {output}")
 
     environment = os.environ.copy()
-    environment["BUILDER3D_MCP_PROFILE"] = "full"
+    environment["MODELER3D_MCP_PROFILE"] = "full"
     server = StdioServerParameters(
         command=str(gateway.resolve()), args=[], env=environment
     )

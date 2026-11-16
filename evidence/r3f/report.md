@@ -10,11 +10,11 @@ topology preservation, reports, and undoable scene integration.
 
 ## Changed files
 
-- crates/builder3d-core/src/brushes.rs
-- crates/builder3d-core/src/lib.rs
-- crates/builder3d-core/src/commands.rs
-- crates/builder3d-core/src/scene.rs
-- crates/builder3d-core/tests/mesh_ops_brushes.rs
+- crates/modeler3d-core/src/brushes.rs
+- crates/modeler3d-core/src/lib.rs
+- crates/modeler3d-core/src/commands.rs
+- crates/modeler3d-core/src/scene.rs
+- crates/modeler3d-core/tests/mesh_ops_brushes.rs
 
 ## Behavioral evidence
 
@@ -36,8 +36,8 @@ topology preservation, reports, and undoable scene integration.
 - Python: tests/test_scene.py -k "elastic_grab_command or crease_polish_command
   or smooth_brush_command or blob_command" -q: 4 passed, 65 deselected.
 - Rust: tests/mesh_ops_brushes.rs: 6 passed.
-- Rust: cargo fmt --all -- --check, cargo check -p builder3d-core, and
-  cargo clippy -p builder3d-core --all-targets -- -D warnings passed.
+- Rust: cargo fmt --all -- --check, cargo check -p modeler3d-core, and
+  cargo clippy -p modeler3d-core --all-targets -- -D warnings passed.
 - New brush/R3 production files contain zero forbidden panic-style or
   debugging markers.
 
@@ -45,7 +45,7 @@ topology preservation, reports, and undoable scene integration.
 
 R3f snapshot:
 G:\Builder3D-Rust_snapshot_20261029-144529_R3f-brushes
-It excludes E:\Builder3D-Rust\target. Exact verification is in
+It excludes E:\3D-Modeler\target. Exact verification is in
 verification.md.
 
 ## Remaining R3 work

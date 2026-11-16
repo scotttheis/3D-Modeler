@@ -3,7 +3,7 @@
 Date: 2026-10-30
 
 The R7 native shell launches and is responsive, but it is still a conversion
-shell rather than a day-to-day Builder3D workspace. The baseline native window
+shell rather than a day-to-day 3D Modeler workspace. The baseline native window
 was 1296 x 879 pixels. The captured view is in
 [`native-printwindow.png`](../baseline/native-printwindow.png).
 

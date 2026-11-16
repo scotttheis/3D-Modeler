@@ -1,7 +1,7 @@
 ﻿{
     "status":  "diagnostic_pending_unlock",
     "process_id":  27176,
-    "window_title":  "Builder3D - Untitled",
+    "window_title":  "3D Modeler - Untitled",
     "foreground":  "Windows Default Lock Screen",
     "descendant_count":  38,
     "elements":  [
@@ -398,7 +398,7 @@
                                     ]
                      },
                      {
-                         "name":  "Builder3D",
+                         "name":  "3D Modeler",
                          "control_type":  "ControlType.Text",
                          "automation_id":  "",
                          "enabled":  true,

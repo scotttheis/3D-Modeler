@@ -36,7 +36,7 @@ desktop_adapters.QSettings = isolated_settings
 
 configure_opengl_defaults()
 app = QApplication(sys.argv)
-saved_theme = isolated_settings("Builder3D", "Builder3D").value(
+saved_theme = isolated_settings("3D Modeler", "3D Modeler").value(
     THEME_MODE_SETTINGS_KEY,
     DEFAULT_THEME_MODE,
 )

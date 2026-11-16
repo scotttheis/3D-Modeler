@@ -4,7 +4,7 @@
 
 - Added fixed native launchers for Windows batch and PowerShell, POSIX/Linux,
   macOS command, and Linux desktop-menu entry points.
-- Launchers resolve only the `Builder3D.exe`/`Builder3D` sibling beside the
+- Launchers resolve only the `Modeler3D.exe`/`3D Modeler` sibling beside the
   launcher and pass arguments as vectors. They contain no Python invocation,
   arbitrary executable path, or constructed shell command string.
 - Added a typed compile-time launcher catalog and validation boundary. The
@@ -17,8 +17,8 @@
 ## Verification
 
 - `cargo fmt --all -- --check` — passed.
-- `cargo test -p builder3d-app` — 15 passed.
-- `cargo run -q -p builder3d-app --bin builder3d-app -- --stage-launchers
+- `cargo test -p modeler3d-app` — 15 passed.
+- `cargo run -q -p modeler3d-app --bin modeler3d-app -- --stage-launchers
   target\\r6-launcher-smoke` — staged 5 launchers.
 - Python `tests/test_slicer_launcher.py` and `tests/test_setup_contract.py` —
   15 passed, 1 existing assertion failed because the dirty reference

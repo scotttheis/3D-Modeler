@@ -5,7 +5,7 @@ Prepared 2026-11-01 for the next implementation session.
 ## Objective and stop boundary
 
 Complete **all of RB-05 - Viewport and input completion** in the existing
-`E:\Builder3D-Rust` worktree. Implement the full slice, run its focused and
+`E:\3D-Modeler` worktree. Implement the full slice, run its focused and
 integrated checks, complete the required sequential Python/Rust native
 walkthrough and paired evidence, update the ledger and documentation, and
 create a verified additive G: recovery snapshot. Then **stop before RB-06**.
@@ -207,15 +207,15 @@ floor owners. Main starting points under `L:\Builder3D`:
 
 Rust starting points:
 
-- `crates/builder3d-app/src/shell.rs`: actual window/view/input routing,
+- `crates/modeler3d-app/src/shell.rs`: actual window/view/input routing,
   viewport controls, selection, modal/text containment and gizmo painting.
-- `crates/builder3d-app/src/view_state.rs`, `commands.rs`,
+- `crates/modeler3d-app/src/view_state.rs`, `commands.rs`,
   `transform_gesture.rs`, `gesture_tests.rs`, `transforms.rs`, `rotation.rs`
   and `lib.rs`: semantic state, exact transform contracts and native wiring.
-- `crates/builder3d-viewport/src/camera.rs`, `gizmo.rs`, `picking.rs`,
+- `crates/modeler3d-viewport/src/camera.rs`, `gizmo.rs`, `picking.rs`,
   `snapping.rs`, `floor.rs`, `scene.rs`, `renderer.rs`, `cpu.rs`, `adaptive.rs`
   and `math.rs`: portable math, exact geometry, rendering and fallback.
-- `builder3d-platform` and existing resource-policy modules own platform
+- `modeler3d-platform` and existing resource-policy modules own platform
   capability/budget seams. Do not introduce a separate vendor-name policy.
 
 Existing RB-05 ledger groups are gizmo Move/Rotate/Resize, Snap preference and
@@ -269,8 +269,8 @@ RB-05 counterpart rather than hardcoded new numbers in old records.
   The later user-review launch was maximized at 2560x1369 client pixels; the
   1280x840 macro's path-dialog check correctly refused to type there. Do not
   infer that the review fixture opened, or reuse those coordinates blindly.
-- The review launch used `target/debug/builder3d-app.exe` with isolated
-  `LOCALAPPDATA=E:\Builder3D-Rust\target\rb04-current-native-profile`.
+- The review launch used `target/debug/modeler3d-app.exe` with isolated
+  `LOCALAPPDATA=E:\3D-Modeler\target\rb04-current-native-profile`.
   A disposable copy named `target/RB04-Visual-Review-20261101-043423.3dp`
   was made; it is not an authoritative fixture. Discover current processes
   and unsaved user state rather than reusing old PID files or closing a
@@ -303,7 +303,7 @@ RB-05 counterpart rather than hardcoded new numbers in old records.
 Use the pinned toolchain. Initialize build-only libclang in the same shell:
 
 ```powershell
-cd E:\Builder3D-Rust
+cd E:\3D-Modeler
 . ./scripts/Initialize-BuildClang.ps1
 cargo check --workspace --locked
 cargo test --workspace --locked
@@ -311,7 +311,7 @@ cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
 cargo fmt --all -- --check
 cargo deny check
 cargo metadata --locked --format-version 1 --no-deps
-cargo build --locked -p builder3d-app --bin builder3d-app
+cargo build --locked -p modeler3d-app --bin modeler3d-app
 ```
 
 Run focused Rust and matching read-only Python tests for each changed contract.
@@ -323,9 +323,9 @@ real native GL/input tests distinct from pure/offscreen math tests.
 At the completed boundary run applicable integrated release/smoke/size gates:
 
 ```powershell
-cargo build --release --locked -p builder3d-app --bin builder3d-app
+cargo build --release --locked -p modeler3d-app --bin modeler3d-app
 cargo bloat --release --workspace
-cargo bloat --release -p builder3d-app --bin builder3d-app
+cargo bloat --release -p modeler3d-app --bin modeler3d-app
 ```
 
 Run isolated debug and ordinary-release `--smoke` as well as the native
@@ -392,7 +392,7 @@ acceptance gate establishes the completed product.
 
 ## Simple activation prompt
 
-Read and follow `E:\Builder3D-Rust\docs\rb-05-viewport-and-input-completion-handoff.md`.
+Read and follow `E:\3D-Modeler\docs\rb-05-viewport-and-input-completion-handoff.md`.
 Complete the entire RB-05 slice, including tests, paired native Python/Rust
 evidence, documentation and a verified additive G: snapshot. Then stop before
 RB-06. Continue the planned work; defer the unrelated button troubleshooting.

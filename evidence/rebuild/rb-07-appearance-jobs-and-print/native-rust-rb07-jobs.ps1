@@ -8,7 +8,7 @@ $projectRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..\..')).Path
 $script:rb03AppPid = 0
 $script:rb07EvidenceRoot = $evidenceRoot
 $script:rb07ProjectRoot = $projectRoot
-$script:rb07Executable = Join-Path $projectRoot 'target\debug\builder3d-app.exe'
+$script:rb07Executable = Join-Path $projectRoot 'target\debug\modeler3d-app.exe'
 $script:rb07Fixture = Join-Path $evidenceRoot 'fixtures\slow-job-closed-cube-heavy.ply'
 $script:rb07BuildSha256 = (Get-FileHash -LiteralPath $script:rb07Executable -Algorithm SHA256).Hash.ToLowerInvariant()
 $script:rb07Records = [System.Collections.Generic.List[object]]::new()
@@ -107,7 +107,7 @@ function Capture-Rb07Job {
 
     $handle = Activate-Rb03App
     $info = Get-Rb03WindowInfo $handle
-    if ($info.Title -notlike 'Builder3D - *' -or $info.ClientWidth -ne 1280 -or $info.ClientHeight -ne 840 -or $info.Dpi -ne 96) {
+    if ($info.Title -notlike '3D Modeler - *' -or $info.ClientWidth -ne 1280 -or $info.ClientHeight -ne 840 -or $info.Dpi -ne 96) {
         throw "Rejected RB-07 capture target or dimensions for $Action"
     }
 
@@ -238,8 +238,8 @@ function Invoke-Rb07JobRun {
 }
 
 try {
-    if (Get-Process -Name builder3d-app -ErrorAction SilentlyContinue) {
-        throw 'A Builder3D Rust app process is already running; refusing ambiguous native input'
+    if (Get-Process -Name modeler3d-app -ErrorAction SilentlyContinue) {
+        throw 'A 3D Modeler Rust app process is already running; refusing ambiguous native input'
     }
     foreach ($path in @($script:rb07Journal, $script:rb07Results)) {
         if (Test-Path -LiteralPath $path) {

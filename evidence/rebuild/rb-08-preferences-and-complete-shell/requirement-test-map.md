@@ -2,7 +2,7 @@
 
 | Requirement | Implementation / contract | Automated verification | Native evidence |
 |---|---|---|---|
-| Partial, malformed, unsupported and migrated settings preserve independent valid values | `builder3d-app::preferences`; read-only Python QSettings adapter in `builder3d-platform` | `preferences.rs` parsing/migration tests; platform registry decoder tests | isolated fresh runtime, current/legacy precedence, restart and recovery warning |
+| Partial, malformed, unsupported and migrated settings preserve independent valid values | `modeler3d-app::preferences`; read-only Python QSettings adapter in `modeler3d-platform` | `preferences.rs` parsing/migration tests; platform registry decoder tests | isolated fresh runtime, current/legacy precedence, restart and recovery warning |
 | Theme/import/display/snap/recent/ribbon settings persist; internal lengths remain mm | preferences and shell load/save | preference serialization and unit-policy tests | Python/Rust settings and post-restart captures |
 | Preferred slicer can browse/select/clear; 3D Print remembers only on explicit choice | Settings and print-prep actions; safe staged handoff | path validation, migration, action and print handoff tests | native chooser/settings/prepare/cancel; do not launch external slicer automatically |
 | Clear Recent Files is non-destructive | bounded `RecentFiles::clear`, preview generation invalidation | recent-list tests plus shell state test | clear in Settings; verify only list/cache cleared and files still exist |

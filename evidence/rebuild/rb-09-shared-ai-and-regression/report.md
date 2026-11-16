@@ -33,7 +33,7 @@ The first Rust live launch installed/opened the project over MCP from Welcome bu
 ## Build and capture identity
 
 - Rust source manifest: 96 Rust files; SHA-256 9846a4a6dee484186283e169a9b7cdbbf74007bdca772efa5981f438ce78b457, using sorted project-relative paths and each file’s SHA-256 digest.
-- Final Release app: target/release/builder3d-app.exe, 16,172,032 bytes, SHA-256 d680cf0ba8e4c8bf7d5ccd1536bf7d5720987d676a1a0946c6c3505b613b0cb9.
+- Final Release app: target/release/modeler3d-app.exe, 16,172,032 bytes, SHA-256 d680cf0ba8e4c8bf7d5ccd1536bf7d5720987d676a1a0946c6c3505b613b0cb9.
 - Live Rust MCP gateway used for the final paired run: target/release/r4_mcp.exe, SHA-256 a1dba8751c5a15cafbf6e26fac8db0b8a96f8464bf750ac62336f573b729545b. A post-run locked Release rebuild passed and produced SHA-256 9b8817015ab5c8195013ee788fb095e9393848be74c7da0221ebd33342fc99d3; both were built from the same recorded source manifest.
 - Python reference identity: L:/Builder3D, Git HEAD 3a0160a95c55f68ce9f1e89d17c792816ac001df, active entrypoint source hash recorded in build-manifest.json, Python 3.12.10, MCP SDK 2.2.0. Its saved QSettings were restored to the values in logs/python-settings-before.json.
 - Every PNG in captures/ has its SHA-256, byte length, image dimensions, host DPI, theme/context, and evidence role in capture-metadata.json. The settings-dialog image rust-final-paired-dark-initial.png is explicitly excluded as a clean scene capture; rust-final-paired-dark-scene.png is the accepted Dark scene.
@@ -42,11 +42,11 @@ The first Rust live launch installed/opened the project over MCP from Welcome bu
 
 The recorded full-gate app hash is `d680cf0ba8e4c8bf7d5ccd1536bf7d5720987d676a1a0946c6c3505b613b0cb9`; its paired live gateway hash is `a1dba8751c5a15cafbf6e26fac8db0b8a96f8464bf750ac62336f573b729545b`. The post-run gateway hash was `9b8817015ab5c8195013ee788fb095e9393848be74c7da0221ebd33342fc99d3`. The gate-time evidence validator passed with exit 0 and its output remains in `logs/evidence-ledger-validation.log` and `.exit`.
 
-The later target-path mismatch came from subsequent Release builds. The recorded `cargo bloat --release --workspace` run warned that `--workspace` was unused and recompiled `builder3d-mcp` and `builder3d-app`; the app restore log records another completed Release build. Copies of both original stderr logs are retained as `logs/identity-recheck-bloat-workspace.stderr.log` and `logs/identity-recheck-restore-release-app.stderr.log`. The current target app hash is `0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a`; the current gateway hash is `aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e`. The previous wrap-up validator failure was `release binary hash mismatch: live Rust app`: it compared the rebuilt target path to the historical full-gate app record.
+The later target-path mismatch came from subsequent Release builds. The recorded `cargo bloat --release --workspace` run warned that `--workspace` was unused and recompiled `modeler3d-mcp` and `modeler3d-app`; the app restore log records another completed Release build. Copies of both original stderr logs are retained as `logs/identity-recheck-bloat-workspace.stderr.log` and `logs/identity-recheck-restore-release-app.stderr.log`. The current target app hash is `0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a`; the current gateway hash is `aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e`. The previous wrap-up validator failure was `release binary hash mismatch: live Rust app`: it compared the rebuilt target path to the historical full-gate app record.
 
 The historical executables are no longer at the current Release paths; no copy of those exact binaries was found under `target/release` or this RB-09 evidence directory. The original hashes remain tied to the paired capture metadata and gate-time validator pass. No binary was restored from a G: snapshot.
 
-The current Release pair was then launched and checked separately. The app process (PID 8516) ran from the current Release path with app hash `0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a`; the MCP gateway hash stayed `aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e`. Host preflight confirmed the active Default desktop and Builder3D foreground. An official Python MCP SDK 2.2.0 client listed 60 tools and its read-only `get_status` call returned `app_state=ready`, `dirty=false`, and scene revision 0. The 1296x879 screenshot and client JSONL are under `artifact-identity-recheck/`; neither is part of the accepted 50-capture paired inventory. The app, gateway, and runtime descriptor were absent after shutdown.
+The current Release pair was then launched and checked separately. The app process (PID 8516) ran from the current Release path with app hash `0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a`; the MCP gateway hash stayed `aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e`. Host preflight confirmed the active Default desktop and 3D Modeler foreground. An official Python MCP SDK 2.2.0 client listed 60 tools and its read-only `get_status` call returned `app_state=ready`, `dirty=false`, and scene revision 0. The 1296x879 screenshot and client JSONL are under `artifact-identity-recheck/`; neither is part of the accepted 50-capture paired inventory. The app, gateway, and runtime descriptor were absent after shutdown.
 
 The validator now checks the historical app/gateway hashes against the full-gate capture metadata, and checks current target hashes against `artifact-identity-recheck.json`. It verifies both rebuild-log copies, the identity screenshot, and the read-only official-client result. The updated validator passed with exit 0; its stdout, stderr, and exit are recorded in `logs/identity-recheck-validator.*`. The 96-file Rust source manifest remains `9846a4a6dee484186283e169a9b7cdbbf74007bdca772efa5981f438ce78b457`; no Rust application source changed.
 
@@ -75,7 +75,7 @@ The owner-reported interface and floor gaps remain open. Earlier visual review a
 
 Run `currpair-20261106-072716` exercised the current Rust Release app and gateway. The app SHA-256 is `0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a`; the gateway SHA-256 is `aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e`.
 
-The official Python MCP SDK 2.2.0 was used only as a stdio client to the Rust gateway. The Python Builder3D application was not launched, and the saved Python catalog snapshots were not refreshed. The historical Python/Rust paired gate above remains tied to its recorded older build.
+The official Python MCP SDK 2.2.0 was used only as a stdio client to the Rust gateway. The Python 3D Modeler application was not launched, and the saved Python catalog snapshots were not refreshed. The historical Python/Rust paired gate above remains tied to its recorded older build.
 
 The Rust client opened `RB09-Paired-Live.3dp`, edited and queried the shared desktop document, saved the result, and the GUI reopened it. The saved output is 82,178 bytes, SHA-256 `e6046a8d3ed7ea949b00a13928311b2fc88e476bda6d4d859af6d866246d9262`, project ID `e5d81c5226e64f58b838d55d9395afa9`, revision 25, clean, with the stable Cube and Sphere IDs. The final GUI capture is `currpair-20261106-072716/captures/rust-current-live-gui-reopened-after-restart-final.png` (SHA-256 `b1223ef8a48c17c3ece09ac77ed263620709bb53a150b18fe4266814ac37e5c5`).
 
@@ -114,7 +114,7 @@ operation_status. The deliberately invalid nested action returned
 invalid_input. The GUI exited normally and its runtime descriptor was removed.
 
 The comparison and run artifacts are listed in schema-parity-run-manifest.json.
-A custom _meta.com.builder3d/longRunning value for emboss_text differs
+A custom _meta.com.modeler3d/longRunning value for emboss_text differs
 (Python false, Rust true) in model/files/full. It is separate from official
 ToolAnnotations, disclosed without owner approval.
 

@@ -3,482 +3,482 @@
   "files": [
     {
       "bytes": 1458,
-      "path": "crates/builder3d-app/examples/rb03_export_fixture.rs",
+      "path": "crates/modeler3d-app/examples/rb03_export_fixture.rs",
       "sha256": "355d76a355d147e026ece27c8297f32207c050acd9391a4b2c265f1c3b335bda"
     },
     {
       "bytes": 806,
-      "path": "crates/builder3d-app/examples/rb04_scene_fixture.rs",
+      "path": "crates/modeler3d-app/examples/rb04_scene_fixture.rs",
       "sha256": "3dd30420e819742963230c51308c9b6db4aa063131e51e0ed55344207eb82edd"
     },
     {
       "bytes": 1237,
-      "path": "crates/builder3d-app/examples/rb04_settle_fixture.rs",
+      "path": "crates/modeler3d-app/examples/rb04_settle_fixture.rs",
       "sha256": "61ca16112e0289d566fe61c49e34930ce057f1232c9770c00ac71ed228ee06d2"
     },
     {
       "bytes": 28198,
-      "path": "crates/builder3d-app/src/artwork.rs",
+      "path": "crates/modeler3d-app/src/artwork.rs",
       "sha256": "605efe0f77304f5241914e5ae634a6af96e07cc52713f4f885f661442a18aaff"
     },
     {
       "bytes": 11897,
-      "path": "crates/builder3d-app/src/bin/r5_viewport.rs",
+      "path": "crates/modeler3d-app/src/bin/r5_viewport.rs",
       "sha256": "aa8206f9d4ce5c72bdcb977567e7dbbe275e71b71c965adb103abe641063df93"
     },
     {
       "bytes": 149387,
-      "path": "crates/builder3d-app/src/commands.rs",
+      "path": "crates/modeler3d-app/src/commands.rs",
       "sha256": "9c08de7c7c4a9a44a5c4c2606ab63d35d8ec12915b2f5d8d415f880a4ccae11f"
     },
     {
       "bytes": 10272,
-      "path": "crates/builder3d-app/src/desktop_jobs.rs",
+      "path": "crates/modeler3d-app/src/desktop_jobs.rs",
       "sha256": "50b3e41775c3655baa4f66112adb295b5f36e42e0c503bf7898c742758ade373"
     },
     {
       "bytes": 43534,
-      "path": "crates/builder3d-app/src/dialogs.rs",
+      "path": "crates/modeler3d-app/src/dialogs.rs",
       "sha256": "3dd2eb345dd75b43d7ef726c41168d25cc4ad67ee9bc432d17dbffc7404c6965"
     },
     {
       "bytes": 23782,
-      "path": "crates/builder3d-app/src/export.rs",
+      "path": "crates/modeler3d-app/src/export.rs",
       "sha256": "3a7390f7caca510ff4fc67bba278e7f15bf55b770d824efcc72d4d4558b96dae"
     },
     {
       "bytes": 17465,
-      "path": "crates/builder3d-app/src/gesture_tests.rs",
+      "path": "crates/modeler3d-app/src/gesture_tests.rs",
       "sha256": "fd4f0e70b65dcc9c1c0aaa45e8479e7d3372b9738366395d7172544237e2dc93"
     },
     {
       "bytes": 7242,
-      "path": "crates/builder3d-app/src/image_color.rs",
+      "path": "crates/modeler3d-app/src/image_color.rs",
       "sha256": "97570c1e1acb0d92e5614e74aaa490d1d5492f7adc3d4bca5175d7ca826cc6ab"
     },
     {
       "bytes": 4974,
-      "path": "crates/builder3d-app/src/launchers.rs",
+      "path": "crates/modeler3d-app/src/launchers.rs",
       "sha256": "571d89d9510887f378e36b9d7328303c308586c9ce3e9aab7cd6d40055adcbdd"
     },
     {
       "bytes": 6304,
-      "path": "crates/builder3d-app/src/lib.rs",
+      "path": "crates/modeler3d-app/src/lib.rs",
       "sha256": "623c8bd79568fcef72ff9196e0cb7492d182c378666bd1c24b7de424f46f3a8d"
     },
     {
       "bytes": 78,
-      "path": "crates/builder3d-app/src/main.rs",
+      "path": "crates/modeler3d-app/src/main.rs",
       "sha256": "0bd8a061c1784b38566acd648ce404649a11a6d875992811e2cfbc7eeda8f192"
     },
     {
       "bytes": 38501,
-      "path": "crates/builder3d-app/src/mcp_bridge.rs",
+      "path": "crates/modeler3d-app/src/mcp_bridge.rs",
       "sha256": "8da97ae29fc5fef3875eb28070c97dec05af3bc1258a3d4eb36b00da7f23a176"
     },
     {
       "bytes": 4355,
-      "path": "crates/builder3d-app/src/numeric_controls.rs",
+      "path": "crates/modeler3d-app/src/numeric_controls.rs",
       "sha256": "d56db4c20df2fe7c2d082f528979ab47c407a39384ea691a634eca19efc62cf6"
     },
     {
       "bytes": 21504,
-      "path": "crates/builder3d-app/src/operations.rs",
+      "path": "crates/modeler3d-app/src/operations.rs",
       "sha256": "4b2af9a94c09e537560ba703ffa2677aeb3a2fa919a1ab9b4b06ad8d9adf8132"
     },
     {
       "bytes": 14287,
-      "path": "crates/builder3d-app/src/packaging.rs",
+      "path": "crates/modeler3d-app/src/packaging.rs",
       "sha256": "8b92ce7fe3fb6964ec95a95ef17f3ed6c8d58435452f7b3960d1cfdb85750768"
     },
     {
       "bytes": 41543,
-      "path": "crates/builder3d-app/src/preferences.rs",
+      "path": "crates/modeler3d-app/src/preferences.rs",
       "sha256": "d5a64c3a37a2983d0bf943db2db2a34abd9d59f775197c5d6b065edea82848d7"
     },
     {
       "bytes": 16442,
-      "path": "crates/builder3d-app/src/print_handoff.rs",
+      "path": "crates/modeler3d-app/src/print_handoff.rs",
       "sha256": "2b95787bb7431a777678417523ff9c47b50b3dd16056d86555af769057882f9f"
     },
     {
       "bytes": 9782,
-      "path": "crates/builder3d-app/src/print_prep.rs",
+      "path": "crates/modeler3d-app/src/print_prep.rs",
       "sha256": "aa6ca06c048fe25d1cfae98d8a5cab80aab8c9ab102b868d7e7acc7a930eb698"
     },
     {
       "bytes": 19195,
-      "path": "crates/builder3d-app/src/recent_preview.rs",
+      "path": "crates/modeler3d-app/src/recent_preview.rs",
       "sha256": "5d4afde3bc674011a77f50ff95119de000563bf3cb1ab0a7d22b8c0223166051"
     },
     {
       "bytes": 5433,
-      "path": "crates/builder3d-app/src/rotation.rs",
+      "path": "crates/modeler3d-app/src/rotation.rs",
       "sha256": "dc9c80002d7aa507e88d48fab024158b4cb3eff0638c6f179f6fcc450aba5484"
     },
     {
       "bytes": 309853,
-      "path": "crates/builder3d-app/src/shell.rs",
+      "path": "crates/modeler3d-app/src/shell.rs",
       "sha256": "d87918a59ec55c354295c4d70bd3e22b2e9086cbe904e354aa36b06e9a1a59ad"
     },
     {
       "bytes": 2749,
-      "path": "crates/builder3d-app/src/signals.rs",
+      "path": "crates/modeler3d-app/src/signals.rs",
       "sha256": "2dd619f05dd642113c31e1942f4dfa162b47f9a51896798bf8ee8cb160422789"
     },
     {
       "bytes": 13591,
-      "path": "crates/builder3d-app/src/theme.rs",
+      "path": "crates/modeler3d-app/src/theme.rs",
       "sha256": "d8f7f4fa87b2f2994b067f1be804c320aa2072ba9f6431ea5f895c4f9671cf0a"
     },
     {
       "bytes": 15258,
-      "path": "crates/builder3d-app/src/transform_gesture.rs",
+      "path": "crates/modeler3d-app/src/transform_gesture.rs",
       "sha256": "d8e82ef92d3d44991e74ca0954595576c6a7e8145cc42183e33c188a3d464f6a"
     },
     {
       "bytes": 26516,
-      "path": "crates/builder3d-app/src/transforms.rs",
+      "path": "crates/modeler3d-app/src/transforms.rs",
       "sha256": "036c2832d3fda055ebdc6fd3f4fcbf57cdbeb234be0a7d5224f2e79ca90d0c9b"
     },
     {
       "bytes": 7087,
-      "path": "crates/builder3d-app/src/ui_state.rs",
+      "path": "crates/modeler3d-app/src/ui_state.rs",
       "sha256": "56e637ea90725a5f749f8c836e53b2c3059bb45cd36e23e45c2979aff77e9096"
     },
     {
       "bytes": 10052,
-      "path": "crates/builder3d-app/src/view_state.rs",
+      "path": "crates/modeler3d-app/src/view_state.rs",
       "sha256": "9d15c0ce5563a5f890c6192d4f71008c1c8d9f07207ec711b37d42fe359a2be5"
     },
     {
       "bytes": 23737,
-      "path": "crates/builder3d-core/src/brushes.rs",
+      "path": "crates/modeler3d-core/src/brushes.rs",
       "sha256": "5af3324076de0a2b1b3f9130394088d8c9764b6bdd7190f9ee524bebfc2f4134"
     },
     {
       "bytes": 33330,
-      "path": "crates/builder3d-core/src/commands.rs",
+      "path": "crates/modeler3d-core/src/commands.rs",
       "sha256": "69a2f5b99fb8ce040ce15165ca3b14e68310de7e55c7cecfb8222a58289110e9"
     },
     {
       "bytes": 37283,
-      "path": "crates/builder3d-core/src/density.rs",
+      "path": "crates/modeler3d-core/src/density.rs",
       "sha256": "76d00ab63e890f7b153d74f920c35ebdc01b7d5d57e5f06b498da982fe135221"
     },
     {
       "bytes": 3723,
-      "path": "crates/builder3d-core/src/error.rs",
+      "path": "crates/modeler3d-core/src/error.rs",
       "sha256": "d2978030e9a0ef0ccde46515d8df8fc04a0502e8e6d302e2ad50256437bbfe47"
     },
     {
       "bytes": 46666,
-      "path": "crates/builder3d-core/src/file_io.rs",
+      "path": "crates/modeler3d-core/src/file_io.rs",
       "sha256": "64399449044fd9a23ef0945d05840d73d3c24e937b8ed087466cf8b6132759a5"
     },
     {
       "bytes": 101204,
-      "path": "crates/builder3d-core/src/gltf.rs",
+      "path": "crates/modeler3d-core/src/gltf.rs",
       "sha256": "25be659e367ad282cfed6d25f8aa43a88930422ece2e5f6781d6338d762806b4"
     },
     {
       "bytes": 17945,
-      "path": "crates/builder3d-core/src/lib.rs",
+      "path": "crates/modeler3d-core/src/lib.rs",
       "sha256": "e4840447f1dbb20f92c0687fa71ad9001d040c18f02dbb4c7df68d77f7a18d25"
     },
     {
       "bytes": 6241,
-      "path": "crates/builder3d-core/src/material.rs",
+      "path": "crates/modeler3d-core/src/material.rs",
       "sha256": "f665265be01d459a9738a0e13a1090c96f9c35a03d914cd615987e0b53f494d0"
     },
     {
       "bytes": 11507,
-      "path": "crates/builder3d-core/src/mesh.rs",
+      "path": "crates/modeler3d-core/src/mesh.rs",
       "sha256": "d6eb6cb443f4a7d67babe526de39c9afca2763ab49831e9494f094bbf6535311"
     },
     {
       "bytes": 45977,
-      "path": "crates/builder3d-core/src/mesh_ops.rs",
+      "path": "crates/modeler3d-core/src/mesh_ops.rs",
       "sha256": "2098db6af69bae7d8d12255d28670b9deb6727e10b741fbc6e671a5ae10fc871"
     },
     {
       "bytes": 7064,
-      "path": "crates/builder3d-core/src/placement.rs",
+      "path": "crates/modeler3d-core/src/placement.rs",
       "sha256": "87c767a0e97adf72e422a340f92cb00c4a6194361128261395b4377e1218b8a6"
     },
     {
       "bytes": 24516,
-      "path": "crates/builder3d-core/src/primitives.rs",
+      "path": "crates/modeler3d-core/src/primitives.rs",
       "sha256": "9d79ae6d586eed99e68741618786906ff5f38c7f6443b210813b55f0992dbffa"
     },
     {
       "bytes": 38191,
-      "path": "crates/builder3d-core/src/project.rs",
+      "path": "crates/modeler3d-core/src/project.rs",
       "sha256": "cbac8d8d250d1532891fc6e170a34e4cd519fcbe2c8d58e8ae66a25a43eddff7"
     },
     {
       "bytes": 37257,
-      "path": "crates/builder3d-core/src/repair.rs",
+      "path": "crates/modeler3d-core/src/repair.rs",
       "sha256": "af7e62599a149cdc0b601f8a30fea50bb69d11795eceeb0f0c5a8491236ff2d5"
     },
     {
       "bytes": 55227,
-      "path": "crates/builder3d-core/src/scene.rs",
+      "path": "crates/modeler3d-core/src/scene.rs",
       "sha256": "f26e10b34a48c1f898cbccf2ba30cb13121d85b0da58eb2465c7076032ee966a"
     },
     {
       "bytes": 55365,
-      "path": "crates/builder3d-core/src/shell_ops.rs",
+      "path": "crates/modeler3d-core/src/shell_ops.rs",
       "sha256": "43db5e9d6acd1c11a7826f01871b401830800b23836c3470d1d85cc10695b890"
     },
     {
       "bytes": 11990,
-      "path": "crates/builder3d-core/src/simplify.rs",
+      "path": "crates/modeler3d-core/src/simplify.rs",
       "sha256": "adf12aa381b83eae8826e14faabb2ea98572a11ba1d809cbc6e9d95c69e2a595"
     },
     {
       "bytes": 7011,
-      "path": "crates/builder3d-core/src/smooth.rs",
+      "path": "crates/modeler3d-core/src/smooth.rs",
       "sha256": "60d9d161a4ba3df93b95e01328b2ac706244593b4fd2e946121b0fb44b5ad589"
     },
     {
       "bytes": 10585,
-      "path": "crates/builder3d-core/src/subdivide.rs",
+      "path": "crates/modeler3d-core/src/subdivide.rs",
       "sha256": "83c611333dc6c82a61902682067acc635d094134b516c9ab085d233dc30147a2"
     },
     {
       "bytes": 88897,
-      "path": "crates/builder3d-core/src/three_mf.rs",
+      "path": "crates/modeler3d-core/src/three_mf.rs",
       "sha256": "663b2c0b4db080d7e9ef51a0db8febfc2b089a3daa8536d178b1d6865f926e3f"
     },
     {
       "bytes": 10140,
-      "path": "crates/builder3d-core/src/transform.rs",
+      "path": "crates/modeler3d-core/src/transform.rs",
       "sha256": "eb47334c0a674874ed97475b80c9f602f0606ee7669f1aa1758bd1999a993f78"
     },
     {
       "bytes": 23087,
-      "path": "crates/builder3d-core/src/wrl.rs",
+      "path": "crates/modeler3d-core/src/wrl.rs",
       "sha256": "885c2eeefd44f583e77b9d03b8bfd2018a352322b634a7a94fe7972b03fd1576"
     },
     {
       "bytes": 5166,
-      "path": "crates/builder3d-core/tests/file_io_golden.rs",
+      "path": "crates/modeler3d-core/tests/file_io_golden.rs",
       "sha256": "ca4c777e7f7b93751dd834f1e530900f9da6ba43f359fdf0a02c32ef9ff02369"
     },
     {
       "bytes": 8701,
-      "path": "crates/builder3d-core/tests/gltf_golden.rs",
+      "path": "crates/modeler3d-core/tests/gltf_golden.rs",
       "sha256": "f6dd176218302591a95820fd32cceefedc68ec17b3250e41498a36dc758cb581"
     },
     {
       "bytes": 13549,
-      "path": "crates/builder3d-core/tests/mesh_ops_booleans.rs",
+      "path": "crates/modeler3d-core/tests/mesh_ops_booleans.rs",
       "sha256": "0bf479dfb759d22a45b4af0b8149f0ed1b0627aa33e872cd77041b5107a16620"
     },
     {
       "bytes": 6597,
-      "path": "crates/builder3d-core/tests/mesh_ops_brushes.rs",
+      "path": "crates/modeler3d-core/tests/mesh_ops_brushes.rs",
       "sha256": "aff73221347b209ff1343f979f00f897ebdde6a2c71c8ebacdba2f377df3edc3"
     },
     {
       "bytes": 5923,
-      "path": "crates/builder3d-core/tests/mesh_ops_density.rs",
+      "path": "crates/modeler3d-core/tests/mesh_ops_density.rs",
       "sha256": "eebd2aab09e215553bfba7fb41acea568c57c1098e53c091505f43aa26c3a43c"
     },
     {
       "bytes": 8337,
-      "path": "crates/builder3d-core/tests/mesh_ops_repair.rs",
+      "path": "crates/modeler3d-core/tests/mesh_ops_repair.rs",
       "sha256": "78b1a0caac381104731f4d943a5877195c4cc4593c44eab5bc3b14cd516a8aae"
     },
     {
       "bytes": 7223,
-      "path": "crates/builder3d-core/tests/mesh_ops_shell.rs",
+      "path": "crates/modeler3d-core/tests/mesh_ops_shell.rs",
       "sha256": "efe5821edb6288fc98b17e22a615d981b277da26116e9c92109ac76eca71a8d4"
     },
     {
       "bytes": 2890,
-      "path": "crates/builder3d-core/tests/mesh_ops_simplify.rs",
+      "path": "crates/modeler3d-core/tests/mesh_ops_simplify.rs",
       "sha256": "e10e6d8ddcf6864c5aeb29964bd710a66aa3a9eba4a4ea8c51fde9639940fcff"
     },
     {
       "bytes": 2364,
-      "path": "crates/builder3d-core/tests/mesh_ops_smooth.rs",
+      "path": "crates/modeler3d-core/tests/mesh_ops_smooth.rs",
       "sha256": "bc9d0c08cb43314a438ba4cd47ea3b5b41e2994e97b2bda75b0c8640b23db3a1"
     },
     {
       "bytes": 3010,
-      "path": "crates/builder3d-core/tests/mesh_ops_subdivide.rs",
+      "path": "crates/modeler3d-core/tests/mesh_ops_subdivide.rs",
       "sha256": "43678e6300df0d90a0dc14b83750ac87a4415b5b49910758be69bdef0ccc0413"
     },
     {
       "bytes": 3955,
-      "path": "crates/builder3d-core/tests/project_golden.rs",
+      "path": "crates/modeler3d-core/tests/project_golden.rs",
       "sha256": "28577b83dbe38767c3bd2722bc13a74932335d25b593ef5a1b4cd90b22752dea"
     },
     {
       "bytes": 3765,
-      "path": "crates/builder3d-core/tests/scene_external_commit.rs",
+      "path": "crates/modeler3d-core/tests/scene_external_commit.rs",
       "sha256": "163061f8c68a22e5fd84854b45cdc98ae50db5b37581858dc9cecf9a05757085"
     },
     {
       "bytes": 15173,
-      "path": "crates/builder3d-core/tests/three_mf_golden.rs",
+      "path": "crates/modeler3d-core/tests/three_mf_golden.rs",
       "sha256": "58b62ab9751582f67864a845f41983efda06d711007da5f6221cd64aa073d957"
     },
     {
       "bytes": 5994,
-      "path": "crates/builder3d-core/tests/wrl_golden.rs",
+      "path": "crates/modeler3d-core/tests/wrl_golden.rs",
       "sha256": "fe54d0fdc52259272283418fecb29335b23e073eb59f9cb259cbe007fde9dd59"
     },
     {
       "bytes": 374,
-      "path": "crates/builder3d-mcp/src/bin/r0b_mcp.rs",
+      "path": "crates/modeler3d-mcp/src/bin/r0b_mcp.rs",
       "sha256": "0e640b547d3f05f0aaf911dbe2e254dfa40cb25e330e085f7c4db90708527e7c"
     },
     {
       "bytes": 291,
-      "path": "crates/builder3d-mcp/src/bin/r4_mcp.rs",
+      "path": "crates/modeler3d-mcp/src/bin/r4_mcp.rs",
       "sha256": "6d7d65f3f403a8c33b5359a948655608bac0e914f42dd00cc72ee8848b8ba765"
     },
     {
       "bytes": 3764,
-      "path": "crates/builder3d-mcp/src/lib.rs",
+      "path": "crates/modeler3d-mcp/src/lib.rs",
       "sha256": "7ff99eed56d3158dee071912ea9317fafa745db6fe0efe11575036eda1b982f1"
     },
     {
       "bytes": 19449,
-      "path": "crates/builder3d-mcp/src/r4/catalog.rs",
+      "path": "crates/modeler3d-mcp/src/r4/catalog.rs",
       "sha256": "116d6f1ec940c8c8b3f2fca7d2365bb1293e978f1460a39e6d0ab821a745cb62"
     },
     {
       "bytes": 13163,
-      "path": "crates/builder3d-mcp/src/r4/gateway.rs",
+      "path": "crates/modeler3d-mcp/src/r4/gateway.rs",
       "sha256": "9b76a9ffc3e0d44615fe373b39c7d2a5119e2ca1dcad026fe7a70fdfcacce933"
     },
     {
       "bytes": 325,
-      "path": "crates/builder3d-mcp/src/r4/mod.rs",
+      "path": "crates/modeler3d-mcp/src/r4/mod.rs",
       "sha256": "046285ee6d505b5b8da97d39b9ba402b154b48941cfbb912f845306b43a3f6b5"
     },
     {
       "bytes": 40065,
-      "path": "crates/builder3d-mcp/src/r4/schema.rs",
+      "path": "crates/modeler3d-mcp/src/r4/schema.rs",
       "sha256": "3616778a846f54e0960458a00e0ee640c9e255ba6693ed63c061dd2b87011fb7"
     },
     {
       "bytes": 8588,
-      "path": "crates/builder3d-mcp/src/r4/security.rs",
+      "path": "crates/modeler3d-mcp/src/r4/security.rs",
       "sha256": "d91ef2d07e51406299a309ac4e88225c2203e24da2d9b2683ffc64f531ae8592"
     },
     {
       "bytes": 136180,
-      "path": "crates/builder3d-mcp/src/r4/server.rs",
+      "path": "crates/modeler3d-mcp/src/r4/server.rs",
       "sha256": "371f878ebfce5b02cf20ed089e998d1441e0fde2e68bd66b2ad339146f6e76bc"
     },
     {
       "bytes": 12816,
-      "path": "crates/builder3d-mcp/src/r4/state.rs",
+      "path": "crates/modeler3d-mcp/src/r4/state.rs",
       "sha256": "01f842561ee82656f55f5d1cbb994142172b30d9b851456e60a32080e026afb9"
     },
     {
       "bytes": 13441,
-      "path": "crates/builder3d-platform/src/discovery.rs",
+      "path": "crates/modeler3d-platform/src/discovery.rs",
       "sha256": "ee0ef0ea2d25bc99067fb4f4c815957c2f6c7d73aba0e2cb5d35456c82adbf55"
     },
     {
       "bytes": 14262,
-      "path": "crates/builder3d-platform/src/ledger.rs",
+      "path": "crates/modeler3d-platform/src/ledger.rs",
       "sha256": "9f528eeb7fe78c5eed9e804cde5b16104449285170c11524b52155c88ec9baab"
     },
     {
       "bytes": 11260,
-      "path": "crates/builder3d-platform/src/legacy_settings.rs",
+      "path": "crates/modeler3d-platform/src/legacy_settings.rs",
       "sha256": "4eb3cf142ee22d38d4b84c0f2ea23fbe1291635f34a3e34066451b3ac7a729ce"
     },
     {
       "bytes": 1482,
-      "path": "crates/builder3d-platform/src/lib.rs",
+      "path": "crates/modeler3d-platform/src/lib.rs",
       "sha256": "e476a80e6ee05fd190a379064541ce416cea93b221349b8492a339dcfdcaa5b0"
     },
     {
       "bytes": 20715,
-      "path": "crates/builder3d-platform/src/routing.rs",
+      "path": "crates/modeler3d-platform/src/routing.rs",
       "sha256": "014d64638fc86b1d0469b845d58b81bbb740304d5634bf7b2397295c465938a5"
     },
     {
       "bytes": 10191,
-      "path": "crates/builder3d-platform/src/runtime.rs",
+      "path": "crates/modeler3d-platform/src/runtime.rs",
       "sha256": "90b6e3c30c9a50317b045247b72e1af4932a82a0f9161065612324bde10ea078"
     },
     {
       "bytes": 18182,
-      "path": "crates/builder3d-platform/src/slicer.rs",
+      "path": "crates/modeler3d-platform/src/slicer.rs",
       "sha256": "acae539ad7afe6bde843f18d4c712b7706ea2aabeb9ae4260cf9285dc8c2849a"
     },
     {
       "bytes": 14640,
-      "path": "crates/builder3d-viewport/src/adaptive.rs",
+      "path": "crates/modeler3d-viewport/src/adaptive.rs",
       "sha256": "81bef83e402740282de5669d2926b1f44642314d3becf2c608b5f4f5bba1907b"
     },
     {
       "bytes": 13609,
-      "path": "crates/builder3d-viewport/src/camera.rs",
+      "path": "crates/modeler3d-viewport/src/camera.rs",
       "sha256": "55197466d107dbd88160f806f7e51392261a8c1dffb530d6f470be38ed02b189"
     },
     {
       "bytes": 19195,
-      "path": "crates/builder3d-viewport/src/cpu.rs",
+      "path": "crates/modeler3d-viewport/src/cpu.rs",
       "sha256": "27f99b1b4c9be960b4c4755b330a343f1e21d4fb0da126aaf0b44eb0a5ec9b27"
     },
     {
       "bytes": 1902,
-      "path": "crates/builder3d-viewport/src/error.rs",
+      "path": "crates/modeler3d-viewport/src/error.rs",
       "sha256": "5a6c5046d1a459132db125e14af2d2730c086c35cab3e9d7c5f4ea97d8a04dfb"
     },
     {
       "bytes": 11191,
-      "path": "crates/builder3d-viewport/src/floor.rs",
+      "path": "crates/modeler3d-viewport/src/floor.rs",
       "sha256": "4d4fb6d606a87899e5b408444909c44a3e713cfc07cb5ecc988aca385b5485f2"
     },
     {
       "bytes": 20180,
-      "path": "crates/builder3d-viewport/src/gizmo.rs",
+      "path": "crates/modeler3d-viewport/src/gizmo.rs",
       "sha256": "a989bd9def4112debbbf97cd2fc3844b116829dba0738856aca9b21dcb676aa1"
     },
     {
       "bytes": 2536,
-      "path": "crates/builder3d-viewport/src/lib.rs",
+      "path": "crates/modeler3d-viewport/src/lib.rs",
       "sha256": "bc55533199a41682ee437c2469cf8deaa573c9f3ce47b4d468e03a4151754ba4"
     },
     {
       "bytes": 16139,
-      "path": "crates/builder3d-viewport/src/math.rs",
+      "path": "crates/modeler3d-viewport/src/math.rs",
       "sha256": "d5aefebe5b187c08acc3b00e0023f13a5ab565e00c1e408ec93c7af86f7b76e7"
     },
     {
       "bytes": 9360,
-      "path": "crates/builder3d-viewport/src/picking.rs",
+      "path": "crates/modeler3d-viewport/src/picking.rs",
       "sha256": "e1a84584e3c0ceffc405070f421e15a1673b9de4500041e4da66fbc515fd33b6"
     },
     {
       "bytes": 69061,
-      "path": "crates/builder3d-viewport/src/renderer.rs",
+      "path": "crates/modeler3d-viewport/src/renderer.rs",
       "sha256": "d2aacca77efac0c24ccb63bda3b7208f4d159cd391f7aadd7c61ca0c5186820c"
     },
     {
       "bytes": 29894,
-      "path": "crates/builder3d-viewport/src/scene.rs",
+      "path": "crates/modeler3d-viewport/src/scene.rs",
       "sha256": "848329daccb2ee68b64c18d69e2ec9e75c87346dc1e5bc46b35157e3e89f6c3e"
     },
     {
       "bytes": 23940,
-      "path": "crates/builder3d-viewport/src/snapping.rs",
+      "path": "crates/modeler3d-viewport/src/snapping.rs",
       "sha256": "81c003a53a665df2035206d12a3193d424b7cde57d33c77e0536f7c371e09b3f"
     },
     {
       "bytes": 17756,
-      "path": "crates/builder3d-viewport/src/spike.rs",
+      "path": "crates/modeler3d-viewport/src/spike.rs",
       "sha256": "6a475741959d4177d761b771594c35c79508491b52a269ae8af4c9e9488da2d1"
     }
   ],

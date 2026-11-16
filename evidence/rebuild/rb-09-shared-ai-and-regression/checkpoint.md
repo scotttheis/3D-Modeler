@@ -5,11 +5,11 @@
 
 ## Current state
 
-- Active Rust source/build/run tree: E:/Builder3D-Rust. At the live-gate start the repository worktree was uncommitted and unstaged; no reset, clean, or snapshot restore was used. The later wrap-up explicitly authorized a task-scoped commit.
+- Active Rust source/build/run tree: E:/3D-Modeler. At the live-gate start the repository worktree was uncommitted and unstaged; no reset, clean, or snapshot restore was used. The later wrap-up explicitly authorized a task-scoped commit.
 - Keep every current tracked/untracked file. The only application-code repair in this live gate is the Welcome-to-Scene presentation synchronization in shell.rs and mcp_bridge.rs, with two focused regression tests.
 - L:/Builder3D remains the read-only Python reference/shipping tree. No Python source or fixture file was changed. Its external QSettings were restored exactly to object_snapping_enabled=true, ribbon_favorites=[], theme_mode=dark; the test-created recent_files key was removed.
 - Before each host UI input/capture, host_desktop.ps1 confirmed the Default desktop was active and interactive. LockApp did not own the live test session. Edge YouTube remained background only; Windows power/lock settings were not changed.
-- The live Rust app and gateways are closed. No builder3d-app or r4_mcp process, owned runtime descriptor, or listener remained at final inspection. Edge remains running.
+- The live Rust app and gateways are closed. No modeler3d-app or r4_mcp process, owned runtime descriptor, or listener remained at final inspection. Edge remains running.
 - Python and Rust live clients used the official Python MCP SDK 2.2.0 and listed all 60 tools. Shared project ID: e5d81c5226e64f58b838d55d9395afa9. Stable Cube ID: 3f449b78621c467b818e8c69925e2b6c. Stable Sphere ID: dff9cc124c6d4d27b4ea9b07d6e4ae6b.
 - Rust final Release app: 16,172,032 bytes; SHA-256 d680cf0ba8e4c8bf7d5ccd1536bf7d5720987d676a1a0946c6c3505b613b0cb9. Rust source manifest: 96 files; SHA-256 9846a4a6dee484186283e169a9b7cdbbf74007bdca772efa5981f438ce78b457.
 - The live matrix passed: MCP edits were immediately visible in viewport and Items; shared GUI/MCP history and no-op behavior passed; save/close/reopen/New/Open and dirty guard passed; file failure atomicity, replay/conflicts, competing clients, long operations, optional startup, closed-desktop errors, and shutdown cleanup passed.
@@ -30,7 +30,7 @@ The owner-reported interface and floor gaps remain open. Visual review, owner ac
 
 ## Current continuation checkpoint (2026-11-06)
 
-- Worktree: `E:\Builder3D-Rust`; existing tracked changes and untracked files were preserved. No stage, commit, push, reset, or restore was performed.
+- Worktree: `E:\3D-Modeler`; existing tracked changes and untracked files were preserved. No stage, commit, push, reset, or restore was performed.
 - Current Rust Release app/gateway hashes: `0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a` / `aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e`.
 - Live run `currpair-20261106-072716` saved project `e5d81c5226e64f58b838d55d9395afa9` at clean revision 25 with the stable Cube/Sphere IDs; Rust GUI reopen was visible in the accepted capture.
 - Optional-MCP startup failure preserved usable GUI work and produced retryable `desktop_unavailable` for two client reads. Both app instances and their clients/gateways shut down normally; no unrelated process was terminated.
@@ -74,7 +74,7 @@ The owner-reported interface and floor gaps remain open. Visual review, owner ac
   validation log, and GUI lifecycle record are in
   currpair-20261107-100537-schema-parity-final/. The run manifest summarizes
   identities, schemas, results, and the acceptance boundary.
-- One custom _meta.com.builder3d/longRunning difference remains for
+- One custom _meta.com.modeler3d/longRunning difference remains for
   emboss_text (Python false, Rust true); it is separate from schemas and
   official ToolAnnotations, and no owner approval is claimed.
 - Additional G: recovery copy: G:\B3D_R09S_20261107. After final

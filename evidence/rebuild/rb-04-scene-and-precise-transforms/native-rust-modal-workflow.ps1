@@ -24,7 +24,7 @@ function New-Rb04SceneCase([string]$Theme,[string]$Name,[bool]$CaptureBefore=$tr
  $matching=@($specs|Where-Object {$_.name -eq $Name})
  if($matching.Count -ne 1){throw "Expected one scene case for $Name, found $($matching.Count)"}
  $spec=$matching[0]
- $fixture="E:/Builder3D-Rust/$script:rb04EvidenceRoot/$($spec.fixture)"
+ $fixture="E:/3D-Modeler/$script:rb04EvidenceRoot/$($spec.fixture)"
  Open-Rb04Project $fixture
  Set-Rb04InsertTab
  $count=if($spec.kind -eq 'unhealthy'){1}elseif($spec.kind -eq 'group'){2}else{3}
@@ -46,6 +46,6 @@ function Complete-Rb04SceneCase([object]$Case,[bool]$Mutation=$false){
   Invoke-Rb03Keys '^z';Capture-Rb04State $Case.Theme "scene-$($Case.Name)-undo" $Case.Fixture;Save-Rb04State "$($Case.Prefix)-undo"
   Invoke-Rb03Keys '^y';Capture-Rb04State $Case.Theme "scene-$($Case.Name)-redo" $Case.Fixture;Save-Rb04State "$($Case.Prefix)-redo"
  }
- @{theme=$Case.Theme;case=$Case.Name;prefix=$Case.Prefix;fixture=$Case.Fixture;build_sha256=(Get-FileHash target/debug/builder3d-app.exe).Hash.ToLowerInvariant()}|ConvertTo-Json -Compress|Add-Content -LiteralPath "$PSScriptRoot/rust-scene-output-routes.ndjson" -Encoding UTF8
+ @{theme=$Case.Theme;case=$Case.Name;prefix=$Case.Prefix;fixture=$Case.Fixture;build_sha256=(Get-FileHash target/debug/modeler3d-app.exe).Hash.ToLowerInvariant()}|ConvertTo-Json -Compress|Add-Content -LiteralPath "$PSScriptRoot/rust-scene-output-routes.ndjson" -Encoding UTF8
  Write-Output "COMPLETED $($Case.Theme) modal-$($Case.Name)"
 }

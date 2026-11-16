@@ -20,7 +20,7 @@ This handoff follows [the product rebuild plan](product-rebuild-plan.md), [the R
 
 Read these files before changing code:
 
-- E:\AGENTS.md, E:\RustDeveloper.md, and E:\Builder3D-Rust\AGENTS.md
+- E:\AGENTS.md, E:\RustDeveloper.md, and E:\3D-Modeler\AGENTS.md
 - docs/product-rebuild-plan.md and this handoff
 - evidence/rebuild/rb-02-first-working-application/checkpoint.md, report.md, verification.md, and capture-board.md
 - evidence/rebuild/parity-matrix.toml and WORK_LOG.md
@@ -47,10 +47,10 @@ Trace the reference handlers for replacement prompts, New/Open/Save/Save As/exit
 
 Then inspect the current Rust seams and tests rather than assuming they already satisfy the contract:
 
-- crates/builder3d-core/src/project.rs and file_io.rs
-- crates/builder3d-core/src/three_mf.rs, gltf.rs, and wrl.rs
-- crates/builder3d-app/src/commands.rs, dialogs.rs, preferences.rs, ui_state.rs, and shell.rs
-- crates/builder3d-core/tests/file_io_golden.rs, gltf_golden.rs, three_mf_golden.rs, and wrl_golden.rs
+- crates/modeler3d-core/src/project.rs and file_io.rs
+- crates/modeler3d-core/src/three_mf.rs, gltf.rs, and wrl.rs
+- crates/modeler3d-app/src/commands.rs, dialogs.rs, preferences.rs, ui_state.rs, and shell.rs
+- crates/modeler3d-core/tests/file_io_golden.rs, gltf_golden.rs, three_mf_golden.rs, and wrl_golden.rs
 
 Write a small requirement-to-test map before implementation. Check existing stable requirement IDs first; update their rows or add only missing rows in evidence/rebuild/parity-matrix.toml. Keep project lifecycle, each file-format contract, units, export selection, recent behavior, and failure behavior distinct.
 
@@ -130,7 +130,7 @@ Add tests for the contracts changed in Steps 3-6. Assert user-visible data and s
 - Save/discard/cancel and picker cancellation; failed operations preserving scene, path, dirty state, and history; failed .3dp saves preserving a prior valid project and overwrite cancellation preserving its destination.
 - Recent-list ordering, deduplication, ten-entry bound, persistence, project/model dispatch, preview success, and fallback states.
 
-For each patch, follow the plan's format, focused check/test, changed-crate Clippy, native exercise, and evidence update gates. At the integrated RB-03 milestone, run from E:\Builder3D-Rust:
+For each patch, follow the plan's format, focused check/test, changed-crate Clippy, native exercise, and evidence update gates. At the integrated RB-03 milestone, run from E:\3D-Modeler:
 
 ~~~powershell
 cargo fmt --all -- --check
@@ -139,10 +139,10 @@ cargo test --workspace --locked
 cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
 cargo deny check
 cargo metadata --locked --format-version 1 --no-deps
-cargo run -p builder3d-app --bin builder3d-app -- --smoke
-cargo build --release --locked -p builder3d-app --bin builder3d-app
+cargo run -p modeler3d-app --bin modeler3d-app -- --smoke
+cargo build --release --locked -p modeler3d-app --bin modeler3d-app
 cargo bloat --release --workspace
-cargo bloat --release -p builder3d-app --bin builder3d-app
+cargo bloat --release -p modeler3d-app --bin modeler3d-app
 ~~~
 
 Run cargo audit --locked if installed and record if it is unavailable. Validate the parity ledger and any manifests as TOML, check requirement IDs and evidence links, and record exact commands, exit results, skipped work, and failures. A passing smoke check does not replace interactive verification.

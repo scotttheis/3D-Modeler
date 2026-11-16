@@ -3,7 +3,7 @@ $ErrorActionPreference='Stop'
 . "$PSScriptRoot/native-rust-workflow.ps1"
 foreach($case in $Cases){
  $name="viewport-$case"
- $fixture="E:/Builder3D-Rust/$script:rb04EvidenceRoot/native-viewport-fixtures/$name.3dp"
+ $fixture="E:/3D-Modeler/$script:rb04EvidenceRoot/native-viewport-fixtures/$name.3dp"
  $mode=($case -split '-')[0]
  $kind=if($case -match 'hidden'){'hidden'}elseif($case -match 'group'){'group'}else{'single'}
  $handle=if($mode -eq 'rotate'){'z'}elseif($mode -eq 'resize'){if($case -match 'corner'){'corner_6'}else{'face_0'}}else{'x'}

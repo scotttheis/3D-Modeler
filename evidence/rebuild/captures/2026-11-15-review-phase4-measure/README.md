@@ -1,7 +1,7 @@
 # Review pack: owner batch 7, Phase 4 — Measure (2026-11-15)
 
 Every image here was taken from one release build
-(`target\release\builder3d-app.exe`) with the review harness, in both themes
+(`target\release\modeler3d-app.exe`) with the review harness, in both themes
 (`-light.png`, `-dark.png`). Images show what was painted; they are not
 approval and do not test the mouse. Open the same exe to try it by hand.
 

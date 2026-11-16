@@ -2,11 +2,11 @@
 
 - **Objective:** port the shared Python snapping solver and connect it to the
   atomic Rust transform seam without entering visual polish.
-- **Completed:** implemented `builder3d.viewport.snapping`, updated the
+- **Completed:** implemented `modeler3d.viewport.snapping`, updated the
   application command seam, catalog, and evidence.
-- **Changed source:** `crates/builder3d-viewport/src/snapping.rs`,
-  `crates/builder3d-viewport/src/lib.rs`, and
-  `crates/builder3d-app/src/commands.rs`.
+- **Changed source:** `crates/modeler3d-viewport/src/snapping.rs`,
+  `crates/modeler3d-viewport/src/lib.rs`, and
+  `crates/modeler3d-app/src/commands.rs`.
 - **Changed documentation/evidence:**
   `docs/component-catalog.toml` and `evidence/r7/04-snapping/`.
 - **Checks:** format, locked workspace check/tests (144 tests plus doctests),

@@ -1,8 +1,8 @@
 Traceback (most recent call last):
-  File "E:\Builder3D-Rust\evidence\rebuild\rb-04-scene-and-precise-transforms\python-viewport-walkthrough.py", line 155, in tick
+  File "E:\3D-Modeler\evidence\rebuild\rb-04-scene-and-precise-transforms\python-viewport-walkthrough.py", line 155, in tick
     activate();name,fn,theme,take=operations[index];fn();w.viewport.update();app.processEvents()
                                                     ^^^^
-  File "E:\Builder3D-Rust\evidence\rebuild\rb-04-scene-and-precise-transforms\python-viewport-walkthrough.py", line 125, in perform
+  File "E:\3D-Modeler\evidence\rebuild\rb-04-scene-and-precise-transforms\python-viewport-walkthrough.py", line 125, in perform
     if not current['handle_active']:raise RuntimeError('OS press did not start reference gizmo '+handle)
                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 RuntimeError: OS press did not start reference gizmo x

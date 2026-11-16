@@ -1,12 +1,12 @@
-﻿COMMAND=cargo run -p builder3d-app --bin builder3d-app -- --smoke
-cargo :    Compiling builder3d-app v0.1.0 (E:\Builder3D-Rust\crates\builder3d-app)
+﻿COMMAND=cargo run -p modeler3d-app --bin modeler3d-app -- --smoke
+cargo :    Compiling modeler3d-app v0.1.0 (E:\3D-Modeler\crates\modeler3d-app)
 At line:2 char:230
-+ ... okeOutput = cargo run -p builder3d-app --bin builder3d-app -- --smoke ...
++ ... okeOutput = cargo run -p modeler3d-app --bin modeler3d-app -- --smoke ...
 +                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: (   Compiling bu...\builder3d-app):String) [], RemoteException
+    + CategoryInfo          : NotSpecified: (   Compiling bu...\modeler3d-app):String) [], RemoteException
     + FullyQualifiedErrorId : NativeCommandError
  
-error: failed to remove file `E:\Builder3D-Rust\target\debug\builder3d-app.exe`
+error: failed to remove file `E:\3D-Modeler\target\debug\modeler3d-app.exe`
 
 Caused by:
   Access is denied. (os error 5)

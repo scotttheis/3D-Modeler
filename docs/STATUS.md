@@ -1,4 +1,4 @@
-# Builder3D Rust — status
+# 3D Modeler Rust — status
 
 The only place current status is written. Keep it to one screen. Plan:
 [`product-rebuild-plan.md`](product-rebuild-plan.md).
@@ -6,10 +6,12 @@ The only place current status is written. Keep it to one screen. Plan:
 Updated 2026-11-16. Full gate passed 2026-11-16 after Phase 6 OF-63/OF-64 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Earlier: full gate passed 2026-11-15 after Phase 5 OF-58 (fmt, clippy, tests, deny, audit, MCP parity with no exemptions, smoke, capture board); a last small fix then passed the Fast gate. Release exe rebuilt from that source (3m49s) and driven live through the real MCP gateway for the Phase 5 review pack.
 
 Test releases (how-to: [`packaging.md`](packaging.md)): last is **RC1**,
-version 0.1.1, 2026-11-13, `E:\Builder3D-RC\Builder3D-RC1.msi` (50 MB),
+version 0.1.1, 2026-11-13, `E:\3D-Modeler-RC\Builder3D-RC1.msi` (50 MB),
 `-Verify` passed on the dev PC. Next: RC2 / 0.1.2.
 
 ## Now
+
+**Renamed 2026-11-16:** the app is now **3D Modeler** (was Builder3D); hidden names use `Modeler3D` / `modeler3d`. Where the old name stays, and why, is in the "Name" section of [`AGENTS.md`](../AGENTS.md). Pre-rename backup: `G:\Builder3D-Rust_snapshot_20261116-094924_pre-rename-3D-Modeler`.
 
 **Owner batch 7** ([`owner-feedback-2026-11-14.md`](owner-feedback-2026-11-14.md),
 OF-28 to OF-58, five phases; Emboss OF-56/57 deferred by the owner).
@@ -90,8 +92,8 @@ the next stop message, not guessed.
 | `cargo test --workspace --locked --no-fail-fast` | Pass (2026-11-12, after the shadow follow-up and the MCP Merge color change) |
 | `cargo deny check` | Pass 2026-11-12 (advisories, bans, licenses, sources ok; warning: `async-executor 1.14.0` yanked, Linux accessibility path only) |
 | `cargo audit` | Pass 2026-11-12 — 0 vulnerabilities in 493 crates; 5 allowed warnings (4 unmaintained already accepted in `deny.toml`, 1 yanked as above). Tool installed 2026-11-12 |
-| MCP catalog parity check | Pass 2026-11-15 (`cargo test -p builder3d-mcp --test ledger_parity`; all 148 ledger rows map to catalog tools; exemptions now fail, D10) |
-| Release (fat LTO) build | `cargo build --release -p builder3d-app` passed twice on 2026-11-12 (4m50s, 3m43s); failed with LLVM out-of-memory on 2026-11-11 |
+| MCP catalog parity check | Pass 2026-11-15 (`cargo test -p modeler3d-mcp --test ledger_parity`; all 148 ledger rows map to catalog tools; exemptions now fail, D10) |
+| Release (fat LTO) build | `cargo build --release -p modeler3d-app` passed twice on 2026-11-12 (4m50s, 3m43s); failed with LLVM out-of-memory on 2026-11-11 |
 | `review` profile build | Pass (3m56s clean build; capture verified) |
 
 ## Last review pack
@@ -206,15 +208,15 @@ owner batch 7.
   (also the Slicer chooser); OF-27 the active tab is joined to the open
   ribbon like a folder tab. **Owner-approved** in the release build
   2026-11-13 ("dang, that looks good. well done!"). Fast gate on
-  `builder3d-app` passed. Captures
+  `modeler3d-app` passed. Captures
   `evidence/rebuild/captures/2026-11-13-of26-27-menu-hover-tab/`. Table in
   [`owner-feedback-2026-11-12.md`](owner-feedback-2026-11-12.md).
 - 2026-11-13 (test release RC1; how-to in [`packaging.md`](packaging.md)):
   `packaging/msi/Build-Msi.ps1 -Version 0.1.1 -Name Builder3D-RC1 -Build
   -Verify` builds a per-user WiX 5 MSI (no admin; installs to
-  `%LOCALAPPDATA%\Programs\Builder3D`; Start-menu + desktop shortcuts; VC++
+  `%LOCALAPPDATA%\Programs\Modeler3D`; Start-menu + desktop shortcuts; VC++
   runtime app-local; bump the version's third field per candidate).
-  Output `E:\Builder3D-RC\Builder3D-RC1.msi` (50 MB). Silent install,
+  Output `E:\3D-Modeler-RC\Builder3D-RC1.msi` (50 MB). Silent install,
   launch, smoke and clean uninstall verified on the dev PC; not yet tried on
   a clean PC. Fixed `--package` artwork staging (arguments swapped; never
   worked) with a regression test. The script stages directly because the
@@ -228,14 +230,14 @@ owner batch 7.
   next: MCP `launch_slicer` falls back to the saved slicer when no
   `slicer_key` is given (owner said yes; F12 parity), then F12 rename and
   show/hide tools, then F9.
-- Review harness: `BUILDER3D_REVIEW_CAMERA=yaw,pitch,distance` poses the
+- Review harness: `MODELER3D_REVIEW_CAMERA=yaw,pitch,distance` poses the
   camera after auto-framing; state `resize-drag` holds the +X handle mid-drag;
-  `BUILDER3D_REVIEW_POINTER=x,y` rests the pointer to show hover states;
-  `BUILDER3D_REVIEW_VIEW=wireframe,xray` turns view toggles on; state
+  `MODELER3D_REVIEW_POINTER=x,y` rests the pointer to show hover states;
+  `MODELER3D_REVIEW_VIEW=wireframe,xray` turns view toggles on; state
   `merge` merges a red and a blue cube; `unselected`, `material` states;
-  `BUILDER3D_REVIEW_INTERACTIVE=1` stays open with isolated settings for
+  `MODELER3D_REVIEW_INTERACTIVE=1` stays open with isolated settings for
   hands-on checks. States `texture`, `texture-dialog` take pictures from
-  `BUILDER3D_REVIEW_TEXTURES` (`;`-separated paths).
+  `MODELER3D_REVIEW_TEXTURES` (`;`-separated paths).
 
 - 2026-11-15 (found during the OF-58 live run): the settings-migration
   notice drawn over the ribbon labels — now OF-64.

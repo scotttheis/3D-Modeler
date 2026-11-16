@@ -9,11 +9,11 @@ All commands below ran from the Rust project root after the presentation-sync re
 | Command | Result | Evidence |
 |---|---|---|
 | cargo fmt --all -- --check | Pass, exit 0 | logs/postfix-cargo-fmt.* |
-| cargo test -p builder3d-app mcp_ | 7 passed, 0 failed | logs/postfix-focused-app-mcp.* |
+| cargo test -p modeler3d-app mcp_ | 7 passed, 0 failed | logs/postfix-focused-app-mcp.* |
 | cargo test --workspace --locked | 329 passed, 0 failed, 0 ignored | logs/postfix-workspace-test.* |
 | cargo clippy --all-targets -- -D warnings | Pass, exit 0 | logs/postfix-cargo-clippy.* |
-| cargo build --release -p builder3d-app --locked | Pass, exit 0 | logs/postfix-release-app.* |
-| cargo build --release -p builder3d-mcp --bin r4_mcp --locked | Pass, exit 0 | logs/postfix-release-mcp.* |
+| cargo build --release -p modeler3d-app --locked | Pass, exit 0 | logs/postfix-release-app.* |
+| cargo build --release -p modeler3d-mcp --bin r4_mcp --locked | Pass, exit 0 | logs/postfix-release-mcp.* |
 
 The workspace count is the prior 327-test result plus the two new UI-presentation regression tests. The 19 focused MCP tests, 3 core external-commit tests, 12 focused Python reference tests, and earlier dependency/metadata/smoke/bloat gates are retained in their original logs. cargo deny passed with 28 duplicate-version warnings and no advisory, ban, license, or source-policy failure. cargo audit was unavailable. cargo bloat --workspace emitted the installed tool’s unused --workspace warning; the explicit app-target report is the usable size measurement.
 
@@ -38,7 +38,7 @@ The final Rust source and binaries are identified in build-manifest.json. The fi
 
 ## Wrap-up recheck (2026-11-04)
 
-The following commands were rerun from `E:\Builder3D-Rust`, after sourcing
+The following commands were rerun from `E:\3D-Modeler`, after sourcing
 `scripts/Initialize-BuildClang.ps1` in the same PowerShell session. Exit 0
 means the command passed. Full wrap-up stdout/stderr is in ignored
 `target/rb09-wrapup-gates/` and is not part of the recovery snapshot.
@@ -51,11 +51,11 @@ means the command passed. Full wrap-up stdout/stderr is in ignored
 | `cargo clippy --all-targets -- -D warnings` | Pass, exit 0 |
 | `cargo deny check` | Pass, exit 0; 28 duplicate-version warnings, no policy errors |
 | `cargo metadata --locked --format-version 1 --no-deps` | Pass, exit 0 |
-| `cargo test -p builder3d-mcp --locked` | Pass, 19 passed, 0 failed, 0 ignored |
-| `cargo run -p builder3d-app --bin builder3d-app -- --smoke` | Pass, `Builder3D shell smoke: objects=2 selected=1 tabs=5` |
+| `cargo test -p modeler3d-mcp --locked` | Pass, 19 passed, 0 failed, 0 ignored |
+| `cargo run -p modeler3d-app --bin modeler3d-app -- --smoke` | Pass, `3D Modeler shell smoke: objects=2 selected=1 tabs=5` |
 
 The earlier locked Release app and MCP builds passed in `logs/postfix-release-*`.
-`cargo bloat --release -p builder3d-app --bin builder3d-app` reported 12.7 MiB
+`cargo bloat --release -p modeler3d-app --bin modeler3d-app` reported 12.7 MiB
 `.text` and a 15.4 MiB file. `cargo bloat --release --workspace` exited 0 but
 warned `unused arguments left: ["--workspace"]` and analyzed the default
 `r5_viewport.exe`; it is not a workspace-size measurement. `cargo audit` was
@@ -75,7 +75,7 @@ paired live gateway hash is
 `a1dba8751c5a15cafbf6e26fac8db0b8a96f8464bf750ac62336f573b729545b`. The
 post-run gateway hash is
 `9b8817015ab5c8195013ee788fb095e9393848be74c7da0221ebd33342fc99d3`. The
-workspace bloat log shows later recompiles of builder3d-mcp and builder3d-app;
+workspace bloat log shows later recompiles of modeler3d-mcp and modeler3d-app;
 the app restore log shows another completed app Release build. Copies are
 retained in `logs/identity-recheck-bloat-workspace.stderr.log` and
 `logs/identity-recheck-restore-release-app.stderr.log`. These builds explain
@@ -88,7 +88,7 @@ The current Release app hash is
 gateway hash is
 `aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e`. Both
 hashes were unchanged before and after the identity-only live run. Host probes
-confirmed the Default desktop was active and Builder3D was foreground before
+confirmed the Default desktop was active and 3D Modeler was foreground before
 the screenshot and Alt+F4 close. The official Python MCP SDK 2.2.0 listed all
 60 tools; read-only `get_status` succeeded with `app_state=ready`,
 `dirty=false`, and revision 0. The app, gateway, and runtime descriptor were
@@ -162,7 +162,7 @@ The new G:/B3D_R09C_20261106 snapshot was synchronized after the final evidence 
 
 After the current Release recheck above, the wrap-up reran `cargo fmt --check`,
 `cargo check --workspace --locked`, `cargo test --workspace --locked --quiet`
-(329 passed, 0 failed, 0 ignored), `cargo test -p builder3d-mcp --locked`
+(329 passed, 0 failed, 0 ignored), `cargo test -p modeler3d-mcp --locked`
 (19 passed, 0 failed, 0 ignored), `cargo clippy --all-targets -- -D warnings`,
 and `cargo deny check`; all exited 0. Cargo Deny reported 28 duplicate-version
 warnings and no advisory, ban, license, or source-policy failures. `cargo audit`
@@ -192,7 +192,7 @@ commands and logs are indexed in schema-parity-run-manifest.json.
 The rebuilt Release app served GUI/MCP calls, including new_project and
 completed operation_status; the nested unknown-action probe returned
 invalid_input. The app closed normally and its runtime descriptor was removed.
-One custom emboss_text _meta.com.builder3d/longRunning difference remains
+One custom emboss_text _meta.com.modeler3d/longRunning difference remains
 disclosed without owner approval. Full RB-09 acceptance, RB-08 native evidence,
 interface/floor gaps, visual review, owner acceptance, and overall product
 acceptance remain pending. RB-10 has not started.

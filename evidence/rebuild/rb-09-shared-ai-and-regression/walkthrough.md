@@ -4,7 +4,7 @@
 
 Before any test input or screenshot, evidence/rebuild/rb-09-shared-ai-and-regression/host_desktop.ps1 reported the current host session active and interactive on the Default desktop. LockApp did not own the session. The owner’s YouTube video remained in Edge in the background only to keep the session awake; it was not captured or used as evidence. Power and lock settings were not changed.
 
-The official Python MCP SDK 2.2.0 ran separate stdio clients against the Python reference and Rust gateway. The Python reference was L:/Builder3D, Python 3.12.10, Git HEAD 3a0160a95c55f68ce9f1e89d17c792816ac001df. The Rust final app was target/release/builder3d-app.exe, SHA-256 d680cf0ba8e4c8bf7d5ccd1536bf7d5720987d676a1a0946c6c3505b613b0cb9. The paired Rust live client used r4_mcp.exe SHA-256 a1dba8751c5a15cafbf6e26fac8db0b8a96f8464bf750ac62336f573b729545b.
+The official Python MCP SDK 2.2.0 ran separate stdio clients against the Python reference and Rust gateway. The Python reference was L:/Builder3D, Python 3.12.10, Git HEAD 3a0160a95c55f68ce9f1e89d17c792816ac001df. The Rust final app was target/release/modeler3d-app.exe, SHA-256 d680cf0ba8e4c8bf7d5ccd1536bf7d5720987d676a1a0946c6c3505b613b0cb9. The paired Rust live client used r4_mcp.exe SHA-256 a1dba8751c5a15cafbf6e26fac8db0b8a96f8464bf750ac62336f573b729545b.
 
 ## Python live sequence
 
@@ -50,7 +50,7 @@ Before the identity screenshot and app-close input, host_desktop.ps1 confirmed
 the Default desktop and an active session; LockApp did not own the foreground.
 The owner video remained in Edge behind the app. No power or lock setting was
 changed. The current Release app ran as PID 8516 from
-target/release/builder3d-app.exe with window title Builder3D - Untitled. Its
+target/release/modeler3d-app.exe with window title 3D Modeler - Untitled. Its
 outer window was 1296x879 px, client area 1280x840 px, at 96 DPI.
 
 The official Python MCP SDK 2.2.0 connected to the current Release gateway,
@@ -61,7 +61,7 @@ under artifact-identity-recheck/current-app.png is identity evidence only and
 is not one of the accepted paired captures.
 
 After Alt+F4, PID 8516 and the gateway process were gone, the runtime descriptor
-was removed, and no Rust Builder3D app/gateway process remained. App and gateway
+was removed, and no Rust 3D Modeler app/gateway process remained. App and gateway
 hashes remained unchanged throughout the check. The client JSONL, screenshot
 hash, host/window fields, artifact hashes, and cleanup outcome are recorded in
 artifact-identity-recheck.json. This did not repeat the full Python/Rust
@@ -101,7 +101,7 @@ was removed.
 The result log, validator log, GUI launch/shutdown record, and run manifest
 are in currpair-20261107-100537-schema-parity-final/; the all-profile
 recursive comparison is in currpair-20261107-093804-schema-parity/. The custom
-Rust emboss_text _meta.com.builder3d/longRunning value remains true while the
+Rust emboss_text _meta.com.modeler3d/longRunning value remains true while the
 reference reports false. It is separate from schema and official MCP
 ToolAnnotations, and no owner-approved deviation is claimed.
 
@@ -111,10 +111,10 @@ acceptance remain pending. RB-10 was not started.
 
 ## Current Rust Release GUI/MCP recheck (2026-11-06)
 
-This is a current Rust app plus Rust gateway run, not a current Python/Rust product pair. The official Python MCP SDK 2.2.0 acted only as the client to `target/release/r4_mcp.exe`; the Python Builder3D application was not launched.
+This is a current Rust app plus Rust gateway run, not a current Python/Rust product pair. The official Python MCP SDK 2.2.0 acted only as the client to `target/release/r4_mcp.exe`; the Python 3D Modeler application was not launched.
 
 1. Identified the Release app (`0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a`) and gateway (`aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e`). The SDK listed 60 tools and matched saved Python catalog names/order at counts 7/52/59/60 for observe/model/files/full.
 2. Opened `RB09-Paired-Live.3dp` in the Rust desktop through MCP. The same project and revision were visible to the GUI and MCP; MCP edits appeared in the viewport and Items panel. Save completed, and the GUI closed/reopened the saved output.
 3. The reopened file was clean at revision 25, project `e5d81c5226e64f58b838d55d9395afa9`, with Cube ID `3f449b78621c467b818e8c69925e2b6c` and Sphere ID `dff9cc124c6d4d27b4ea9b07d6e4ae6b`. The accepted screenshot is `currpair-20261106-072716/captures/rust-current-live-gui-reopened-after-restart-final.png`.
-4. In a separate run, MCP startup failed because `BUILDER3D_RUNTIME_FILE` had a regular file as its parent. The desktop still supported New Scene, adding a Cube, and Undo. The client found 60 tools but received retryable `desktop_unavailable` from `get_status` and `scene_summary`. Shutdown removed no unrelated processes and left no owned runtime descriptor or listener.
+4. In a separate run, MCP startup failed because `MODELER3D_RUNTIME_FILE` had a regular file as its parent. The desktop still supported New Scene, adding a Cube, and Undo. The client found 60 tools but received retryable `desktop_unavailable` from `get_status` and `scene_summary`. Shutdown removed no unrelated processes and left no owned runtime descriptor or listener.
 5. The separate schema comparison found no exact input/output schema matches across the four profiles. The Python product was not launched and its saved catalog snapshots were not refreshed. See `currpair-20261106-072716/schema-comparison.json`; this contract gap remains open.

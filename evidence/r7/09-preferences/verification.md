@@ -2,7 +2,7 @@
 
 ## Focused behavior
 
-- `cargo test -p builder3d-app --locked`: pass, 41 application tests.
+- `cargo test -p modeler3d-app --locked`: pass, 41 application tests.
 - Preference tests cover ambiguous-unit fallback, authoritative format
   handling, newest-first ten-entry recent history, duplicate filtering, ribbon
   preference normalization, and mm/in display conversion.
@@ -19,6 +19,6 @@
 - `cargo metadata --locked --format-version 1 --no-deps`: pass.
 - Catalog TOML/path validation: pass, 20 unique IDs and all referenced paths
   present.
-- Native smoke: pass, `Builder3D shell smoke: objects=2 selected=1 tabs=5`.
+- Native smoke: pass, `3D Modeler shell smoke: objects=2 selected=1 tabs=5`.
 
 No commit was created. Python source and existing snapshots were not written.

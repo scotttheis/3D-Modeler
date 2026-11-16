@@ -17,14 +17,14 @@
 
 ## Runtime and size checks
 
-- Native smoke: `Builder3D shell smoke: objects=2 selected=1 tabs=5`.
+- Native smoke: `3D Modeler shell smoke: objects=2 selected=1 tabs=5`.
 - Owner visual acceptance: light and dark native shell accepted on
   2026-10-30.
 - Official Python MCP client stdio probe: protocol `2025-11-25`, 60 tools,
   Emboss completed with 72 occupied cells, Hollow completed through the
   `convex-exact` branch at `9128.000000000015` mm³, and MCP undo returned
   `changed=true`.
-- `cargo bloat --release --package builder3d-app --bin builder3d-app -n 20`:
+- `cargo bloat --release --package modeler3d-app --bin modeler3d-app -n 20`:
   9.1 MiB `.text` section and 11.4 MiB executable file.
 - Size-profile package: 13 files, 9,621,111 installed bytes (9.175 MiB),
   4,282,705 ZIP bytes (4.084 MiB), both under the 40 MiB installed and 15 MiB

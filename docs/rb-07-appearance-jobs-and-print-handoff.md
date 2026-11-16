@@ -34,7 +34,7 @@ The preceding slice, RB-06, is complete and has a verified snapshot:
 
 The RB-06 snapshot receipt is:
 
-    E:\Builder3D-Rust\evidence\rebuild\rb-06-modelling-tools-and-brushes\snapshot-receipt.md
+    E:\3D-Modeler\evidence\rebuild\rb-06-modelling-tools-and-brushes\snapshot-receipt.md
 
 The final RB-06 verification recorded:
 
@@ -58,7 +58,7 @@ The final RB-06 verification recorded:
   874b2076060a29cdadcee2497c2da2ba3a178048623508f9dddd99c72de2879a.
 
 The final RB-06 snapshot is an immutable reference. Do not edit it or replace
-it. Start from the current E:\Builder3D-Rust worktree and take a new additive
+it. Start from the current E:\3D-Modeler worktree and take a new additive
 RB-07 baseline before implementation. The Rust repository currently has no
 commits and its files are untracked; preserve the worktree and do not use
 reset, checkout, or other commands that discard it. Do not stage or commit.
@@ -77,13 +77,13 @@ testing, or evidence collection.
 Before changing code, read the current versions of:
 
 1. E:\AGENTS.md and E:\RustDeveloper.md;
-2. E:\Builder3D-Rust\AGENTS.md;
-3. E:\Builder3D-Rust\docs\product-rebuild-plan.md, especially sections 4,
+2. E:\3D-Modeler\AGENTS.md;
+3. E:\3D-Modeler\docs\product-rebuild-plan.md, especially sections 4,
    6, 8, 9, 10, and 11;
 4. the RB-06 report, verification, checkpoint, walkthrough, button ledger,
    and snapshot receipt under
-   E:\Builder3D-Rust\evidence\rebuild\rb-06-modelling-tools-and-brushes;
-5. E:\Builder3D-Rust\WORK_LOG.md;
+   E:\3D-Modeler\evidence\rebuild\rb-06-modelling-tools-and-brushes;
+5. E:\3D-Modeler\WORK_LOG.md;
 6. the current component catalog and parity matrix;
 7. the current Rust sources listed in section 5 below;
 8. the relevant Python handlers, services, tests, and native evidence under
@@ -129,14 +129,14 @@ contract. The completed native workflow must cover:
   remaining consistent after errors.
 
 The existing image-color implementation is in
-crates\builder3d-app\src\image_color.rs. It is bounded and currently samples
+crates\modeler3d-app\src\image_color.rs. It is bounded and currently samples
 an average color. Confirm its limits and error contract against the reference
 before changing it.
 
 ### 4.2 Background jobs, progress, errors, and cancellation
 
 The existing operation model in
-crates\builder3d-app\src\operations.rs has a bounded single-active-operation
+crates\modeler3d-app\src\operations.rs has a bounded single-active-operation
 lifecycle, progress, messages, cooperative cancellation, retention, and
 terminal states. Use it as the starting seam. Do not create a competing job
 registry unless the current design cannot satisfy a demonstrated requirement.
@@ -187,13 +187,13 @@ The completed print workflow must provide:
 
 The current implementation seams are:
 
-- crates\builder3d-app\src\print_prep.rs;
-- crates\builder3d-app\src\print_handoff.rs;
-- crates\builder3d-platform\src\slicer.rs;
+- crates\modeler3d-app\src\print_prep.rs;
+- crates\modeler3d-app\src\print_handoff.rs;
+- crates\modeler3d-platform\src\slicer.rs;
 - dialog and command handling in
-  crates\builder3d-app\src\dialogs.rs,
-  crates\builder3d-app\src\commands.rs, and
-  crates\builder3d-app\src\shell.rs.
+  crates\modeler3d-app\src\dialogs.rs,
+  crates\modeler3d-app\src\commands.rs, and
+  crates\modeler3d-app\src\shell.rs.
 
 Use an installed slicer found on this machine if one exists. Do not silently
 invent a fake launch or claim the installed-slicer exit evidence from a unit
@@ -227,14 +227,14 @@ starting points, not as proof of end-to-end completion:
 
 | Area | Current Rust seam | Verification still needed |
 | --- | --- | --- |
-| Image color | builder3d-app/src/image_color.rs | Reference contract, native chooser/error route, authored-color persistence |
-| Material dialog | builder3d-app/src/dialogs.rs | All entry points, apply/cancel/reopen behavior, visible errors |
-| Desktop dispatch | builder3d-app/src/commands.rs and shell.rs | Real reachability, state lifetime, no synchronous UI freeze |
-| Operations | builder3d-app/src/operations.rs | Shell worker/poll/cancel integration and stale-result guards |
-| Print checks | builder3d-app/src/print_prep.rs | Native reports, invalid/empty/hidden cases, no scene mutation |
-| Print staging | builder3d-app/src/print_handoff.rs | Filesystem validation, format fallback, cleanup, failure safety |
-| Slicer discovery | builder3d-platform/src/slicer.rs | Installed-slicer discovery and actual safe launch |
-| Existing technical adapters | builder3d-mcp/src/r4/server.rs | Reuse only where needed; not a substitute for native proof |
+| Image color | modeler3d-app/src/image_color.rs | Reference contract, native chooser/error route, authored-color persistence |
+| Material dialog | modeler3d-app/src/dialogs.rs | All entry points, apply/cancel/reopen behavior, visible errors |
+| Desktop dispatch | modeler3d-app/src/commands.rs and shell.rs | Real reachability, state lifetime, no synchronous UI freeze |
+| Operations | modeler3d-app/src/operations.rs | Shell worker/poll/cancel integration and stale-result guards |
+| Print checks | modeler3d-app/src/print_prep.rs | Native reports, invalid/empty/hidden cases, no scene mutation |
+| Print staging | modeler3d-app/src/print_handoff.rs | Filesystem validation, format fallback, cleanup, failure safety |
+| Slicer discovery | modeler3d-platform/src/slicer.rs | Installed-slicer discovery and actual safe launch |
+| Existing technical adapters | modeler3d-mcp/src/r4/server.rs | Reuse only where needed; not a substitute for native proof |
 
 Use ripgrep to locate the exact Python handlers and tests rather than
 assuming that a similarly named Python module exists. The reference source
@@ -296,7 +296,7 @@ verification receipt are required.
 ## 8. Test and quality gates
 
 Run focused tests while implementing, then run the complete project gates from
-E:\Builder3D-Rust. Use the existing Rust toolchain and lockfile.
+E:\3D-Modeler. Use the existing Rust toolchain and lockfile.
 
 Python reference tests must use the existing environment and remain
 read-only. A typical command is:
@@ -317,7 +317,7 @@ platform crates, especially image_color, dialogs/commands/shell,
 operations, print_prep, print_handoff, and slicer discovery. Then run:
 
 ~~~powershell
-Set-Location E:\Builder3D-Rust
+Set-Location E:\3D-Modeler
 . .\scripts\Initialize-BuildClang.ps1
 cargo fmt --all -- --check
 cargo check --workspace --locked
@@ -325,10 +325,10 @@ cargo test --workspace --locked
 cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
 cargo deny check
 cargo metadata --locked --format-version 1 --no-deps
-cargo run -p builder3d-app --bin builder3d-app -- --smoke
-cargo build --release --locked -p builder3d-app --bin builder3d-app
+cargo run -p modeler3d-app --bin modeler3d-app -- --smoke
+cargo build --release --locked -p modeler3d-app --bin modeler3d-app
 cargo bloat --release --workspace
-cargo bloat --release -p builder3d-app --bin builder3d-app
+cargo bloat --release -p modeler3d-app --bin modeler3d-app
 ~~~
 
 Run cargo audit if it is installed and record the result. If it is not
@@ -343,7 +343,7 @@ native application and exercising the RB-07 workflows with real OS input.
 
 Create the new evidence set under:
 
-    E:\Builder3D-Rust\evidence\rebuild\rb-07-appearance-jobs-and-print
+    E:\3D-Modeler\evidence\rebuild\rb-07-appearance-jobs-and-print
 
 Use the established RB-06 paired-evidence discipline:
 
@@ -353,7 +353,7 @@ Use the established RB-06 paired-evidence discipline:
   requires another documented size;
 - use real OS input and the real native window; do not substitute headless
   widget screenshots for native proof;
-- run captures serially and confirm no stale Builder3D process remains;
+- run captures serially and confirm no stale 3D Modeler process remains;
 - record build SHA, route, theme, window size, DPI, fixture, action sequence,
   result, and timestamp for every frame;
 - keep accepted and rejected attempts separate and explain rejected captures;
@@ -418,9 +418,9 @@ structure used for RB-06:
 
 Update, without rewriting prior history:
 
-- E:\Builder3D-Rust\WORK_LOG.md;
-- E:\Builder3D-Rust\docs\component-catalog.toml;
-- E:\Builder3D-Rust\evidence\rebuild\parity-matrix.toml.
+- E:\3D-Modeler\WORK_LOG.md;
+- E:\3D-Modeler\docs\component-catalog.toml;
+- E:\3D-Modeler\evidence\rebuild\parity-matrix.toml.
 
 Add current RB-07 rows and an RB-07 audit entry. Keep legacy R7 rows
 distinct. Do not claim owner acceptance, overall product acceptance, or
@@ -482,9 +482,9 @@ Before stopping:
 Paste the following as the first user message in the next context:
 
 ~~~text
-Read and follow E:\Builder3D-Rust\docs\rb-07-appearance-jobs-and-print-handoff.md.
+Read and follow E:\3D-Modeler\docs\rb-07-appearance-jobs-and-print-handoff.md.
 
-Continue the Builder3D Rust rewrite from the current E:\Builder3D-Rust
+Continue the 3D Modeler Rust rewrite from the current E:\3D-Modeler
 worktree. Complete the entire current RB-07 slice: appearance/material/image
 workflows, native background progress/errors/cancel, print checks, staging,
 known-slicer handoff, and every affected non-working button. Reuse the

@@ -1,20 +1,20 @@
-COMMAND: cargo bloat --release -p builder3d-app --bin builder3d-app
+COMMAND: cargo bloat --release -p modeler3d-app --bin modeler3d-app
     Blocking waiting for file lock on package cache
     Blocking waiting for file lock on package cache
-   Compiling builder3d-core v0.1.0 (E:\Builder3D-Rust\crates\builder3d-core)
-   Compiling builder3d-viewport v0.1.0 (E:\Builder3D-Rust\crates\builder3d-viewport)
-   Compiling builder3d-app v0.1.0 (E:\Builder3D-Rust\crates\builder3d-app)
+   Compiling modeler3d-core v0.1.0 (E:\3D-Modeler\crates\modeler3d-core)
+   Compiling modeler3d-viewport v0.1.0 (E:\3D-Modeler\crates\modeler3d-viewport)
+   Compiling modeler3d-app v0.1.0 (E:\3D-Modeler\crates\modeler3d-app)
     Finished `release` profile [optimized + debuginfo] target(s) in 4m 16s
-    Analyzing target\release\builder3d-app.exe
+    Analyzing target\release\modeler3d-app.exe
 
  File  .text    Size         Crate Name
  0.3%   0.4% 48.3KiB      wgpu_hal wgpu_hal::vulkan::Instance::expose_adapter
  0.3%   0.4% 47.6KiB        epaint epaint::text::text_layout::layout
- 0.3%   0.4% 46.8KiB builder3d_app builder3d_app::shell::Builder3dApp::new
+ 0.3%   0.4% 46.8KiB modeler3d_app modeler3d_app::shell::Modeler3dApp::new
  0.3%   0.4% 44.7KiB          egui egui::context::ContextImpl::begin_pass
  0.3%   0.4% 43.8KiB           std core::ops::function::FnOnce::call_once<zip::write::impl$14::prepare_next_writer::closure_env$3<core::io::cursor::Cursor<alloc::vec::Vec<u8,alloc::alloc::Global> > >,tuple$<enum2$<zip::write::MaybeEncrypted<core::io::cursor::Cursor<alloc::vec::Vec<u8,alloc::alloc::Global> > > >,ref_mut$<zip::write::DeflateCache<core::io::cursor::Cursor<alloc::vec::Vec<u8,alloc::alloc::Global> > > > > >
  0.3%   0.4% 42.3KiB        skrifa skrifa::outline::glyf::hint::engine::Engine::run
- 0.3%   0.4% 42.2KiB builder3d_app builder3d_app::shell::impl$3::ui
+ 0.3%   0.4% 42.2KiB modeler3d_app modeler3d_app::shell::impl$3::ui
  0.3%   0.4% 41.4KiB          naga naga::back::spv::Writer::write_function
  0.3%   0.4% 41.0KiB  enum2$<image enum2$<image::images::dynimage::DynamicImage>::thumbnail_exact
  0.3%   0.3% 40.1KiB     wgpu_core wgpu_core::command::render::encode_render_pass

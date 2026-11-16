@@ -1,13 +1,13 @@
 # RB-09 USB Backup Receipt
 
-- Source: `E:\Builder3D-Rust`.
+- Source: `E:\3D-Modeler`.
 - Destination: `L:\Builder3D-Rust_snapshot_20261103-103227_RB-09-paused`.
 - Target device: USB `Generic STORAGE DEVICE`, volume `16GBMICROSD`, FAT32.
 - Free space before copy: 4,755,218,432 bytes. The included source tree was
   584,907,453 bytes before this receipt was added; its largest included file was
   67,108,865 bytes, below FAT32's per-file limit.
 - Copy command:
-  `robocopy E:\Builder3D-Rust L:\Builder3D-Rust_snapshot_20261103-103227_RB-09-paused /E /COPY:DAT /DCOPY:DAT /XJ /XD E:\Builder3D-Rust\target E:\Builder3D-Rust\.cache E:\Builder3D-Rust\logs /R:1 /W:1 /NP /NFL /NDL`.
+  `robocopy E:\3D-Modeler L:\Builder3D-Rust_snapshot_20261103-103227_RB-09-paused /E /COPY:DAT /DCOPY:DAT /XJ /XD E:\3D-Modeler\target E:\3D-Modeler\.cache E:\3D-Modeler\logs /R:1 /W:1 /NP /NFL /NDL`.
 - Exclusions: repository-root `target`, `.cache`, and `logs`, plus reparse
   points/junction traversal. Nested RB-09 evidence logs are included. No
   `*.log` exclusion was used.

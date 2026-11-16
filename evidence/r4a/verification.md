@@ -1,7 +1,7 @@
 # R4a snapshot verification
 
 Snapshot: `G:\Builder3D-Rust_snapshot_20261029-155500_R4a-protocol-final`
-Source: `E:\Builder3D-Rust`
+Source: `E:\3D-Modeler`
 Excluded: every `target\` directory
 
 The numeric fields use fixed-width values so this record can be updated after

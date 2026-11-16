@@ -1,7 +1,7 @@
 # RB-06 verified snapshot receipt
 
 Snapshot target: `G:\Builder3D-Rust_snapshot_20261101-095500_RB-06-complete`  
-Source: `E:\Builder3D-Rust`  
+Source: `E:\3D-Modeler`  
 Scope: additive RB-06 completion snapshot; existing G: snapshots were not modified.
 
 ## Copy contract

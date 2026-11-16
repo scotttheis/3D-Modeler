@@ -6,7 +6,7 @@ This slice implements the next ordered R2 format from the Python reference:
 3MF package import/export. The Python tree at `L:\Builder3D` was read and
 tested only as the temporary behavioral reference; it was not modified.
 
-The Rust boundary is in `builder3d-core`. It provides a typed 3MF package
+The Rust boundary is in `modeler3d-core`. It provides a typed 3MF package
 boundary with bounded ZIP entries, expanded bytes, compression ratios, XML
 parts, metadata, material colors, objects, build items, component depth, and
 expanded instances. XML is parsed as a bounded event stream. The root model's

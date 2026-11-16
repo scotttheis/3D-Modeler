@@ -1,5 +1,5 @@
-COMMAND: cargo build --release --locked -p builder3d-app --bin builder3d-app
-   Compiling builder3d-app v0.1.0 (E:\Builder3D-Rust\crates\builder3d-app)
+COMMAND: cargo build --release --locked -p modeler3d-app --bin modeler3d-app
+   Compiling modeler3d-app v0.1.0 (E:\3D-Modeler\crates\modeler3d-app)
  
     Finished `release` profile [optimized] target(s) in 2m 27s
 EXIT_CODE=0

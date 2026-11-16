@@ -1,6 +1,6 @@
 # R7-09 — application preferences and recent-file coverage
 
-Component: `builder3d.app.preferences`
+Component: `modeler3d.app.preferences`
 
 ## Implemented contract
 

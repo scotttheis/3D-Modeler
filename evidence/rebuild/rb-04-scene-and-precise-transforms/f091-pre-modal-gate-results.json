@@ -57,7 +57,7 @@
   {
     "name": "smoke",
     "command": [
-      "E:\\Builder3D-Rust\\target\\debug\\builder3d-app.exe",
+      "E:\\3D-Modeler\\target\\debug\\modeler3d-app.exe",
       "--smoke"
     ],
     "exit_code": 0,
@@ -72,9 +72,9 @@
       "--release",
       "--locked",
       "-p",
-      "builder3d-app",
+      "modeler3d-app",
       "--bin",
-      "builder3d-app"
+      "modeler3d-app"
     ],
     "exit_code": 0,
     "seconds": 167.61,
@@ -83,7 +83,7 @@
   {
     "name": "release-smoke",
     "command": [
-      "E:\\Builder3D-Rust\\target\\rb04-final-native-build-20261031-225520\\release-builder3d-app.exe",
+      "E:\\3D-Modeler\\target\\rb04-final-native-build-20261031-225520\\release-modeler3d-app.exe",
       "--smoke"
     ],
     "exit_code": 0,

@@ -6,7 +6,7 @@ state; the final ledger in `report.md` records closure and remaining gaps.
 
 | Surface / control | Python reference observation | Rust pre-edit observation | Required RB-08 closure |
 |---|---|---|---|
-| Main menu | Builder3D, New, Open, Save, Save As, Export, Repair, Print Prep Check, Settings, Exit | Same main routes plus Customize ribbon | Preserve routes and accessible names; cancel/disabled/error paths stay visible |
+| Main menu | 3D Modeler, New, Open, Save, Save As, Export, Repair, Print Prep Check, Settings, Exit | Same main routes plus Customize ribbon | Preserve routes and accessible names; cancel/disabled/error paths stay visible |
 | Theme | Dark/Light applies immediately and persists | Dark/Light applies immediately and persists | Keep JSON restart behavior and test theme migration |
 | Import units | mm, µm, cm, m, in, ft; only STL/OBJ/PLY use default | Same bounded import policy | Preserve aliases and authoritative 3MF/glTF units |
 | Transform display units | No equivalent Python preference | mm/in | Keep display conversion separate from stored millimetres |

@@ -28,32 +28,32 @@
                                 "sha256":  "9d6c7364c978e1b890b22a6c1d28bd2bf0f9c0f473c3e325072fdd14c4087da8"
                             },
                             {
-                                "path":  "crates/builder3d-mcp/Cargo.toml",
+                                "path":  "crates/modeler3d-mcp/Cargo.toml",
                                 "bytes":  450,
                                 "sha256":  "32705f01ef21ecec459915f013426f5f8f4ee89be3d7eb857f36a9dc84235a3f"
                             },
                             {
-                                "path":  "crates/builder3d-mcp/src/r4/catalog.rs",
+                                "path":  "crates/modeler3d-mcp/src/r4/catalog.rs",
                                 "bytes":  19449,
                                 "sha256":  "116d6f1ec940c8c8b3f2fca7d2365bb1293e978f1460a39e6d0ab821a745cb62"
                             },
                             {
-                                "path":  "crates/builder3d-mcp/src/r4/schema.rs",
+                                "path":  "crates/modeler3d-mcp/src/r4/schema.rs",
                                 "bytes":  40065,
                                 "sha256":  "3616778a846f54e0960458a00e0ee640c9e255ba6693ed63c061dd2b87011fb7"
                             },
                             {
-                                "path":  "crates/builder3d-mcp/src/r4/server.rs",
+                                "path":  "crates/modeler3d-mcp/src/r4/server.rs",
                                 "bytes":  136180,
                                 "sha256":  "371f878ebfce5b02cf20ed089e998d1441e0fde2e68bd66b2ad339146f6e76bc"
                             },
                             {
-                                "path":  "crates/builder3d-mcp/src/r4/gateway.rs",
+                                "path":  "crates/modeler3d-mcp/src/r4/gateway.rs",
                                 "bytes":  13163,
                                 "sha256":  "9b76a9ffc3e0d44615fe373b39c7d2a5119e2ca1dcad026fe7a70fdfcacce933"
                             },
                             {
-                                "path":  "crates/builder3d-app/src/mcp_bridge.rs",
+                                "path":  "crates/modeler3d-app/src/mcp_bridge.rs",
                                 "bytes":  38501,
                                 "sha256":  "8da97ae29fc5fef3875eb28070c97dec05af3bc1258a3d4eb36b00da7f23a176"
                             },

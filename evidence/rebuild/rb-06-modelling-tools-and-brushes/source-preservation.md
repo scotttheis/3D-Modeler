@@ -7,12 +7,12 @@ provider disabled. The native reference script wrote only RB-06-owned output
 under this Rust evidence directory; it did not write Python source, tests,
 configuration, or caches.
 
-The Rust work is confined to `E:\Builder3D-Rust` source, tests, documentation,
+The Rust work is confined to `E:\3D-Modeler` source, tests, documentation,
 and additive evidence. `target/`, `.cache/`, and logs are excluded from the
 verified snapshot. Existing `G:\` snapshot directories were not changed; the
 RB-06 complete snapshot is a new additive directory.
 
-`git -C E:\Builder3D-Rust status --short --branch` was inspected only. The
+`git -C E:\3D-Modeler status --short --branch` was inspected only. The
 repository has no commits yet and its existing files are untracked; no
 `git add`, staging, commit, reset, or checkout was performed. The Python tree's
 pre-existing dirty state was not normalized or changed.

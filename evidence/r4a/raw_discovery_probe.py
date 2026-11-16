@@ -10,8 +10,8 @@ def main() -> None:
     project_root = Path(__file__).resolve().parents[2]
     binary = project_root / "target" / "debug" / "r4_mcp.exe"
     environment = os.environ.copy()
-    environment["BUILDER3D_MCP_PROFILE"] = "full"
-    environment["BUILDER3D_AI_APPROVED_ROOTS"] = str(project_root / "evidence" / "r4a")
+    environment["MODELER3D_MCP_PROFILE"] = "full"
+    environment["MODELER3D_AI_APPROVED_ROOTS"] = str(project_root / "evidence" / "r4a")
     request = {
         "jsonrpc": "2.0",
         "id": 1,

@@ -1,9 +1,9 @@
 {
   "run_id": "currpair-20261106-072716",
   "recorded_utc": "2026-11-06",
-  "scope": "Current Rust Release desktop/MCP workflow and optional-bridge failure check. The Python Builder3D product was not launched; the official Python MCP SDK was used only as a client for the Rust stdio gateway.",
+  "scope": "Current Rust Release desktop/MCP workflow and optional-bridge failure check. The Python 3D Modeler product was not launched; the official Python MCP SDK was used only as a client for the Rust stdio gateway.",
   "rust_release": {
-    "app_path": "target/release/builder3d-app.exe",
+    "app_path": "target/release/modeler3d-app.exe",
     "app_sha256": "0bc4f1a0fd0327e51ecd8acdb75a01120b3c53325b11738a7b3fb6ce198cc75a",
     "gateway_path": "target/release/r4_mcp.exe",
     "gateway_sha256": "aff0af548a3f8055e2ebe1d218135a774cc9b88f210a94f19627a9f9b22e1c1e"
@@ -86,11 +86,11 @@
     "paired_release_app_exited_normally": true,
     "paired_release_gateway_exited_after_client_close": true,
     "gui_reopened_saved_path": "fixtures/approved/rust-current-live-saved.3dp",
-    "gui_reopen_title": "Builder3D - rust-current-live-saved.3dp",
+    "gui_reopen_title": "3D Modeler - rust-current-live-saved.3dp",
     "gui_reopen_status": {
       "app_state": "ready",
       "approved_roots": [
-        "\\\\?\\E:\\Builder3D-Rust\\evidence\\rebuild\\rb-09-shared-ai-and-regression\\currpair-20261106-072716\\fixtures\\approved"
+        "\\\\?\\E:\\3D-Modeler\\evidence\\rebuild\\rb-09-shared-ai-and-regression\\currpair-20261106-072716\\fixtures\\approved"
       ],
       "busy": false,
       "dirty": false,
@@ -238,7 +238,7 @@
       "height": 879,
       "purpose": "first reopen screenshot attempt",
       "disposition": "rejected",
-      "reason": "Another foreground window covered Builder3D during capture; do not use it as Builder3D visual evidence."
+      "reason": "Another foreground window covered 3D Modeler during capture; do not use it as 3D Modeler visual evidence."
     },
     {
       "path": "captures/rust-current-optional-gui-new-scene.png",

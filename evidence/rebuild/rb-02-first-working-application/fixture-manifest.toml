@@ -1,5 +1,5 @@
 schema_version = 1
-fixture = "crates/builder3d-core/tests/fixtures/formats/python_box.stl"
+fixture = "crates/modeler3d-core/tests/fixtures/formats/python_box.stl"
 size_bytes = 1397
 sha256 = "f55301ca87cc6a654673dedd0e5265ff1437362e2a8d078c11d1f1ca628aa240"
 format = "ASCII STL"

@@ -2,7 +2,7 @@
 
 ## Scope and authority
 
-- Working source: `E:\Builder3D-Rust`, branch `main` (unborn repository).
+- Working source: `E:\3D-Modeler`, branch `main` (unborn repository).
 - Python behavior reference: `L:\Builder3D`, read-only throughout this slice.
 - RB-07 is complete; RB-08 is the authorized implementation slice. Stop before RB-09.
 - No Git files were staged, committed, reset, restored, or discarded.

@@ -16,7 +16,7 @@ RB-02 and stop before RB-03. Do not claim an approval that has not happened.
 Use this order of authority:
 
 1. `E:\AGENTS.md` and `E:\RustDeveloper.md`.
-2. `E:\Builder3D-Rust\AGENTS.md`.
+2. `E:\3D-Modeler\AGENTS.md`.
 3. [`product-rebuild-plan.md`](product-rebuild-plan.md), which owns the current
    slice order, contracts, evidence and acceptance rules.
 4. The historical [`product-rebuild-handoff.md`](product-rebuild-handoff.md)
@@ -63,7 +63,7 @@ If a capture or owner review is unavailable, finish safe RB-01 capture and
 documentation work, keep its visual and owner statuses pending, and stop
 before RB-02. Do not start implementation while waiting for approval.
 
-The one-window rule means one visible Builder3D target window at a time. Use
+The one-window rule means one visible 3D Modeler target window at a time. Use
 serial sessions for comparisons: launch the Python app, capture the needed
 theme, close it normally and verify its window is gone; then launch the Rust
 app, capture the matching state, and close it. Compare the saved images after
@@ -103,7 +103,7 @@ Before implementation:
 4. Read the `.3dp` and import contracts in the original project's
    `docs/project-format.md`, `docs/architecture.md`, and relevant source/tests
    without writing under `L:\Builder3D`.
-5. Trace the current Rust flow from `Builder3dApp` and `CommandState` through
+5. Trace the current Rust flow from `Modeler3dApp` and `CommandState` through
    `RenderScene`, camera, picking, gizmo, and `ViewportRenderer`. Map stable
    object IDs through rendering and back to the authoritative scene; never use
    a filtered render-list index as a scene index.
@@ -125,7 +125,7 @@ task without a separate demo executable or an approximate preview:
 2. Add a cube. Import the known `python_box.stl` fixture through a native
    desktop file picker and choose millimetres for its unitless mesh format.
    The fixture source is
-   `crates/builder3d-core/tests/fixtures/formats/python_box.stl`; record its
+   `crates/modeler3d-core/tests/fixtures/formats/python_box.stl`; record its
    byte length and SHA-256 in the evidence manifest when exercised. Keep the
    fixture read-only and inside the Rust project. If it proves unsuitable,
    select a documented existing supported fixture and record the reason and
@@ -162,13 +162,13 @@ and one command/history path.
 
 | Area | Current seam / known gap | RB-02 direction |
 |---|---|---|
-| Application shell | `crates/builder3d-app/src/shell.rs`; `render_viewport` draws projected rectangles and `preview_object_rects` selects by rectangle | Replace the product viewport path with a real renderer presentation and geometry-based input. Keep the RB-01 eframe shell, theme and artwork in the same window. |
-| Document and commands | `crates/builder3d-app/src/commands.rs` already routes New, Cube, import, transforms, undo/redo, `.3dp` open/save | Reuse `CommandState` and core commands. Widgets and renderer adapters must not mutate the scene directly. Route completed gizmo drags as one grouped command. |
-| Import dialog | `crates/builder3d-app/src/dialogs.rs` currently asks for a typed path in an egui window | Add a native OS file-selection path for import with supported-format filters; retain unit choice for STL/OBJ/PLY and honor file-authoritative units for glTF/GLB/3MF. Keep cancel/error non-destructive. Do not claim WRL import; it is explicitly unsupported in the current Rust import seam. |
-| Camera and picking | `crates/builder3d-viewport/src/camera.rs`, `picking.rs`, `math.rs` | Reuse the camera/ray math. Derive viewport dimensions and pointer coordinates from the actual client surface, account for logical/physical scale, and return stable IDs from exact geometry hits. |
-| Gizmo | `crates/builder3d-viewport/src/gizmo.rs` builds/hit-tests renderer-neutral geometry; app input is not yet wired to a real viewport | Present and hit-test the same translation handle geometry; capture pointer through drag, preview the transform, commit once on release, restore on cancel, and test hidden/reordered objects. |
-| Renderer | `crates/builder3d-viewport/src/renderer.rs` creates its own wgpu instance/device and offscreen color/depth textures. `r5_viewport` is a renderer spike and notes it has no native surface/text labels. | Adapt the existing renderer to eframe's native presentation seam and the pinned wgpu device/target format. Avoid creating a second device/window if the eframe render state can supply the shared device. Preserve budget accounting and renderer reuse. |
-| Reference runner | `crates/builder3d-app/src/bin/r5_viewport.rs` renders offscreen R5 controls | Keep it as diagnostic evidence only; it cannot close native surface, resize, input, or app integration acceptance. |
+| Application shell | `crates/modeler3d-app/src/shell.rs`; `render_viewport` draws projected rectangles and `preview_object_rects` selects by rectangle | Replace the product viewport path with a real renderer presentation and geometry-based input. Keep the RB-01 eframe shell, theme and artwork in the same window. |
+| Document and commands | `crates/modeler3d-app/src/commands.rs` already routes New, Cube, import, transforms, undo/redo, `.3dp` open/save | Reuse `CommandState` and core commands. Widgets and renderer adapters must not mutate the scene directly. Route completed gizmo drags as one grouped command. |
+| Import dialog | `crates/modeler3d-app/src/dialogs.rs` currently asks for a typed path in an egui window | Add a native OS file-selection path for import with supported-format filters; retain unit choice for STL/OBJ/PLY and honor file-authoritative units for glTF/GLB/3MF. Keep cancel/error non-destructive. Do not claim WRL import; it is explicitly unsupported in the current Rust import seam. |
+| Camera and picking | `crates/modeler3d-viewport/src/camera.rs`, `picking.rs`, `math.rs` | Reuse the camera/ray math. Derive viewport dimensions and pointer coordinates from the actual client surface, account for logical/physical scale, and return stable IDs from exact geometry hits. |
+| Gizmo | `crates/modeler3d-viewport/src/gizmo.rs` builds/hit-tests renderer-neutral geometry; app input is not yet wired to a real viewport | Present and hit-test the same translation handle geometry; capture pointer through drag, preview the transform, commit once on release, restore on cancel, and test hidden/reordered objects. |
+| Renderer | `crates/modeler3d-viewport/src/renderer.rs` creates its own wgpu instance/device and offscreen color/depth textures. `r5_viewport` is a renderer spike and notes it has no native surface/text labels. | Adapt the existing renderer to eframe's native presentation seam and the pinned wgpu device/target format. Avoid creating a second device/window if the eframe render state can supply the shared device. Preserve budget accounting and renderer reuse. |
+| Reference runner | `crates/modeler3d-app/src/bin/r5_viewport.rs` renders offscreen R5 controls | Keep it as diagnostic evidence only; it cannot close native surface, resize, input, or app integration acceptance. |
 
 Before coding the renderer adapter, verify the actual eframe 0.37.0 feature
 configuration and documented wgpu paint-callback/render-state API. Preserve
@@ -193,7 +193,7 @@ capture; map pointer positions correctly at the current display scale; preserve
 focus and release capture on button-up, Escape, window focus loss and cancel.
 Orbit/pan/zoom, exact pick and gizmo drag must share one camera/surface mapping.
 Keep eframe responsible for the approved original-art shell and theme; do not
-open a second top-level Builder3D window.
+open a second top-level 3D Modeler window.
 
 ## 6. Focused acceptance matrix
 
@@ -321,18 +321,18 @@ pending. Do not infer approval and stop before RB-03.
 
 ## 11. Short execution prompt
 
-> Read `E:\AGENTS.md`, `E:\RustDeveloper.md`, `E:\Builder3D-Rust\AGENTS.md`,
+> Read `E:\AGENTS.md`, `E:\RustDeveloper.md`, `E:\3D-Modeler\AGENTS.md`,
 > the current product rebuild plan, this RB-02 handoff, the latest checkpoint
 > and work log. First verify RB-01 has live matched Light/Dark captures at
 > 1280 x 840 logical client pixels, with actual client size and display scale
-> recorded, and explicit owner approval. Capture the Python Builder3D app and
+> recorded, and explicit owner approval. Capture the Python 3D Modeler app and
 > Rust app sequentially: capture and close one before opening the other; a
 > background MCP gateway alone is not a blocker. If any RB-01 requirement or
 > owner approval is missing, do safe RB-01 capture/evidence work only, present
 > it for review, and stop before RB-02. If approved, implement the bounded
 > New/Cube/native-import/real shaded-viewport/orbit-pan-zoom/exact-pick/
 > translation-gizmo/undo/save-reopen flow in the existing eframe app. Use the
-> Python Builder3D at `L:\Builder3D` as the reference (not Microsoft's 3D
+> Python 3D Modeler at `L:\Builder3D` as the reference (not Microsoft's 3D
 > Builder), keep it read-only, and capture Light and Dark for each app. Update
 > evidence and the ledger, verify an additive G: snapshot,
 > and stop before RB-03. Do not stage or commit.

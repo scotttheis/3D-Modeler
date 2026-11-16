@@ -1,7 +1,7 @@
 param([string]$Theme='dark')
 $ErrorActionPreference='Stop'
 . "$PSScriptRoot/native-rust-modal-workflow.ps1"
-$fixture="E:/Builder3D-Rust/$script:rb04EvidenceRoot/native-scene-fixtures/row-toggle.3dp"
+$fixture="E:/3D-Modeler/$script:rb04EvidenceRoot/native-scene-fixtures/row-toggle.3dp"
 Open-Rb04Project $fixture;Set-Rb04InsertTab
 Select-Rb04SceneIndices @() 'base' 3
 Invoke-Rb03Click 492 738;Wait-Rb04Frame

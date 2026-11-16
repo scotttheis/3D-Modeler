@@ -1,4 +1,4 @@
-# Builder3D Rust R1 core evidence
+# 3D Modeler Rust R1 core evidence
 
 This records the R1 core acceptance checks performed on 2026-10-29.
 

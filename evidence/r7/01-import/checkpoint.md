@@ -3,13 +3,13 @@
 - **Objective:** continue the owner-approved conversion-first plan with the
   next catalog follow-up, without entering shell polish.
 - **Completed:** implemented and tested
-  `builder3d.app.commands.coverage` for semantic desktop model import;
+  `modeler3d.app.commands.coverage` for semantic desktop model import;
   updated the component catalog and evidence.
 - **Changed source:**
-  `crates/builder3d-app/src/commands.rs`,
-  `crates/builder3d-app/src/dialogs.rs`,
-  `crates/builder3d-app/src/lib.rs`, and
-  `crates/builder3d-app/src/shell.rs`.
+  `crates/modeler3d-app/src/commands.rs`,
+  `crates/modeler3d-app/src/dialogs.rs`,
+  `crates/modeler3d-app/src/lib.rs`, and
+  `crates/modeler3d-app/src/shell.rs`.
 - **Changed documentation/evidence:**
   `docs/component-catalog.toml` and `evidence/r7/01-import/`.
 - **Checks:** formatting, workspace check/tests, clippy, cargo-deny, metadata,
@@ -27,7 +27,7 @@
 - **Known boundary:** background import/preview preparation, recent-file
   integration, and remaining application selection/workflow coverage are not
   part of this slice. The next catalog follow-up is
-  `builder3d.app.commands.selection`.
+  `modeler3d.app.commands.selection`.
 - **Recovery/continuation:** after the final snapshot, reread this checkpoint,
   `WORK_LOG.md`, current Git status, and the workspace instructions before the
   next R7 slice. Do not modify the Python checkout or existing snapshots.

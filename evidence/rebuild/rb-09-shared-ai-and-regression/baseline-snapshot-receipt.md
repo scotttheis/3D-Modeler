@@ -1,9 +1,9 @@
 # RB-09 Baseline Snapshot Receipt
 
-- Source: `E:\Builder3D-Rust` (`main`, unborn repository; all existing project files were untracked at inspection).
+- Source: `E:\3D-Modeler` (`main`, unborn repository; all existing project files were untracked at inspection).
 - Snapshot: `G:\Builder3D-Rust_snapshot_20261102-141606_RB-09-baseline`.
 - Created: 2026-11-02 14:16:06 local time (`America/Denver`).
-- Copy command: `robocopy E:\Builder3D-Rust G:\Builder3D-Rust_snapshot_20261102-141606_RB-09-baseline /E /COPY:DAT /DCOPY:DAT /XJ /XD target .cache logs /XF *.log /R:1 /W:1 /NP /NFL /NDL`.
+- Copy command: `robocopy E:\3D-Modeler G:\Builder3D-Rust_snapshot_20261102-141606_RB-09-baseline /E /COPY:DAT /DCOPY:DAT /XJ /XD target .cache logs /XF *.log /R:1 /W:1 /NP /NFL /NDL`.
 - Robocopy exit code: `1` (files copied; no failures).
 - Independent source manifest: 3,027 files / 581,282,246 bytes.
 - Independent snapshot manifest: 3,027 files / 581,282,246 bytes.

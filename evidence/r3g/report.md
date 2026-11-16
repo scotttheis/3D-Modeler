@@ -10,11 +10,11 @@ reports, and scene/command history integration.
 
 ## Changed files
 
-- crates/builder3d-core/src/density.rs
-- crates/builder3d-core/src/lib.rs
-- crates/builder3d-core/src/commands.rs
-- crates/builder3d-core/src/scene.rs
-- crates/builder3d-core/tests/mesh_ops_density.rs
+- crates/modeler3d-core/src/density.rs
+- crates/modeler3d-core/src/lib.rs
+- crates/modeler3d-core/src/commands.rs
+- crates/modeler3d-core/src/scene.rs
+- crates/modeler3d-core/tests/mesh_ops_density.rs
 
 ## Behavioral evidence
 
@@ -54,7 +54,7 @@ reports, and scene/command history integration.
 R3g snapshot:
 `G:\Builder3D-Rust_snapshot_20261029-145400_R3g-density`
 
-It excludes `E:\Builder3D-Rust\target`. Exact count, byte, path, length, and
+It excludes `E:\3D-Modeler\target`. Exact count, byte, path, length, and
 SHA-256 verification is recorded in `verification.md`.
 
 ## Remaining R3 work

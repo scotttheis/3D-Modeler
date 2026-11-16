@@ -6,7 +6,7 @@ the R6 handoff: text embossing and hollowing.
 
 ## Implementation
 
-- `builder3d-core` now owns bounded, pure `text_emboss` and `hollow_mesh`
+- `modeler3d-core` now owns bounded, pure `text_emboss` and `hollow_mesh`
   operations plus cancellation hooks. Emboss validates the Python contract,
   supports raised/engraved relief, depth, X/Z offsets, the portable default
   glyph set, and named Sans/Serif/Mono system-font paths. Hollowing uses an

@@ -12,7 +12,7 @@
                       "path":  "L:/Builder3D",
                       "designated_by":  [
                                             "E:/AGENTS.md",
-                                            "E:/Builder3D-Rust/AGENTS.md"
+                                            "E:/3D-Modeler/AGENTS.md"
                                         ],
                       "git_branch":  "main",
                       "git_head":  "3a0160a95c55f68ce9f1e89d17c792816ac001df",
@@ -22,7 +22,7 @@
                       "python_environment":  "L:/Builder3D/venv",
                       "mcp_sdk_version":  "2.2.0",
                       "current_catalog_capture_directory":  "evidence/rebuild/rb-09-shared-ai-and-regression/reference-current-20261107-084248",
-                      "catalog_method":  "Official Python MCP SDK tools/list only; no Python Builder3D application or tool handler was launched.",
+                      "catalog_method":  "Official Python MCP SDK tools/list only; no Python 3D Modeler application or tool handler was launched.",
                       "post_capture_identity_check":  {
                                                           "git_status_entry_count":  223,
                                                           "git_status_sha256_unchanged":  true,
@@ -67,32 +67,32 @@
                                                           "sha256":  "9d6c7364c978e1b890b22a6c1d28bd2bf0f9c0f473c3e325072fdd14c4087da8"
                                                       },
                                                       {
-                                                          "path":  "crates/builder3d-mcp/Cargo.toml",
+                                                          "path":  "crates/modeler3d-mcp/Cargo.toml",
                                                           "bytes":  450,
                                                           "sha256":  "32705f01ef21ecec459915f013426f5f8f4ee89be3d7eb857f36a9dc84235a3f"
                                                       },
                                                       {
-                                                          "path":  "crates/builder3d-mcp/src/r4/catalog.rs",
+                                                          "path":  "crates/modeler3d-mcp/src/r4/catalog.rs",
                                                           "bytes":  19449,
                                                           "sha256":  "116d6f1ec940c8c8b3f2fca7d2365bb1293e978f1460a39e6d0ab821a745cb62"
                                                       },
                                                       {
-                                                          "path":  "crates/builder3d-mcp/src/r4/schema.rs",
+                                                          "path":  "crates/modeler3d-mcp/src/r4/schema.rs",
                                                           "bytes":  40065,
                                                           "sha256":  "3616778a846f54e0960458a00e0ee640c9e255ba6693ed63c061dd2b87011fb7"
                                                       },
                                                       {
-                                                          "path":  "crates/builder3d-mcp/src/r4/server.rs",
+                                                          "path":  "crates/modeler3d-mcp/src/r4/server.rs",
                                                           "bytes":  136180,
                                                           "sha256":  "371f878ebfce5b02cf20ed089e998d1441e0fde2e68bd66b2ad339146f6e76bc"
                                                       },
                                                       {
-                                                          "path":  "crates/builder3d-mcp/src/r4/gateway.rs",
+                                                          "path":  "crates/modeler3d-mcp/src/r4/gateway.rs",
                                                           "bytes":  13163,
                                                           "sha256":  "9b76a9ffc3e0d44615fe373b39c7d2a5119e2ca1dcad026fe7a70fdfcacce933"
                                                       },
                                                       {
-                                                          "path":  "crates/builder3d-app/src/mcp_bridge.rs",
+                                                          "path":  "crates/modeler3d-app/src/mcp_bridge.rs",
                                                           "bytes":  38501,
                                                           "sha256":  "8da97ae29fc5fef3875eb28070c97dec05af3bc1258a3d4eb36b00da7f23a176"
                                                       },
@@ -139,7 +139,7 @@
                                                   ]
                           },
     "schema_parity":  {
-                          "schema_contract":  "crates/builder3d-mcp/src/r4/schema_contract.json",
+                          "schema_contract":  "crates/modeler3d-mcp/src/r4/schema_contract.json",
                           "schema_contract_generator":  "evidence/rebuild/rb-09-shared-ai-and-regression/generate_schema_contract.mjs",
                           "schema_dialect":  "https://json-schema.org/draft/2020-12/schema",
                           "validator":  {
@@ -229,7 +229,7 @@
                           "custom_metadata_difference_count":  3,
                           "custom_metadata_difference":  {
                                                              "tool":  "emboss_text",
-                                                             "pointer":  "/_meta/com.builder3d~1longRunning",
+                                                             "pointer":  "/_meta/com.modeler3d~1longRunning",
                                                              "reference":  false,
                                                              "rust":  true,
                                                              "profiles":  [
@@ -242,13 +242,13 @@
                                                          }
                       },
     "release_validation":  {
-                               "application_binary":  "target/release/builder3d-app.exe",
+                               "application_binary":  "target/release/modeler3d-app.exe",
                                "application_sha256":  "0e874b6fb06d9b6cb5e70517ca35856d3a8304975e2a0842cd971f20df2c45ba",
                                "gateway_binary":  "target/release/r4_mcp.exe",
                                "gateway_sha256":  "636171b58800915de87fc8ad26814498279919ea80341076a344c208757da370",
                                "gui_launch_record":  "evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261107-100537-schema-parity-final/rust-release-gui-launch.json",
                                "gui_pid":  2640,
-                               "gui_title":  "Builder3D - Untitled",
+                               "gui_title":  "3D Modeler - Untitled",
                                "gui_responding":  true,
                                "gui_closed_normally":  true,
                                "runtime_descriptor_removed":  true,
@@ -267,13 +267,13 @@
                                                  },
                               "new_project_success":  true,
                               "async_operation_status_completed":  true,
-                              "validation_test":  "cargo test --locked -p builder3d-mcp captured_release_success_results_match_reference_output_schemas_when_supplied -- --nocapture",
+                              "validation_test":  "cargo test --locked -p modeler3d-mcp captured_release_success_results_match_reference_output_schemas_when_supplied -- --nocapture",
                               "validation_test_log":  "evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261107-100537-schema-parity-final/logs/rust-release-schema-result-validation-final.log",
                               "validation_test_outcome":  "test result: ok. 1 passed; 0 failed"
                           },
     "engineering_checks":  {
                                "focused_mcp_tests":  {
-                                                         "command":  "cargo test --locked -p builder3d-mcp",
+                                                         "command":  "cargo test --locked -p modeler3d-mcp",
                                                          "passed":  26,
                                                          "failed":  0,
                                                          "log":  "evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261107-100537-schema-parity-final/logs/cargo-test-mcp-final.log"
@@ -312,7 +312,7 @@
                                                          "log":  "evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261107-093804-schema-parity/logs/cargo-deny-check.log"
                                                      },
                                "release_size":  {
-                                                    "command":  "cargo bloat --release -p builder3d-app --bin builder3d-app",
+                                                    "command":  "cargo bloat --release -p modeler3d-app --bin modeler3d-app",
                                                     "result":  "pass",
                                                     "text_section":  "16.0 MiB",
                                                     "executable_file":  "19.6 MiB",
@@ -365,14 +365,14 @@
                                            },
                               "current":  {
                                               "manifest_path":  "evidence/rebuild/rb-09-shared-ai-and-regression/currpair-20261107-100537-schema-parity-final/current-rust-source-manifest.json",
-                                              "workspace_root":  "E:\\Builder3D-Rust",
+                                              "workspace_root":  "E:\\3D-Modeler",
                                               "file_count":  96,
                                               "manifest_sha256":  "2d5f502eb7150975be368d2f126ddd69cbd5493c3ffe6eb0324acb3d6ecf7f18"
                                           }
                           },
     "final_snapshot":  {
                            "path":  "G:/B3D_R09S_20261107",
-                           "copy_command":  "robocopy E:/Builder3D-Rust G:/B3D_R09S_20261107 /E /COPY:DAT /DCOPY:DAT /XJ /XD E:/Builder3D-Rust/target E:/Builder3D-Rust/.cache E:/Builder3D-Rust/logs /R:1 /W:1 /NP /NFL /NDL",
+                           "copy_command":  "robocopy E:/3D-Modeler G:/B3D_R09S_20261107 /E /COPY:DAT /DCOPY:DAT /XJ /XD E:/3D-Modeler/target E:/3D-Modeler/.cache E:/3D-Modeler/logs /R:1 /W:1 /NP /NFL /NDL",
                            "robocopy_exit_code":  1,
                            "first_verification":  {
                                                       "source_files":  4078,

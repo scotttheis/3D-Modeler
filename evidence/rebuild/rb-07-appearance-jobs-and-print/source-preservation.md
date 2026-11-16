@@ -2,7 +2,7 @@
 
 ## Recovery point
 
-- Starting Rust worktree: `E:\Builder3D-Rust` (all files remain uncommitted and
+- Starting Rust worktree: `E:\3D-Modeler` (all files remain uncommitted and
   unstaged; no reset/checkout was used).
 - Verified RB-06 source snapshot: `G:\Builder3D-Rust_snapshot_20261101-095500_RB-06-complete`.
 - Additive RB-07 baseline: `G:\Builder3D-Rust_snapshot_20261101-132912_RB-07-baseline`.

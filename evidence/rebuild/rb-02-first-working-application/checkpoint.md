@@ -17,7 +17,7 @@ Complete the bounded workflow in the existing eframe app: New, Cube, native impo
 
 ## Changed project evidence and implementation
 
-RB-02-edited source/manifests: `Cargo.toml`, `Cargo.lock`, `crates/builder3d-app/Cargo.toml`, `crates/builder3d-app/src/shell.rs`, `crates/builder3d-app/src/dialogs.rs`, `crates/builder3d-app/src/commands.rs`, `crates/builder3d-viewport/src/renderer.rs`, `crates/builder3d-viewport/src/math.rs`, `crates/builder3d-viewport/src/picking.rs`, and `crates/builder3d-viewport/src/adaptive.rs`.
+RB-02-edited source/manifests: `Cargo.toml`, `Cargo.lock`, `crates/modeler3d-app/Cargo.toml`, `crates/modeler3d-app/src/shell.rs`, `crates/modeler3d-app/src/dialogs.rs`, `crates/modeler3d-app/src/commands.rs`, `crates/modeler3d-viewport/src/renderer.rs`, `crates/modeler3d-viewport/src/math.rs`, `crates/modeler3d-viewport/src/picking.rs`, and `crates/modeler3d-viewport/src/adaptive.rs`.
 
 Evidence files include `report.md`, `walkthrough.md`, `capture-board.md`, `capture-metadata.toml`, `fixture-manifest.toml`, `runtime-adapter.txt`, `verification.md`, `checkpoint.md`, 25 PNGs, and two saved `.3dp` projects under this directory. The RB-02 feature/audit entry is appended to `evidence/rebuild/parity-matrix.toml`; the RB-01 audit record is unchanged. `WORK_LOG.md` has the RB-02 entry and will receive the snapshot receipt after copying.
 

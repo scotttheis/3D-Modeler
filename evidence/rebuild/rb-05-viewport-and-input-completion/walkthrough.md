@@ -21,7 +21,7 @@ Command:
 & .\evidence\rebuild\rb-05-viewport-and-input-completion\native-rust-rb05.ps1
 ```
 
-The harness launched `target\debug\builder3d-app.exe`, opened each immutable `.3dp` fixture through the application menu and native file dialog, and sent guarded OS pointer/button/wheel/keyboard events. It replayed both themes in this order: empty and single resting scenes; orbit, middle/right pan, wheel, and double-click frame; Move/Rotate/Resize; no-op, Escape, focus-loss, grouped, and hidden Move; then a resting floor/grid render. It accepted 52 records, 26 per theme, against debug SHA-256 `4a42ec94338baf986806740e7a59c7fc7db2faa9bdf2027af4d8f6160ac69232`.
+The harness launched `target\debug\modeler3d-app.exe`, opened each immutable `.3dp` fixture through the application menu and native file dialog, and sent guarded OS pointer/button/wheel/keyboard events. It replayed both themes in this order: empty and single resting scenes; orbit, middle/right pan, wheel, and double-click frame; Move/Rotate/Resize; no-op, Escape, focus-loss, grouped, and hidden Move; then a resting floor/grid render. It accepted 52 records, 26 per theme, against debug SHA-256 `4a42ec94338baf986806740e7a59c7fc7db2faa9bdf2027af4d8f6160ac69232`.
 
 ## Inspection and rejection
 

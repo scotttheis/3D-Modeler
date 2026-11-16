@@ -9,10 +9,10 @@ import time
 from pathlib import Path
 
 sys.dont_write_bytecode = True
-ROOT = Path("E:/Builder3D-Rust/evidence/rebuild/rb-07-appearance-jobs-and-print")
+ROOT = Path("E:/3D-Modeler/evidence/rebuild/rb-07-appearance-jobs-and-print")
 CAPTURES = ROOT / "captures"
 FIXTURE = ROOT / "fixtures/slow-job-closed-cube-heavy.ply"
-RB05_ROOT = Path("E:/Builder3D-Rust/evidence/rebuild/rb-05-viewport-and-input-completion")
+RB05_ROOT = Path("E:/3D-Modeler/evidence/rebuild/rb-05-viewport-and-input-completion")
 sys.path.insert(0, str(RB05_ROOT))
 from native_desktop_guard import require_default_desktop  # noqa: E402
 
@@ -99,7 +99,7 @@ def activate_handle(handle: int) -> None:
         USER.AttachThreadInput(foreground_thread, current_thread, False)
     pause(100)
     if int(USER.GetForegroundWindow() or 0) != handle:
-        raise RuntimeError("reference Builder3D window did not become foreground")
+        raise RuntimeError("reference 3D Modeler window did not become foreground")
 
 
 def click_widget(widget: QWidget) -> None:

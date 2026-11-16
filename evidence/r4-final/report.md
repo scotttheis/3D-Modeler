@@ -45,7 +45,7 @@ authorization, and Rust SDK contracts:
   allowance and duplicate transitive `hashbrown`/`syn` warnings.
 - `cargo audit` could not run because the installed Cargo has no `audit`
   subcommand; it was not installed or changed as part of R4.
-- `cargo bloat --release --package builder3d-mcp --bin r4_mcp` passed: 3.6 MiB
+- `cargo bloat --release --package modeler3d-mcp --bin r4_mcp` passed: 3.6 MiB
   `.text`, 4.3 MiB executable.
 - The official Python MCP client discovered all 60 tools and returned
   structured results. It negotiated protocol `2025-11-25`; a raw discovery

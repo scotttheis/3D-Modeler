@@ -10537,5 +10537,5 @@
   "binary_size_bytes": 4698624,
   "cpu_reference_ms": 17.993,
   "ui_toolkit_decision": "Use egui/eframe as the R0/R6 native shell baseline; keep the G1 ribbon visual-acceptance gate open.",
-  "generated_by": "builder3d-app R0b spike"
+  "generated_by": "modeler3d-app R0b spike"
 }

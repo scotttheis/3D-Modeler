@@ -7,7 +7,7 @@ $ErrorActionPreference = 'Stop'
 
 $root = (Resolve-Path $PSScriptRoot).Path
 $fixture = (Resolve-Path (Join-Path $PSScriptRoot '..\rb-04-scene-and-precise-transforms\native-viewport-fixtures\viewport-move-single.3dp')).Path
-$buildHash = (Get-FileHash -LiteralPath 'target\debug\builder3d-app.exe' -Algorithm SHA256).Hash.ToLowerInvariant()
+$buildHash = (Get-FileHash -LiteralPath 'target\debug\modeler3d-app.exe' -Algorithm SHA256).Hash.ToLowerInvariant()
 $resultsPath = Join-Path $root 'rust-display-results.json'
 $records = [System.Collections.Generic.List[object]]::new()
 
@@ -69,8 +69,8 @@ function Open-DisplayFixture {
     do {
         Start-Sleep -Milliseconds 150
         try { $title = (Get-Rb03WindowInfo (Activate-Rb03App)).Title } catch { $title = '' }
-    } while ($title -ne "Builder3D - $expected" -and [DateTime]::UtcNow -lt $deadline)
-    if ($title -ne "Builder3D - $expected") {
+    } while ($title -ne "3D Modeler - $expected" -and [DateTime]::UtcNow -lt $deadline)
+    if ($title -ne "3D Modeler - $expected") {
         throw "Native display fixture did not open: $expected"
     }
     Wait-DisplayFrame
@@ -102,7 +102,7 @@ function Capture-Display([string]$Theme, [string]$Action, [string]$Mode, [string
 
 $process = $null
 try {
-    $process = Start-Process -FilePath (Join-Path (Get-Location) 'target\debug\builder3d-app.exe') -PassThru
+    $process = Start-Process -FilePath (Join-Path (Get-Location) 'target\debug\modeler3d-app.exe') -PassThru
     $script:rb03AppPid = $process.Id
     $deadline = [DateTime]::UtcNow.AddSeconds(15)
     do {

@@ -4,7 +4,7 @@
   "client": {
     "method": "official Python MCP SDK 2.2.0 over stdio; tools/list only",
     "python_version": "3.12.10",
-    "rust_binary": "E:\\Builder3D-Rust\\target\\release\\r4_mcp.exe",
+    "rust_binary": "E:\\3D-Modeler\\target\\release\\r4_mcp.exe",
     "rust_binary_sha256": "636171b58800915de87fc8ad26814498279919ea80341076a344c208757da370",
     "sdk_package": "mcp",
     "sdk_version": "2.2.0",
@@ -16,11 +16,11 @@
   "tools": [
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "inspection",
-        "com.builder3d/launchProfile": "observe",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "observe"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "inspection",
+        "com.modeler3d/launchProfile": "observe",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "observe"
       },
       "annotations": {
         "destructiveHint": false,
@@ -28,7 +28,7 @@
         "openWorldHint": false,
         "readOnlyHint": true
       },
-      "description": "Builder3D get_status command",
+      "description": "3D Modeler get_status command",
       "inputSchema": {
         "properties": {},
         "title": "get_statusArguments",
@@ -331,11 +331,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "inspection",
-        "com.builder3d/launchProfile": "observe",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "observe"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "inspection",
+        "com.modeler3d/launchProfile": "observe",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "observe"
       },
       "annotations": {
         "destructiveHint": false,
@@ -343,7 +343,7 @@
         "openWorldHint": false,
         "readOnlyHint": true
       },
-      "description": "Builder3D operation_status command",
+      "description": "3D Modeler operation_status command",
       "inputSchema": {
         "properties": {
           "operation_id": {
@@ -546,11 +546,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "inspection",
-        "com.builder3d/launchProfile": "observe",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "observe"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "inspection",
+        "com.modeler3d/launchProfile": "observe",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "observe"
       },
       "annotations": {
         "destructiveHint": false,
@@ -558,7 +558,7 @@
         "openWorldHint": false,
         "readOnlyHint": true
       },
-      "description": "Builder3D scene_summary command",
+      "description": "3D Modeler scene_summary command",
       "inputSchema": {
         "properties": {
           "fields": {
@@ -1098,11 +1098,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "inspection",
-        "com.builder3d/launchProfile": "observe",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "observe"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "inspection",
+        "com.modeler3d/launchProfile": "observe",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "observe"
       },
       "annotations": {
         "destructiveHint": false,
@@ -1110,7 +1110,7 @@
         "openWorldHint": false,
         "readOnlyHint": true
       },
-      "description": "Builder3D print_check command",
+      "description": "3D Modeler print_check command",
       "inputSchema": {
         "properties": {
           "bed_size_mm": {
@@ -1210,11 +1210,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "inspection",
-        "com.builder3d/launchProfile": "observe",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "observe"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "inspection",
+        "com.modeler3d/launchProfile": "observe",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "observe"
       },
       "annotations": {
         "destructiveHint": false,
@@ -1222,7 +1222,7 @@
         "openWorldHint": false,
         "readOnlyHint": true
       },
-      "description": "Builder3D scene_changes command",
+      "description": "3D Modeler scene_changes command",
       "inputSchema": {
         "properties": {
           "fields": {
@@ -1787,11 +1787,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "inspection",
-        "com.builder3d/launchProfile": "observe",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "observe"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "inspection",
+        "com.modeler3d/launchProfile": "observe",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "observe"
       },
       "annotations": {
         "destructiveHint": false,
@@ -1799,7 +1799,7 @@
         "openWorldHint": false,
         "readOnlyHint": true
       },
-      "description": "Builder3D mesh_health command",
+      "description": "3D Modeler mesh_health command",
       "inputSchema": {
         "properties": {
           "index": {
@@ -2051,11 +2051,11 @@
     },
     {
       "_meta": {
-        "com.builder3d/catalogVersion": "2026-09-25.1",
-        "com.builder3d/category": "view",
-        "com.builder3d/launchProfile": "observe",
-        "com.builder3d/longRunning": false,
-        "com.builder3d/profile": "observe"
+        "com.modeler3d/catalogVersion": "2026-09-25.1",
+        "com.modeler3d/category": "view",
+        "com.modeler3d/launchProfile": "observe",
+        "com.modeler3d/longRunning": false,
+        "com.modeler3d/profile": "observe"
       },
       "annotations": {
         "destructiveHint": false,
@@ -2063,7 +2063,7 @@
         "openWorldHint": false,
         "readOnlyHint": true
       },
-      "description": "Builder3D view_state command",
+      "description": "3D Modeler view_state command",
       "inputSchema": {
         "properties": {},
         "title": "view_stateArguments",

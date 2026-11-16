@@ -25,7 +25,7 @@ def digest(path: Path) -> str:
 
 
 def established_tool_names() -> list[str]:
-    source_path = ROOT / "crates" / "builder3d-mcp" / "src" / "r4" / "catalog.rs"
+    source_path = ROOT / "crates" / "modeler3d-mcp" / "src" / "r4" / "catalog.rs"
     source = source_path.read_text(encoding="utf-8")
     catalog = re.search(
         r"pub const TOOL_CATALOG: \[ToolSpec;\s*60\]\s*=\s*\[(.*?)\n\];",
@@ -80,7 +80,7 @@ component_ids = [component["id"] for component in components]
 require(len(component_ids) == len(set(component_ids)), "duplicate component IDs")
 component_by_id = {component["id"]: component for component in components}
 feature = next(
-    row for row in parity["feature"] if row["id"] == "builder3d.mcp.catalog_and_parity"
+    row for row in parity["feature"] if row["id"] == "modeler3d.mcp.catalog_and_parity"
 )
 current_run_directory = EVIDENCE / "currpair-20261106-072716"
 current_run_manifest_path = current_run_directory / "current-run-manifest.json"
@@ -147,7 +147,7 @@ require(feature["implementation"] == "pass",
         "RB-09 catalog/schema implementation status must reflect current parity")
 require(feature["automated"] == "pass",
         "RB-09 catalog/schema automation status must reflect current parity")
-require("schema-parity-current-reference" in component_by_id["builder3d.mcp.stdio-gateway"]["contracts"],
+require("schema-parity-current-reference" in component_by_id["modeler3d.mcp.stdio-gateway"]["contracts"],
         "gateway component must record current-reference schema parity")
 require(str(current_run["acceptance_boundary"]["schema_parity"]).startswith("open"),
         "historical 2026-11-06 run must retain its open schema status")
@@ -183,7 +183,7 @@ require(feature["visual"] == "pending", "visual review must remain pending")
 require(feature["owner_acceptance"] == "pending", "owner acceptance must remain pending")
 require(len(feature["visual_capture_pair"]) == 4, "expected Light/Dark capture pairs")
 require(
-    "builder3d.mcp.stdio-gateway" in feature["rust_component_ids"],
+    "modeler3d.mcp.stdio-gateway" in feature["rust_component_ids"],
     "stdio gateway component missing from parity row",
 )
 for component_id in feature["rust_component_ids"]:
@@ -197,9 +197,9 @@ for raw_path in feature.get("schema_evidence", []):
     require((ROOT / path).is_file(), f"missing parity schema evidence path: {path}")
 
 for component_id in (
-    "builder3d.mcp.desktop-bridge",
-    "builder3d.mcp.stdio-gateway",
-    "builder3d.mcp.server",
+    "modeler3d.mcp.desktop-bridge",
+    "modeler3d.mcp.stdio-gateway",
+    "modeler3d.mcp.server",
 ):
     component = component_by_id[component_id]
     for field in ("rust_paths", "tests", "evidence"):
@@ -372,14 +372,14 @@ bloat_log = bloat_log_path.read_text(encoding="utf-8")
 restore_log = restore_log_path.read_text(encoding="utf-8")
 require("--workspace" in bloat_log and "unused arguments" in bloat_log,
         "workspace bloat CLI warning missing from rebuild log")
-require("Compiling builder3d-mcp" in bloat_log and "Compiling builder3d-app" in bloat_log,
+require("Compiling modeler3d-mcp" in bloat_log and "Compiling modeler3d-app" in bloat_log,
         "workspace bloat rebuild log does not show app and gateway rebuilds")
-require("Compiling builder3d-app" in restore_log and "Finished" in restore_log,
+require("Compiling modeler3d-app" in restore_log and "Finished" in restore_log,
         "app restore rebuild log does not show a completed app rebuild")
 
 release = schema_parity_manifest["release_validation"]
 expected_release_artifacts = (
-    ("application", "target/release/builder3d-app.exe", "application_sha256", "application_bytes"),
+    ("application", "target/release/modeler3d-app.exe", "application_sha256", "application_bytes"),
     ("gateway", "target/release/r4_mcp.exe", "gateway_sha256", "gateway_bytes"),
 )
 for artifact_name, expected_relative_path, hash_key, bytes_key in expected_release_artifacts:
@@ -410,7 +410,7 @@ require(identity["previous_wrap_up_failure"]["gateway_hash_at_failure"]
 app_process = identity["release_artifacts"]["rust_app"]["process"]
 require(app_process["pid"] == identity["cleanup"]["app_pid"], "app process ID mismatch")
 require(Path(app_process["executable_path"]).resolve()
-        == (ROOT / "target/release/builder3d-app.exe").resolve(),
+        == (ROOT / "target/release/modeler3d-app.exe").resolve(),
         "app process path differs from the current Release app path")
 require(app_process["exited_after_close"] is True, "identity recheck app process did not close")
 require(identity["release_artifacts"]["rust_mcp_gateway"]["gateway_process_exited_after_client_close"] is True,
@@ -418,7 +418,7 @@ require(identity["release_artifacts"]["rust_mcp_gateway"]["gateway_process_exite
 require(identity["cleanup"]["app_process_exited"] is True,
         "identity recheck app process remains running")
 require(identity["cleanup"]["rust_builder_process_count_after_shutdown"] == 0,
-        "Rust Builder3D process remained after identity recheck")
+        "Rust 3D Modeler process remained after identity recheck")
 require(identity["cleanup"]["runtime_descriptor_removed"] is True,
         "identity recheck runtime descriptor was not removed")
 
@@ -426,7 +426,7 @@ host = identity["host"]
 require(host["input_desktop"] == "Default", "identity screenshot was not on the Default desktop")
 require(host["session_state"] == 0, "identity screenshot session was not active")
 require(host["lockapp_owned_session"] is False, "LockApp owned the identity recheck session")
-require(host["foreground_process"] == "builder3d-app", "identity screenshot app was not foreground")
+require(host["foreground_process"] == "modeler3d-app", "identity screenshot app was not foreground")
 require(host["owner_video_background_only"] is True,
         "owner video was not kept in the background during the identity check")
 require(host["power_or_lock_settings_changed"] is False, "power/lock settings changed during recheck")

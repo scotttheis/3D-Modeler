@@ -324,7 +324,7 @@
           1.0
         ]
       ],
-      "status": "Could not load image for color sampling: E:\\Builder3D-Rust\\evidence\\rebuild\\rb-07-appearance-jobs-and-print\\fixtures\\corrupt-image.png",
+      "status": "Could not load image for color sampling: E:\\3D-Modeler\\evidence\\rebuild\\rb-07-appearance-jobs-and-print\\fixtures\\corrupt-image.png",
       "modal": null,
       "image": "captures/python-light-corrupt-image-visible-error.png"
     },
@@ -365,7 +365,7 @@
           1.0
         ]
       ],
-      "status": "Could not load image for color sampling: E:\\Builder3D-Rust\\evidence\\rebuild\\rb-07-appearance-jobs-and-print\\fixtures\\corrupt-image.png",
+      "status": "Could not load image for color sampling: E:\\3D-Modeler\\evidence\\rebuild\\rb-07-appearance-jobs-and-print\\fixtures\\corrupt-image.png",
       "modal": "QFileDialog",
       "image": "captures/python-light-sample-image-picker.png"
     },
@@ -775,7 +775,7 @@
           1.0
         ]
       ],
-      "status": "Could not load image for color sampling: E:\\Builder3D-Rust\\evidence\\rebuild\\rb-07-appearance-jobs-and-print\\fixtures\\corrupt-image.png",
+      "status": "Could not load image for color sampling: E:\\3D-Modeler\\evidence\\rebuild\\rb-07-appearance-jobs-and-print\\fixtures\\corrupt-image.png",
       "modal": null,
       "image": "captures/python-dark-corrupt-image-visible-error.png"
     },
@@ -816,7 +816,7 @@
           1.0
         ]
       ],
-      "status": "Could not load image for color sampling: E:\\Builder3D-Rust\\evidence\\rebuild\\rb-07-appearance-jobs-and-print\\fixtures\\corrupt-image.png",
+      "status": "Could not load image for color sampling: E:\\3D-Modeler\\evidence\\rebuild\\rb-07-appearance-jobs-and-print\\fixtures\\corrupt-image.png",
       "modal": "QFileDialog",
       "image": "captures/python-dark-sample-image-picker.png"
     },

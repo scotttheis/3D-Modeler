@@ -1,9 +1,9 @@
-   Compiling builder3d-core v0.1.0 (E:\Builder3D-Rust\crates\builder3d-core)
-   Compiling builder3d-viewport v0.1.0 (E:\Builder3D-Rust\crates\builder3d-viewport)
-   Compiling builder3d-mcp v0.1.0 (E:\Builder3D-Rust\crates\builder3d-mcp)
-   Compiling builder3d-app v0.1.0 (E:\Builder3D-Rust\crates\builder3d-app)
+   Compiling modeler3d-core v0.1.0 (E:\3D-Modeler\crates\modeler3d-core)
+   Compiling modeler3d-viewport v0.1.0 (E:\3D-Modeler\crates\modeler3d-viewport)
+   Compiling modeler3d-mcp v0.1.0 (E:\3D-Modeler\crates\modeler3d-mcp)
+   Compiling modeler3d-app v0.1.0 (E:\3D-Modeler\crates\modeler3d-app)
     Finished `test` profile [unoptimized + debuginfo] target(s) in 46.27s
-     Running unittests src\lib.rs (target\debug\deps\builder3d_app-289afea2fa319164.exe)
+     Running unittests src\lib.rs (target\debug\deps\modeler3d_app-289afea2fa319164.exe)
 
 running 104 tests
 test artwork::tests::theme_artwork_is_scoped_and_not_shared_raster_data ... ok
@@ -115,7 +115,7 @@ failures:
 
 ---- preferences::tests::persisted_micrometre_spellings_deserialize_without_changing_the_schema stdout ----
 
-thread 'preferences::tests::persisted_micrometre_spellings_deserialize_without_changing_the_schema' (30904) panicked at crates\builder3d-app\src\preferences.rs:502:47:
+thread 'preferences::tests::persisted_micrometre_spellings_deserialize_without_changing_the_schema' (30904) panicked at crates\modeler3d-app\src\preferences.rs:502:47:
 micrometre alias should deserialize: Error("unknown variant `µm`, expected one of `Micrometre`, `um`, `Âµm`, `Î¼m`, `Millimetre`, `Centimetre`, `Metre`, `Inch`, `Foot`", line: 0, column: 0)
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
@@ -125,4 +125,4 @@ failures:
 
 test result: FAILED. 103 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.95s
 
-error: test failed, to rerun pass `-p builder3d-app --lib`
+error: test failed, to rerun pass `-p modeler3d-app --lib`

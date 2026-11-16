@@ -3,17 +3,17 @@
   "accepted_png_count": 117,
   "application_counts": {
     "Bambu Studio": 1,
-    "Builder3D Rust": 82,
+    "3D Modeler Rust": 82,
     "Python reference": 34
   },
   "application_theme_counts": {
     "Bambu Studio / light": 1,
-    "Builder3D Rust / dark": 42,
-    "Builder3D Rust / light": 40,
+    "3D Modeler Rust / dark": 42,
+    "3D Modeler Rust / light": 40,
     "Python reference / dark": 17,
     "Python reference / light": 17
   },
-  "capture_dimensions": "Builder3D Python/Rust frames are 1280x840 logical and physical at 96 DPI / 100% scale; Bambu Studio screenshot is 2553x1385 pixels.",
+  "capture_dimensions": "3D Modeler Python/Rust frames are 1280x840 logical and physical at 96 DPI / 100% scale; Bambu Studio screenshot is 2553x1385 pixels.",
   "python_result_record_count": 32,
   "manual_python_report_count": 2,
   "rust_debug_sha256": "0BF7753FE460A6A854906457F86363DDC905B455FA790760B6D9122F6F9CB0D6",
@@ -26,7 +26,7 @@
       "application": "Bambu Studio",
       "theme": "light",
       "action": "opened-staged-stl",
-      "route": "Launched from Rust 3D Print handoff; loaded Builder3D_Print_001.stl.",
+      "route": "Launched from Rust 3D Print handoff; loaded Modeler3D_Print_001.stl.",
       "capture": "captures/bambu-studio-rust-final-staged-scene.png",
       "sha256": "90866CA1DF67C24D48E84F561C994DB0D437B10EF175DB1D9782F30DDDADE359",
       "bytes": 173458,
@@ -43,7 +43,7 @@
       "source_result_json": null,
       "provenance": "actual installed slicer process after Rust launch",
       "observed": {
-        "model_name": "Builder3D_Print_001.stl",
+        "model_name": "Modeler3D_Print_001.stl",
         "toast": "40 ? 40 ? 40 mm; 64,000 mm?; 12 triangles"
       }
     },
@@ -171,7 +171,7 @@
             1.0
           ]
         ],
-        "status": "Could not load image for color sampling: E:\\Builder3D-Rust\\evidence\\rebuild\\rb-07-appearance-jobs-and-print\\fixtures\\corrupt-image.png",
+        "status": "Could not load image for color sampling: E:\\3D-Modeler\\evidence\\rebuild\\rb-07-appearance-jobs-and-print\\fixtures\\corrupt-image.png",
         "modal": null
       }
     },
@@ -956,7 +956,7 @@
             1.0
           ]
         ],
-        "status": "Could not load image for color sampling: E:\\Builder3D-Rust\\evidence\\rebuild\\rb-07-appearance-jobs-and-print\\fixtures\\corrupt-image.png",
+        "status": "Could not load image for color sampling: E:\\3D-Modeler\\evidence\\rebuild\\rb-07-appearance-jobs-and-print\\fixtures\\corrupt-image.png",
         "modal": "QFileDialog"
       }
     },
@@ -1148,7 +1148,7 @@
             1.0
           ]
         ],
-        "status": "Could not load image for color sampling: E:\\Builder3D-Rust\\evidence\\rebuild\\rb-07-appearance-jobs-and-print\\fixtures\\corrupt-image.png",
+        "status": "Could not load image for color sampling: E:\\3D-Modeler\\evidence\\rebuild\\rb-07-appearance-jobs-and-print\\fixtures\\corrupt-image.png",
         "modal": null
       }
     },
@@ -1933,7 +1933,7 @@
             1.0
           ]
         ],
-        "status": "Could not load image for color sampling: E:\\Builder3D-Rust\\evidence\\rebuild\\rb-07-appearance-jobs-and-print\\fixtures\\corrupt-image.png",
+        "status": "Could not load image for color sampling: E:\\3D-Modeler\\evidence\\rebuild\\rb-07-appearance-jobs-and-print\\fixtures\\corrupt-image.png",
         "modal": "QFileDialog"
       }
     },
@@ -2004,7 +2004,7 @@
     {
       "id": "RB07-036",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "after-color-cancel",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -2031,7 +2031,7 @@
     {
       "id": "RB07-037",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "after-report-close",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -2058,7 +2058,7 @@
     {
       "id": "RB07-038",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "after-simplify-failure",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -2085,7 +2085,7 @@
     {
       "id": "RB07-039",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "app-menu",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -2112,7 +2112,7 @@
     {
       "id": "RB07-040",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "color-dialog",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -2139,7 +2139,7 @@
     {
       "id": "RB07-041",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "corrupt-image-error",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -2166,7 +2166,7 @@
     {
       "id": "RB07-042",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "corrupt-image-path",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -2193,7 +2193,7 @@
     {
       "id": "RB07-043",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "edit-tab",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -2220,7 +2220,7 @@
     {
       "id": "RB07-044",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "empty-scene",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -2247,7 +2247,7 @@
     {
       "id": "RB07-045",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "image-path",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -2274,7 +2274,7 @@
     {
       "id": "RB07-046",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "image-retry-success",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -2301,7 +2301,7 @@
     {
       "id": "RB07-047",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "image-sampled",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -2328,7 +2328,7 @@
     {
       "id": "RB07-048",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "import-model-dialog",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -2355,7 +2355,7 @@
     {
       "id": "RB07-049",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "insert-cube-toolbar",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -2382,7 +2382,7 @@
     {
       "id": "RB07-050",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "insert-tab",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -2409,7 +2409,7 @@
     {
       "id": "RB07-051",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "job-cancel-requested",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -2436,7 +2436,7 @@
     {
       "id": "RB07-052",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "job-cancelled",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -2463,7 +2463,7 @@
     {
       "id": "RB07-053",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "job-failure",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -2490,7 +2490,7 @@
     {
       "id": "RB07-054",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "job-fixture-imported",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -2517,7 +2517,7 @@
     {
       "id": "RB07-055",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "job-fixture-path",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -2544,7 +2544,7 @@
     {
       "id": "RB07-056",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "job-retry-after-failure",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -2571,7 +2571,7 @@
     {
       "id": "RB07-057",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "job-retry-complete",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -2598,7 +2598,7 @@
     {
       "id": "RB07-058",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "job-smooth-running",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -2625,7 +2625,7 @@
     {
       "id": "RB07-059",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "material-dialog",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -2652,7 +2652,7 @@
     {
       "id": "RB07-060",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "new-scene-prompt",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -2679,7 +2679,7 @@
     {
       "id": "RB07-061",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "paint-route",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -2706,7 +2706,7 @@
     {
       "id": "RB07-062",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "print-check-progress",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -2733,7 +2733,7 @@
     {
       "id": "RB07-063",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "print-cube-scene",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -2760,7 +2760,7 @@
     {
       "id": "RB07-064",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "print-prep-cube-open",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -2787,7 +2787,7 @@
     {
       "id": "RB07-065",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "print-prep-cube-report",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -2814,7 +2814,7 @@
     {
       "id": "RB07-066",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "print-prep-open",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -2841,7 +2841,7 @@
     {
       "id": "RB07-067",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "print-prep-report",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -2868,7 +2868,7 @@
     {
       "id": "RB07-068",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "print-stage-progress",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -2895,7 +2895,7 @@
     {
       "id": "RB07-069",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "print-stage-ready",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -2922,7 +2922,7 @@
     {
       "id": "RB07-070",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "settings-open",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -2949,7 +2949,7 @@
     {
       "id": "RB07-071",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "settings",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -2976,7 +2976,7 @@
     {
       "id": "RB07-072",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "simplify-hover",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -3003,7 +3003,7 @@
     {
       "id": "RB07-073",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "slicer-launch-requested",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -3030,7 +3030,7 @@
     {
       "id": "RB07-074",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "slicer-launched",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -3057,7 +3057,7 @@
     {
       "id": "RB07-075",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "slicer-selected",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -3084,7 +3084,7 @@
     {
       "id": "RB07-076",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "slicer-selection-open",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -3111,7 +3111,7 @@
     {
       "id": "RB07-077",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "dark",
       "action": "workspace",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -3138,7 +3138,7 @@
     {
       "id": "RB07-078",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "color-applied-two",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -3165,7 +3165,7 @@
     {
       "id": "RB07-079",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "color-authored",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -3192,7 +3192,7 @@
     {
       "id": "RB07-080",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "color-dialog",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -3219,7 +3219,7 @@
     {
       "id": "RB07-081",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "color-picker",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -3246,7 +3246,7 @@
     {
       "id": "RB07-082",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "color-red-selected",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -3273,7 +3273,7 @@
     {
       "id": "RB07-083",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "color-roundtrip-reimported",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -3300,7 +3300,7 @@
     {
       "id": "RB07-084",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "corrupt-image-error",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -3327,7 +3327,7 @@
     {
       "id": "RB07-085",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "export-complete",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -3354,7 +3354,7 @@
     {
       "id": "RB07-086",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "export-dialog",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -3381,7 +3381,7 @@
     {
       "id": "RB07-087",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "export-path",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -3408,7 +3408,7 @@
     {
       "id": "RB07-088",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "image-path",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -3435,7 +3435,7 @@
     {
       "id": "RB07-089",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "image-retry-success",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -3462,7 +3462,7 @@
     {
       "id": "RB07-090",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "image-sampled-two",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -3489,7 +3489,7 @@
     {
       "id": "RB07-091",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "import-roundtrip-dialog",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -3516,7 +3516,7 @@
     {
       "id": "RB07-092",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "import-roundtrip-path",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -3543,7 +3543,7 @@
     {
       "id": "RB07-093",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "insert-for-reimport",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -3570,7 +3570,7 @@
     {
       "id": "RB07-094",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "job-subdivide-first-complete",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -3597,7 +3597,7 @@
     {
       "id": "RB07-095",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "job-subdivide-limit-failure",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -3624,7 +3624,7 @@
     {
       "id": "RB07-096",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "material-dialog",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -3651,7 +3651,7 @@
     {
       "id": "RB07-097",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "material-reopened-red",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -3678,7 +3678,7 @@
     {
       "id": "RB07-098",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "menu-open",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -3705,7 +3705,7 @@
     {
       "id": "RB07-099",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "one-cube",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -3732,7 +3732,7 @@
     {
       "id": "RB07-100",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "paint-cancelled",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -3759,7 +3759,7 @@
     {
       "id": "RB07-101",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "paint-route",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -3786,7 +3786,7 @@
     {
       "id": "RB07-102",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "paint-tab",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -3813,7 +3813,7 @@
     {
       "id": "RB07-103",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "print-cube-raised",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -3840,7 +3840,7 @@
     {
       "id": "RB07-104",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "print-prep-clean-report",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -3867,7 +3867,7 @@
     {
       "id": "RB07-105",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "print-prep-open",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -3894,7 +3894,7 @@
     {
       "id": "RB07-106",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "print-stage-ready",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -3921,7 +3921,7 @@
     {
       "id": "RB07-107",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "reimport-new-scene-prompt",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -3948,7 +3948,7 @@
     {
       "id": "RB07-108",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "settings-open",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -3975,7 +3975,7 @@
     {
       "id": "RB07-109",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "settings",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -4002,7 +4002,7 @@
     {
       "id": "RB07-110",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "two-selected",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -4029,7 +4029,7 @@
     {
       "id": "RB07-111",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "workspace",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -4056,7 +4056,7 @@
     {
       "id": "RB07-112",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "welcome-start",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -4083,7 +4083,7 @@
     {
       "id": "RB07-113",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "job-heavy-fixture-imported",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -4110,7 +4110,7 @@
     {
       "id": "RB07-114",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "job-heavy-import-fixture-path",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -4137,7 +4137,7 @@
     {
       "id": "RB07-115",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "job-heavy-smooth-progress",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -4164,7 +4164,7 @@
     {
       "id": "RB07-116",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "job-heavy-smooth-retry-complete",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",
@@ -4191,7 +4191,7 @@
     {
       "id": "RB07-117",
       "accepted": true,
-      "application": "Builder3D Rust",
+      "application": "3D Modeler Rust",
       "theme": "light",
       "action": "job-heavy-welcome-theme-ready",
       "route": "Native Rust window; action is encoded by capture name and described in walkthrough.md.",

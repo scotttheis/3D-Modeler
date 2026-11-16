@@ -1,2 +1,2 @@
-COMMAND: E:\Builder3D-Rust\target\debug\builder3d-app.exe --smoke
-Builder3D shell smoke: objects=2 selected=1 tabs=5
+COMMAND: E:\3D-Modeler\target\debug\modeler3d-app.exe --smoke
+3D Modeler shell smoke: objects=2 selected=1 tabs=5

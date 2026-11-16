@@ -13,7 +13,7 @@
                         "action":  "welcome-theme-ready",
                         "fixture":  "empty",
                         "input_route":  "native Settings Light theme; 1280x840 client at 96 DPI",
-                        "window_title":  "Builder3D - Untitled",
+                        "window_title":  "3D Modeler - Untitled",
                         "logical_client_size":  [
                                                     1280,
                                                     840
@@ -36,7 +36,7 @@
                         "action":  "import-fixture-path",
                         "fixture":  "slow-job-closed-cube-heavy.ply",
                         "input_route":  "native Insert/Import Model path",
-                        "window_title":  "Builder3D - Untitled",
+                        "window_title":  "3D Modeler - Untitled",
                         "logical_client_size":  [
                                                     1280,
                                                     840
@@ -59,7 +59,7 @@
                         "action":  "fixture-imported",
                         "fixture":  "960002 vertices / 1920000 faces",
                         "input_route":  "native Import action; one selected dense mesh",
-                        "window_title":  "Builder3D - Untitled *",
+                        "window_title":  "3D Modeler - Untitled *",
                         "logical_client_size":  [
                                                     1280,
                                                     840
@@ -82,7 +82,7 @@
                         "action":  "edit-tab-ready",
                         "fixture":  "960002 vertices / 1920000 faces",
                         "input_route":  "native Edit tab selected before Subdivide",
-                        "window_title":  "Builder3D - Untitled *",
+                        "window_title":  "3D Modeler - Untitled *",
                         "logical_client_size":  [
                                                     1280,
                                                     840
@@ -105,7 +105,7 @@
                         "action":  "subdivide-cancel-requested",
                         "fixture":  "1920000 input faces",
                         "input_route":  "native Subdivide start followed immediately by its Cancel control",
-                        "window_title":  "Builder3D - Untitled *",
+                        "window_title":  "3D Modeler - Untitled *",
                         "logical_client_size":  [
                                                     1280,
                                                     840
@@ -128,7 +128,7 @@
                         "action":  "subdivide-cancelled",
                         "fixture":  "original 1920000-face scene and history retained",
                         "input_route":  "native terminal cancellation",
-                        "window_title":  "Builder3D - Untitled *",
+                        "window_title":  "3D Modeler - Untitled *",
                         "logical_client_size":  [
                                                     1280,
                                                     840
@@ -151,7 +151,7 @@
                         "action":  "subdivide-retry-complete",
                         "fixture":  "1920000 input faces; 3840000 output faces",
                         "input_route":  "native Subdivide retry after cancellation",
-                        "window_title":  "Builder3D - Untitled *",
+                        "window_title":  "3D Modeler - Untitled *",
                         "logical_client_size":  [
                                                     1280,
                                                     840
@@ -174,7 +174,7 @@
                         "action":  "subdivide-limit-failure",
                         "fixture":  "3840000 input faces; 7680000-face result exceeds 4000000-face limit",
                         "input_route":  "native second Subdivide; controlled limit error",
-                        "window_title":  "Builder3D - Untitled *",
+                        "window_title":  "3D Modeler - Untitled *",
                         "logical_client_size":  [
                                                     1280,
                                                     840
@@ -197,7 +197,7 @@
                         "action":  "smooth-retry-after-failure",
                         "fixture":  "3840000-face scene retained after controlled failure",
                         "input_route":  "native Edit/Smooth retry after failure",
-                        "window_title":  "Builder3D - Untitled *",
+                        "window_title":  "3D Modeler - Untitled *",
                         "logical_client_size":  [
                                                     1280,
                                                     840

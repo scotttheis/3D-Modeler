@@ -1,7 +1,7 @@
 # Review pack: owner batch 7, Phase 1 (2026-11-14)
 
 Every image here was taken from one release build
-(`target\release\builder3d-app.exe`) with the review harness, in both themes
+(`target\release\modeler3d-app.exe`) with the review harness, in both themes
 (`-light.png`, `-dark.png`). Older images for comparison are in `before\`.
 Images show what was painted; they are not approval and do not test the
 mouse. Open the same exe to try things by hand.
@@ -10,7 +10,7 @@ mouse. Open the same exe to try things by hand.
 |---|---|---|
 | OF-4 (from last time) | `of4-hover-tab`, `of4-hover-button` | Buttons and tabs light up when the pointer is over them. |
 | OF-28 No console window | (none) | Start the exe: no black command window behind the app. |
-| OF-29 App icon | `of29-exe-icon.png` (before: `before\of29-exe-icon.png`) | The exe file shows the blue Builder3D cube instead of the plain program icon. |
+| OF-29 App icon | `of29-exe-icon.png` (before: `before\of29-exe-icon.png`) | The exe file shows the blue 3D Modeler cube instead of the plain program icon. |
 | OF-30 Light Cube icon | `of30-insert-tab` | New glass cube on the Insert tab in light mode; dark mode unchanged. |
 | OF-31 Floor numbers | `of31-floor-framed`, `of31-floor-top` | Each number starts at the corner where its 50 mm line meets the axis. |
 | OF-32 Resize arrows | `of32-resize`, `of32-resize-drag` | Arrows twice as big; they are also twice as easy to grab. |

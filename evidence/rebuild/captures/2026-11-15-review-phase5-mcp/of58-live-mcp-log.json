@@ -8,7 +8,7 @@
       "result": {
         "about": {
           "description": "A reverse-engineering-informed 3D model repair and building application.",
-          "product": "Builder3D",
+          "product": "3D Modeler",
           "version": "0.1.0"
         },
         "default_import_unit": "mm",
@@ -330,7 +330,7 @@
         "size": "normal",
         "sticky_selection": false,
         "theme": "dark",
-        "window_title": "Builder3D - Untitled"
+        "window_title": "3D Modeler - Untitled"
       }
     },
     {
@@ -343,7 +343,7 @@
       "result": {
         "about": {
           "description": "A reverse-engineering-informed 3D model repair and building application.",
-          "product": "Builder3D",
+          "product": "3D Modeler",
           "version": "0.1.0"
         },
         "default_import_unit": "mm",
@@ -665,7 +665,7 @@
         "size": "normal",
         "sticky_selection": false,
         "theme": "light",
-        "window_title": "Builder3D - Untitled"
+        "window_title": "3D Modeler - Untitled"
       }
     },
     {
@@ -736,7 +736,7 @@
       "result": {
         "about": {
           "description": "A reverse-engineering-informed 3D model repair and building application.",
-          "product": "Builder3D",
+          "product": "3D Modeler",
           "version": "0.1.0"
         },
         "default_import_unit": "mm",
@@ -1059,7 +1059,7 @@
         "size": "normal",
         "sticky_selection": false,
         "theme": "light",
-        "window_title": "Builder3D - Untitled *"
+        "window_title": "3D Modeler - Untitled *"
       }
     },
     {
@@ -1072,7 +1072,7 @@
       "result": {
         "about": {
           "description": "A reverse-engineering-informed 3D model repair and building application.",
-          "product": "Builder3D",
+          "product": "3D Modeler",
           "version": "0.1.0"
         },
         "default_import_unit": "mm",
@@ -1395,20 +1395,20 @@
         "size": "normal",
         "sticky_selection": false,
         "theme": "light",
-        "window_title": "Builder3D - Untitled *"
+        "window_title": "3D Modeler - Untitled *"
       }
     },
     {
       "tool": "capture_window",
       "arguments": {
-        "path": "E:/Builder3D-Rust/evidence/rebuild/captures/2026-11-15-review-phase5-mcp/of58-light-object-tab.png",
+        "path": "E:/3D-Modeler/evidence/rebuild/captures/2026-11-15-review-phase5-mcp/of58-light-object-tab.png",
         "overwrite": true
       },
       "ok": true,
       "result": {
         "bytes": 238257,
         "height_px": 840,
-        "path": "\\\\?\\E:\\Builder3D-Rust\\evidence\\rebuild\\captures\\2026-11-15-review-phase5-mcp\\of58-light-object-tab.png",
+        "path": "\\\\?\\E:\\3D-Modeler\\evidence\\rebuild\\captures\\2026-11-15-review-phase5-mcp\\of58-light-object-tab.png",
         "width_px": 1280
       }
     },
@@ -1421,7 +1421,7 @@
       "result": {
         "about": {
           "description": "A reverse-engineering-informed 3D model repair and building application.",
-          "product": "Builder3D",
+          "product": "3D Modeler",
           "version": "0.1.0"
         },
         "default_import_unit": "mm",
@@ -1744,7 +1744,7 @@
         "size": "normal",
         "sticky_selection": false,
         "theme": "dark",
-        "window_title": "Builder3D - Untitled *"
+        "window_title": "3D Modeler - Untitled *"
       }
     },
     {
@@ -1756,7 +1756,7 @@
       "result": {
         "about": {
           "description": "A reverse-engineering-informed 3D model repair and building application.",
-          "product": "Builder3D",
+          "product": "3D Modeler",
           "version": "0.1.0"
         },
         "default_import_unit": "mm",
@@ -2079,20 +2079,20 @@
         "size": "normal",
         "sticky_selection": false,
         "theme": "dark",
-        "window_title": "Builder3D - Untitled *"
+        "window_title": "3D Modeler - Untitled *"
       }
     },
     {
       "tool": "capture_window",
       "arguments": {
-        "path": "E:/Builder3D-Rust/evidence/rebuild/captures/2026-11-15-review-phase5-mcp/of58-dark-about.png",
+        "path": "E:/3D-Modeler/evidence/rebuild/captures/2026-11-15-review-phase5-mcp/of58-dark-about.png",
         "overwrite": true
       },
       "ok": true,
       "result": {
         "bytes": 704607,
         "height_px": 840,
-        "path": "\\\\?\\E:\\Builder3D-Rust\\evidence\\rebuild\\captures\\2026-11-15-review-phase5-mcp\\of58-dark-about.png",
+        "path": "\\\\?\\E:\\3D-Modeler\\evidence\\rebuild\\captures\\2026-11-15-review-phase5-mcp\\of58-dark-about.png",
         "width_px": 1280
       }
     },
@@ -2105,7 +2105,7 @@
       "result": {
         "about": {
           "description": "A reverse-engineering-informed 3D model repair and building application.",
-          "product": "Builder3D",
+          "product": "3D Modeler",
           "version": "0.1.0"
         },
         "default_import_unit": "mm",
@@ -2428,20 +2428,20 @@
         "size": "normal",
         "sticky_selection": false,
         "theme": "dark",
-        "window_title": "Builder3D - Untitled *"
+        "window_title": "3D Modeler - Untitled *"
       }
     },
     {
       "tool": "capture_window",
       "arguments": {
-        "path": "E:/Builder3D-Rust/evidence/rebuild/captures/2026-11-15-review-phase5-mcp/of58-dark-start.png",
+        "path": "E:/3D-Modeler/evidence/rebuild/captures/2026-11-15-review-phase5-mcp/of58-dark-start.png",
         "overwrite": true
       },
       "ok": true,
       "result": {
         "bytes": 248085,
         "height_px": 840,
-        "path": "\\\\?\\E:\\Builder3D-Rust\\evidence\\rebuild\\captures\\2026-11-15-review-phase5-mcp\\of58-dark-start.png",
+        "path": "\\\\?\\E:\\3D-Modeler\\evidence\\rebuild\\captures\\2026-11-15-review-phase5-mcp\\of58-dark-start.png",
         "width_px": 1280
       }
     },
@@ -2488,7 +2488,7 @@
       "result": {
         "about": {
           "description": "A reverse-engineering-informed 3D model repair and building application.",
-          "product": "Builder3D",
+          "product": "3D Modeler",
           "version": "0.1.0"
         },
         "default_import_unit": "mm",
@@ -2810,7 +2810,7 @@
         "size": "normal",
         "sticky_selection": false,
         "theme": "dark",
-        "window_title": "Builder3D - Untitled *"
+        "window_title": "3D Modeler - Untitled *"
       }
     },
     {
@@ -2823,7 +2823,7 @@
       "result": {
         "about": {
           "description": "A reverse-engineering-informed 3D model repair and building application.",
-          "product": "Builder3D",
+          "product": "3D Modeler",
           "version": "0.1.0"
         },
         "default_import_unit": "mm",
@@ -3145,7 +3145,7 @@
         "size": "normal",
         "sticky_selection": false,
         "theme": "dark",
-        "window_title": "Builder3D - Untitled *"
+        "window_title": "3D Modeler - Untitled *"
       }
     },
     {
@@ -3157,7 +3157,7 @@
       "result": {
         "asked_user": false,
         "exiting": true,
-        "message": "Closing Builder3D without saving"
+        "message": "Closing 3D Modeler without saving"
       }
     }
   ]

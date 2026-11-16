@@ -28,8 +28,8 @@ MISSING_DESCRIPTOR = (
 
 async def main() -> None:
     environment = os.environ.copy()
-    environment["BUILDER3D_RUNTIME_FILE"] = str(MISSING_DESCRIPTOR)
-    environment["BUILDER3D_MCP_PROFILE"] = "full"
+    environment["MODELER3D_RUNTIME_FILE"] = str(MISSING_DESCRIPTOR)
+    environment["MODELER3D_MCP_PROFILE"] = "full"
     server = StdioServerParameters(
         command=str(PROJECT_ROOT / "target" / "release" / "r4_mcp.exe"),
         args=[],
