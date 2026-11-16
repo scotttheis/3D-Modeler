@@ -48,14 +48,14 @@ Phase 5 (OF-58, the AI does everything) built 2026-11-15, pack
 tools (catalog 74): `app_settings`, `set_app_settings`, `customize_ribbon`,
 `show_screen`, `recent_files`, `open_recent`, `capture_window`, `exit_app`,
 carried out by the desktop shell with its own code. No "visual only" ledger
-rows remain. **Awaiting owner review.**
+rows remain. **Owner 2026-11-16: approved ("it tests great … call it done").**
+Phase 5 is closed.
 
 **Known work, in order** (a session takes the first item not done):
 
 1. Done and approved 2026-11-15: Phase 3 follow-ups OF-59 to OF-61.
 2. Done and approved 2026-11-15: Phase 4 — Measure ruler (OF-55).
-3. Phase 5 — MCP does everything (OF-58): built 2026-11-15, awaiting owner
-   review.
+3. Done and approved 2026-11-16: Phase 5 — MCP does everything (OF-58).
 4. F5 — release link reliability; F6 — reconcile the 148-row ledger
    (fix-first list below).
 5. Revisit the Material texture dialog (OF-46 follow-up): the owner wants to
@@ -84,8 +84,8 @@ the next stop message, not guessed.
 
 ## Last review pack
 
-`evidence/rebuild/captures/2026-11-15-review-phase5-mcp/` (OF-58), awaiting
-owner review. `evidence/rebuild/captures/2026-11-15-review-phase4-measure/` (OF-55),
+`evidence/rebuild/captures/2026-11-15-review-phase5-mcp/` (OF-58), approved
+by the owner 2026-11-16. `evidence/rebuild/captures/2026-11-15-review-phase4-measure/` (OF-55),
 approved by the owner 2026-11-15. `evidence/rebuild/captures/2026-11-15-review-phase3-followups/` (OF-59 to
 OF-61), approved by the owner 2026-11-15. `evidence/rebuild/captures/2026-11-14-review-phase3/` (Phase 3: OF-48 to
 OF-54), reviewed by the owner 2026-11-15. `evidence/rebuild/captures/2026-11-14-review-phase2/` (Phase 2: OF-44 and
