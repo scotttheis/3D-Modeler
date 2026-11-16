@@ -1190,7 +1190,9 @@ impl Modeler3dApp {
                 self.theme_mode = self.commands.preferences().theme_mode();
                 self.ui_size = self.commands.preferences().ui_size();
                 self.ribbon_pinned = self.commands.preferences().ribbon_pinned();
-                if self.commands.preferences().ribbon_favorites().is_empty() {
+                // Only a first start gets the default shortcuts. A saved bar,
+                // even one the person emptied, is theirs and is kept.
+                if !report.ribbon_favorites_saved {
                     self.commands
                         .preferences_mut()
                         .set_ribbon_favorites(default_favorites());
@@ -8558,6 +8560,52 @@ mod tests {
             ..Modeler3dApp::default()
         };
         (app, directory)
+    }
+
+    #[test]
+    fn shortcut_bar_starts_with_the_owner_set_and_then_keeps_what_the_person_chose() {
+        let (mut app, directory) = shell_for_jobs("shortcut-bar-defaults-kept");
+        let legacy = modeler3d_platform::LegacySettings::default();
+        let restart = |app: &Modeler3dApp| {
+            let mut next = Modeler3dApp {
+                settings_path: app.settings_path.clone(),
+                ..Modeler3dApp::default()
+            };
+            next.load_preferences_from_legacy(&legacy);
+            next.commands.preferences().ribbon_favorites().to_vec()
+        };
+
+        // First start: no saved bar, so the default six.
+        app.load_preferences_from_legacy(&legacy);
+        let defaults = [
+            "Insert:Cube",
+            "Insert:Sphere",
+            "Object:Settle",
+            "Object:Mirror",
+            "Edit:Merge",
+            "Edit:Subtract",
+        ];
+        assert_eq!(app.commands.preferences().ribbon_favorites(), defaults);
+
+        // A change is kept across a restart.
+        app.set_favorite("Object:Mirror", false);
+        app.set_favorite("Insert:Torus", true);
+        let changed = app.commands.preferences().ribbon_favorites().to_vec();
+        assert!(!changed.iter().any(|key| key == "Object:Mirror"));
+        assert_eq!(restart(&app), changed);
+
+        // Changing it again replaces the earlier choice.
+        app.set_favorite("Insert:Cube", false);
+        let changed_again = app.commands.preferences().ribbon_favorites().to_vec();
+        assert_ne!(changed_again, changed);
+        assert_eq!(restart(&app), changed_again);
+
+        // An emptied bar stays empty; the defaults do not come back.
+        for key in changed_again {
+            app.set_favorite(&key, false);
+        }
+        assert!(restart(&app).is_empty());
+        let _ = std::fs::remove_dir_all(directory);
     }
 
     #[test]

@@ -168,14 +168,17 @@ pub(crate) fn normalized_tab_order(
     order
 }
 
-/// Returns a small default favorite set that fits the compact strip.
+/// Returns the shortcut bar a person starts with (owner's choice,
+/// 2026-11-16). After that the bar is theirs: it is saved as they change it.
 #[must_use]
 pub(crate) fn default_favorites() -> Vec<String> {
     [
         (RibbonTab::Insert, "Cube"),
-        (RibbonTab::Object, "Duplicate"),
-        (RibbonTab::Object, "Delete"),
-        (RibbonTab::View, "Reset View"),
+        (RibbonTab::Insert, "Sphere"),
+        (RibbonTab::Object, "Settle"),
+        (RibbonTab::Object, "Mirror"),
+        (RibbonTab::Edit, "Merge"),
+        (RibbonTab::Edit, "Subtract"),
     ]
     .into_iter()
     .filter_map(|(tab, label)| {

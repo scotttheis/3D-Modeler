@@ -229,6 +229,10 @@ pub struct PreferenceLoadReport {
     pub migrated_legacy: bool,
     /// True when an existing JSON file was parsed successfully.
     pub json_file_loaded: bool,
+    /// True when the settings (or the legacy settings) already held the
+    /// person's shortcut bar, even an empty one. Only a first start, with no
+    /// saved bar at all, gets the default shortcuts.
+    pub ribbon_favorites_saved: bool,
 }
 
 impl Preferences {
@@ -343,9 +347,13 @@ impl Preferences {
             migrated_legacy = true;
         }
 
+        let mut ribbon_favorites_saved = false;
         if let Some(value) = object.remove("ribbon_favorites") {
             match parse_string_list(&value) {
-                Some(items) => preferences.set_ribbon_favorites(items),
+                Some(items) => {
+                    preferences.set_ribbon_favorites(items);
+                    ribbon_favorites_saved = true;
+                }
                 None => {
                     push_warning(
                         &mut warnings,
@@ -355,12 +363,14 @@ impl Preferences {
                         legacy_string_list(legacy, "ribbon_favorites", &mut warnings)
                     {
                         preferences.set_ribbon_favorites(items);
+                        ribbon_favorites_saved = true;
                         migrated_legacy = true;
                     }
                 }
             }
         } else if let Some(items) = legacy_string_list(legacy, "ribbon_favorites", &mut warnings) {
             preferences.set_ribbon_favorites(items);
+            ribbon_favorites_saved = true;
             migrated_legacy = true;
         }
 
@@ -442,6 +452,7 @@ impl Preferences {
             warnings,
             migrated_legacy,
             json_file_loaded,
+            ribbon_favorites_saved,
         })
     }
 

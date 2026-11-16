@@ -13,6 +13,8 @@ version 0.1.1, 2026-11-13, `E:\3D-Modeler-RC\Builder3D-RC1.msi` (50 MB),
 
 **Renamed 2026-11-16:** the app is now **3D Modeler** (was Builder3D); hidden names use `Modeler3D` / `modeler3d`. Where the old name stays, and why, is in the "Name" section of [`AGENTS.md`](../AGENTS.md). Pre-rename backup: `G:\Builder3D-Rust_snapshot_20261116-094924_pre-rename-3D-Modeler`.
 
+**Shortcut bar 2026-11-16 (owner request):** a first start now gets Cube, Sphere, Settle, Mirror, Merge, Subtract. After that the bar is the person's own: every change is saved and kept, and an emptied bar stays empty (before, an empty bar got the defaults back at the next start). Existing settings keep their bar; Customize ribbon → Reset defaults gives the new six. Test `shortcut_bar_starts_with_the_owner_set_and_then_keeps_what_the_person_chose`. Waiting for owner review.
+
 **Owner batch 7** ([`owner-feedback-2026-11-14.md`](owner-feedback-2026-11-14.md),
 OF-28 to OF-58, five phases; Emboss OF-56/57 deferred by the owner).
 Phase 1 done (OF-28 to OF-45), pack
