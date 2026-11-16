@@ -87,6 +87,8 @@ struct ShortcutDrag(String);
 const EMPTY_FAVORITES_HINT_WIDTH: f32 = 130.0;
 const TOP_ROW_SPACING: f32 = 1.0;
 const SLICER_BUTTON_WIDTH: f32 = 84.0;
+const TRANSFORM_AXIS_LABEL_WIDTH: f32 = 14.0;
+const TRANSFORM_FIELD_WIDTH: f32 = 92.0;
 const THEME_TOGGLE_WIDTH: f32 = 52.0;
 /// Room for the top-right cluster: Slicer, theme toggle, "Save", "Save As",
 /// Undo and Redo, with spacing. The labelled buttons size to their text, so
@@ -4301,6 +4303,10 @@ impl Modeler3dApp {
                     .shadow(theme::floating_shadow(self.theme_mode))
                     .inner_margin(egui::Margin::symmetric(10, 8))
                     .show(ui, |ui| {
+                        // Each tab spans exactly one axis column below it
+                        // (axis letter + box), so the edges line up (OF-65).
+                        let gap = ui.spacing().item_spacing.x;
+                        let column_width = TRANSFORM_AXIS_LABEL_WIDTH + gap + TRANSFORM_FIELD_WIDTH;
                         ui.horizontal(|ui| {
                             for mode in [
                                 TransformPanelMode::Move,
@@ -4322,25 +4328,10 @@ impl Modeler3dApp {
                                 } else {
                                     Color32::TRANSPARENT
                                 });
-                                if ui.add_sized([82.0, 28.0], button).clicked() {
+                                if ui.add_sized([column_width, 28.0], button).clicked() {
                                     self.transform_panel_mode = mode;
                                 }
                             }
-                            ui.separator();
-                            ui.label(
-                                RichText::new(format!(
-                                    "{} selected",
-                                    self.commands.selected_count()
-                                ))
-                                .small()
-                                .color(palette.muted),
-                            );
-                            ui.label(
-                                RichText::new(self.commands.preferences().display_unit().label())
-                                    .small()
-                                    .strong()
-                                    .color(palette.accent_dark),
-                            );
                         });
                         if self.commands.selected_count() > 0 {
                             let mut apply = false;
@@ -4354,7 +4345,7 @@ impl Modeler3dApp {
                                     ["X", "Y", "Z"].into_iter().zip(fields).enumerate()
                                 {
                                     ui.add_sized(
-                                        [14.0, CONTROL_HEIGHT],
+                                        [TRANSFORM_AXIS_LABEL_WIDTH, CONTROL_HEIGHT],
                                         egui::Label::new(
                                             RichText::new(axis)
                                                 .strong()
@@ -4362,7 +4353,7 @@ impl Modeler3dApp {
                                         ),
                                     );
                                     let response = ui.add_sized(
-                                        [92.0, CONTROL_HEIGHT],
+                                        [TRANSFORM_FIELD_WIDTH, CONTROL_HEIGHT],
                                         egui::TextEdit::singleline(field)
                                             .align(egui::Align2::LEFT_CENTER),
                                     );
@@ -8836,6 +8827,95 @@ mod tests {
         app.toggle_theme();
         assert_eq!(app.theme_mode, ThemeMode::Light);
         assert_eq!(app.commands.preferences().theme_mode(), ThemeMode::Light);
+        assert!(std::fs::remove_dir_all(directory).is_ok());
+    }
+
+    /// Renders the transform strip once and returns its painted rectangles and
+    /// text.
+    fn transform_strip_shapes(app: &mut Modeler3dApp) -> (Vec<egui::epaint::RectShape>, String) {
+        let context = egui::Context::default();
+        let mut rects = Vec::new();
+        let mut text = String::new();
+        for _ in 0..2 {
+            let mut output = context.run_ui(egui::RawInput::default(), |ui| {
+                app.render_transform_strip(&ui.ctx().clone());
+            });
+            output.textures_delta.clear();
+            rects.clear();
+            text.clear();
+            for clipped in &output.shapes {
+                match &clipped.shape {
+                    egui::Shape::Rect(rect) => rects.push(rect.clone()),
+                    egui::Shape::Text(shape) => {
+                        text.push_str(shape.galley.text());
+                        text.push('|');
+                    }
+                    _ => {}
+                }
+            }
+        }
+        (rects, text)
+    }
+
+    #[test]
+    fn transform_strip_has_no_count_and_each_tab_sits_over_its_axis_box() {
+        let (mut app, directory) = shell_for_jobs("of65-transform-strip");
+        app.dispatch(CommandId::AddPrimitive(modeler3d_core::PrimitiveKind::Cube));
+        assert_eq!(app.commands.selected_count(), 1);
+        for (axis, mode) in [
+            TransformPanelMode::Move,
+            TransformPanelMode::Rotate,
+            TransformPanelMode::Resize,
+        ]
+        .into_iter()
+        .enumerate()
+        {
+            app.transform_panel_mode = mode;
+            let (rects, text) = transform_strip_shapes(&mut app);
+            assert!(!text.contains("selected"), "count still shown: {text}");
+            // The tab row is the top row; only the chosen tab is filled.
+            let top = rects
+                .iter()
+                .map(|rect| rect.rect.min.y)
+                .fold(f32::MAX, f32::min);
+            let tabs: Vec<&egui::epaint::RectShape> = rects
+                .iter()
+                .filter(|rect| (rect.rect.min.y - top).abs() < 0.5)
+                .collect();
+            assert_eq!(tabs.len(), 3, "{mode:?}: three tabs");
+            let filled: Vec<egui::Rect> = tabs
+                .iter()
+                .filter(|rect| rect.fill != Color32::TRANSPARENT)
+                .map(|rect| rect.rect)
+                .collect();
+            assert_eq!(filled.len(), 1, "{mode:?}: one highlighted tab");
+            let tab = filled[0];
+            // The axis boxes are the stroked frames below the tab row.
+            let mut boxes: Vec<egui::Rect> = rects
+                .iter()
+                .map(|rect| rect.rect)
+                .filter(|rect| {
+                    rect.min.y > tab.max.y && (rect.width() - TRANSFORM_FIELD_WIDTH).abs() < 1.0
+                })
+                .collect();
+            boxes.sort_by(|a, b| a.min.x.total_cmp(&b.min.x));
+            boxes.dedup_by(|a, b| (a.min.x - b.min.x).abs() < 0.5);
+            assert_eq!(boxes.len(), 3, "{mode:?}: {boxes:?}");
+            assert!(
+                (tab.max.x - boxes[axis].max.x).abs() < 0.5,
+                "{mode:?}: tab right {} vs box right {}",
+                tab.max.x,
+                boxes[axis].max.x
+            );
+            // Between two boxes sit: gap, axis letter, gap.
+            let gap = (boxes[1].min.x - boxes[0].max.x - TRANSFORM_AXIS_LABEL_WIDTH) / 2.0;
+            let column_left = boxes[axis].min.x - gap - TRANSFORM_AXIS_LABEL_WIDTH;
+            assert!(
+                (tab.min.x - column_left).abs() < 0.5,
+                "{mode:?}: tab left {} vs column left {column_left}",
+                tab.min.x
+            );
+        }
         assert!(std::fs::remove_dir_all(directory).is_ok());
     }
 

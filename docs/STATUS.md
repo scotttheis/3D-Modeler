@@ -3,7 +3,7 @@
 The only place current status is written. Keep it to one screen. Plan:
 [`product-rebuild-plan.md`](product-rebuild-plan.md).
 
-Updated 2026-11-16. Full gate passed 2026-11-16 after Phase 6 OF-63/OF-64 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Earlier: full gate passed 2026-11-15 after Phase 5 OF-58 (fmt, clippy, tests, deny, audit, MCP parity with no exemptions, smoke, capture board); a last small fix then passed the Fast gate. Release exe rebuilt from that source (3m49s) and driven live through the real MCP gateway for the Phase 5 review pack.
+Updated 2026-11-16. Full gate passed 2026-11-16 after OF-65 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Before that, full gate passed 2026-11-16 after Phase 6 OF-63/OF-64 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Earlier: full gate passed 2026-11-15 after Phase 5 OF-58 (fmt, clippy, tests, deny, audit, MCP parity with no exemptions, smoke, capture board); a last small fix then passed the Fast gate. Release exe rebuilt from that source (3m49s) and driven live through the real MCP gateway for the Phase 5 review pack.
 
 Test releases (how-to: [`packaging.md`](packaging.md)): last is **RC1**,
 version 0.1.1, 2026-11-13, `E:\3D-Modeler-RC\Builder3D-RC1.msi` (50 MB),
@@ -60,7 +60,13 @@ Phase 6 (OF-63 Items double-click centres, OF-64 settings note) built
 MCP `frame_view` in the live app now frames with the desktop camera (same
 camera as a double-click); `app_settings` gains `settings_notice`,
 `set_app_settings` gains `dismiss_settings_notice`. **Waiting for owner
-review**; the owner may add more Phase 6 rows.
+review**; the owner may add more Phase 6 rows. OF-65 (transform strip: the
+"N selected / mm" note removed; each Move / Rotate / Resize tab exactly as wide
+as the X / Y / Z column below it) built 2026-11-16, pack
+`evidence/rebuild/captures/2026-11-16-of65-transform-strip/`, test
+`transform_strip_has_no_count_and_each_tab_sits_over_its_axis_box`. **Waiting
+for owner review.** Noticed while capturing, not changed: Rotate shows
+"-0.000 deg" for an unrotated cube's Y.
 
 **Known work, in order** (a session takes the first item not done):
 
@@ -70,10 +76,9 @@ review**; the owner may add more Phase 6 rows.
 4. Phase 6 — more fixes before F5 (owner 2026-11-16: "let's finish fixing
    everything before f5"): OF-63 double-click an Items row to centre on it,
    OF-64 settings-migration notice overlapping the ribbon — both built
-   2026-11-16, owner review pending. **Next to build: OF-65** transform
-   strip clean-up (remove the "N selected / mm" note, line up Move / Rotate /
-   Resize with the X / Y / Z boxes; owner 2026-11-16, screenshot in the row).
-   The owner may add more; finish them all before item 5.
+   2026-11-16, owner review pending. OF-65 transform strip clean-up built
+   2026-11-16, owner review pending. No more Phase 6 rows to build; the
+   owner may add more; finish them all before item 5.
 5. F5 — release link reliability; F6 — reconcile the 148-row ledger
    (fix-first list below).
 6. Revisit the Material texture dialog (OF-46 follow-up): the owner wants to
@@ -102,7 +107,7 @@ the next stop message, not guessed.
 
 ## Last review pack
 
-`evidence/rebuild/captures/2026-11-16-review-phase6/` (OF-63, OF-64), owner review pending. `evidence/rebuild/captures/2026-11-15-review-phase5-mcp/` (OF-58), approved
+`evidence/rebuild/captures/2026-11-16-of65-transform-strip/` (OF-65), owner review pending. `evidence/rebuild/captures/2026-11-16-review-phase6/` (OF-63, OF-64), owner review pending. `evidence/rebuild/captures/2026-11-15-review-phase5-mcp/` (OF-58), approved
 by the owner 2026-11-16. `evidence/rebuild/captures/2026-11-15-review-phase4-measure/` (OF-55),
 approved by the owner 2026-11-15. `evidence/rebuild/captures/2026-11-15-review-phase3-followups/` (OF-59 to
 OF-61), approved by the owner 2026-11-15. `evidence/rebuild/captures/2026-11-14-review-phase3/` (Phase 3: OF-48 to
