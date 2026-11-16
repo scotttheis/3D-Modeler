@@ -4346,3 +4346,5 @@ Owner decision: the app is renamed from Builder3D to 3D Modeler. Display name "3
 Pre-rename snapshot `G:\Builder3D-Rust_snapshot_20261116-094924_pre-rename-3D-Modeler`: 8,624 files and 1,216,896,280 bytes matched the source exactly (`target` excluded).
 
 Done by script over 844 text files and 23 file/folder names, then hand fixes where a program-file name was needed. Recorded hashes and byte counts inside older evidence receipts describe the files as they were before the rename. Two old logs with mixed encoding (`evidence/rebuild/rb-03-lifecycle-and-file-completion/logs/cargo-clippy-workspace.log`, `cargo-test-workspace.log`) and binary captures were left as they were.
+
+Folder renamed to `E:D-Modeler` and `E:D-Modeler-RC` the same day (an Explorer window on `targetelease` had held the old folder). Debug build and `--smoke` pass from the new path. Full gate passed before the commit: fmt, clippy, 483 tests, deny, audit, MCP parity, smoke, capture board. Snapshot `G:D-Modeler_snapshot_20261116-104006_rename-complete`: 9,647 files and 1,251,402,190 bytes matched the source exactly (`target` excluded).
