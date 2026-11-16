@@ -57,6 +57,12 @@ pub fn read_legacy_settings() -> LegacySettings {
 /// `REG_SZ` and `REG_MULTI_SZ` are the usual scalar and QStringList encodings;
 /// `REG_DWORD`/`REG_QWORD` cover scalar values if a QSettings version chose an
 /// integer representation. Other encodings are reported to the caller.
+/// Pure byte decoding, so its tests run on every platform; only the Windows
+/// registry reader calls it in a product build.
+#[cfg_attr(
+    all(not(windows), not(test)),
+    expect(dead_code, reason = "only the Windows registry reader calls it")
+)]
 fn decode_registry_value(registry_type: u32, bytes: &[u8]) -> Result<Vec<String>, String> {
     const REG_SZ: u32 = 1;
     const REG_DWORD: u32 = 4;
