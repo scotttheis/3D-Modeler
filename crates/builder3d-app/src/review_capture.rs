@@ -12,7 +12,7 @@
 //! | Variable | Values | Default |
 //! |---|---|---|
 //! | `BUILDER3D_REVIEW_CAPTURE` | output PNG path | harness off |
-//! | `BUILDER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `resize`, `resize-drag`, `multi`, `merge`, `unselected`, `material`, `settings`, `save`, `export`, `menu`, `colors`, `mirror`, `merge-apart`, `repair`, `paste`, `align`, `paint`, `paint-picker`, `xray`, `texture`, `texture-dialog`, `grab`, `crease`, `crease-sharp`, `smooth-brush`, `simplify`, `simplify-area`, `subdivide`, `hollow`, `hollow-dialog`, `hollow-error`, `measure`, `measure-start` | `move` |
+//! | `BUILDER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `resize`, `resize-drag`, `multi`, `merge`, `unselected`, `material`, `settings`, `save`, `export`, `menu`, `colors`, `mirror`, `merge-apart`, `repair`, `paste`, `align`, `paint`, `paint-picker`, `xray`, `texture`, `texture-dialog`, `grab`, `crease`, `crease-sharp`, `smooth-brush`, `simplify`, `simplify-area`, `subdivide`, `hollow`, `hollow-dialog`, `hollow-error`, `measure`, `measure-start`, `centre`, `settings-note` | `move` |
 //! | `BUILDER3D_REVIEW_TEXTURES` | `;`-separated picture paths for the `texture` states (one per object, reused in turn) | a built-in brick picture |
 //! | `BUILDER3D_REVIEW_THEME` | `light`, `dark` | `dark` |
 //! | `BUILDER3D_REVIEW_SIZE` | `normal`, `big` (Settings > Size) | `normal` |
@@ -146,6 +146,13 @@ pub(crate) enum ReviewState {
     /// The `Measure` state with only the first end placed: with
     /// `BUILDER3D_REVIEW_POINTER` over a model the live ruler follows it.
     MeasureStart,
+    /// The `multi` scene after a double-click on the sphere's Items row
+    /// (OF-63): the sphere is the only selection and the camera frames it.
+    Centre,
+    /// One cube after a first start that imported the Python settings
+    /// (OF-64): the real import path runs on a stand-in registry value, so
+    /// the settings note shows under the ribbon.
+    SettingsNote,
 }
 
 impl ReviewState {
@@ -188,6 +195,8 @@ impl ReviewState {
             "hollow-error" => Some(Self::HollowError),
             "measure" => Some(Self::Measure),
             "measure-start" => Some(Self::MeasureStart),
+            "centre" => Some(Self::Centre),
+            "settings-note" => Some(Self::SettingsNote),
             _ => None,
         }
     }

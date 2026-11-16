@@ -605,12 +605,13 @@ impl Builder3dApp {
             | ReviewState::Settings
             | ReviewState::Save
             | ReviewState::Export
-            | ReviewState::Menu => &[builder3d_core::PrimitiveKind::Cube],
+            | ReviewState::Menu
+            | ReviewState::SettingsNote => &[builder3d_core::PrimitiveKind::Cube],
             ReviewState::Merge => &[
                 builder3d_core::PrimitiveKind::Cube,
                 builder3d_core::PrimitiveKind::Cube,
             ],
-            ReviewState::Multi => &[
+            ReviewState::Multi | ReviewState::Centre => &[
                 builder3d_core::PrimitiveKind::Cube,
                 builder3d_core::PrimitiveKind::Cylinder,
                 builder3d_core::PrimitiveKind::Sphere,
@@ -683,6 +684,29 @@ impl Builder3dApp {
             ReviewState::Align => {
                 self.commands.set_selection_indices([0, 1]);
                 self.dispatch(CommandId::Align);
+            }
+            ReviewState::SettingsNote => {
+                // The registry read is replaced by one supported value; the
+                // rest is the real first-start import into the isolated file.
+                let value = match review.theme() {
+                    ThemeMode::Light => "light",
+                    ThemeMode::Dark => "dark",
+                };
+                let current = std::collections::BTreeMap::from([(
+                    "theme_mode".to_owned(),
+                    vec![value.to_owned()],
+                )]);
+                let legacy = builder3d_platform::LegacySettings {
+                    current_present: current.keys().cloned().collect(),
+                    current,
+                    ..builder3d_platform::LegacySettings::default()
+                };
+                // A first start has no Rust settings file; the harness has
+                // already written its own isolated one by now.
+                let _ = std::fs::remove_file(&self.settings_path);
+                self.load_preferences_from_legacy(&legacy);
+                self.theme_mode = review.theme();
+                self.ui_size = review.size();
             }
             _ => {}
         }
@@ -2203,6 +2227,51 @@ impl Builder3dApp {
                 }
             });
         self.ribbon_rect = Some(response.response.rect);
+        self.render_settings_note(ui, palette);
+    }
+
+    /// A settings message (OF-64) sits in its own strip under the ribbon, so
+    /// it pushes the workspace down instead of covering anything, and stays
+    /// until Dismiss is pressed (MCP: `set_app_settings`
+    /// `dismiss_settings_notice`).
+    fn render_settings_note(&mut self, ui: &mut Ui, palette: ThemePalette) {
+        let Some(warning) = self.settings_warning.clone() else {
+            return;
+        };
+        let mut dismissed = false;
+        egui::Panel::top("builder3d-settings-note")
+            .frame(
+                egui::Frame::new()
+                    .fill(palette.surface_alt)
+                    .stroke(Stroke::new(1.0, palette.divider))
+                    .inner_margin(egui::Margin::symmetric(12, 4)),
+            )
+            .show(ui, |ui| {
+                ui.horizontal(|ui| {
+                    ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                        dismissed = ui
+                            .button("Dismiss")
+                            .on_hover_text("Close this note")
+                            .clicked();
+                        ui.with_layout(Layout::left_to_right(Align::Center), |ui| {
+                            ui.add(
+                                egui::Label::new(
+                                    RichText::new(warning).color(palette.warning_text),
+                                )
+                                .wrap(),
+                            );
+                        });
+                    });
+                });
+            });
+        if dismissed {
+            self.dismiss_settings_note();
+        }
+    }
+
+    /// Closes the settings note; returns whether one was showing.
+    pub(crate) fn dismiss_settings_note(&mut self) -> bool {
+        self.settings_warning.take().is_some()
     }
 
     fn toggle_theme(&mut self) {
@@ -3528,6 +3597,7 @@ impl Builder3dApp {
         }
         let modifiers = ui.ctx().input(|input| input.modifiers);
         let mut selection_click = None;
+        let mut centre_click = None;
         let mut repair_click = None;
         let mut visibility_toggle = None;
         let mut command_click = None;
@@ -3703,11 +3773,16 @@ impl Builder3dApp {
                                     name_galley,
                                     name_color,
                                 );
-                                let response = row_response.on_hover_text(
-                                    "Click to select; Ctrl/Command adds; Shift selects a range",
-                                );
+                                let response = row_response.on_hover_text(if *child_count > 0 {
+                                    "Click to select; Ctrl/Command adds; Shift selects a range;                                      double-click centres on the whole group"
+                                } else {
+                                    "Click to select; Ctrl/Command adds; Shift selects a range;                                      double-click centres on it"
+                                });
                                 if response.clicked() {
                                     selection_click = Some(*index);
+                                }
+                                if response.double_clicked() {
+                                    centre_click = Some(*index);
                                 }
                                 response.context_menu(|ui| {
                                     ui.label(RichText::new(name).strong());
@@ -3766,6 +3841,12 @@ impl Builder3dApp {
                 self.commands.scene().objects()[index].name()
             ));
             self.invalidate_presentation();
+        }
+        if let Some(index) = centre_click {
+            // Both clicks of a double-click also arrive as single clicks
+            // (select, then toggle off); centring ends with this row as the
+            // only selection, exactly like a double-click in the 3D view.
+            self.centre_on_object(index);
         }
         if let Some(command) = context_command {
             self.dispatch(command);
@@ -4817,6 +4898,14 @@ impl Builder3dApp {
                 eprintln!("review capture: camera pose rejected: {error}");
             }
         }
+        if self
+            .review
+            .as_ref()
+            .is_some_and(|review| review.state() == crate::review_capture::ReviewState::Centre)
+        {
+            // Index 2 is the sphere; centring needs the real viewport size.
+            self.centre_on_object(2);
+        }
     }
 
     /// Frames the exact frontmost object under a double-click without
@@ -4836,26 +4925,73 @@ impl Builder3dApp {
             self.viewport_gizmo_consumed = true;
             return;
         };
-        let Some(object) = scene
-            .objects()
-            .iter()
-            .find(|object| object.object_id() == hit.object_id)
-        else {
-            self.viewport_gizmo_consumed = true;
-            return;
-        };
-        let Ok(bounds) = object.world_bounds() else {
-            self.viewport_gizmo_consumed = true;
-            return;
-        };
+        self.viewport_gizmo_consumed = true;
         if let Ok(index) = self.commands.scene().object_index(&hit.object_id) {
-            self.commands.select_index(index);
-            self.surface = WorkspaceSurface::Scene;
+            self.centre_on_object(index);
         }
-        if self.camera.frame_bounds(&[bounds]).is_ok() {
-            self.camera_auto_frame_pending = false;
-            self.viewport_gizmo_consumed = true;
+    }
+
+    /// Centres the camera on one top-level object, as a double-click on it
+    /// does in the 3D view or in the Items list (OF-63): the object becomes
+    /// the only selection and the camera frames it, keeping its angle. A
+    /// group is one top-level object, so its whole outline is framed. A
+    /// hidden object is selected but not framed (framing ignores hidden
+    /// objects everywhere). No model history is created.
+    pub(crate) fn centre_on_object(&mut self, index: usize) -> bool {
+        let Some(name) = self
+            .commands
+            .scene()
+            .objects()
+            .get(index)
+            .map(|object| object.name().to_owned())
+        else {
+            return false;
+        };
+        self.commands.select_index(index);
+        self.selection_anchor = self
+            .commands
+            .scene()
+            .objects()
+            .get(index)
+            .map(|object| object.object_id().to_owned());
+        self.surface = WorkspaceSurface::Scene;
+        let framed = self.frame_objects(&[index]);
+        self.commands.set_status(if framed {
+            format!("Centred on {name}")
+        } else {
+            format!("{name} is hidden; show it to centre on it")
+        });
+        self.invalidate_presentation();
+        framed
+    }
+
+    /// The one desktop framing rule, shared by the 3D-view and Items
+    /// double-click and by MCP `frame_view` in the live app: the camera keeps
+    /// its angle and fits the visible objects among `indices` to the current
+    /// viewport. Hidden objects are skipped, as in the Python reference.
+    /// Returns whether the camera moved.
+    pub(crate) fn frame_objects(&mut self, indices: &[usize]) -> bool {
+        let scene = self.commands.scene();
+        let mut bounds = Vec::new();
+        for &index in indices {
+            if !scene
+                .objects()
+                .get(index)
+                .is_some_and(|object| object.is_visible())
+            {
+                continue;
+            }
+            if let Ok(world) = world_bounds(scene, &[index])
+                && let Ok(aabb) = Aabb::new(world.minimum, world.maximum)
+            {
+                bounds.push(aabb);
+            }
         }
+        if bounds.is_empty() || self.camera.frame_bounds(&bounds).is_err() {
+            return false;
+        }
+        self.camera_auto_frame_pending = false;
+        true
     }
 
     fn gizmo_mode(&self) -> GizmoMode {
@@ -6960,16 +7096,6 @@ impl eframe::App for Builder3dApp {
             && !toast.show(&ctx, &ThemePalette::for_mode(self.theme_mode))
         {
             self.toast = None;
-        }
-        if let Some(warning) = &self.settings_warning {
-            egui::Area::new(egui::Id::unique("settings-warning"))
-                .fixed_pos(egui::pos2(16.0, 92.0))
-                .show(&ctx, |ui| {
-                    ui.label(
-                        RichText::new(warning)
-                            .color(ThemePalette::for_mode(self.theme_mode).warning_text),
-                    );
-                });
         }
         if self.close_requested {
             ctx.send_viewport_cmd(egui::ViewportCommand::Close);

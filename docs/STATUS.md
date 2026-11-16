@@ -3,7 +3,7 @@
 The only place current status is written. Keep it to one screen. Plan:
 [`product-rebuild-plan.md`](product-rebuild-plan.md).
 
-Updated 2026-11-15. Full gate passed 2026-11-15 after Phase 5 OF-58 (fmt, clippy, tests, deny, audit, MCP parity with no exemptions, smoke, capture board); a last small fix then passed the Fast gate. Release exe rebuilt from that source (3m49s) and driven live through the real MCP gateway for the Phase 5 review pack.
+Updated 2026-11-16. Full gate passed 2026-11-16 after Phase 6 OF-63/OF-64 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Earlier: full gate passed 2026-11-15 after Phase 5 OF-58 (fmt, clippy, tests, deny, audit, MCP parity with no exemptions, smoke, capture board); a last small fix then passed the Fast gate. Release exe rebuilt from that source (3m49s) and driven live through the real MCP gateway for the Phase 5 review pack.
 
 Test releases (how-to: [`packaging.md`](packaging.md)): last is **RC1**,
 version 0.1.1, 2026-11-13, `E:\Builder3D-RC\Builder3D-RC1.msi` (50 MB),
@@ -51,6 +51,13 @@ carried out by the desktop shell with its own code. No "visual only" ledger
 rows remain. **Owner 2026-11-16: approved ("it tests great … call it done").**
 Phase 5 is closed.
 
+Phase 6 (OF-63 Items double-click centres, OF-64 settings note) built
+2026-11-16, pack `evidence/rebuild/captures/2026-11-16-review-phase6/`.
+MCP `frame_view` in the live app now frames with the desktop camera (same
+camera as a double-click); `app_settings` gains `settings_notice`,
+`set_app_settings` gains `dismiss_settings_notice`. **Waiting for owner
+review**; the owner may add more Phase 6 rows.
+
 **Known work, in order** (a session takes the first item not done):
 
 1. Done and approved 2026-11-15: Phase 3 follow-ups OF-59 to OF-61.
@@ -58,8 +65,9 @@ Phase 5 is closed.
 3. Done and approved 2026-11-16: Phase 5 — MCP does everything (OF-58).
 4. Phase 6 — more fixes before F5 (owner 2026-11-16: "let's finish fixing
    everything before f5"): OF-63 double-click an Items row to centre on it,
-   OF-64 settings-migration notice overlapping the ribbon. The owner may add
-   more; finish them all before item 5.
+   OF-64 settings-migration notice overlapping the ribbon — both built
+   2026-11-16, owner review pending. The owner may add more; finish them all
+   before item 5.
 5. F5 — release link reliability; F6 — reconcile the 148-row ledger
    (fix-first list below).
 6. Revisit the Material texture dialog (OF-46 follow-up): the owner wants to
@@ -88,7 +96,7 @@ the next stop message, not guessed.
 
 ## Last review pack
 
-`evidence/rebuild/captures/2026-11-15-review-phase5-mcp/` (OF-58), approved
+`evidence/rebuild/captures/2026-11-16-review-phase6/` (OF-63, OF-64), owner review pending. `evidence/rebuild/captures/2026-11-15-review-phase5-mcp/` (OF-58), approved
 by the owner 2026-11-16. `evidence/rebuild/captures/2026-11-15-review-phase4-measure/` (OF-55),
 approved by the owner 2026-11-15. `evidence/rebuild/captures/2026-11-15-review-phase3-followups/` (OF-59 to
 OF-61), approved by the owner 2026-11-15. `evidence/rebuild/captures/2026-11-14-review-phase3/` (Phase 3: OF-48 to

@@ -262,6 +262,7 @@ impl Builder3dApp {
                 "path": path.display().to_string(),
                 "label": preferences.preferred_slicer_label(),
             })),
+            "settings_notice": self.settings_warning,
             "message": message,
         })
     }
@@ -310,6 +311,7 @@ impl Builder3dApp {
             Some(change) => merge_lighting(base_lighting, change)?,
             None => base_lighting,
         };
+        let dismiss_notice = optional_bool(args, "dismiss_settings_notice") == Some(true);
         let clear_slicer = optional_bool(args, "clear_slicer") == Some(true);
         let slicer = match optional_str(args, "slicer") {
             Some(_) if clear_slicer => {
@@ -386,6 +388,9 @@ impl Builder3dApp {
         {
             self.apply_preferred_slicer(None, None);
             changed.push("saved slicer");
+        }
+        if dismiss_notice && self.dismiss_settings_note() {
+            changed.push("settings note dismissed");
         }
         let message = if changed.is_empty() {
             String::from("No settings changed")
@@ -1265,5 +1270,41 @@ mod tests {
         assert!(dirty.close_requested);
         let _ = std::fs::remove_dir_all(clean_dir);
         let _ = std::fs::remove_dir_all(dirty_dir);
+    }
+
+    #[test]
+    fn settings_note_is_read_and_dismissed_like_its_button() {
+        const NOTE: &str = "Imported supported Python settings; the Rust JSON settings file will be the writable copy.";
+        let (mut desktop, desktop_dir) = app("note-desktop");
+        let (mut ai, ai_dir) = app("note-mcp");
+        desktop.settings_warning = Some(NOTE.to_owned());
+        ai.settings_warning = Some(NOTE.to_owned());
+
+        let shown = mcp(&mut ai, "app_settings", json!({})).expect("app settings");
+        assert_eq!(shown["settings_notice"], json!(NOTE));
+
+        // Desktop: the note's Dismiss button.
+        assert!(desktop.dismiss_settings_note());
+        assert!(!desktop.dismiss_settings_note());
+
+        let result = mcp(
+            &mut ai,
+            "set_app_settings",
+            json!({"dismiss_settings_notice": true}),
+        )
+        .expect("dismiss");
+        assert_eq!(result["settings_notice"], Value::Null);
+        assert_eq!(result["message"], json!("Changed settings note dismissed"));
+        assert_eq!(ai.settings_warning, desktop.settings_warning);
+
+        let again = mcp(
+            &mut ai,
+            "set_app_settings",
+            json!({"dismiss_settings_notice": true}),
+        )
+        .expect("dismiss again");
+        assert_eq!(again["message"], json!("No settings changed"));
+        let _ = std::fs::remove_dir_all(desktop_dir);
+        let _ = std::fs::remove_dir_all(ai_dir);
     }
 }

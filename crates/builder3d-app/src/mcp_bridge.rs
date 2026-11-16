@@ -305,6 +305,12 @@ impl McpDesktopIntegration {
 
         match self.server.is_long_running_tool(name) {
             Some(true) => self.start_operation(app, name, arguments),
+            Some(false) if name == "frame_view" => {
+                let target = arguments.get("target").cloned();
+                let before = app.camera.state();
+                let result = self.call_synchronous(app, name, arguments)?;
+                Ok(frame_on_desktop(app, target.as_ref(), before, result))
+            }
             Some(false) => self.call_synchronous(app, name, arguments),
             None => self.server.call_value(name, arguments),
         }
@@ -613,6 +619,34 @@ impl McpDesktopIntegration {
             .find(|(id, _)| id == operation_id)
             .map(|(_, status)| status.clone())
     }
+}
+
+/// MCP `frame_view` in the live app frames with the desktop camera, as the
+/// Python reference does, so the AI gets the same camera as a double-click or
+/// the Fit buttons (OF-63). The adapter has already checked the arguments;
+/// this replaces only its camera with the desktop one. `selected` with an
+/// empty selection frames everything, and hidden objects are skipped.
+fn frame_on_desktop(
+    app: &mut Builder3dApp,
+    target: Option<&Value>,
+    before: CameraState,
+    mut result: Value,
+) -> Value {
+    let scene = app.commands.scene();
+    let selected = scene.selection().iter().copied().collect::<Vec<_>>();
+    let indices = if target.and_then(Value::as_str) == Some("selected") && !selected.is_empty() {
+        selected
+    } else {
+        (0..scene.objects().len()).collect()
+    };
+    if !app.frame_objects(&indices) {
+        // Nothing visible to frame: the camera stays exactly where it was.
+        let _ = app.camera.set_state(before);
+    }
+    if let Some(object) = result.as_object_mut() {
+        object.insert("view".to_owned(), view_from_app(app).to_value());
+    }
+    result
 }
 
 fn view_from_app(app: &Builder3dApp) -> ViewState {
@@ -1235,6 +1269,142 @@ mod tests {
 
         drop(integration);
         assert!(!descriptor_path.exists());
+        let _ = fs::remove_dir_all(root);
+    }
+
+    fn framing_integration() -> (McpDesktopIntegration, PathBuf) {
+        let (root, descriptor_path) = temporary_descriptor();
+        let config = R4Config::for_profile(
+            builder3d_mcp::Profile::Full,
+            builder3d_mcp::ApprovedRoots::from_paths(Vec::new()).expect("deny-all roots"),
+        );
+        let bridge = McpDesktopBridge::start_at(descriptor_path).expect("start bridge");
+        let integration = McpDesktopIntegration {
+            server: R4Server::new(config.clone()),
+            config,
+            bridge,
+            active_operation: None,
+            stale_statuses: VecDeque::new(),
+            last_poll: Instant::now(),
+        };
+        (integration, root)
+    }
+
+    /// Two apps holding the same scene: a small cube at the origin and a
+    /// large one far along +X, both built through MCP.
+    fn framing_scene(
+        integration: &mut McpDesktopIntegration,
+        context: &egui::Context,
+    ) -> Builder3dApp {
+        let mut app = Builder3dApp::default();
+        app.camera
+            .set_viewport_size(1280, 720)
+            .expect("viewport size");
+        for (name, arguments) in [
+            (
+                "add_primitive",
+                json!({"primitive":"cube","dimensions_mm":[10.0,10.0,10.0]}),
+            ),
+            (
+                "add_primitive",
+                json!({"primitive":"cube","dimensions_mm":[40.0,30.0,20.0]}),
+            ),
+            ("translate", json!({"index":1,"offset_mm":[300.0,50.0,0.0]})),
+        ] {
+            integration
+                .call_tool(&mut app, context, name, arguments)
+                .expect("build scene");
+        }
+        app
+    }
+
+    #[test]
+    fn items_and_viewport_double_click_frame_like_mcp_frame_view() {
+        let (mut integration, root) = framing_integration();
+        let context = egui::Context::default();
+
+        // Desktop: the Items double-click (two plain clicks, then centring)
+        // ends with the row as the only selection and the object framed.
+        let mut desktop = framing_scene(&mut integration, &context);
+        let history = desktop.commands.scene().history_state_id();
+        let dirty = desktop.commands.is_dirty();
+        let before = desktop.camera.state();
+        desktop.commands.select_index(0);
+        assert!(desktop.centre_on_object(1));
+        let framed = desktop.camera.state();
+        assert_ne!(framed, before);
+        assert_eq!(framed.yaw_degrees, before.yaw_degrees);
+        assert_eq!(framed.pitch_degrees, before.pitch_degrees);
+        assert!((framed.center[0] - 300.0).abs() < 1.0e-3);
+        assert_eq!(
+            desktop
+                .commands
+                .scene()
+                .selection()
+                .iter()
+                .copied()
+                .collect::<Vec<_>>(),
+            [1]
+        );
+        assert_eq!(desktop.commands.scene().history_state_id(), history);
+        assert_eq!(desktop.commands.is_dirty(), dirty);
+
+        // MCP: select + frame_view(selected) gives the very same camera.
+        let mut ai = framing_scene(&mut integration, &context);
+        integration
+            .call_tool(&mut ai, &context, "select", json!({"indices":[1]}))
+            .expect("select");
+        let result = integration
+            .call_tool(
+                &mut ai,
+                &context,
+                "frame_view",
+                json!({"target":"selected"}),
+            )
+            .expect("frame view");
+        assert_eq!(ai.camera.state(), framed);
+        assert_eq!(result["view"]["distance_mm"], json!(framed.distance));
+
+        // frame_view(all) matches the desktop framing of every object.
+        integration
+            .call_tool(&mut ai, &context, "frame_view", json!({"target":"all"}))
+            .expect("frame all");
+        assert!(desktop.frame_objects(&[0, 1]));
+        assert_eq!(ai.camera.state(), desktop.camera.state());
+
+        // A hidden object is selected but the camera stays where it is, on
+        // both sides.
+        integration
+            .call_tool(
+                &mut ai,
+                &context,
+                "set_visibility",
+                json!({"index":0,"visible":false}),
+            )
+            .expect("hide");
+        let still = ai.camera.state();
+        assert!(!ai.centre_on_object(0));
+        assert_eq!(ai.camera.state(), still);
+        assert_eq!(
+            ai.commands
+                .scene()
+                .selection()
+                .iter()
+                .copied()
+                .collect::<Vec<_>>(),
+            [0]
+        );
+        integration
+            .call_tool(
+                &mut ai,
+                &context,
+                "frame_view",
+                json!({"target":"selected"}),
+            )
+            .expect("frame hidden selection");
+        assert_eq!(ai.camera.state(), still);
+
+        drop(integration);
         let _ = fs::remove_dir_all(root);
     }
 }

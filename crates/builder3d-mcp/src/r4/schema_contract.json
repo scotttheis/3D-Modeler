@@ -8145,6 +8145,19 @@
           "default": null,
           "title": "Saved Slicer"
         },
+        "settings_notice": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Settings Notice",
+          "description": "A settings message the desktop shows in a note under the ribbon (for example after importing the Python settings); null when none is showing. Close it with set_app_settings dismiss_settings_notice."
+        },
         "message": {
           "anyOf": [
             {
@@ -13480,6 +13493,19 @@
             "title": "Clear Slicer",
             "type": "boolean",
             "description": "Forget the saved slicer."
+          },
+          "dismiss_settings_notice": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Dismiss Settings Notice",
+            "description": "Close the settings note under the ribbon, as its Dismiss button does."
           }
         },
         "required": [],
