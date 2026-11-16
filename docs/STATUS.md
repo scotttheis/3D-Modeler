@@ -56,11 +56,15 @@ Phase 5 is closed.
 1. Done and approved 2026-11-15: Phase 3 follow-ups OF-59 to OF-61.
 2. Done and approved 2026-11-15: Phase 4 — Measure ruler (OF-55).
 3. Done and approved 2026-11-16: Phase 5 — MCP does everything (OF-58).
-4. F5 — release link reliability; F6 — reconcile the 148-row ledger
+4. Phase 6 — more fixes before F5 (owner 2026-11-16: "let's finish fixing
+   everything before f5"): OF-63 double-click an Items row to centre on it,
+   OF-64 settings-migration notice overlapping the ribbon. The owner may add
+   more; finish them all before item 5.
+5. F5 — release link reliability; F6 — reconcile the 148-row ledger
    (fix-first list below).
-5. Revisit the Material texture dialog (OF-46 follow-up): the owner wants to
+6. Revisit the Material texture dialog (OF-46 follow-up): the owner wants to
    look at its layout again; ask what to change before building.
-6. Stop before RB-10 (S3). OF-56/57 (Emboss) stay deferred until the owner
+7. Stop before RB-10 (S3). OF-56/57 (Emboss) stay deferred until the owner
    brings them back.
 
 Each phase ends with its review pack and a stop for owner review, as
@@ -225,9 +229,8 @@ owner batch 7.
   hands-on checks. States `texture`, `texture-dialog` take pictures from
   `BUILDER3D_REVIEW_TEXTURES` (`;`-separated paths).
 
-- 2026-11-15 (found during the OF-58 live run, not fixed): on a first start
-  that migrates the Python settings, the yellow "Imported supported Python
-  settings" notice is drawn over the ribbon button labels. Pre-existing.
+- 2026-11-15 (found during the OF-58 live run): the settings-migration
+  notice drawn over the ribbon labels — now OF-64.
 
 ## Last recovery point
 
