@@ -253,12 +253,12 @@ owner batch 7.
 
 ## Last recovery point
 
-Git: branch `rebuild/work`, see `git log` (Phase 6: `1ac2583` OF-63/OF-64; Phase 5: `2f6aaf8` OF-58; Phase 4: `cfc96a7` OF-55,
+Git: branch `rebuild/work`, see `git log` (OF-65: `02fc0ce`; Phase 6: `1ac2583` OF-63/OF-64; Phase 5: `2f6aaf8` OF-58; Phase 4: `cfc96a7` OF-55,
 pack `ff8b28f`, one-press Esc `229f0d2`; Phase 3 follow-ups: `57671fb`
 OF-59, `fbbfff8` OF-60, `0238ccf` OF-61; Phase 3: `e95dbd3` OF-48,
 `e9aa73d` OF-49, `7248d91` OF-50, `7432d0b` OF-51, `54b6f2a` OF-52,
 `e283f15` OF-53 findings, `114a676` OF-54; Phase 2: `654872a` (OF-46), `344e88e` (OF-44),
 `82f4a58` (OF-47), pack `06699d2`; Phase 1: `566ba48` to `3288a55`). Tree
-snapshot: `G:\Builder3D-Rust_snapshot_20261116-091132_OF63-64-phase6` (8,437
-files, 1,205,372,191 bytes, counts verified; excludes `target\` and `logs\`).
-Previous: `G:\Builder3D-Rust_snapshot_20261115-180039_OF58-phase5-mcp`.
+snapshot: `G:D-Modeler_snapshot_20261116-121325_OF65-transform-strip` (9,683
+files, 1,275,301,662 bytes, counts verified; excludes `target\` and `logs\`).
+Previous: `G:\Builder3D-Rust_snapshot_20261116-091132_OF63-64-phase6`.
