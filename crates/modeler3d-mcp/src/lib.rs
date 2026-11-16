@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 
 pub use r4::{
     AdapterError, ApprovedRoots, CATALOG_VERSION, Profile, R4Config, R4Document, R4Gateway,
-    R4Server, SHELL_TOOLS, SavedSlicer, TOOL_CATALOG, ToolSpec, ViewState,
+    R4Server, SHELL_TOOLS, SavedSlicer, TOOL_CATALOG, ToolSpec, ViewState, validate_tool_result,
 };
 
 /// Input for the bounded R0b device-profile tool.

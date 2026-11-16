@@ -643,8 +643,14 @@ fn frame_on_desktop(
         // Nothing visible to frame: the camera stays exactly where it was.
         let _ = app.camera.set_state(before);
     }
-    if let Some(object) = result.as_object_mut() {
-        object.insert("view".to_owned(), view_from_app(app).to_value());
+    // The declared output (`ViewStateOutput`) holds the camera fields at the
+    // top level, so the desktop camera overwrites them there; a nested
+    // `view` object would fail the gateway's output-schema check.
+    if let (Some(object), Value::Object(view)) =
+        (result.as_object_mut(), view_from_app(app).to_value())
+    {
+        object.remove("view");
+        object.extend(view);
     }
     result
 }
@@ -1363,7 +1369,11 @@ mod tests {
             )
             .expect("frame view");
         assert_eq!(ai.camera.state(), framed);
-        assert_eq!(result["view"]["distance_mm"], json!(framed.distance));
+        assert_eq!(result["distance_mm"], json!(framed.distance));
+        assert_eq!(
+            modeler3d_mcp::validate_tool_result("frame_view", &result),
+            Ok(())
+        );
 
         // frame_view(all) matches the desktop framing of every object.
         integration
