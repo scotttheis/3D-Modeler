@@ -259,6 +259,6 @@ OF-59, `fbbfff8` OF-60, `0238ccf` OF-61; Phase 3: `e95dbd3` OF-48,
 `e9aa73d` OF-49, `7248d91` OF-50, `7432d0b` OF-51, `54b6f2a` OF-52,
 `e283f15` OF-53 findings, `114a676` OF-54; Phase 2: `654872a` (OF-46), `344e88e` (OF-44),
 `82f4a58` (OF-47), pack `06699d2`; Phase 1: `566ba48` to `3288a55`). Tree
-snapshot: `G:D-Modeler_snapshot_20261116-121325_OF65-transform-strip` (9,683
+snapshot: `G:\3D-Modeler_snapshot_20261116-121325_OF65-transform-strip` (9,683
 files, 1,275,301,662 bytes, counts verified; excludes `target\` and `logs\`).
 Previous: `G:\Builder3D-Rust_snapshot_20261116-091132_OF63-64-phase6`.
