@@ -176,6 +176,12 @@ product behaviour it mirrors. See plan section 3.7. Each needs a golden-file tes
 Python build's current output. Shared contracts live as test fixtures, never
 as shared source.
 
+## GitHub upload
+
+The owner plans a public GitHub repository. When they say they are ready,
+follow [`docs/github-upload.md`](docs/github-upload.md); until then do not
+push.
+
 ## Test releases and packaging
 
 When the owner asks for a release candidate, test build, installer, MSI or
