@@ -214,19 +214,13 @@ mod tests {
             ("TEMP", r"C:\Temp"),
         ]);
         let paths = default_runtime_paths(&values, Path::new(r"C:\Users\Test"), "windows");
-        assert_eq!(
-            paths.config_dir,
-            PathBuf::from(r"C:\Users\Test\AppData\Local\Modeler3D")
-        );
-        assert_eq!(
-            paths.cache_dir,
-            PathBuf::from(r"C:\Users\Test\AppData\Local\Modeler3D\cache")
-        );
-        assert_eq!(
-            paths.log_dir,
-            PathBuf::from(r"C:\Users\Test\AppData\Local\Modeler3D\logs")
-        );
-        assert_eq!(paths.temp_dir, PathBuf::from(r"C:\Temp\Modeler3D"));
+        // Joined with the host separator, so the policy is also checked when
+        // the tests run on Linux or macOS.
+        let local = Path::new(r"C:\Users\Test\AppData\Local").join("Modeler3D");
+        assert_eq!(paths.config_dir, local);
+        assert_eq!(paths.cache_dir, local.join("cache"));
+        assert_eq!(paths.log_dir, local.join("logs"));
+        assert_eq!(paths.temp_dir, Path::new(r"C:\Temp").join("Modeler3D"));
     }
 
     #[test]
