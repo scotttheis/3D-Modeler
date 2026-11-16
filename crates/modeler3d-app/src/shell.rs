@@ -74,6 +74,10 @@ const FAVORITE_ICON_SIZE: f32 = 22.0;
 const FAVORITE_BUTTON_WIDTH: f32 = 36.0;
 const FAVORITE_BUTTON_HEIGHT: f32 = 34.0;
 const FAVORITE_OVERFLOW_WIDTH: f32 = 40.0;
+/// Shown on the shortcut bar when it has no shortcuts (owner idea, 2026-11-16).
+const EMPTY_FAVORITES_HINT: &str = "Drag shortcuts here";
+/// Room the empty-bar hint needs before it is drawn.
+const EMPTY_FAVORITES_HINT_WIDTH: f32 = 130.0;
 const TOP_ROW_SPACING: f32 = 1.0;
 const SLICER_BUTTON_WIDTH: f32 = 84.0;
 const THEME_TOGGLE_WIDTH: f32 = 52.0;
@@ -582,10 +586,17 @@ impl Modeler3dApp {
         self.ui_size = review.size();
         // A real start seeds the shortcut bar when it is empty; do the same so
         // captures show it.
-        if self.commands.preferences().ribbon_favorites().is_empty() {
+        let favorites = if review.state() == ReviewState::NoShortcuts {
+            Vec::new()
+        } else {
+            default_favorites()
+        };
+        if review.state() == ReviewState::NoShortcuts
+            || self.commands.preferences().ribbon_favorites().is_empty()
+        {
             self.commands
                 .preferences_mut()
-                .set_ribbon_favorites(default_favorites());
+                .set_ribbon_favorites(favorites);
         }
         if let Some(tab) = review.tab().and_then(|label| {
             RibbonTab::all()
@@ -595,7 +606,7 @@ impl Modeler3dApp {
             self.active_tab = tab;
         }
         let primitives: &[modeler3d_core::PrimitiveKind] = match review.state() {
-            ReviewState::Welcome | ReviewState::Empty => &[],
+            ReviewState::Welcome | ReviewState::Empty | ReviewState::NoShortcuts => &[],
             ReviewState::Move
             | ReviewState::Rotate
             | ReviewState::Resize
@@ -2686,6 +2697,15 @@ impl Modeler3dApp {
             }
             if has_favorites_strip {
                 ui.add_space(4.0);
+            }
+            // An empty bar says where shortcuts go, in small dim text.
+            if current.is_empty() && available_width >= EMPTY_FAVORITES_HINT_WIDTH {
+                ui.add_space(8.0);
+                ui.label(
+                    egui::RichText::new(EMPTY_FAVORITES_HINT)
+                        .small()
+                        .color(palette.muted.gamma_multiply(0.7)),
+                );
             }
         });
         if let Some((source, target)) = dropped

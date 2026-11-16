@@ -12,7 +12,7 @@
 //! | Variable | Values | Default |
 //! |---|---|---|
 //! | `MODELER3D_REVIEW_CAPTURE` | output PNG path | harness off |
-//! | `MODELER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `resize`, `resize-drag`, `multi`, `merge`, `unselected`, `material`, `settings`, `save`, `export`, `menu`, `colors`, `mirror`, `merge-apart`, `repair`, `paste`, `align`, `paint`, `paint-picker`, `xray`, `texture`, `texture-dialog`, `grab`, `crease`, `crease-sharp`, `smooth-brush`, `simplify`, `simplify-area`, `subdivide`, `hollow`, `hollow-dialog`, `hollow-error`, `measure`, `measure-start`, `centre`, `settings-note` | `move` |
+//! | `MODELER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `resize`, `resize-drag`, `multi`, `merge`, `unselected`, `material`, `settings`, `save`, `export`, `menu`, `colors`, `mirror`, `merge-apart`, `repair`, `paste`, `align`, `paint`, `paint-picker`, `xray`, `texture`, `texture-dialog`, `grab`, `crease`, `crease-sharp`, `smooth-brush`, `simplify`, `simplify-area`, `subdivide`, `hollow`, `hollow-dialog`, `hollow-error`, `measure`, `measure-start`, `centre`, `settings-note`, `no-shortcuts` | `move` |
 //! | `MODELER3D_REVIEW_TEXTURES` | `;`-separated picture paths for the `texture` states (one per object, reused in turn) | a built-in brick picture |
 //! | `MODELER3D_REVIEW_THEME` | `light`, `dark` | `dark` |
 //! | `MODELER3D_REVIEW_SIZE` | `normal`, `big` (Settings > Size) | `normal` |
@@ -153,6 +153,9 @@ pub(crate) enum ReviewState {
     /// (OF-64): the real import path runs on a stand-in registry value, so
     /// the settings note shows under the ribbon.
     SettingsNote,
+    /// The empty scene with an emptied shortcut bar, so the dim
+    /// "Drag shortcuts here" hint shows.
+    NoShortcuts,
 }
 
 impl ReviewState {
@@ -197,6 +200,7 @@ impl ReviewState {
             "measure-start" => Some(Self::MeasureStart),
             "centre" => Some(Self::Centre),
             "settings-note" => Some(Self::SettingsNote),
+            "no-shortcuts" => Some(Self::NoShortcuts),
             _ => None,
         }
     }
