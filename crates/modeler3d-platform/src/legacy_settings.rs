@@ -96,14 +96,12 @@ fn decode_registry_value(registry_type: u32, bytes: &[u8]) -> Result<Vec<String>
             }
             Ok(values)
         }
-        REG_DWORD if bytes.len() == 4 => Ok(vec![
-            u32::from_le_bytes(bytes.try_into().expect("DWORD length checked")).to_string(),
-        ]),
-        REG_QWORD if bytes.len() == 8 => Ok(vec![
-            u64::from_le_bytes(bytes.try_into().expect("QWORD length checked")).to_string(),
-        ]),
-        REG_DWORD => Err(String::from("REG_DWORD had an invalid byte count")),
-        REG_QWORD => Err(String::from("REG_QWORD had an invalid byte count")),
+        REG_DWORD => <[u8; 4]>::try_from(bytes)
+            .map(|word| vec![u32::from_le_bytes(word).to_string()])
+            .map_err(|_| String::from("REG_DWORD had an invalid byte count")),
+        REG_QWORD => <[u8; 8]>::try_from(bytes)
+            .map(|word| vec![u64::from_le_bytes(word).to_string()])
+            .map_err(|_| String::from("REG_QWORD had an invalid byte count")),
         _ => Err(format!("unsupported registry type {registry_type}")),
     }
 }
