@@ -252,12 +252,12 @@ owner batch 7.
 
 ## Last recovery point
 
-Git: branch `rebuild/work`, see `git log` (OF-65: `02fc0ce`, centred tabs `e6e03bf`, 0.000 angles `02dba59`; Phase 6: `1ac2583` OF-63/OF-64; Phase 5: `2f6aaf8` OF-58; Phase 4: `cfc96a7` OF-55,
+Git: branch `rebuild/work`, see `git log` (F5/F6: `f0a6cb0`; OF-65: `02fc0ce`, centred tabs `e6e03bf`, 0.000 angles `02dba59`; Phase 6: `1ac2583` OF-63/OF-64; Phase 5: `2f6aaf8` OF-58; Phase 4: `cfc96a7` OF-55,
 pack `ff8b28f`, one-press Esc `229f0d2`; Phase 3 follow-ups: `57671fb`
 OF-59, `fbbfff8` OF-60, `0238ccf` OF-61; Phase 3: `e95dbd3` OF-48,
 `e9aa73d` OF-49, `7248d91` OF-50, `7432d0b` OF-51, `54b6f2a` OF-52,
 `e283f15` OF-53 findings, `114a676` OF-54; Phase 2: `654872a` (OF-46), `344e88e` (OF-44),
 `82f4a58` (OF-47), pack `06699d2`; Phase 1: `566ba48` to `3288a55`). Tree
-snapshot: `G:\3D-Modeler_snapshot_20261116-133446_OF65-followups` (10,009
-files, 1,338,273,933 bytes, counts verified; excludes `target\` and `logs\`).
-Previous: `G:\3D-Modeler_snapshot_20261116-121325_OF65-transform-strip`.
+snapshot: `G:\3D-Modeler_snapshot_20261116-145640_F5-F6` (10,026
+files, 1,338,525,537 bytes, counts verified; excludes `target\` and `logs\`).
+Previous: `G:\3D-Modeler_snapshot_20261116-133446_OF65-followups`.
