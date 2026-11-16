@@ -59,26 +59,21 @@ Phase 6 (OF-63 Items double-click centres, OF-64 settings note) built
 2026-11-16, pack `evidence/rebuild/captures/2026-11-16-review-phase6/`.
 MCP `frame_view` in the live app now frames with the desktop camera (same
 camera as a double-click); `app_settings` gains `settings_notice`,
-`set_app_settings` gains `dismiss_settings_notice`. **Waiting for owner
-review**; the owner may add more Phase 6 rows. OF-65 (transform strip: the
+`set_app_settings` gains `dismiss_settings_notice`. OF-65 (transform strip: the
 "N selected / mm" note removed; each Move / Rotate / Resize label centred over
 its X / Y / Z box (owner follow-up)) built 2026-11-16, pack
 `evidence/rebuild/captures/2026-11-16-of65-transform-strip/`, test
-`transform_strip_has_no_count_and_each_tab_is_centred_over_its_box`. **Waiting
-for owner review.** Rotate now shows "0.000 deg" instead of
-"-0.000 deg" (owner yes).
+`transform_strip_has_no_count_and_each_tab_is_centred_over_its_box`. Rotate now
+shows "0.000 deg" instead of "-0.000 deg" (owner yes). **Owner 2026-11-16:
+OF-63, OF-64, OF-65 approved ("love it all call it all done").** Phase 6 is
+closed.
 
 **Known work, in order** (a session takes the first item not done):
 
 1. Done and approved 2026-11-15: Phase 3 follow-ups OF-59 to OF-61.
 2. Done and approved 2026-11-15: Phase 4 — Measure ruler (OF-55).
 3. Done and approved 2026-11-16: Phase 5 — MCP does everything (OF-58).
-4. Phase 6 — more fixes before F5 (owner 2026-11-16: "let's finish fixing
-   everything before f5"): OF-63 double-click an Items row to centre on it,
-   OF-64 settings-migration notice overlapping the ribbon — both built
-   2026-11-16, owner review pending. OF-65 transform strip clean-up built
-   2026-11-16, owner review pending. No more Phase 6 rows to build; the
-   owner may add more; finish them all before item 5.
+4. Done and approved 2026-11-16: Phase 6 — OF-63 to OF-65.
 5. F5 — release link reliability; F6 — reconcile the 148-row ledger
    (fix-first list below).
 6. Revisit the Material texture dialog (OF-46 follow-up): the owner wants to
@@ -107,7 +102,7 @@ the next stop message, not guessed.
 
 ## Last review pack
 
-`evidence/rebuild/captures/2026-11-16-of65-transform-strip/` (OF-65), owner review pending. `evidence/rebuild/captures/2026-11-16-review-phase6/` (OF-63, OF-64), owner review pending. `evidence/rebuild/captures/2026-11-15-review-phase5-mcp/` (OF-58), approved
+`evidence/rebuild/captures/2026-11-16-of65-transform-strip/` (OF-65) and `evidence/rebuild/captures/2026-11-16-review-phase6/` (OF-63, OF-64), approved by the owner 2026-11-16. `evidence/rebuild/captures/2026-11-15-review-phase5-mcp/` (OF-58), approved
 by the owner 2026-11-16. `evidence/rebuild/captures/2026-11-15-review-phase4-measure/` (OF-55),
 approved by the owner 2026-11-15. `evidence/rebuild/captures/2026-11-15-review-phase3-followups/` (OF-59 to
 OF-61), approved by the owner 2026-11-15. `evidence/rebuild/captures/2026-11-14-review-phase3/` (Phase 3: OF-48 to
