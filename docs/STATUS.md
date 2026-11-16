@@ -13,7 +13,7 @@ version 0.1.1, 2026-11-13, `E:\3D-Modeler-RC\Builder3D-RC1.msi` (50 MB),
 
 **Renamed 2026-11-16:** the app is now **3D Modeler** (was Builder3D); hidden names use `Modeler3D` / `modeler3d`. Where the old name stays, and why, is in the "Name" section of [`AGENTS.md`](../AGENTS.md). Pre-rename backup: `G:\Builder3D-Rust_snapshot_20261116-094924_pre-rename-3D-Modeler`.
 
-**Shortcut bar 2026-11-16 (owner request):** a first start now gets Cube, Sphere, Settle, Mirror, Merge, Subtract. After that the bar is the person's own: every change is saved and kept, and an emptied bar stays empty (before, an empty bar got the defaults back at the next start). Existing settings keep their bar; Customize ribbon → Reset defaults gives the new six. Test `shortcut_bar_starts_with_the_owner_set_and_then_keeps_what_the_person_chose`. An empty bar shows "Drag shortcuts here" in small dim text after the View tab; **owner 2026-11-16: approved ("I love it. shade, size, location, all of it")**. Capture state `no-shortcuts`. **Open, on hold by the owner:** dragging a ribbon button onto the bar does not work yet (only right-click → Pin), so either build that drag or change the hint's wording; owner to choose.
+**Shortcut bar 2026-11-16 (owner request):** a first start now gets Cube, Sphere, Settle, Mirror, Merge, Subtract. After that the bar is the person's own: every change is saved and kept, and an emptied bar stays empty (before, an empty bar got the defaults back at the next start). Existing settings keep their bar; Customize ribbon → Reset defaults gives the new six. Test `shortcut_bar_starts_with_the_owner_set_and_then_keeps_what_the_person_chose`. An empty bar shows "Drag shortcuts here" in small dim text after the View tab; **owner 2026-11-16: approved ("I love it. shade, size, location, all of it")**. Capture state `no-shortcuts`. **Drag on the bar, 2026-11-16 (owner request):** while a shortcut is dragged, an accent-coloured bar shows the gap it will land in and its icon follows the pointer (no bar where the drop would change nothing); a ribbon button can be dragged up onto the bar and is pinned at that gap (a click still runs it). On a full bar a new shortcut dropped at the end lands before the last visible one, not hidden in "More". `place_favorite_at` (`ui_state.rs`) with tests; `favorites_drop` (`shell.rs`). **Owner 2026-11-16: approved ("great job")** in the release build.
 
 **Owner batch 7** ([`owner-feedback-2026-11-14.md`](owner-feedback-2026-11-14.md),
 OF-28 to OF-58, five phases; Emboss OF-56/57 deferred by the owner).
@@ -70,8 +70,10 @@ review**; the owner may add more Phase 6 rows.
 4. Phase 6 — more fixes before F5 (owner 2026-11-16: "let's finish fixing
    everything before f5"): OF-63 double-click an Items row to centre on it,
    OF-64 settings-migration notice overlapping the ribbon — both built
-   2026-11-16, owner review pending. The owner may add more; finish them all
-   before item 5.
+   2026-11-16, owner review pending. **Next to build: OF-65** transform
+   strip clean-up (remove the "N selected / mm" note, line up Move / Rotate /
+   Resize with the X / Y / Z boxes; owner 2026-11-16, screenshot in the row).
+   The owner may add more; finish them all before item 5.
 5. F5 — release link reliability; F6 — reconcile the 148-row ledger
    (fix-first list below).
 6. Revisit the Material texture dialog (OF-46 follow-up): the owner wants to

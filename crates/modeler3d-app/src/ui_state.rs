@@ -128,22 +128,25 @@ pub(crate) fn move_favorite(values: &[String], key: &str, delta: isize) -> Optio
     Some(next)
 }
 
-/// Moves a dragged favorite to the position of the favorite it was dropped on.
+/// Drops `dragged` into the gap before slot `index` (0..=len) of the
+/// shortcut bar: a shortcut already on the bar moves there, a ribbon command
+/// dragged up is pinned there. Returns `None` when the bar would not change.
 #[must_use]
-pub(crate) fn move_favorite_to(
+pub(crate) fn place_favorite_at(
     values: &[String],
     dragged: &str,
-    target: &str,
+    index: usize,
 ) -> Option<Vec<String>> {
-    let source_index = values.iter().position(|value| value == dragged)?;
-    let target_index = values.iter().position(|value| value == target)?;
-    if source_index == target_index {
-        return None;
-    }
     let mut next = values.to_vec();
-    let item = next.remove(source_index);
-    next.insert(target_index, item);
-    Some(next)
+    let mut index = index.min(next.len());
+    if let Some(source) = next.iter().position(|value| value == dragged) {
+        next.remove(source);
+        if source < index {
+            index -= 1;
+        }
+    }
+    next.insert(index, dragged.to_owned());
+    (next != values).then_some(next)
 }
 
 /// Produces a complete tab order from a persisted partial order.
@@ -225,10 +228,30 @@ mod tests {
             ])
         );
         assert_eq!(
-            move_favorite_to(&values, "Insert:Cube", "Object:Delete"),
+            place_favorite_at(&values, "Insert:Cube", 0),
             Some(vec![
                 String::from("Insert:Cube"),
                 String::from("Object:Delete")
+            ])
+        );
+        // Dropping a shortcut into either gap beside itself changes nothing.
+        assert!(place_favorite_at(&values, "Object:Delete", 0).is_none());
+        assert!(place_favorite_at(&values, "Object:Delete", 1).is_none());
+        // A ribbon command dragged up is pinned at the gap it lands in.
+        assert_eq!(
+            place_favorite_at(&values, "Insert:Sphere", 1),
+            Some(vec![
+                String::from("Object:Delete"),
+                String::from("Insert:Sphere"),
+                String::from("Insert:Cube")
+            ])
+        );
+        assert_eq!(
+            place_favorite_at(&values, "Insert:Sphere", 99),
+            Some(vec![
+                String::from("Object:Delete"),
+                String::from("Insert:Cube"),
+                String::from("Insert:Sphere")
             ])
         );
         assert!(move_favorite(&values, "Object:Delete", -1).is_none());

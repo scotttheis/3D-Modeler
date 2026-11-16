@@ -62,7 +62,7 @@ use crate::transform_gesture::{ResizeFrame, ResizeHandle, TransformGesture};
 use crate::transforms::{Alignment, Axis, world_bounds};
 use crate::ui_state::{
     RecentEntry, RecentEntryKind, WorkspaceSurface, command_key, default_favorites, move_favorite,
-    move_favorite_to, normalize_favorites, normalized_tab_order, recent_entry, tab_commands,
+    normalize_favorites, normalized_tab_order, place_favorite_at, recent_entry, tab_commands,
 };
 use modeler3d_platform::{
     CapabilityProfile, SlicerInfo, current_runtime_paths, discover_capability_profile,
@@ -76,6 +76,13 @@ const FAVORITE_BUTTON_HEIGHT: f32 = 34.0;
 const FAVORITE_OVERFLOW_WIDTH: f32 = 40.0;
 /// Shown on the shortcut bar when it has no shortcuts (owner idea, 2026-11-16).
 const EMPTY_FAVORITES_HINT: &str = "Drag shortcuts here";
+/// Width of the bar that shows where a dragged shortcut will land.
+const FAVORITE_DROP_MARKER_WIDTH: f32 = 3.0;
+
+/// What a shortcut drag carries: the command key of a shortcut being
+/// reordered on the bar, or of a ribbon command being dragged up to it.
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct ShortcutDrag(String);
 /// Room the empty-bar hint needs before it is drawn.
 const EMPTY_FAVORITES_HINT_WIDTH: f32 = 130.0;
 const TOP_ROW_SPACING: f32 = 1.0;
@@ -1416,7 +1423,7 @@ impl Modeler3dApp {
             self.active_brush = Some(brush);
             self.brush_settings_open = true;
             self.commands.set_status(format!(
-                "{} active — hold Shift and drag on a mesh",
+                "{} active â€” hold Shift and drag on a mesh",
                 brush.label()
             ));
         }
@@ -2595,8 +2602,9 @@ impl Modeler3dApp {
         let has_favorites_strip = visible_count > 0 || has_overflow;
         let mut clicked = None;
         let mut unpin = None;
-        let mut dropped = None;
-        ui.horizontal(|ui| {
+        let mut button_rects = Vec::with_capacity(visible_count);
+        let zone_left = ui.cursor().left();
+        let row = ui.horizontal(|ui| {
             if has_favorites_strip {
                 ui.add_space(4.0);
             }
@@ -2607,6 +2615,7 @@ impl Modeler3dApp {
                         Vec2::new(FAVORITE_BUTTON_WIDTH, FAVORITE_BUTTON_HEIGHT),
                         Sense::click_and_drag(),
                     );
+                    button_rects.push(rect);
                     response.widget_info(|| {
                         egui::WidgetInfo::labeled(egui::Role::Button, enabled, command.label)
                     });
@@ -2627,16 +2636,6 @@ impl Modeler3dApp {
                             egui::StrokeKind::Inside,
                         );
                     }
-                    if let Some(payload) = response.dnd_hover_payload::<String>()
-                        && payload.as_str() != key
-                    {
-                        ui.painter().rect_stroke(
-                            rect,
-                            6.0,
-                            Stroke::new(2.0, palette.accent_border),
-                            egui::StrokeKind::Inside,
-                        );
-                    }
                     self.paint_command_icon(
                         ui,
                         egui::Rect::from_center_size(
@@ -2654,12 +2653,7 @@ impl Modeler3dApp {
                             }
                         },
                     );
-                    response.dnd_set_drag_payload(key.clone());
-                    if let Some(payload) = response.dnd_release_payload::<String>()
-                        && payload.as_str() != key
-                    {
-                        dropped = Some((payload.as_str().to_owned(), key.clone()));
-                    }
+                    response.dnd_set_drag_payload(ShortcutDrag(key.clone()));
                     let mut remove_this = false;
                     response.context_menu(|ui| {
                         if ui.button("Remove from shortcut bar").clicked() {
@@ -2708,9 +2702,22 @@ impl Modeler3dApp {
                 );
             }
         });
-        if let Some((source, target)) = dropped
-            && let Some(next) = move_favorite_to(&current, &source, &target)
-        {
+        // The whole strip left of the right-hand cluster takes drops, so a
+        // shortcut can land past the last one or on an empty bar.
+        let drop_zone = egui::Rect::from_x_y_ranges(
+            zone_left..=zone_left + available_width.max(row.response.rect.width()),
+            row.response.rect.y_range(),
+        );
+        let dropped = self.favorites_drop(
+            ui,
+            drop_zone,
+            &current,
+            &button_rects,
+            has_overflow,
+            spacing,
+            palette,
+        );
+        if let Some(next) = dropped {
             self.commands.preferences_mut().set_ribbon_favorites(next);
             self.persist_preferences();
         } else if let Some(key) = unpin {
@@ -2727,6 +2734,101 @@ impl Modeler3dApp {
             self.ribbon_expanded = true;
             self.dispatch(command);
         }
+    }
+
+    /// While a shortcut or ribbon command is dragged, shows a bar in the gap
+    /// on the shortcut bar where it will land and its icon under the pointer.
+    /// Returns the new bar when it is dropped there and the bar changes.
+    #[allow(clippy::too_many_arguments)]
+    fn favorites_drop(
+        &mut self,
+        ui: &Ui,
+        zone: egui::Rect,
+        current: &[String],
+        button_rects: &[egui::Rect],
+        has_overflow: bool,
+        spacing: f32,
+        palette: ThemePalette,
+    ) -> Option<Vec<String>> {
+        let ctx = ui.ctx().clone();
+        let payload = egui::DragAndDrop::payload::<ShortcutDrag>(&ctx)?;
+        let pointer = ctx.input(|input| input.pointer.latest_pos())?;
+        ctx.set_cursor_icon(egui::CursorIcon::Grabbing);
+        self.paint_shortcut_drag_ghost(&ctx, &payload.0, pointer, palette);
+        if !zone.contains(pointer) {
+            return None;
+        }
+        let visible = button_rects.len();
+        let mut index = button_rects
+            .iter()
+            .filter(|rect| rect.center().x < pointer.x)
+            .count();
+        // On a full bar the gap before "More" would hide a newly placed
+        // shortcut, so it lands before the last visible one instead.
+        let shown_already = current.iter().take(visible).any(|key| key == &payload.0);
+        if has_overflow && index == visible && !shown_already {
+            index = visible.saturating_sub(1);
+        }
+        let next = place_favorite_at(current, &payload.0, index)?;
+        let marker_x = match index
+            .checked_sub(1)
+            .and_then(|before| button_rects.get(before))
+        {
+            Some(before) => before.right() + spacing / 2.0,
+            None => button_rects
+                .first()
+                .map_or(zone.left() + 4.0 + FAVORITE_DROP_MARKER_WIDTH, |first| {
+                    first.left() - spacing / 2.0
+                }),
+        };
+        let marker = egui::Rect::from_center_size(
+            egui::pos2(marker_x, zone.center().y),
+            Vec2::new(FAVORITE_DROP_MARKER_WIDTH, FAVORITE_BUTTON_HEIGHT),
+        );
+        ui.painter()
+            .rect_filled(marker, FAVORITE_DROP_MARKER_WIDTH / 2.0, palette.accent);
+        if ctx.input(|input| input.pointer.any_released()) {
+            egui::DragAndDrop::clear_payload(&ctx);
+            return Some(next);
+        }
+        None
+    }
+
+    /// Paints the dragged command's icon beside the pointer.
+    fn paint_shortcut_drag_ghost(
+        &mut self,
+        ctx: &egui::Context,
+        key: &str,
+        pointer: egui::Pos2,
+        palette: ThemePalette,
+    ) {
+        let Some((_, command)) = find_command_key(key) else {
+            return;
+        };
+        egui::Area::new(egui::Id::unique("shortcut-drag-ghost"))
+            .order(egui::Order::Tooltip)
+            .fixed_pos(pointer + Vec2::new(12.0, 12.0))
+            .interactable(false)
+            .show(ctx, |ui| {
+                let (rect, _) = ui.allocate_exact_size(
+                    Vec2::new(FAVORITE_BUTTON_WIDTH, FAVORITE_BUTTON_HEIGHT),
+                    Sense::hover(),
+                );
+                ui.painter().rect_filled(rect, 6.0, palette.surface_raised);
+                ui.painter().rect_stroke(
+                    rect,
+                    6.0,
+                    Stroke::new(1.0, palette.accent_border),
+                    egui::StrokeKind::Inside,
+                );
+                self.paint_command_icon(
+                    ui,
+                    egui::Rect::from_center_size(rect.center(), Vec2::splat(FAVORITE_ICON_SIZE)),
+                    command.id,
+                    command.icon,
+                    palette,
+                );
+            });
     }
 
     fn set_favorite(&mut self, key: &str, pinned: bool) {
@@ -2872,7 +2974,8 @@ impl Modeler3dApp {
         } else {
             palette.text
         };
-        let sense = Sense::click();
+        // Dragging a ribbon command up to the shortcut bar pins it there.
+        let sense = Sense::click_and_drag();
         let label_width = ui
             .painter()
             .layout_no_wrap(
@@ -2927,6 +3030,7 @@ impl Modeler3dApp {
             text_color,
         );
         let favorite_key = command_key(self.active_tab, command);
+        response.dnd_set_drag_payload(ShortcutDrag(favorite_key.clone()));
         let is_pinned = self
             .commands
             .preferences()
@@ -3138,7 +3242,7 @@ impl Modeler3dApp {
                             ui.add_space(18.0);
                             ui.vertical(|ui| {
                                 ui.label(
-                                    RichText::new("CREATE  •  REPAIR  •  PREPARE")
+                                    RichText::new("CREATE  â€¢  REPAIR  â€¢  PREPARE")
                                         .small()
                                         .strong()
                                         .color(palette.accent),
@@ -4559,9 +4663,9 @@ impl Modeler3dApp {
                                         ));
                                     }
                                 } else if status.phase == OperationPhase::Cancelling {
-                                    ui.add_enabled(false, egui::Button::new("Cancelling…"));
+                                    ui.add_enabled(false, egui::Button::new("Cancellingâ€¦"));
                                 } else if status.phase == OperationPhase::Committing {
-                                    ui.add_enabled(false, egui::Button::new("Applying…"));
+                                    ui.add_enabled(false, egui::Button::new("Applyingâ€¦"));
                                 }
                             }
                             ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
@@ -6879,13 +6983,13 @@ impl Modeler3dApp {
                 for key in order_snapshot {
                     ui.horizontal(|ui| {
                         ui.label(&key);
-                        if ui.small_button("↑").clicked()
+                        if ui.small_button("â†‘").clicked()
                             && let Some(moved) = move_favorite(&next, &key, -1)
                         {
                             next = moved;
                             changed = true;
                         }
-                        if ui.small_button("↓").clicked()
+                        if ui.small_button("â†“").clicked()
                             && let Some(moved) = move_favorite(&next, &key, 1)
                         {
                             next = moved;
