@@ -65,8 +65,8 @@ review**; the owner may add more Phase 6 rows. OF-65 (transform strip: the
 its X / Y / Z box (owner follow-up)) built 2026-11-16, pack
 `evidence/rebuild/captures/2026-11-16-of65-transform-strip/`, test
 `transform_strip_has_no_count_and_each_tab_is_centred_over_its_box`. **Waiting
-for owner review.** Noticed while capturing, not changed: Rotate shows
-"-0.000 deg" for an unrotated cube's Y.
+for owner review.** Rotate now shows "0.000 deg" instead of
+"-0.000 deg" (owner yes).
 
 **Known work, in order** (a session takes the first item not done):
 

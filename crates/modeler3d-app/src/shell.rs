@@ -4068,7 +4068,7 @@ impl Modeler3dApp {
                 .unwrap_or_else(|_| [String::new(), String::new(), String::new()]);
             self.rotation_fields = crate::rotation::degrees(object.transform())
                 .unwrap_or([0.0; 3])
-                .map(|angle| format!("{angle:.3} deg"));
+                .map(crate::numeric_controls::format_angle_degrees);
             self.scale_fields = [
                 String::from("1.0x"),
                 String::from("1.0x"),

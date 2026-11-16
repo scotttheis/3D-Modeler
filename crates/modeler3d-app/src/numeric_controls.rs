@@ -55,6 +55,18 @@ pub fn format_distance(value_mm: f32, display_unit: DisplayUnit) -> String {
     format!("{value:.3} {}", display_unit.label())
 }
 
+/// Formats an angle in degrees for a transform box. Values that would round
+/// to zero show as "0.000", never "-0.000".
+#[must_use]
+pub fn format_angle_degrees(degrees: f32) -> String {
+    let degrees = if degrees.abs() < 0.000_5 {
+        0.0
+    } else {
+        degrees
+    };
+    format!("{degrees:.3} deg")
+}
+
 /// Parses a finite rotation delta in degrees.
 pub fn parse_angle_degrees(text: &str) -> Result<f32, &'static str> {
     let trimmed = text.trim().trim_end_matches('°').trim();
@@ -101,6 +113,14 @@ mod tests {
         assert_eq!(parse_distance_mm("2", DisplayUnit::Inch), Ok(50.8));
         assert!(parse_distance_mm("NaN", DisplayUnit::Millimetre).is_err());
         assert!(parse_distance_mm("", DisplayUnit::Millimetre).is_err());
+    }
+
+    #[test]
+    fn angles_near_zero_show_without_a_minus_sign() {
+        assert_eq!(format_angle_degrees(-0.0), "0.000 deg");
+        assert_eq!(format_angle_degrees(-0.000_2), "0.000 deg");
+        assert_eq!(format_angle_degrees(-90.0), "-90.000 deg");
+        assert_eq!(format_angle_degrees(12.345_6), "12.346 deg");
     }
 
     #[test]
