@@ -9,7 +9,8 @@ Test releases (how-to: [`packaging.md`](packaging.md)): last is **RC1**,
 version 0.1.1, 2026-11-13, `E:\3D-Modeler-RC\Builder3D-RC1.msi` (50 MB),
 `-Verify` passed on the dev PC. **RC2 / 0.1.2, 2026-11-16, Linux:**
 `E:\3D-Modeler-RC\3D-Modeler-0.1.2-linux-x86_64.tar.gz` (52 MB), also on the
-USB card under `3D-Modeler-packaging\linux\`; 487 tests, clippy, fmt passed in
+USB card under `3D-Modeler-packaging\linux\`; full Windows gate passed after
+the fixes (2026-11-16 16:38); 487 tests, clippy, fmt passed in
 WSL Ubuntu 24.04; packaged app run under WSLg: insert, save, reopen through
 MCP, settings in `~/.config/Modeler3D`. Not checked: a real Linux GPU and
 desktop (WSL only has the CPU route), the AppImage (needs the owner's OK to
