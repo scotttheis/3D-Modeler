@@ -27,6 +27,18 @@ for RC2. Next after RC2: RC3 / 0.1.3.
 
 ## Now
 
+**Bottom bar and interface text (owner, 2026-11-17):** removed the permanent
+status bar; Move/Rotate/Resize sits 12 px above the bottom. Active operations
+retain a temporary progress/Cancel window. Home slogan is "Imagine, Design,
+Play"; corrupted brush punctuation, face-preview arrow and shortcut-order
+arrows fixed. Workspace checks passed (`logs/gate/20261117-111144-full`):
+498 tests, fmt, Clippy, deny, audit, parity and smoke. The 40-state x 2-theme
+capture board passed separately (`gate-20261117-110823`); its initial Clippy
+failure was corrected before the final checks. Final slogan/layout captured
+again from Release in both themes. Release rebuilt (4m06s, 23,335,936 bytes),
+release smoke passed. Task and before/after evidence: [`bottom-text.md`](tasks/bottom-text.md).
+**Owner visual review pending.** Recovery: `G:\3D-Modeler_snapshot_20261117-111816_bottom-text`.
+
 **Caption and modifier toggles (owner, 2026-11-17):** Windows title bar follows
 the menu theme. Clicking an active brush or modifier again closes its controls,
 including after selection is lost. Full gate passed

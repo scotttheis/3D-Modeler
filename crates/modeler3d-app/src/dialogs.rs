@@ -1447,7 +1447,7 @@ impl DialogState {
         )
         .unwrap_or(self.selection_faces);
         ui.label(format!(
-            "Faces: {} â†’ about {}",
+            "Faces: {} → about {}",
             crate::desktop_jobs::group_thousands(self.selection_faces),
             crate::desktop_jobs::group_thousands(target)
         ));

@@ -371,7 +371,6 @@ pub struct Modeler3dApp {
     ribbon_pinned: bool,
     ribbon_expanded: bool,
     ribbon_rect: Option<egui::Rect>,
-    status_bar_rect: Option<egui::Rect>,
     transform_strip_rect: Option<egui::Rect>,
     dialog: Option<DialogState>,
     theme_mode: ThemeMode,
@@ -472,7 +471,6 @@ impl Default for Modeler3dApp {
             ribbon_pinned: false,
             ribbon_expanded: true,
             ribbon_rect: None,
-            status_bar_rect: None,
             transform_strip_rect: None,
             dialog: None,
             theme_mode: ThemeMode::Dark,
@@ -1452,7 +1450,7 @@ impl Modeler3dApp {
             self.active_brush = Some(brush);
             self.brush_settings_open = true;
             self.commands.set_status(format!(
-                "{} active â€” hold Shift and drag on a mesh",
+                "{} active — hold Shift and drag on a mesh",
                 brush.label()
             ));
         }
@@ -3294,7 +3292,7 @@ impl Modeler3dApp {
                             ui.add_space(18.0);
                             ui.vertical(|ui| {
                                 ui.label(
-                                    RichText::new("CREATE  â€¢  REPAIR  â€¢  PREPARE")
+                                    RichText::new("Imagine, Design, Play")
                                         .small()
                                         .strong()
                                         .color(palette.accent),
@@ -4344,7 +4342,7 @@ impl Modeler3dApp {
         let response = egui::Area::new(egui::Id::unique("modeler3d-transform-strip"))
             .enabled(!self.interaction_blocked())
             .order(egui::Order::Foreground)
-            .anchor(Align2::CENTER_BOTTOM, Vec2::new(0.0, -40.0))
+            .anchor(Align2::CENTER_BOTTOM, Vec2::new(0.0, -12.0))
             .show(ctx, |ui| {
                 egui::Frame::new()
                     .fill(palette.panel)
@@ -4631,115 +4629,38 @@ impl Modeler3dApp {
         }
     }
 
-    fn render_bottom(&mut self, ui: &mut Ui) {
-        let palette = ThemePalette::for_mode(self.theme_mode);
-        self.render_transform_strip(ui.ctx());
-        let content_rect = ui.ctx().content_rect();
-        let response = egui::Area::new(egui::Id::unique("modeler3d-status-area"))
-            .enabled(!self.interaction_blocked() || self.desktop_job.is_some())
-            .order(egui::Order::Foreground)
-            .anchor(Align2::LEFT_BOTTOM, Vec2::ZERO)
-            .show(ui.ctx(), |ui| {
-                egui::Frame::new()
-                    .fill(palette.surface_alt)
-                    .stroke(Stroke::new(1.0, palette.divider))
-                    .inner_margin(egui::Margin::symmetric(12, 6))
-                    .show(ui, |ui| {
-                        // The frame margins and stroke sit outside this width;
-                        // filling the full content width clipped the right edge.
-                        let inner_width = (content_rect.width() - 26.0).max(0.0);
-                        ui.set_min_size(egui::vec2(inner_width, 22.0));
-                        ui.set_max_width(inner_width);
-                        ui.horizontal(|ui| {
-                            let dirty_text = if self.commands.is_dirty() {
-                                "Unsaved"
-                            } else {
-                                "Saved"
-                            };
-                            ui.label(RichText::new(dirty_text).color(
-                                if self.commands.is_dirty() {
-                                    palette.accent_dark
-                                } else {
-                                    palette.muted
-                                },
-                            ));
-                            ui.separator();
-                            ui.label(
-                                RichText::new(format!(
-                                    "Selected: {}  |",
-                                    self.commands.selected_count()
-                                ))
-                                .color(palette.muted),
-                            );
-                            // OF-61: the status message can be selected and copied.
-                            let status = self.commands.last_status().to_owned();
-                            ui.add(
-                                egui::Label::new(RichText::new(&status).color(palette.muted))
-                                    .selectable(true),
-                            );
-                            if !status.is_empty() {
-                                crate::dialogs::copy_button(ui, "status-bar-copy", &status);
-                            }
-                            if let Ok(Some(status)) = self.commands.operations().active_status() {
-                                ui.separator();
-                                ui.label(
-                                    RichText::new(format!(
-                                        "{}: {}",
-                                        status.title,
-                                        status.phase.as_str()
-                                    ))
-                                    .color(palette.accent_dark),
-                                );
-                                if let Some(progress) = status.progress {
-                                    ui.add(
-                                        egui::ProgressBar::new(f32::from(progress) / 100.0)
-                                            .desired_width(100.0),
-                                    );
-                                }
-                                if matches!(
-                                    status.phase,
-                                    OperationPhase::Queued | OperationPhase::Running
-                                ) {
-                                    if ui.small_button("Cancel").clicked() {
-                                        let _ =
-                                            self.commands.operations().cancel(&status.operation_id);
-                                        self.commands.set_status(format!(
-                                            "{} cancellation requested",
-                                            status.title
-                                        ));
-                                    }
-                                } else if status.phase == OperationPhase::Cancelling {
-                                    ui.add_enabled(false, egui::Button::new("Cancellingâ€¦"));
-                                } else if status.phase == OperationPhase::Committing {
-                                    ui.add_enabled(false, egui::Button::new("Applyingâ€¦"));
-                                }
-                            }
-                            ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                                let unit = self.commands.preferences().display_unit();
-                                let values = self
-                                    .commands
-                                    .scene()
-                                    .selection()
-                                    .iter()
-                                    .next()
-                                    .and_then(|index| self.commands.scene().object(*index).ok())
-                                    .map(|object| object.position())
-                                    .unwrap_or([0.0; 3]);
-                                ui.label(
-                                    RichText::new(format!(
-                                        "X {}   Y {}   Z {}",
-                                        format_distance(values[0], unit),
-                                        format_distance(values[1], unit),
-                                        format_distance(values[2], unit)
-                                    ))
-                                    .small()
-                                    .color(palette.muted),
-                                );
-                            });
-                        });
-                    });
+    fn render_operation_progress(&mut self, ctx: &egui::Context) {
+        let Ok(Some(status)) = self.commands.operations().active_status() else {
+            return;
+        };
+        // Only an active operation needs progress and cancellation controls.
+        egui::Window::new(&status.title)
+            .id(egui::Id::unique("modeler3d-operation-progress"))
+            .anchor(Align2::RIGHT_BOTTOM, Vec2::new(-12.0, -12.0))
+            .resizable(false)
+            .collapsible(false)
+            .show(ctx, |ui| {
+                ui.label(status.phase.as_str());
+                if let Some(progress) = status.progress {
+                    ui.add(
+                        egui::ProgressBar::new(f32::from(progress) / 100.0).desired_width(160.0),
+                    );
+                }
+                if matches!(
+                    status.phase,
+                    OperationPhase::Queued | OperationPhase::Running
+                ) {
+                    if ui.button("Cancel").clicked() {
+                        let _ = self.commands.operations().cancel(&status.operation_id);
+                        self.commands
+                            .set_status(format!("{} cancellation requested", status.title));
+                    }
+                } else if status.phase == OperationPhase::Cancelling {
+                    ui.add_enabled(false, egui::Button::new("Cancelling..."));
+                } else if status.phase == OperationPhase::Committing {
+                    ui.add_enabled(false, egui::Button::new("Applying..."));
+                }
             });
-        self.status_bar_rect = Some(response.response.rect);
     }
 
     fn render_viewport(&mut self, ui: &mut Ui) {
@@ -6421,13 +6342,9 @@ impl Modeler3dApp {
             .ribbon_rect
             .map_or(safe_top, |rect| rect.bottom() + 6.0)
             .max(safe_top);
-        let mut bottom = self
-            .status_bar_rect
-            .map_or(safe_bottom, |rect| rect.top() - 8.0)
-            .min(safe_bottom);
+        let mut bottom = safe_bottom;
         // Stop above the transform strip when there is room; on a short window
-        // (or at Big size) run down to the status bar instead, so Settings
-        // stays under the ribbon rather than covering it.
+        // (or at Big size) use the full height below the ribbon.
         if let Some(rect) = self.transform_strip_rect
             && rect.top() - 8.0 - top >= 160.0
         {
@@ -7029,13 +6946,13 @@ impl Modeler3dApp {
                 for key in order_snapshot {
                     ui.horizontal(|ui| {
                         ui.label(&key);
-                        if ui.small_button("â†‘").clicked()
+                        if ui.small_button("↑").clicked()
                             && let Some(moved) = move_favorite(&next, &key, -1)
                         {
                             next = moved;
                             changed = true;
                         }
-                        if ui.small_button("â†“").clicked()
+                        if ui.small_button("↓").clicked()
                             && let Some(moved) = move_favorite(&next, &key, 1)
                         {
                             next = moved;
@@ -7108,14 +7025,14 @@ impl Modeler3dApp {
             ui.disable();
         }
         self.render_top(ui);
+        self.render_transform_strip(ui.ctx());
+        self.render_operation_progress(ui.ctx());
         match self.surface {
             WorkspaceSurface::Welcome => {
-                self.render_bottom(ui);
                 self.render_welcome(ui);
             }
             WorkspaceSurface::Scene => {
                 self.render_objects(ui);
-                self.render_bottom(ui);
                 self.render_viewport(ui);
             }
         }
@@ -8908,6 +8825,59 @@ mod tests {
         app.toggle_theme();
         assert_eq!(app.theme_mode, ThemeMode::Light);
         assert_eq!(app.commands.preferences().theme_mode(), ThemeMode::Light);
+        assert!(std::fs::remove_dir_all(directory).is_ok());
+    }
+
+    #[test]
+    fn operation_controls_appear_only_while_work_is_active() {
+        fn painted_text(app: &mut Modeler3dApp, ctx: &egui::Context) -> String {
+            fn collect(shape: &egui::Shape, text: &mut String) {
+                match shape {
+                    egui::Shape::Text(shape) => {
+                        text.push_str(shape.galley.text());
+                        text.push('|');
+                    }
+                    egui::Shape::Vec(shapes) => {
+                        for shape in shapes {
+                            collect(shape, text);
+                        }
+                    }
+                    _ => {}
+                }
+            }
+            let mut text = String::new();
+            for _ in 0..3 {
+                let mut output = ctx.run_ui(egui::RawInput::default(), |ui| {
+                    app.render_operation_progress(ui.ctx());
+                });
+                output.textures_delta.clear();
+                text.clear();
+                for clipped in &output.shapes {
+                    collect(&clipped.shape, &mut text);
+                }
+            }
+            text
+        }
+        let (mut app, directory) = shell_for_jobs("operation-controls");
+        let ctx = egui::Context::default();
+        // Disable window fade animations so terminal-state checks are deterministic.
+        for theme in [egui::Theme::Light, egui::Theme::Dark] {
+            ctx.style_mut_of(theme, |style| style.animation_time = 0.0);
+        }
+        assert!(painted_text(&mut app, &ctx).is_empty());
+        let operation = app
+            .commands
+            .operations()
+            .start("Repair model", "repair", None)
+            .expect("start operation");
+        let text = painted_text(&mut app, &ctx);
+        assert!(text.contains("Repair model"), "{text}");
+        assert!(text.contains("Cancel"), "{text}");
+        app.commands
+            .operations()
+            .complete(&operation.operation_id, None)
+            .expect("complete operation");
+        assert!(painted_text(&mut app, &ctx).is_empty());
         assert!(std::fs::remove_dir_all(directory).is_ok());
     }
 
