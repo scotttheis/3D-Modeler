@@ -196,6 +196,57 @@ fn is_macos(platform: &str) -> bool {
     matches!(platform, "darwin" | "macos" | "osx")
 }
 
+/// Resolves the person's Documents folder, including Windows Known Folder redirection.
+/// Falls back to the home Documents folder when the platform lookup is unavailable.
+#[must_use]
+pub fn documents_directory() -> PathBuf {
+    #[cfg(windows)]
+    if let Some(path) = windows_documents_directory() {
+        return path;
+    }
+    let home = env::var_os(if cfg!(windows) { "USERPROFILE" } else { "HOME" })
+        .map(PathBuf::from)
+        .unwrap_or_else(|| PathBuf::from("."));
+    #[cfg(target_os = "linux")]
+    {
+        let config = env::var_os("XDG_CONFIG_HOME")
+            .map(PathBuf::from)
+            .unwrap_or_else(|| home.join(".config"));
+        if let Ok(text) = std::fs::read_to_string(config.join("user-dirs.dirs")) {
+            for line in text.lines() {
+                if let Some(value) = line.trim().strip_prefix("XDG_DOCUMENTS_DIR=") {
+                    let value = value.trim().trim_matches('"');
+                    let path = if let Some(rest) = value.strip_prefix("$HOME/") {
+                        home.join(rest)
+                    } else {
+                        PathBuf::from(value)
+                    };
+                    if path.is_absolute() {
+                        return path;
+                    }
+                }
+            }
+        }
+    }
+    home.join("Documents")
+}
+
+#[cfg(windows)]
+#[allow(unsafe_code)]
+fn windows_documents_directory() -> Option<PathBuf> {
+    use windows::Win32::{
+        System::Com::CoTaskMemFree,
+        UI::Shell::{FOLDERID_Documents, KF_FLAG_DEFAULT, SHGetKnownFolderPath},
+    };
+    // The shell allocates the returned NUL-terminated string with the COM allocator.
+    unsafe {
+        let raw = SHGetKnownFolderPath(&FOLDERID_Documents, KF_FLAG_DEFAULT, None).ok()?;
+        let value = raw.to_string().ok().map(PathBuf::from);
+        CoTaskMemFree(Some(raw.0.cast()));
+        value
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -489,7 +489,7 @@ mod tests {
         assert!(load_recent_preview(&missing).is_none());
         assert!(load_recent_preview(&corrupt).is_none());
         assert!(load_recent_preview(&unsupported).is_none());
-        assert!(load_recent_preview(&fixture("wrl/python_reference.wrl")).is_none());
+        assert!(load_recent_preview(&fixture("wrl/python_reference.wrl")).is_some());
         assert!(fs::remove_dir_all(directory).is_ok());
     }
 }

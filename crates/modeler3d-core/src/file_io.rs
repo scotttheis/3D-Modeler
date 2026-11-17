@@ -136,11 +136,6 @@ pub fn load_mesh_asset(path: impl AsRef<Path>) -> Result<MeshAsset, CoreError> {
     if matches!(format, MeshFormat::Gltf | MeshFormat::Glb) {
         return gltf_asset(load_gltf(path)?);
     }
-    if format == MeshFormat::Wrl {
-        return Err(CoreError::UnsupportedMeshFormat(
-            "WRL import is not supported".to_owned(),
-        ));
-    }
     let metadata = fs::metadata(path)?;
     if metadata.len() > MAX_MESH_FILE_BYTES {
         return Err(CoreError::MeshFile(format!(
@@ -179,9 +174,25 @@ pub fn load_mesh_asset_bytes(format: MeshFormat, bytes: &[u8]) -> Result<MeshAss
         MeshFormat::Ply => decode_ply(bytes),
         MeshFormat::ThreeMf => decode_3mf(bytes),
         MeshFormat::Gltf | MeshFormat::Glb => decode_gltf(bytes),
-        MeshFormat::Wrl => Err(CoreError::UnsupportedMeshFormat(
-            "WRL import is not supported".to_owned(),
-        )),
+        MeshFormat::Wrl => {
+            let items = crate::load_wrl_bytes(bytes)?;
+            let meshes = items
+                .iter()
+                .map(|item| item.mesh.transformed(&item.transform))
+                .collect::<Result<Vec<_>, _>>()?;
+            let colors = items
+                .iter()
+                .flat_map(|item| {
+                    let rgba = item
+                        .color
+                        .unwrap_or(crate::DEFAULT_MESH_COLOR)
+                        .map(|v| (v * 255.).round() as u8);
+                    std::iter::repeat_n(rgba, item.mesh.vertex_count())
+                })
+                .collect();
+            let mesh = Mesh::concatenate(&meshes)?;
+            MeshAsset::new(mesh, Some(colors))
+        }
     }
 }
 

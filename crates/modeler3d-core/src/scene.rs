@@ -330,6 +330,10 @@ impl SceneObject {
         Ok(())
     }
 
+    pub(crate) fn duplicate_for_import(&self) -> Result<Self, CoreError> {
+        self.duplicate_with_new_id(self.name.clone())
+    }
+
     fn duplicate_with_new_id(&self, name: String) -> Result<Self, CoreError> {
         Self::from_parts(
             self.mesh.clone(),

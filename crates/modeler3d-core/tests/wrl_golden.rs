@@ -65,7 +65,7 @@ fn wrl_preserves_names_colors_transforms_and_indexed_geometry() {
 }
 
 #[test]
-fn wrl_sanitizes_duplicate_names_and_rejects_import() {
+fn wrl_sanitizes_duplicate_names_and_rejects_empty_scene() {
     let mesh = make_box([2.0, 2.0, 2.0]).expect("box should be valid");
     let first = WrlItem::new(
         mesh.clone(),
@@ -86,7 +86,7 @@ fn wrl_sanitizes_duplicate_names_and_rejects_import() {
     ));
     let error = load_mesh_asset_bytes(MeshFormat::Wrl, b"#VRML V2.0 utf8")
         .expect_err("WRL import should be unsupported");
-    assert!(matches!(error, CoreError::UnsupportedMeshFormat(_)));
+    assert!(matches!(error, CoreError::Wrl(_)));
 }
 
 #[test]

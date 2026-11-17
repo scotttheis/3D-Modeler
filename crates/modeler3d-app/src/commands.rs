@@ -7,12 +7,11 @@
 use std::path::{Path, PathBuf};
 
 use modeler3d_core::{
-    AddObjectCommand, BlobOptions, BooleanOperation, BooleanOptions, Command as CoreCommand,
-    CoreError, CreasePolishOptions, ElasticGrabOptions, GltfItem, GroupedCommand, HollowOptions,
-    Mesh, MeshFormat, PrimitiveKind, ReplaceMeshCommand, Scene, SceneObject, SetColorCommand,
-    SetMetadataCommand, SmoothBrushOptions, TextEmbossOptions, ThreeMfItem, TorusParameters,
-    Transform, TransformObjectCommand, build_parametric_torus, load_3mf, load_gltf,
-    load_mesh_asset, load_project, repair_mesh, save_project, torus_metadata,
+    BlobOptions, BooleanOperation, BooleanOptions, Command as CoreCommand, CoreError,
+    CreasePolishOptions, ElasticGrabOptions, GroupedCommand, HollowOptions, Mesh, PrimitiveKind,
+    ReplaceMeshCommand, Scene, SceneObject, SetColorCommand, SetMetadataCommand,
+    SmoothBrushOptions, TextEmbossOptions, TorusParameters, Transform, TransformObjectCommand,
+    build_parametric_torus, load_project, repair_mesh, save_project, torus_metadata,
     torus_parameters_from_metadata,
 };
 use modeler3d_mcp::{R4Document, ViewState as McpViewState};
@@ -1149,34 +1148,8 @@ impl CommandState {
         unit: ImportUnit,
     ) -> Result<String, CommandError> {
         validate_path(path)?;
-        let mut imported = load_import_objects(path, unit)?;
-        if imported.is_empty() {
-            return Err(CommandError::Core(CoreError::MeshFile(
-                "import contains no mesh objects".to_owned(),
-            )));
-        }
-        center_import_objects(&mut imported)?;
-
-        let start = self.scene.objects().len();
+        let imported = modeler3d_core::import_model(&mut self.scene, path, unit.scale_mm())?;
         let count = imported.len();
-        let mut commands: Vec<Box<dyn CoreCommand>> = Vec::with_capacity(count * 2);
-        for (offset, imported_object) in imported.into_iter().enumerate() {
-            let index = start + offset;
-            commands.push(Box::new(AddObjectCommand::at_index(
-                imported_object.object,
-                index,
-            )));
-            if imported_object.transform != Transform::identity() {
-                commands.push(Box::new(TransformObjectCommand::new(
-                    index,
-                    imported_object.transform,
-                )));
-            }
-        }
-
-        let selection = (start..start + count).collect();
-        self.scene
-            .execute(GroupedCommand::with_after_selection(commands, selection))?;
         self.preferences.recent_files_mut().record(path);
         self.dirty = true;
         let message = format!("Imported {count} object(s)");
@@ -2371,6 +2344,7 @@ pub fn file_menu_spec() -> Vec<RibbonItem> {
     vec![
         command(CommandId::Modeler3dMenu, "3D Modeler", IconKey::Object),
         RibbonItem::Separator,
+        command(CommandId::ImportModel, "Import", IconKey::Folder),
         command(CommandId::NewScene, "New Scene", IconKey::Object),
         command(CommandId::OpenProject, "Open Project", IconKey::Folder),
         command(CommandId::SaveProject, "Save", IconKey::Save),
@@ -2639,122 +2613,6 @@ fn project_save_path(path: &Path) -> Result<PathBuf, CommandError> {
     Ok(normalized)
 }
 
-struct ImportedObject {
-    object: SceneObject,
-    transform: Transform,
-}
-
-fn load_import_objects(path: &Path, unit: ImportUnit) -> Result<Vec<ImportedObject>, CoreError> {
-    match MeshFormat::from_path(path)? {
-        MeshFormat::Stl | MeshFormat::Obj | MeshFormat::Ply => {
-            let asset = load_mesh_asset(path)?;
-            let mesh = if unit == ImportUnit::Millimetre {
-                asset.mesh().clone()
-            } else {
-                let scale = Transform::identity().scaled([unit.scale_mm(); 3])?;
-                asset.mesh().transformed(&scale)?
-            };
-            Ok(vec![imported_object(
-                mesh,
-                Transform::identity(),
-                import_file_name(path),
-                asset.display_color(),
-                None,
-            )?])
-        }
-        MeshFormat::Gltf | MeshFormat::Glb => {
-            load_gltf(path)?.into_iter().map(import_gltf).collect()
-        }
-        MeshFormat::ThreeMf => load_3mf(path)?
-            .items
-            .into_iter()
-            .map(import_three_mf)
-            .collect(),
-        MeshFormat::Wrl => Err(CoreError::UnsupportedMeshFormat(
-            "WRL import is not supported".to_owned(),
-        )),
-    }
-}
-
-fn center_import_objects(items: &mut [ImportedObject]) -> Result<(), CoreError> {
-    let mut bounds: Option<([f32; 3], [f32; 3])> = None;
-    for item in items.iter() {
-        let world_mesh = item.object.mesh().transformed(&item.transform)?;
-        let Some((minimum, maximum)) = world_mesh.bounds() else {
-            return Err(CoreError::InvalidMesh(
-                "imported mesh has no vertex bounds".to_owned(),
-            ));
-        };
-        bounds = Some(match bounds {
-            None => (minimum, maximum),
-            Some((current_minimum, current_maximum)) => {
-                let mut next_minimum = current_minimum;
-                let mut next_maximum = current_maximum;
-                for axis in 0..3 {
-                    next_minimum[axis] = next_minimum[axis].min(minimum[axis]);
-                    next_maximum[axis] = next_maximum[axis].max(maximum[axis]);
-                }
-                (next_minimum, next_maximum)
-            }
-        });
-    }
-
-    let Some((minimum, maximum)) = bounds else {
-        return Ok(());
-    };
-    let placement = Transform::identity().translated([
-        -(minimum[0] + maximum[0]) * 0.5,
-        -minimum[1],
-        -(minimum[2] + maximum[2]) * 0.5,
-    ])?;
-    for item in items {
-        item.transform = placement.multiply(&item.transform)?;
-    }
-    Ok(())
-}
-
-fn import_gltf(item: GltfItem) -> Result<ImportedObject, CoreError> {
-    imported_object(item.mesh, item.transform, item.name, item.color, None)
-}
-
-fn import_three_mf(item: ThreeMfItem) -> Result<ImportedObject, CoreError> {
-    let metadata = if item.metadata.is_empty() {
-        None
-    } else {
-        Some(
-            serde_json::to_value(item.metadata)
-                .map_err(|error| CoreError::Json(error.to_string()))?,
-        )
-    };
-    imported_object(
-        item.mesh,
-        item.transform,
-        item.name,
-        Some(item.color),
-        metadata,
-    )
-}
-
-fn imported_object(
-    mesh: Mesh,
-    transform: Transform,
-    name: String,
-    color: Option<[f32; 4]>,
-    metadata: Option<Value>,
-) -> Result<ImportedObject, CoreError> {
-    Ok(ImportedObject {
-        object: SceneObject::with_details(mesh, None, Some(name), color, metadata)?,
-        transform,
-    })
-}
-
-fn import_file_name(path: &Path) -> String {
-    path.file_stem()
-        .and_then(|value| value.to_str())
-        .filter(|value| !value.trim().is_empty())
-        .map_or_else(|| String::from("Imported"), ToOwned::to_owned)
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -2814,6 +2672,93 @@ mod tests {
         }
         desktop.select_index(0);
         (desktop, mcp)
+    }
+
+    #[test]
+    fn every_export_format_imports_atomically_and_matches_mcp() {
+        let directory = temporary_import_directory("all-export-import");
+        let mut source = CommandState::default();
+        for _ in 0..2 {
+            source
+                .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
+                .expect("cube");
+        }
+        source.select_all();
+        for extension in ["stl", "obj", "ply", "3mf", "gltf", "glb", "wrl", "3dp"] {
+            let path = directory.join(format!("model.{extension}"));
+            if extension == "3dp" {
+                source.export_project_copy(&path).expect("export project");
+            } else {
+                source.export_to_path(&path).expect("export model");
+            }
+            let mut desktop = CommandState::default();
+            desktop
+                .dispatch(CommandId::AddPrimitive(PrimitiveKind::Sphere))
+                .expect("existing object");
+            let mut mcp = CommandState::default();
+            mcp.dispatch(CommandId::AddPrimitive(PrimitiveKind::Sphere))
+                .expect("existing object");
+            desktop
+                .import_from_path(&path)
+                .unwrap_or_else(|e| panic!("{extension}: {e}"));
+            let expected_count = if matches!(extension, "stl" | "obj" | "ply") {
+                1
+            } else {
+                2
+            };
+            assert_eq!(desktop.selected_count(), expected_count, "{extension}");
+            let roots =
+                modeler3d_mcp::ApprovedRoots::from_paths(vec![directory.clone()]).expect("roots");
+            let server = modeler3d_mcp::R4Server::new(modeler3d_mcp::R4Config::for_profile(
+                modeler3d_mcp::Profile::Full,
+                roots,
+            ));
+            let version = mcp.mcp_document_version();
+            let mut document = Some(mcp.take_mcp_document(modeler3d_mcp::ViewState::default()));
+            server.replace_document(&mut document).expect("attach");
+            let started = server
+                .call_value("import_file", serde_json::json!({"path":path,"unit":"mm"}))
+                .expect("MCP import");
+            let mut status = serde_json::Value::Null;
+            for _ in 0..500 {
+                status = server
+                    .call_value(
+                        "operation_status",
+                        serde_json::json!({"operation_id":started["operation_id"]}),
+                    )
+                    .expect("status");
+                if matches!(
+                    status["state"].as_str(),
+                    Some("completed" | "failed" | "cancelled")
+                ) {
+                    break;
+                }
+                std::thread::sleep(std::time::Duration::from_millis(10));
+            }
+            assert_eq!(status["state"], "completed", "{extension}: {status}");
+            mcp.install_mcp_document(server.take_document().expect("detach"), &version)
+                .expect("install");
+            assert_eq!(
+                mcp.selected_count(),
+                desktop.selected_count(),
+                "{extension}"
+            );
+            for (a, b) in desktop.scene().objects().iter().zip(mcp.scene().objects()) {
+                assert_eq!(a.mesh().vertices, b.mesh().vertices, "{extension}");
+                assert_eq!(a.mesh().faces, b.mesh().faces, "{extension}");
+                assert_eq!(a.transform(), b.transform(), "{extension}");
+                assert_eq!(a.color(), b.color(), "{extension}");
+            }
+            for state in [&mut desktop, &mut mcp] {
+                assert_eq!(state.scene().objects().len(), expected_count + 1);
+                state.dispatch(CommandId::Undo).expect("undo");
+                assert_eq!(state.scene().objects().len(), 1, "{extension}");
+                state.dispatch(CommandId::Redo).expect("redo");
+                assert_eq!(state.scene().objects().len(), expected_count + 1);
+                assert_eq!(state.project_path(), None);
+            }
+        }
+        std::fs::remove_dir_all(directory).expect("cleanup");
     }
 
     #[test]
@@ -3850,6 +3795,7 @@ mod tests {
             labels,
             vec![
                 "3D Modeler",
+                "Import",
                 "New Scene",
                 "Open Project",
                 "Save",
@@ -4208,14 +4154,11 @@ mod tests {
     }
 
     #[test]
-    fn unsupported_import_does_not_change_scene() {
+    fn missing_import_does_not_change_scene() {
         let mut state = CommandState::default();
         let result = state.import_from_path(Path::new("model.wrl"));
 
-        assert!(matches!(
-            result,
-            Err(CommandError::Core(CoreError::UnsupportedMeshFormat(_)))
-        ));
+        assert!(result.is_err());
         assert!(state.scene().objects().is_empty());
         assert_eq!(state.scene().revision(), 0);
         assert!(!state.is_dirty());

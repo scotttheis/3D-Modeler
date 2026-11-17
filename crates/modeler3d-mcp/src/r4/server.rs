@@ -21,9 +21,8 @@ use modeler3d_core::{
     CreasePolishOptions, ElasticGrabOptions, EmbossFont, GroupedCommand, HollowOptions, Mesh,
     NormalizeDensityOptions, PrimitiveKind, Scene, SceneChild, SceneObject, SetColorCommand,
     SetMetadataCommand, SmoothBrushOptions, TextEmbossOptions, Transform, TransformObjectCommand,
-    build_parametric_torus, inspect_mesh, load_mesh_asset, load_project,
-    normalize_face_density_with_hooks, repair_mesh_with_profile, save_mesh, save_project,
-    simplify_mesh, smooth_mesh, subdivide_mesh,
+    build_parametric_torus, inspect_mesh, load_project, normalize_face_density_with_hooks,
+    repair_mesh_with_profile, save_mesh, save_project, simplify_mesh, smooth_mesh, subdivide_mesh,
 };
 use modeler3d_platform::{self, SlicerError};
 use rmcp::{
@@ -2758,34 +2757,22 @@ impl R4Server {
             .ok_or_else(|| AdapterError::Validation("arguments must be an object".to_owned()))?;
         let raw_path = schema::required_string(args, "path")?;
         let path = self.config.approved_roots.read_path(raw_path)?;
-        let asset = load_mesh_asset(&path)?;
+        let factor = unit_factor(&schema::string_or(args, "unit", "mm")?)?;
+        let prepared = modeler3d_core::prepare_model_import(&path, factor)?;
+        let mut state = self.lock_state()?;
+        check_expected(&state, args)?;
         if cancel.load(Ordering::Acquire) {
             return Err(AdapterError::Core(
                 modeler3d_core::CoreError::OperationCancelled("import_file".to_owned()),
             ));
         }
-        let factor = unit_factor(&schema::string_or(args, "unit", "mm")?)?;
-        let mesh = scale_mesh(asset.mesh(), factor)?;
-        let color = asset.display_color();
-        let mut state = self.lock_state()?;
-        check_expected(&state, args)?;
-        let object = SceneObject::with_details(
-            mesh,
-            None,
-            Some(
-                path.file_stem()
-                    .and_then(|name| name.to_str())
-                    .unwrap_or("Imported mesh")
-                    .to_owned(),
-            ),
-            color,
-            None,
-        )?;
-        let object_id = object.object_id().to_owned();
-        let result = state.scene.add_object(object)?;
+        let ids = prepared.commit(&mut state.scene)?;
+        let object_id = ids
+            .first()
+            .ok_or_else(|| AdapterError::Validation("no imported objects".to_owned()))?;
         state.dirty = true;
         Ok(
-            json!({"action":"import_file","changed":result.changed,"scene_revision":state.scene.revision(),"object_id":object_id,"index":state.scene.object_index(&object_id)?}),
+            json!({"action":"import_file","changed":true,"scene_revision":state.scene.revision(),"object_id":object_id,"index":state.scene.object_index(object_id)?}),
         )
     }
 
@@ -3899,23 +3886,6 @@ fn unit_factor(unit: &str) -> Result<f32, AdapterError> {
             "unit must be um, mm, cm, in, ft, or m".to_owned(),
         )),
     }
-}
-
-fn scale_mesh(mesh: &Mesh, factor: f32) -> Result<Mesh, AdapterError> {
-    if !factor.is_finite() || factor <= 0.0 {
-        return Err(AdapterError::Validation(
-            "unit scale must be positive and finite".to_owned(),
-        ));
-    }
-    if (factor - 1.0).abs() <= f32::EPSILON {
-        return Ok(mesh.clone());
-    }
-    let vertices = mesh
-        .vertices
-        .iter()
-        .map(|vertex| [vertex[0] * factor, vertex[1] * factor, vertex[2] * factor])
-        .collect();
-    Ok(Mesh::new(vertices, mesh.faces.clone())?)
 }
 
 fn bed_size(args: &Map<String, Value>) -> Result<[f32; 3], AdapterError> {

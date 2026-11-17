@@ -16,6 +16,7 @@ mod material;
 mod measure;
 mod mesh;
 mod mesh_ops;
+mod model_import;
 mod paint;
 mod primitives;
 mod project;
@@ -29,6 +30,9 @@ mod texture;
 mod three_mf;
 mod transform;
 mod wrl;
+mod wrl_import;
+pub use model_import::{PreparedModelImport, import_model, prepare_model_import};
+pub use wrl_import::{load_wrl, load_wrl_bytes};
 
 mod placement;
 pub use placement::{MAX_PLACEMENT_POINTS, placement_rotation};

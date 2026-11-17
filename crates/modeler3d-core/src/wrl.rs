@@ -3,7 +3,7 @@
 //! VRML has no physical unit declaration.  3D Modeler writes model coordinates
 //! in millimetres and keeps each scene item in its own Transform/Shape pair so
 //! placement, names, display colors, and transparency survive export.  WRL
-//! import remains intentionally unsupported by the product contract.
+//! import is provided by the bounded static scene reader.
 
 use std::collections::HashSet;
 use std::fmt::Write as FmtWrite;

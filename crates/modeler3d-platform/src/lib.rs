@@ -34,8 +34,8 @@ pub use routing::{
 };
 pub use runtime::{
     APP_NAME, RUNTIME_DESCRIPTOR_ENV, RUNTIME_DESCRIPTOR_NAME, RuntimeCheckError, RuntimePaths,
-    current_runtime_paths, default_runtime_paths, ensure_opengl_gui_platform, process_is_alive,
-    resolve_runtime_descriptor_path,
+    current_runtime_paths, default_runtime_paths, documents_directory, ensure_opengl_gui_platform,
+    process_is_alive, resolve_runtime_descriptor_path,
 };
 pub use slicer::{
     SlicerError, SlicerInfo, SlicerLaunch, discover_slicers, launch_discovered_slicer,

@@ -802,16 +802,28 @@ impl DialogState {
         });
     }
 
+    pub(crate) fn set_import_path(&mut self, path: &Path) {
+        self.path_text = path.to_string_lossy().into_owned();
+    }
+
     fn import_dialog(&mut self, ui: &mut egui::Ui, action: &mut Option<DialogAction>) {
         ui.label("Path");
         ui.horizontal(|ui| {
             ui.text_edit_singleline(&mut self.path_text);
             if ui.button("Browse...").clicked() {
                 let selected = rfd::FileDialog::new()
-                    .set_title("Import 3D Modeler model")
+                    .set_title("Import model")
+                    .set_directory(
+                        Path::new(self.path_text.trim())
+                            .parent()
+                            .filter(|path| path.is_dir())
+                            .map(Path::to_path_buf)
+                            .unwrap_or_else(modeler3d_platform::documents_directory),
+                    )
+                    .add_filter("All files", &["*"])
                     .add_filter(
                         "3D Modeler models",
-                        &["stl", "obj", "ply", "3mf", "gltf", "glb"],
+                        &["stl", "obj", "ply", "3mf", "gltf", "glb", "wrl", "3dp"],
                     )
                     .add_filter("STL mesh", &["stl"])
                     .add_filter("OBJ mesh", &["obj"])
@@ -830,7 +842,7 @@ impl DialogState {
                 if import_uses_authoritative_units(Path::new(self.path_text.trim())) {
                     "This format carries its own units; the selector is ignored."
                 } else {
-                    "Unit applies to STL, OBJ, and PLY; 3MF, glTF, and GLB carry their own units."
+                    "Units apply to STL, OBJ, PLY and WRL. 3MF, glTF, GLB and projects keep their own units."
                 },
             )
             .weak(),

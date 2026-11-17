@@ -1674,7 +1674,32 @@ impl Modeler3dApp {
         self.measure_mode = None;
     }
 
+    fn open_import_with_picker(&mut self, picker: impl FnOnce(&Path) -> Option<PathBuf>) {
+        let directory = self
+            .commands
+            .preferences()
+            .last_import_directory()
+            .filter(|path| path.is_dir())
+            .map(Path::to_path_buf)
+            .unwrap_or_else(modeler3d_platform::documents_directory);
+        if let Some(path) = picker(&directory) {
+            self.dialog_generation = self.dialog_generation.wrapping_add(1);
+            self.preview_mesh_override = None;
+            let unit = self.commands.preferences().default_import_unit();
+            // Keep a useful retry/error dialog if parsing fails.
+            let mut dialog = DialogState::new(DialogKind::ImportModel, self.theme_mode);
+            dialog.set_import_unit(unit);
+            dialog.set_import_path(&path);
+            self.dialog = Some(dialog);
+            self.apply_dialog_action(DialogAction::Import(path, unit));
+        }
+    }
+
     fn open_dialog(&mut self, kind: DialogKind) {
+        if kind == DialogKind::ImportModel {
+            self.open_import_with_picker(native_import_picker);
+            return;
+        }
         self.dialog_generation = self.dialog_generation.wrapping_add(1);
         self.preview_mesh_override = None;
         let mut dialog = DialogState::new(kind, self.theme_mode);
@@ -6559,6 +6584,8 @@ impl Modeler3dApp {
             DialogAction::Close => Ok(String::new()),
             DialogAction::Open(path) => self.open_project(&path),
             DialogAction::Import(path, unit) => {
+                self.commands.preferences_mut().remember_import_path(&path);
+                self.persist_preferences();
                 self.commands.import_from_path_with_unit(&path, unit)
             }
             DialogAction::Save(path, _) => self.commands.save_document_to_path(&path).map(|_| {
@@ -7226,6 +7253,18 @@ impl Drop for RunningDesktopJob {
             self.handle.request_cancel();
         }
     }
+}
+
+fn native_import_picker(directory: &Path) -> Option<PathBuf> {
+    rfd::FileDialog::new()
+        .set_title("Import model")
+        .set_directory(directory)
+        .add_filter("All files", &["*"])
+        .add_filter(
+            "3D models",
+            &["stl", "3mf", "obj", "ply", "gltf", "glb", "wrl", "3dp"],
+        )
+        .pick_file()
 }
 
 fn native_slicer_picker(current: Option<&Path>) -> Option<PathBuf> {
@@ -8460,6 +8499,48 @@ mod tests {
     use crate::preferences::Preferences;
     use modeler3d_core::PrimitiveKind;
     use serde_json::Value;
+
+    #[test]
+    fn import_picker_starts_in_documents_remembers_folder_and_cancel_preserves_scene() {
+        let directory = test_directory("import-picker");
+        std::fs::create_dir_all(&directory).expect("directory");
+        let path = directory.join("model.stl");
+        modeler3d_core::save_mesh(&modeler3d_core::make_box([2., 4., 6.]).expect("box"), &path)
+            .expect("fixture");
+        let mut app = Modeler3dApp {
+            settings_path: directory.join("settings.json"),
+            ..Modeler3dApp::default()
+        };
+        app.open_import_with_picker(|start| {
+            assert_eq!(start, modeler3d_platform::documents_directory());
+            Some(path.clone())
+        });
+        assert_eq!(app.commands.scene().objects().len(), 1);
+        assert!(app.dialog.is_none());
+        let history = app.commands.scene().history_state_id();
+        let mut restarted = Modeler3dApp {
+            settings_path: app.settings_path.clone(),
+            ..Modeler3dApp::default()
+        };
+        restarted.load_preferences();
+        restarted.open_import_with_picker(|start| {
+            assert_eq!(start, directory);
+            None
+        });
+        assert!(restarted.commands.scene().objects().is_empty());
+        app.open_import_with_picker(|start| {
+            assert_eq!(start, directory);
+            None
+        });
+        assert_eq!(app.commands.scene().history_state_id(), history);
+        assert_eq!(app.commands.scene().objects().len(), 1);
+        let bad = directory.join("unrelated.txt");
+        std::fs::write(&bad, "not a model").expect("invalid fixture");
+        app.open_import_with_picker(|_| Some(bad));
+        assert!(app.dialog.is_some());
+        assert_eq!(app.commands.scene().history_state_id(), history);
+        std::fs::remove_dir_all(directory).expect("cleanup");
+    }
 
     #[test]
     fn grab_brush_shift_drag_on_a_mesh_changes_it_in_one_undo_entry() {
@@ -10059,7 +10140,7 @@ mod tests {
     }
 
     #[test]
-    fn failed_recent_project_and_wrl_import_preserve_scene_and_recent_state() {
+    fn failed_recent_project_preserves_state_and_wrl_imports_additively() {
         let directory = test_directory("recent-failures");
         assert!(std::fs::create_dir_all(&directory).is_ok());
         let prior_project = directory.join("prior.3dp");
@@ -10099,28 +10180,28 @@ mod tests {
         let wrl = fixture("wrl/python_reference.wrl");
         assert_eq!(recent_entry(&wrl).kind, RecentEntryKind::Supported);
         shell.open_recent(&wrl);
-        assert_eq!(shell.commands.scene().objects().len(), scene_before.len());
+        assert_eq!(
+            shell.commands.scene().objects().len(),
+            scene_before.len() + 2
+        );
         assert_eq!(
             shell.commands.scene().objects()[0].object_id(),
             scene_before[0].object_id()
         );
+        assert_eq!(shell.commands.project_path(), Some(prior_project.as_path()));
+        assert!(shell.commands.is_dirty());
+        assert_eq!(
+            shell.commands.preferences().recent_files().paths().first(),
+            Some(&wrl)
+        );
+        shell
+            .commands
+            .dispatch(CommandId::Undo)
+            .expect("undo WRL import");
+        assert_eq!(shell.commands.scene().objects().len(), scene_before.len());
         assert_eq!(
             shell.commands.scene().objects()[0].mesh().vertices,
             scene_before[0].mesh().vertices
-        );
-        assert_eq!(shell.commands.scene().history_state_id(), history_before);
-        assert_eq!(shell.commands.project_path(), Some(prior_project.as_path()));
-        assert!(!shell.commands.is_dirty());
-        assert_eq!(
-            shell.commands.preferences().recent_files().paths(),
-            recent_before.as_slice()
-        );
-        assert!(
-            shell
-                .commands
-                .last_status()
-                .to_ascii_lowercase()
-                .contains("wrl")
         );
         assert!(std::fs::remove_dir_all(directory).is_ok());
     }

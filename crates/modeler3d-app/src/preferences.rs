@@ -140,7 +140,7 @@ pub fn import_uses_authoritative_units(path: &Path) -> bool {
             .and_then(|extension| extension.to_str())
             .map(|extension| extension.to_ascii_lowercase())
             .as_deref(),
-        Some("3mf" | "gltf" | "glb")
+        Some("3mf" | "gltf" | "glb" | "3dp")
     )
 }
 
@@ -161,6 +161,8 @@ pub fn import_unit_for_path(
 /// Pure application preferences that can be persisted by any desktop adapter.
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Preferences {
+    #[serde(default)]
+    last_import_directory: Option<PathBuf>,
     default_import_unit: ImportUnit,
     recent_files: RecentFiles,
     ribbon_favorites: Vec<String>,
@@ -200,6 +202,7 @@ const fn default_object_snapping_enabled() -> bool {
 impl Default for Preferences {
     fn default() -> Self {
         Self {
+            last_import_directory: None,
             default_import_unit: ImportUnit::Millimetre,
             recent_files: RecentFiles::default(),
             ribbon_favorites: Vec::new(),
@@ -236,6 +239,19 @@ pub struct PreferenceLoadReport {
 }
 
 impl Preferences {
+    /// Last folder used to choose an import, retained across application restarts.
+    pub fn last_import_directory(&self) -> Option<&Path> {
+        self.last_import_directory.as_deref()
+    }
+
+    /// Remembers the selected file's parent even when the file cannot be imported.
+    pub fn remember_import_path(&mut self, path: &Path) {
+        self.last_import_directory = path
+            .parent()
+            .filter(|p| !p.as_os_str().is_empty())
+            .map(Path::to_path_buf);
+    }
+
     /// Loads preferences from a JSON settings file and normalizes its bounds.
     pub fn load_from_path(path: &Path) -> Result<Self, PreferencesError> {
         Self::load_with_legacy(path, &LegacySettings::default()).map(|report| report.preferences)
@@ -347,6 +363,10 @@ impl Preferences {
             migrated_legacy = true;
         }
 
+        if let Some(value) = object.remove("last_import_directory") {
+            preferences.last_import_directory =
+                value.as_str().filter(|s| !s.is_empty()).map(PathBuf::from);
+        }
         let mut ribbon_favorites_saved = false;
         if let Some(value) = object.remove("ribbon_favorites") {
             match parse_string_list(&value) {
@@ -1011,6 +1031,7 @@ mod tests {
         ));
         let mut preferences = Preferences::default();
         preferences.set_default_import_unit(ImportUnit::Micrometre);
+        preferences.remember_import_path(&std::env::temp_dir().join("model.stl"));
         for index in 0..12 {
             preferences
                 .recent_files_mut()
