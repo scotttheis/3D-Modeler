@@ -3,7 +3,7 @@
 The only place current status is written. Keep it to one screen. Plan:
 [`product-rebuild-plan.md`](product-rebuild-plan.md).
 
-Updated 2026-11-16. F5 and F6 closed 2026-11-16 (ledger parity test passed after F6). Full gate passed 2026-11-16 after OF-65 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Before that, full gate passed 2026-11-16 after Phase 6 OF-63/OF-64 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Earlier: full gate passed 2026-11-15 after Phase 5 OF-58 (fmt, clippy, tests, deny, audit, MCP parity with no exemptions, smoke, capture board); a last small fix then passed the Fast gate. Release exe rebuilt from that source (3m49s) and driven live through the real MCP gateway for the Phase 5 review pack.
+Updated 2026-11-17 (Mac RC2). F5 and F6 closed 2026-11-16 (ledger parity test passed after F6). Full gate passed 2026-11-16 after OF-65 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Before that, full gate passed 2026-11-16 after Phase 6 OF-63/OF-64 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Earlier: full gate passed 2026-11-15 after Phase 5 OF-58 (fmt, clippy, tests, deny, audit, MCP parity with no exemptions, smoke, capture board); a last small fix then passed the Fast gate. Release exe rebuilt from that source (3m49s) and driven live through the real MCP gateway for the Phase 5 review pack.
 
 Test releases (how-to: [`packaging.md`](packaging.md)): last is **RC1**,
 version 0.1.1, 2026-11-13, `E:\3D-Modeler-RC\Builder3D-RC1.msi` (50 MB),
@@ -14,9 +14,14 @@ the fixes (2026-11-16 16:38); 487 tests, clippy, fmt passed in
 WSL Ubuntu 24.04; packaged app run under WSLg: insert, save, reopen through
 MCP, settings in `~/.config/Modeler3D`. Not checked: a real Linux GPU and
 desktop (WSL only has the CPU route), the AppImage (needs the owner's OK to
-download `appimagetool`). **Mac RC2: not built yet**; the USB card holds the
-source and steps ([`packaging-linux-mac.md`](packaging-linux-mac.md), "Mac
-package from the USB"). No Windows MSI for RC2. Next after RC2: RC3 / 0.1.3.
+download `appimagetool`). **Mac RC2 / 0.1.2, 2026-11-17:**
+`3D-Modeler-packaging/mac/3D-Modeler-0.1.2.dmg` (62 MB) on the USB card;
+universal arm64 + x86_64 app, built and `--smoke` passed; DMG checksum
+verified. Mac fmt and Clippy passed. Workspace tests: 253 passed; one loopback
+bridge test resets its connection in full-suite runs but passes alone. Not
+checked: installation into Applications or interactive Mac use. The app is
+ad-hoc signed, not notarized; first open may need the user's approval in
+Privacy & Security. No Windows MSI for RC2. Next after RC2: RC3 / 0.1.3.
 
 ## Now
 
