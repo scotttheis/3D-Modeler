@@ -32,6 +32,7 @@ the menu theme. Clicking an active brush or modifier again closes its controls,
 including after selection is lost. Full gate passed
 (`logs/gate/20261117-104840-full`): 497 tests, fmt, Clippy, deny, audit, parity,
 smoke, 40 states x 2 themes. Task/captures: [`toolbar-toggle.md`](tasks/toolbar-toggle.md).
+Release rebuilt (5m58s, 23,341,056-byte exe) and launched from the active workspace.
 Native caption/text setters passed in both themes; native colour readback is
 unsupported. **Owner visual review pending.** Recovery:
 `G:\3D-Modeler_snapshot_20261117-105524_toolbar-toggle` (robocopy 1;

@@ -3,18 +3,18 @@
 
 Gate 'full' on 2026-11-17 10:53
 
-Step                 Result Seconds Note                                                                               
-----                 ------ ------- ----                                                                               
-fmt                  Pass         2                                                                                    
-clippy (workspace)   Pass         9                                                                                    
-test (workspace)     Pass        42                                                                                    
-cargo deny           Pass         4                                                                                    
-cargo audit          Pass         2                                                                                    
-MCP catalog parity   Pass         6                                                                                    
-smoke                Pass         6                                                                                    
-build review profile Pass         1                                                                                    
-capture board        Pass       218 images only (not owner review):                                                    
-                                    E:\3D-Modeler\evidence\rebuild\captures\gate-20261117-104840                       
+Step                 Result Seconds Note
+----                 ------ ------- ----
+fmt                  Pass         2
+clippy (workspace)   Pass         9
+test (workspace)     Pass        42
+cargo deny           Pass         4
+cargo audit          Pass         2
+MCP catalog parity   Pass         6
+smoke                Pass         6
+build review profile Pass         1
+capture board        Pass       218 images only (not owner review):
+                                    E:\3D-Modeler\evidence\rebuild\captures\gate-20261117-104840
 
 
 
