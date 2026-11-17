@@ -27,6 +27,16 @@ for RC2. Next after RC2: RC3 / 0.1.3.
 
 ## Now
 
+**Caption and modifier toggles (owner, 2026-11-17):** Windows title bar follows
+the menu theme. Clicking an active brush or modifier again closes its controls,
+including after selection is lost. Full gate passed
+(`logs/gate/20261117-104840-full`): 497 tests, fmt, Clippy, deny, audit, parity,
+smoke, 40 states x 2 themes. Task/captures: [`toolbar-toggle.md`](tasks/toolbar-toggle.md).
+Native caption/text setters passed in both themes; native colour readback is
+unsupported. **Owner visual review pending.** Recovery:
+`G:\3D-Modeler_snapshot_20261117-105524_toolbar-toggle` (robocopy 1;
+11,119 files / 1,590,685,157 bytes matched).
+
 **Startup updates (owner, 2026-11-17):** mirror the prompt inside the individual
 Craft apps (confirmed in installed CADCraft), checking GitHub at launch and
 asking before downloading/installing. Implementation and release preparation:

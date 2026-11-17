@@ -31,12 +31,13 @@ manifold-csg = "=0.4.1"
 quick-xml = { version = "=0.42.0", default-features = false }
 qhull = { git = "https://github.com/LucaCiucci/qhull-rs.git", rev = "62e810ccf93b458470f03cae6ef4df26023d2260" }
 rfd = "=0.17.2"
+raw-window-handle = "=0.6.2"
 sysinfo = { version = "=0.40.0", default-features = false, features = ["system"] }
 thiserror = "=2.0.21"
 tokio = { version = "=1.51.6", features = ["macros", "rt-multi-thread"] }
 uuid = { version = "=1.29.0", default-features = false, features = ["std", "v4"] }
 wgpu = { version = "=30.0.1", default-features = false, features = ["dx12", "gles", "vulkan", "wgsl"] }
-windows = { version = "=0.62.2", default-features = false, features = ["Win32_Foundation", "Win32_Graphics_Dxgi", "Win32_Storage_FileSystem", "Win32_System_Console", "Win32_System_Registry"] }
+windows = { version = "=0.62.2", default-features = false, features = ["Win32_Foundation", "Win32_Graphics_Dwm", "Win32_Graphics_Dxgi", "Win32_Storage_FileSystem", "Win32_System_Console", "Win32_System_Registry"] }
 zip = { version = "=9.1.3", default-features = false, features = ["deflate"] }
 
 # The shipping profile keeps the renderer fast; the size profile exists to

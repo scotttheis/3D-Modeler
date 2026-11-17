@@ -21,6 +21,9 @@ tokio.workspace = true
 uuid.workspace = true
 zip.workspace = true
 
+[target.'cfg(windows)'.dependencies]
+raw-window-handle.workspace = true
+
 [build-dependencies]
 semver = "=1.0.28"
 serde_json.workspace = true

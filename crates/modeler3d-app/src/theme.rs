@@ -61,6 +61,27 @@ impl UiSize {
     }
 }
 
+/// Matches the Windows 11 caption to the menu row when the app theme changes.
+#[cfg(windows)]
+pub(crate) fn apply_native_caption(ctx: &Context, frame: &eframe::Frame, mode: ThemeMode) {
+    use raw_window_handle::HasWindowHandle;
+    let key = eframe::egui::Id::unique("native-title-bar-theme");
+    if ctx.data(|data| data.get_temp::<ThemeMode>(key)) == Some(mode) {
+        return;
+    }
+    if let Ok(handle) = frame.window_handle() {
+        let palette = ThemePalette::for_mode(mode);
+        let [r, g, b, _] = palette.navigation.to_srgba_unmultiplied();
+        let [tr, tg, tb, _] = palette.text.to_srgba_unmultiplied();
+        if let Err(error) =
+            modeler3d_platform::set_title_bar_colors(handle, [r, g, b], [tr, tg, tb])
+        {
+            crate::diagnostics::record_error("native title bar", error);
+        }
+        ctx.data_mut(|data| data.insert_temp(key, mode));
+    }
+}
+
 /// Applies the shell size, touching egui only when it changes.
 pub fn apply_size(ctx: &Context, size: UiSize) {
     let zoom = size.zoom_factor();

@@ -661,9 +661,11 @@ impl Modeler3dApp {
                 modeler3d_core::PrimitiveKind::Cylinder,
             ],
             ReviewState::TextureDialog => &[modeler3d_core::PrimitiveKind::Cube],
-            ReviewState::Grab | ReviewState::Crease | ReviewState::CreaseSharp => {
-                &[modeler3d_core::PrimitiveKind::Sphere]
-            }
+            ReviewState::Grab
+            | ReviewState::Crease
+            | ReviewState::CreaseSharp
+            | ReviewState::BrushSettings
+            | ReviewState::BrushDismissed => &[modeler3d_core::PrimitiveKind::Sphere],
             ReviewState::SmoothBrush => &[modeler3d_core::PrimitiveKind::Cylinder],
             ReviewState::Simplify | ReviewState::SimplifyArea => {
                 &[modeler3d_core::PrimitiveKind::Sphere]
@@ -1134,6 +1136,18 @@ impl Modeler3dApp {
         }
         self.camera_auto_frame_pending = true;
         self.invalidate_presentation();
+        if matches!(
+            review.state(),
+            ReviewState::BrushSettings | ReviewState::BrushDismissed
+        ) {
+            self.commands.set_selection_indices([0]);
+            self.active_tab = RibbonTab::Edit;
+            self.dispatch(CommandId::Grab);
+            if review.state() == ReviewState::BrushDismissed {
+                self.commands.deselect_all();
+                self.dispatch(CommandId::Grab);
+            }
+        }
         self.review = Some(review);
     }
 
@@ -1321,6 +1335,10 @@ impl Modeler3dApp {
     /// Dispatches one command and routes typed dialog/exit effects to the
     /// shell. This is the only command entry point used by widgets.
     pub(crate) fn dispatch(&mut self, command: CommandId) {
+        // Dismissing a selected modifier does not require a mesh selection.
+        if self.command_selected(command) && self.dismiss_modifier(command) {
+            return;
+        }
         if command == CommandId::Paint {
             self.toggle_paint_mode();
             return;
@@ -1416,7 +1434,7 @@ impl Modeler3dApp {
     }
 
     fn toggle_brush(&mut self, brush: ActiveBrush) {
-        if self.commands.selected_count() == 0 {
+        if self.active_brush != Some(brush) && self.commands.selected_count() == 0 {
             self.commands
                 .set_status(format!("Select a mesh to use {}", brush.label()));
             return;
@@ -1439,6 +1457,20 @@ impl Modeler3dApp {
             ));
         }
         self.invalidate_presentation();
+    }
+
+    fn dismiss_modifier(&mut self, command: CommandId) -> bool {
+        if modifier_dialog(command).is_some() {
+            self.apply_dialog_action(DialogAction::Close);
+        } else if self.placement_command == Some(command) {
+            self.placement_command = None;
+            self.transform_error = None;
+        } else if let Some(brush) = ActiveBrush::from_command(command) {
+            self.toggle_brush(brush);
+        } else {
+            return false;
+        }
+        true
     }
 
     fn dispatch_boolean(&mut self, operation: modeler3d_core::BooleanOperation) {
@@ -2621,7 +2653,8 @@ impl Modeler3dApp {
             }
             for key in current.iter().take(visible_count) {
                 if let Some((tab, command)) = find_command_key(key) {
-                    let enabled = command_enabled(command.id, &self.commands);
+                    let enabled = self.command_selected(command.id)
+                        || command_enabled(command.id, &self.commands);
                     let (rect, response) = ui.allocate_exact_size(
                         Vec2::new(FAVORITE_BUTTON_WIDTH, FAVORITE_BUTTON_HEIGHT),
                         Sense::click_and_drag(),
@@ -2977,7 +3010,7 @@ impl Modeler3dApp {
         palette: ThemePalette,
     ) {
         let selected = self.command_selected(command.id);
-        let enabled = command_enabled(command.id, &self.commands);
+        let enabled = selected || command_enabled(command.id, &self.commands);
         let text_color = if !enabled {
             palette.disabled_text
         } else if selected {
@@ -3219,6 +3252,14 @@ impl Modeler3dApp {
     }
 
     fn command_selected(&self, command: CommandId) -> bool {
+        if modifier_dialog(command).is_some_and(|kind| {
+            self.dialog
+                .as_ref()
+                .is_some_and(|dialog| dialog.kind() == kind)
+        }) || self.placement_command == Some(command)
+        {
+            return true;
+        }
         let display = self.commands.display_state();
         match command {
             CommandId::ToggleGrid => display.grid_visible,
@@ -7206,6 +7247,8 @@ impl eframe::App for Modeler3dApp {
         self.poll_desktop_job(&ctx);
         ctx.send_viewport_cmd(egui::ViewportCommand::Title(self.window_title()));
         theme::apply(&ctx, self.theme_mode);
+        #[cfg(windows)]
+        theme::apply_native_caption(&ctx, _frame, self.theme_mode);
         theme::apply_size(&ctx, self.ui_size);
         self.handle_shortcuts(&ctx);
         if self.surface == WorkspaceSurface::Welcome {
@@ -7662,6 +7705,16 @@ const fn measure_keeps_running_for(command: CommandId) -> bool {
             | CommandId::ToggleWireframe
             | CommandId::ToggleXray
     )
+}
+
+fn modifier_dialog(command: CommandId) -> Option<DialogKind> {
+    match command {
+        CommandId::Simplify => Some(DialogKind::Simplify),
+        CommandId::Subdivide => Some(DialogKind::Subdivide),
+        CommandId::Hollow => Some(DialogKind::Hollow),
+        CommandId::Emboss => Some(DialogKind::Emboss),
+        _ => None,
+    }
 }
 
 fn command_enabled(command: CommandId, state: &CommandState) -> bool {
@@ -10417,6 +10470,105 @@ mod tests {
         app.dispatch(CommandId::Blob);
         assert_eq!(app.active_brush, None);
         assert_eq!(app.commands.scene().history_state_id(), history);
+    }
+
+    #[test]
+    fn active_brush_buttons_close_settings_after_selection_is_lost() {
+        for command in [
+            CommandId::Grab,
+            CommandId::Blob,
+            CommandId::Crease,
+            CommandId::SmoothBrush,
+        ] {
+            let mut app = Modeler3dApp::default();
+            app.dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube));
+            let history = app.commands.scene().history_state_id();
+            app.dispatch(command);
+            assert!(app.command_selected(command));
+            assert!(app.brush_settings_open);
+            app.commands.deselect_all();
+            app.dispatch(command);
+            assert!(!app.command_selected(command));
+            assert!(app.active_brush.is_none());
+            assert!(!app.brush_settings_open);
+            assert!(app.viewport_drag.is_none());
+            assert!(app.preview_mesh_override.is_none());
+            assert_eq!(app.commands.scene().history_state_id(), history);
+        }
+    }
+
+    #[test]
+    fn clicking_the_brush_button_again_closes_its_window() {
+        let mut app = Modeler3dApp::default();
+        app.dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube));
+        let button = tab_commands(RibbonTab::Edit)
+            .into_iter()
+            .find(|button| button.id == CommandId::Grab)
+            .expect("Grab button");
+        let ctx = egui::Context::default();
+        let frame = |app: &mut Modeler3dApp, events| {
+            let mut output = ctx.run_ui(
+                egui::RawInput {
+                    screen_rect: Some(egui::Rect::from_min_size(
+                        egui::Pos2::ZERO,
+                        Vec2::new(1280.0, 840.0),
+                    )),
+                    events,
+                    ..Default::default()
+                },
+                |ui| {
+                    app.render_command_button(ui, button, ThemePalette::dark());
+                    app.render_brush_settings(ui.ctx());
+                },
+            );
+            output.textures_delta.clear();
+        };
+        let pointer = egui::pos2(30.0, 30.0);
+        frame(&mut app, vec![]);
+        for click in 0..2 {
+            frame(&mut app, vec![egui::Event::PointerMoved(pointer)]);
+            for pressed in [true, false] {
+                frame(
+                    &mut app,
+                    vec![egui::Event::PointerButton {
+                        pos: pointer,
+                        button: egui::PointerButton::Primary,
+                        pressed,
+                        modifiers: egui::Modifiers::default(),
+                    }],
+                );
+            }
+            assert_eq!(app.command_selected(CommandId::Grab), click == 0);
+            assert_eq!(app.brush_settings_open, click == 0);
+            app.commands.deselect_all();
+        }
+    }
+
+    #[test]
+    fn modifier_dialog_buttons_toggle_closed_without_applying_changes() {
+        for command in [
+            CommandId::Simplify,
+            CommandId::Subdivide,
+            CommandId::Hollow,
+            CommandId::Emboss,
+            CommandId::Mirror,
+            CommandId::Align,
+            CommandId::Arrange,
+        ] {
+            let mut app = Modeler3dApp::default();
+            app.dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube));
+            app.dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube));
+            app.commands.select_all();
+            let history = app.commands.scene().history_state_id();
+            app.dispatch(command);
+            assert!(app.command_selected(command), "{command:?}");
+            app.commands.deselect_all();
+            app.dispatch(command);
+            assert!(!app.command_selected(command), "{command:?}");
+            assert!(app.dialog.is_none());
+            assert!(app.placement_command.is_none());
+            assert_eq!(app.commands.scene().history_state_id(), history);
+        }
     }
 
     #[test]

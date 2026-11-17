@@ -18,3 +18,4 @@ wgpu.workspace = true
 
 [target.'cfg(windows)'.dependencies]
 windows.workspace = true
+raw-window-handle.workspace = true

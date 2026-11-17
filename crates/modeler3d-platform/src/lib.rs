@@ -12,6 +12,10 @@ mod legacy_settings;
 mod routing;
 mod runtime;
 mod slicer;
+#[cfg(windows)]
+mod window_chrome;
+#[cfg(windows)]
+pub use window_chrome::set_title_bar_colors;
 pub mod updates;
 
 pub use console::attach_console;

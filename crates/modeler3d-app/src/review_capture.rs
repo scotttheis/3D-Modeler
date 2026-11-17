@@ -24,6 +24,8 @@
 //!
 //! A capture shows what was painted. It is engineering evidence for layout and
 //! styling; it does not exercise pointer behaviour and is not owner approval.
+//! `brush-settings` shows Grab selected with its controls; `brush-dismissed`
+//! toggles it off after deselecting the mesh, leaving the controls closed.
 
 use std::{
     env,
@@ -47,6 +49,10 @@ const TIMEOUT_FRAMES: u32 = 600;
 /// The named application state a review capture starts in.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum ReviewState {
+    /// Grab selected with its settings window open.
+    BrushSettings,
+    /// Grab toggled off after the mesh selection is lost.
+    BrushDismissed,
     /// The welcome surface with no scene.
     Welcome,
     /// The scene surface with no objects.
@@ -189,6 +195,8 @@ impl ReviewState {
             "texture" => Some(Self::Texture),
             "texture-dialog" => Some(Self::TextureDialog),
             "grab" => Some(Self::Grab),
+            "brush-settings" => Some(Self::BrushSettings),
+            "brush-dismissed" => Some(Self::BrushDismissed),
             "crease" => Some(Self::Crease),
             "crease-sharp" => Some(Self::CreaseSharp),
             "smooth-brush" => Some(Self::SmoothBrush),
