@@ -150,10 +150,19 @@ pub fn ordered_indices(
 
 /// Computes the combined world bounds of selected top-level objects.
 pub fn world_bounds(scene: &Scene, indices: &[usize]) -> Result<WorldBounds, TransformError> {
+    world_bounds_with_delta(scene, indices, Transform::identity())
+}
+
+/// Computes preview bounds with the same geometry and precision as committed sizes.
+pub(crate) fn world_bounds_with_delta(
+    scene: &Scene,
+    indices: &[usize],
+    delta: Transform,
+) -> Result<WorldBounds, TransformError> {
     let mut bounds: Option<WorldBounds> = None;
     for index in indices {
         let object = scene.object(*index)?;
-        let rows = object.transform().f64_rows();
+        let rows = delta.multiply(object.transform())?.f64_rows();
         let mut minimum = [f32::INFINITY; 3];
         let mut maximum = [f32::NEG_INFINITY; 3];
         if object.mesh().vertices.is_empty() {

@@ -396,6 +396,7 @@ pub struct Modeler3dApp {
     numeric_edited_axes: [bool; 3],
     position_fields: [String; 3],
     size_fields: [String; 3],
+    resize_size_preview: Option<(modeler3d_core::Transform, DisplayUnit, u64)>,
     rotation_fields: [String; 3],
     scale_fields: [String; 3],
     arrange_gap_field: String,
@@ -494,6 +495,7 @@ impl Default for Modeler3dApp {
             numeric_edited_axes: [false; 3],
             position_fields: [String::new(), String::new(), String::new()],
             size_fields: [String::new(), String::new(), String::new()],
+            resize_size_preview: None,
             rotation_fields: [
                 String::from("0 deg"),
                 String::from("0 deg"),
@@ -4774,6 +4776,7 @@ impl Modeler3dApp {
                 self.refresh_preview();
                 self.update_gizmo_frame();
                 let staged_review_drag = self.stage_review_resize_drag(rect);
+                self.sync_resize_size_fields();
                 let theme_color = palette
                     .viewport
                     .to_srgba_unmultiplied()
@@ -5346,15 +5349,56 @@ impl Modeler3dApp {
         }
     }
 
+    // Sizes follow the same uncommitted delta as the mesh. Once it disappears
+    // (release, Escape, focus loss or a blocked gesture), restore scene sizes.
+    // Leave idle text alone so a person's numeric edits survive repainting.
+    fn sync_resize_size_fields(&mut self) {
+        let delta = match &self.viewport_drag {
+            Some(ViewportDrag::Transform(drag)) if drag.active_resize_handle().is_some() => {
+                Some(drag.delta)
+            }
+            _ => None,
+        };
+        if delta.is_none() && self.resize_size_preview.is_none() {
+            return;
+        }
+        let unit = self.commands.preferences().display_unit();
+        let preview = delta.map(|delta| (delta, unit, self.commands.scene().revision()));
+        if preview.is_some() && preview == self.resize_size_preview {
+            return;
+        }
+        let indices = self
+            .commands
+            .scene()
+            .selection()
+            .iter()
+            .copied()
+            .collect::<Vec<_>>();
+        if indices.is_empty() {
+            self.resize_size_preview = None;
+            return;
+        }
+        match crate::transforms::world_bounds_with_delta(
+            self.commands.scene(),
+            &indices,
+            delta.unwrap_or_else(modeler3d_core::Transform::identity),
+        ) {
+            Ok(bounds) => {
+                self.size_fields = bounds.extents().map(|value| format_distance(value, unit));
+                self.numeric_edited_axes = [false; 3];
+                self.last_numeric_axis = None;
+            }
+            Err(error) => self.viewport_error = Some(error.to_string()),
+        }
+        self.resize_size_preview = preview;
+    }
+
     fn paint_resize_handles(
         &self,
         painter: &egui::Painter,
         rect: egui::Rect,
         _palette: ThemePalette,
     ) {
-        let Some((_, frame)) = &self.gizmo_frame else {
-            return;
-        };
         let delta = match &self.viewport_drag {
             Some(ViewportDrag::Transform(drag)) => Mat4::from_rows(drag.delta.rows()).ok(),
             _ => None,
@@ -5373,25 +5417,7 @@ impl Modeler3dApp {
                     .and_then(|position| overlay.handle_at(position))
             })
             .flatten();
-        // 3D Builder shows the size above the box, and no numbers while a
-        // handle is dragged (the transform strip carries the live value).
-        let label = dragging.is_none().then(|| {
-            let axis = match hovered {
-                Some(ResizeHandle::Face { axis, .. } | ResizeHandle::Edge { axis, .. }) => axis,
-                _ => 1,
-            };
-            crate::resize_overlay::size_label(
-                frame.extents[axis],
-                self.commands.preferences().display_unit(),
-            )
-        });
-        overlay.paint(
-            painter,
-            rect,
-            dragging.or(hovered),
-            dragging,
-            label.as_deref(),
-        );
+        overlay.paint(painter, dragging.or(hovered), dragging);
     }
 
     /// For the `resize-drag` review capture: holds the +X face handle
@@ -7107,7 +7133,6 @@ impl Modeler3dApp {
             ui.disable();
         }
         self.render_top(ui);
-        self.render_transform_strip(ui.ctx());
         self.render_operation_progress(ui.ctx());
         match self.surface {
             WorkspaceSurface::Welcome => {
@@ -7118,6 +7143,7 @@ impl Modeler3dApp {
                 self.render_viewport(ui);
             }
         }
+        self.render_transform_strip(ui.ctx());
     }
 
     fn handle_shortcuts(&mut self, ctx: &egui::Context) {
@@ -11417,6 +11443,156 @@ mod tests {
         assert!(!viewport_pointer_interactions_allowed(false, false, false));
         assert!(viewport_pointer_interactions_allowed(false, false, true));
         assert!(!viewport_pointer_interactions_allowed(true, true, true));
+    }
+
+    #[test]
+    fn resize_boxes_follow_pointer_preview_cancel_and_one_step_commit() {
+        for unit in [DisplayUnit::Millimetre, DisplayUnit::Inch] {
+            for object_basis in [false, true] {
+                for handle in [
+                    ResizeHandle::Face { axis: 0, side: 1.0 },
+                    ResizeHandle::Face { axis: 1, side: 1.0 },
+                    ResizeHandle::Face { axis: 2, side: 1.0 },
+                    ResizeHandle::Corner([1.; 3]),
+                ] {
+                    let mut app = Modeler3dApp {
+                        settings_path: repository_test_directory("resize-live-boxes")
+                            .join("settings.json"),
+                        ..Default::default()
+                    };
+                    app.commands
+                        .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
+                        .expect("cube");
+                    app.commands
+                        .set_selected_size([30., 40., 50.])
+                        .expect("size");
+                    if object_basis {
+                        app.commands
+                            .set_selected_rotation([15., 25., 35.])
+                            .expect("rotate");
+                    }
+                    app.commands.preferences_mut().set_display_unit(unit);
+                    app.transform_panel_mode = TransformPanelMode::Resize;
+                    app.object_resize_basis = object_basis;
+                    app.refresh_preview();
+                    app.camera.set_viewport_size(800, 600).expect("viewport");
+                    app.frame_camera_if_pending();
+                    app.update_gizmo_frame();
+                    let frame = app.gizmo_frame.as_ref().expect("frame").1;
+                    let original = world_bounds(app.commands.scene(), &[0]).expect("bounds");
+                    let original_fields = original.extents().map(|v| format_distance(v, unit));
+                    let pose = *app.commands.scene().objects()[0].transform();
+                    let history = app.commands.scene().history_state_id();
+                    let rect = egui::Rect::from_min_size(egui::Pos2::ZERO, Vec2::new(800., 600.));
+                    // Use a ray through the handle's model-space point. This also
+                    // exercises the depth axis when its chevron is foreshortened.
+                    let sides = match handle {
+                        ResizeHandle::Face { axis, side } => {
+                            let mut sides = [0.; 3];
+                            sides[axis] = side;
+                            sides
+                        }
+                        ResizeHandle::Corner(sides) => sides,
+                        _ => unreachable!(),
+                    };
+                    let start = frame.point(sides);
+                    let direction =
+                        modeler3d_viewport::normalize(subtract(start, frame.center), "resize test")
+                            .expect("direction");
+                    let ray = |distance: f32| {
+                        let point = modeler3d_viewport::add(
+                            start,
+                            modeler3d_viewport::scale(direction, distance),
+                        );
+                        modeler3d_viewport::Ray::new(
+                            modeler3d_viewport::add(point, [100., 100., 100.]),
+                            [-1., -1., -1.],
+                        )
+                        .expect("ray")
+                    };
+                    let input = ViewportInput {
+                        pointer_position: None,
+                        pointer_delta: Vec2::ZERO,
+                        primary_pressed: false,
+                        primary_down: false,
+                        primary_released: false,
+                        secondary_pressed: false,
+                        secondary_down: false,
+                        secondary_released: false,
+                        middle_pressed: false,
+                        middle_down: false,
+                        middle_released: false,
+                        scroll_y: 0.,
+                        pinch_zoom_factor: 1.,
+                        escape_pressed: false,
+                        focused: true,
+                        modifiers: egui::Modifiers::default(),
+                    };
+                    for finish in 0..4 {
+                        let cancel = finish != 3;
+                        let mut gesture = TransformGesture::resize(
+                            app.commands
+                                .capture_transform_selection()
+                                .expect("snapshot"),
+                            frame,
+                            handle,
+                            ray(0.),
+                        )
+                        .expect("gesture");
+                        let mut previous = original_fields.clone();
+                        for distance in [-8., 6., 14.] {
+                            gesture
+                                .update_with_snap(ray(distance), false)
+                                .expect("motion");
+                            app.viewport_drag =
+                                Some(ViewportDrag::Transform(Box::new(gesture.clone())));
+                            app.sync_resize_size_fields();
+                            assert_ne!(app.size_fields, previous, "every motion updates sizes");
+                            previous = app.size_fields.clone();
+                            assert_eq!(*app.commands.scene().objects()[0].transform(), pose);
+                            assert_eq!(app.commands.scene().history_state_id(), history);
+                            if matches!(handle, ResizeHandle::Corner(_)) {
+                                for (live, original) in app.size_fields.iter().zip(&original_fields)
+                                {
+                                    assert_ne!(live, original);
+                                }
+                            }
+                        }
+                        let live = app.size_fields.clone();
+                        let mut end = input;
+                        end.escape_pressed = finish == 0;
+                        end.focused = finish != 1;
+                        end.primary_released = !cancel;
+                        app.route_viewport_input(rect, 1., end, finish != 2);
+                        app.sync_resize_size_fields();
+                        assert!(app.viewport_drag.is_none());
+                        let committed = world_bounds(app.commands.scene(), &[0]).expect("bounds");
+                        assert_eq!(
+                            app.size_fields,
+                            committed.extents().map(|v| format_distance(v, unit))
+                        );
+                        if cancel {
+                            assert_eq!(app.size_fields, original_fields);
+                            assert_eq!(*app.commands.scene().objects()[0].transform(), pose);
+                            assert_eq!(app.commands.scene().history_state_id(), history);
+                        } else {
+                            assert_eq!(app.size_fields, live, "no jump on release");
+                            app.commands.dispatch(CommandId::Undo).expect("undo");
+                            assert_eq!(*app.commands.scene().objects()[0].transform(), pose);
+                            assert_eq!(app.commands.scene().history_state_id(), history);
+                            app.commands.dispatch(CommandId::Redo).expect("redo");
+                            assert_eq!(
+                                world_bounds(app.commands.scene(), &[0]).expect("bounds"),
+                                committed
+                            );
+                        }
+                    }
+                    app.size_fields[0] = "a numeric edit in progress".into();
+                    app.sync_resize_size_fields();
+                    assert_eq!(app.size_fields[0], "a numeric edit in progress");
+                }
+            }
+        }
     }
 
     #[test]

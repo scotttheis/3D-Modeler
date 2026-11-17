@@ -3,7 +3,7 @@
 The only place current status is written. Keep it to one screen. Plan:
 [`product-rebuild-plan.md`](product-rebuild-plan.md).
 
-Updated 2026-11-17 (Edit tools). F5 and F6 closed 2026-11-16 (ledger parity test passed after F6). Full gate passed 2026-11-16 after OF-65 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Before that, full gate passed 2026-11-16 after Phase 6 OF-63/OF-64 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Earlier: full gate passed 2026-11-15 after Phase 5 OF-58 (fmt, clippy, tests, deny, audit, MCP parity with no exemptions, smoke, capture board); a last small fix then passed the Fast gate. Release exe rebuilt from that source (3m49s) and driven live through the real MCP gateway for the Phase 5 review pack.
+Updated 2026-11-17 (Resize OF-66/OF-67). F5 and F6 closed 2026-11-16 (ledger parity test passed after F6). Full gate passed 2026-11-16 after OF-65 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Before that, full gate passed 2026-11-16 after Phase 6 OF-63/OF-64 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Earlier: full gate passed 2026-11-15 after Phase 5 OF-58 (fmt, clippy, tests, deny, audit, MCP parity with no exemptions, smoke, capture board); a last small fix then passed the Fast gate. Release exe rebuilt from that source (3m49s) and driven live through the real MCP gateway for the Phase 5 review pack.
 
 Test releases (how-to: [`packaging.md`](packaging.md)): last is **RC1**,
 version 0.1.1, 2026-11-13, `E:\3D-Modeler-RC\Builder3D-RC1.msi` (50 MB),
@@ -26,6 +26,24 @@ checked on the Mac. The app is ad-hoc signed, not notarized. No Windows MSI
 for RC2. Next after RC2: RC3 / 0.1.3.
 
 ## Now
+
+**Resize OF-66 / OF-67 (owner, 2026-11-17):** removed the size label above
+Resize; the existing XYZ boxes follow the uncommitted mesh preview in display
+units, including all axes affected by corner scaling. Escape, focus loss and
+blocked input restore scene sizes. Numeric entry and gesture/history math
+remain unchanged. Fast and Full gates passed: 508 workspace tests, fmt,
+Clippy, deny, audit, MCP parity, smoke, 44 states x 2 themes
+(`logs/gate/20261117-155921-full`). Independent code review found no blockers.
+Release rebuilt (4m12s, 23,370,240 bytes); Release smoke passed. Both-theme
+before/after and Release captures:
+`evidence/rebuild/captures/2026-11-17-of66-67-resize/`.
+**Done, awaiting owner review. OF-68 through OF-70 remain queued.**
+Feedback: [`owner-feedback-2026-11-17.md`](owner-feedback-2026-11-17.md).
+Task: [`resize-live-sizes.md`](tasks/resize-live-sizes.md).
+Recovery: `G:\3D-Modeler_snapshot_20261117-160600_OF66-67`
+(copy and file/byte counts verified).
+Baseline: `G:\3D-Modeler_snapshot_20261117-155214_OF66-67-baseline`
+(11,778 files, 1,697,810,506 bytes; counts verified).
 
 **Edit tools independent of selection (owner, 2026-11-17):** all 12 Edit
 buttons can be chosen, switched and dismissed with no selection, including an

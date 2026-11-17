@@ -7,17 +7,15 @@
 //!   for the vertical Y axis and for depth (Z). A face whose axis points
 //!   away from the viewer hides its handle behind the object, as in
 //!   3D Builder, which shows only the front depth handle.
-//! - One small grey size label above the box.
 //! - While a face handle is dragged, a pale band crosses the object along
 //!   the drag axis; no extra numbers appear.
 //!
 //! One layout feeds both painting and hit-testing, so what is drawn is
 //! exactly what can be grabbed.
 
-use eframe::egui::{self, Color32, FontId, Stroke, Vec2};
+use eframe::egui::{self, Color32, Stroke, Vec2};
 use modeler3d_viewport::{Mat4, add, dot, scale};
 
-use crate::preferences::DisplayUnit;
 use crate::transform_gesture::{ResizeFrame, ResizeHandle};
 
 /// 3D Builder's lime green for horizontal (X) handles.
@@ -189,15 +187,12 @@ impl ResizeOverlay {
     }
 
     /// Paints the overlay. `emphasized` is the hovered or dragged handle;
-    /// `dragging` is the handle of an in-progress drag; `label` is the size
-    /// text, or `None` to omit it.
+    /// `dragging` is the handle of an in-progress drag.
     pub(crate) fn paint(
         &self,
         painter: &egui::Painter,
-        viewport: egui::Rect,
         emphasized: Option<ResizeHandle>,
         dragging: Option<ResizeHandle>,
-        label: Option<&str>,
     ) {
         if let Some(ResizeHandle::Face { axis, .. } | ResizeHandle::Edge { axis, .. }) = dragging
             && let Some([minus, plus]) = self.face_centers[axis]
@@ -235,28 +230,6 @@ impl ResizeOverlay {
                 FACE_HANDLE_SCALE
             };
             paint_double_chevron(painter, face.center, face.direction, color, size);
-        }
-        if let Some(text) = label {
-            let top = self
-                .faces
-                .iter()
-                .map(|face| face.center.y - 9.0 * FACE_HANDLE_SCALE)
-                .filter(|y| *y < self.bounds.top())
-                .fold(self.bounds.top(), f32::min);
-            let galley = painter.layout_no_wrap(
-                text.to_owned(),
-                FontId::proportional(12.0),
-                Color32::from_rgb(104, 104, 108),
-            );
-            let size = galley.size();
-            let position = egui::pos2(
-                (self.bounds.center().x - size.x * 0.5).clamp(
-                    viewport.left() + 4.0,
-                    (viewport.right() - size.x - 4.0).max(viewport.left()),
-                ),
-                (top - 4.0 - size.y).max(viewport.top() + 4.0),
-            );
-            painter.galley(position, galley, Color32::from_rgb(104, 104, 108));
         }
     }
 }
@@ -336,15 +309,6 @@ fn paint_drag_band(
     ));
 }
 
-/// The size label text: the value in the display unit with up to two
-/// decimals, trailing zeros dropped (`150 mm`, `95.18 mm`, `1.5 in`).
-pub(crate) fn size_label(value_mm: f32, unit: DisplayUnit) -> String {
-    let value = unit.from_mm(value_mm);
-    let text = format!("{value:.2}");
-    let text = text.trim_end_matches('0').trim_end_matches('.');
-    format!("{text} {}", unit.label())
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -400,6 +364,28 @@ mod tests {
     }
 
     #[test]
+    fn resize_overlay_never_paints_a_size_number() {
+        let overlay = ResizeOverlay::layout(&frame(), None, project, VIEW).expect("overlay");
+        let ctx = egui::Context::default();
+        let mut output = ctx.run_ui(egui::RawInput::default(), |ui| {
+            overlay.paint(ui.painter(), None, None);
+            overlay.paint(
+                ui.painter(),
+                None,
+                Some(ResizeHandle::Face { axis: 0, side: 1. }),
+            );
+        });
+        output.textures_delta.clear();
+        assert!(!output.shapes.is_empty());
+        assert!(
+            output
+                .shapes
+                .iter()
+                .all(|shape| !matches!(shape.shape, egui::Shape::Text(_)))
+        );
+    }
+
+    #[test]
     fn every_drawn_handle_is_grabbable_where_it_is_drawn() {
         let overlay = ResizeOverlay::layout(&frame(), None, project, VIEW).unwrap_or_else(|| {
             panic!("layout");
@@ -431,12 +417,5 @@ mod tests {
             });
         assert!(dragged.bounds.width() > still.bounds.width() * 1.9);
         assert!(ResizeOverlay::layout(&frame(), None, |_| None, VIEW).is_none());
-    }
-
-    #[test]
-    fn size_labels_are_compact_in_the_display_unit() {
-        assert_eq!(size_label(150.0, DisplayUnit::Millimetre), "150 mm");
-        assert_eq!(size_label(95.183, DisplayUnit::Millimetre), "95.18 mm");
-        assert_eq!(size_label(38.1, DisplayUnit::Inch), "1.5 in");
     }
 }
