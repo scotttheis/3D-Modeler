@@ -51,6 +51,11 @@ const TIMEOUT_FRAMES: u32 = 600;
 pub(crate) enum ReviewState {
     /// Grab selected with its settings window open.
     BrushSettings,
+    /// Edit tool controls after selection loss and switching tools.
+    EditSimplify,
+    EditSmooth,
+    EditBlob,
+    EditOff,
     /// Grab toggled off after the mesh selection is lost.
     BrushDismissed,
     /// The welcome surface with no scene.
@@ -195,6 +200,10 @@ impl ReviewState {
             "texture" => Some(Self::Texture),
             "texture-dialog" => Some(Self::TextureDialog),
             "grab" => Some(Self::Grab),
+            "edit-simplify" => Some(Self::EditSimplify),
+            "edit-smooth" => Some(Self::EditSmooth),
+            "edit-blob" => Some(Self::EditBlob),
+            "edit-off" => Some(Self::EditOff),
             "brush-settings" => Some(Self::BrushSettings),
             "brush-dismissed" => Some(Self::BrushDismissed),
             "crease" => Some(Self::Crease),

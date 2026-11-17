@@ -105,6 +105,8 @@ pub(crate) type SavePicker = fn(&SavePickerRequest) -> Option<PathBuf>;
 /// A result emitted by one dialog interaction.
 #[derive(Clone, Debug, PartialEq)]
 pub(crate) enum DialogAction {
+    /// Apply an armed whole-object tool to the current selection.
+    EditAction(crate::commands::CommandId),
     /// Close the current dialog.
     Close,
     /// Open a project path.
@@ -490,7 +492,12 @@ impl DialogState {
     pub(crate) fn is_modal(&self) -> bool {
         !matches!(
             self.kind,
-            DialogKind::Settings | DialogKind::Simplify | DialogKind::Subdivide
+            DialogKind::Settings
+                | DialogKind::Simplify
+                | DialogKind::Subdivide
+                | DialogKind::EditAction(_)
+                | DialogKind::Emboss
+                | DialogKind::Hollow
         ) || self.about_open
     }
 
@@ -547,6 +554,12 @@ impl DialogState {
             };
             ui.set_min_width(min_width);
             match self.kind {
+                DialogKind::EditAction(command) => {
+                    ui.label("Select an object, then apply the tool.");
+                    if ui.button("Apply").clicked() {
+                        action = Some(DialogAction::EditAction(command));
+                    }
+                }
                 DialogKind::OpenProject => self.path_dialog(ui, "Open", &mut action),
                 DialogKind::ImportModel => self.import_dialog(ui, &mut action),
                 DialogKind::SaveProject | DialogKind::Export => self.file_type_dialog(ui),
@@ -1513,6 +1526,13 @@ impl DialogState {
             DialogKind::Torus => "Edit Torus",
             DialogKind::Emboss => "Emboss",
             DialogKind::Hollow => "Hollow",
+            DialogKind::EditAction(command) => match command {
+                crate::commands::CommandId::Smooth => "Smooth",
+                crate::commands::CommandId::Merge => "Merge",
+                crate::commands::CommandId::Intersect => "Intersect",
+                crate::commands::CommandId::Subtract => "Subtract",
+                _ => "Edit",
+            },
             DialogKind::Simplify => "Simplify",
             DialogKind::Subdivide => "Subdivide",
         }

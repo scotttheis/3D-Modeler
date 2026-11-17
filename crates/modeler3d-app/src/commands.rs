@@ -321,6 +321,8 @@ impl CommandDescriptor {
 /// A modal request emitted by a command dispatch.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum DialogKind {
+    /// Select a target before applying a whole-object Edit action.
+    EditAction(CommandId),
     /// Select a project to open.
     OpenProject,
     /// Select a mesh or scene file to import.

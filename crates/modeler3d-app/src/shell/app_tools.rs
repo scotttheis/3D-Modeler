@@ -949,6 +949,24 @@ mod tests {
     }
 
     #[test]
+    fn mcp_settings_reports_all_edit_tools_available_without_a_selection() {
+        let (mut app, directory) = app("edit-availability");
+        let settings = mcp(&mut app, "app_settings", json!({})).expect("settings");
+        let edit = settings["ribbon"]["tabs"]
+            .as_array()
+            .expect("tabs")
+            .iter()
+            .find(|tab| tab["tab"] == "Edit")
+            .expect("Edit");
+        let commands = edit["commands"].as_array().expect("commands");
+        assert_eq!(commands.len(), 12);
+        for command in commands {
+            assert_eq!(command["enabled"], true, "{command}");
+        }
+        assert!(std::fs::remove_dir_all(directory).is_ok());
+    }
+
+    #[test]
     fn mcp_set_app_settings_matches_the_desktop_controls() {
         let (mut desktop, desktop_dir) = app("settings-desktop");
         let (mut ai, ai_dir) = app("settings-mcp");

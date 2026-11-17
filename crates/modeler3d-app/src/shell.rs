@@ -662,6 +662,10 @@ impl Modeler3dApp {
             ReviewState::Grab
             | ReviewState::Crease
             | ReviewState::CreaseSharp
+            | ReviewState::EditSimplify
+            | ReviewState::EditSmooth
+            | ReviewState::EditBlob
+            | ReviewState::EditOff
             | ReviewState::BrushSettings
             | ReviewState::BrushDismissed => &[modeler3d_core::PrimitiveKind::Sphere],
             ReviewState::SmoothBrush => &[modeler3d_core::PrimitiveKind::Cylinder],
@@ -1146,6 +1150,32 @@ impl Modeler3dApp {
                 self.dispatch(CommandId::Grab);
             }
         }
+        if matches!(
+            review.state(),
+            ReviewState::EditSimplify
+                | ReviewState::EditSmooth
+                | ReviewState::EditBlob
+                | ReviewState::EditOff
+        ) {
+            self.active_tab = RibbonTab::Edit;
+            self.commands.preferences_mut().set_ribbon_favorites(vec![
+                "Edit:Simplify".into(),
+                "Edit:Smooth".into(),
+                "Edit:Blob".into(),
+            ]);
+            self.commands.set_selection_indices([0]);
+            self.dispatch(CommandId::Simplify);
+            self.commands.deselect_all();
+            if review.state() != ReviewState::EditSimplify {
+                self.dispatch(CommandId::Smooth);
+            }
+            if matches!(review.state(), ReviewState::EditBlob | ReviewState::EditOff) {
+                self.dispatch(CommandId::Blob);
+            }
+            if review.state() == ReviewState::EditOff {
+                self.dispatch(CommandId::Blob);
+            }
+        }
         self.review = Some(review);
     }
 
@@ -1355,6 +1385,23 @@ impl Modeler3dApp {
         if self.paint_mode.is_some() && !matches!(command, CommandId::Undo | CommandId::Redo) {
             self.finish_paint_mode(true);
         }
+        if is_edit_tool(command) {
+            // Tool intent is independent of the eventual mesh target.
+            self.apply_dialog_action(DialogAction::Close);
+            self.active_brush = None;
+            self.brush_settings_open = false;
+            self.viewport_drag = None;
+            self.preview_mesh_override = None;
+            self.boolean_pick = None;
+            self.placement_command = None;
+            if let Some(kind) = modifier_dialog(command)
+                && (!matches!(kind, DialogKind::EditAction(_))
+                    || self.commands.selected_count() == 0)
+            {
+                self.open_dialog(kind);
+                return;
+            }
+        }
         let mesh_operation = match command {
             CommandId::Smooth => Some(MeshJobOperation::Smooth),
             _ => None,
@@ -1432,11 +1479,6 @@ impl Modeler3dApp {
     }
 
     fn toggle_brush(&mut self, brush: ActiveBrush) {
-        if self.active_brush != Some(brush) && self.commands.selected_count() == 0 {
-            self.commands
-                .set_status(format!("Select a mesh to use {}", brush.label()));
-            return;
-        }
         self.viewport_drag = None;
         self.preview_mesh_override = None;
         self.boolean_pick = None;
@@ -1460,6 +1502,7 @@ impl Modeler3dApp {
     fn dismiss_modifier(&mut self, command: CommandId) -> bool {
         if modifier_dialog(command).is_some() {
             self.apply_dialog_action(DialogAction::Close);
+            self.boolean_pick = None;
         } else if self.placement_command == Some(command) {
             self.placement_command = None;
             self.transform_error = None;
@@ -3280,6 +3323,10 @@ impl Modeler3dApp {
                 .as_ref()
                 .is_some_and(|dialog| dialog.kind() == kind)
         }) || self.placement_command == Some(command)
+            || self
+                .boolean_pick
+                .as_ref()
+                .is_some_and(|pick| boolean_operation_for_command(command) == Some(pick.operation))
         {
             return true;
         }
@@ -6610,6 +6657,14 @@ impl Modeler3dApp {
                 self.start_mesh_job(MeshJobOperation::Repair, true);
                 return;
             }
+            DialogAction::EditAction(command) => {
+                if let Some(operation) = boolean_operation_for_command(command) {
+                    self.dispatch_boolean(operation);
+                } else if command == CommandId::Smooth {
+                    self.start_mesh_job(MeshJobOperation::Smooth, true);
+                }
+                return;
+            }
             DialogAction::Simplify(percent) => {
                 self.start_mesh_job(MeshJobOperation::Simplify(percent), true);
                 return;
@@ -7663,17 +7718,41 @@ const fn measure_keeps_running_for(command: CommandId) -> bool {
     )
 }
 
+const fn is_edit_tool(command: CommandId) -> bool {
+    matches!(
+        command,
+        CommandId::Simplify
+            | CommandId::Subdivide
+            | CommandId::Smooth
+            | CommandId::Grab
+            | CommandId::Crease
+            | CommandId::SmoothBrush
+            | CommandId::Blob
+            | CommandId::Merge
+            | CommandId::Emboss
+            | CommandId::Hollow
+            | CommandId::Intersect
+            | CommandId::Subtract
+    )
+}
+
 fn modifier_dialog(command: CommandId) -> Option<DialogKind> {
     match command {
         CommandId::Simplify => Some(DialogKind::Simplify),
         CommandId::Subdivide => Some(DialogKind::Subdivide),
         CommandId::Hollow => Some(DialogKind::Hollow),
         CommandId::Emboss => Some(DialogKind::Emboss),
+        CommandId::Smooth | CommandId::Merge | CommandId::Intersect | CommandId::Subtract => {
+            Some(DialogKind::EditAction(command))
+        }
         _ => None,
     }
 }
 
 fn command_enabled(command: CommandId, state: &CommandState) -> bool {
+    if is_edit_tool(command) {
+        return true;
+    }
     let selected = state.selected_count();
     match command {
         CommandId::Paste => state.has_clipboard(),
@@ -8554,15 +8633,12 @@ mod tests {
         app.refresh_preview();
         app.camera.set_viewport_size(800, 600).expect("size");
         app.frame_camera_if_pending();
-        // Like the Python build, a brush needs a selected mesh, and says so
-        // instead of silently doing nothing.
+        // Choose the brush first, then select the mesh without rearming it.
         app.commands.set_selection_indices(std::iter::empty());
         assert!(command_enabled(CommandId::Grab, &app.commands));
         app.dispatch(CommandId::Grab);
-        assert_eq!(app.active_brush, None);
-        assert_eq!(app.commands.last_status(), "Select a mesh to use Grab");
+        assert_eq!(app.active_brush, Some(ActiveBrush::Grab));
         app.commands.set_selection_indices([0]);
-        app.dispatch(CommandId::Grab);
         assert_eq!(app.active_brush, Some(ActiveBrush::Grab));
         let rect = egui::Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(800., 600.));
         let center = rect.center();
@@ -10521,6 +10597,152 @@ mod tests {
         app.dispatch(CommandId::Blob);
         assert_eq!(app.active_brush, None);
         assert_eq!(app.commands.scene().history_state_id(), history);
+    }
+
+    #[test]
+    fn clicking_off_a_model_allows_simplify_smooth_blob_and_selection_resume() {
+        let mut app = Modeler3dApp::default();
+        app.dispatch(CommandId::AddPrimitive(PrimitiveKind::Sphere));
+        app.refresh_preview();
+        app.camera.set_viewport_size(800, 600).expect("viewport");
+        app.frame_camera_if_pending();
+        let rect = egui::Rect::from_min_size(egui::Pos2::ZERO, Vec2::new(800., 600.));
+        let history = app.commands.scene().history_state_id();
+        app.dispatch(CommandId::Simplify);
+        app.pick_viewport_object(rect, egui::pos2(1., 1.), egui::Modifiers::default());
+        assert_eq!(app.commands.selected_count(), 0);
+        app.dispatch(CommandId::Smooth);
+        assert!(app.command_selected(CommandId::Smooth));
+        app.dispatch(CommandId::Blob);
+        assert!(app.command_selected(CommandId::Blob));
+        assert!(app.dialog.is_none());
+        app.pick_viewport_object(rect, rect.center(), egui::Modifiers::default());
+        assert_eq!(app.commands.selected_count(), 1);
+        assert!(app.command_selected(CommandId::Blob));
+        app.dispatch(CommandId::Blob);
+        assert!(!app.brush_settings_open);
+        assert_eq!(app.commands.scene().history_state_id(), history);
+    }
+
+    #[test]
+    fn every_edit_tool_switches_and_dismisses_without_selection_or_history() {
+        let buttons = tab_commands(RibbonTab::Edit);
+        for populated in [false, true] {
+            for from in &buttons {
+                for to in &buttons {
+                    let mut app = Modeler3dApp::default();
+                    if populated {
+                        app.dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube));
+                        app.commands.deselect_all();
+                    }
+                    let history = app.commands.scene().history_state_id();
+                    let revision = app.commands.scene().revision();
+                    // Begin from no active tool, including when a Boolean ran.
+                    app.apply_dialog_action(DialogAction::Close);
+                    app.active_brush = None;
+                    app.boolean_pick = None;
+                    assert!(command_enabled(from.id, &app.commands));
+                    app.dispatch(from.id);
+                    assert!(app.command_selected(from.id), "{from:?}");
+                    if from.id != to.id {
+                        app.dispatch(to.id);
+                        assert!(!app.command_selected(from.id), "{from:?} -> {to:?}");
+                    }
+                    assert!(app.command_selected(to.id), "{to:?}");
+                    app.dispatch(to.id);
+                    assert!(!app.command_selected(to.id));
+                    assert!(app.dialog.is_none());
+                    assert!(!app.brush_settings_open);
+                    assert_eq!(app.commands.scene().history_state_id(), history);
+                    assert_eq!(app.commands.scene().revision(), revision);
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn edit_buttons_accept_pointer_clicks_in_ribbon_and_favorites_without_selection() {
+        for favorite in [false, true] {
+            for button in tab_commands(RibbonTab::Edit) {
+                let (mut app, directory) = shell_for_jobs("edit-tool-buttons");
+                app.commands
+                    .preferences_mut()
+                    .set_ribbon_favorites(vec![command_key(RibbonTab::Edit, button)]);
+                let ctx = egui::Context::default();
+                let frame = |app: &mut Modeler3dApp, events| {
+                    let mut output = ctx.run_ui(
+                        egui::RawInput {
+                            screen_rect: Some(egui::Rect::from_min_size(
+                                egui::Pos2::ZERO,
+                                Vec2::new(1280., 840.),
+                            )),
+                            events,
+                            ..Default::default()
+                        },
+                        |ui| {
+                            if favorite {
+                                app.render_favorites(ui, ThemePalette::dark());
+                            } else {
+                                app.render_command_button(ui, button, ThemePalette::dark());
+                            }
+                        },
+                    );
+                    output.textures_delta.clear();
+                };
+                frame(&mut app, vec![]);
+                let pointer = egui::pos2(20., 15.);
+                for selected in [true, false] {
+                    frame(&mut app, vec![egui::Event::PointerMoved(pointer)]);
+                    for pressed in [true, false] {
+                        frame(
+                            &mut app,
+                            vec![egui::Event::PointerButton {
+                                pos: pointer,
+                                button: egui::PointerButton::Primary,
+                                pressed,
+                                modifiers: egui::Modifiers::default(),
+                            }],
+                        );
+                    }
+                    assert_eq!(
+                        app.command_selected(button.id),
+                        selected,
+                        "favorite={favorite}, {button:?}"
+                    );
+                }
+                assert!(std::fs::remove_dir_all(directory).is_ok());
+            }
+        }
+    }
+
+    #[test]
+    fn chosen_whole_object_tool_applies_after_selection_with_one_undo() {
+        for command in [CommandId::Simplify, CommandId::Subdivide, CommandId::Smooth] {
+            let (mut app, directory) = shell_for_jobs("edit-tool-resume");
+            app.dispatch(CommandId::AddPrimitive(PrimitiveKind::Sphere));
+            app.commands.deselect_all();
+            let before = app.commands.scene().objects()[0].mesh().clone();
+            let history = app.commands.scene().history_state_id();
+            app.dispatch(command);
+            let action = match command {
+                CommandId::Simplify => DialogAction::Simplify(10),
+                CommandId::Subdivide => DialogAction::SubdivideWhole,
+                _ => DialogAction::EditAction(command),
+            };
+            app.apply_dialog_action(action.clone());
+            assert!(app.desktop_job.is_none());
+            assert_eq!(app.commands.scene().history_state_id(), history);
+            app.commands.select_index(0);
+            app.apply_dialog_action(action);
+            wait_for_desktop_job(&mut app);
+            assert_ne!(app.commands.scene().objects()[0].mesh(), &before);
+            app.dispatch(CommandId::Undo);
+            assert_eq!(app.commands.scene().objects()[0].mesh(), &before);
+            assert_eq!(app.commands.scene().history_state_id(), history);
+            app.dispatch(CommandId::Redo);
+            assert_ne!(app.commands.scene().objects()[0].mesh(), &before);
+            assert!(std::fs::remove_dir_all(directory).is_ok());
+        }
     }
 
     #[test]

@@ -3,7 +3,7 @@
 The only place current status is written. Keep it to one screen. Plan:
 [`product-rebuild-plan.md`](product-rebuild-plan.md).
 
-Updated 2026-11-17 (Import). F5 and F6 closed 2026-11-16 (ledger parity test passed after F6). Full gate passed 2026-11-16 after OF-65 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Before that, full gate passed 2026-11-16 after Phase 6 OF-63/OF-64 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Earlier: full gate passed 2026-11-15 after Phase 5 OF-58 (fmt, clippy, tests, deny, audit, MCP parity with no exemptions, smoke, capture board); a last small fix then passed the Fast gate. Release exe rebuilt from that source (3m49s) and driven live through the real MCP gateway for the Phase 5 review pack.
+Updated 2026-11-17 (Edit tools). F5 and F6 closed 2026-11-16 (ledger parity test passed after F6). Full gate passed 2026-11-16 after OF-65 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Before that, full gate passed 2026-11-16 after Phase 6 OF-63/OF-64 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Earlier: full gate passed 2026-11-15 after Phase 5 OF-58 (fmt, clippy, tests, deny, audit, MCP parity with no exemptions, smoke, capture board); a last small fix then passed the Fast gate. Release exe rebuilt from that source (3m49s) and driven live through the real MCP gateway for the Phase 5 review pack.
 
 Test releases (how-to: [`packaging.md`](packaging.md)): last is **RC1**,
 version 0.1.1, 2026-11-13, `E:\3D-Modeler-RC\Builder3D-RC1.msi` (50 MB),
@@ -25,22 +25,22 @@ save/reopen flow, settings location, and MCP gateway were not separately
 checked on the Mac. The app is ad-hoc signed, not notarized. No Windows MSI
 for RC2. Next after RC2: RC3 / 0.1.3.
 
-## TODO - next session
-
-**Edit tools independent of object selection (owner, 2026-11-17):** allow
-selecting, switching and toggling off every Edit tool/button even when no
-object is selected. Examples: Simplify to Smooth to Blob after clicking off
-the model. Choosing a tool and having a valid model target are separate:
-actual editing still requires an appropriate object, but lack of selection
-must not block changing the active button or opening/closing its controls.
-Cover both ribbon and shortcut/favorite buttons. Check the earlier
-[`toolbar-toggle.md`](tasks/toolbar-toggle.md) work, which enabled dismissal
-after selection loss but did not cover freely switching to another tool.
-Verify no-selection switching, second-click dismissal, selection loss and
-resuming on a selected object; retain normal undo behavior and MCP parity.
-**Recorded only; implementation is for the next session.**
-
 ## Now
+
+**Edit tools independent of selection (owner, 2026-11-17):** all 12 Edit
+buttons can be chosen, switched and dismissed with no selection, including an
+empty scene, from both the ribbon and favorites. Switching closes previous
+controls. Smooth and Boolean tools chosen without a target offer nonmodal
+Apply controls; invocation with an existing selection retains its behavior.
+Mesh application still validates its target; tool changes add no undo entry.
+Full gate passed: 507 tests, fmt, Clippy, deny, audit, MCP parity, smoke and
+44 states x 2 themes (`logs/gate/20261117-130618-full`). Tests cover actual
+egui clicks on both button surfaces, all tool pairs, clicking off the model,
+selection resumption and one-step undo/redo. Both-theme before/after and Release
+captures: `evidence/rebuild/captures/2026-11-17-edit-tools/`. Release rebuilt
+(4m16s, 23,368,704 bytes); Release smoke passed. **Owner review pending.**
+Task: [`edit-tools-selection.md`](tasks/edit-tools-selection.md).
+Recovery: `G:\3D-Modeler_snapshot_20261117-131300_edit-tools`.
 
 **Import (owner, 2026-11-17):** menu Import sits above New Scene and opens
 an all-files native picker. First use resolves Documents (including Windows
