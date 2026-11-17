@@ -25,6 +25,21 @@ save/reopen flow, settings location, and MCP gateway were not separately
 checked on the Mac. The app is ad-hoc signed, not notarized. No Windows MSI
 for RC2. Next after RC2: RC3 / 0.1.3.
 
+## TODO ? next session
+
+**Edit tools independent of object selection (owner, 2026-11-17):** allow
+selecting, switching and toggling off every Edit tool/button even when no
+object is selected. Examples: Simplify ? Smooth ? Blob after clicking off
+the model. Choosing a tool and having a valid model target are separate:
+actual editing still requires an appropriate object, but lack of selection
+must not block changing the active button or opening/closing its controls.
+Cover both ribbon and shortcut/favorite buttons. Check the earlier
+[`toolbar-toggle.md`](tasks/toolbar-toggle.md) work, which enabled dismissal
+after selection loss but did not cover freely switching to another tool.
+Verify no-selection switching, second-click dismissal, selection loss and
+resuming on a selected object; retain normal undo behavior and MCP parity.
+**Recorded only; implementation is for the next session.**
+
 ## Now
 
 **Import (owner, 2026-11-17):** menu Import sits above New Scene and opens
