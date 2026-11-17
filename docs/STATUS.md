@@ -27,6 +27,27 @@ for RC2. Next after RC2: RC3 / 0.1.3.
 
 ## Now
 
+**Startup updates (owner, 2026-11-17):** mirror the prompt inside the individual
+Craft apps (confirmed in installed CADCraft), checking GitHub at launch and
+asking before downloading/installing. Implementation and release preparation:
+[`updates.md`](updates.md), task [`startup-updates.md`](tasks/startup-updates.md).
+Feed remains unconfigured until the public repository is chosen; configure and
+rebuild every platform before the first public build. **Full gate passed**
+2026-11-17 (`logs/gate/20261117-101438-full`): 494 tests, fmt, Clippy, deny,
+audit (informational warnings), parity, smoke, 38 states × 2 themes. Linux
+helper success/invalid-payload/rollback passed in WSL; real stdio client against
+an isolated desktop passed (76 tools, unavailable install refused, normal close).
+Review pack: `evidence/rebuild/captures/2026-11-17-startup-updates/`, including
+the actual CADCraft reference. **Owner visual review pending.** Mac helper and
+live Windows/Mac/Linux installed upgrades are not yet validated; do those with
+the real feed before public launch. MCP catalog is 76 tools (`2026-11-17.1`).
+Recovery snapshot: `G:\3D-Modeler_snapshot_20261117-101915_startup-updates`
+(robocopy plus matching source/destination file and byte counts).
+Baseline snapshot: `G:\3D-Modeler_snapshot_20261117-094734_pre-updater`
+(robocopy 1, 10,114 files / 1,396,721,684 bytes matched). USB Mac commits merged
+as `ff8e43e`; DMG copied to `E:\3D-Modeler-RC\3D-Modeler-0.1.2.dmg`, SHA-256
+`c90ba253986d89b1a0eba842b367b1db1b6eaf94f847620f3e56bca65d7b600d` matches USB.
+
 **GitHub, 2026-11-16 (owner):** goal is a public repository named "3D Modeler", free to use, donations on; "almost" ready, not uploaded. Commit email chosen; licence (Apache 2.0 suggested) and artwork origin still to confirm. Checklist and open questions: [`github-upload.md`](github-upload.md).
 
 **Bug sweep 2026-11-16 (owner request before the upload):** Full gate passed (all steps, capture board 37 states × 2 themes). New test `crates/modeler3d-core/tests/malformed_inputs.rs`: about 5,000 cut-short or corrupted copies of every importable format and of `.3dp` projects; every one is refused with an error, none crashes (debug and release). Last two `expect()` calls removed from library code (`legacy_settings.rs`). No new bugs found. Still open from before: the faint pale dotted rim at the floor (F9 note) and Emboss (deferred).

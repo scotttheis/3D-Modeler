@@ -14,6 +14,7 @@ version=${1:?version, for example 0.1.2}
 out_dir=${2:?output directory}
 root=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 cd "$root"
+export MODELER3D_RELEASE_VERSION="$version"
 
 targets=(aarch64-apple-darwin x86_64-apple-darwin)
 rustup target add "${targets[@]}"
@@ -101,12 +102,13 @@ PLIST
 # an ad-hoc signature keeps Apple Silicon willing to run it.
 codesign --force --deep --sign - "$app"
 "$contents/MacOS/Modeler3D" --smoke
+if [ "${MODELER3D_PUBLIC_RELEASE:-0}" = 1 ]; then "$contents/MacOS/Modeler3D" --require-update-feed; fi
 
 stage="$work/dmg"
 mkdir -p "$stage"
 cp -R "$app" "$stage/"
 ln -s /Applications "$stage/Applications"
 mkdir -p "$out_dir"
-target_dmg="$out_dir/3D-Modeler-$version.dmg"
+target_dmg="$out_dir/3D-Modeler-$version-macos-universal.dmg"
 hdiutil create -volname "3D Modeler" -srcfolder "$stage" -ov -format UDZO "$target_dmg"
 echo "built $target_dmg ($(du -h "$target_dmg" | cut -f1))"

@@ -22,4 +22,6 @@ uuid.workspace = true
 zip.workspace = true
 
 [build-dependencies]
+semver = "=1.0.28"
+serde_json.workspace = true
 embed-resource = "=3.0.12"

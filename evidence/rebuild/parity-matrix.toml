@@ -4259,3 +4259,11 @@ requirements_covered = ["solid-color Material/Paint/Color", "average image color
 known_limits = ["Python full suite has one existing K-drive assertion failure in the read-only reference; two existing trimesh warnings.", "Rust Light native Cancel terminal was not confirmed; Rust Dark and Python Light/Dark cancellation are confirmed.", "Missing/unreadable/oversized/unsupported image errors and deliberate stale/busy/launch-failure routes are automated-only.", "Python native Print Prep report was captured manually after the runner QAction route did not open it; Python native external slicer launch was not captured.", "Visual review and owner acceptance remain pending; Windows 11 at 96 DPI / 100% only.", "cargo audit is not installed."]
 observed_steps = "Paired native Python/Rust appearance and job routes were run serially in Light and Dark. The actual installed Bambu Studio opened the staged Rust STL. Per-frame metadata and hashes are in capture-metadata.json and accepted-journal.ndjson."
 next_slice = "RB-08"
+
+[[feature]]
+id = "modeler3d.application.startup_updates"
+area = "application"
+behavior = "Inspect the same GitHub update state and accept or defer the exact offered version; installation uses the desktop updater and ordinary unsaved-work close guard."
+mcp_tool = ["get_update_status", "respond_to_update"]
+rust_paths = ["crates/modeler3d-app/src/updates.rs", "crates/modeler3d-platform/src/updates.rs", "crates/modeler3d-app/src/shell/app_tools.rs"]
+evidence = ["docs/updates.md", "scripts/Test-UpdateHelpers.sh"]

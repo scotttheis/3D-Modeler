@@ -168,6 +168,7 @@ if ($fullScope) {
             New-Item -ItemType Directory -Force $boardDir | Out-Null
             $states = @('welcome', 'empty', 'move', 'rotate', 'resize', 'resize-drag', 'multi', 'merge', 'unselected', 'material', 'settings', 'save', 'export', 'menu', 'colors', 'mirror', 'merge-apart', 'repair', 'paste', 'align', 'paint', 'paint-picker', 'xray', 'texture', 'texture-dialog', 'grab', 'crease', 'crease-sharp', 'smooth-brush', 'simplify', 'simplify-area', 'subdivide', 'hollow', 'hollow-dialog', 'hollow-error', 'measure', 'measure-start')
             $started = Get-Date
+            $states += 'update'
             $missing = @()
             Write-Host ""
             Write-Host "=== capture board ($($states.Count) states x 2 themes)" -ForegroundColor Cyan

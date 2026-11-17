@@ -12,6 +12,12 @@ Do not hand the owner commands to run. Stop and ask only at the points marked
 
 ## What to make
 
+For future builds, the Mac update asset is named
+`3D-Modeler-<version>-macos-universal.dmg` (RC2 below keeps its original name).
+Before the first public build, configure the update feed and set
+`MODELER3D_PUBLIC_RELEASE=1`; see [`updates.md`](updates.md). Both packaging
+scripts embed the supplied version in the app used for startup checks.
+
 | | Linux | Mac |
 |---|---|---|
 | File | `3D-Modeler-<version>-linux-x86_64.tar.gz` (unpack, run `Modeler3D`; needs no downloaded tools) and, once the owner allows the `appimagetool` download, `3D-Modeler-<version>-x86_64.AppImage` (one file) | `3D-Modeler-<version>.dmg` holding `3D Modeler.app` (drag to Applications) |

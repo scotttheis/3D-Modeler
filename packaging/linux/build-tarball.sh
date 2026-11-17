@@ -11,6 +11,9 @@ version=${1:?version, for example 0.1.2}
 out_dir=${2:?output directory}
 root=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 exe="$root/target/release/modeler3d-app"
+cd "$root"
+MODELER3D_RELEASE_VERSION="$version" cargo build --release --locked -p modeler3d-app
+if [ "${MODELER3D_PUBLIC_RELEASE:-0}" = 1 ]; then "$exe" --require-update-feed; fi
 
 [ -x "$exe" ] || { echo "release build missing: $exe" >&2; exit 2; }
 "$exe" --smoke

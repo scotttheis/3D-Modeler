@@ -12,6 +12,7 @@ mod legacy_settings;
 mod routing;
 mod runtime;
 mod slicer;
+pub mod updates;
 
 pub use console::attach_console;
 pub use discovery::{

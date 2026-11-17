@@ -50,6 +50,10 @@ the owner says when. Until then the "no push" rule in `AGENTS.md` stands.
    snapshot.
 3. Add `LICENSE` (owner's choice) and a short `README.md` (what the app is,
    how to build: `docs/building.md`, how to run).
+   Configure the real GitHub update repository before the first public build
+   and follow [`updates.md`](updates.md): rebuild every platform with the
+   public-release guard, publish the matching installers, and exercise an
+   installed-version upgrade. An unconfigured first build cannot find updates.
 4. Run the Full gate (`scripts/Invoke-Gate.ps1 -Tier full`).
 5. Sign in: the owner types `! gh auth login` in the session and follows the
    browser prompt. The session never sees the password; the owner can sign

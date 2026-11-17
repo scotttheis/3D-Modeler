@@ -6,6 +6,10 @@ version = 2
 # user-supplied. Revisit this narrow exception when a maintained compatible
 # rasterizer can preserve the same behavior.
 ignore = [
+    # Existing rmcp/schemars dependency: informational unmaintained notice,
+    # no vulnerability or patched chrono version. Revisit when upstream
+    # adopts a maintained time library; updater itself uses no chrono.
+    "RUSTSEC-2026-0543",
     "RUSTSEC-2026-0192",
     # AccessKit's Unix AT-SPI backend currently brings these informational
     # advisories through zbus v5. They have no patched versions and are not in
@@ -64,3 +68,10 @@ unknown-registry = "deny"
 unknown-git = "deny"
 allow-registry = ["https://github.com/rust-lang/crates.io-index"]
 allow-git = ["https://github.com/LucaCiucci/qhull-rs"]
+
+# TLS trust-anchor data. CDLA 2.0 permits redistribution with the agreement;
+# packaging/licenses/WEBPKI-ROOTS-LICENSE.txt is staged in every package.
+[[licenses.exceptions]]
+name = "webpki-roots"
+version = "=1.0.12"
+allow = ["CDLA-Permissive-2.0"]

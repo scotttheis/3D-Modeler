@@ -358,6 +358,7 @@ impl TransformPanelMode {
 
 /// The native 3D Modeler application shell state.
 pub struct Modeler3dApp {
+    updater: crate::updates::Updater,
     /// Portable application command state.
     pub(crate) commands: CommandState,
     active_tab: RibbonTab,
@@ -461,6 +462,7 @@ impl Default for Modeler3dApp {
         let (recent_preview_request_sender, recent_preview_request_receiver) = mpsc::channel();
         let (recent_preview_result_sender, recent_preview_result_receiver) = mpsc::channel();
         Self {
+            updater: crate::updates::Updater::default(),
             commands: CommandState::default(),
             active_tab: RibbonTab::Insert,
             surface: WorkspaceSurface::Welcome,
@@ -574,6 +576,7 @@ impl Modeler3dApp {
             return app;
         }
         app.load_preferences();
+        app.updater.start(&creation_context.egui_ctx);
         app.initialize_viewport(creation_context);
         match crate::mcp_bridge::McpDesktopIntegration::start() {
             Ok(bridge) => app.mcp_bridge = Some(bridge),
@@ -589,6 +592,9 @@ impl Modeler3dApp {
     /// [`crate::review_capture`].
     fn enter_review_state(&mut self, review: crate::review_capture::ReviewCapture) {
         use crate::review_capture::ReviewState;
+        if review.state() == ReviewState::Update {
+            self.updater = crate::updates::Updater::review();
+        }
 
         self.settings_path = review.isolated_settings_path();
         self.theme_mode = review.theme();
@@ -615,7 +621,10 @@ impl Modeler3dApp {
             self.active_tab = tab;
         }
         let primitives: &[modeler3d_core::PrimitiveKind] = match review.state() {
-            ReviewState::Welcome | ReviewState::Empty | ReviewState::NoShortcuts => &[],
+            ReviewState::Welcome
+            | ReviewState::Empty
+            | ReviewState::NoShortcuts
+            | ReviewState::Update => &[],
             ReviewState::Move
             | ReviewState::Rotate
             | ReviewState::Resize
@@ -7208,6 +7217,13 @@ impl eframe::App for Modeler3dApp {
         self.render_overwrite_confirmation(&ctx);
         self.render_confirmation(&ctx);
         self.render_ribbon_customizer(&ctx);
+        if self.confirm_action.is_none()
+            && self.pending_after_save.is_none()
+            && self.updater.show(&ctx)
+        {
+            self.updater.hide();
+            self.request_exit();
+        }
         if let Some(notice) = self.commands.take_notice() {
             self.toast = Some(crate::toast::Toast::new(
                 notice,
@@ -7220,6 +7236,13 @@ impl eframe::App for Modeler3dApp {
             self.toast = None;
         }
         if self.close_requested {
+            if let Err(error) = self.updater.finish_close() {
+                self.close_requested = false;
+                self.commands
+                    .set_status(format!("Could not start the updater: {error}"));
+                ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
+                return;
+            }
             ctx.send_viewport_cmd(egui::ViewportCommand::Close);
         }
         if !self.close_requested {

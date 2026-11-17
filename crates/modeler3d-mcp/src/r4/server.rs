@@ -4241,14 +4241,14 @@ mod tests {
     fn full_profile_publishes_the_fixed_catalog_with_strict_metadata() {
         let server = server(Profile::Full);
         let tools = server.tools();
-        assert_eq!(tools.len(), 74);
+        assert_eq!(tools.len(), 76);
         assert_eq!(
             tools.first().map(|tool| tool.name.as_ref()),
             Some("get_status")
         );
         assert_eq!(
             tools.last().map(|tool| tool.name.as_ref()),
-            Some("exit_app")
+            Some("respond_to_update")
         );
         let launch = tools.iter().find(|tool| tool.name == "launch_slicer");
         assert_eq!(
@@ -4467,7 +4467,7 @@ mod tests {
         let invalid = full.call_value("mirror", json!({"axis":"bad","index":0}));
         assert!(matches!(invalid, Err(AdapterError::Validation(_))));
         let observe = server(Profile::Observe);
-        assert_eq!(observe.tools().len(), 9);
+        assert_eq!(observe.tools().len(), 10);
         assert!(
             observe
                 .call_value("translate", json!({"index":0,"offset_mm":[1,0,0]}))

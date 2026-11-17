@@ -35,6 +35,7 @@ mod toast;
 mod transform_gesture;
 mod transforms;
 mod ui_state;
+mod updates;
 mod view_state;
 
 use std::{env, path::Path};
@@ -133,6 +134,19 @@ pub fn run() -> Result<(), AppError> {
 }
 
 fn run_inner() -> Result<(), AppError> {
+    if has_argument("--require-update-feed") {
+        modeler3d_platform::updates::validate_repository(env!("MODELER3D_UPDATE_REPOSITORY"))
+            .map_err(|error| std::io::Error::other(error.to_string()))?;
+        println!(
+            "Update feed: https://github.com/{}",
+            env!("MODELER3D_UPDATE_REPOSITORY")
+        );
+        return Ok(());
+    }
+    if has_argument("--version") {
+        println!("3D Modeler {}", updates::VERSION);
+        return Ok(());
+    }
     ThemeArtwork::new(ThemeMode::Light).validate()?;
     ThemeArtwork::new(ThemeMode::Dark).validate()?;
     let artwork_root = artwork::original_asset_root();

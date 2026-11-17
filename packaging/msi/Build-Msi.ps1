@@ -3,7 +3,8 @@ param(
     [string] $Name = "3D-Modeler-RC",
     [string] $OutDir = "E:\3D-Modeler-RC",
     [switch] $Build,    # stop a running 3D Modeler, set up libclang, cargo build --release
-    [switch] $Verify    # silent install, smoke + launch check, silent uninstall
+    [switch] $Verify,    # silent install, smoke + launch check, silent uninstall
+    [switch] $PublicRelease # refuse an unconfigured updater
 )
 # Builds a per-user 3D Modeler MSI from the release exe. See docs/packaging.md.
 # One-shot:  .\packaging\msi\Build-Msi.ps1 -Version 0.1.2 -Name 3D-Modeler-RC2 -Build -Verify
@@ -29,12 +30,20 @@ if ($Build) {
     Get-Process modeler3d-app, Modeler3D, builder3d-app, Builder3D -ErrorAction SilentlyContinue | Stop-Process -Force
     Push-Location $projectRoot
     try {
+        $previousReleaseVersion = $env:MODELER3D_RELEASE_VERSION
+        $env:MODELER3D_RELEASE_VERSION = $Version
         . (Join-Path $projectRoot 'scripts\Initialize-BuildClang.ps1') | Out-Null
         cmd /c "cargo build --release -p modeler3d-app --locked 2>&1"
         if ($LASTEXITCODE -ne 0) { throw "cargo build failed ($LASTEXITCODE)." }
-    } finally { Pop-Location }
+    } finally { $env:MODELER3D_RELEASE_VERSION = $previousReleaseVersion; Pop-Location }
 }
 if (-not (Test-Path -LiteralPath $exe)) { throw "Release exe not found: $exe (use -Build)." }
+$builtVersion = (& $exe --version | Out-String).Trim()
+if ($builtVersion -ne "3D Modeler $Version") { throw "Binary version does not match $Version; rebuild with -Build." }
+if ($PublicRelease) {
+    & $exe --require-update-feed | Write-Host
+    if ($LASTEXITCODE -ne 0) { throw 'Configure packaging/update-feed.json, then rebuild.' }
+}
 
 $crt = Get-ChildItem 'C:\Program Files\Microsoft Visual Studio\*\*\VC\Redist\MSVC\*\x64\Microsoft.VC143.CRT' -Directory |
     Sort-Object FullName -Descending | Select-Object -First 1
@@ -63,6 +72,10 @@ $msi = Join-Path $OutDir "$Name.msi"
     -d "Version=$Version" -d "StageDir=$stage" -d "CrtDir=$($crt.FullName)" `
     -o $msi
 if ($LASTEXITCODE -ne 0) { throw "wix build failed ($LASTEXITCODE)." }
+$updateMsi = Join-Path $OutDir "3D-Modeler-$Version-windows-x86_64.msi"
+if ([IO.Path]::GetFullPath($msi) -ne [IO.Path]::GetFullPath($updateMsi)) {
+    Copy-Item -LiteralPath $msi -Destination $updateMsi -Force
+}
 Remove-Item -LiteralPath $stage -Recurse -Force
 Remove-Item -LiteralPath (Join-Path $OutDir "$Name.wixpdb") -ErrorAction SilentlyContinue
 Get-Item -LiteralPath $msi | Select-Object FullName, Length

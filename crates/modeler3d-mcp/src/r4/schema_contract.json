@@ -8365,6 +8365,68 @@
         "asked_user",
         "message"
       ]
+    },
+    "e6205a54aecb77eaeea7a5abc398be4e5199e611bb91d262dafc05bbd0f6fc4b": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "current_version": {
+          "type": "string"
+        },
+        "available_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "notes_url": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "phase": {
+          "enum": [
+            "unconfigured",
+            "checking",
+            "available",
+            "downloading",
+            "ready",
+            "idle"
+          ]
+        },
+        "downloaded_bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "prompt_open": {
+          "type": "boolean"
+        },
+        "can_install": {
+          "type": "boolean"
+        },
+        "message": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "current_version",
+        "available_version",
+        "notes_url",
+        "phase",
+        "downloaded_bytes",
+        "total_bytes",
+        "prompt_open",
+        "can_install",
+        "message"
+      ]
     }
   },
   "tools": {
@@ -13816,6 +13878,41 @@
         "type": "object"
       },
       "output_schema_id": "0b9701e97034d3e67ff35b65c4a4a5374abebf9cad0a43468479cb98b9c0caa4"
+    },
+    "get_update_status": {
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "output_schema_id": "e6205a54aecb77eaeea7a5abc398be4e5199e611bb91d262dafc05bbd0f6fc4b"
+    },
+    "respond_to_update": {
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "response": {
+            "type": "string",
+            "enum": [
+              "install",
+              "later"
+            ],
+            "description": "Respond to the current update offer. Install downloads, verifies and asks the normal save/discard/cancel close prompt before restarting. Later defers the restart."
+          },
+          "version": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "description": "Exact available_version from get_update_status; prevents accepting a stale offer."
+          }
+        },
+        "required": [
+          "response",
+          "version"
+        ]
+      },
+      "output_schema_id": "e6205a54aecb77eaeea7a5abc398be4e5199e611bb91d262dafc05bbd0f6fc4b"
     }
   }
 }

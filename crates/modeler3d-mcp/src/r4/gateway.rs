@@ -358,14 +358,14 @@ mod tests {
             )),
         );
         let tools = gateway.tools();
-        assert_eq!(tools.len(), 74);
+        assert_eq!(tools.len(), 76);
         assert_eq!(
             tools.first().map(|tool| tool.name.as_ref()),
             Some("get_status")
         );
         assert_eq!(
             tools.last().map(|tool| tool.name.as_ref()),
-            Some("exit_app")
+            Some("respond_to_update")
         );
         assert!(matches!(
             gateway.call_desktop("get_status", &json!({})),

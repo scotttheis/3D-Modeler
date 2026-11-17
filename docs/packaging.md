@@ -36,6 +36,11 @@ Leave out `-Build` to package the release exe that is already built.
 
 ## Versions
 
+The script embeds this version into the executable and also emits
+`3D-Modeler-<version>-windows-x86_64.msi` for the update feed. Before the first
+public build, configure the feed and add `-PublicRelease`; see
+[`updates.md`](updates.md). Keep the existing UpgradeCode unchanged.
+
 Release candidate *n* is version `0.1.n` (RC1 = 0.1.1, RC2 = 0.1.2, ...).
 **Bump the third number every time.** Windows Installer ignores a fourth
 field, so an MSI with the same three numbers will not replace the old one.

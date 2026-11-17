@@ -185,6 +185,20 @@ impl Modeler3dApp {
         args: &Map<String, Value>,
     ) -> Result<Value, AdapterError> {
         match name {
+            "get_update_status" => Ok(self.updater.status()),
+            "respond_to_update" => {
+                let response = optional_str(args, "response").unwrap_or("");
+                let version = optional_str(args, "version").unwrap_or("");
+                let close = self
+                    .updater
+                    .respond(response, version)
+                    .map_err(AdapterError::Conflict)?;
+                if close {
+                    self.updater.hide();
+                    self.request_exit();
+                }
+                Ok(self.updater.status())
+            }
             "app_settings" => Ok(self.app_settings_value(None)),
             "set_app_settings" => self.mcp_set_app_settings(args),
             "customize_ribbon" => self.mcp_customize_ribbon(args),
@@ -879,6 +893,59 @@ mod tests {
     fn saved_settings(app: &Modeler3dApp) -> Value {
         serde_json::from_slice(&std::fs::read(&app.settings_path).expect("settings saved"))
             .expect("settings json")
+    }
+
+    #[test]
+    fn mcp_update_consent_matches_the_card_and_rejects_stale_or_unknown_arguments() {
+        let (mut ai, directory) = app("updates");
+        assert_eq!(
+            mcp(&mut ai, "get_update_status", json!({})).unwrap()["available_version"],
+            Value::Null
+        );
+        assert!(matches!(
+            mcp(
+                &mut ai,
+                "respond_to_update",
+                json!({"response":"install","version":"0.2.0"})
+            ),
+            Err(AdapterError::Conflict(_))
+        ));
+        ai.updater = crate::updates::Updater::review();
+        let mut desktop = crate::updates::Updater::review();
+        assert!(!desktop.respond("later", "0.2.0").unwrap());
+        let later = mcp(
+            &mut ai,
+            "respond_to_update",
+            json!({"response":"later","version":"0.2.0"}),
+        )
+        .unwrap();
+        assert_eq!(later, desktop.status());
+        let repeated = mcp(
+            &mut ai,
+            "respond_to_update",
+            json!({"response":"later","version":"0.2.0"}),
+        )
+        .unwrap();
+        assert_eq!(later, repeated);
+        assert!(matches!(
+            mcp(
+                &mut ai,
+                "respond_to_update",
+                json!({"response":"install","version":"0.3.0"})
+            ),
+            Err(AdapterError::Conflict(_))
+        ));
+        assert!(matches!(
+            mcp(
+                &mut ai,
+                "respond_to_update",
+                json!({"response":"later","version":"0.2.0","url":"https://example.com"})
+            ),
+            Err(AdapterError::Validation(_))
+        ));
+        assert!(!ai.close_requested);
+        assert!(!ai.commands.is_dirty());
+        let _ = std::fs::remove_dir_all(directory);
     }
 
     #[test]

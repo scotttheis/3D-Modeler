@@ -86,11 +86,11 @@ impl ToolSpec {
 }
 
 /// Version of the shared 3D Modeler MCP catalog.
-pub const CATALOG_VERSION: &str = "2026-09-25.1";
+pub const CATALOG_VERSION: &str = "2026-11-17.1";
 
 /// The exact reference order.  Keep this list append-only unless the Python
 /// catalog version changes with an explicit compatibility decision.
-pub const TOOL_CATALOG: [ToolSpec; 74] = [
+pub const TOOL_CATALOG: [ToolSpec; 76] = [
     ToolSpec {
         name: "get_status",
         category: "inspection",
@@ -841,13 +841,33 @@ pub const TOOL_CATALOG: [ToolSpec; 74] = [
         long_running: false,
         profile: Profile::Full,
     },
+    ToolSpec {
+        name: "get_update_status",
+        category: "application",
+        read_only: true,
+        destructive: false,
+        idempotent: true,
+        open_world: false,
+        long_running: false,
+        profile: Profile::Observe,
+    },
+    ToolSpec {
+        name: "respond_to_update",
+        category: "application",
+        read_only: false,
+        destructive: true,
+        idempotent: true,
+        open_world: true,
+        long_running: false,
+        profile: Profile::Full,
+    },
 ];
 
 /// Tools carried out by the desktop shell rather than the MCP document
 /// (OF-58). The MCP crate owns their schemas and checks; the desktop bridge
 /// performs them with the same shell code its own buttons use, through
 /// `R4Server::call_shell_value`.
-pub const SHELL_TOOLS: [&str; 8] = [
+pub const SHELL_TOOLS: [&str; 10] = [
     "app_settings",
     "set_app_settings",
     "customize_ribbon",
@@ -856,6 +876,8 @@ pub const SHELL_TOOLS: [&str; 8] = [
     "open_recent",
     "capture_window",
     "exit_app",
+    "get_update_status",
+    "respond_to_update",
 ];
 
 /// Returns whether a tool is carried out by the desktop shell.
@@ -876,7 +898,7 @@ mod tests {
 
     #[test]
     fn catalog_is_exactly_ordered_and_profile_monotonic() {
-        assert_eq!(TOOL_CATALOG.len(), 74);
+        assert_eq!(TOOL_CATALOG.len(), 76);
         assert_eq!(TOOL_CATALOG[0].name, "get_status");
         assert_eq!(TOOL_CATALOG[59].name, "launch_slicer");
         assert_eq!(TOOL_CATALOG[60].name, "rename_object");
@@ -905,7 +927,7 @@ mod tests {
             .iter()
             .filter(|spec| spec.visible_in(Profile::Files))
             .count();
-        assert_eq!((observe, model, files), (9, 61, 72));
+        assert_eq!((observe, model, files), (10, 62, 73));
         assert!(Profile::Full.includes(Profile::Full));
         assert!(!Profile::Files.includes(Profile::Full));
         assert_eq!(Profile::parse(" MODEL "), Some(Profile::Model));

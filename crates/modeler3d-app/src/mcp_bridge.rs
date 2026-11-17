@@ -265,7 +265,9 @@ impl McpDesktopIntegration {
             // Settings, ribbon, screens and recent-file lists do not touch the
             // document, so they work during a long operation; opening a file
             // or exiting waits for it.
-            if self.active_operation.is_some() && matches!(name, "open_recent" | "exit_app") {
+            if self.active_operation.is_some()
+                && matches!(name, "open_recent" | "exit_app" | "respond_to_update")
+            {
                 return Err(AdapterError::Busy);
             }
             let version = app.commands.mcp_document_version();

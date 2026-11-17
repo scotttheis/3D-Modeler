@@ -156,6 +156,8 @@ pub(crate) enum ReviewState {
     /// The empty scene with an emptied shortcut bar, so the dim
     /// "Drag shortcuts here" hint shows.
     NoShortcuts,
+    /// Startup update offer, with no network or installer worker.
+    Update,
 }
 
 impl ReviewState {
@@ -201,6 +203,7 @@ impl ReviewState {
             "centre" => Some(Self::Centre),
             "settings-note" => Some(Self::SettingsNote),
             "no-shortcuts" => Some(Self::NoShortcuts),
+            "update" => Some(Self::Update),
             _ => None,
         }
     }
