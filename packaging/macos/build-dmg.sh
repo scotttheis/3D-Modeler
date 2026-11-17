@@ -19,7 +19,35 @@ targets=(aarch64-apple-darwin x86_64-apple-darwin)
 rustup target add "${targets[@]}"
 for target in "${targets[@]}"; do
     # Output lands in target/<triple>/release, inside target/ as AGENTS.md asks.
-    cargo build --release --locked -p modeler3d-app --target "$target"
+    if [[ "$target" == x86_64-apple-darwin ]]; then
+        # manifold-csg-sys drives CMake directly and does not pass Cargo's
+        # target architecture to it. On Apple Silicon that can leave an ARM64
+        # native archive under the Intel target directory. Reconfigure only
+        # when the cached archive has the wrong architecture.
+        for build in target/"$target"/release/build/manifold-csg-sys-*/out/build; do
+            [[ -d "$build" ]] || continue
+            wrong_architecture=0
+            for archive in \
+                "$build/src/libmanifold.a" \
+                "$build/bindings/c/libmanifoldc.a" \
+                "$build/_deps/clipper2-build/libClipper2.a" \
+                "$build"/*release/libtbb.a \
+                "$build"/*release/libtbbmalloc.a; do
+                [[ -f "$archive" ]] || continue
+                if ! lipo -verify_arch x86_64 "$archive" >/dev/null 2>&1; then
+                    wrong_architecture=1
+                    break
+                fi
+            done
+            if ((wrong_architecture)); then
+                rm -rf "${build%/out/build}"
+            fi
+        done
+        CXX="$root/packaging/macos/clang-x86_64.sh" \
+            cargo build --release --locked -p modeler3d-app --target "$target"
+    else
+        cargo build --release --locked -p modeler3d-app --target "$target"
+    fi
 done
 
 work=$(mktemp -d)
