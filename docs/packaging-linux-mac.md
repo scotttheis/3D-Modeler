@@ -115,6 +115,38 @@ On the Mac the card mounts at `/Volumes/16GBMICROSD` (check `ls /Volumes`).
    first open shows a warning because it is not signed, allowed once in
    System Settings, Privacy & Security, Open Anyway.
 
+## Instructions given to the owner (RC2, 2026-11-16)
+
+Kept here so they can be read back later. Plain version for the owner:
+
+**Linux box (test package):**
+1. Copy `3D-Modeler-0.1.2-linux-x86_64.tar.gz` from the USB card
+   (`linux\` folder) to the Linux box.
+2. Double-click it, or run `tar -xzf 3D-Modeler-0.1.2-linux-x86_64.tar.gz`.
+3. Open the unpacked folder and double-click `Modeler3D`, or run
+   `./Modeler3D` in a terminal from that folder.
+4. Needs a 2024-or-newer Linux (Ubuntu 24.04, Fedora 40, Debian 13 or
+   later) with X11 or Wayland. Optional: `installers/install_linux.sh`
+   copies it to `~/.local/opt/modeler3d`; `installers/uninstall_linux.sh`
+   removes it.
+5. Try: open a project, insert a shape, move it, save, close, reopen.
+   Settings are in `~/.config/Modeler3D`, logs in `~/.local/state/Modeler3D`.
+6. Not yet checked on a real Linux desktop with a graphics card. Tell the
+   session what you saw.
+
+**Mac (to be built on the Mac):**
+1. Plug in the USB card. Open Claude Code in
+   `3D-Modeler-packaging/3D-Modeler` on the card (or follow steps 1–7 in
+   "Mac package from the USB" above) and say "make the Mac package".
+2. The `.dmg` is saved to the card's `mac\` folder. Open it, drag
+   3D Modeler to Applications, start it once.
+3. First open shows a warning because the app is not signed. Allow it
+   once in System Settings → Privacy & Security → Open Anyway.
+
+**Open question (AppImage):** a single-file Linux version is not built. It
+needs the `appimagetool` download from GitHub, which was blocked; the owner
+must say yes before it is fetched. The `.tar.gz` covers testing without it.
+
 ## Known risks
 
 - Never built on Linux or macOS. Build-time QHull/bindgen, font loading,
