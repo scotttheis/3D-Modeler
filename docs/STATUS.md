@@ -292,9 +292,19 @@ closed.
 7. Resize reference toggle (owner, 2026-11-18). Built for owner trial: an icon-only
    switch above Apply for floor-front or imported-object-front sizing, with
    tooltips. Trial: [`resize-basis-toggle.md`](tasks/resize-basis-toggle.md).
-8. Revisit the Material texture dialog (OF-46 follow-up): the owner wants to
+8. Next task, recorded 2026-11-18: investigate and fix Settle while Resize is
+   active. The owner reports that clicking Settle distorts the object and
+   fails to settle it. Expected behavior is to place the object on the floor
+   without deforming it. Reproduction and cause are pending investigation.
+9. Following task, recorded 2026-11-18: replace grab feedback throughout the
+   app with a very simplified robot-claw/wrench-style cursor, with open and
+   closed variants for ready-to-grab and actively-grabbing states. Cover
+   Resize, Rotate, Move and any other grabbing interaction consistently.
+   The owner requested documentation only for both new items this session;
+   implementation is queued for later.
+10. Revisit the Material texture dialog (OF-46 follow-up): the owner wants to
    look at its layout again; ask what to change before building.
-9. Stop before RB-10 (S3). OF-56/57 (Emboss) stay deferred until the owner
+11. Stop before RB-10 (S3). OF-56/57 (Emboss) stay deferred until the owner
    brings them back.
 
 Each phase ends with its review pack and a stop for owner review, as
