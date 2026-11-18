@@ -100,6 +100,81 @@ impl ResizeFrame {
         Ok(frame)
     }
 
+    /// Floor axes remain fixed; object axes follow the imported mesh orientation.
+    /// Multiple objects use the first selected object's frame as one selection.
+    pub(crate) fn resize_selection(
+        scene: &Scene,
+        indices: &[usize],
+        object_basis: bool,
+    ) -> Result<Self, TransformError> {
+        if object_basis {
+            Self::rotation_selection(scene, indices)
+        } else {
+            Self::from_scene(scene, indices, false)
+        }
+    }
+
+    pub(crate) fn resize_delta(
+        self,
+        size: [f32; 3],
+        pivot: [f32; 3],
+    ) -> Result<Transform, TransformError> {
+        if size.iter().any(|v| !v.is_finite() || *v <= 0.) {
+            return Err(invalid("size must be finite and positive"));
+        }
+        if self.extents.iter().any(|v| *v <= f32::EPSILON) {
+            return Err(invalid("cannot resize a zero dimension"));
+        }
+        if size == self.extents {
+            return Ok(Transform::identity());
+        }
+        self.scale_delta(
+            std::array::from_fn(|i| size[i] / self.extents[i]),
+            pivot,
+            [0.; 3],
+        )
+    }
+
+    fn scale_delta(
+        self,
+        factors: [f32; 3],
+        pivot: [f32; 3],
+        offset: [f32; 3],
+    ) -> Result<Transform, TransformError> {
+        let mut rows = Transform::identity().rows();
+        for (i, row) in rows.iter_mut().take(3).enumerate() {
+            for (j, value) in row.iter_mut().take(3).enumerate() {
+                *value = (0..3)
+                    .map(|k| self.axes[k][i] * factors[k] * self.axes[k][j])
+                    .sum();
+            }
+        }
+        around_center(Transform::from_rows(rows)?, pivot, offset)
+    }
+
+    pub(crate) fn extents_after(self, delta: Transform) -> Result<[f32; 3], TransformError> {
+        let mut low = [f32::INFINITY; 3];
+        let mut high = [f32::NEG_INFINITY; 3];
+        for x in [-1., 1.] {
+            for y in [-1., 1.] {
+                for z in [-1., 1.] {
+                    let offset =
+                        subtract(delta.transform_point(self.point([x, y, z])), self.center);
+                    for i in 0..3 {
+                        let value = dot(offset, self.axes[i]);
+                        low[i] = low[i].min(value);
+                        high[i] = high[i].max(value);
+                    }
+                }
+            }
+        }
+        let extents = std::array::from_fn(|i| high[i] - low[i]);
+        if extents.iter().any(|v| !v.is_finite()) {
+            return Err(invalid("resize bounds exceed finite millimetres"));
+        }
+        Ok(extents)
+    }
+
     #[cfg(test)]
     pub(crate) fn handles(self) -> Vec<(ResizeHandle, [f32; 3])> {
         let mut handles = Vec::with_capacity(26);
@@ -395,15 +470,7 @@ impl TransformGesture {
                         length + start_parameter.map_or(0.0, |start| parameter - start);
                     factors = [new_extent.max(0.01) / length; 3];
                 }
-                let mut rows = Transform::identity().rows();
-                for (i, row) in rows.iter_mut().take(3).enumerate() {
-                    for (j, value) in row.iter_mut().take(3).enumerate() {
-                        *value = (0..3)
-                            .map(|k| frame.axes[k][i] * factors[k] * frame.axes[k][j])
-                            .sum();
-                    }
-                }
-                around_center(Transform::from_rows(rows)?, frame.center, offset)?
+                frame.scale_delta(factors, frame.center, offset)?
             }
         };
         self.delta = matrix;

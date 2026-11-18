@@ -16,5 +16,5 @@ Verified: Full gate `logs/gate/20261118-104915-full` passed, including
 271 app and 57 viewport tests, catalog parity and 92 captures. Regression
 checks opposite arrow tips in edge-on views and mesh occlusion for both
 strokes and fills. Release build/smoke and both-theme captures passed.
-Release EXE: 23,393,792 bytes. Owner visual acceptance pending.
+Release EXE: 23,393,792 bytes. Owner-approved and complete 2026-11-18 ("awesome!").
 Recovery: `G:\3D-Modeler_snapshot_20261118-105552_rotate-reference` (counts in logs/rotate-reference-recovery.txt).

@@ -1582,6 +1582,29 @@ impl CommandState {
         Ok(CommandOutcome::Applied(String::from("Size")))
     }
 
+    /// Sizes along the chosen frame, using the existing atomic transform command.
+    pub(crate) fn set_selected_size_in_basis(
+        &mut self,
+        size_mm: [f32; 3],
+        object_basis: bool,
+    ) -> Result<CommandOutcome, CommandError> {
+        if !object_basis {
+            return self.set_selected_size(size_mm);
+        }
+        let snapshot = self.capture_transform_selection()?;
+        // Match the model order used by viewport bounds and drag snapshots.
+        let indices: Vec<_> = snapshot.selection.iter().copied().collect();
+        let frame =
+            crate::transform_gesture::ResizeFrame::resize_selection(&self.scene, &indices, true)?;
+        let pivot = if indices.len() == 1 {
+            self.scene.object(indices[0])?.position()
+        } else {
+            frame.center
+        };
+        let delta = frame.resize_delta(size_mm, pivot)?;
+        self.commit_transform_snapshot(&snapshot, delta)
+    }
+
     /// Sets the selected object's position and size as one history command.
     pub fn set_selected_position_and_size(
         &mut self,

@@ -631,6 +631,8 @@ impl Modeler3dApp {
             | ReviewState::RotateDrag
             | ReviewState::Resize
             | ReviewState::ResizeDrag
+            | ReviewState::ResizeFloor
+            | ReviewState::ResizeObject
             | ReviewState::Unselected
             | ReviewState::Material
             | ReviewState::Settings
@@ -1127,7 +1129,10 @@ impl Modeler3dApp {
         }
         if matches!(
             review.state(),
-            ReviewState::RotateTilted | ReviewState::RotateDrag
+            ReviewState::RotateTilted
+                | ReviewState::RotateDrag
+                | ReviewState::ResizeFloor
+                | ReviewState::ResizeObject
         ) {
             let _ = self.commands.rotate_selected([25., 35., 20.]);
         }
@@ -1135,9 +1140,13 @@ impl Modeler3dApp {
             ReviewState::Rotate | ReviewState::RotateTilted | ReviewState::RotateDrag => {
                 TransformPanelMode::Rotate
             }
-            ReviewState::Resize | ReviewState::ResizeDrag => TransformPanelMode::Resize,
+            ReviewState::Resize
+            | ReviewState::ResizeDrag
+            | ReviewState::ResizeFloor
+            | ReviewState::ResizeObject => TransformPanelMode::Resize,
             _ => TransformPanelMode::Move,
         };
+        self.object_resize_basis = review.state() == ReviewState::ResizeObject;
         if review.state() != ReviewState::Welcome {
             self.surface = WorkspaceSurface::Scene;
         }
@@ -4161,10 +4170,11 @@ impl Modeler3dApp {
         let index = selected[0];
         let unit = self.commands.preferences().display_unit();
         let signature = format!(
-            "{}:{selected:?}:{}:{}",
+            "{}:{selected:?}:{}:{}:{}",
             self.commands.scene().revision(),
             unit.label(),
-            self.transform_panel_mode.label()
+            self.transform_panel_mode.label(),
+            self.object_resize_basis
         );
         if signature != self.transform_signature {
             self.transform_signature = signature;
@@ -4173,15 +4183,18 @@ impl Modeler3dApp {
             let object = &self.commands.scene().objects()[index];
             self.name_field = object.name().to_owned();
             let bounds = world_bounds(self.commands.scene(), &selected).ok();
-            let extents = bounds
-                .map(|bounds| {
-                    [
-                        bounds.maximum[0] - bounds.minimum[0],
-                        bounds.maximum[1] - bounds.minimum[1],
-                        bounds.maximum[2] - bounds.minimum[2],
-                    ]
-                })
-                .unwrap_or([0.0; 3]);
+            let extents = if self.transform_panel_mode == TransformPanelMode::Resize {
+                ResizeFrame::resize_selection(
+                    self.commands.scene(),
+                    &selected,
+                    self.object_resize_basis,
+                )
+                .ok()
+                .map(|frame| frame.extents)
+            } else {
+                bounds.map(|b| b.extents())
+            }
+            .unwrap_or([0.; 3]);
             self.position_fields = if selected.len() > 1 {
                 bounds.map_or([0.; 3], |b| b.center())
             } else {
@@ -4317,11 +4330,6 @@ impl Modeler3dApp {
                 }
                 TransformPanelMode::Resize => {
                     ui.checkbox(&mut self.proportional_resize, "Keep proportions");
-                    ui.horizontal(|ui| {
-                        ui.label("Resize basis");
-                        ui.selectable_value(&mut self.object_resize_basis, false, "Grid");
-                        ui.selectable_value(&mut self.object_resize_basis, true, "Object");
-                    });
                     for (axis_index, (axis, field)) in ["X", "Y", "Z"]
                         .into_iter()
                         .zip(&mut self.size_fields)
@@ -4417,6 +4425,21 @@ impl Modeler3dApp {
         }
     }
 
+    fn set_resize_basis(&mut self, object: bool) {
+        if self.object_resize_basis == object {
+            return;
+        }
+        if self.active_resize_handle().is_some() {
+            self.viewport_drag = None;
+        }
+        self.object_resize_basis = object;
+        self.gizmo_frame = None;
+        self.resize_size_preview = None;
+        self.transform_signature.clear();
+        self.numeric_edited_axes = [false; 3];
+        self.last_numeric_axis = None;
+    }
+
     fn render_transform_strip(&mut self, ctx: &egui::Context) {
         if self.surface != WorkspaceSurface::Scene {
             self.transform_strip_rect = None;
@@ -4468,6 +4491,17 @@ impl Modeler3dApp {
                                 {
                                     self.transform_panel_mode = mode;
                                 }
+                            }
+                            if self.transform_panel_mode == TransformPanelMode::Resize
+                                && self.commands.selected_count() > 0
+                                && crate::chrome::resize_basis_toggle(
+                                    ui,
+                                    self.object_resize_basis,
+                                    palette,
+                                )
+                                .clicked()
+                            {
+                                self.set_resize_basis(!self.object_resize_basis);
                             }
                         });
                         if self.commands.selected_count() > 0 {
@@ -4675,17 +4709,26 @@ impl Modeler3dApp {
                 }
             }
         } else {
-            let mut size = match parse(&self.size_fields, bounds.extents()) {
+            let frame = match ResizeFrame::resize_selection(
+                self.commands.scene(),
+                &indices,
+                self.object_resize_basis,
+            ) {
+                Ok(frame) => frame,
+                Err(error) => {
+                    self.transform_error = Some(error.to_string());
+                    return;
+                }
+            };
+            let mut size = match parse(&self.size_fields, frame.extents) {
                 Ok(size) => size,
                 Err(error) => {
                     self.transform_error = Some(format!("Size: {error}"));
                     return;
                 }
             };
-            if self.proportional_resize
-                && let Ok(bounds) = world_bounds(self.commands.scene(), &indices)
-            {
-                let current = bounds.extents();
+            if self.proportional_resize {
+                let current = frame.extents;
                 let edited = self
                     .last_numeric_axis
                     .or_else(|| (0..3).find(|i| (size[*i] - current[*i]).abs() > 1e-5));
@@ -4695,7 +4738,8 @@ impl Modeler3dApp {
                     size = current.map(|value| value * size[axis] / current[axis]);
                 }
             }
-            self.commands.set_selected_size(size)
+            self.commands
+                .set_selected_size_in_basis(size, self.object_resize_basis)
         };
         match outcome {
             Ok(_) => {
@@ -5205,7 +5249,7 @@ impl Modeler3dApp {
         self.gizmo_frame = if self.transform_panel_mode == TransformPanelMode::Rotate {
             ResizeFrame::rotation_selection(scene, &indices)
         } else {
-            ResizeFrame::from_scene(
+            ResizeFrame::resize_selection(
                 scene,
                 &indices,
                 self.object_resize_basis && self.transform_panel_mode == TransformPanelMode::Resize,
@@ -5405,13 +5449,30 @@ impl Modeler3dApp {
             self.resize_size_preview = None;
             return;
         }
-        match crate::transforms::world_bounds_with_delta(
-            self.commands.scene(),
-            &indices,
-            delta.unwrap_or_else(modeler3d_core::Transform::identity),
-        ) {
-            Ok(bounds) => {
-                self.size_fields = bounds.extents().map(|value| format_distance(value, unit));
+        let extents = if self.object_resize_basis {
+            if let Some(delta) = delta {
+                self.gizmo_frame
+                    .as_ref()
+                    .map(|(_, frame)| *frame)
+                    .ok_or(crate::transforms::TransformError::SelectionRequired(
+                        "Resize",
+                    ))
+                    .and_then(|frame| frame.extents_after(delta))
+            } else {
+                ResizeFrame::resize_selection(self.commands.scene(), &indices, true)
+                    .map(|frame| frame.extents)
+            }
+        } else {
+            crate::transforms::world_bounds_with_delta(
+                self.commands.scene(),
+                &indices,
+                delta.unwrap_or_else(modeler3d_core::Transform::identity),
+            )
+            .map(|bounds| bounds.extents())
+        };
+        match extents {
+            Ok(extents) => {
+                self.size_fields = extents.map(|value| format_distance(value, unit));
                 self.numeric_edited_axes = [false; 3];
                 self.last_numeric_axis = None;
             }
@@ -11304,8 +11365,7 @@ mod tests {
                     app.frame_camera_if_pending();
                     app.update_gizmo_frame();
                     let frame = app.gizmo_frame.as_ref().expect("frame").1;
-                    let original = world_bounds(app.commands.scene(), &[0]).expect("bounds");
-                    let original_fields = original.extents().map(|v| format_distance(v, unit));
+                    let original_fields = frame.extents.map(|v| format_distance(v, unit));
                     let pose = *app.commands.scene().objects()[0].transform();
                     let history = app.commands.scene().history_state_id();
                     let rect = egui::Rect::from_min_size(egui::Pos2::ZERO, Vec2::new(800., 600.));
@@ -11394,7 +11454,10 @@ mod tests {
                         let committed = world_bounds(app.commands.scene(), &[0]).expect("bounds");
                         assert_eq!(
                             app.size_fields,
-                            committed.extents().map(|v| format_distance(v, unit))
+                            ResizeFrame::resize_selection(app.commands.scene(), &[0], object_basis)
+                                .expect("frame")
+                                .extents
+                                .map(|v| format_distance(v, unit))
                         );
                         if cancel {
                             assert_eq!(app.size_fields, original_fields);
@@ -11418,6 +11481,223 @@ mod tests {
                 }
             }
         }
+    }
+
+    #[test]
+    fn resize_numeric_apply_follows_floor_or_imported_axes_and_undoes_once() {
+        for object_basis in [false, true] {
+            for unit in [DisplayUnit::Millimetre, DisplayUnit::Inch] {
+                for proportional in [false, true] {
+                    let (mut app, directory) = shell_for_jobs("resize-basis-numeric");
+                    app.commands
+                        .import_from_path(&fixture("formats/python_box.stl"))
+                        .expect("import");
+                    app.commands
+                        .set_selected_size([30., 40., 50.])
+                        .expect("size");
+                    app.commands
+                        .set_selected_rotation([0., 90., 0.])
+                        .expect("rotate");
+                    app.commands.preferences_mut().set_display_unit(unit);
+                    app.transform_panel_mode = TransformPanelMode::Resize;
+                    app.set_resize_basis(object_basis);
+                    app.proportional_resize = proportional;
+                    let frame =
+                        ResizeFrame::resize_selection(app.commands.scene(), &[0], object_basis)
+                            .expect("frame");
+                    let expected_x = if unit == DisplayUnit::Inch { 50.8 } else { 60. };
+                    app.size_fields = frame.extents.map(|v| format_distance(v, unit));
+                    app.size_fields[0] = if unit == DisplayUnit::Inch {
+                        "2 in"
+                    } else {
+                        "60 mm"
+                    }
+                    .into();
+                    app.numeric_edited_axes = [true, false, false];
+                    app.last_numeric_axis = Some(0);
+                    let before = *app.commands.scene().objects()[0].transform();
+                    let history = app.commands.scene().history_state_id();
+                    app.apply_transform_fields(0, unit);
+                    assert!(app.transform_error.is_none(), "{:?}", app.transform_error);
+                    let after = *app.commands.scene().objects()[0].transform();
+                    assert_ne!(before, after);
+                    let actual =
+                        ResizeFrame::resize_selection(app.commands.scene(), &[0], object_basis)
+                            .expect("frame")
+                            .extents;
+                    let expected = if proportional {
+                        frame.extents.map(|v| v * expected_x / frame.extents[0])
+                    } else {
+                        [expected_x, frame.extents[1], frame.extents[2]]
+                    };
+                    for (a, e) in actual.into_iter().zip(expected) {
+                        assert!((a - e).abs() < 0.001, "{actual:?}");
+                    }
+                    app.commands.dispatch(CommandId::Undo).expect("undo");
+                    assert_eq!(*app.commands.scene().objects()[0].transform(), before);
+                    assert_eq!(app.commands.scene().history_state_id(), history);
+                    app.commands.dispatch(CommandId::Redo).expect("redo");
+                    assert_eq!(*app.commands.scene().objects()[0].transform(), after);
+                    let unchanged = app.commands.scene().history_state_id();
+                    assert!(
+                        app.commands
+                            .set_selected_size_in_basis([-1., 2., 3.], object_basis)
+                            .is_err()
+                    );
+                    assert_eq!(app.commands.scene().history_state_id(), unchanged);
+                    assert!(std::fs::remove_dir_all(directory).is_ok());
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn object_basis_resizes_a_selection_in_one_history_step() {
+        let (mut app, directory) = shell_for_jobs("resize-basis-group");
+        for (position, angle) in [([0., 20., 0.], 35.), ([70., 20., 10.], -20.)] {
+            app.commands
+                .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
+                .expect("cube");
+            app.commands
+                .set_selected_position(position)
+                .expect("position");
+            app.commands
+                .set_selected_rotation([0., angle, 0.])
+                .expect("rotate");
+        }
+        app.commands.set_selection_indices([1, 0]);
+        let frame =
+            ResizeFrame::resize_selection(app.commands.scene(), &[0, 1], true).expect("frame");
+        let expected = [frame.extents[0] * 1.5, frame.extents[1], frame.extents[2]];
+        let before: Vec<_> = app
+            .commands
+            .scene()
+            .objects()
+            .iter()
+            .map(|o| *o.transform())
+            .collect();
+        let history = app.commands.scene().history_state_id();
+        app.commands
+            .set_selected_size_in_basis(expected, true)
+            .expect("resize");
+        let after =
+            ResizeFrame::resize_selection(app.commands.scene(), &[0, 1], true).expect("frame");
+        for (a, e) in after.extents.into_iter().zip(expected) {
+            assert!(
+                (a - e).abs() < 0.001,
+                "actual {:?}, expected {:?}",
+                after.extents,
+                expected
+            );
+        }
+        let resized = app.commands.scene().history_state_id();
+        app.commands
+            .set_selected_size_in_basis(after.extents, true)
+            .expect("no op");
+        assert_eq!(app.commands.scene().history_state_id(), resized);
+        app.commands.dispatch(CommandId::Undo).expect("undo");
+        assert_eq!(app.commands.scene().history_state_id(), history);
+        assert_eq!(
+            app.commands
+                .scene()
+                .objects()
+                .iter()
+                .map(|o| *o.transform())
+                .collect::<Vec<_>>(),
+            before
+        );
+        app.commands.dispatch(CommandId::Redo).expect("redo");
+        assert_eq!(app.commands.scene().history_state_id(), resized);
+        assert!(std::fs::remove_dir_all(directory).is_ok());
+    }
+
+    #[test]
+    fn resize_basis_switch_is_above_apply_clickable_and_does_not_dirty_the_scene() {
+        let (mut app, directory) = shell_for_jobs("resize-basis-switch");
+        app.commands
+            .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
+            .expect("cube");
+        app.commands
+            .set_selected_rotation([0., 35., 0.])
+            .expect("rotate");
+        app.commands
+            .save_to_path(&directory.join("clean.3dp"))
+            .expect("save");
+        app.surface = WorkspaceSurface::Scene;
+        app.transform_panel_mode = TransformPanelMode::Resize;
+        let ctx = egui::Context::default();
+        ctx.enable_accesskit();
+        let render = |app: &mut Modeler3dApp, events| {
+            let mut output = ctx.run_ui(
+                egui::RawInput {
+                    screen_rect: Some(egui::Rect::from_min_size(
+                        egui::Pos2::ZERO,
+                        Vec2::new(1280., 840.),
+                    )),
+                    events,
+                    ..Default::default()
+                },
+                |ui| {
+                    app.render_transform_inspector(ui, ThemePalette::for_mode(app.theme_mode));
+                    app.render_transform_strip(ui.ctx());
+                },
+            );
+            output.textures_delta.clear();
+            output
+        };
+        let history = app.commands.scene().history_state_id();
+        let pose = *app.commands.scene().objects()[0].transform();
+        for target in [true, false] {
+            render(&mut app, vec![]);
+            render(&mut app, vec![]);
+            let output = render(&mut app, vec![]);
+            let nodes = output
+                .platform_output
+                .accesskit_update
+                .expect("accessibility")
+                .nodes;
+            let bounds = |label: &str| {
+                nodes
+                    .iter()
+                    .find_map(|(_, node)| {
+                        node.label()
+                            .filter(|text| text.starts_with(label))
+                            .and_then(|_| node.bounds())
+                    })
+                    .expect("control bounds")
+            };
+            let toggle = bounds("Resize relative to");
+            let apply = bounds("Apply");
+            assert!(
+                (toggle.x0 + toggle.x1 - apply.x0 - apply.x1).abs() < 1.0,
+                "above Apply"
+            );
+            assert!(toggle.y1 <= apply.y0);
+            let point = egui::pos2(
+                ((toggle.x0 + toggle.x1) * 0.5) as f32,
+                ((toggle.y0 + toggle.y1) * 0.5) as f32,
+            );
+            for pressed in [true, false] {
+                render(
+                    &mut app,
+                    vec![
+                        egui::Event::PointerMoved(point),
+                        egui::Event::PointerButton {
+                            pos: point,
+                            button: egui::PointerButton::Primary,
+                            pressed,
+                            modifiers: egui::Modifiers::default(),
+                        },
+                    ],
+                );
+            }
+            render(&mut app, vec![]);
+            assert_eq!(app.object_resize_basis, target);
+            assert!(!app.commands.is_dirty());
+            assert_eq!(app.commands.scene().history_state_id(), history);
+            assert_eq!(*app.commands.scene().objects()[0].transform(), pose);
+        }
+        assert!(std::fs::remove_dir_all(directory).is_ok());
     }
 
     #[test]

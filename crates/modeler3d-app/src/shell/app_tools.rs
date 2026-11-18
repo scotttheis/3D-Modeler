@@ -978,7 +978,7 @@ mod tests {
         desktop.apply_display_unit(DisplayUnit::Inch);
         desktop.apply_default_import_unit(ImportUnit::Centimetre);
         desktop.sticky_selection = true;
-        desktop.object_resize_basis = true;
+        desktop.set_resize_basis(true);
         desktop.proportional_resize = true;
         desktop.apply_ribbon_pinned(true);
 

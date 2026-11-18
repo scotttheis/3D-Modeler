@@ -4,6 +4,9 @@ Goal: make the Rotate rings read as precise, three-dimensional controls while
 preserving their axis colors, silhouette clipping, picking, hover/drag feedback
 and transform behavior.
 
+Completed through the reference grip design in `rotate-reference.md`, approved
+by the owner on 2026-11-18. The earlier shaded treatment below was rejected.
+
 Implementation: shade continuous visible arc paths with a soft cast edge, dark
 contour, shaded body and narrow glint; give curved grips matching edge
 definition; increase ring tessellation from 48 to 96 segments. The app painter

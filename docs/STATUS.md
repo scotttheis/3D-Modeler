@@ -27,6 +27,17 @@ for RC2. Next after RC2: RC3 / 0.1.3.
 
 ## Now
 
+**Resize reference toggle (owner trial, 2026-11-18):** icon-only
+floor/object switch above Apply, with tooltips. Floor uses fixed floor axes;
+Object follows imported local axes as the object turns. Multiple objects use
+the first object's frame in model order. Handles, live dimensions and numeric
+Apply use the chosen frame; switching does not dirty the document or add Undo.
+Full gate passed (`logs/gate/20261118-112226-full`), including 274 app and 57
+viewport tests, MCP parity and 96 captures. Release built and smoke passed
+(23,402,496-byte executable). Pack: `evidence/rebuild/captures/2026-11-18-resize-basis/`.
+Task: [`resize-basis-toggle.md`](tasks/resize-basis-toggle.md).
+Built for the owner to try. Recovery: `G:\3D-Modeler_snapshot_20261118-112934_resize-basis-toggle`.
+
 **Rotate grips from owner reference (2026-11-18):** `erros/rotate.png`
 sets the grip style: filled double-ended tips joined by a narrower solid
 stem. Grips follow short curved arcs; rings stay thin. Mesh depth testing
@@ -36,8 +47,7 @@ history pass. Full gate passed (`logs/gate/20261118-104915-full`), with
 271 app and 57 viewport tests and 92 captures. Release built and smoke passed
 (23,393,792-byte executable). Both-theme comparisons and Release captures:
 `evidence/rebuild/captures/2026-11-18-rotate-reference/`.
-Task: [`rotate-reference.md`](tasks/rotate-reference.md). Resize retains its
-restored original appearance. Owner visual review pending.
+Task: [`rotate-reference.md`](tasks/rotate-reference.md). Owner-approved 2026-11-18 ("awesome!"). Done.
 Recovery: `G:\3D-Modeler_snapshot_20261118-105552_rotate-reference`.
 
 **Rotation ring finish (owner, 2026-11-18):** continuous shaded tube paths
@@ -45,7 +55,10 @@ with soft depth edge and specular glint; curved grips receive matching edge
 definition; rings use 96 segments for smoother arcs. Picking and transform
 behavior are unchanged. Fast gate passed (269 app + 56 viewport tests); Release
 build and smoke passed. Both-theme before/after pack:
-`evidence/rebuild/captures/2026-11-18-rotate-finish/`. Awaiting owner review.
+`evidence/rebuild/captures/2026-11-18-rotate-finish/`.
+**Owner rejected the visual result, 2026-11-18:** "it still look awful (like a child did it)".
+This earlier treatment is superseded by the owner-approved reference grips
+above. The rotation finish task is closed.
 Task: [`rotation-finish.md`](tasks/rotation-finish.md). Recovery:
 `G:\3D-Modeler_snapshot_20261118-085850_rotation-finish`.
 
@@ -56,7 +69,7 @@ passed for the app and viewport crates (269 + 56 tests); Release build and
 smoke passed. Both-theme captures:
 `evidence/rebuild/captures/2026-11-18-rotate-occlusion/`.
 Task: [`rotation-occlusion.md`](tasks/rotation-occlusion.md).
-Awaiting owner review. Recovery:
+Superseded by the owner-approved reference grips above. Recovery:
 `G:\3D-Modeler_snapshot_20261118-rotate-occlusion-final` (13,104 files,
 1,882,744,593 bytes verified).
 
@@ -67,7 +80,7 @@ selected object's orientation. Regression covers single/multiple selection,
 local-axis picking, preview, cancellation, commit, undo and redo. Independent
 diff review found no remaining blockers. Full gate passed (`logs/gate/20261118-071412-full`), including 46 states
 in both themes. Release build, smoke and both-theme captures passed. Pack: `evidence/rebuild/captures/2026-11-18-rotate-follow/`.
-Task: [`rotate-follow.md`](tasks/rotate-follow.md). Owner acceptance pending.
+Task: [`rotate-follow.md`](tasks/rotate-follow.md). Included in the owner-approved Rotate result above.
 Recovery: `G:\3D-Modeler_snapshot_20261118-072319_rotate-follow-checkpoint`.
 
 
@@ -81,7 +94,7 @@ Fast and Full gates passed (`logs/gate/20261117-183431-fast`,
 Release rebuilt (4m14s, 23,369,216 bytes); Release smoke and captures passed.
 Pack: `evidence/rebuild/captures/2026-11-17-of69-move/`.
 Task: [`move-arrows.md`](tasks/move-arrows.md).
-**Done, awaiting owner review. OF-70 remains queued; OF-68 approval not inferred.**
+**Done, awaiting owner review. OF-70 remains queued; Rotate approved 2026-11-18.**
 Baseline: `G:\3D-Modeler_snapshot_20261117-183334_OF69-baseline`
 (12,195 files, 1,770,275,521 bytes verified).
 Recovery: `G:\3D-Modeler_snapshot_20261117-184100_OF69`
@@ -100,7 +113,7 @@ Task: [`rotation-arrows.md`](tasks/rotation-arrows.md).
 Final Release rebuilt; Release smoke and both-theme captures passed.
 Recovery: `G:\3D-Modeler_snapshot_20261117-180620_OF68`
 (additive copy, file and byte counts verified).
-**Done, awaiting owner review. OF-69 and OF-70 remain queued.**
+**Owner-approved through the reference Rotate grips, 2026-11-18. OF-69 and OF-70 remain queued.**
 Baseline: `G:\3D-Modeler_snapshot_20261117-175442_OF68-baseline`
 (11,995 files, 1,734,687,424 bytes verified against the pre-edit tree).
 
@@ -276,9 +289,12 @@ closed.
    `frame_view` failed its output check through the gateway (nested `view`),
    and the CPU viewport route never showed its frames (grey viewport on
    software-only adapters).
-7. Revisit the Material texture dialog (OF-46 follow-up): the owner wants to
+7. Resize reference toggle (owner, 2026-11-18). Built for owner trial: an icon-only
+   switch above Apply for floor-front or imported-object-front sizing, with
+   tooltips. Trial: [`resize-basis-toggle.md`](tasks/resize-basis-toggle.md).
+8. Revisit the Material texture dialog (OF-46 follow-up): the owner wants to
    look at its layout again; ask what to change before building.
-8. Stop before RB-10 (S3). OF-56/57 (Emboss) stay deferred until the owner
+9. Stop before RB-10 (S3). OF-56/57 (Emboss) stay deferred until the owner
    brings them back.
 
 Each phase ends with its review pack and a stop for owner review, as

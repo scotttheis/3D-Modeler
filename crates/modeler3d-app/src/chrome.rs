@@ -26,6 +26,10 @@ pub(crate) const AXIS_COLORS: [Color32; 3] = [
 /// A line icon drawn on a 16-point grid.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum Glyph {
+    /// Floor-aligned axes.
+    Floor,
+    /// Imported object axes.
+    ObjectFront,
     /// Two shapes inside one outline.
     Group,
     /// Two separate shapes.
@@ -44,6 +48,58 @@ pub(crate) enum Glyph {
     Warning,
 }
 
+/// A two-position icon switch for floor or imported-object resize axes.
+pub(crate) fn resize_basis_toggle(
+    ui: &mut egui::Ui,
+    object: bool,
+    palette: crate::theme::ThemePalette,
+) -> egui::Response {
+    let (rect, response) = ui.allocate_exact_size(Vec2::new(60., 26.), egui::Sense::click());
+    let tooltip = if object {
+        "Resize relative to the object's imported front (first object for a selection). Click to use the front of the floor."
+    } else {
+        "Resize relative to the front of the floor. Click to use the object's imported front."
+    };
+    response
+        .widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, ui.is_enabled(), tooltip));
+    let painter = ui.painter();
+    painter.rect(
+        rect,
+        13.,
+        palette.surface,
+        Stroke::new(1., palette.border),
+        StrokeKind::Inside,
+    );
+    let progress = ui.ctx().animate_bool(response.id, object);
+    let selected = Rect::from_min_size(
+        rect.min + Vec2::new(2. + progress * 29., 2.),
+        Vec2::new(27., 22.),
+    );
+    painter.rect_filled(
+        selected,
+        10.,
+        if response.hovered() {
+            palette.accent_control_hover
+        } else {
+            palette.accent_control
+        },
+    );
+    for (i, glyph) in [Glyph::Floor, Glyph::ObjectFront].into_iter().enumerate() {
+        let center = rect.min + Vec2::new(15.5 + i as f32 * 29., 13.);
+        paint_glyph(
+            painter,
+            Rect::from_center_size(center, Vec2::splat(17.)),
+            glyph,
+            if (i == 1) == object {
+                palette.accent_text
+            } else {
+                palette.muted
+            },
+        );
+    }
+    response.on_hover_text(tooltip)
+}
+
 /// Paints `glyph` centred in `rect` with a stroke weight matched to its size.
 pub(crate) fn paint_glyph(painter: &Painter, rect: Rect, glyph: Glyph, color: Color32) {
     let unit = rect.width().min(rect.height()) / 16.0;
@@ -53,6 +109,30 @@ pub(crate) fn paint_glyph(painter: &Painter, rect: Rect, glyph: Glyph, color: Co
     let stroke = Stroke::new((1.4 * unit).max(1.0), color);
     let radius = 1.5 * unit;
     match glyph {
+        Glyph::Floor => {
+            painter.add(egui::Shape::closed_line(
+                vec![at(1., 11.), at(6., 4.), at(15., 6.), at(10., 14.)],
+                stroke,
+            ));
+            painter.line_segment([at(4., 10.), at(12., 12.)], stroke);
+            painter.line_segment([at(8., 5.), at(3., 12.)], stroke);
+        }
+        Glyph::ObjectFront => {
+            painter.add(egui::Shape::closed_line(
+                vec![
+                    at(2., 5.),
+                    at(8., 2.),
+                    at(14., 5.),
+                    at(14., 12.),
+                    at(8., 15.),
+                    at(2., 12.),
+                ],
+                stroke,
+            ));
+            painter.line_segment([at(2., 5.), at(8., 8.)], stroke);
+            painter.line_segment([at(14., 5.), at(8., 8.)], stroke);
+            painter.line_segment([at(8., 8.), at(8., 15.)], stroke);
+        }
         Glyph::Group => {
             painter.rect_stroke(
                 boxed(1.5, 1.5, 14.5, 14.5),

@@ -12,7 +12,7 @@
 //! | Variable | Values | Default |
 //! |---|---|---|
 //! | `MODELER3D_REVIEW_CAPTURE` | output PNG path | harness off |
-//! | `MODELER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `rotate-tilted`, `rotate-drag`, `resize`, `resize-drag`, `multi`, `merge`, `unselected`, `material`, `settings`, `save`, `export`, `menu`, `colors`, `mirror`, `merge-apart`, `repair`, `paste`, `align`, `paint`, `paint-picker`, `xray`, `texture`, `texture-dialog`, `grab`, `crease`, `crease-sharp`, `smooth-brush`, `simplify`, `simplify-area`, `subdivide`, `hollow`, `hollow-dialog`, `hollow-error`, `measure`, `measure-start`, `centre`, `settings-note`, `no-shortcuts` | `move` |
+//! | `MODELER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `rotate-tilted`, `rotate-drag`, `resize`, `resize-drag`, `resize-floor`, `resize-object`, `multi`, `merge`, `unselected`, `material`, `settings`, `save`, `export`, `menu`, `colors`, `mirror`, `merge-apart`, `repair`, `paste`, `align`, `paint`, `paint-picker`, `xray`, `texture`, `texture-dialog`, `grab`, `crease`, `crease-sharp`, `smooth-brush`, `simplify`, `simplify-area`, `subdivide`, `hollow`, `hollow-dialog`, `hollow-error`, `measure`, `measure-start`, `centre`, `settings-note`, `no-shortcuts` | `move` |
 //! | `MODELER3D_REVIEW_TEXTURES` | `;`-separated picture paths for the `texture` states (one per object, reused in turn) | a built-in brick picture |
 //! | `MODELER3D_REVIEW_THEME` | `light`, `dark` | `dark` |
 //! | `MODELER3D_REVIEW_SIZE` | `normal`, `big` (Settings > Size) | `normal` |
@@ -72,6 +72,10 @@ pub(crate) enum ReviewState {
     RotateDrag,
     /// One selected cube with the Resize handles.
     Resize,
+    /// Tilted object resized along fixed floor axes.
+    ResizeFloor,
+    /// Tilted object resized along its imported axes.
+    ResizeObject,
     /// The Resize state with the +X face handle held mid-drag. The drag is
     /// staged through the shell's own gesture code each frame; no pointer
     /// input is simulated and nothing is committed.
@@ -185,6 +189,8 @@ impl ReviewState {
             "rotate-tilted" => Some(Self::RotateTilted),
             "rotate-drag" => Some(Self::RotateDrag),
             "resize" => Some(Self::Resize),
+            "resize-floor" => Some(Self::ResizeFloor),
+            "resize-object" => Some(Self::ResizeObject),
             "resize-drag" => Some(Self::ResizeDrag),
             "multi" => Some(Self::Multi),
             "merge" => Some(Self::Merge),

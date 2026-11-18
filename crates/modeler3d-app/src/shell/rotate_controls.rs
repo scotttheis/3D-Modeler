@@ -7,7 +7,8 @@ use modeler3d_viewport::{
 use crate::transform_gesture::ResizeFrame;
 
 impl ResizeFrame {
-    pub(super) fn rotation_selection(
+    /// Shared object-oriented selection frame for Rotate and Resize.
+    pub(crate) fn rotation_selection(
         scene: &modeler3d_core::Scene,
         indices: &[usize],
     ) -> Result<Self, crate::transforms::TransformError> {
