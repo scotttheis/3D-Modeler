@@ -3,7 +3,7 @@
 The only place current status is written. Keep it to one screen. Plan:
 [`product-rebuild-plan.md`](product-rebuild-plan.md).
 
-Updated 2026-11-17 (Resize OF-66/OF-67). F5 and F6 closed 2026-11-16 (ledger parity test passed after F6). Full gate passed 2026-11-16 after OF-65 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Before that, full gate passed 2026-11-16 after Phase 6 OF-63/OF-64 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Earlier: full gate passed 2026-11-15 after Phase 5 OF-58 (fmt, clippy, tests, deny, audit, MCP parity with no exemptions, smoke, capture board); a last small fix then passed the Fast gate. Release exe rebuilt from that source (3m49s) and driven live through the real MCP gateway for the Phase 5 review pack.
+Updated 2026-11-17 (rotation arrows OF-68). F5 and F6 closed 2026-11-16 (ledger parity test passed after F6). Full gate passed 2026-11-16 after OF-65 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Before that, full gate passed 2026-11-16 after Phase 6 OF-63/OF-64 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Earlier: full gate passed 2026-11-15 after Phase 5 OF-58 (fmt, clippy, tests, deny, audit, MCP parity with no exemptions, smoke, capture board); a last small fix then passed the Fast gate. Release exe rebuilt from that source (3m49s) and driven live through the real MCP gateway for the Phase 5 review pack.
 
 Test releases (how-to: [`packaging.md`](packaging.md)): last is **RC1**,
 version 0.1.1, 2026-11-13, `E:\3D-Modeler-RC\Builder3D-RC1.msi` (50 MB),
@@ -27,6 +27,24 @@ for RC2. Next after RC2: RC3 / 0.1.3.
 
 ## Now
 
+**OF-68 rotation arrows (2026-11-17):** original curved grips with solid flat
+triangular heads pointing both ways, inspired by the owner reference and Resize.
+Axis colors, rings, hover emphasis and existing picking retained; MCP rotation
+semantics unchanged. Independent diff review found no remaining blockers after
+viewport-edge fixes (requested reviewer models unavailable; inherited-model
+independent review used). Fast and Full gates passed, including the 44-state,
+both-theme capture board (`logs/gate/20261117-175642-full`); final clipping
+changes also passed Fast (`logs/gate/20261117-175825-fast`).
+Pack: `evidence/rebuild/captures/2026-11-17-of68-rotation/`.
+Task: [`rotation-arrows.md`](tasks/rotation-arrows.md).
+Final Release rebuilt; Release smoke and both-theme captures passed.
+Recovery: `G:\3D-Modeler_snapshot_20261117-180620_OF68`
+(additive copy, file and byte counts verified).
+**Done, awaiting owner review. OF-69 and OF-70 remain queued.**
+Baseline: `G:\3D-Modeler_snapshot_20261117-175442_OF68-baseline`
+(11,995 files, 1,734,687,424 bytes verified against the pre-edit tree).
+
+
 **Resize OF-66 / OF-67 (owner, 2026-11-17):** removed the size label above
 Resize; the existing XYZ boxes follow the uncommitted mesh preview in display
 units, including all axes affected by corner scaling. Escape, focus loss and
@@ -37,7 +55,7 @@ Clippy, deny, audit, MCP parity, smoke, 44 states x 2 themes
 Release rebuilt (4m12s, 23,370,240 bytes); Release smoke passed. Both-theme
 before/after and Release captures:
 `evidence/rebuild/captures/2026-11-17-of66-67-resize/`.
-**Done, awaiting owner review. OF-68 through OF-70 remain queued.**
+**Done, awaiting owner review. OF-68 follows below; OF-69 and OF-70 remain queued.**
 Feedback: [`owner-feedback-2026-11-17.md`](owner-feedback-2026-11-17.md).
 Task: [`resize-live-sizes.md`](tasks/resize-live-sizes.md).
 Recovery: `G:\3D-Modeler_snapshot_20261117-160600_OF66-67`

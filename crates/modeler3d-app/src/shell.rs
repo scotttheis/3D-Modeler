@@ -8322,7 +8322,7 @@ fn paint_curved_rotate_arrows(
     let size_scale = MOVE_GIZMO_SCALE;
     let head_length = MOVE_ARROW_HEAD_LENGTH_PIXELS * size_scale / pixels_per_point;
     let head_half_width = MOVE_ARROW_HEAD_HALF_WIDTH_PIXELS * size_scale / pixels_per_point;
-    let visible_rect = rect.shrink(head_half_width + 4.0 / pixels_per_point);
+    let visible_rect = rect.shrink(head_length + head_half_width + 4.0 / pixels_per_point);
     let mut arrow_tips = Vec::new();
 
     for (ring_index, ring) in ring_lines.chunks_exact(ring_segments).enumerate() {
@@ -8336,6 +8336,7 @@ fn paint_curved_rotate_arrows(
             let tangent_length = tangent.length();
             if !tangent_length.is_finite()
                 || tangent_length <= 1.0e-3
+                || !visible_rect.contains(start)
                 || !visible_rect.contains(end)
             {
                 continue;
@@ -8368,35 +8369,45 @@ fn paint_curved_rotate_arrows(
             ring[tip_segment].color[3],
         ));
 
-        // Thicken a short section of the existing ring so the arrow follows
-        // its curve into the tangent arrowhead without replacing the ring.
+        // A flat double-ended grip follows the ring, with solid triangular
+        // heads like the Resize handles. Keep the underlying ring pickable.
         let mut curve_length = 0.0;
         let mut step = 0;
-        while step < ring.len() && (curve_length < head_length * 1.25 || step < 4) {
+        let mut tail = None;
+        while step < ring.len() && curve_length < head_length * 2.5 {
             let segment_index = (tip_segment + ring.len() - step) % ring.len();
             let line = ring[segment_index];
             if let Some([start, end]) = project_gizmo_line(matrix, rect, line.start, line.end) {
-                curve_length += (end - start).length();
-                paint_gizmo_shaft(
-                    painter,
-                    start,
-                    end,
-                    axis_color,
-                    line.width_pixels,
-                    emphasized,
-                );
+                if !visible_rect.contains(start) || !visible_rect.contains(end) {
+                    break;
+                }
+                let span = end - start;
+                if span.length() > 1.0e-3 {
+                    curve_length += span.length();
+                    let face = if emphasized {
+                        axis_highlight_color(axis_color)
+                    } else {
+                        axis_color
+                    };
+                    painter.line_segment([start, end], Stroke::new(4.0 / pixels_per_point, face));
+                    tail = Some((start, -span.normalized()));
+                }
             }
             step += 1;
         }
-
-        paint_gizmo_arrowhead(
-            painter,
-            tip - direction * head_length,
-            direction,
-            axis_color,
-            size_scale,
-            emphasized,
-        );
+        let face = if emphasized {
+            axis_highlight_color(axis_color)
+        } else {
+            axis_color
+        };
+        for (base, outward) in std::iter::once((tip, direction)).chain(tail) {
+            let across = outward.rot90() * head_half_width;
+            painter.add(egui::Shape::convex_polygon(
+                vec![base + outward * head_length, base + across, base - across],
+                face,
+                Stroke::NONE,
+            ));
+        }
         arrow_tips.push(tip);
     }
 }
