@@ -1,9 +1,20 @@
-//! Thin resize guides on the camera-facing selection bounds. Guide strokes and
-//! open arrowheads use the viewport depth buffer. The screen rectangle and
-//! corner grips remain in the UI. One layout supplies drawing and picking.
+//! The Resize-mode overlay, drawn the way Microsoft 3D Builder draws its
+//! scale handles.
+//!
+//! - A screen-aligned white rectangle around the selection's projected box,
+//!   with a white dot at each corner. A corner dot scales uniformly.
+//! - A double-chevron handle beyond each face: green for the X axis, blue
+//!   for the vertical Y axis and for depth (Z). A face whose axis points
+//!   away from the viewer hides its handle behind the object, as in
+//!   3D Builder, which shows only the front depth handle.
+//! - While a face handle is dragged, a pale band crosses the object along
+//!   the drag axis; no extra numbers appear.
+//!
+//! One layout feeds both painting and hit-testing, so what is drawn is
+//! exactly what can be grabbed.
 
 use eframe::egui::{self, Color32, Stroke, Vec2};
-use modeler3d_viewport::{GizmoLine, Mat4, add, dot, scale};
+use modeler3d_viewport::{Mat4, add, dot, scale};
 
 use crate::transform_gesture::{ResizeFrame, ResizeHandle};
 
@@ -11,7 +22,9 @@ use crate::transform_gesture::{ResizeFrame, ResizeHandle};
 const HANDLE_GREEN: Color32 = Color32::from_rgb(118, 214, 46);
 /// 3D Builder's sky blue for vertical (Y) and depth (Z) handles.
 const HANDLE_BLUE: Color32 = Color32::from_rgb(36, 162, 238);
-/// Preserve the established spacing and generous pointer reach.
+/// Size of the face-handle chevrons relative to 3D Builder's originals. The
+/// owner asked for them twice as big (OF-32); the gap from the box and the
+/// pointer reach scale with them.
 const FACE_HANDLE_SCALE: f32 = 2.0;
 /// Gap between the box outline and a face handle's centre, in points.
 const FACE_HANDLE_GAP: f32 = 16.0 * FACE_HANDLE_SCALE;
@@ -28,9 +41,9 @@ const END_ON_ALIGNMENT: f32 = 0.8;
 pub(crate) struct FaceHandle {
     pub(crate) handle: ResizeHandle,
     pub(crate) axis: usize,
-    /// Centre of the open arrowhead, in viewport points.
+    /// Centre of the double chevron, in viewport points.
     pub(crate) center: egui::Pos2,
-    /// Unit screen direction the arrow points (outward along the axis).
+    /// Unit screen direction the chevrons point (outward along the axis).
     pub(crate) direction: Vec2,
 }
 
@@ -43,8 +56,8 @@ pub(crate) struct ResizeOverlay {
     pub(crate) corners: Vec<(ResizeHandle, egui::Pos2)>,
     /// Visible face handles.
     pub(crate) faces: Vec<FaceHandle>,
-    /// World endpoints of each camera-facing guide, `[minus, plus]`.
-    face_centers: [Option<[[f32; 3]; 2]>; 3],
+    /// Projected centres of each axis's two faces, `[minus, plus]`.
+    face_centers: [Option<[egui::Pos2; 2]>; 3],
 }
 
 impl ResizeOverlay {
@@ -96,27 +109,11 @@ impl ResizeOverlay {
         let mut faces = Vec::with_capacity(6);
         let mut face_centers = [None; 3];
         for (axis, face_slot) in face_centers.iter_mut().enumerate() {
-            let mut centers = [[0.0; 3]; 2];
-            // Place each guide on the most camera-facing parallel box face.
-            // A small clearance prevents coplanar flicker without lifting it
-            // through another object in front of the selection.
-            let front_axis = (0..3).filter(|other| *other != axis).max_by(|a, b| {
-                dot(frame.axes[*a], view_direction)
-                    .abs()
-                    .total_cmp(&dot(frame.axes[*b], view_direction).abs())
-            })?;
-            let front_sign = -dot(frame.axes[front_axis], view_direction).signum();
-            let front_offset = scale(
-                frame.axes[front_axis],
-                front_sign * (frame.extents[front_axis] * 0.5 + largest * 0.002),
-            );
+            let mut centers = [egui::Pos2::ZERO; 2];
             let mut complete = true;
             for (slot, side) in [-1.0_f32, 1.0].into_iter().enumerate() {
                 let outward = scale(frame.axes[axis], side);
-                let world = add(
-                    add(frame.center, front_offset),
-                    scale(outward, frame.extents[axis] * 0.5),
-                );
+                let world = add(frame.center, scale(outward, frame.extents[axis] * 0.5));
                 let (Some(center), Some(ahead)) = (
                     project(moved(world)),
                     project(moved(add(world, scale(outward, probe)))),
@@ -124,7 +121,7 @@ impl ResizeOverlay {
                     complete = false;
                     continue;
                 };
-                centers[slot] = moved(world);
+                centers[slot] = center;
                 let screen = ahead - center;
                 let length = screen.length();
                 if !length.is_finite() || length <= 1.0e-4 {
@@ -189,83 +186,19 @@ impl ResizeOverlay {
             .chain(self.corners.iter().copied())
     }
 
-    /// World strokes for both GPU and CPU depth-tested presentation.
-    pub(crate) fn depth_lines(
+    /// Paints the overlay. `emphasized` is the hovered or dragged handle;
+    /// `dragging` is the handle of an in-progress drag.
+    pub(crate) fn paint(
         &self,
-        matrix: Mat4,
-        rect: egui::Rect,
+        painter: &egui::Painter,
         emphasized: Option<ResizeHandle>,
-    ) -> Vec<GizmoLine> {
-        let Ok(inverse) = matrix.inverse() else {
-            return Vec::new();
-        };
-        let mut lines = Vec::new();
-        for (axis, centers) in self.face_centers.iter().enumerate() {
-            let Some([minus, plus]) = centers else {
-                continue;
-            };
-            let color = if axis == 0 { HANDLE_GREEN } else { HANDLE_BLUE };
-            let color = egui::Rgba::from(color).to_array();
-            lines.push(GizmoLine {
-                start: *minus,
-                end: *plus,
-                color,
-                width_pixels: 1.0,
-            });
-            for face in self.faces.iter().filter(|face| face.axis == axis) {
-                let ResizeHandle::Face { side, .. } = face.handle else {
-                    continue;
-                };
-                let anchor = if side < 0.0 { *minus } else { *plus };
-                let Ok(projected) = matrix.transform_point(anchor) else {
-                    continue;
-                };
-                let world = |point: egui::Pos2| {
-                    inverse
-                        .transform_point([
-                            (point.x - rect.left()) / rect.width() * 2.0 - 1.0,
-                            1.0 - (point.y - rect.top()) / rect.height() * 2.0,
-                            projected[2],
-                        ])
-                        .ok()
-                };
-                let size = if emphasized == Some(face.handle) {
-                    9.0
-                } else {
-                    7.0
-                };
-                let tip = face.center + face.direction * size;
-                let base = face.center - face.direction * size;
-                let across = face.direction.rot90() * size * 0.65;
-                for (start, end) in [
-                    (world(base), world(tip)),
-                    (world(base + across), world(tip)),
-                    (world(base - across), world(tip)),
-                ] {
-                    if let (Some(start), Some(end)) = (start, end) {
-                        lines.push(GizmoLine {
-                            start,
-                            end,
-                            color,
-                            width_pixels: 1.0,
-                        });
-                    }
-                }
-                if let Some(end) = world(base) {
-                    lines.push(GizmoLine {
-                        start: anchor,
-                        end,
-                        color,
-                        width_pixels: 1.0,
-                    });
-                }
-            }
+        dragging: Option<ResizeHandle>,
+    ) {
+        if let Some(ResizeHandle::Face { axis, .. } | ResizeHandle::Edge { axis, .. }) = dragging
+            && let Some([minus, plus]) = self.face_centers[axis]
+        {
+            paint_drag_band(painter, minus, plus, self.bounds);
         }
-        lines
-    }
-
-    /// Paints the screen frame. `emphasized` is the hovered or dragged grip.
-    pub(crate) fn paint(&self, painter: &egui::Painter, emphasized: Option<ResizeHandle>) {
         painter.rect_stroke(
             self.bounds,
             0.0,
@@ -284,6 +217,19 @@ impl ResizeOverlay {
                 Color32::WHITE,
                 Stroke::new(1.0, Color32::from_rgba_unmultiplied(0, 0, 0, 60)),
             );
+        }
+        for face in &self.faces {
+            let color = if face.axis == 0 {
+                HANDLE_GREEN
+            } else {
+                HANDLE_BLUE
+            };
+            let size = if emphasized == Some(face.handle) {
+                1.15 * FACE_HANDLE_SCALE
+            } else {
+                FACE_HANDLE_SCALE
+            };
+            paint_double_chevron(painter, face.center, face.direction, color, size);
         }
     }
 }
@@ -306,6 +252,61 @@ fn exit_distance(bounds: egui::Rect, point: egui::Pos2, direction: Vec2) -> f32 
     along(point.x, bounds.left(), bounds.right(), direction.x)
         .min(along(point.y, bounds.top(), bounds.bottom(), direction.y))
         .max(0.0)
+}
+
+/// Two solid stacked triangles pointing along `direction`.
+fn paint_double_chevron(
+    painter: &egui::Painter,
+    center: egui::Pos2,
+    direction: Vec2,
+    color: Color32,
+    size: f32,
+) {
+    let across = direction.rot90();
+    let (length, half_width) = (7.0 * size, 6.5 * size);
+    for base in [-length - 0.5 * size, -0.5 * size] {
+        let base_center = center + direction * base;
+        painter.add(egui::Shape::convex_polygon(
+            vec![
+                base_center + direction * length,
+                base_center + across * half_width,
+                base_center - across * half_width,
+            ],
+            color,
+            Stroke::NONE,
+        ));
+    }
+}
+
+/// The pale band 3D Builder draws across the object along the drag axis.
+fn paint_drag_band(
+    painter: &egui::Painter,
+    minus: egui::Pos2,
+    plus: egui::Pos2,
+    bounds: egui::Rect,
+) {
+    let span = plus - minus;
+    let length = span.length();
+    if !length.is_finite() || length < 4.0 {
+        return;
+    }
+    let direction = span / length;
+    let across = direction.rot90();
+    let perpendicular_extent = across.x.abs() * bounds.width() + across.y.abs() * bounds.height();
+    let half_thickness = (perpendicular_extent * 0.09).clamp(4.0, 10.0);
+    let inset = length * 0.07;
+    let start = minus + direction * inset;
+    let end = plus - direction * inset;
+    painter.add(egui::Shape::convex_polygon(
+        vec![
+            start + across * half_thickness,
+            end + across * half_thickness,
+            end - across * half_thickness,
+            start - across * half_thickness,
+        ],
+        Color32::from_rgba_unmultiplied(255, 255, 255, 125),
+        Stroke::NONE,
+    ));
 }
 
 #[cfg(test)]
@@ -367,8 +368,12 @@ mod tests {
         let overlay = ResizeOverlay::layout(&frame(), None, project, VIEW).expect("overlay");
         let ctx = egui::Context::default();
         let mut output = ctx.run_ui(egui::RawInput::default(), |ui| {
-            overlay.paint(ui.painter(), None);
-            overlay.paint(ui.painter(), Some(ResizeHandle::Face { axis: 0, side: 1. }));
+            overlay.paint(ui.painter(), None, None);
+            overlay.paint(
+                ui.painter(),
+                None,
+                Some(ResizeHandle::Face { axis: 0, side: 1. }),
+            );
         });
         output.textures_delta.clear();
         assert!(!output.shapes.is_empty());
@@ -389,7 +394,7 @@ mod tests {
             assert_eq!(overlay.handle_at(point), Some(handle));
         }
         assert_eq!(
-            overlay.handle_at(overlay.bounds.left_top() - Vec2::splat(100.0)),
+            overlay.handle_at(overlay.bounds.center() + Vec2::new(0.0, -8.0)),
             None
         );
     }

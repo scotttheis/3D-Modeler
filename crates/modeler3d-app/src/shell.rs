@@ -35,8 +35,8 @@ use modeler3d_core::{
 };
 use modeler3d_viewport::{
     Aabb, Camera, GizmoAxis, GizmoLine, GizmoMode, InteractionState, MOVE_GIZMO_SCALE, Mat4,
-    ROTATE_RING_SEGMENTS, RenderScene, RendererConfig, SnapViewContext, ViewportRenderOptions,
-    ViewportRenderer, ViewportTheme, build_gizmo_with_bounds, dot, pick_scene, subtract,
+    RenderScene, RendererConfig, SnapViewContext, ViewportRenderOptions, ViewportRenderer,
+    ViewportTheme, build_gizmo_with_bounds, dot, pick_scene, subtract,
 };
 
 use crate::artwork::{
@@ -4834,9 +4834,8 @@ impl Modeler3dApp {
                     lighting: self.commands.preferences().viewport_lighting(),
                     theme: viewport_theme,
                     floor_text,
-                    guide_lines: if gizmo_mode == GizmoMode::Resize
-                        && self.paint_mode.is_none() && self.measure_mode.is_none() {
-                        self.resize_guide_lines(rect, &painter)
+                    guide_lines: if gizmo_mode == GizmoMode::Rotate && self.paint_mode.is_none() && self.measure_mode.is_none() {
+                        self.rotation_guide_lines(rect, &painter)
                     } else { Vec::new() },
                 };
                 let derived_preview = match (&self.preview, &self.viewport_drag) {
@@ -5265,7 +5264,38 @@ impl Modeler3dApp {
         .ok()
     }
 
+    fn rotation_guide_lines(&self, rect: egui::Rect, painter: &egui::Painter) -> Vec<GizmoLine> {
+        let Some(frame) = self.rotation_control_frame() else {
+            return Vec::new();
+        };
+        let Ok(matrix) = self
+            .camera
+            .view_projection(self.current_scene_radius().unwrap_or(1.))
+        else {
+            return Vec::new();
+        };
+        let active = self.active_gizmo_axis_index();
+        let hovered = active.or_else(|| {
+            painter
+                .ctx()
+                .input(|input| input.pointer.hover_pos())
+                .filter(|point| rect.contains(*point))
+                .and_then(|point| {
+                    self.transform_axis_at_pointer(
+                        rect,
+                        point,
+                        painter.ctx().pixels_per_point(),
+                        GizmoMode::Rotate,
+                    )
+                })
+        });
+        rotate_controls::guide_lines(frame, &self.camera, matrix, rect, hovered)
+    }
+
     fn paint_transform_handles(&self, painter: &egui::Painter, rect: egui::Rect) {
+        if self.gizmo_mode() != GizmoMode::Move {
+            return;
+        }
         let Some(center) = self.selected_gizmo_state() else {
             return;
         };
@@ -5275,152 +5305,67 @@ impl Modeler3dApp {
         else {
             return;
         };
-        let mode = self.gizmo_mode();
-        let geometry = if mode == GizmoMode::Rotate {
-            self.rotation_control_frame()
-                .and_then(|frame| frame.rotation_geometry(&self.camera))
-        } else {
-            build_gizmo_with_bounds(&self.camera, center, mode, self.selected_gizmo_bounds()).ok()
-        };
-        let Some(geometry) = geometry else {
+        let Ok(geometry) = build_gizmo_with_bounds(
+            &self.camera,
+            center,
+            GizmoMode::Move,
+            self.selected_gizmo_bounds(),
+        ) else {
             return;
         };
-        // The interaction controls remain visible over solid meshes on both
-        // GPU and CPU paths; hit testing consumes the same world geometry.
         let color = |rgba: [f32; 4]| {
             Color32::from(egui::Rgba::from_rgba_unmultiplied(
                 rgba[0], rgba[1], rgba[2], rgba[3],
             ))
         };
         let pixels_per_point = painter.ctx().pixels_per_point().max(1.0e-6);
-        let rotation_occlusion_frame = (mode == GizmoMode::Rotate)
-            .then(|| self.rotation_control_frame())
-            .flatten();
         let active_axis = self.active_gizmo_axis_index();
-        let hovered_axis = active_axis
-            .is_none()
-            .then(|| {
-                painter
-                    .ctx()
-                    .input(|input| input.pointer.hover_pos())
-                    .filter(|position| rect.contains(*position))
-                    .and_then(|position| {
-                        self.transform_axis_at_pointer(rect, position, pixels_per_point, mode)
-                    })
-            })
-            .flatten();
-        if mode == GizmoMode::Move {
-            for (axis_index, line) in geometry.lines.iter().enumerate() {
-                let Some(anchor) = project_gizmo_point(matrix, rect, line.start) else {
-                    continue;
-                };
-                let Some([axis_start, axis_end]) =
-                    project_gizmo_line(matrix, rect, line.start, line.end)
-                else {
-                    continue;
-                };
-                let axis_direction = axis_end - axis_start;
-                let direction_length = axis_direction.length();
-                if !direction_length.is_finite() || direction_length <= 1.0e-3 {
-                    continue;
-                }
-                let direction = axis_direction / direction_length;
-                let pixel_scale = MOVE_GIZMO_SCALE / pixels_per_point;
-                let shaft_end = anchor + direction * (MOVE_ARROW_SHAFT_LENGTH_PIXELS * pixel_scale);
-                let axis_color = color(line.color);
-                let emphasized =
-                    Some(axis_index) == hovered_axis || Some(axis_index) == active_axis;
-                // Flat axis-colored stem, matching Resize's solid handles.
-                let face = if emphasized {
-                    axis_highlight_color(axis_color)
-                } else {
-                    axis_color
-                };
-                painter.line_segment(
-                    [anchor, shaft_end],
-                    Stroke::new(line.width_pixels / pixels_per_point, face),
-                );
-                paint_gizmo_arrowhead(
-                    painter,
-                    shaft_end,
-                    direction,
-                    axis_color,
-                    MOVE_GIZMO_SCALE,
-                    emphasized,
-                );
+        let hovered_axis = active_axis.or_else(|| {
+            painter
+                .ctx()
+                .input(|input| input.pointer.hover_pos())
+                .filter(|point| rect.contains(*point))
+                .and_then(|point| {
+                    self.transform_axis_at_pointer(rect, point, pixels_per_point, GizmoMode::Move)
+                })
+        });
+        for (axis_index, line) in geometry.lines.iter().enumerate() {
+            let Some(anchor) = project_gizmo_point(matrix, rect, line.start) else {
+                continue;
+            };
+            let Some([axis_start, axis_end]) =
+                project_gizmo_line(matrix, rect, line.start, line.end)
+            else {
+                continue;
+            };
+            let axis_direction = axis_end - axis_start;
+            let direction_length = axis_direction.length();
+            if !direction_length.is_finite() || direction_length <= 1.0e-3 {
+                continue;
             }
-        } else {
-            let ring_segments = ROTATE_RING_SEGMENTS as usize;
-            for (axis_index, ring) in geometry.lines.chunks_exact(ring_segments).enumerate() {
-                let emphasized =
-                    Some(axis_index) == hovered_axis || Some(axis_index) == active_axis;
-                let mut path = Vec::with_capacity(ring.len() + 1);
-                for line in ring {
-                    let occluded = rotation_occlusion_frame.is_some_and(|frame| {
-                        rotate_controls::ring_segment_is_occluded(&self.camera, line, frame)
-                    });
-                    let projected = (!occluded)
-                        .then(|| project_gizmo_line(matrix, rect, line.start, line.end))
-                        .flatten();
-                    if let Some([start, end]) = projected {
-                        if path.is_empty() {
-                            path.push(start);
-                        } else if path.last().is_some_and(|last| last.distance(start) > 0.1) {
-                            paint_rotate_ring_path(
-                                painter,
-                                &path,
-                                color(line.color),
-                                line.width_pixels,
-                                emphasized,
-                            );
-                            path.clear();
-                            path.push(start);
-                        }
-                        path.push(end);
-                    } else if !path.is_empty() {
-                        paint_rotate_ring_path(
-                            painter,
-                            &path,
-                            color(line.color),
-                            line.width_pixels,
-                            emphasized,
-                        );
-                        path.clear();
-                    }
-                }
-                paint_rotate_ring_path(
-                    painter,
-                    &path,
-                    color(ring[0].color),
-                    ring[0].width_pixels,
-                    emphasized,
-                );
-            }
-            if mode == GizmoMode::Rotate {
-                paint_curved_rotate_arrows(
-                    painter,
-                    &self.camera,
-                    matrix,
-                    rect,
-                    &geometry.lines,
-                    active_axis.or(hovered_axis),
-                    rotation_occlusion_frame,
-                );
-            }
-            for triangle in &geometry.triangles {
-                let points = clip_gizmo_triangle(
-                    matrix,
-                    rect,
-                    [triangle.first, triangle.second, triangle.third],
-                );
-                if points.len() >= 3 {
-                    painter.add(egui::Shape::convex_polygon(
-                        points,
-                        color(triangle.color),
-                        Stroke::NONE,
-                    ));
-                }
-            }
+            let direction = axis_direction / direction_length;
+            let pixel_scale = MOVE_GIZMO_SCALE / pixels_per_point;
+            let shaft_end = anchor + direction * (MOVE_ARROW_SHAFT_LENGTH_PIXELS * pixel_scale);
+            let axis_color = color(line.color);
+            let emphasized = Some(axis_index) == hovered_axis || Some(axis_index) == active_axis;
+            // Flat axis-colored stem, matching Resize's solid handles.
+            let face = if emphasized {
+                axis_highlight_color(axis_color)
+            } else {
+                axis_color
+            };
+            painter.line_segment(
+                [anchor, shaft_end],
+                Stroke::new(line.width_pixels / pixels_per_point, face),
+            );
+            paint_gizmo_arrowhead(
+                painter,
+                shaft_end,
+                direction,
+                axis_color,
+                MOVE_GIZMO_SCALE,
+                emphasized,
+            );
         }
     }
 
@@ -5468,33 +5413,6 @@ impl Modeler3dApp {
         self.resize_size_preview = preview;
     }
 
-    fn resize_guide_lines(
-        &self,
-        rect: egui::Rect,
-        painter: &egui::Painter,
-    ) -> Vec<modeler3d_viewport::GizmoLine> {
-        let delta = match &self.viewport_drag {
-            Some(ViewportDrag::Transform(drag)) => Mat4::from_rows(drag.delta.rows()).ok(),
-            _ => None,
-        };
-        let Some(overlay) = self.resize_overlay(rect, delta) else {
-            return Vec::new();
-        };
-        let Ok(matrix) = self
-            .camera
-            .view_projection(self.current_scene_radius().unwrap_or(1.))
-        else {
-            return Vec::new();
-        };
-        let emphasized = self.active_resize_handle().or_else(|| {
-            painter
-                .ctx()
-                .input(|input| input.pointer.hover_pos())
-                .and_then(|point| overlay.handle_at(point))
-        });
-        overlay.depth_lines(matrix, rect, emphasized)
-    }
-
     fn paint_resize_handles(
         &self,
         painter: &egui::Painter,
@@ -5519,7 +5437,7 @@ impl Modeler3dApp {
                     .and_then(|position| overlay.handle_at(position))
             })
             .flatten();
-        overlay.paint(painter, dragging.or(hovered));
+        overlay.paint(painter, dragging.or(hovered), dragging);
     }
 
     /// For the `resize-drag` review capture: holds the +X face handle
@@ -8395,186 +8313,6 @@ fn project_gizmo_line(
     ])
 }
 
-/// Paints a continuous visible arc as a narrow, shaded tube. Shared joins avoid
-/// the dotted contour caused by shading each tessellation segment separately.
-fn paint_rotate_ring_path(
-    painter: &egui::Painter,
-    points: &[egui::Pos2],
-    axis_color: Color32,
-    width_pixels: f32,
-    emphasized: bool,
-) {
-    if points.len() < 2 {
-        return;
-    }
-    let pixels_per_point = painter.ctx().pixels_per_point().max(1.0e-6);
-    let to_points = 1.0 / pixels_per_point;
-    let radius = width_pixels.max(2.2);
-    let shadow_offset = Vec2::new(0.8, 1.15) * to_points;
-    let shadow_points: Vec<_> = points.iter().map(|point| *point + shadow_offset).collect();
-    let mut highlight_points = Vec::with_capacity(points.len());
-    for index in 0..points.len() {
-        let before = points[index.saturating_sub(1)];
-        let after = points[(index + 1).min(points.len() - 1)];
-        let tangent = after - before;
-        let tangent_length = tangent.length();
-        let normal = if tangent_length > 1.0e-3 {
-            Vec2::new(-tangent.y, tangent.x) / tangent_length
-        } else {
-            Vec2::ZERO
-        };
-        highlight_points.push(points[index] + normal * (radius * 0.28 * to_points));
-    }
-
-    // A small cast edge, dark contour, shaded body and narrow glint give the
-    // arc a consistent cylindrical read at normal viewport scale.
-    if emphasized {
-        painter.add(egui::Shape::line(
-            points.to_vec(),
-            Stroke::new((radius + 7.0) * to_points, with_alpha(axis_color, 44)),
-        ));
-    }
-    painter.add(egui::Shape::line(
-        shadow_points,
-        Stroke::new((radius + 2.2) * to_points, Color32::from_black_alpha(90)),
-    ));
-    painter.add(egui::Shape::line(
-        points.to_vec(),
-        Stroke::new((radius + 1.8) * to_points, Color32::from_rgb(18, 24, 36)),
-    ));
-    painter.add(egui::Shape::line(
-        points.to_vec(),
-        Stroke::new((radius + 0.35) * to_points, shade_color(axis_color, 0.58)),
-    ));
-    painter.add(egui::Shape::line(
-        points.to_vec(),
-        Stroke::new(radius * to_points, axis_color),
-    ));
-    let highlight = axis_highlight_color(axis_color);
-    painter.add(egui::Shape::line(
-        highlight_points,
-        Stroke::new(
-            (0.85 + if emphasized { 0.25 } else { 0.0 }) * to_points,
-            with_alpha(highlight, 238),
-        ),
-    ));
-}
-
-fn paint_curved_rotate_arrows(
-    painter: &egui::Painter,
-    camera: &Camera,
-    matrix: Mat4,
-    rect: egui::Rect,
-    ring_lines: &[GizmoLine],
-    emphasized_axis: Option<usize>,
-    occlusion_frame: Option<crate::transform_gesture::ResizeFrame>,
-) {
-    let ring_segments = ROTATE_RING_SEGMENTS as usize;
-    let pixels_per_point = painter.ctx().pixels_per_point().max(1.0e-6);
-    let size_scale = MOVE_GIZMO_SCALE;
-    let head_length = MOVE_ARROW_HEAD_LENGTH_PIXELS * size_scale / pixels_per_point;
-    let head_half_width = MOVE_ARROW_HEAD_HALF_WIDTH_PIXELS * size_scale / pixels_per_point;
-    let visible_rect = rect.shrink(head_length + head_half_width + 4.0 / pixels_per_point);
-
-    for (ring_index, ring) in ring_lines.chunks_exact(ring_segments).enumerate() {
-        let preferred = (ring_index * ring_segments / 3 + ring_segments / 8) % ring_segments;
-        let mut best: Option<(f32, usize, egui::Pos2, Vec2)> = None;
-        for (segment_index, line) in ring.iter().enumerate() {
-            if occlusion_frame
-                .is_some_and(|frame| rotate_controls::ring_segment_is_occluded(camera, line, frame))
-            {
-                continue;
-            }
-            let Some([start, end]) = project_gizmo_line(matrix, rect, line.start, line.end) else {
-                continue;
-            };
-            let tangent = end - start;
-            let tangent_length = tangent.length();
-            if !tangent_length.is_finite()
-                || tangent_length <= 1.0e-3
-                || !visible_rect.contains(start)
-                || !visible_rect.contains(end)
-            {
-                continue;
-            }
-            let difference = segment_index.abs_diff(preferred);
-            let preferred_distance = difference.min(ring_segments - difference) as f32;
-            let score = -preferred_distance;
-            if best
-                .as_ref()
-                .is_none_or(|(current, _, _, _)| score > *current)
-            {
-                best = Some((score, segment_index, end, tangent / tangent_length));
-            }
-        }
-
-        let Some((_, tip_segment, tip, direction)) = best else {
-            continue;
-        };
-        let emphasized = emphasized_axis == Some(ring_index);
-        let axis_color = Color32::from(egui::Rgba::from_rgba_unmultiplied(
-            ring[tip_segment].color[0],
-            ring[tip_segment].color[1],
-            ring[tip_segment].color[2],
-            ring[tip_segment].color[3],
-        ));
-
-        // A flat double-ended grip follows the ring, with solid triangular
-        // heads like the Resize handles. Keep the underlying ring pickable.
-        let mut curve_length = 0.0;
-        let mut step = 0;
-        let mut tail = None;
-        let mut grip_path = Vec::new();
-        while step < ring.len() && curve_length < head_length * 2.5 {
-            let segment_index = (tip_segment + ring.len() - step) % ring.len();
-            let line = ring[segment_index];
-            if occlusion_frame.is_some_and(|frame| {
-                rotate_controls::ring_segment_is_occluded(camera, &line, frame)
-            }) {
-                break;
-            }
-            if let Some([start, end]) = project_gizmo_line(matrix, rect, line.start, line.end) {
-                if !visible_rect.contains(start) || !visible_rect.contains(end) {
-                    break;
-                }
-                let span = end - start;
-                if span.length() > 1.0e-3 {
-                    curve_length += span.length();
-                    if grip_path.is_empty() {
-                        grip_path.push(start);
-                    }
-                    grip_path.push(end);
-                    tail = Some((start, -span.normalized()));
-                }
-            }
-            step += 1;
-        }
-        paint_rotate_ring_path(painter, &grip_path, axis_color, 4.0, emphasized);
-        let face = if emphasized {
-            axis_highlight_color(axis_color)
-        } else {
-            axis_color
-        };
-        for (base, outward) in std::iter::once((tip, direction)).chain(tail) {
-            let across = outward.rot90() * head_half_width;
-            painter.add(egui::Shape::convex_polygon(
-                vec![base + outward * head_length, base + across, base - across],
-                face,
-                Stroke::new(0.9 / pixels_per_point, shade_color(face, 0.52)),
-            ));
-            let highlight_start = base + outward * (head_length * 0.12) - across * 0.55;
-            let highlight_end = base + outward * (head_length * 0.78);
-            painter.line_segment(
-                [highlight_start, highlight_end],
-                Stroke::new(
-                    0.8 / pixels_per_point,
-                    with_alpha(axis_highlight_color(face), 225),
-                ),
-            );
-        }
-    }
-}
-
 fn distance_to_screen_segment(point: egui::Pos2, start: egui::Pos2, end: egui::Pos2) -> f32 {
     let segment = end - start;
     let length_squared = segment.length_sq();
@@ -8591,20 +8329,6 @@ fn gizmo_axis_index(axis: GizmoAxis) -> usize {
         GizmoAxis::Y => 1,
         GizmoAxis::Z => 2,
     }
-}
-
-fn with_alpha(color: Color32, alpha: u8) -> Color32 {
-    Color32::from_rgba_unmultiplied(color.r(), color.g(), color.b(), alpha)
-}
-
-fn shade_color(color: Color32, factor: f32) -> Color32 {
-    let shade = |channel: u8| (f32::from(channel) * factor).round() as u8;
-    Color32::from_rgba_unmultiplied(
-        shade(color.r()),
-        shade(color.g()),
-        shade(color.b()),
-        color.a(),
-    )
 }
 
 fn axis_highlight_color(color: Color32) -> Color32 {
@@ -8647,51 +8371,6 @@ fn paint_gizmo_arrowhead(
         face,
         Stroke::NONE,
     ));
-}
-
-fn clip_gizmo_triangle(matrix: Mat4, rect: egui::Rect, triangle: [[f32; 3]; 3]) -> Vec<egui::Pos2> {
-    let mut polygon = triangle
-        .into_iter()
-        .map(|point| matrix.transform4([point[0], point[1], point[2], 1.0]))
-        .collect::<Vec<_>>();
-    if polygon.iter().flatten().any(|value| !value.is_finite()) {
-        return Vec::new();
-    }
-    for plane in 0..6 {
-        let input = std::mem::take(&mut polygon);
-        let Some(mut previous) = input.last().copied() else {
-            return Vec::new();
-        };
-        let mut previous_distance = clip_plane_distance(previous, plane);
-        if !previous_distance.is_finite() {
-            return Vec::new();
-        }
-        for current in input {
-            let current_distance = clip_plane_distance(current, plane);
-            if !current_distance.is_finite() {
-                return Vec::new();
-            }
-            let previous_inside = previous_distance >= 0.0;
-            let current_inside = current_distance >= 0.0;
-            if previous_inside != current_inside {
-                let amount = previous_distance / (previous_distance - current_distance);
-                polygon.push(interpolate_clip_point(previous, current, amount));
-            }
-            if current_inside {
-                polygon.push(current);
-            }
-            previous = current;
-            previous_distance = current_distance;
-        }
-    }
-    let mut projected = Vec::with_capacity(polygon.len());
-    for point in polygon {
-        let Some(point) = clip_point_to_viewport(rect, point) else {
-            return Vec::new();
-        };
-        projected.push(point);
-    }
-    projected
 }
 
 fn clip_plane_distance(point: [f32; 4], plane: usize) -> f32 {

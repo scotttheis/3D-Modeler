@@ -98,9 +98,99 @@ impl ResizeFrame {
     }
 }
 
-/// Tests whether a ring segment projects across the rotated selection. The UI
-/// painter draws above the viewport, so both near and far edges must respect
-/// the selected object's silhouette.
+/// Thin ring strokes and open arrowheads share the viewport's mesh depth test.
+/// Picking and drag axes retain the same local rotation frame.
+pub(super) fn guide_lines(
+    frame: ResizeFrame,
+    camera: &Camera,
+    matrix: modeler3d_viewport::Mat4,
+    rect: eframe::egui::Rect,
+    emphasized: Option<usize>,
+) -> Vec<GizmoLine> {
+    let Some(geometry) = frame.rotation_geometry(camera) else {
+        return Vec::new();
+    };
+    let Ok(inverse) = matrix.inverse() else {
+        return Vec::new();
+    };
+    let mut lines = geometry.lines;
+    let segments = modeler3d_viewport::ROTATE_RING_SEGMENTS as usize;
+    for (axis, ring) in lines.chunks_exact_mut(segments).enumerate() {
+        for line in ring {
+            line.width_pixels = 1.0;
+            if emphasized == Some(axis) {
+                for value in &mut line.color[..3] {
+                    *value += (1.0 - *value) * 0.35;
+                }
+            }
+        }
+    }
+    let mut heads = Vec::new();
+    for (axis, ring) in lines.chunks_exact(segments).enumerate() {
+        let preferred = (axis * segments / 3 + segments / 8) % segments;
+        let candidate = ring
+            .iter()
+            .enumerate()
+            .filter(|(_, line)| !ring_segment_is_occluded(camera, line, frame))
+            .filter(|(_, line)| {
+                super::project_gizmo_line(matrix, rect, line.start, line.end).is_some_and(
+                    |[a, b]| {
+                        rect.shrink(12.0).contains(a)
+                            && rect.shrink(12.0).contains(b)
+                            && a.distance(b) > 0.01
+                    },
+                )
+            })
+            .min_by_key(|(index, _)| {
+                let d = index.abs_diff(preferred);
+                d.min(segments - d)
+            });
+        let Some((index, _)) = candidate else {
+            continue;
+        };
+        for (index, forward) in [(index, true), ((index + segments - 8) % segments, false)] {
+            let line = ring[index];
+            let Some([start, end]) = super::project_gizmo_line(matrix, rect, line.start, line.end)
+            else {
+                continue;
+            };
+            let (tip, direction, anchor) = if forward {
+                (end, (end - start).normalized(), line.end)
+            } else {
+                (start, (start - end).normalized(), line.start)
+            };
+            let Ok(projected) = matrix.transform_point(anchor) else {
+                continue;
+            };
+            let world = |point: eframe::egui::Pos2| {
+                inverse
+                    .transform_point([
+                        (point.x - rect.left()) / rect.width() * 2.0 - 1.0,
+                        1.0 - (point.y - rect.top()) / rect.height() * 2.0,
+                        projected[2],
+                    ])
+                    .ok()
+            };
+            let length = if emphasized == Some(axis) { 11.0 } else { 9.0 };
+            for sign in [-1.0, 1.0] {
+                let wing = tip - direction * length + direction.rot90() * (sign * length * 0.5);
+                if let Some(start) = world(wing) {
+                    heads.push(GizmoLine {
+                        start,
+                        end: anchor,
+                        color: line.color,
+                        width_pixels: 1.0,
+                    });
+                }
+            }
+        }
+    }
+    lines.extend(heads);
+    lines
+}
+
+/// Rejects rear arrow placements while allowing front arcs across the object.
+/// Actual stroke visibility is determined per pixel by the scene depth buffer.
 pub(super) fn ring_segment_is_occluded(
     camera: &Camera,
     line: &GizmoLine,
@@ -128,7 +218,10 @@ pub(super) fn ring_segment_is_occluded(
     let Ok(local_ray) = local_ray else {
         return false;
     };
-    bounds.ray_entry(local_ray).is_some()
+    let distance = dot(direction, direction).sqrt();
+    bounds
+        .ray_entry(local_ray)
+        .is_some_and(|entry| entry < distance - 1.0e-3)
 }
 
 #[cfg(test)]
@@ -149,8 +242,9 @@ mod tests {
     }
 
     #[test]
-    fn rotate_ring_segments_hide_when_their_projection_crosses_the_selection() {
-        let camera = Camera::new();
+    fn rotate_ring_rear_segments_hide_but_front_segments_cross_the_selection() {
+        let mut camera = Camera::new();
+        camera.set_view(0.0, 0.0).expect("front view");
         let frame = ResizeFrame {
             center: [0.; 3],
             axes: [[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]],
@@ -165,6 +259,35 @@ mod tests {
 
         assert!(ring_segment_is_occluded(&camera, &line(-3.), frame));
         assert!(!ring_segment_is_occluded(&camera, &line(3.), frame));
+    }
+
+    #[test]
+    fn thin_rotation_strokes_keep_front_and_rear_arcs_for_mesh_depth_testing() {
+        let mut camera = Camera::new();
+        camera.set_viewport_size(1280, 720).expect("viewport");
+        camera
+            .frame_bounds(&[Aabb::new([-20.; 3], [20.; 3]).expect("bounds")])
+            .expect("frame");
+        let frame = ResizeFrame {
+            center: [0.; 3],
+            axes: [[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]],
+            extents: [40.; 3],
+        };
+        let matrix = camera.view_projection(35.).expect("matrix");
+        let rect = eframe::egui::Rect::from_min_size(
+            eframe::egui::Pos2::ZERO,
+            eframe::egui::vec2(1280., 720.),
+        );
+        let original = frame.rotation_geometry(&camera).expect("geometry");
+        let lines = guide_lines(frame, &camera, matrix, rect, None);
+        assert!(
+            lines.len() > original.lines.len(),
+            "open arrowheads are present"
+        );
+        assert!(lines.iter().all(|line| line.width_pixels == 1.0));
+        for (actual, expected) in lines.iter().zip(&original.lines) {
+            assert_eq!((actual.start, actual.end), (expected.start, expected.end));
+        }
     }
 
     #[test]

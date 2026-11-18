@@ -27,16 +27,17 @@ for RC2. Next after RC2: RC3 / 0.1.3.
 
 ## Now
 
-**Resize arrows and front guides (owner, 2026-11-18):** thin open
-arrowheads and single-pixel guides on camera-facing selection bounds. GPU and
-CPU depth tests hide strokes behind scene surfaces. Fast gate passed (269 app,
-57 viewport tests), workspace tests, deny/audit, MCP parity, smoke and the
-92-image capture board passed. The Full run recorded an initial test-code lint
-failure; it was fixed and workspace Clippy passed on recheck. Release built and
-smoke passed (23,394,304-byte executable). Both-theme front/oblique and drag
-captures: `evidence/rebuild/captures/2026-11-18-resize-thin/`.
-Task: [`resize-thin.md`](tasks/resize-thin.md). Owner visual review pending.
-Recovery: `G:\3D-Modeler_snapshot_20261118-095859_resize-thin`.
+**Thin Rotate rings; Resize restored (owner correction, 2026-11-18):**
+The requested control was Rotate. Resize has its original handles and drag
+band again. Rotate uses thin ring strokes and open arrowheads, rendered with
+GPU/CPU mesh depth testing: front arcs cross visible faces and rear arcs hide
+behind scene surfaces. Local axes, live preview, picking and history pass.
+Full gate passed (`logs/gate/20261118-100850-full`), including 270 app and 57
+viewport tests and the 92-image board. Release built and smoke passed
+(23,387,136-byte executable). Both-theme before/after and Release captures:
+`evidence/rebuild/captures/2026-11-18-rotate-thin/`.
+Task: [`rotate-thin.md`](tasks/rotate-thin.md). Supersedes the shaded ring
+finish below. Owner visual review pending. Recovery: `G:\3D-Modeler_snapshot_20261118-101504_rotate-thin`.
 
 **Rotation ring finish (owner, 2026-11-18):** continuous shaded tube paths
 with soft depth edge and specular glint; curved grips receive matching edge

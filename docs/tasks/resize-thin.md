@@ -20,3 +20,6 @@ An additional cargo-bloat rebuild was cancelled; the verified Release EXE
 measures 23,394,304 bytes. Installer size was not measured in this UI task.
 Final recovery: `G:\3D-Modeler_snapshot_20261118-095859_resize-thin`.
 File/byte verification is recorded in `logs/resize-thin-recovery.txt`.
+
+Owner correction, 2026-11-18: the intended control was Rotate. Resize appearance
+changes are reverted by the rotate-thin task.
