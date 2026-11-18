@@ -292,10 +292,11 @@ closed.
 7. Resize reference toggle (owner, 2026-11-18). Built for owner trial: an icon-only
    switch above Apply for floor-front or imported-object-front sizing, with
    tooltips. Trial: [`resize-basis-toggle.md`](tasks/resize-basis-toggle.md).
-8. Next task, recorded 2026-11-18: investigate and fix Settle while Resize is
-   active. The owner reports that clicking Settle distorts the object and
-   fails to settle it. Expected behavior is to place the object on the floor
-   without deforming it. Reproduction and cause are pending investigation.
+8. Resize -> Settle fixed 2026-11-18: world-space hull rotation preserves
+   resized shapes and puts the support face on Y=0. Numeric Resize in both
+   bases, single/multi selection, repeat no-op and undo/redo pass; Fast gate
+   passed (275 app tests); independent review found no blockers. Owner review
+   pending. Task: [`resize-settle.md`](tasks/resize-settle.md).
 9. Following task, recorded 2026-11-18: replace grab feedback throughout the
    app with a very simplified robot-claw/wrench-style cursor, with open and
    closed variants for ready-to-grab and actively-grabbing states. Cover

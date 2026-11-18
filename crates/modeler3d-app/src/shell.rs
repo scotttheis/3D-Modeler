@@ -631,6 +631,8 @@ impl Modeler3dApp {
             | ReviewState::RotateDrag
             | ReviewState::Resize
             | ReviewState::ResizeDrag
+            | ReviewState::ResizeSettleBefore
+            | ReviewState::ResizeSettle
             | ReviewState::ResizeFloor
             | ReviewState::ResizeObject
             | ReviewState::Unselected
@@ -1142,10 +1144,25 @@ impl Modeler3dApp {
             }
             ReviewState::Resize
             | ReviewState::ResizeDrag
+            | ReviewState::ResizeSettleBefore
+            | ReviewState::ResizeSettle
             | ReviewState::ResizeFloor
             | ReviewState::ResizeObject => TransformPanelMode::Resize,
             _ => TransformPanelMode::Move,
         };
+        if matches!(
+            review.state(),
+            ReviewState::ResizeSettleBefore | ReviewState::ResizeSettle
+        ) {
+            for _ in 0..2 {
+                let _ = self.commands.rotate_selected([25., 35., 20.]);
+            }
+            let _ = self.commands.set_selected_size([30., 50., 70.]);
+            let _ = self.commands.set_selected_position([10., 45., 15.]);
+            if review.state() == ReviewState::ResizeSettle {
+                self.dispatch(CommandId::Settle);
+            }
+        }
         self.object_resize_basis = review.state() == ReviewState::ResizeObject;
         if review.state() != ReviewState::Welcome {
             self.surface = WorkspaceSurface::Scene;
@@ -11479,6 +11496,77 @@ mod tests {
                     app.sync_resize_size_fields();
                     assert_eq!(app.size_fields[0], "a numeric edit in progress");
                 }
+            }
+        }
+    }
+
+    #[test]
+    fn resize_then_settle_preserves_shape_floor_contact_and_history() {
+        for object_basis in [false, true] {
+            for count in [1, 2] {
+                let (mut app, directory) = shell_for_jobs("resize-settle");
+                for _ in 0..count {
+                    app.commands
+                        .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
+                        .expect("cube");
+                }
+                app.commands.set_selection_indices(0..count);
+                app.commands.rotate_selected([25., 35., 20.]).expect("tilt");
+                app.transform_panel_mode = TransformPanelMode::Resize;
+                app.set_resize_basis(object_basis);
+                app.proportional_resize = false;
+                app.size_fields = ["30 mm".into(), "50 mm".into(), "70 mm".into()];
+                app.numeric_edited_axes = [true; 3];
+                app.apply_transform_fields(0, DisplayUnit::Millimetre);
+                assert!(app.transform_error.is_none());
+                app.commands
+                    .set_selected_position([15., 45., -12.])
+                    .expect("lift");
+                let points = |app: &Modeler3dApp| -> Vec<[f32; 3]> {
+                    app.commands
+                        .scene()
+                        .objects()
+                        .iter()
+                        .flat_map(|object| object.transformed_mesh().expect("world mesh").vertices)
+                        .collect()
+                };
+                let before_points = points(&app);
+                let before = app.commands.scene().history_state_id();
+                app.dispatch(CommandId::Settle);
+                let after_points = points(&app);
+                let after = app.commands.scene().history_state_id();
+                assert_ne!(before, after);
+                let indices = (0..count).collect::<Vec<_>>();
+                let bounds = world_bounds(app.commands.scene(), &indices).expect("bounds");
+                assert!(bounds.minimum[1].abs() < 0.001, "{bounds:?}");
+                for i in 0..before_points.len() {
+                    for j in 0..i {
+                        let distance = |points: &[[f32; 3]]| {
+                            (0..3)
+                                .map(|a| (points[i][a] - points[j][a]).powi(2))
+                                .sum::<f32>()
+                                .sqrt()
+                        };
+                        assert!(
+                            (distance(&before_points) - distance(&after_points)).abs() < 0.001,
+                            "Settle distorted Resize (object basis={object_basis}, count={count})"
+                        );
+                    }
+                }
+                app.dispatch(CommandId::Undo);
+                assert_eq!(app.commands.scene().history_state_id(), before);
+                assert_eq!(points(&app), before_points);
+                app.dispatch(CommandId::Redo);
+                assert_eq!(app.commands.scene().history_state_id(), after);
+                assert_eq!(points(&app), after_points);
+                app.dispatch(CommandId::Settle);
+                assert_eq!(
+                    app.commands.scene().history_state_id(),
+                    after,
+                    "repeat Settle is a no-op"
+                );
+                drop(app);
+                let _ = std::fs::remove_dir_all(directory);
             }
         }
     }

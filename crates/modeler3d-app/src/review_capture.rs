@@ -74,6 +74,9 @@ pub(crate) enum ReviewState {
     Resize,
     /// Tilted object resized along fixed floor axes.
     ResizeFloor,
+    /// Nonuniformly resized, tilted cube before/after Settle.
+    ResizeSettleBefore,
+    ResizeSettle,
     /// Tilted object resized along its imported axes.
     ResizeObject,
     /// The Resize state with the +X face handle held mid-drag. The drag is
@@ -190,6 +193,8 @@ impl ReviewState {
             "rotate-drag" => Some(Self::RotateDrag),
             "resize" => Some(Self::Resize),
             "resize-floor" => Some(Self::ResizeFloor),
+            "resize-settle-before" => Some(Self::ResizeSettleBefore),
+            "resize-settle" => Some(Self::ResizeSettle),
             "resize-object" => Some(Self::ResizeObject),
             "resize-drag" => Some(Self::ResizeDrag),
             "multi" => Some(Self::Multi),

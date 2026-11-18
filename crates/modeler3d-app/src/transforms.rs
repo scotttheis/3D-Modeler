@@ -402,6 +402,8 @@ pub fn arrange(
 
 /// Rotates the combined convex hull's best downward face to the bed, then
 /// centers X/Z and places the lowest point at Y=0 in one history entry.
+/// The motion is rigid in world space, preserving prior resize and mirror.
+/// This corrects the Python single-object local-rotation behavior.
 pub fn settle(scene: &mut Scene, indices: &[usize]) -> Result<bool, TransformError> {
     let indices = ordered_indices(scene, indices.iter().copied(), "Settle")?;
     let count = indices.iter().try_fold(0usize, |count, index| {
@@ -426,36 +428,9 @@ pub fn settle(scene: &mut Scene, indices: &[usize]) -> Result<bool, TransformErr
         }
     }
     let rotation = modeler3d_core::placement_rotation(&points)?;
-    if indices.len() == 1 {
-        // Python lay_flat calls SceneObject.rotate (post-multiplied local
-        // rotation); its multi-object service composes in world space below.
-        let index = indices[0];
-        let object = scene.object(index)?;
-        let mut rotation_rows = Transform::identity().f64_rows();
-        for axis in 0..3 {
-            rotation_rows[axis][..3].copy_from_slice(&rotation[axis]);
-        }
-        let mut rows = object
-            .transform()
-            .multiply(&Transform::from_f64_rows(rotation_rows)?)?
-            .f64_rows();
-        let mut minimum = [f64::INFINITY; 3];
-        let mut maximum = [f64::NEG_INFINITY; 3];
-        for point in &object.mesh().vertices {
-            for axis in 0..3 {
-                let value = rows[axis][3]
-                    + (0..3)
-                        .map(|i| rows[axis][i] * f64::from(point[i]))
-                        .sum::<f64>();
-                minimum[axis] = minimum[axis].min(value);
-                maximum[axis] = maximum[axis].max(value);
-            }
-        }
-        rows[0][3] -= (minimum[0] + maximum[0]) * 0.5;
-        rows[1][3] -= minimum[1];
-        rows[2][3] -= (minimum[2] + maximum[2]) * 0.5;
-        return commit_transforms(scene, &indices, vec![Transform::from_f64_rows(rows)?]);
-    }
+    // The hull rotation is expressed in world coordinates. Pre-multiply it
+    // for every selection size: post-multiplying a nonuniformly scaled
+    // object rotates its local axes through that scale and deforms the mesh.
     let mut minimum = [f64::INFINITY; 3];
     let mut maximum = [f64::NEG_INFINITY; 3];
     for point in points {
@@ -707,7 +682,7 @@ mod rb04_placement_oracle {
         after: Vec<[[f64; 4]; 4]>,
     }
     #[test]
-    fn settle_single_and_group_match_python_convex_hull_cases() {
+    fn settle_group_matches_python_and_single_corrects_local_rotation() {
         let cases: Vec<Case> = serde_json::from_str(include_str!(
             "../../../evidence/rebuild/rb-04-scene-and-precise-transforms/settle-oracle.json"
         ))
@@ -728,7 +703,16 @@ mod rb04_placement_oracle {
             let before = scene.history_state_id();
             let indices = (0..scene.objects().len()).collect::<Vec<_>>();
             assert!(settle(&mut scene, &indices).expect("settle"));
-            for (object, expected) in scene.objects().iter().zip(&case.after) {
+            let bounds = world_bounds(&scene, &indices).expect("bounds");
+            assert!(bounds.minimum[1].abs() < 0.001);
+            // The frozen single-object Python output preserves the old local
+            // rotation bug; group output remains the compatibility contract.
+            for (object, expected) in scene
+                .objects()
+                .iter()
+                .zip(&case.after)
+                .filter(|_| indices.len() > 1)
+            {
                 for (a, b) in object
                     .transform()
                     .f64_rows()
