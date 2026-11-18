@@ -1327,6 +1327,56 @@ mod tests {
     }
 
     #[test]
+    fn mcp_settle_after_resize_matches_desktop_rigid_placement() {
+        for indices in [vec![0], vec![1, 0]] {
+            let (mut integration, root) = framing_integration();
+            let context = egui::Context::default();
+            let mut app = framing_scene(&mut integration, &context);
+            app.commands.set_selection_indices(indices.iter().copied());
+            app.commands.rotate_selected([25., 35., 20.]).expect("tilt");
+            app.commands
+                .set_selected_size([30., 50., 70.])
+                .expect("resize");
+            app.commands
+                .set_selected_position([10., 60., 15.])
+                .expect("lift");
+            let matrices = |app: &Modeler3dApp| {
+                app.commands
+                    .scene()
+                    .objects()
+                    .iter()
+                    .map(|object| object.transform().rows())
+                    .collect::<Vec<_>>()
+            };
+            let before = matrices(&app);
+            let history = app.commands.scene().history_state_id();
+            app.dispatch(CommandId::Settle);
+            let expected = matrices(&app);
+            app.dispatch(CommandId::Undo);
+            integration
+                .call_tool(&mut app, &context, "settle", json!({}))
+                .expect("MCP settle");
+            assert_eq!(matrices(&app), expected);
+            let bounds =
+                crate::transforms::world_bounds(app.commands.scene(), &indices).expect("bounds");
+            assert!(bounds.minimum[1].abs() < 0.001, "{bounds:?}");
+            let settled = app.commands.scene().history_state_id();
+            integration
+                .call_tool(&mut app, &context, "settle", json!({}))
+                .expect("repeat");
+            assert_eq!(app.commands.scene().history_state_id(), settled);
+            app.dispatch(CommandId::Undo);
+            assert_eq!(matrices(&app), before);
+            assert_eq!(app.commands.scene().history_state_id(), history);
+            app.dispatch(CommandId::Redo);
+            assert_eq!(matrices(&app), expected);
+            drop(app);
+            drop(integration);
+            let _ = fs::remove_dir_all(root);
+        }
+    }
+
+    #[test]
     fn items_and_viewport_double_click_frame_like_mcp_frame_view() {
         let (mut integration, root) = framing_integration();
         let context = egui::Context::default();

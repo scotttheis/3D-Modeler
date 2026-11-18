@@ -1494,21 +1494,10 @@ impl R4Server {
         } else {
             selected_or_targets(&state.scene, args)?
         };
-        let mut affected = Vec::new();
-        let mut changed = false;
-        for index in indices {
-            let object = state.scene.object(index)?;
-            let Some((minimum, _)) = object.transformed_mesh()?.bounds() else {
-                continue;
-            };
-            let offset = [0.0, 0.0, -minimum[2]];
-            let result = state.scene.translate(index, offset)?;
-            changed |= result.changed;
-            affected.extend(result.affected_object_ids);
-        }
-        state.dirty |= changed;
+        let result = modeler3d_core::settle_on_floor(&mut state.scene, &indices)?;
+        state.dirty |= result.changed;
         Ok(
-            json!({"action":"settle","changed":changed,"scene_revision":state.scene.revision(),"affected_object_ids":affected}),
+            json!({"action":"settle","changed":result.changed,"scene_revision":state.scene.revision(),"affected_object_ids":result.affected_object_ids}),
         )
     }
 

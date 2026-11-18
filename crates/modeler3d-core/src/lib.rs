@@ -35,7 +35,7 @@ pub use model_import::{PreparedModelImport, import_model, prepare_model_import};
 pub use wrl_import::{load_wrl, load_wrl_bytes};
 
 mod placement;
-pub use placement::{MAX_PLACEMENT_POINTS, placement_rotation};
+pub use placement::{MAX_PLACEMENT_POINTS, placement_rotation, settle_on_floor};
 
 pub use brushes::{
     BlobOptions, BrushDirection, BrushFalloff, BrushReport, BrushResult, BrushSymmetry,

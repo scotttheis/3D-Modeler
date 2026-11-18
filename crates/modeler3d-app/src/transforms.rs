@@ -406,60 +406,7 @@ pub fn arrange(
 /// This corrects the Python single-object local-rotation behavior.
 pub fn settle(scene: &mut Scene, indices: &[usize]) -> Result<bool, TransformError> {
     let indices = ordered_indices(scene, indices.iter().copied(), "Settle")?;
-    let count = indices.iter().try_fold(0usize, |count, index| {
-        let next = count.checked_add(scene.object(*index)?.mesh().vertices.len());
-        next.filter(|count| *count <= modeler3d_core::MAX_PLACEMENT_POINTS)
-            .ok_or_else(|| CoreError::OperationResourceLimit {
-                operation: "settle".into(),
-                reason: "placement point/memory budget exceeded".into(),
-            })
-    })?;
-    let mut points = Vec::with_capacity(count);
-    for index in &indices {
-        let object = scene.object(*index)?;
-        let rows = object.transform().f64_rows();
-        for point in &object.mesh().vertices {
-            points.push(std::array::from_fn::<_, 3, _>(|axis| {
-                rows[axis][3]
-                    + (0..3)
-                        .map(|i| rows[axis][i] * f64::from(point[i]))
-                        .sum::<f64>()
-            }));
-        }
-    }
-    let rotation = modeler3d_core::placement_rotation(&points)?;
-    // The hull rotation is expressed in world coordinates. Pre-multiply it
-    // for every selection size: post-multiplying a nonuniformly scaled
-    // object rotates its local axes through that scale and deforms the mesh.
-    let mut minimum = [f64::INFINITY; 3];
-    let mut maximum = [f64::NEG_INFINITY; 3];
-    for point in points {
-        for axis in 0..3 {
-            let value = (0..3).map(|i| rotation[axis][i] * point[i]).sum::<f64>();
-            minimum[axis] = minimum[axis].min(value);
-            maximum[axis] = maximum[axis].max(value);
-        }
-    }
-    let offset = [
-        -(minimum[0] + maximum[0]) * 0.5,
-        -minimum[1],
-        -(minimum[2] + maximum[2]) * 0.5,
-    ];
-    let mut transforms = Vec::with_capacity(indices.len());
-    for index in &indices {
-        let before = scene.object(*index)?.transform().f64_rows();
-        let mut rows = before;
-        for axis in 0..3 {
-            for column in 0..4 {
-                rows[axis][column] = (0..3)
-                    .map(|i| rotation[axis][i] * before[i][column])
-                    .sum::<f64>();
-            }
-            rows[axis][3] += offset[axis];
-        }
-        transforms.push(Transform::from_f64_rows(rows)?);
-    }
-    commit_transforms(scene, &indices, transforms)
+    Ok(modeler3d_core::settle_on_floor(scene, &indices)?.changed)
 }
 
 /// Mirrors the reference's local basis column and world translation component.

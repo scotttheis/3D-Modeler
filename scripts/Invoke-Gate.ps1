@@ -169,7 +169,7 @@ if ($fullScope) {
             $states = @('welcome', 'empty', 'move', 'rotate', 'rotate-tilted', 'rotate-drag', 'resize', 'resize-drag', 'multi', 'merge', 'unselected', 'material', 'settings', 'save', 'export', 'menu', 'colors', 'mirror', 'merge-apart', 'repair', 'paste', 'align', 'paint', 'paint-picker', 'xray', 'texture', 'texture-dialog', 'grab', 'crease', 'crease-sharp', 'smooth-brush', 'simplify', 'simplify-area', 'subdivide', 'hollow', 'hollow-dialog', 'hollow-error', 'measure', 'measure-start')
             $started = Get-Date
             $states += 'update'
-            $states += @('resize-floor', 'resize-object', 'resize-settle-before', 'resize-settle')
+            $states += @('resize-floor', 'resize-object', 'resize-settle-before', 'resize-settle', 'grab-ready', 'grab-held')
             $states += @('brush-settings', 'brush-dismissed', 'edit-simplify', 'edit-smooth', 'edit-blob', 'edit-off')
             $missing = @()
             Write-Host ""

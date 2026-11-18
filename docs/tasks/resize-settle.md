@@ -1,20 +1,24 @@
 # Resize -> Settle without distortion
-Goal: settle resized/rotated selections on Y=0 with rigid world-space motion.
-Files: transforms.rs, shell.rs, review_capture.rs, scripts/Invoke-Gate.ps1.
-Remove the single-object local-rotation special case; preserve centering and
-one grouped undo entry. Retain historical Python fixtures as evidence while
-recording the intentional correction to its single-object rotation bug.
-Verify: shape-distance regression after numeric Resize in both bases,
-single/multi selection, floor contact, repeat no-op, undo/redo, Fast/Full gate,
-both-theme before/after captures. Review existing MCP settle behavior.
-Baseline: see logs/settle-claw-baseline.txt (copy and counts verified).
-Follow E:\RustDeveloper.md and AGENTS.md. Owner acceptance remains pending.
-
-Checkpoint: regression failed before the fix (distance changed); all four
-Settle tests and Fast gate passed (275 app tests), independent diff review
-found no blockers. Pack: evidence/rebuild/captures/2026-11-18-settle-claw/.
-Both-theme before/after states captured; initial scene PNGs match exactly.
-MCP already lowers by translation and cannot introduce this local-rotation
-bug; its existing behavior is unchanged. Full gate follows with cursor task.
-Recovery: `G:\3D-Modeler_snapshot_20261118-115425_resize-settle` (additive copy; counts verified by logs/resize-settle-recovery.txt).
-Next: implement shared open/closed robot-claw grab feedback.
+Goal: place resized/rotated selections on Y=0 with rigid world-space motion.
+Files: core placement.rs/lib.rs; app transforms.rs, shell.rs, mcp_bridge.rs;
+review_capture.rs; MCP r4/server.rs; scripts/Invoke-Gate.ps1.
+Cause: Python-compatible local post-rotation sheared nonuniformly resized
+objects. Shared core settle_on_floor pre-rotates in world space, centers X/Z
+and places the support face on the floor through one grouped command.
+Desktop and MCP both delegate to it. MCP previously used local translation
+and the wrong floor axis. Schemas, output shape and replay rules are unchanged.
+Frozen Python fixtures remain unchanged; the single-object bug is an
+intentional owner-requested correction. Group fixture comparison is retained.
+Verify: regression failed before the fix; distance preservation in both Resize
+bases, single/multi selection, floor contact, no-op, undo/redo; MCP exact
+single/multi desktop parity and grouped history; invalid-target atomicity.
+First Fast gate: logs/gate/20261118-115242-fast (275 app tests).
+Independent diff reviews found no blockers; cross-family review unavailable.
+Official MCP tools specification and Rust SDK releases checked 2026-11-18;
+no protocol/SDK changes. See E:\MCP_DESIGN_GUIDE.md; follow E:\RustDeveloper.md.
+Pack: evidence/rebuild/captures/2026-11-18-settle-claw/README.md.
+Baseline: G:\3D-Modeler_snapshot_20261118-114840_settle-claw-baseline
+(13,956 files / 2,076,032,925 bytes verified).
+First recovery: G:\3D-Modeler_snapshot_20261118-115425_resize-settle
+(13,991 files / 2,079,052,511 bytes verified). Full gate: logs/gate/20261118-120020-full passed (521 tests, 104 captures).
+Release build/smoke/captures passed; final recovery: `G:\3D-Modeler_snapshot_20261118-122146_settle-claw`.

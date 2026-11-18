@@ -567,6 +567,9 @@ impl Modeler3dApp {
     #[must_use]
     pub fn new(creation_context: &eframe::CreationContext<'_>) -> Self {
         theme::configure_fonts(&creation_context.egui_ctx);
+        creation_context
+            .egui_ctx
+            .add_plugin(crate::grab_cursor::GrabCursor);
         let mut app = Self::default();
         if let Some(review) = crate::review_capture::ReviewCapture::from_environment() {
             // A review capture starts from defaults in an isolated settings
@@ -631,6 +634,8 @@ impl Modeler3dApp {
             | ReviewState::RotateDrag
             | ReviewState::Resize
             | ReviewState::ResizeDrag
+            | ReviewState::GrabReady
+            | ReviewState::GrabHeld
             | ReviewState::ResizeSettleBefore
             | ReviewState::ResizeSettle
             | ReviewState::ResizeFloor
@@ -1144,6 +1149,8 @@ impl Modeler3dApp {
             }
             ReviewState::Resize
             | ReviewState::ResizeDrag
+            | ReviewState::GrabReady
+            | ReviewState::GrabHeld
             | ReviewState::ResizeSettleBefore
             | ReviewState::ResizeSettle
             | ReviewState::ResizeFloor
@@ -4846,6 +4853,13 @@ impl Modeler3dApp {
                 // committed scene revision so floor cues use matching bounds.
                 self.refresh_preview();
                 self.update_gizmo_frame();
+                if self.review.as_ref().is_some_and(|review| matches!(
+                    review.state(), crate::review_capture::ReviewState::GrabReady | crate::review_capture::ReviewState::GrabHeld))
+                    && let Some(face) = self.resize_overlay(rect, None).and_then(|overlay| overlay.faces.into_iter().find(|face| face.handle == ResizeHandle::Face { axis: 0, side: 1.0 }))
+                    && let Some(review) = self.review.as_mut()
+                {
+                    review.set_pointer([face.center.x, face.center.y]);
+                }
                 let staged_review_drag = self.stage_review_resize_drag(rect);
                 self.sync_resize_size_fields();
                 let theme_color = palette
@@ -5047,6 +5061,18 @@ impl Modeler3dApp {
                     {
                         ui.ctx().set_cursor_icon(icon);
                     }
+                }
+                // Camera and brush grabs share the held-claw feedback too.
+                if matches!(self.viewport_drag, Some(ViewportDrag::Orbit | ViewportDrag::Pan))
+                    || (self.active_brush == Some(ActiveBrush::Grab)
+                        && matches!(self.viewport_drag, Some(ViewportDrag::Brush(_))))
+                {
+                    ui.ctx().set_cursor_icon(egui::CursorIcon::Grabbing);
+                } else if self.active_brush == Some(ActiveBrush::Grab) && hovering
+                    && ui.ctx().input(|input| input.modifiers.shift)
+                    && hover.is_some_and(|pointer| self.object_under_pointer(rect, pointer))
+                {
+                    ui.ctx().set_cursor_icon(egui::CursorIcon::Grab);
                 }
                 self.paint_box_selection(&painter, palette);
                 if staged_review_drag {
@@ -5540,10 +5566,12 @@ impl Modeler3dApp {
             return self.stage_review_rotation_drag().is_some();
         }
         if self.viewport_drag.is_some()
-            || self
-                .review
-                .as_ref()
-                .is_none_or(|review| review.state() != ReviewState::ResizeDrag)
+            || self.review.as_ref().is_none_or(|review| {
+                !matches!(
+                    review.state(),
+                    ReviewState::ResizeDrag | ReviewState::GrabHeld
+                )
+            })
         {
             return false;
         }
@@ -6227,8 +6255,8 @@ impl Modeler3dApp {
         nearest.map(|(_, _, axis)| axis)
     }
 
-    /// The pointer over a Move, Rotate or Resize handle shows an open hand;
-    /// while a handle is held it shows a closed hand (OF-33).
+    /// Move, Rotate and Resize request ready/held grab feedback.
+    /// The shared cursor adapter paints the open/closed robot claw.
     fn transform_handle_cursor(
         &self,
         rect: egui::Rect,
@@ -7357,6 +7385,9 @@ impl Modeler3dApp {
 impl eframe::App for Modeler3dApp {
     fn raw_input_hook(&mut self, ctx: &egui::Context, input: &mut egui::RawInput) {
         if let Some([x, y]) = self.review.as_ref().and_then(|review| review.pointer()) {
+            // A resting review pointer represents the focused app even when
+            // an unattended capture did not receive native window focus.
+            input.focused = true;
             input
                 .events
                 .push(egui::Event::PointerMoved(egui::pos2(x, y)));

@@ -15,6 +15,7 @@ mod diagnostics;
 mod dialogs;
 mod export;
 mod floor_labels;
+mod grab_cursor;
 mod image_color;
 mod launchers;
 mod mcp_bridge;

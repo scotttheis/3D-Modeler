@@ -3,7 +3,7 @@
 The only place current status is written. Keep it to one screen. Plan:
 [`product-rebuild-plan.md`](product-rebuild-plan.md).
 
-Updated 2026-11-18 (rotation controls follow the object). F5 and F6 closed 2026-11-16 (ledger parity test passed after F6). Full gate passed 2026-11-16 after OF-65 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Before that, full gate passed 2026-11-16 after Phase 6 OF-63/OF-64 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Earlier: full gate passed 2026-11-15 after Phase 5 OF-58 (fmt, clippy, tests, deny, audit, MCP parity with no exemptions, smoke, capture board); a last small fix then passed the Fast gate. Release exe rebuilt from that source (3m49s) and driven live through the real MCP gateway for the Phase 5 review pack.
+Updated 2026-11-18 (Resize Settle and robot-claw grab cursors). F5 and F6 closed 2026-11-16 (ledger parity test passed after F6). Full gate passed 2026-11-16 after OF-65 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Before that, full gate passed 2026-11-16 after Phase 6 OF-63/OF-64 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Earlier: full gate passed 2026-11-15 after Phase 5 OF-58 (fmt, clippy, tests, deny, audit, MCP parity with no exemptions, smoke, capture board); a last small fix then passed the Fast gate. Release exe rebuilt from that source (3m49s) and driven live through the real MCP gateway for the Phase 5 review pack.
 
 Test releases (how-to: [`packaging.md`](packaging.md)): last is **RC1**,
 version 0.1.1, 2026-11-13, `E:\3D-Modeler-RC\Builder3D-RC1.msi` (50 MB),
@@ -26,6 +26,22 @@ checked on the Mac. The app is ad-hoc signed, not notarized. No Windows MSI
 for RC2. Next after RC2: RC3 / 0.1.3.
 
 ## Now
+
+**Resize Settle and robot-claw cursors (2026-11-18):** Settle now uses a
+shared core service: rigid world-space support-face rotation, Y=0 contact,
+X/Z centering, one undo entry, repeat no-op. Desktop and MCP agree for single
+and multiple selections. Open/closed vector claws cover Move/Rotate/Resize,
+shortcut dragging, camera orbit/pan and Grab brush. Full gate passed
+(`logs/gate/20261118-120020-full`): 521 workspace tests, fmt, Clippy, deny,
+audit, MCP parity, smoke and 104 captures. Independent code and both-theme
+capture review found no blockers (cross-family review unavailable).
+Tasks: [`resize-settle.md`](tasks/resize-settle.md),
+[`grab-cursors.md`](tasks/grab-cursors.md). Pack:
+`evidence/rebuild/captures/2026-11-18-settle-claw/`. Owner visual review pending.
+Release build, smoke and both-theme Release captures passed (23,396,352-byte EXE).
+Cargo bloat: 22.3 MiB file / estimated 18.1 MiB code. Recovery: `G:\3D-Modeler_snapshot_20261118-122146_settle-claw`
+(additive copy; file/byte counts verified).
+
 
 **Resize reference toggle (owner trial, 2026-11-18):** icon-only
 floor/object switch above Apply, with tooltips. Floor uses fixed floor axes;
@@ -292,17 +308,10 @@ closed.
 7. Resize reference toggle (owner, 2026-11-18). Built for owner trial: an icon-only
    switch above Apply for floor-front or imported-object-front sizing, with
    tooltips. Trial: [`resize-basis-toggle.md`](tasks/resize-basis-toggle.md).
-8. Resize -> Settle fixed 2026-11-18: world-space hull rotation preserves
-   resized shapes and puts the support face on Y=0. Numeric Resize in both
-   bases, single/multi selection, repeat no-op and undo/redo pass; Fast gate
-   passed (275 app tests); independent review found no blockers. Owner review
-   pending. Task: [`resize-settle.md`](tasks/resize-settle.md).
-9. Following task, recorded 2026-11-18: replace grab feedback throughout the
-   app with a very simplified robot-claw/wrench-style cursor, with open and
-   closed variants for ready-to-grab and actively-grabbing states. Cover
-   Resize, Rotate, Move and any other grabbing interaction consistently.
-   The owner requested documentation only for both new items this session;
-   implementation is queued for later.
+8. Resize -> Settle implemented 2026-11-18; shared desktop/MCP placement,
+   shape and history regression verified. Owner review pending; see Now.
+9. Open/closed robot-claw grab cursors implemented 2026-11-18 throughout the
+   app's grab feedback. Both-theme review captures checked; owner review pending.
 10. Revisit the Material texture dialog (OF-46 follow-up): the owner wants to
    look at its layout again; ask what to change before building.
 11. Stop before RB-10 (S3). OF-56/57 (Emboss) stay deferred until the owner

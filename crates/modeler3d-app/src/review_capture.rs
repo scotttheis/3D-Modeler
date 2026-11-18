@@ -12,7 +12,7 @@
 //! | Variable | Values | Default |
 //! |---|---|---|
 //! | `MODELER3D_REVIEW_CAPTURE` | output PNG path | harness off |
-//! | `MODELER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `rotate-tilted`, `rotate-drag`, `resize`, `resize-drag`, `resize-floor`, `resize-object`, `multi`, `merge`, `unselected`, `material`, `settings`, `save`, `export`, `menu`, `colors`, `mirror`, `merge-apart`, `repair`, `paste`, `align`, `paint`, `paint-picker`, `xray`, `texture`, `texture-dialog`, `grab`, `crease`, `crease-sharp`, `smooth-brush`, `simplify`, `simplify-area`, `subdivide`, `hollow`, `hollow-dialog`, `hollow-error`, `measure`, `measure-start`, `centre`, `settings-note`, `no-shortcuts` | `move` |
+//! | `MODELER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `rotate-tilted`, `rotate-drag`, `resize`, `resize-drag`, `resize-floor`, `resize-object`, `resize-settle-before`, `resize-settle`, `grab-ready`, `grab-held`, `multi`, `merge`, `unselected`, `material`, `settings`, `save`, `export`, `menu`, `colors`, `mirror`, `merge-apart`, `repair`, `paste`, `align`, `paint`, `paint-picker`, `xray`, `texture`, `texture-dialog`, `grab`, `crease`, `crease-sharp`, `smooth-brush`, `simplify`, `simplify-area`, `subdivide`, `hollow`, `hollow-dialog`, `hollow-error`, `measure`, `measure-start`, `centre`, `settings-note`, `no-shortcuts` | `move` |
 //! | `MODELER3D_REVIEW_TEXTURES` | `;`-separated picture paths for the `texture` states (one per object, reused in turn) | a built-in brick picture |
 //! | `MODELER3D_REVIEW_THEME` | `light`, `dark` | `dark` |
 //! | `MODELER3D_REVIEW_SIZE` | `normal`, `big` (Settings > Size) | `normal` |
@@ -83,6 +83,9 @@ pub(crate) enum ReviewState {
     /// staged through the shell's own gesture code each frame; no pointer
     /// input is simulated and nothing is committed.
     ResizeDrag,
+    /// Open claw over a Resize handle / closed claw holding it.
+    GrabReady,
+    GrabHeld,
     /// Several primitives with one selected, for list and inspector density.
     Multi,
     /// A red cube (top of the Items list) and an overlapping blue cube,
@@ -197,6 +200,8 @@ impl ReviewState {
             "resize-settle" => Some(Self::ResizeSettle),
             "resize-object" => Some(Self::ResizeObject),
             "resize-drag" => Some(Self::ResizeDrag),
+            "grab-ready" => Some(Self::GrabReady),
+            "grab-held" => Some(Self::GrabHeld),
             "multi" => Some(Self::Multi),
             "merge" => Some(Self::Merge),
             "unselected" => Some(Self::Unselected),
@@ -404,7 +409,12 @@ impl ReviewCapture {
         &self.view
     }
 
-    /// Where the pointer rests, in window points, to reveal a hover state.
+    /// Positions the resting pointer on a handle in a review-only state.
+    pub(crate) fn set_pointer(&mut self, pointer: [f32; 2]) {
+        self.pointer = Some(pointer);
+    }
+
+    /// Where the resting pointer is placed, in window points.
     pub(crate) const fn pointer(&self) -> Option<[f32; 2]> {
         self.pointer
     }
