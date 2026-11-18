@@ -4834,6 +4834,10 @@ impl Modeler3dApp {
                     lighting: self.commands.preferences().viewport_lighting(),
                     theme: viewport_theme,
                     floor_text,
+                    guide_lines: if gizmo_mode == GizmoMode::Resize
+                        && self.paint_mode.is_none() && self.measure_mode.is_none() {
+                        self.resize_guide_lines(rect, &painter)
+                    } else { Vec::new() },
                 };
                 let derived_preview = match (&self.preview, &self.viewport_drag) {
                     (Some(scene), Some(ViewportDrag::Transform(drag))) => {
@@ -5464,6 +5468,33 @@ impl Modeler3dApp {
         self.resize_size_preview = preview;
     }
 
+    fn resize_guide_lines(
+        &self,
+        rect: egui::Rect,
+        painter: &egui::Painter,
+    ) -> Vec<modeler3d_viewport::GizmoLine> {
+        let delta = match &self.viewport_drag {
+            Some(ViewportDrag::Transform(drag)) => Mat4::from_rows(drag.delta.rows()).ok(),
+            _ => None,
+        };
+        let Some(overlay) = self.resize_overlay(rect, delta) else {
+            return Vec::new();
+        };
+        let Ok(matrix) = self
+            .camera
+            .view_projection(self.current_scene_radius().unwrap_or(1.))
+        else {
+            return Vec::new();
+        };
+        let emphasized = self.active_resize_handle().or_else(|| {
+            painter
+                .ctx()
+                .input(|input| input.pointer.hover_pos())
+                .and_then(|point| overlay.handle_at(point))
+        });
+        overlay.depth_lines(matrix, rect, emphasized)
+    }
+
     fn paint_resize_handles(
         &self,
         painter: &egui::Painter,
@@ -5488,7 +5519,7 @@ impl Modeler3dApp {
                     .and_then(|position| overlay.handle_at(position))
             })
             .flatten();
-        overlay.paint(painter, dragging.or(hovered), dragging);
+        overlay.paint(painter, dragging.or(hovered));
     }
 
     /// For the `resize-drag` review capture: holds the +X face handle

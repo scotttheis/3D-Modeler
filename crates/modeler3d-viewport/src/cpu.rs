@@ -40,6 +40,8 @@ pub struct CpuRenderOptions {
     pub clear_color: [u8; 4],
     /// Draw opaque black mesh edges over the depth-tested scene.
     pub wireframe: bool,
+    /// World guide strokes, depth tested against the same scene as GPU guides.
+    pub guide_lines: Vec<crate::GizmoLine>,
     /// Blend mesh colors translucently without changing authored geometry.
     pub xray: bool,
     /// Durable IDs drawn with the selection shade
@@ -66,6 +68,7 @@ impl Default for CpuRenderOptions {
         Self {
             clear_color: [4, 7, 13, 255],
             wireframe: false,
+            guide_lines: Vec::new(),
             xray: false,
             selected_object_ids: Vec::new(),
             lighting: ViewportLighting::default(),
@@ -324,6 +327,23 @@ pub fn render_cpu_with_options(
             &depth,
             &mut shaded_pixels,
         );
+    }
+    for line in &options.guide_lines {
+        if let (Some(start), Some(end)) = (
+            project(view_projection, line.start, width, height),
+            project(view_projection, line.end, width, height),
+        ) {
+            rasterize_line(
+                start,
+                end,
+                line.color,
+                width,
+                height,
+                &mut rgba,
+                &depth,
+                &mut shaded_pixels,
+            );
+        }
     }
     Ok(CpuFrame {
         width,
@@ -1033,6 +1053,56 @@ mod tests {
         }
         // Both stripes show on the default green box instead of plain green.
         assert!(reddish > 50 && bluish > 50, "red {reddish}, blue {bluish}");
+    }
+
+    #[test]
+    fn guide_strokes_cross_front_surfaces_and_hide_behind_meshes() {
+        let mut scene = Scene::new();
+        scene
+            .add_object(SceneObject::new(make_box([2.; 3]).expect("box")))
+            .expect("object");
+        let scene = RenderScene::from_core(&scene).expect("render scene");
+        let mut camera = Camera::new();
+        camera.set_viewport_size(128, 128).expect("viewport");
+        let bounds = scene.world_bounds().expect("bounds").expect("box bounds");
+        camera.frame_bounds(&[bounds]).expect("frame");
+        let direction =
+            crate::normalize(crate::subtract(camera.center(), camera.position()), "view")
+                .expect("view");
+        let right =
+            crate::normalize(crate::cross(direction, [0., 1., 0.]), "right").expect("right");
+        for (offset, visible) in [(-2.0, true), (2.0, false)] {
+            let center = crate::add(camera.center(), crate::scale(direction, offset));
+            let frame = render_cpu_with_options(
+                &scene,
+                &camera,
+                128,
+                128,
+                false,
+                &CpuRenderOptions {
+                    guide_lines: vec![crate::GizmoLine {
+                        start: crate::add(center, crate::scale(right, -0.25)),
+                        end: crate::add(center, crate::scale(right, 0.25)),
+                        color: [1., 0., 0., 1.],
+                        width_pixels: 1.0,
+                    }],
+                    ..CpuRenderOptions::default()
+                },
+            )
+            .expect("render");
+            let red_pixels = frame
+                .rgba
+                .as_chunks::<4>()
+                .0
+                .iter()
+                .filter(|pixel| pixel[..3] == [255, 0, 0])
+                .count();
+            assert_eq!(
+                red_pixels > 4,
+                visible,
+                "offset {offset}, red pixels {red_pixels}"
+            );
+        }
     }
 
     #[test]

@@ -144,6 +144,8 @@ pub struct ViewportRenderOptions {
     /// fallback does not draw it, so the adapter paints it instead when a
     /// frame report says `cpu_fallback`.
     pub floor_text: FloorTextMesh,
+    /// World guide strokes, depth tested against visible surfaces on all backends.
+    pub guide_lines: Vec<crate::GizmoLine>,
 }
 
 impl Default for ViewportRenderOptions {
@@ -156,6 +158,7 @@ impl Default for ViewportRenderOptions {
             theme: ViewportTheme::Dark,
             lighting: ViewportLighting::default(),
             floor_text: FloorTextMesh::default(),
+            guide_lines: Vec::new(),
         }
     }
 }
@@ -1301,6 +1304,7 @@ impl ViewportRenderer {
             self.height,
             interaction,
             &CpuRenderOptions {
+                guide_lines: options.guide_lines.clone(),
                 clear_color: cpu_clear_color(options.theme),
                 wireframe: options.wireframe,
                 xray: options.xray,
@@ -2614,6 +2618,10 @@ fn build_overlay_vertices(
     outline: &[(Vec3, Vec3)],
 ) -> Result<OverlayBuffers, ViewportError> {
     let mut lines = Vec::new();
+    for line in &options.guide_lines {
+        lines.push(OverlayVertex::new(line.start, line.color));
+        lines.push(OverlayVertex::new(line.end, line.color));
+    }
     for (start, end) in outline {
         lines.push(OverlayVertex::new(*start, crate::outline::OUTLINE_COLOR));
         lines.push(OverlayVertex::new(*end, crate::outline::OUTLINE_COLOR));
