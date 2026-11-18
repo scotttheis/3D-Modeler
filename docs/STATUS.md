@@ -27,6 +27,15 @@ for RC2. Next after RC2: RC3 / 0.1.3.
 
 ## Now
 
+**Rotation ring finish (owner, 2026-11-18):** continuous shaded tube paths
+with soft depth edge and specular glint; curved grips receive matching edge
+definition; rings use 96 segments for smoother arcs. Picking and transform
+behavior are unchanged. Fast gate passed (269 app + 56 viewport tests); Release
+build and smoke passed. Both-theme before/after pack:
+`evidence/rebuild/captures/2026-11-18-rotate-finish/`. Awaiting owner review.
+Task: [`rotation-finish.md`](tasks/rotation-finish.md). Recovery:
+`G:\3D-Modeler_snapshot_20261118-085850_rotation-finish`.
+
 **Rotate ring occlusion (owner, 2026-11-18):** rear ring strokes and curved
 grips clip at the rotated selection silhouette, so no lines cross the object
 faces. Picking, visible grips and transform behavior are unchanged. Fast gate

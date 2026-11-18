@@ -23,7 +23,7 @@ const ROTATE_ARROW_PICK_RADIUS_PIXELS: f32 = 26.0;
 /// Fraction of the screen-sized gizmo length used for rotate-ring clearance.
 pub const ROTATE_RING_GAP_FACTOR: f32 = 0.18;
 /// Segment count for the analytic rotate ring.
-pub const ROTATE_RING_SEGMENTS: u32 = 48;
+pub const ROTATE_RING_SEGMENTS: u32 = 96;
 /// Normalized X-axis gizmo color (#FF3333).
 pub const X_AXIS_COLOR: [f32; 4] = [1.0, 0.2, 0.2, 1.0];
 /// Normalized Y-axis gizmo color (#33CC33).

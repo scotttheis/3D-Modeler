@@ -5346,23 +5346,51 @@ impl Modeler3dApp {
                 );
             }
         } else {
-            for (line_index, line) in geometry.lines.iter().enumerate() {
-                if rotation_occlusion_frame.is_some_and(|frame| {
-                    rotate_controls::ring_segment_is_occluded(&self.camera, line, frame)
-                }) {
-                    continue;
+            let ring_segments = ROTATE_RING_SEGMENTS as usize;
+            for (axis_index, ring) in geometry.lines.chunks_exact(ring_segments).enumerate() {
+                let emphasized =
+                    Some(axis_index) == hovered_axis || Some(axis_index) == active_axis;
+                let mut path = Vec::with_capacity(ring.len() + 1);
+                for line in ring {
+                    let occluded = rotation_occlusion_frame.is_some_and(|frame| {
+                        rotate_controls::ring_segment_is_occluded(&self.camera, line, frame)
+                    });
+                    let projected = (!occluded)
+                        .then(|| project_gizmo_line(matrix, rect, line.start, line.end))
+                        .flatten();
+                    if let Some([start, end]) = projected {
+                        if path.is_empty() {
+                            path.push(start);
+                        } else if path.last().is_some_and(|last| last.distance(start) > 0.1) {
+                            paint_rotate_ring_path(
+                                painter,
+                                &path,
+                                color(line.color),
+                                line.width_pixels,
+                                emphasized,
+                            );
+                            path.clear();
+                            path.push(start);
+                        }
+                        path.push(end);
+                    } else if !path.is_empty() {
+                        paint_rotate_ring_path(
+                            painter,
+                            &path,
+                            color(line.color),
+                            line.width_pixels,
+                            emphasized,
+                        );
+                        path.clear();
+                    }
                 }
-                let axis_index = line_index / ROTATE_RING_SEGMENTS as usize;
-                if let Some([start, end]) = project_gizmo_line(matrix, rect, line.start, line.end) {
-                    paint_gizmo_shaft(
-                        painter,
-                        start,
-                        end,
-                        color(line.color),
-                        line.width_pixels,
-                        Some(axis_index) == hovered_axis || Some(axis_index) == active_axis,
-                    );
-                }
+                paint_rotate_ring_path(
+                    painter,
+                    &path,
+                    color(ring[0].color),
+                    ring[0].width_pixels,
+                    emphasized,
+                );
             }
             if mode == GizmoMode::Rotate {
                 paint_curved_rotate_arrows(
@@ -8336,47 +8364,69 @@ fn project_gizmo_line(
     ])
 }
 
-fn paint_gizmo_shaft(
+/// Paints a continuous visible arc as a narrow, shaded tube. Shared joins avoid
+/// the dotted contour caused by shading each tessellation segment separately.
+fn paint_rotate_ring_path(
     painter: &egui::Painter,
-    start: egui::Pos2,
-    end: egui::Pos2,
+    points: &[egui::Pos2],
     axis_color: Color32,
     width_pixels: f32,
     emphasized: bool,
 ) {
-    let pixels_per_point = painter.ctx().pixels_per_point().max(1.0e-6);
-    let segment = end - start;
-    let segment_length = segment.length();
-    if !segment_length.is_finite() || segment_length <= 1.0e-3 {
+    if points.len() < 2 {
         return;
     }
-    let direction = segment / segment_length;
-    let perpendicular = Vec2::new(-direction.y, direction.x);
-    let pixels_to_points = 1.0 / pixels_per_point;
-    let outline = Color32::from_rgba_unmultiplied(18, 24, 36, 232);
-    if emphasized {
-        painter.line_segment(
-            [start, end],
-            Stroke::new(
-                (width_pixels + 7.0) * pixels_to_points,
-                with_alpha(axis_color, 44),
-            ),
-        );
+    let pixels_per_point = painter.ctx().pixels_per_point().max(1.0e-6);
+    let to_points = 1.0 / pixels_per_point;
+    let radius = width_pixels.max(2.2);
+    let shadow_offset = Vec2::new(0.8, 1.15) * to_points;
+    let shadow_points: Vec<_> = points.iter().map(|point| *point + shadow_offset).collect();
+    let mut highlight_points = Vec::with_capacity(points.len());
+    for index in 0..points.len() {
+        let before = points[index.saturating_sub(1)];
+        let after = points[(index + 1).min(points.len() - 1)];
+        let tangent = after - before;
+        let tangent_length = tangent.length();
+        let normal = if tangent_length > 1.0e-3 {
+            Vec2::new(-tangent.y, tangent.x) / tangent_length
+        } else {
+            Vec2::ZERO
+        };
+        highlight_points.push(points[index] + normal * (radius * 0.28 * to_points));
     }
-    painter.line_segment(
-        [start, end],
-        Stroke::new((width_pixels + 2.0) * pixels_to_points, outline),
-    );
-    painter.line_segment(
-        [start, end],
-        Stroke::new(width_pixels * pixels_to_points, axis_color),
-    );
+
+    // A small cast edge, dark contour, shaded body and narrow glint give the
+    // arc a consistent cylindrical read at normal viewport scale.
+    if emphasized {
+        painter.add(egui::Shape::line(
+            points.to_vec(),
+            Stroke::new((radius + 7.0) * to_points, with_alpha(axis_color, 44)),
+        ));
+    }
+    painter.add(egui::Shape::line(
+        shadow_points,
+        Stroke::new((radius + 2.2) * to_points, Color32::from_black_alpha(90)),
+    ));
+    painter.add(egui::Shape::line(
+        points.to_vec(),
+        Stroke::new((radius + 1.8) * to_points, Color32::from_rgb(18, 24, 36)),
+    ));
+    painter.add(egui::Shape::line(
+        points.to_vec(),
+        Stroke::new((radius + 0.35) * to_points, shade_color(axis_color, 0.58)),
+    ));
+    painter.add(egui::Shape::line(
+        points.to_vec(),
+        Stroke::new(radius * to_points, axis_color),
+    ));
     let highlight = axis_highlight_color(axis_color);
-    let highlight_offset = perpendicular * (width_pixels * 0.16 * pixels_to_points);
-    painter.line_segment(
-        [start + highlight_offset, end + highlight_offset],
-        Stroke::new(0.8 * pixels_to_points, with_alpha(highlight, 220)),
-    );
+    painter.add(egui::Shape::line(
+        highlight_points,
+        Stroke::new(
+            (0.85 + if emphasized { 0.25 } else { 0.0 }) * to_points,
+            with_alpha(highlight, 238),
+        ),
+    ));
 }
 
 fn paint_curved_rotate_arrows(
@@ -8443,6 +8493,7 @@ fn paint_curved_rotate_arrows(
         let mut curve_length = 0.0;
         let mut step = 0;
         let mut tail = None;
+        let mut grip_path = Vec::new();
         while step < ring.len() && curve_length < head_length * 2.5 {
             let segment_index = (tip_segment + ring.len() - step) % ring.len();
             let line = ring[segment_index];
@@ -8458,17 +8509,16 @@ fn paint_curved_rotate_arrows(
                 let span = end - start;
                 if span.length() > 1.0e-3 {
                     curve_length += span.length();
-                    let face = if emphasized {
-                        axis_highlight_color(axis_color)
-                    } else {
-                        axis_color
-                    };
-                    painter.line_segment([start, end], Stroke::new(4.0 / pixels_per_point, face));
+                    if grip_path.is_empty() {
+                        grip_path.push(start);
+                    }
+                    grip_path.push(end);
                     tail = Some((start, -span.normalized()));
                 }
             }
             step += 1;
         }
+        paint_rotate_ring_path(painter, &grip_path, axis_color, 4.0, emphasized);
         let face = if emphasized {
             axis_highlight_color(axis_color)
         } else {
@@ -8479,8 +8529,17 @@ fn paint_curved_rotate_arrows(
             painter.add(egui::Shape::convex_polygon(
                 vec![base + outward * head_length, base + across, base - across],
                 face,
-                Stroke::NONE,
+                Stroke::new(0.9 / pixels_per_point, shade_color(face, 0.52)),
             ));
+            let highlight_start = base + outward * (head_length * 0.12) - across * 0.55;
+            let highlight_end = base + outward * (head_length * 0.78);
+            painter.line_segment(
+                [highlight_start, highlight_end],
+                Stroke::new(
+                    0.8 / pixels_per_point,
+                    with_alpha(axis_highlight_color(face), 225),
+                ),
+            );
         }
     }
 }
@@ -8505,6 +8564,16 @@ fn gizmo_axis_index(axis: GizmoAxis) -> usize {
 
 fn with_alpha(color: Color32, alpha: u8) -> Color32 {
     Color32::from_rgba_unmultiplied(color.r(), color.g(), color.b(), alpha)
+}
+
+fn shade_color(color: Color32, factor: f32) -> Color32 {
+    let shade = |channel: u8| (f32::from(channel) * factor).round() as u8;
+    Color32::from_rgba_unmultiplied(
+        shade(color.r()),
+        shade(color.g()),
+        shade(color.b()),
+        color.a(),
+    )
 }
 
 fn axis_highlight_color(color: Color32) -> Color32 {
