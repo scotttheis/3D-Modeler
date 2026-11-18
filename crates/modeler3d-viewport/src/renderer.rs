@@ -23,9 +23,9 @@ use crate::{
         ContactCueCache, DEFAULT_FLOOR_SIZE, FLOOR_SURFACE_SUBDIVISIONS, FloorGeometry,
         FloorTextMesh, build_floor, shadow_light_direction_world,
     },
-    gizmo::{GizmoMode, build_gizmo},
+    gizmo::{GizmoMode, build_gizmo_with_bounds},
     lighting::ViewportLighting,
-    math::{Mat4, Vec3, subtract},
+    math::{Aabb, Mat4, Ray, Vec3, dot, subtract},
     scene::{MeshGeometry, RenderObject, RenderScene},
 };
 
@@ -2712,8 +2712,21 @@ fn build_overlay_vertices(
         }
     }
     if let Some(center) = gizmo_center {
-        let geometry = build_gizmo(camera, center, gizmo_mode)?;
+        let selected_bounds = if gizmo_mode == GizmoMode::Rotate {
+            selected_world_bounds(scene, options)?
+        } else {
+            Vec::new()
+        };
+        let bounds = combined_bounds(&selected_bounds)?;
+        let geometry = build_gizmo_with_bounds(camera, center, gizmo_mode, bounds)?;
         for line in geometry.lines {
+            if gizmo_mode == GizmoMode::Rotate
+                && selected_bounds
+                    .iter()
+                    .any(|bounds| line_is_behind_bounds(camera, line.start, line.end, *bounds))
+            {
+                continue;
+            }
             lines.push(OverlayVertex {
                 ..OverlayVertex::new(line.start, line.color)
             });
@@ -2742,6 +2755,62 @@ fn build_overlay_vertices(
     }
     let _ = (scene_radius, width, height, scene);
     Ok(OverlayBuffers { lines, triangles })
+}
+
+/// Returns the combined world bounds of the selected objects for sizing the
+/// rotation rings clear of the selected geometry.
+fn selected_world_bounds(
+    scene: &RenderScene,
+    options: &ViewportRenderOptions,
+) -> Result<Vec<Aabb>, ViewportError> {
+    let mut bounds = Vec::new();
+    for object in scene.objects() {
+        if !options
+            .selected_object_ids
+            .iter()
+            .any(|id| id == object.object_id())
+        {
+            continue;
+        }
+        let object_bounds = object.world_bounds()?;
+        bounds.push(object_bounds);
+    }
+    Ok(bounds)
+}
+
+fn combined_bounds(bounds: &[Aabb]) -> Result<Option<Aabb>, ViewportError> {
+    let Some(first) = bounds.first().copied() else {
+        return Ok(None);
+    };
+    let mut minimum = first.minimum;
+    let mut maximum = first.maximum;
+    for bounds in &bounds[1..] {
+        for axis in 0..3 {
+            minimum[axis] = minimum[axis].min(bounds.minimum[axis]);
+            maximum[axis] = maximum[axis].max(bounds.maximum[axis]);
+        }
+    }
+    Ok(Some(Aabb::new(minimum, maximum)?))
+}
+
+/// Hides rotate-ring segments whose view ray enters a selected object's bounds
+/// before reaching the segment. The mesh depth test remains authoritative for
+/// the actual surface silhouette.
+fn line_is_behind_bounds(camera: &Camera, start: Vec3, end: Vec3, bounds: Aabb) -> bool {
+    let midpoint = [
+        (start[0] + end[0]) * 0.5,
+        (start[1] + end[1]) * 0.5,
+        (start[2] + end[2]) * 0.5,
+    ];
+    let camera_position = camera.position();
+    let direction = subtract(midpoint, camera_position);
+    let distance = dot(direction, direction).sqrt();
+    let Ok(ray) = Ray::new(camera_position, direction) else {
+        return false;
+    };
+    bounds
+        .ray_entry(ray)
+        .is_some_and(|entry| entry < distance - 1.0e-3)
 }
 
 fn face_index_batches(

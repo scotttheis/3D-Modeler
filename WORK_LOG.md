@@ -4358,3 +4358,19 @@ OF-65 follow-ups the same day (owner): tabs centred over their boxes (`e6e03bf`)
 ## 2026-11-16 - Linux RC2 package and Mac kit on the USB card
 
 Linux build in WSL Ubuntu 24.04 (`~/3D-Modeler`). Fixes, one commit each: the `windows` crate became a Windows-only dependency of `modeler3d-platform` (`de5a2e3`); the Windows runtime-path test joins with the host separator (`3816e3f`); the registry decoder may go unused off Windows (`0651688`); the desktop `frame_view` answer stays inside its output schema, which every gateway call failed before (`20edded`); CPU viewport frames are copied into the displayed texture, which was grey on software-only adapters (`8ab250c`, test `cpu_frames_reach_the_displayed_colour_target`, runs on the Windows GPU, skips in WSL). Linux: 487 tests, clippy, fmt pass. Package `E:\3D-Modeler-RC\3D-Modeler-0.1.2-linux-x86_64.tar.gz` (sha256 `20de8a55...d8ee`), built by `packaging/linux/build-tarball.sh`; the unpacked package, with the source tree moved away, ran under WSLg and was driven through `r4_mcp`: insert, save, reopen, capture. AppImage not built: the `appimagetool` download was blocked and needs the owner's OK. Full Windows gate passed after the fixes (16:38). USB card `L:\3D-Modeler-packaging\`: `linux\` (same sha256), `3D-Modeler\` (clone of `rebuild/work` at `44791b0`), `mac\` (empty). Mac steps: `docs/packaging-linux-mac.md`, "Mac package from the USB"; `packaging/macos/build-dmg.sh` not yet run on a Mac. Snapshot `G:\3D-Modeler_snapshot_20261116-164334_linux-rc2-mac-usb`: 10,413 files and 1,401,131,129 bytes matched the source exactly (`target`, `logs` excluded).
+
+## 2026-11-18 - Rotate ring occlusion
+
+Rotate ring strokes and curved grips are clipped against the live oriented
+selection frame in the UI painter, preventing linework from crossing the
+object silhouette. The renderer-neutral gizmo also sizes rings from selected
+bounds and culls rear segments. Picking, rotation math, history and MCP
+behavior remain unchanged. Added the projected-segment regression in
+`shell::rotate_controls`.
+
+Fast gate passed for `modeler3d-app` and `modeler3d-viewport` (269 + 56 tests).
+Release build and `--smoke` passed; light and dark Release captures are in
+`evidence/rebuild/captures/2026-11-18-rotate-occlusion/`. Owner review pending.
+Recovery snapshot `G:\3D-Modeler_snapshot_20261118-rotate-occlusion-final`:
+13,104 files and 1,882,744,593 bytes matched the source, excluding `target`
+and `logs`.

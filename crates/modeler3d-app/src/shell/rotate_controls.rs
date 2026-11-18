@@ -1,7 +1,7 @@
 //! Object-oriented rotation geometry shared by painting and pointer picking.
 use modeler3d_viewport::{
-    Aabb, Camera, GIZMO_TARGET_PIXELS, GizmoGeometry, GizmoMode, Ray, add, build_gizmo_with_bounds,
-    dot, scale, subtract,
+    Aabb, Camera, GIZMO_TARGET_PIXELS, GizmoGeometry, GizmoLine, GizmoMode, Ray, add,
+    build_gizmo_with_bounds, dot, scale, subtract,
 };
 
 use crate::transform_gesture::ResizeFrame;
@@ -98,6 +98,39 @@ impl ResizeFrame {
     }
 }
 
+/// Tests whether a ring segment projects across the rotated selection. The UI
+/// painter draws above the viewport, so both near and far edges must respect
+/// the selected object's silhouette.
+pub(super) fn ring_segment_is_occluded(
+    camera: &Camera,
+    line: &GizmoLine,
+    frame: ResizeFrame,
+) -> bool {
+    let midpoint = [
+        (line.start[0] + line.end[0]) * 0.5,
+        (line.start[1] + line.end[1]) * 0.5,
+        (line.start[2] + line.end[2]) * 0.5,
+    ];
+    let camera_position = camera.position();
+    let direction = subtract(midpoint, camera_position);
+    let Ok(world_ray) = Ray::new(camera_position, direction) else {
+        return false;
+    };
+    let local_origin = subtract(world_ray.origin, frame.center);
+    let local_ray = Ray::new(
+        frame.axes.map(|axis| dot(local_origin, axis)),
+        frame.axes.map(|axis| dot(world_ray.direction, axis)),
+    );
+    let half_extents = frame.extents.map(|extent| extent.abs() * 0.5);
+    let Ok(bounds) = Aabb::new(half_extents.map(|extent| -extent), half_extents) else {
+        return false;
+    };
+    let Ok(local_ray) = local_ray else {
+        return false;
+    };
+    bounds.ray_entry(local_ray).is_some()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -113,6 +146,25 @@ mod tests {
         for i in 0..3 {
             assert!((a[i] - b[i]).abs() < 0.001, "{a:?} != {b:?}");
         }
+    }
+
+    #[test]
+    fn rotate_ring_segments_hide_when_their_projection_crosses_the_selection() {
+        let camera = Camera::new();
+        let frame = ResizeFrame {
+            center: [0.; 3],
+            axes: [[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]],
+            extents: [4.; 3],
+        };
+        let line = |z| GizmoLine {
+            start: [0., 0., z],
+            end: [0.1, 0., z],
+            color: [1.; 4],
+            width_pixels: 3.,
+        };
+
+        assert!(ring_segment_is_occluded(&camera, &line(-3.), frame));
+        assert!(!ring_segment_is_occluded(&camera, &line(3.), frame));
     }
 
     #[test]

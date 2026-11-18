@@ -27,6 +27,17 @@ for RC2. Next after RC2: RC3 / 0.1.3.
 
 ## Now
 
+**Rotate ring occlusion (owner, 2026-11-18):** rear ring strokes and curved
+grips clip at the rotated selection silhouette, so no lines cross the object
+faces. Picking, visible grips and transform behavior are unchanged. Fast gate
+passed for the app and viewport crates (269 + 56 tests); Release build and
+smoke passed. Both-theme captures:
+`evidence/rebuild/captures/2026-11-18-rotate-occlusion/`.
+Task: [`rotation-occlusion.md`](tasks/rotation-occlusion.md).
+Awaiting owner review. Recovery:
+`G:\3D-Modeler_snapshot_20261118-rotate-occlusion-final` (13,104 files,
+1,882,744,593 bytes verified).
+
 **Rotation controls follow the object (owner, 2026-11-18):** local rings and
 arrow grips follow committed orientation and the live drag. Painting, picking
 and drag axes share the same frame; multiple selected objects follow the first

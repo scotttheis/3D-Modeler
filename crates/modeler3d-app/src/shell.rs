@@ -5289,6 +5289,9 @@ impl Modeler3dApp {
             ))
         };
         let pixels_per_point = painter.ctx().pixels_per_point().max(1.0e-6);
+        let rotation_occlusion_frame = (mode == GizmoMode::Rotate)
+            .then(|| self.rotation_control_frame())
+            .flatten();
         let active_axis = self.active_gizmo_axis_index();
         let hovered_axis = active_axis
             .is_none()
@@ -5344,6 +5347,11 @@ impl Modeler3dApp {
             }
         } else {
             for (line_index, line) in geometry.lines.iter().enumerate() {
+                if rotation_occlusion_frame.is_some_and(|frame| {
+                    rotate_controls::ring_segment_is_occluded(&self.camera, line, frame)
+                }) {
+                    continue;
+                }
                 let axis_index = line_index / ROTATE_RING_SEGMENTS as usize;
                 if let Some([start, end]) = project_gizmo_line(matrix, rect, line.start, line.end) {
                     paint_gizmo_shaft(
@@ -5359,10 +5367,12 @@ impl Modeler3dApp {
             if mode == GizmoMode::Rotate {
                 paint_curved_rotate_arrows(
                     painter,
+                    &self.camera,
                     matrix,
                     rect,
                     &geometry.lines,
                     active_axis.or(hovered_axis),
+                    rotation_occlusion_frame,
                 );
             }
             for triangle in &geometry.triangles {
@@ -8371,10 +8381,12 @@ fn paint_gizmo_shaft(
 
 fn paint_curved_rotate_arrows(
     painter: &egui::Painter,
+    camera: &Camera,
     matrix: Mat4,
     rect: egui::Rect,
     ring_lines: &[GizmoLine],
     emphasized_axis: Option<usize>,
+    occlusion_frame: Option<crate::transform_gesture::ResizeFrame>,
 ) {
     let ring_segments = ROTATE_RING_SEGMENTS as usize;
     let pixels_per_point = painter.ctx().pixels_per_point().max(1.0e-6);
@@ -8387,6 +8399,11 @@ fn paint_curved_rotate_arrows(
         let preferred = (ring_index * ring_segments / 3 + ring_segments / 8) % ring_segments;
         let mut best: Option<(f32, usize, egui::Pos2, Vec2)> = None;
         for (segment_index, line) in ring.iter().enumerate() {
+            if occlusion_frame
+                .is_some_and(|frame| rotate_controls::ring_segment_is_occluded(camera, line, frame))
+            {
+                continue;
+            }
             let Some([start, end]) = project_gizmo_line(matrix, rect, line.start, line.end) else {
                 continue;
             };
@@ -8429,6 +8446,11 @@ fn paint_curved_rotate_arrows(
         while step < ring.len() && curve_length < head_length * 2.5 {
             let segment_index = (tip_segment + ring.len() - step) % ring.len();
             let line = ring[segment_index];
+            if occlusion_frame.is_some_and(|frame| {
+                rotate_controls::ring_segment_is_occluded(camera, &line, frame)
+            }) {
+                break;
+            }
             if let Some([start, end]) = project_gizmo_line(matrix, rect, line.start, line.end) {
                 if !visible_rect.contains(start) || !visible_rect.contains(end) {
                     break;
