@@ -9,6 +9,7 @@ use crate::chrome::{CONTROL_HEIGHT, Glyph, RADIUS_CONTROL, ROW_HEIGHT};
 mod app_tools;
 mod measure_ruler;
 mod paint_bar;
+mod rotate_controls;
 use app_tools::{RecentOpen, recent_is_project};
 use measure_ruler::MeasureMode;
 use paint_bar::PaintMode;
@@ -35,8 +36,7 @@ use modeler3d_core::{
 use modeler3d_viewport::{
     Aabb, Camera, GizmoAxis, GizmoLine, GizmoMode, InteractionState, MOVE_GIZMO_SCALE, Mat4,
     ROTATE_RING_SEGMENTS, RenderScene, RendererConfig, SnapViewContext, ViewportRenderOptions,
-    ViewportRenderer, ViewportTheme, build_gizmo_with_bounds, dot, hit_test_with_bounds,
-    pick_scene, subtract,
+    ViewportRenderer, ViewportTheme, build_gizmo_with_bounds, dot, pick_scene, subtract,
 };
 
 use crate::artwork::{
@@ -627,6 +627,8 @@ impl Modeler3dApp {
             | ReviewState::Update => &[],
             ReviewState::Move
             | ReviewState::Rotate
+            | ReviewState::RotateTilted
+            | ReviewState::RotateDrag
             | ReviewState::Resize
             | ReviewState::ResizeDrag
             | ReviewState::Unselected
@@ -1123,8 +1125,16 @@ impl Modeler3dApp {
             self.commands.set_selection_indices([1, 0]);
             self.dispatch(CommandId::Merge);
         }
+        if matches!(
+            review.state(),
+            ReviewState::RotateTilted | ReviewState::RotateDrag
+        ) {
+            let _ = self.commands.rotate_selected([25., 35., 20.]);
+        }
         self.transform_panel_mode = match review.state() {
-            ReviewState::Rotate => TransformPanelMode::Rotate,
+            ReviewState::Rotate | ReviewState::RotateTilted | ReviewState::RotateDrag => {
+                TransformPanelMode::Rotate
+            }
             ReviewState::Resize | ReviewState::ResizeDrag => TransformPanelMode::Resize,
             _ => TransformPanelMode::Move,
         };
@@ -5186,11 +5196,15 @@ impl Modeler3dApp {
         {
             return;
         }
-        self.gizmo_frame = ResizeFrame::from_scene(
-            scene,
-            &indices,
-            self.object_resize_basis && self.transform_panel_mode == TransformPanelMode::Resize,
-        )
+        self.gizmo_frame = if self.transform_panel_mode == TransformPanelMode::Rotate {
+            ResizeFrame::rotation_selection(scene, &indices)
+        } else {
+            ResizeFrame::from_scene(
+                scene,
+                &indices,
+                self.object_resize_basis && self.transform_panel_mode == TransformPanelMode::Resize,
+            )
+        }
         .ok()
         .map(|frame| (key, frame));
     }
@@ -5213,6 +5227,19 @@ impl Modeler3dApp {
             .view_projection(self.current_scene_radius().unwrap_or(1.))
             .ok()?;
         project_to_viewport(matrix, rect, point)
+    }
+
+    fn rotation_control_frame(&self) -> Option<ResizeFrame> {
+        let mut frame = self.gizmo_frame.as_ref()?.1;
+        if let Some(ViewportDrag::Transform(drag)) = &self.viewport_drag {
+            let delta = Mat4::from_rows(drag.delta.rows()).ok()?;
+            frame.center = delta.transform_point(frame.center).ok()?;
+            for axis in &mut frame.axes {
+                let v = delta.transform4([axis[0], axis[1], axis[2], 0.]);
+                *axis = [v[0], v[1], v[2]];
+            }
+        }
+        Some(frame)
     }
 
     fn selected_gizmo_bounds(&self) -> Option<Aabb> {
@@ -5245,9 +5272,13 @@ impl Modeler3dApp {
             return;
         };
         let mode = self.gizmo_mode();
-        let Ok(geometry) =
-            build_gizmo_with_bounds(&self.camera, center, mode, self.selected_gizmo_bounds())
-        else {
+        let geometry = if mode == GizmoMode::Rotate {
+            self.rotation_control_frame()
+                .and_then(|frame| frame.rotation_geometry(&self.camera))
+        } else {
+            build_gizmo_with_bounds(&self.camera, center, mode, self.selected_gizmo_bounds()).ok()
+        };
+        let Some(geometry) = geometry else {
             return;
         };
         // The interaction controls remain visible over solid meshes on both
@@ -5428,6 +5459,14 @@ impl Modeler3dApp {
     /// so it is never committed.
     fn stage_review_resize_drag(&mut self, rect: egui::Rect) -> bool {
         use crate::review_capture::ReviewState;
+        if self.viewport_drag.is_none()
+            && self
+                .review
+                .as_ref()
+                .is_some_and(|review| review.state() == ReviewState::RotateDrag)
+        {
+            return self.stage_review_rotation_drag().is_some();
+        }
         if self.viewport_drag.is_some()
             || self
                 .review
@@ -5460,6 +5499,28 @@ impl Modeler3dApp {
         }
         self.viewport_drag = Some(drag);
         true
+    }
+
+    fn stage_review_rotation_drag(&mut self) -> Option<()> {
+        use modeler3d_viewport::{Ray, add, scale};
+        let frame = self.rotation_control_frame()?;
+        let snapshot = self.commands.capture_transform_selection().ok()?;
+        let ray_at = |angle: f32| {
+            let radial = add(
+                scale(frame.axes[1], angle.cos() * 50.),
+                scale(frame.axes[2], angle.sin() * 50.),
+            );
+            Ray::new(
+                add(add(frame.center, radial), scale(frame.axes[0], 100.)),
+                scale(frame.axes[0], -1.),
+            )
+            .ok()
+        };
+        let mut drag =
+            TransformGesture::rotate(snapshot, frame.center, frame.axes[0], ray_at(0.)?)?;
+        drag.update(ray_at(40_f32.to_radians())?).ok()?;
+        self.viewport_drag = Some(ViewportDrag::Transform(Box::new(drag)));
+        Some(())
     }
 
     /// Lays out the Resize overlay for the current gizmo frame, moved by an
@@ -6004,17 +6065,9 @@ impl Modeler3dApp {
             }
             gesture
         } else {
-            let hit = hit_test_with_bounds(
-                &self.camera,
-                center,
-                mode,
-                screen[0],
-                screen[1],
-                scene_radius,
-                self.selected_gizmo_bounds(),
-            )
-            .ok()??;
-            TransformGesture::rotate(snapshot, center, hit.axis.vector(), ray)?
+            let frame = self.rotation_control_frame()?;
+            let axis = frame.rotation_hit(&self.camera, ray)?;
+            TransformGesture::rotate(snapshot, center, frame.axes[axis], ray)?
         };
         Some(ViewportDrag::Transform(Box::new(drag)))
     }
@@ -6031,24 +6084,18 @@ impl Modeler3dApp {
                 .move_axis_at_pointer(rect, pointer, pixels_per_point)
                 .map(gizmo_axis_index),
             GizmoMode::Rotate => {
-                let center = self.selected_gizmo_state()?;
                 let scene_radius = self.current_scene_radius()?;
                 let size = self
                     .viewport_renderer
                     .as_ref()
                     .map_or(self.camera.viewport_size(), ViewportRenderer::size);
                 let screen = viewport_pixel_position(pointer, rect, size);
-                let hit = hit_test_with_bounds(
-                    &self.camera,
-                    center,
-                    GizmoMode::Rotate,
-                    screen[0],
-                    screen[1],
-                    scene_radius,
-                    self.selected_gizmo_bounds(),
-                )
-                .ok()??;
-                Some(gizmo_axis_index(hit.axis))
+                let ray = self
+                    .camera
+                    .screen_ray(screen[0], screen[1], scene_radius)
+                    .ok()?;
+                self.rotation_control_frame()?
+                    .rotation_hit(&self.camera, ray)
             }
             GizmoMode::Resize => None,
         }
@@ -6145,7 +6192,17 @@ impl Modeler3dApp {
 
     fn active_gizmo_axis_index(&self) -> Option<usize> {
         match self.viewport_drag.as_ref()? {
-            ViewportDrag::Transform(gesture) => gesture.active_axis_index(),
+            ViewportDrag::Transform(gesture) => {
+                if let Some(axis) = gesture.rotation_axis() {
+                    let frame = self.gizmo_frame.as_ref()?.1;
+                    frame
+                        .axes
+                        .iter()
+                        .position(|normal| dot(*normal, axis) > 0.999)
+                } else {
+                    gesture.active_axis_index()
+                }
+            }
             ViewportDrag::Orbit
             | ViewportDrag::Pan
             | ViewportDrag::Brush(_)
@@ -8325,7 +8382,6 @@ fn paint_curved_rotate_arrows(
     let head_length = MOVE_ARROW_HEAD_LENGTH_PIXELS * size_scale / pixels_per_point;
     let head_half_width = MOVE_ARROW_HEAD_HALF_WIDTH_PIXELS * size_scale / pixels_per_point;
     let visible_rect = rect.shrink(head_length + head_half_width + 4.0 / pixels_per_point);
-    let mut arrow_tips = Vec::new();
 
     for (ring_index, ring) in ring_lines.chunks_exact(ring_segments).enumerate() {
         let preferred = (ring_index * ring_segments / 3 + ring_segments / 8) % ring_segments;
@@ -8343,15 +8399,9 @@ fn paint_curved_rotate_arrows(
             {
                 continue;
             }
-            let separation = arrow_tips
-                .iter()
-                .map(|tip: &egui::Pos2| tip.distance(end))
-                .fold(150.0_f32, f32::min);
-            let center_distance = end.distance(rect.center());
             let difference = segment_index.abs_diff(preferred);
             let preferred_distance = difference.min(ring_segments - difference) as f32;
-            let score = tangent_length + center_distance * 0.15 + separation * 0.2
-                - preferred_distance * 0.05;
+            let score = -preferred_distance;
             if best
                 .as_ref()
                 .is_none_or(|(current, _, _, _)| score > *current)
@@ -8410,7 +8460,6 @@ fn paint_curved_rotate_arrows(
                 Stroke::NONE,
             ));
         }
-        arrow_tips.push(tip);
     }
 }
 

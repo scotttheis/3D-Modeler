@@ -1,9 +1,9 @@
-# 3D Modeler Rust — status
+# 3D Modeler Rust â€” status
 
 The only place current status is written. Keep it to one screen. Plan:
 [`product-rebuild-plan.md`](product-rebuild-plan.md).
 
-Updated 2026-11-17 (Move arrows OF-69). F5 and F6 closed 2026-11-16 (ledger parity test passed after F6). Full gate passed 2026-11-16 after OF-65 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Before that, full gate passed 2026-11-16 after Phase 6 OF-63/OF-64 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Earlier: full gate passed 2026-11-15 after Phase 5 OF-58 (fmt, clippy, tests, deny, audit, MCP parity with no exemptions, smoke, capture board); a last small fix then passed the Fast gate. Release exe rebuilt from that source (3m49s) and driven live through the real MCP gateway for the Phase 5 review pack.
+Updated 2026-11-18 (rotation controls follow the object). F5 and F6 closed 2026-11-16 (ledger parity test passed after F6). Full gate passed 2026-11-16 after OF-65 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Before that, full gate passed 2026-11-16 after Phase 6 OF-63/OF-64 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Earlier: full gate passed 2026-11-15 after Phase 5 OF-58 (fmt, clippy, tests, deny, audit, MCP parity with no exemptions, smoke, capture board); a last small fix then passed the Fast gate. Release exe rebuilt from that source (3m49s) and driven live through the real MCP gateway for the Phase 5 review pack.
 
 Test releases (how-to: [`packaging.md`](packaging.md)): last is **RC1**,
 version 0.1.1, 2026-11-13, `E:\3D-Modeler-RC\Builder3D-RC1.msi` (50 MB),
@@ -26,6 +26,17 @@ checked on the Mac. The app is ad-hoc signed, not notarized. No Windows MSI
 for RC2. Next after RC2: RC3 / 0.1.3.
 
 ## Now
+
+**Rotation controls follow the object (owner, 2026-11-18):** local rings and
+arrow grips follow committed orientation and the live drag. Painting, picking
+and drag axes share the same frame; multiple selected objects follow the first
+selected object's orientation. Regression covers single/multiple selection,
+local-axis picking, preview, cancellation, commit, undo and redo. Independent
+diff review found no remaining blockers. Full gate and Release verification
+in progress. Pack: `evidence/rebuild/captures/2026-11-18-rotate-follow/`.
+Task: [`rotate-follow.md`](tasks/rotate-follow.md). Owner acceptance pending.
+Recovery: `G:\3D-Modeler_snapshot_20261118-072157_rotate-follow`.
+
 
 **OF-69 Move arrows (2026-11-17):** flat axis-colored stems and solid
 triangular heads consistent with Resize. Axis colors, directions, dimensions,
@@ -142,7 +153,7 @@ asking before downloading/installing. Implementation and release preparation:
 Feed remains unconfigured until the public repository is chosen; configure and
 rebuild every platform before the first public build. **Full gate passed**
 2026-11-17 (`logs/gate/20261117-101438-full`): 494 tests, fmt, Clippy, deny,
-audit (informational warnings), parity, smoke, 38 states × 2 themes. Linux
+audit (informational warnings), parity, smoke, 38 states Ã— 2 themes. Linux
 helper success/invalid-payload/rollback passed in WSL; real stdio client against
 an isolated desktop passed (76 tools, unavailable install refused, normal close).
 Review pack: `evidence/rebuild/captures/2026-11-17-startup-updates/`, including
@@ -158,11 +169,11 @@ as `ff8e43e`; DMG copied to `E:\3D-Modeler-RC\3D-Modeler-0.1.2.dmg`, SHA-256
 
 **GitHub, 2026-11-16 (owner):** goal is a public repository named "3D Modeler", free to use, donations on; "almost" ready, not uploaded. Commit email chosen; licence (Apache 2.0 suggested) and artwork origin still to confirm. Checklist and open questions: [`github-upload.md`](github-upload.md).
 
-**Bug sweep 2026-11-16 (owner request before the upload):** Full gate passed (all steps, capture board 37 states × 2 themes). New test `crates/modeler3d-core/tests/malformed_inputs.rs`: about 5,000 cut-short or corrupted copies of every importable format and of `.3dp` projects; every one is refused with an error, none crashes (debug and release). Last two `expect()` calls removed from library code (`legacy_settings.rs`). No new bugs found. Still open from before: the faint pale dotted rim at the floor (F9 note) and Emboss (deferred).
+**Bug sweep 2026-11-16 (owner request before the upload):** Full gate passed (all steps, capture board 37 states Ã— 2 themes). New test `crates/modeler3d-core/tests/malformed_inputs.rs`: about 5,000 cut-short or corrupted copies of every importable format and of `.3dp` projects; every one is refused with an error, none crashes (debug and release). Last two `expect()` calls removed from library code (`legacy_settings.rs`). No new bugs found. Still open from before: the faint pale dotted rim at the floor (F9 note) and Emboss (deferred).
 
 **Renamed 2026-11-16:** the app is now **3D Modeler** (was Builder3D); hidden names use `Modeler3D` / `modeler3d`. Where the old name stays, and why, is in the "Name" section of [`AGENTS.md`](../AGENTS.md). Pre-rename backup: `G:\Builder3D-Rust_snapshot_20261116-094924_pre-rename-3D-Modeler`.
 
-**Shortcut bar 2026-11-16 (owner request):** a first start now gets Cube, Sphere, Settle, Mirror, Merge, Subtract. After that the bar is the person's own: every change is saved and kept, and an emptied bar stays empty (before, an empty bar got the defaults back at the next start). Existing settings keep their bar; Customize ribbon → Reset defaults gives the new six. Test `shortcut_bar_starts_with_the_owner_set_and_then_keeps_what_the_person_chose`. An empty bar shows "Drag shortcuts here" in small dim text after the View tab; **owner 2026-11-16: approved ("I love it. shade, size, location, all of it")**. Capture state `no-shortcuts`. **Drag on the bar, 2026-11-16 (owner request):** while a shortcut is dragged, an accent-coloured bar shows the gap it will land in and its icon follows the pointer (no bar where the drop would change nothing); a ribbon button can be dragged up onto the bar and is pinned at that gap (a click still runs it). On a full bar a new shortcut dropped at the end lands before the last visible one, not hidden in "More". `place_favorite_at` (`ui_state.rs`) with tests; `favorites_drop` (`shell.rs`). **Owner 2026-11-16: approved ("great job")** in the release build.
+**Shortcut bar 2026-11-16 (owner request):** a first start now gets Cube, Sphere, Settle, Mirror, Merge, Subtract. After that the bar is the person's own: every change is saved and kept, and an emptied bar stays empty (before, an empty bar got the defaults back at the next start). Existing settings keep their bar; Customize ribbon â†’ Reset defaults gives the new six. Test `shortcut_bar_starts_with_the_owner_set_and_then_keeps_what_the_person_chose`. An empty bar shows "Drag shortcuts here" in small dim text after the View tab; **owner 2026-11-16: approved ("I love it. shade, size, location, all of it")**. Capture state `no-shortcuts`. **Drag on the bar, 2026-11-16 (owner request):** while a shortcut is dragged, an accent-coloured bar shows the gap it will land in and its icon follows the pointer (no bar where the drop would change nothing); a ribbon button can be dragged up onto the bar and is pinned at that gap (a click still runs it). On a full bar a new shortcut dropped at the end lands before the last visible one, not hidden in "More". `place_favorite_at` (`ui_state.rs`) with tests; `favorites_drop` (`shell.rs`). **Owner 2026-11-16: approved ("great job")** in the release build.
 
 **Owner batch 7** ([`owner-feedback-2026-11-14.md`](owner-feedback-2026-11-14.md),
 OF-28 to OF-58, five phases; Emboss OF-56/57 deferred by the owner).
@@ -201,7 +212,7 @@ Phase 5 (OF-58, the AI does everything) built 2026-11-15, pack
 tools (catalog 74): `app_settings`, `set_app_settings`, `customize_ribbon`,
 `show_screen`, `recent_files`, `open_recent`, `capture_window`, `exit_app`,
 carried out by the desktop shell with its own code. No "visual only" ledger
-rows remain. **Owner 2026-11-16: approved ("it tests great … call it done").**
+rows remain. **Owner 2026-11-16: approved ("it tests great â€¦ call it done").**
 Phase 5 is closed.
 
 Phase 6 (OF-63 Items double-click centres, OF-64 settings note) built
@@ -220,9 +231,9 @@ closed.
 **Known work, in order** (a session takes the first item not done):
 
 1. Done and approved 2026-11-15: Phase 3 follow-ups OF-59 to OF-61.
-2. Done and approved 2026-11-15: Phase 4 — Measure ruler (OF-55).
-3. Done and approved 2026-11-16: Phase 5 — MCP does everything (OF-58).
-4. Done and approved 2026-11-16: Phase 6 — OF-63 to OF-65.
+2. Done and approved 2026-11-15: Phase 4 â€” Measure ruler (OF-55).
+3. Done and approved 2026-11-16: Phase 5 â€” MCP does everything (OF-58).
+4. Done and approved 2026-11-16: Phase 6 â€” OF-63 to OF-65.
 5. Done 2026-11-16: F5 release links and F6 ledger reconciliation (fix-first
    list below).
 6. Linux and Mac test packages for the owner's own machines, before the
@@ -251,7 +262,7 @@ the next stop message, not guessed.
 | `cargo clippy --workspace --all-targets --locked -- -D warnings` | Pass |
 | `cargo test --workspace --locked --no-fail-fast` | Pass (2026-11-12, after the shadow follow-up and the MCP Merge color change) |
 | `cargo deny check` | Pass 2026-11-12 (advisories, bans, licenses, sources ok; warning: `async-executor 1.14.0` yanked, Linux accessibility path only) |
-| `cargo audit` | Pass 2026-11-12 — 0 vulnerabilities in 493 crates; 5 allowed warnings (4 unmaintained already accepted in `deny.toml`, 1 yanked as above). Tool installed 2026-11-12 |
+| `cargo audit` | Pass 2026-11-12 â€” 0 vulnerabilities in 493 crates; 5 allowed warnings (4 unmaintained already accepted in `deny.toml`, 1 yanked as above). Tool installed 2026-11-12 |
 | MCP catalog parity check | Pass 2026-11-15 (`cargo test -p modeler3d-mcp --test ledger_parity`; all 148 ledger rows map to catalog tools; exemptions now fail, D10) |
 | Release (fat LTO) build | `cargo build --release -p modeler3d-app` passed twice on 2026-11-12 (4m50s, 3m43s); failed with LLVM out-of-memory on 2026-11-11 |
 | `review` profile build | Pass (3m56s clean build; capture verified) |
@@ -280,24 +291,24 @@ not know what it meant; explain it in the next pack.
 | F2 | Whole suite green | **Done** 2026-11-12 (`f1b581d`; re-verified after OF-1) |
 | F3 | Clippy on all targets | **Done** 2026-11-12 |
 | F4 | Baseline commit of 220+ uncommitted paths | **Done** 2026-11-12 on `rebuild/work` |
-| F5 | Release link reliability | **Done** 2026-11-16 — two consecutive forced fat-LTO release links, both clean (3m23s, 3m18s; 64 GB host), exe 21.9 MB. Plan exit met; `lto = "fat"` kept. Earlier: three clean links 2026-11-12; one LLVM out-of-memory 2026-11-11 |
-| F6 | Reconcile the 148-row feature ledger with the app | **Done** 2026-11-16 — 69 stale rows (mostly the October RB-00 audit: "no Ctrl+N", "no pan gesture", "text menu button" and so on) checked against the code and named tests and rewritten; owner approvals from this file copied in with the owner's words (`owner_quote`). Code and tests only, nothing re-driven live. Counts in the Ledger section |
-| F7 | Clear ad hoc `target/` directories (`E:` had 40 GB free) | **Done** 2026-11-12 — archived to `G:\Builder3D-Rust_target-adhoc-archive_20261112`, `target/` 91 → ~55 GB |
-| F8 | `scripts/Invoke-Gate.ps1` | **Done** 2026-11-13 — `-Tier fast\|full\|ship`; ship does not script package staging or the performance run |
-| F9 | Depth fight where meshes meet the floor | **Owner-approved 2026-11-14** ("works exactly as I asked"); done 2026-11-13 — depth bias on floor surface, shadows and text; captures `evidence/rebuild/captures/2026-11-13-f9-floor-depth/` (before/after, both themes). Dark serration gone; a faint pale dotted fringe on the rim remains and does not change with the bias or the reflection (cause not found). CPU fallback not touched |
+| F5 | Release link reliability | **Done** 2026-11-16 â€” two consecutive forced fat-LTO release links, both clean (3m23s, 3m18s; 64 GB host), exe 21.9 MB. Plan exit met; `lto = "fat"` kept. Earlier: three clean links 2026-11-12; one LLVM out-of-memory 2026-11-11 |
+| F6 | Reconcile the 148-row feature ledger with the app | **Done** 2026-11-16 â€” 69 stale rows (mostly the October RB-00 audit: "no Ctrl+N", "no pan gesture", "text menu button" and so on) checked against the code and named tests and rewritten; owner approvals from this file copied in with the owner's words (`owner_quote`). Code and tests only, nothing re-driven live. Counts in the Ledger section |
+| F7 | Clear ad hoc `target/` directories (`E:` had 40 GB free) | **Done** 2026-11-12 â€” archived to `G:\Builder3D-Rust_target-adhoc-archive_20261112`, `target/` 91 â†’ ~55 GB |
+| F8 | `scripts/Invoke-Gate.ps1` | **Done** 2026-11-13 â€” `-Tier fast\|full\|ship`; ship does not script package staging or the performance run |
+| F9 | Depth fight where meshes meet the floor | **Owner-approved 2026-11-14** ("works exactly as I asked"); done 2026-11-13 â€” depth bias on floor surface, shadows and text; captures `evidence/rebuild/captures/2026-11-13-f9-floor-depth/` (before/after, both themes). Dark serration gone; a faint pale dotted fringe on the rim remains and does not change with the bias or the reflection (cause not found). CPU fallback not touched |
 | F10 | `emboss_text` long-running metadata | Decided (D5): keep the flag; progress indicator is OF-57, deferred by the owner 2026-11-14 |
 | F11 | Status narrative out of `AGENTS.md` | **Done** 2026-11-12 |
-| F12 | MCP 100% desktop parity (plan 3.7) | **Done** 2026-11-13 — Merge color; `rename_object` and `set_visibility` tools (catalog now 62, each with a desktop-vs-MCP test); `launch_slicer` falls back to the saved slicer; ledger `mcp_tool` / `mcp_exempt` column and parity check. Owner 2026-11-14 (D10): no "visual only" exemptions — MCP gets tools for all of them (OF-58) |
-| F13 | Run `cargo deny` and `cargo audit` | **Done** 2026-11-12 — both pass; now in the Full gate |
+| F12 | MCP 100% desktop parity (plan 3.7) | **Done** 2026-11-13 â€” Merge color; `rename_object` and `set_visibility` tools (catalog now 62, each with a desktop-vs-MCP test); `launch_slicer` falls back to the saved slicer; ledger `mcp_tool` / `mcp_exempt` column and parity check. Owner 2026-11-14 (D10): no "visual only" exemptions â€” MCP gets tools for all of them (OF-58) |
+| F13 | Run `cargo deny` and `cargo audit` | **Done** 2026-11-12 â€” both pass; now in the Full gate |
 
 ## Ledger (`evidence/rebuild/parity-matrix.toml`, 148 features, reconciled 2026-11-16)
 
-Implementation: pass 142 · partial 5 · not applicable 1. Automated: pass 139 ·
-partial 4 · pending 5. Used live: pass 124 · pending 20. Owner-accepted 29
+Implementation: pass 142 Â· partial 5 Â· not applicable 1. Automated: pass 139 Â·
+partial 4 Â· pending 5. Used live: pass 124 Â· pending 20. Owner-accepted 29
 (visual pass on the same 29); 119 rows wait for the owner's
 walkthroughs (S2 owner review session 2). Still partial: the five RB-01
 look rows (theme foundation, welcome, Items panel, dark palette, artwork
-conflicts) — they belong to the S1 finish, not to code gaps. Gaps found:
+conflicts) â€” they belong to the S1 finish, not to code gaps. Gaps found:
 no test dispatches Center View, Frame or the Snap toggle directly, and none
 covers the window-icon load.
 
@@ -313,13 +324,13 @@ owner batch 7.
 
 ## Owner feedback queue
 
-- 2026-11-02: interface and floor "still missing" — floor addressed
+- 2026-11-02: interface and floor "still missing" â€” floor addressed
   2026-11-09/10; interface finish is stage S1.
-- 2026-11-11: move / resize / rotate arrows "feel cheap" — handled as one
+- 2026-11-11: move / resize / rotate arrows "feel cheap" â€” handled as one
   reviewed set in S1 task 7, not iteratively.
-- 2026-11-12: the app "looks kind of home made" — first finish pass landed
+- 2026-11-12: the app "looks kind of home made" â€” first finish pass landed
   (captures in `evidence/rebuild/captures/2026-11-12-finish-pass/`); remaining
-  work is S1 tasks 1–9. **Not yet reviewed by the owner.**
+  work is S1 tasks 1â€“9. **Not yet reviewed by the owner.**
 - 2026-11-12 (second batch): nine items OF-1 to OF-9 in
   [`owner-feedback-2026-11-12.md`](owner-feedback-2026-11-12.md), worked in
   the owner's order (OF-1 floor, OF-1 resize + OF-3, OF-4, OF-6, OF-9, OF-2,
@@ -356,14 +367,14 @@ owner batch 7.
   Commit `2c7b319`. **Owner-approved** in the release build 2026-11-12
   ("fantastic").
 - 2026-11-12 (third batch): OF-10 to OF-14 **owner-approved** in the
-  release build ("you did amazing. i say yes to it all") — icon-only
+  release build ("you did amazing. i say yes to it all") â€” icon-only
   shortcuts, Slicer button with remembered slicer (no dialog), labelled
   Save / Save As, light/dark toggle (`0f3dd09`); Shift+drag box select,
   additive, touching counts (`907f9b0`). Full workspace gate passed.
   Captures `evidence/rebuild/captures/2026-11-12-of10-14-topbar/`. Table in
   [`owner-feedback-2026-11-12.md`](owner-feedback-2026-11-12.md).
 - 2026-11-12 (fourth batch): OF-15 to OF-19 **owner-approved** in the
-  release build 2026-11-12 ("You did great. i approve of it all") — darker light-mode top bar, Settings follows the top-bar theme
+  release build 2026-11-12 ("You did great. i approve of it all") â€” darker light-mode top bar, Settings follows the top-bar theme
   toggle, a press outside Settings closes it, one Close button (Done
   removed), menu icon centred with the tab text. Full workspace gate passed.
   Captures `evidence/rebuild/captures/2026-11-12-of15-19-settings-topbar/`.
@@ -404,7 +415,7 @@ owner batch 7.
   `MODELER3D_REVIEW_TEXTURES` (`;`-separated paths).
 
 - 2026-11-15 (found during the OF-58 live run): the settings-migration
-  notice drawn over the ribbon labels — now OF-64.
+  notice drawn over the ribbon labels â€” now OF-64.
 
 ## Last recovery point
 

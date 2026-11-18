@@ -12,7 +12,7 @@
 //! | Variable | Values | Default |
 //! |---|---|---|
 //! | `MODELER3D_REVIEW_CAPTURE` | output PNG path | harness off |
-//! | `MODELER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `resize`, `resize-drag`, `multi`, `merge`, `unselected`, `material`, `settings`, `save`, `export`, `menu`, `colors`, `mirror`, `merge-apart`, `repair`, `paste`, `align`, `paint`, `paint-picker`, `xray`, `texture`, `texture-dialog`, `grab`, `crease`, `crease-sharp`, `smooth-brush`, `simplify`, `simplify-area`, `subdivide`, `hollow`, `hollow-dialog`, `hollow-error`, `measure`, `measure-start`, `centre`, `settings-note`, `no-shortcuts` | `move` |
+//! | `MODELER3D_REVIEW_STATE` | `welcome`, `empty`, `move`, `rotate`, `rotate-tilted`, `rotate-drag`, `resize`, `resize-drag`, `multi`, `merge`, `unselected`, `material`, `settings`, `save`, `export`, `menu`, `colors`, `mirror`, `merge-apart`, `repair`, `paste`, `align`, `paint`, `paint-picker`, `xray`, `texture`, `texture-dialog`, `grab`, `crease`, `crease-sharp`, `smooth-brush`, `simplify`, `simplify-area`, `subdivide`, `hollow`, `hollow-dialog`, `hollow-error`, `measure`, `measure-start`, `centre`, `settings-note`, `no-shortcuts` | `move` |
 //! | `MODELER3D_REVIEW_TEXTURES` | `;`-separated picture paths for the `texture` states (one per object, reused in turn) | a built-in brick picture |
 //! | `MODELER3D_REVIEW_THEME` | `light`, `dark` | `dark` |
 //! | `MODELER3D_REVIEW_SIZE` | `normal`, `big` (Settings > Size) | `normal` |
@@ -66,6 +66,10 @@ pub(crate) enum ReviewState {
     Move,
     /// One selected cube with the Rotate handles.
     Rotate,
+    /// A cube already rotated around several axes.
+    RotateTilted,
+    /// A tilted cube held partway through a local-axis rotation.
+    RotateDrag,
     /// One selected cube with the Resize handles.
     Resize,
     /// The Resize state with the +X face handle held mid-drag. The drag is
@@ -178,6 +182,8 @@ impl ReviewState {
             "empty" => Some(Self::Empty),
             "move" => Some(Self::Move),
             "rotate" => Some(Self::Rotate),
+            "rotate-tilted" => Some(Self::RotateTilted),
+            "rotate-drag" => Some(Self::RotateDrag),
             "resize" => Some(Self::Resize),
             "resize-drag" => Some(Self::ResizeDrag),
             "multi" => Some(Self::Multi),

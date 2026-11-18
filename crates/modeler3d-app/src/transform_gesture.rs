@@ -288,6 +288,13 @@ impl TransformGesture {
         self.previous_move_delta = 0.0;
     }
 
+    pub(crate) fn rotation_axis(&self) -> Option<[f32; 3]> {
+        match self.kind {
+            GestureKind::Rotate { axis, .. } => Some(axis),
+            _ => None,
+        }
+    }
+
     pub(crate) fn active_axis_index(&self) -> Option<usize> {
         match &self.kind {
             GestureKind::Move { axis, .. } | GestureKind::Rotate { axis, .. } => {
