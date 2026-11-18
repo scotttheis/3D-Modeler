@@ -5292,13 +5292,15 @@ impl Modeler3dApp {
                 let axis_color = color(line.color);
                 let emphasized =
                     Some(axis_index) == hovered_axis || Some(axis_index) == active_axis;
-                paint_gizmo_shaft(
-                    painter,
-                    anchor,
-                    shaft_end,
-                    axis_color,
-                    line.width_pixels,
-                    emphasized,
+                // Flat axis-colored stem, matching Resize's solid handles.
+                let face = if emphasized {
+                    axis_highlight_color(axis_color)
+                } else {
+                    axis_color
+                };
+                painter.line_segment(
+                    [anchor, shaft_end],
+                    Stroke::new(line.width_pixels / pixels_per_point, face),
                 );
                 paint_gizmo_arrowhead(
                     painter,
@@ -8443,14 +8445,6 @@ fn axis_highlight_color(color: Color32) -> Color32 {
     )
 }
 
-fn axis_shadow_color(color: Color32) -> Color32 {
-    Color32::from_rgb(
-        (u16::from(color.r()) * 68 / 100) as u8,
-        (u16::from(color.g()) * 68 / 100) as u8,
-        (u16::from(color.b()) * 68 / 100) as u8,
-    )
-}
-
 fn paint_gizmo_arrowhead(
     painter: &egui::Painter,
     base: egui::Pos2,
@@ -8472,53 +8466,16 @@ fn paint_gizmo_arrowhead(
     let tip = base + direction * head_length;
     let outer_left = base + perpendicular * head_half_width;
     let outer_right = base - perpendicular * head_half_width;
-    let outline = Color32::from_rgba_unmultiplied(18, 24, 36, 240);
-    painter.add(egui::Shape::convex_polygon(
-        vec![tip, outer_left, outer_right],
-        outline,
-        Stroke::NONE,
-    ));
-
-    let inset = 1.5 / pixels_per_point;
-    let inner_half_width = head_half_width - inset;
-    if inner_half_width <= 0.0 {
-        return;
-    }
-    let inner_tip = tip - direction * inset;
-    let inner_base = base + direction * inset;
-    let face_color = if emphasized {
+    let face = if emphasized {
         axis_highlight_color(axis_color)
     } else {
         axis_color
     };
     painter.add(egui::Shape::convex_polygon(
-        vec![
-            inner_tip,
-            inner_base + perpendicular * inner_half_width,
-            inner_base - perpendicular * inner_half_width,
-        ],
-        face_color,
+        vec![tip, outer_left, outer_right],
+        face,
         Stroke::NONE,
     ));
-    painter.add(egui::Shape::convex_polygon(
-        vec![
-            inner_tip,
-            inner_base,
-            inner_base - perpendicular * inner_half_width,
-        ],
-        axis_shadow_color(face_color),
-        Stroke::NONE,
-    ));
-    painter.line_segment(
-        [
-            inner_tip,
-            inner_base + perpendicular * inner_half_width * 0.85,
-        ],
-        Stroke::new(
-            0.9 / pixels_per_point,
-            with_alpha(Color32::WHITE, if emphasized { 245 } else { 190 }),
-        ),
-    );
 }
 
 fn clip_gizmo_triangle(matrix: Mat4, rect: egui::Rect, triangle: [[f32; 3]; 3]) -> Vec<egui::Pos2> {

@@ -3,7 +3,7 @@
 The only place current status is written. Keep it to one screen. Plan:
 [`product-rebuild-plan.md`](product-rebuild-plan.md).
 
-Updated 2026-11-17 (rotation arrows OF-68). F5 and F6 closed 2026-11-16 (ledger parity test passed after F6). Full gate passed 2026-11-16 after OF-65 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Before that, full gate passed 2026-11-16 after Phase 6 OF-63/OF-64 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Earlier: full gate passed 2026-11-15 after Phase 5 OF-58 (fmt, clippy, tests, deny, audit, MCP parity with no exemptions, smoke, capture board); a last small fix then passed the Fast gate. Release exe rebuilt from that source (3m49s) and driven live through the real MCP gateway for the Phase 5 review pack.
+Updated 2026-11-17 (Move arrows OF-69). F5 and F6 closed 2026-11-16 (ledger parity test passed after F6). Full gate passed 2026-11-16 after OF-65 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Before that, full gate passed 2026-11-16 after Phase 6 OF-63/OF-64 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Earlier: full gate passed 2026-11-15 after Phase 5 OF-58 (fmt, clippy, tests, deny, audit, MCP parity with no exemptions, smoke, capture board); a last small fix then passed the Fast gate. Release exe rebuilt from that source (3m49s) and driven live through the real MCP gateway for the Phase 5 review pack.
 
 Test releases (how-to: [`packaging.md`](packaging.md)): last is **RC1**,
 version 0.1.1, 2026-11-13, `E:\3D-Modeler-RC\Builder3D-RC1.msi` (50 MB),
@@ -26,6 +26,22 @@ checked on the Mac. The app is ad-hoc signed, not notarized. No Windows MSI
 for RC2. Next after RC2: RC3 / 0.1.3.
 
 ## Now
+
+**OF-69 Move arrows (2026-11-17):** flat axis-colored stems and solid
+triangular heads consistent with Resize. Axis colors, directions, dimensions,
+picking, hover/drag emphasis and gesture/history paths retained. MCP translation
+semantics unchanged. Independent code and both-theme capture review found no
+blockers (requested reviewer models unavailable; inherited-model review used).
+Fast and Full gates passed (`logs/gate/20261117-183431-fast`,
+`logs/gate/20261117-183452-full`), including the 44-state, both-theme board.
+Release rebuilt (4m14s, 23,369,216 bytes); Release smoke and captures passed.
+Pack: `evidence/rebuild/captures/2026-11-17-of69-move/`.
+Task: [`move-arrows.md`](tasks/move-arrows.md).
+**Done, awaiting owner review. OF-70 remains queued; OF-68 approval not inferred.**
+Baseline: `G:\3D-Modeler_snapshot_20261117-183334_OF69-baseline`
+(12,195 files, 1,770,275,521 bytes verified).
+Recovery: `G:\3D-Modeler_snapshot_20261117-184100_OF69`
+(additive copy; file and byte counts verified).
 
 **OF-68 rotation arrows (2026-11-17):** original curved grips with solid flat
 triangular heads pointing both ways, inspired by the owner reference and Resize.
