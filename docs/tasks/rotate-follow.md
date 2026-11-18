@@ -25,3 +25,5 @@ cube with isolated review settings for the owner to try.
 
 Full gate: logs/gate/20261118-071412-full (all checks passed; 92 captures).
 Recovery snapshot: G:\3D-Modeler_snapshot_20261118-072157_rotate-follow (source, evidence and Git metadata).
+
+Final documentation checkpoint: G:\3D-Modeler_snapshot_20261118-072319_rotate-follow-checkpoint.
