@@ -146,6 +146,8 @@ pub struct ViewportRenderOptions {
     pub floor_text: FloorTextMesh,
     /// World guide strokes, depth tested against visible surfaces on all backends.
     pub guide_lines: Vec<crate::GizmoLine>,
+    /// Filled guide grips, depth tested against scene surfaces.
+    pub guide_triangles: Vec<crate::GizmoTriangle>,
 }
 
 impl Default for ViewportRenderOptions {
@@ -159,6 +161,7 @@ impl Default for ViewportRenderOptions {
             lighting: ViewportLighting::default(),
             floor_text: FloorTextMesh::default(),
             guide_lines: Vec::new(),
+            guide_triangles: Vec::new(),
         }
     }
 }
@@ -1305,6 +1308,7 @@ impl ViewportRenderer {
             interaction,
             &CpuRenderOptions {
                 guide_lines: options.guide_lines.clone(),
+                guide_triangles: options.guide_triangles.clone(),
                 clear_color: cpu_clear_color(options.theme),
                 wireframe: options.wireframe,
                 xray: options.xray,
@@ -2754,6 +2758,12 @@ fn build_overlay_vertices(
                     ..OverlayVertex::new(triangle.third, triangle.color)
                 },
             ]);
+        }
+    }
+    // Grips follow the floor fills so the floor cannot paint over them.
+    for triangle in &options.guide_triangles {
+        for point in [triangle.first, triangle.second, triangle.third] {
+            triangles.push(OverlayVertex::new(point, triangle.color));
         }
     }
     if lines.len().saturating_add(triangles.len()) > MAX_OVERLAY_VERTICES {

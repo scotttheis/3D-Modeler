@@ -34,9 +34,9 @@ use modeler3d_core::{
     crease_polish, elastic_grab, smooth_brush,
 };
 use modeler3d_viewport::{
-    Aabb, Camera, GizmoAxis, GizmoLine, GizmoMode, InteractionState, MOVE_GIZMO_SCALE, Mat4,
-    RenderScene, RendererConfig, SnapViewContext, ViewportRenderOptions, ViewportRenderer,
-    ViewportTheme, build_gizmo_with_bounds, dot, pick_scene, subtract,
+    Aabb, Camera, GizmoAxis, GizmoMode, InteractionState, MOVE_GIZMO_SCALE, Mat4, RenderScene,
+    RendererConfig, SnapViewContext, ViewportRenderOptions, ViewportRenderer, ViewportTheme,
+    build_gizmo_with_bounds, dot, pick_scene, subtract,
 };
 
 use crate::artwork::{
@@ -4826,6 +4826,10 @@ impl Modeler3dApp {
                     atlas_size,
                     viewport_theme,
                 );
+                let rotation_guides = if gizmo_mode == GizmoMode::Rotate
+                    && self.paint_mode.is_none() && self.measure_mode.is_none() {
+                    self.rotation_guides(rect, &painter)
+                } else { modeler3d_viewport::GizmoGeometry::default() };
                 let render_options = ViewportRenderOptions {
                     grid_visible: display.grid_visible,
                     wireframe: display.wireframe,
@@ -4834,9 +4838,8 @@ impl Modeler3dApp {
                     lighting: self.commands.preferences().viewport_lighting(),
                     theme: viewport_theme,
                     floor_text,
-                    guide_lines: if gizmo_mode == GizmoMode::Rotate && self.paint_mode.is_none() && self.measure_mode.is_none() {
-                        self.rotation_guide_lines(rect, &painter)
-                    } else { Vec::new() },
+                    guide_lines: rotation_guides.lines,
+                    guide_triangles: rotation_guides.triangles,
                 };
                 let derived_preview = match (&self.preview, &self.viewport_drag) {
                     (Some(scene), Some(ViewportDrag::Transform(drag))) => {
@@ -5264,15 +5267,19 @@ impl Modeler3dApp {
         .ok()
     }
 
-    fn rotation_guide_lines(&self, rect: egui::Rect, painter: &egui::Painter) -> Vec<GizmoLine> {
+    fn rotation_guides(
+        &self,
+        rect: egui::Rect,
+        painter: &egui::Painter,
+    ) -> modeler3d_viewport::GizmoGeometry {
         let Some(frame) = self.rotation_control_frame() else {
-            return Vec::new();
+            return modeler3d_viewport::GizmoGeometry::default();
         };
         let Ok(matrix) = self
             .camera
             .view_projection(self.current_scene_radius().unwrap_or(1.))
         else {
-            return Vec::new();
+            return modeler3d_viewport::GizmoGeometry::default();
         };
         let active = self.active_gizmo_axis_index();
         let hovered = active.or_else(|| {
@@ -5289,7 +5296,7 @@ impl Modeler3dApp {
                     )
                 })
         });
-        rotate_controls::guide_lines(frame, &self.camera, matrix, rect, hovered)
+        rotate_controls::guide_geometry(frame, &self.camera, matrix, rect, hovered)
     }
 
     fn paint_transform_handles(&self, painter: &egui::Painter, rect: egui::Rect) {

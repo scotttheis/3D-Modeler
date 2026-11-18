@@ -98,24 +98,23 @@ impl ResizeFrame {
     }
 }
 
-/// Thin ring strokes and open arrowheads share the viewport's mesh depth test.
-/// Picking and drag axes retain the same local rotation frame.
-pub(super) fn guide_lines(
+/// Thin rings and filled double-ended grips share the mesh depth test.
+/// Grips follow the owner's rotate.png proportions in viewport points.
+pub(super) fn guide_geometry(
     frame: ResizeFrame,
     camera: &Camera,
     matrix: modeler3d_viewport::Mat4,
     rect: eframe::egui::Rect,
     emphasized: Option<usize>,
-) -> Vec<GizmoLine> {
-    let Some(geometry) = frame.rotation_geometry(camera) else {
-        return Vec::new();
+) -> GizmoGeometry {
+    let Some(mut geometry) = frame.rotation_geometry(camera) else {
+        return GizmoGeometry::default();
     };
     let Ok(inverse) = matrix.inverse() else {
-        return Vec::new();
+        return GizmoGeometry::default();
     };
-    let mut lines = geometry.lines;
     let segments = modeler3d_viewport::ROTATE_RING_SEGMENTS as usize;
-    for (axis, ring) in lines.chunks_exact_mut(segments).enumerate() {
+    for (axis, ring) in geometry.lines.chunks_exact_mut(segments).enumerate() {
         for line in ring {
             line.width_pixels = 1.0;
             if emphasized == Some(axis) {
@@ -125,68 +124,133 @@ pub(super) fn guide_lines(
             }
         }
     }
-    let mut heads = Vec::new();
-    for (axis, ring) in lines.chunks_exact(segments).enumerate() {
+    let mut occupied = Vec::<eframe::egui::Rect>::new();
+    for (axis, ring) in geometry.lines.chunks_exact(segments).enumerate() {
         let preferred = (axis * segments / 3 + segments / 8) % segments;
         let candidate = ring
             .iter()
             .enumerate()
-            .filter(|(_, line)| !ring_segment_is_occluded(camera, line, frame))
-            .filter(|(_, line)| {
-                super::project_gizmo_line(matrix, rect, line.start, line.end).is_some_and(
-                    |[a, b]| {
-                        rect.shrink(12.0).contains(a)
-                            && rect.shrink(12.0).contains(b)
-                            && a.distance(b) > 0.01
-                    },
-                )
-            })
-            .min_by_key(|(index, _)| {
+            .filter_map(|(index, line)| {
+                let path = grip_path(ring, index, camera, frame, matrix, rect)?;
+                let mut bounds = eframe::egui::Rect::NOTHING;
+                for (point, _) in &path {
+                    bounds.extend_with(*point);
+                }
+                let bounds = bounds.expand(22.0);
+                let overlap = occupied
+                    .iter()
+                    .filter(|previous| previous.intersects(bounds))
+                    .count();
                 let d = index.abs_diff(preferred);
-                d.min(segments - d)
-            });
-        let Some((index, _)) = candidate else {
+                Some((
+                    overlap * segments * 4 + d.min(segments - d),
+                    line.color,
+                    path,
+                    bounds,
+                ))
+            })
+            .min_by_key(|(score, _, _, _)| *score);
+        let Some((_, color, path, bounds)) = candidate else {
             continue;
         };
-        for (index, forward) in [(index, true), ((index + segments - 8) % segments, false)] {
-            let line = ring[index];
-            let Some([start, end]) = super::project_gizmo_line(matrix, rect, line.start, line.end)
-            else {
-                continue;
-            };
-            let (tip, direction, anchor) = if forward {
-                (end, (end - start).normalized(), line.end)
-            } else {
-                (start, (start - end).normalized(), line.start)
-            };
-            let Ok(projected) = matrix.transform_point(anchor) else {
-                continue;
-            };
-            let world = |point: eframe::egui::Pos2| {
-                inverse
-                    .transform_point([
-                        (point.x - rect.left()) / rect.width() * 2.0 - 1.0,
-                        1.0 - (point.y - rect.top()) / rect.height() * 2.0,
-                        projected[2],
-                    ])
-                    .ok()
-            };
-            let length = if emphasized == Some(axis) { 11.0 } else { 9.0 };
-            for sign in [-1.0, 1.0] {
-                let wing = tip - direction * length + direction.rot90() * (sign * length * 0.5);
-                if let Some(start) = world(wing) {
-                    heads.push(GizmoLine {
-                        start,
-                        end: anchor,
-                        color: line.color,
-                        width_pixels: 1.0,
-                    });
-                }
+        occupied.push(bounds);
+        let world = |point: eframe::egui::Pos2, depth: f32| {
+            inverse
+                .transform_point([
+                    (point.x - rect.left()) / rect.width() * 2.0 - 1.0,
+                    1.0 - (point.y - rect.top()) / rect.height() * 2.0,
+                    depth,
+                ])
+                .ok()
+        };
+        let mut triangle = |points: [(eframe::egui::Pos2, f32); 3]| {
+            if let [Some(first), Some(second), Some(third)] =
+                points.map(|(point, depth)| world(point, depth))
+            {
+                geometry.triangles.push(modeler3d_viewport::GizmoTriangle {
+                    first,
+                    second,
+                    third,
+                    color,
+                });
             }
+        };
+        let edges: Vec<_> = path
+            .iter()
+            .enumerate()
+            .map(|(i, (point, depth))| {
+                let before = path[i.saturating_sub(1)].0;
+                let after = path[(i + 1).min(path.len() - 1)].0;
+                let across = (after - before).normalized().rot90() * 3.0;
+                ((*point + across, *depth), (*point - across, *depth))
+            })
+            .collect();
+        for pair in edges.windows(2) {
+            triangle([pair[0].0, pair[0].1, pair[1].0]);
+            triangle([pair[1].0, pair[0].1, pair[1].1]);
+        }
+        let last = path.len() - 1;
+        for (end, neighbor) in [(0, 1), (last, last - 1)] {
+            let (base, depth) = path[end];
+            let outward = (base - path[neighbor].0).normalized();
+            let across = outward.rot90() * 8.0;
+            triangle([
+                (base + outward * 14.0, depth),
+                (base + across, depth),
+                (base - across, depth),
+            ]);
         }
     }
-    lines.extend(heads);
-    lines
+    geometry
+}
+
+/// A short visible arc with consistent projected direction avoids folded grips
+/// when a ring is seen edge-on. Each node retains its own scene depth.
+fn grip_path(
+    ring: &[GizmoLine],
+    index: usize,
+    camera: &Camera,
+    frame: ResizeFrame,
+    matrix: modeler3d_viewport::Mat4,
+    rect: eframe::egui::Rect,
+) -> Option<Vec<(eframe::egui::Pos2, f32)>> {
+    let mut path = Vec::new();
+    let mut remaining = 32.0;
+    for step in 0..ring.len() {
+        let line = ring[(index + ring.len() - step) % ring.len()];
+        if ring_segment_is_occluded(camera, &line, frame) {
+            return None;
+        }
+        let [start, end] = super::project_gizmo_line(matrix, rect, line.start, line.end)?;
+        if !rect.shrink(24.0).contains(start) || !rect.shrink(24.0).contains(end) {
+            return None;
+        }
+        let first = matrix.transform_point(line.start).ok()?;
+        let second = matrix.transform_point(line.end).ok()?;
+        let length = start.distance(end);
+        if length <= 0.01 {
+            continue;
+        }
+        if path.is_empty() {
+            path.push((end, second[2]));
+        }
+        let fraction = (remaining / length).min(1.0);
+        path.push((
+            end.lerp(start, fraction),
+            second[2] + (first[2] - second[2]) * fraction,
+        ));
+        remaining -= length;
+        if remaining <= 0.0 {
+            break;
+        }
+    }
+    if remaining > 0.0 || path.len() < 2 {
+        return None;
+    }
+    let overall = (path[0].0 - path.last()?.0).normalized();
+    path.windows(2)
+        .all(|pair| (pair[0].0 - pair[1].0).normalized().dot(overall) > 0.7)
+        .then_some(path)
 }
 
 /// Rejects rear arrow placements while allowing front arcs across the object.
@@ -279,14 +343,68 @@ mod tests {
             eframe::egui::vec2(1280., 720.),
         );
         let original = frame.rotation_geometry(&camera).expect("geometry");
-        let lines = guide_lines(frame, &camera, matrix, rect, None);
-        assert!(
-            lines.len() > original.lines.len(),
-            "open arrowheads are present"
-        );
+        let guides = guide_geometry(frame, &camera, matrix, rect, None);
+        let lines = guides.lines;
+        assert_eq!(lines.len(), original.lines.len());
+        assert!(!guides.triangles.is_empty(), "filled grips are present");
         assert!(lines.iter().all(|line| line.width_pixels == 1.0));
         for (actual, expected) in lines.iter().zip(&original.lines) {
             assert_eq!((actual.start, actual.end), (expected.start, expected.end));
+        }
+    }
+
+    #[test]
+    fn filled_rotation_grips_point_in_opposite_directions_when_rings_turn_edge_on() {
+        let mut camera = Camera::new();
+        camera.set_viewport_size(1280, 720).expect("viewport");
+        camera
+            .frame_bounds(&[Aabb::new([-20.; 3], [20.; 3]).expect("bounds")])
+            .expect("frame");
+        let frame = ResizeFrame {
+            center: [0.; 3],
+            axes: [[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]],
+            extents: [40.; 3],
+        };
+        let rect = eframe::egui::Rect::from_min_size(
+            eframe::egui::Pos2::ZERO,
+            eframe::egui::vec2(1280., 720.),
+        );
+        for (yaw, pitch) in [(0., 35.), (45., 25.), (90., 0.)] {
+            camera.set_view(yaw, pitch).expect("view");
+            let geometry = guide_geometry(
+                frame,
+                &camera,
+                camera.view_projection(35.).expect("matrix"),
+                rect,
+                None,
+            );
+            for axis in [
+                modeler3d_viewport::GizmoAxis::X,
+                modeler3d_viewport::GizmoAxis::Y,
+                modeler3d_viewport::GizmoAxis::Z,
+            ] {
+                let tips: Vec<_> = geometry
+                    .triangles
+                    .iter()
+                    .filter(|triangle| triangle.color == axis.color())
+                    .rev()
+                    .take(2)
+                    .collect();
+                assert_eq!(
+                    tips.len(),
+                    2,
+                    "both filled tips for {axis:?}, view {yaw}/{pitch}"
+                );
+                let outward = |triangle: &modeler3d_viewport::GizmoTriangle| {
+                    let base = scale(add(triangle.second, triangle.third), 0.5);
+                    modeler3d_viewport::normalize(subtract(triangle.first, base), "tip")
+                        .expect("tip")
+                };
+                assert!(
+                    dot(outward(tips[0]), outward(tips[1])) < -0.5,
+                    "opposite tips for {axis:?}, view {yaw}/{pitch}"
+                );
+            }
         }
     }
 

@@ -42,6 +42,8 @@ pub struct CpuRenderOptions {
     pub wireframe: bool,
     /// World guide strokes, depth tested against the same scene as GPU guides.
     pub guide_lines: Vec<crate::GizmoLine>,
+    /// Filled guide grips, depth tested against scene surfaces.
+    pub guide_triangles: Vec<crate::GizmoTriangle>,
     /// Blend mesh colors translucently without changing authored geometry.
     pub xray: bool,
     /// Durable IDs drawn with the selection shade
@@ -69,6 +71,7 @@ impl Default for CpuRenderOptions {
             clear_color: [4, 7, 13, 255],
             wireframe: false,
             guide_lines: Vec::new(),
+            guide_triangles: Vec::new(),
             xray: false,
             selected_object_ids: Vec::new(),
             lighting: ViewportLighting::default(),
@@ -327,6 +330,24 @@ pub fn render_cpu_with_options(
             &depth,
             &mut shaded_pixels,
         );
+    }
+    for triangle in &options.guide_triangles {
+        if let [Some(first), Some(second), Some(third)] =
+            [triangle.first, triangle.second, triangle.third]
+                .map(|point| project(view_projection, point, width, height))
+        {
+            // Read scene depth without writing it, as in the GPU overlay pass.
+            rasterize_triangle(
+                [first, second, third],
+                triangle.color,
+                true,
+                width,
+                height,
+                &mut rgba,
+                &mut depth,
+                &mut shaded_pixels,
+            );
+        }
     }
     for line in &options.guide_lines {
         if let (Some(start), Some(end)) = (
@@ -1071,6 +1092,7 @@ mod tests {
                 .expect("view");
         let right =
             crate::normalize(crate::cross(direction, [0., 1., 0.]), "right").expect("right");
+        let up = crate::cross(right, direction);
         for (offset, visible) in [(-2.0, true), (2.0, false)] {
             let center = crate::add(camera.center(), crate::scale(direction, offset));
             let frame = render_cpu_with_options(
@@ -1086,6 +1108,18 @@ mod tests {
                         color: [1., 0., 0., 1.],
                         width_pixels: 1.0,
                     }],
+                    guide_triangles: vec![crate::GizmoTriangle {
+                        first: crate::add(
+                            crate::add(center, crate::scale(up, 0.1)),
+                            crate::scale(right, -0.25),
+                        ),
+                        second: crate::add(
+                            crate::add(center, crate::scale(up, 0.1)),
+                            crate::scale(right, 0.25),
+                        ),
+                        third: crate::add(center, crate::scale(up, 0.4)),
+                        color: [0., 0., 1., 1.],
+                    }],
                     ..CpuRenderOptions::default()
                 },
             )
@@ -1097,6 +1131,14 @@ mod tests {
                 .iter()
                 .filter(|pixel| pixel[..3] == [255, 0, 0])
                 .count();
+            let blue_pixels = frame
+                .rgba
+                .as_chunks::<4>()
+                .0
+                .iter()
+                .filter(|pixel| pixel[..3] == [0, 0, 255])
+                .count();
+            assert_eq!(blue_pixels > 4, visible, "filled grip at offset {offset}");
             assert_eq!(
                 red_pixels > 4,
                 visible,

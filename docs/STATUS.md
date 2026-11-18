@@ -27,17 +27,18 @@ for RC2. Next after RC2: RC3 / 0.1.3.
 
 ## Now
 
-**Thin Rotate rings; Resize restored (owner correction, 2026-11-18):**
-The requested control was Rotate. Resize has its original handles and drag
-band again. Rotate uses thin ring strokes and open arrowheads, rendered with
-GPU/CPU mesh depth testing: front arcs cross visible faces and rear arcs hide
-behind scene surfaces. Local axes, live preview, picking and history pass.
-Full gate passed (`logs/gate/20261118-100850-full`), including 270 app and 57
-viewport tests and the 92-image board. Release built and smoke passed
-(23,387,136-byte executable). Both-theme before/after and Release captures:
-`evidence/rebuild/captures/2026-11-18-rotate-thin/`.
-Task: [`rotate-thin.md`](tasks/rotate-thin.md). Supersedes the shaded ring
-finish below. Owner visual review pending. Recovery: `G:\3D-Modeler_snapshot_20261118-101504_rotate-thin`.
+**Rotate grips from owner reference (2026-11-18):** `erros/rotate.png`
+sets the grip style: filled double-ended tips joined by a narrower solid
+stem. Grips follow short curved arcs; rings stay thin. Mesh depth testing
+hides rear strokes and filled grips on GPU and CPU. Placement avoids folded
+edge-on grips and favors space between axes. Rotation picking, preview and
+history pass. Full gate passed (`logs/gate/20261118-104915-full`), with
+271 app and 57 viewport tests and 92 captures. Release built and smoke passed
+(23,393,792-byte executable). Both-theme comparisons and Release captures:
+`evidence/rebuild/captures/2026-11-18-rotate-reference/`.
+Task: [`rotate-reference.md`](tasks/rotate-reference.md). Resize retains its
+restored original appearance. Owner visual review pending.
+Recovery: `G:\3D-Modeler_snapshot_20261118-105552_rotate-reference`.
 
 **Rotation ring finish (owner, 2026-11-18):** continuous shaded tube paths
 with soft depth edge and specular glint; curved grips receive matching edge
