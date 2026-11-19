@@ -2426,7 +2426,6 @@ pub fn ribbon_spec() -> Vec<(RibbonTab, Vec<RibbonItem>)> {
             vec![
                 command(CommandId::Simplify, "Simplify", IconKey::Edit),
                 command(CommandId::Subdivide, "Subdivide", IconKey::Edit),
-                command(CommandId::Smooth, "Smooth", IconKey::Edit),
                 checked_command(CommandId::Grab, "Grab", IconKey::Edit),
                 checked_command(CommandId::Crease, "Crease", IconKey::Edit),
                 checked_command(CommandId::SmoothBrush, "Smooth Brush", IconKey::Edit),
@@ -2439,6 +2438,7 @@ pub fn ribbon_spec() -> Vec<(RibbonTab, Vec<RibbonItem>)> {
                 command(CommandId::Hollow, "Hollow", IconKey::Edit),
                 command(CommandId::Intersect, "Intersect", IconKey::Edit),
                 command(CommandId::Subtract, "Subtract", IconKey::Subtract),
+                command(CommandId::Smooth, "Smooth", IconKey::Edit),
             ],
         ),
         (
