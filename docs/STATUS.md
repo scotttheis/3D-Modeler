@@ -3,7 +3,7 @@
 The only place current status is written. Keep it to one screen. Plan:
 [`product-rebuild-plan.md`](product-rebuild-plan.md).
 
-Updated 2026-11-19 (claw redraw, Rotate grip reach, Resize handles zoomed in; before that OF-70).
+Updated 2026-11-19 (finish plan Session 2; before that claw redraw, Rotate grip reach, Resize handles zoomed in; before that OF-70).
 
 Test releases (how-to: [`packaging.md`](packaging.md)): last is **RC1**,
 version 0.1.1, 2026-11-13, `E:\3D-Modeler-RC\Builder3D-RC1.msi` (50 MB),
@@ -28,6 +28,8 @@ for RC2. Next after RC2: RC3 / 0.1.3.
 **Finish plan (2026-11-19):** [`finish-plan.md`](finish-plan.md) — the remaining work by difficulty, in three sessions to a public v1.0. **Owner answers 2026-11-19** (approvals of Settle, claw, edit tools, live numbers and the gizmo arrows; Smooth to move; Resize floor/object switch approved; release icons at 128 px, source art unchanged; Emboss and Material dialog after v1.0) are recorded at the end of that file.
 
 ## Now
+
+**Finish plan Session 2 done (2026-11-19), awaiting owner review:** S1-1 tokens in `chrome.rs` (type scale, spacing, radii, heights); S1-3 Inspector sections and one field grid; S1-4 ribbon separators, tab type and overflow menu; S1-5/6 one dialog frame, button order, error style, Welcome grid and empty/missing/loading states; S1-8/9 control states, focus ring and a contrast test over every text pair (muted, border, disabled and axis text colours nudged to pass). No MCP change. Tasks: `tasks/s1-*.md`. Captures: `evidence/rebuild/captures/2026-11-19-polish-m3` to `-m5` and the Full-gate board `gate-20261119-154320`.
 
 **Finish plan Session 1 done (2026-11-19):** one-current-build rule committed; STATUS trimmed (old entries in `WORK_LOG.md`); Windows username removed from tracked files (drive letters left); Smooth now right of Subtract; tests for Center View, Frame, Snap toggle, window icon; `README.md`, Apache 2.0 `LICENSE`, workspace licence set to Apache-2.0. Full gate passed (`logs/gate/20261119-142720-full`). Release rebuilt (`Update-CurrentBuild.ps1`, old exe in `G:D-Modeler-old-builds61119-135038_OLD-BUILD`). Recovery: `G:D-Modeler_snapshot_20261119-144135_finish-session1` (15,223 files, 2,279,020,930 bytes; counts match).
 
