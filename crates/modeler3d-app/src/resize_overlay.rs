@@ -62,13 +62,20 @@ pub(crate) struct ResizeOverlay {
 
 impl ResizeOverlay {
     /// Lays out the overlay for `frame`, optionally moved by an in-progress
-    /// drag `delta`. `project` maps a world point to viewport points;
-    /// `view_direction` is the camera's unit forward vector. Returns `None`
-    /// when any box corner cannot be projected (behind the camera).
+    /// drag `delta`. `project` maps a world point to viewport points and
+    /// returns `None` only for points behind the camera: off-screen points
+    /// still project, so the handles stay usable when the view is zoomed in
+    /// past the box. `project_edge` does the same for a box edge, cut where
+    /// it crosses the camera. `viewport` keeps a handle whose natural place
+    /// is off-screen at the nearest edge. `view_direction` is the camera's
+    /// unit forward vector. Returns `None` when no part of the box is in
+    /// front of the camera.
     pub(crate) fn layout(
         frame: &ResizeFrame,
         delta: Option<Mat4>,
         project: impl Fn([f32; 3]) -> Option<egui::Pos2>,
+        project_edge: impl Fn([f32; 3], [f32; 3]) -> Option<[egui::Pos2; 2]>,
+        viewport: egui::Rect,
         view_direction: [f32; 3],
     ) -> Option<Self> {
         let moved = |point: [f32; 3]| {
@@ -77,32 +84,53 @@ impl ResizeOverlay {
                 .unwrap_or(point)
         };
         let mut projected = Vec::with_capacity(8);
+        let mut bounds = egui::Rect::NOTHING;
         for x in [-1.0, 1.0] {
             for y in [-1.0, 1.0] {
                 for z in [-1.0, 1.0] {
                     let sides = [x, y, z];
-                    projected.push((sides, project(moved(frame.point(sides)))?));
+                    if let Some(point) = project(moved(frame.point(sides))) {
+                        projected.push((sides, point));
+                    }
+                    for axis in 0..3 {
+                        if sides[axis] > 0.0 {
+                            continue;
+                        }
+                        let mut other = sides;
+                        other[axis] = 1.0;
+                        if let Some([start, end]) =
+                            project_edge(moved(frame.point(sides)), moved(frame.point(other)))
+                        {
+                            bounds.extend_with(start);
+                            bounds.extend_with(end);
+                        }
+                    }
                 }
             }
         }
-        let mut bounds = egui::Rect::NOTHING;
-        for (_, point) in &projected {
-            bounds.extend_with(*point);
+        if bounds.min.x > bounds.max.x {
+            return None;
         }
-        let corners = [
-            bounds.left_top(),
-            bounds.right_top(),
-            bounds.left_bottom(),
-            bounds.right_bottom(),
-        ]
-        .into_iter()
-        .filter_map(|corner| {
-            projected
-                .iter()
-                .min_by(|a, b| a.1.distance(corner).total_cmp(&b.1.distance(corner)))
-                .map(|(sides, _)| (ResizeHandle::Corner(*sides), corner))
-        })
-        .collect();
+        // A corner dot stands for one corner; with a corner behind the
+        // camera the nearest-corner match would be a guess, so show none.
+        let corners = if projected.len() == 8 {
+            [
+                bounds.left_top(),
+                bounds.right_top(),
+                bounds.left_bottom(),
+                bounds.right_bottom(),
+            ]
+            .into_iter()
+            .filter_map(|corner| {
+                projected
+                    .iter()
+                    .min_by(|a, b| a.1.distance(corner).total_cmp(&b.1.distance(corner)))
+                    .map(|(sides, _)| (ResizeHandle::Corner(*sides), corner))
+            })
+            .collect()
+        } else {
+            Vec::new()
+        };
 
         let largest = frame.extents.iter().copied().fold(0.0_f32, f32::max);
         let probe = (largest * 0.05).max(1.0e-3);
@@ -114,15 +142,21 @@ impl ResizeOverlay {
             for (slot, side) in [-1.0_f32, 1.0].into_iter().enumerate() {
                 let outward = scale(frame.axes[axis], side);
                 let world = add(frame.center, scale(outward, frame.extents[axis] * 0.5));
-                let (Some(center), Some(ahead)) = (
-                    project(moved(world)),
-                    project(moved(add(world, scale(outward, probe)))),
-                ) else {
+                let Some(center) = project(moved(world)) else {
+                    // Behind the camera: this face is past the viewer.
                     complete = false;
                     continue;
                 };
                 centers[slot] = center;
-                let screen = ahead - center;
+                // Near the camera the point just outside the face can be the
+                // one behind it; step inward instead and flip the direction.
+                let screen = match project(moved(add(world, scale(outward, probe)))) {
+                    Some(ahead) => ahead - center,
+                    None => match project(moved(add(world, scale(outward, -probe)))) {
+                        Some(behind) => center - behind,
+                        None => continue,
+                    },
+                };
                 let length = screen.length();
                 if !length.is_finite() || length <= 1.0e-4 {
                     continue;
@@ -144,7 +178,7 @@ impl ResizeOverlay {
                 faces.push(FaceHandle {
                     handle: ResizeHandle::Face { axis, side },
                     axis,
-                    center,
+                    center: keep_in_view(center, viewport),
                     direction,
                 });
             }
@@ -234,6 +268,16 @@ impl ResizeOverlay {
     }
 }
 
+/// Moves a handle that would sit off-screen to the nearest point of the
+/// viewport, inset so the whole chevron shows.
+fn keep_in_view(point: egui::Pos2, viewport: egui::Rect) -> egui::Pos2 {
+    let area = viewport.shrink2(Vec2::splat(FACE_HANDLE_GAP).min(viewport.size() * 0.5));
+    egui::pos2(
+        point.x.clamp(area.left(), area.right()),
+        point.y.clamp(area.top(), area.bottom()),
+    )
+}
+
 /// How far a ray from `point` along unit `direction` travels before it
 /// leaves `bounds`; zero when the point is already outside.
 fn exit_distance(bounds: egui::Rect, point: egui::Pos2, direction: Vec2) -> f32 {
@@ -313,6 +357,21 @@ fn paint_drag_band(
 mod tests {
     use super::*;
 
+    fn layout_for_test(
+        frame: &ResizeFrame,
+        delta: Option<Mat4>,
+        project: impl Fn([f32; 3]) -> Option<egui::Pos2>,
+    ) -> Option<ResizeOverlay> {
+        ResizeOverlay::layout(
+            frame,
+            delta,
+            &project,
+            |a, b| Some([project(a)?, project(b)?]),
+            egui::Rect::from_min_size(egui::Pos2::ZERO, Vec2::splat(100_000.0)),
+            VIEW,
+        )
+    }
+
     fn frame() -> ResizeFrame {
         ResizeFrame {
             center: [0.0, 20.0, 0.0],
@@ -334,7 +393,7 @@ mod tests {
 
     #[test]
     fn overlay_frames_the_box_with_corner_dots_and_visible_face_handles() {
-        let overlay = ResizeOverlay::layout(&frame(), None, project, VIEW).unwrap_or_else(|| {
+        let overlay = layout_for_test(&frame(), None, project).unwrap_or_else(|| {
             panic!("layout");
         });
         assert_eq!(overlay.corners.len(), 4);
@@ -365,7 +424,7 @@ mod tests {
 
     #[test]
     fn resize_overlay_never_paints_a_size_number() {
-        let overlay = ResizeOverlay::layout(&frame(), None, project, VIEW).expect("overlay");
+        let overlay = layout_for_test(&frame(), None, project).expect("overlay");
         let ctx = egui::Context::default();
         let mut output = ctx.run_ui(egui::RawInput::default(), |ui| {
             overlay.paint(ui.painter(), None, None);
@@ -387,7 +446,7 @@ mod tests {
 
     #[test]
     fn every_drawn_handle_is_grabbable_where_it_is_drawn() {
-        let overlay = ResizeOverlay::layout(&frame(), None, project, VIEW).unwrap_or_else(|| {
+        let overlay = layout_for_test(&frame(), None, project).unwrap_or_else(|| {
             panic!("layout");
         });
         for (handle, point) in overlay.grab_points() {
@@ -401,7 +460,7 @@ mod tests {
 
     #[test]
     fn layout_follows_the_drag_and_needs_a_projectable_box() {
-        let still = ResizeOverlay::layout(&frame(), None, project, VIEW).unwrap_or_else(|| {
+        let still = layout_for_test(&frame(), None, project).unwrap_or_else(|| {
             panic!("layout");
         });
         let stretch = Mat4::from_rows([
@@ -411,11 +470,38 @@ mod tests {
             [0.0, 0.0, 0.0, 1.0],
         ])
         .ok();
-        let dragged =
-            ResizeOverlay::layout(&frame(), stretch, project, VIEW).unwrap_or_else(|| {
-                panic!("layout");
-            });
+        let dragged = layout_for_test(&frame(), stretch, project).unwrap_or_else(|| {
+            panic!("layout");
+        });
         assert!(dragged.bounds.width() > still.bounds.width() * 1.9);
-        assert!(ResizeOverlay::layout(&frame(), None, |_| None, VIEW).is_none());
+        assert!(layout_for_test(&frame(), None, |_| None).is_none());
+    }
+
+    #[test]
+    fn handles_stay_on_screen_when_the_box_is_larger_than_the_view() {
+        // Zoomed in so far that every corner is far outside the viewport:
+        // the handles must still be drawn, pinned inside the viewport.
+        let viewport = egui::Rect::from_min_size(egui::Pos2::ZERO, Vec2::new(800.0, 600.0));
+        let zoomed = |point: [f32; 3]| {
+            Some(egui::pos2(
+                400.0 + point[0] * 90.0,
+                300.0 - (point[1] - 20.0) * 90.0 + point[2] * 30.0,
+            ))
+        };
+        let overlay = ResizeOverlay::layout(
+            &frame(),
+            None,
+            zoomed,
+            |a, b| Some([zoomed(a)?, zoomed(b)?]),
+            viewport,
+            VIEW,
+        )
+        .expect("overlay survives zooming in");
+        assert!(!overlay.faces.is_empty());
+        for face in &overlay.faces {
+            assert!(viewport.contains(face.center), "{:?}", face.center);
+            // Pinned handles can overlap; whichever is nearest is grabbed.
+            assert!(overlay.handle_at(face.center).is_some());
+        }
     }
 }

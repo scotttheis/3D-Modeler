@@ -17,3 +17,5 @@ Independent code and both-theme capture review found no blockers.
 Capture pack: evidence/rebuild/captures/2026-11-18-settle-claw/README.md.
 Release build, smoke and both-theme captures passed; EXE 23,396,352 bytes.
 Recovery: `G:\3D-Modeler_snapshot_20261118-122146_settle-claw` (copy and file/byte counts verified).
+
+Update 2026-11-19: artwork replaced to follow erros/claw.png; see STATUS.md "Now". Owner: "much better!".

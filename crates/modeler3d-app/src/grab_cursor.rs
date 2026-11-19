@@ -32,35 +32,60 @@ impl egui::Plugin for GrabCursor {
     }
 }
 
-/// The jaw gap is the pointer hotspot in both states; only the jaws close.
+/// Claw art, drawn on the 960-unit grid of `erros/claw.png` and scaled down.
+const SCALE: f32 = 0.05;
+/// Hub centre, which the arms pivot around when the claw closes.
+const HUB: (f32, f32) = (490., 520.);
+/// Arm centre line for the left arm, from the hub up to the jaw tip.
+const ARM: [(f32, f32); 4] = [(405., 505.), (290., 390.), (290., 250.), (385., 115.)];
+/// How far each arm swings inward when closed.
+const CLOSE_RADIANS: f32 = 14. * std::f32::consts::PI / 180.;
+
+/// The jaw gap between the tips is the pointer hotspot in both states; only
+/// the arms swing shut. Shape follows the owner's reference icon: two flared
+/// pincer arms on a round hub, a neck and a flared base.
 fn paint(painter: &egui::Painter, pointer: Pos2, closed: bool) {
-    let (tip, elbow) = if closed { (1.5, 6.0) } else { (6.0, 12.0) };
     let outline = Color32::from_rgb(25, 29, 35);
     let fill = Color32::from_rgb(242, 245, 249);
-    for side in [-1., 1.] {
-        let points = [(tip, 0.), (elbow, -5.), (elbow, 2.), (5., 11.), (3., 12.)]
-            .map(|(x, y)| pointer + egui::vec2(side * x, y));
-        painter.add(Shape::line(points.to_vec(), Stroke::new(5., outline)));
-        painter.add(Shape::line(points.to_vec(), Stroke::new(2.5, fill)));
+    let at = |x: f32, y: f32| pointer + egui::vec2((x - HUB.0) * SCALE, (y - 115.) * SCALE);
+    let angle = if closed { CLOSE_RADIANS } else { 0. };
+    // The left arm swings clockwise when closing; the right arm mirrors it.
+    let arm = |mirror: bool| -> Vec<Pos2> {
+        let (sin, cos) = angle.sin_cos();
+        ARM.iter()
+            .map(|&(x, y)| {
+                let (dx, dy) = (x - HUB.0, y - HUB.1);
+                let x = HUB.0 + dx * cos - dy * sin;
+                let y = HUB.1 + dx * sin + dy * cos;
+                at(if mirror { 2. * HUB.0 - x } else { x }, y)
+            })
+            .collect()
+    };
+    for (rounding, rect) in [
+        (1.8, ((360., 720.), (620., 870.))),
+        (0.8, ((430., 625.), (550., 705.))),
+    ] {
+        painter.rect(
+            egui::Rect::from_min_max(at(rect.0.0, rect.0.1), at(rect.1.0, rect.1.1)),
+            rounding,
+            fill,
+            Stroke::new(1.8, outline),
+            egui::StrokeKind::Inside,
+        );
     }
-    let wrist = egui::Rect::from_min_max(
-        pointer + egui::vec2(-4., 11.),
-        pointer + egui::vec2(4., 20.),
-    );
-    painter.rect(
-        wrist,
-        1.5,
-        fill,
-        Stroke::new(1.5, outline),
-        egui::StrokeKind::Inside,
-    );
-    painter.line_segment(
-        [
-            pointer + egui::vec2(-2., 15.),
-            pointer + egui::vec2(2., 15.),
-        ],
-        Stroke::new(1.5, outline),
-    );
+    // Dark pass first, then the light pass, so the arms read as outlined tubes.
+    for (width, color) in [(150. * SCALE, outline), (70. * SCALE, fill)] {
+        for mirror in [false, true] {
+            let points = arm(mirror);
+            painter.add(Shape::line(points.clone(), Stroke::new(width, color)));
+            for point in points {
+                painter.circle_filled(point, width / 2., color);
+            }
+        }
+    }
+    let hub = at(HUB.0, HUB.1);
+    painter.circle_filled(hub, 125. * SCALE, outline);
+    painter.circle_filled(hub, 70. * SCALE, fill);
 }
 
 #[cfg(test)]

@@ -5738,10 +5738,18 @@ impl Modeler3dApp {
             "camera view direction",
         )
         .ok()?;
+        // Inside the box the handles are gone; until the camera has passed
+        // the first wall they stay, however far the view is zoomed in.
+        let local = subtract(self.camera.position(), frame.center);
+        if (0..3).all(|axis| dot(local, frame.axes[axis]).abs() < frame.extents[axis] * 0.5) {
+            return None;
+        }
         crate::resize_overlay::ResizeOverlay::layout(
             &frame,
             delta,
-            |point| project_gizmo_point(matrix, rect, point),
+            |point| project_gizmo_point_in_front(matrix, rect, point),
+            |start, end| project_gizmo_edge_in_front(matrix, rect, start, end),
+            rect,
             view_direction,
         )
     }
@@ -6264,10 +6272,26 @@ impl Modeler3dApp {
             gesture
         } else {
             let frame = self.rotation_control_frame()?;
-            let axis = frame.rotation_hit(&self.camera, ray)?;
+            let axis = self.rotation_axis_hit(frame, rect, pointer, ray)?;
             TransformGesture::rotate(snapshot, center, frame.axes[axis], ray)?
         };
         Some(ViewportDrag::Transform(Box::new(drag)))
+    }
+
+    /// A rotate ring is grabbed by its drawn grip (wide reach) or by the ring
+    /// itself; the grip wins when both are in reach.
+    fn rotation_axis_hit(
+        &self,
+        frame: ResizeFrame,
+        rect: egui::Rect,
+        pointer: egui::Pos2,
+        ray: modeler3d_viewport::Ray,
+    ) -> Option<usize> {
+        let grip = self
+            .current_scene_radius()
+            .and_then(|radius| self.camera.view_projection(radius).ok())
+            .and_then(|matrix| frame.rotation_grip_hit(&self.camera, matrix, rect, pointer));
+        grip.or_else(|| frame.rotation_hit(&self.camera, ray))
     }
 
     fn transform_axis_at_pointer(
@@ -6292,8 +6316,8 @@ impl Modeler3dApp {
                     .camera
                     .screen_ray(screen[0], screen[1], scene_radius)
                     .ok()?;
-                self.rotation_control_frame()?
-                    .rotation_hit(&self.camera, ray)
+                let frame = self.rotation_control_frame()?;
+                self.rotation_axis_hit(frame, rect, pointer, ray)
             }
             GizmoMode::Resize => None,
         }
@@ -8489,6 +8513,64 @@ fn project_gizmo_point(matrix: Mat4, rect: egui::Rect, point: [f32; 3]) -> Optio
         return None;
     }
     clip_point_to_viewport(rect, clip)
+}
+
+/// Depth (clip w) at or below which a point counts as at the camera.
+const GIZMO_NEAR_W: f32 = 1.0e-3;
+
+/// Projects a point that is in front of the camera, whether or not it lands
+/// inside the viewport.
+fn project_gizmo_point_in_front(
+    matrix: Mat4,
+    rect: egui::Rect,
+    point: [f32; 3],
+) -> Option<egui::Pos2> {
+    let clip = matrix.transform4([point[0], point[1], point[2], 1.0]);
+    if clip.iter().any(|value| !value.is_finite()) || clip[3] <= GIZMO_NEAR_W {
+        return None;
+    }
+    clip_point_to_viewport(rect, clip).map(|point| keep_near_viewport(rect, point))
+}
+
+/// Projects a segment cut where it crosses the camera plane, keeping the
+/// parts outside the viewport.
+fn project_gizmo_edge_in_front(
+    matrix: Mat4,
+    rect: egui::Rect,
+    start: [f32; 3],
+    end: [f32; 3],
+) -> Option<[egui::Pos2; 2]> {
+    let mut points = [
+        matrix.transform4([start[0], start[1], start[2], 1.0]),
+        matrix.transform4([end[0], end[1], end[2], 1.0]),
+    ];
+    if points.iter().flatten().any(|value| !value.is_finite()) {
+        return None;
+    }
+    let distances = points.map(|point| point[3] - GIZMO_NEAR_W);
+    if distances[0] <= 0.0 && distances[1] <= 0.0 {
+        return None;
+    }
+    let amount = distances[0] / (distances[0] - distances[1]);
+    if distances[0] <= 0.0 {
+        points[0] = interpolate_clip_point(points[0], points[1], amount);
+    } else if distances[1] <= 0.0 {
+        points[1] = interpolate_clip_point(points[0], points[1], amount);
+    }
+    Some([
+        keep_near_viewport(rect, clip_point_to_viewport(rect, points[0])?),
+        keep_near_viewport(rect, clip_point_to_viewport(rect, points[1])?),
+    ])
+}
+
+/// Points almost at the camera project to enormous coordinates; keep them
+/// within a few screens so drawing stays well behaved.
+fn keep_near_viewport(rect: egui::Rect, point: egui::Pos2) -> egui::Pos2 {
+    let area = rect.expand(rect.size().max_elem() * 4.0);
+    egui::pos2(
+        point.x.clamp(area.left(), area.right()),
+        point.y.clamp(area.top(), area.bottom()),
+    )
 }
 
 fn project_gizmo_line(

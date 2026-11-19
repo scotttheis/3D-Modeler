@@ -99,32 +99,24 @@ impl ResizeFrame {
     }
 }
 
-/// Thin rings and filled double-ended grips share the mesh depth test.
-/// Grips follow the owner's rotate.png proportions in viewport points.
-pub(super) fn guide_geometry(
-    frame: ResizeFrame,
+/// Screen reach of a rotate grip, in points: about twice the drawn arrow, so
+/// the arrow is easy to catch without touching the object behind it.
+const GRIP_HIT_RADIUS: f32 = 34.0;
+
+/// One grip per ring: axis index, colour and screen path with depths.
+type Grip = (usize, [f32; 4], Vec<(eframe::egui::Pos2, f32)>);
+
+/// The grip chosen for each ring. Painting and picking both use this, so what
+/// is drawn is what can be grabbed.
+fn chosen_grips(
+    geometry: &GizmoGeometry,
     camera: &Camera,
+    frame: ResizeFrame,
     matrix: modeler3d_viewport::Mat4,
     rect: eframe::egui::Rect,
-    emphasized: Option<usize>,
-) -> GizmoGeometry {
-    let Some(mut geometry) = frame.rotation_geometry(camera) else {
-        return GizmoGeometry::default();
-    };
-    let Ok(inverse) = matrix.inverse() else {
-        return GizmoGeometry::default();
-    };
+) -> Vec<Grip> {
     let segments = modeler3d_viewport::ROTATE_RING_SEGMENTS as usize;
-    for (axis, ring) in geometry.lines.chunks_exact_mut(segments).enumerate() {
-        for line in ring {
-            line.width_pixels = 1.0;
-            if emphasized == Some(axis) {
-                for value in &mut line.color[..3] {
-                    *value += (1.0 - *value) * 0.35;
-                }
-            }
-        }
-    }
+    let mut chosen = Vec::new();
     let mut occupied = Vec::<eframe::egui::Rect>::new();
     for (axis, ring) in geometry.lines.chunks_exact(segments).enumerate() {
         let preferred = (axis * segments / 3 + segments / 8) % segments;
@@ -155,6 +147,77 @@ pub(super) fn guide_geometry(
             continue;
         };
         occupied.push(bounds);
+        chosen.push((axis, color, path));
+    }
+    chosen
+}
+
+impl ResizeFrame {
+    /// The ring whose drawn grip is within reach of `pointer` (viewport
+    /// points), nearest first.
+    pub(super) fn rotation_grip_hit(
+        self,
+        camera: &Camera,
+        matrix: modeler3d_viewport::Mat4,
+        rect: eframe::egui::Rect,
+        pointer: eframe::egui::Pos2,
+    ) -> Option<usize> {
+        let geometry = self.rotation_geometry(camera)?;
+        chosen_grips(&geometry, camera, self, matrix, rect)
+            .into_iter()
+            .filter_map(|(axis, _, path)| {
+                let distance = path
+                    .windows(2)
+                    .map(|pair| distance_to_segment(pointer, pair[0].0, pair[1].0))
+                    .fold(f32::INFINITY, f32::min);
+                (distance <= GRIP_HIT_RADIUS).then_some((distance, axis))
+            })
+            .min_by(|a, b| a.0.total_cmp(&b.0))
+            .map(|(_, axis)| axis)
+    }
+}
+
+fn distance_to_segment(
+    point: eframe::egui::Pos2,
+    start: eframe::egui::Pos2,
+    end: eframe::egui::Pos2,
+) -> f32 {
+    let span = end - start;
+    let length_squared = span.length_sq();
+    if !length_squared.is_finite() || length_squared <= 1.0e-6 {
+        return point.distance(start);
+    }
+    let along = ((point - start).dot(span) / length_squared).clamp(0.0, 1.0);
+    point.distance(start + span * along)
+}
+
+/// Thin rings and filled double-ended grips share the mesh depth test.
+/// Grips follow the owner's rotate.png proportions in viewport points.
+pub(super) fn guide_geometry(
+    frame: ResizeFrame,
+    camera: &Camera,
+    matrix: modeler3d_viewport::Mat4,
+    rect: eframe::egui::Rect,
+    emphasized: Option<usize>,
+) -> GizmoGeometry {
+    let Some(mut geometry) = frame.rotation_geometry(camera) else {
+        return GizmoGeometry::default();
+    };
+    let Ok(inverse) = matrix.inverse() else {
+        return GizmoGeometry::default();
+    };
+    let segments = modeler3d_viewport::ROTATE_RING_SEGMENTS as usize;
+    for (axis, ring) in geometry.lines.chunks_exact_mut(segments).enumerate() {
+        for line in ring {
+            line.width_pixels = 1.0;
+            if emphasized == Some(axis) {
+                for value in &mut line.color[..3] {
+                    *value += (1.0 - *value) * 0.35;
+                }
+            }
+        }
+    }
+    for (_, color, path) in chosen_grips(&geometry, camera, frame, matrix, rect) {
         let world = |point: eframe::egui::Pos2, depth: f32| {
             inverse
                 .transform_point([
