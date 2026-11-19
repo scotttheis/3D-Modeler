@@ -92,7 +92,7 @@ The overseer reads this file and `STATUS.md` and picks the next unticked task.
 
 ## Progress
 
-- [ ] Session 1
+- [x] Session 1 (2026-11-19: E1-E3, E5-E7 done; E4 and M1 were already built as OF-35 and OF-38)
 - [ ] Session 2
 - [ ] Session 3
 

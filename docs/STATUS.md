@@ -29,6 +29,8 @@ for RC2. Next after RC2: RC3 / 0.1.3.
 
 ## Now
 
+**Finish plan Session 1 done (2026-11-19):** one-current-build rule committed; STATUS trimmed (old entries in `WORK_LOG.md`); Windows username removed from tracked files (drive letters left); Smooth now right of Subtract; tests for Center View, Frame, Snap toggle, window icon; `README.md`, Apache 2.0 `LICENSE`, workspace licence set to Apache-2.0. Full gate passed (`logs/gate/20261119-142720-full`). Release rebuilt (`Update-CurrentBuild.ps1`, old exe in `G:D-Modeler-old-builds61119-135038_OLD-BUILD`). Recovery: `G:D-Modeler_snapshot_20261119-144135_finish-session1` (15,223 files, 2,279,020,930 bytes; counts match).
+
 **Claw redraw, Rotate grip reach, Resize handles when zoomed in (owner, 2026-11-19):**
 the grab cursor now follows `erros/claw.png`: two flared pincer arms on a round
 hub, neck and flared base; arms splay open and swing shut at the same jaw-gap
