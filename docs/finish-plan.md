@@ -74,6 +74,19 @@ one commit per task, snapshots, no approval inferred) still apply.
 3. **Session 3: ship.** H1, M8, M9, H2, Ship gate, H3. Owner signs in to
    GitHub; v1.0 goes public.
 
+Model for the overseer session (the owner picks it with `/model` before
+pasting the prompt; workers are chosen by the overseer as above):
+
+| Session | Overseer model | Effort | Why |
+|---|---|---|---|
+| 1 | **Sonnet 5.5** | low | Easy tasks and one medium; reviewing small diffs |
+| 2 | **Sonnet 5.5** | medium | Visible polish; more judgement on captures |
+| 3 | **Opus 5.5** | medium | Smoothing algorithm, build pipelines, history rewrite and the public push |
+
+Escalate a session to Opus only if a task fails review twice (plan 3.2).
+Every session ends by telling the owner, in bold, the model and effort for
+the next session and giving the prompt to paste.
+
 Each session starts with the owner saying "carry on with the finish plan".
 The overseer reads this file and `STATUS.md` and picks the next unticked task.
 
