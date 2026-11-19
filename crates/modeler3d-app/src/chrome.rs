@@ -37,6 +37,64 @@ pub(crate) const CONTROL_HEIGHT: f32 = 26.0;
 /// Height of a list row.
 pub(crate) const ROW_HEIGHT: f32 = 28.0;
 
+/// Shared floating dialog surface on every desktop platform.
+pub(crate) fn dialog_frame(mode: crate::theme::ThemeMode) -> egui::Frame {
+    let palette = crate::theme::ThemePalette::for_mode(mode);
+    egui::Frame::new()
+        .fill(palette.surface)
+        .stroke(Stroke::new(1.0, palette.border))
+        .corner_radius(RADIUS_SURFACE)
+        .shadow(crate::theme::floating_shadow(mode))
+        .inner_margin(egui::Margin::same(SPACE_4 as i8))
+}
+
+/// Raised dialog title surface, using the active palette on every platform.
+pub(crate) fn dialog_title_frame(mode: crate::theme::ThemeMode) -> egui::Frame {
+    dialog_frame(mode).fill(crate::theme::ThemePalette::for_mode(mode).surface_raised)
+}
+
+/// Shared dialog action height and shape; the caller retains action semantics.
+pub(crate) fn dialog_button(label: impl Into<egui::WidgetText>) -> egui::Button<'static> {
+    egui::Button::new(label)
+        .min_size(Vec2::new(0.0, CONTROL_HEIGHT))
+        .corner_radius(RADIUS_CONTROL)
+}
+
+/// Primary dialog action with the palette's contrast-tested accent and text.
+pub(crate) fn dialog_primary_button(
+    label: impl Into<String>,
+    palette: crate::theme::ThemePalette,
+) -> egui::Button<'static> {
+    dialog_button(egui::RichText::new(label).color(palette.accent_text))
+        .fill(palette.accent_control)
+}
+
+/// A single dialog footer row, with the first action placed at the right edge.
+pub(crate) fn dialog_actions(ui: &mut egui::Ui, contents: impl FnOnce(&mut egui::Ui)) {
+    ui.add_space(SPACE_4);
+    ui.horizontal(|ui| {
+        ui.spacing_mut().item_spacing.x = SPACE_2;
+        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), contents);
+    });
+}
+
+/// Selectable error text with a palette-coloured warning glyph on every platform.
+pub(crate) fn dialog_error(ui: &mut egui::Ui, palette: crate::theme::ThemePalette, text: &str) {
+    ui.horizontal_top(|ui| {
+        let (icon, _) = ui.allocate_exact_size(Vec2::splat(FONT_SMALL), egui::Sense::hover());
+        paint_glyph(ui.painter(), icon, Glyph::Warning, palette.error_text);
+        ui.add(
+            egui::Label::new(
+                egui::RichText::new(text)
+                    .size(FONT_SMALL)
+                    .color(palette.error_text),
+            )
+            .wrap()
+            .selectable(true),
+        );
+    });
+}
+
 /// Axis colours shared by numeric fields and the viewport handles.
 pub(crate) const AXIS_COLORS: [Color32; 3] = [
     Color32::from_rgb(0xE5, 0x5C, 0x5C),

@@ -6,7 +6,7 @@
 
 use crate::chrome::{
     CONTROL_HEIGHT, FONT_BODY, FONT_CAPTION, FONT_SMALL, FONT_TITLE, Glyph, RADIUS_CONTROL,
-    ROW_HEIGHT, SPACE_1, SPACE_2, SPACE_3, SPACE_4,
+    RADIUS_SURFACE, ROW_HEIGHT, SPACE_1, SPACE_2, SPACE_3, SPACE_4, SPACE_5,
 };
 
 mod app_tools;
@@ -3445,111 +3445,122 @@ impl Modeler3dApp {
     fn render_welcome(&mut self, ui: &mut Ui) {
         let palette = ThemePalette::for_mode(self.theme_mode);
         egui::CentralPanel::default()
-            .frame(egui::Frame::new().fill(palette.background))
+            .frame(
+                egui::Frame::new()
+                    .fill(palette.background)
+                    .inner_margin(egui::Margin::same(SPACE_5 as i8)),
+            )
             .show(ui, |ui| {
                 egui::ScrollArea::vertical()
                     .auto_shrink([false, false])
                     .show(ui, |ui| {
-                        ui.add_space(46.0);
+                        let width = ui.available_width().min(1200.0);
+                        let inset = ((ui.available_width() - width) * 0.5).max(0.0);
                         ui.horizontal(|ui| {
-                            ui.add_space((ui.available_width() * 0.22).min(260.0));
-                            let (logo_rect, _) =
-                                ui.allocate_exact_size(Vec2::splat(72.0), Sense::hover());
-                            self.paint_original_icon(
-                                ui,
-                                logo_rect,
-                                OriginalAsset::Brandmark,
-                                palette,
-                            );
-                            ui.add_space(18.0);
+                            ui.spacing_mut().item_spacing.x = 0.0;
+                            ui.add_space(inset);
                             ui.vertical(|ui| {
-                                ui.label(
-                                    RichText::new("Imagine, Design, Play")
-                                        .small()
-                                        .strong()
-                                        .color(palette.accent),
-                                );
-                                ui.add_space(2.0);
-                                ui.heading(RichText::new("3D Modeler").size(30.0).strong());
-                                ui.label(
-                                    RichText::new(
-                                        "Start a scene, open a model, or return to a recent project.",
-                                    )
-                                    .color(palette.muted),
-                                );
+                                self.render_welcome_content(ui, palette, width);
                             });
                         });
-                        ui.add_space(30.0);
-                        ui.horizontal(|ui| {
-                            ui.add_space((ui.available_width() * 0.22).min(260.0));
-                            if self.welcome_action_card(
-                                ui,
-                                palette,
-                                OriginalAsset::Action("New Scene.png"),
-                                "New Scene",
-                                "Start with an empty workspace",
-                            ) {
-                                self.dispatch(CommandId::NewScene);
-                            }
-                            ui.add_space(18.0);
-                            if self.welcome_action_card(
-                                ui,
-                                palette,
-                                OriginalAsset::Action("Folder and Open.png"),
-                                "Open Project",
-                                "Load a saved 3D Modeler project",
-                            ) {
-                                self.dispatch(CommandId::OpenProject);
-                            }
-                        });
-                        ui.add_space(34.0);
-
-                        let entries = self.recent_entries();
-                        ui.horizontal(|ui| {
-                            ui.add_space(20.0);
-                            ui.label(
-                                RichText::new("RECENT")
-                                    .size(FONT_SMALL)
-                                    .strong()
-                                    .color(palette.muted),
-                            );
-                        });
-                        ui.add_space(10.0);
-                        if entries.is_empty() {
-                            egui::Frame::new()
-                                .fill(palette.surface_alt)
-                                .stroke(Stroke::new(1.0, palette.divider))
-                                .corner_radius(crate::chrome::RADIUS_SURFACE)
-                                .outer_margin(egui::Margin::symmetric(20, 0))
-                                .inner_margin(egui::Margin::same(18))
-                                .show(ui, |ui| {
-                                    ui.set_min_width((ui.available_width() - SPACE_1).max(220.0));
-                                    ui.label(
-                                        RichText::new("Recent projects and models appear here.")
-                                            .color(palette.muted),
-                                    );
-                                });
-                        } else {
-                            let (columns, column_width) = recent_grid_layout(
-                                ui.available_width(),
-                                ui.spacing().item_spacing.x,
-                            );
-                            for row in entries.chunks(columns) {
-                                ui.horizontal(|ui| {
-                                    for entry in row {
-                                        let _ = ui.allocate_ui_with_layout(
-                                            // Include the wrapped source path in the scroll range.
-                                            Vec2::new(column_width, 120.0),
-                                            Layout::top_down(Align::Min),
-                                            |ui| self.render_recent_entry(ui, entry, palette),
-                                        );
-                                    }
-                                });
-                                ui.add_space(10.0);
-                            }
-                        }
                     });
             });
+    }
+
+    fn render_welcome_content(&mut self, ui: &mut Ui, palette: ThemePalette, width: f32) {
+        ui.set_width(width);
+        ui.spacing_mut().item_spacing = Vec2::splat(SPACE_4);
+        ui.add_space(SPACE_5);
+        ui.horizontal(|ui| {
+            let (logo_rect, _) = ui.allocate_exact_size(Vec2::splat(SPACE_5 * 3.0), Sense::hover());
+            self.paint_original_icon(ui, logo_rect, OriginalAsset::Brandmark, palette);
+            ui.vertical(|ui| {
+                ui.spacing_mut().item_spacing.y = SPACE_1;
+                ui.label(
+                    RichText::new("Imagine, Design, Play")
+                        .size(FONT_SMALL)
+                        .strong()
+                        .color(palette.accent),
+                );
+                ui.heading(
+                    RichText::new("3D Modeler")
+                        .size(crate::chrome::FONT_HERO)
+                        .strong(),
+                );
+                ui.label(
+                    RichText::new("Start a scene, open a model, or return to a recent project.")
+                        .color(palette.muted),
+                );
+            });
+        });
+        ui.add_space(SPACE_2);
+        let (columns, column_width) = recent_grid_layout(width, SPACE_4);
+        let action_columns = columns.min(2);
+        egui::Grid::new("welcome-actions")
+            .num_columns(action_columns)
+            .spacing(Vec2::splat(SPACE_4))
+            .show(ui, |ui| {
+                if self.welcome_action_card(
+                    ui,
+                    palette,
+                    OriginalAsset::Action("New Scene.png"),
+                    "New Scene",
+                    "Start with an empty workspace",
+                    column_width,
+                ) {
+                    self.dispatch(CommandId::NewScene);
+                }
+                if action_columns == 1 {
+                    ui.end_row();
+                }
+                if self.welcome_action_card(
+                    ui,
+                    palette,
+                    OriginalAsset::Action("Folder and Open.png"),
+                    "Open Project",
+                    "Load a saved 3D Modeler project",
+                    column_width,
+                ) {
+                    self.dispatch(CommandId::OpenProject);
+                }
+                ui.end_row();
+            });
+        ui.add_space(SPACE_5);
+        ui.label(
+            RichText::new("RECENT")
+                .size(FONT_SMALL)
+                .strong()
+                .color(palette.muted),
+        );
+        let entries = self.recent_entries();
+        if entries.is_empty() {
+            egui::Frame::new()
+                .fill(palette.surface_alt)
+                .stroke(Stroke::new(1.0, palette.border))
+                .corner_radius(RADIUS_SURFACE)
+                .inner_margin(egui::Margin::same(SPACE_4 as i8))
+                .show(ui, |ui| {
+                    ui.set_width((width - 2.0 * (SPACE_4 + 1.0)).max(0.0));
+                    ui.label(
+                        RichText::new(
+                            "Your next idea starts here. Create a scene or open a project above.",
+                        )
+                        .color(palette.muted),
+                    );
+                });
+        } else {
+            for row in entries.chunks(columns) {
+                ui.horizontal_top(|ui| {
+                    for entry in row {
+                        ui.allocate_ui_with_layout(
+                            Vec2::new(column_width, 120.0),
+                            Layout::top_down(Align::Min),
+                            |ui| self.render_recent_entry(ui, entry, palette),
+                        );
+                    }
+                });
+            }
+        }
     }
 
     fn welcome_action_card(
@@ -3559,14 +3570,16 @@ impl Modeler3dApp {
         asset: OriginalAsset,
         title: &'static str,
         subtitle: &'static str,
+        width: f32,
     ) -> bool {
-        let (rect, response) = ui.allocate_exact_size(Vec2::new(280.0, 96.0), Sense::click());
+        let (rect, response) =
+            ui.allocate_exact_size(Vec2::new(width, SPACE_5 * 4.0), Sense::click());
         response.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, true, title));
         let response = response.on_hover_cursor(egui::CursorIcon::PointingHand);
         let painter = ui.painter_at(rect);
         painter.rect_filled(
             rect,
-            12.0,
+            RADIUS_SURFACE,
             if response.hovered() || response.has_focus() {
                 palette.hover
             } else {
@@ -3575,7 +3588,7 @@ impl Modeler3dApp {
         );
         painter.rect_stroke(
             rect,
-            12.0,
+            RADIUS_SURFACE,
             Stroke::new(
                 1.0,
                 if response.hovered() || response.has_focus() {
@@ -3589,24 +3602,29 @@ impl Modeler3dApp {
         self.paint_original_icon(
             ui,
             egui::Rect::from_center_size(
-                egui::pos2(rect.left() + 54.0, rect.center().y),
-                Vec2::splat(46.0),
+                egui::pos2(rect.left() + SPACE_4 + SPACE_5, rect.center().y),
+                Vec2::splat(SPACE_5 * 2.0),
             ),
             asset,
             palette,
         );
+        let text_left = rect.left() + SPACE_4 + SPACE_5 * 2.0 + SPACE_3;
         painter.text(
-            egui::pos2(rect.left() + 94.0, rect.center().y - 10.0),
+            egui::pos2(text_left, rect.center().y - SPACE_3),
             Align2::LEFT_CENTER,
             title,
             FontId::proportional(FONT_TITLE),
             palette.text,
         );
-        painter.text(
-            egui::pos2(rect.left() + 94.0, rect.center().y + 13.0),
-            Align2::LEFT_CENTER,
-            subtitle,
+        let subtitle_galley = painter.layout(
+            subtitle.to_owned(),
             FontId::proportional(FONT_CAPTION),
+            palette.muted,
+            (rect.right() - text_left - SPACE_4).max(0.0),
+        );
+        painter.galley(
+            egui::pos2(text_left, rect.center().y + SPACE_1),
+            subtitle_galley,
             palette.muted,
         );
         response.on_hover_text(subtitle).clicked()
@@ -3713,18 +3731,24 @@ impl Modeler3dApp {
     }
 
     fn render_recent_entry(&mut self, ui: &mut Ui, entry: &RecentEntry, palette: ThemePalette) {
+        let loading = entry.kind == RecentEntryKind::Supported
+            && self.recent_preview_pending.contains(&entry.path);
         let kind_label = match entry.kind {
+            RecentEntryKind::Supported if loading => "Loading preview...",
             RecentEntryKind::Supported => "Ready",
-            RecentEntryKind::Missing => "Missing",
+            RecentEntryKind::Missing => "File not found",
             RecentEntryKind::Unsupported => "Unsupported format",
         };
+        let width = (ui.available_width() - 2.0 * (SPACE_3 + 1.0)).max(0.0);
         egui::Frame::new()
             .fill(palette.panel)
             .stroke(Stroke::new(1.0, palette.border))
-            .corner_radius(crate::chrome::RADIUS_SURFACE)
+            .corner_radius(RADIUS_SURFACE)
             .inner_margin(egui::Margin::same(SPACE_3 as i8))
             .show(ui, |ui| {
-                ui.set_min_size(Vec2::new(256.0, 62.0));
+                ui.set_width(width);
+                ui.set_min_height(62.0);
+                ui.spacing_mut().item_spacing = Vec2::splat(SPACE_2);
                 ui.horizontal(|ui| {
                     let is_project = entry
                         .path
@@ -3741,6 +3765,18 @@ impl Modeler3dApp {
                             egui::Rect::from_min_max(egui::Pos2::ZERO, egui::pos2(1.0, 1.0)),
                             Color32::WHITE,
                         );
+                    } else if loading {
+                        ui.painter().rect_filled(
+                            preview_rect,
+                            RADIUS_CONTROL,
+                            palette.surface_raised,
+                        );
+                        ui.painter().rect_stroke(
+                            preview_rect,
+                            RADIUS_CONTROL,
+                            Stroke::new(1.0, palette.border),
+                            egui::StrokeKind::Inside,
+                        );
                     } else {
                         self.paint_original_icon(
                             ui,
@@ -3753,16 +3789,6 @@ impl Modeler3dApp {
                             palette,
                         );
                     }
-                    ui.add_space(6.0);
-                    ui.vertical(|ui| {
-                        let color = if entry.kind == RecentEntryKind::Supported {
-                            palette.text
-                        } else {
-                            palette.muted
-                        };
-                        ui.label(RichText::new(&entry.label).color(color).strong());
-                        ui.label(RichText::new(kind_label).small().color(palette.muted));
-                    });
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                         if entry.kind == RecentEntryKind::Supported {
                             if ui.small_button("Open").clicked() {
@@ -3779,12 +3805,34 @@ impl Modeler3dApp {
                                 self.commands.set_status("Removed recent entry");
                             }
                         }
+                        ui.with_layout(Layout::top_down(Align::Min), |ui| {
+                            let color = if entry.kind == RecentEntryKind::Supported {
+                                palette.text
+                            } else {
+                                palette.muted
+                            };
+                            ui.add(
+                                egui::Label::new(RichText::new(&entry.label).color(color).strong())
+                                    .truncate(),
+                            );
+                            ui.add(
+                                egui::Label::new(
+                                    RichText::new(kind_label)
+                                        .size(FONT_CAPTION)
+                                        .color(palette.muted),
+                                )
+                                .truncate(),
+                            );
+                        });
                     });
                 });
-                ui.label(
-                    RichText::new(entry.path.display().to_string())
-                        .small()
-                        .color(palette.muted),
+                ui.add(
+                    egui::Label::new(
+                        RichText::new(entry.path.display().to_string())
+                            .size(FONT_CAPTION)
+                            .color(palette.muted),
+                    )
+                    .wrap(),
                 );
             });
     }

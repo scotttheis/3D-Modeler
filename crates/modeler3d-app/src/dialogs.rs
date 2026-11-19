@@ -14,7 +14,10 @@ use modeler3d_core::{
 use modeler3d_platform::{SlicerInfo, slicer_info_from_path};
 use modeler3d_viewport::ViewportLighting;
 
-use crate::chrome::{SPACE_1, SPACE_5};
+use crate::chrome::{
+    CONTROL_HEIGHT, FONT_SMALL, FONT_TITLE, SPACE_1, SPACE_4, SPACE_5, dialog_actions,
+    dialog_button, dialog_error, dialog_frame, dialog_primary_button, dialog_title_frame,
+};
 use crate::commands::{CommandState, DialogKind, ImportUnit};
 use crate::numeric_controls::parse_distance_mm;
 use crate::preferences::DisplayUnit;
@@ -528,7 +531,10 @@ impl DialogState {
         settings_work_area: Option<egui::Rect>,
     ) -> Option<DialogAction> {
         let mut action = None;
-        let title = self.title();
+        let palette = ThemePalette::for_mode(self.theme_mode);
+        let title = RichText::new(self.title())
+            .size(FONT_TITLE)
+            .color(palette.text);
         let window = match settings_work_area {
             // Settings is docked between the shell bars and fills that area.
             Some(rect) if self.kind == DialogKind::Settings => egui::Window::new(title)
@@ -547,22 +553,25 @@ impl DialogState {
             }
             _ => dialog_window(ctx, title),
         };
+        let window = window
+            .frame(dialog_frame(self.theme_mode))
+            .title_frame(dialog_title_frame(self.theme_mode));
         let shown = window.show(ctx, |ui| {
+            ui.spacing_mut().interact_size.y = CONTROL_HEIGHT;
             let min_width = if self.kind == DialogKind::Settings {
-                settings_work_area.map_or(360.0, |rect| (rect.width() - 24.0).max(240.0))
+                settings_work_area.map_or(360.0, |rect| {
+                    (rect.width() - (SPACE_4 + 1.0) * 2.0).max(240.0)
+                })
             } else {
                 360.0
             };
             ui.set_min_width(min_width);
             match self.kind {
-                DialogKind::EditAction(command) => {
+                DialogKind::EditAction(_) => {
                     ui.label("Select an object, then apply the tool.");
-                    if ui.button("Apply").clicked() {
-                        action = Some(DialogAction::EditAction(command));
-                    }
                 }
-                DialogKind::OpenProject => self.path_dialog(ui, "Open", &mut action),
-                DialogKind::ImportModel => self.import_dialog(ui, &mut action),
+                DialogKind::OpenProject => self.path_dialog(ui),
+                DialogKind::ImportModel => self.import_dialog(ui),
                 DialogKind::SaveProject | DialogKind::Export => self.file_type_dialog(ui),
                 DialogKind::Settings => {
                     let max_height = settings_work_area.map_or_else(
@@ -573,12 +582,12 @@ impl DialogState {
                         .max_height(max_height)
                         .show(ui, |ui| self.settings_dialog(ui, &mut action));
                 }
-                DialogKind::Repair => self.repair_dialog(ui, &mut action),
+                DialogKind::Repair => self.repair_dialog(ui),
                 DialogKind::PrintPrep => self.print_prep_dialog(ui, &mut action),
                 DialogKind::Material => self.material_dialog(ui, &mut action),
                 DialogKind::Torus => self.torus_dialog(ui, &mut action),
-                DialogKind::Emboss => self.emboss_dialog(ui, &mut action),
-                DialogKind::Hollow => self.hollow_dialog(ui, &mut action),
+                DialogKind::Emboss => self.emboss_dialog(ui),
+                DialogKind::Hollow => self.hollow_dialog(ui),
                 DialogKind::Simplify => self.simplify_dialog(ui, &mut action),
                 DialogKind::Subdivide => self.subdivide_dialog(ui, &mut action),
             }
@@ -589,10 +598,16 @@ impl DialogState {
                 egui::ScrollArea::vertical()
                     .max_height(180.0)
                     .show(ui, |ui| {
-                        ui.add(
-                            egui::Label::new(RichText::new(&self.message).color(color))
+                        if matches!(self.message_tone, MessageTone::Error) {
+                            dialog_error(ui, palette, &self.message);
+                        } else {
+                            ui.add(
+                                egui::Label::new(
+                                    RichText::new(&self.message).size(FONT_SMALL).color(color),
+                                )
                                 .selectable(true),
-                        )
+                            );
+                        }
                     });
                 copy_button(ui, "dialog-message-copy", &self.message);
             }
@@ -601,11 +616,7 @@ impl DialogState {
                 DialogKind::SaveProject | DialogKind::Export => {
                     self.file_type_footer(ui, &mut action);
                 }
-                _ => {
-                    if ui.button(self.dismiss_label()).clicked() {
-                        action = Some(DialogAction::Close);
-                    }
-                }
+                _ => self.action_footer(ui, &mut action),
             }
         });
         if action.is_none()
@@ -616,14 +627,19 @@ impl DialogState {
         }
         if self.about_open {
             let mut close_about = false;
-            dialog_window(ctx, "About 3D Modeler").show(ctx, |ui| {
-                ui.label(
-                    "A reverse-engineering-informed 3D model repair and building application.",
-                );
-                if ui.button("Close About").clicked() {
-                    close_about = true;
-                }
-            });
+            dialog_window(ctx, RichText::new("About 3D Modeler").size(FONT_TITLE))
+                .frame(dialog_frame(self.theme_mode))
+                .title_frame(dialog_title_frame(self.theme_mode))
+                .show(ctx, |ui| {
+                    ui.label(
+                        "A reverse-engineering-informed 3D model repair and building application.",
+                    );
+                    dialog_actions(ui, |ui| {
+                        if ui.add(dialog_button("Close About")).clicked() {
+                            close_about = true;
+                        }
+                    });
+                });
             if close_about {
                 self.about_open = false;
             }
@@ -692,12 +708,7 @@ impl DialogState {
         self.theme_mode = mode;
     }
 
-    fn path_dialog(
-        &mut self,
-        ui: &mut egui::Ui,
-        action_label: &str,
-        action: &mut Option<DialogAction>,
-    ) {
+    fn path_dialog(&mut self, ui: &mut egui::Ui) {
         ui.label(match self.kind {
             DialogKind::OpenProject => "3D Modeler project (.3dp)",
             _ => "Path",
@@ -707,7 +718,7 @@ impl DialogState {
             if path_changed {
                 self.native_overwrite_confirmed = false;
             }
-            if ui.button("Browse...").clicked() {
+            if ui.add(dialog_button("Browse...")).clicked() {
                 let selected = native_path_picker(self.kind, &self.path_text);
                 self.path_text = path_after_browse(&self.path_text, selected.as_deref());
                 if selected.is_some() {
@@ -718,13 +729,6 @@ impl DialogState {
             }
         });
         ui.label(RichText::new("The path is validated before the core file operation.").weak());
-        if ui.button(action_label).clicked() {
-            let path = PathBuf::from(self.path_text.trim());
-            *action = Some(match self.kind {
-                DialogKind::OpenProject => DialogAction::Open(path),
-                _ => return,
-            });
-        }
     }
 
     /// Save: quick-pick STL or 3MF (STL default). Export: a drop-down of every
@@ -738,7 +742,7 @@ impl DialogState {
                         self.file_type == file_type,
                         RichText::new(file_type.short_label()).strong(),
                     )
-                    .min_size(egui::vec2(72.0, 32.0));
+                    .min_size(egui::vec2(72.0, CONTROL_HEIGHT));
                     if ui.add(button).on_hover_text(file_type.label()).clicked() {
                         self.file_type = file_type;
                     }
@@ -762,13 +766,14 @@ impl DialogState {
 
     /// The Save / Export button and Cancel on one line (OF-22, OF-25).
     fn file_type_footer(&mut self, ui: &mut egui::Ui, action: &mut Option<DialogAction>) {
+        let palette = ThemePalette::for_mode(self.theme_mode);
         let (label, title) = if self.kind == DialogKind::SaveProject {
             ("Save", "Save 3D Modeler model")
         } else {
             ("Export", "Export 3D Modeler model")
         };
-        ui.horizontal(|ui| {
-            if ui.button(label).clicked() {
+        dialog_actions(ui, |ui| {
+            if ui.add(dialog_primary_button(label, palette)).clicked() {
                 let request = SavePickerRequest {
                     title,
                     file_type: self.file_type,
@@ -779,7 +784,138 @@ impl DialogState {
                     *action = Some(self.file_action(selected));
                 }
             }
-            if ui.button("Cancel").clicked() {
+            if ui.add(dialog_button("Cancel")).clicked() {
+                *action = Some(DialogAction::Close);
+            }
+        });
+    }
+
+    /// One footer order for every operation: dismissal left, primary rightmost.
+    fn action_footer(&mut self, ui: &mut egui::Ui, action: &mut Option<DialogAction>) {
+        let palette = ThemePalette::for_mode(self.theme_mode);
+        dialog_actions(ui, |ui| {
+            match self.kind {
+                DialogKind::Repair => {
+                    if ui
+                        .add(dialog_primary_button("Run repair", palette))
+                        .clicked()
+                    {
+                        *action = Some(DialogAction::Repair);
+                    }
+                }
+                DialogKind::Torus => {
+                    if ui
+                        .add(dialog_primary_button("Apply torus", palette))
+                        .clicked()
+                    {
+                        *action = Some(DialogAction::Torus(self.torus.clone()));
+                    }
+                }
+                DialogKind::Emboss => {
+                    if ui
+                        .add(dialog_primary_button("Apply text emboss", palette))
+                        .clicked()
+                    {
+                        *action = Some(DialogAction::Emboss(TextEmbossOptions {
+                            text: self.emboss_text.clone(),
+                            font_size: self.emboss_font_size,
+                            depth_mm: self.emboss_depth_mm,
+                            raised: self.emboss_raised,
+                            font: self.emboss_font,
+                            offset_x_mm: self.emboss_offset_x_mm,
+                            offset_z_mm: self.emboss_offset_z_mm,
+                            limits: Default::default(),
+                        }));
+                    }
+                }
+                DialogKind::Hollow => {
+                    if ui
+                        .add(dialog_primary_button("Apply hollow", palette))
+                        .clicked()
+                    {
+                        *action = Some(DialogAction::Hollow(HollowOptions {
+                            wall_thickness_mm: self.hollow_wall_thickness_mm,
+                            ..HollowOptions::default()
+                        }));
+                    }
+                }
+                DialogKind::Simplify => {
+                    if !self.simplify_area
+                        && ui.add(dialog_primary_button("Simplify", palette)).clicked()
+                    {
+                        *action = Some(DialogAction::Simplify(self.simplify_percent));
+                    }
+                }
+                DialogKind::Subdivide => {
+                    if !self.subdivide_area
+                        && ui
+                            .add(dialog_primary_button("Subdivide", palette))
+                            .clicked()
+                    {
+                        *action = Some(DialogAction::SubdivideWhole);
+                    }
+                }
+                DialogKind::ImportModel => {
+                    if ui.add(dialog_primary_button("Import", palette)).clicked() {
+                        let path = self.path_text.trim();
+                        if path.is_empty() {
+                            self.set_error("Enter an import path.");
+                        } else {
+                            *action =
+                                Some(DialogAction::Import(PathBuf::from(path), self.import_unit));
+                        }
+                    }
+                }
+                DialogKind::Material => {
+                    if ui
+                        .add(dialog_primary_button(
+                            format!(
+                                "Apply color to {} selected object(s)",
+                                self.selected_object_count
+                            ),
+                            palette,
+                        ))
+                        .clicked()
+                    {
+                        *action = Some(DialogAction::Color(self.color));
+                    }
+                }
+                DialogKind::PrintPrep => {
+                    if self.prepared_print.is_some() {
+                        if ui
+                            .add_enabled(
+                                !self.prepared_print_launched,
+                                dialog_primary_button("Launch slicer", palette),
+                            )
+                            .clicked()
+                        {
+                            *action = Some(DialogAction::LaunchPrint);
+                        }
+                    } else if !self.print_slicers.is_empty()
+                        && ui
+                            .add(dialog_primary_button("Prepare visible objects", palette))
+                            .clicked()
+                    {
+                        if let Some((slicer, remember)) = self.selected_print_slicer() {
+                            *action = Some(DialogAction::PreparePrint(slicer, remember));
+                        } else {
+                            self.set_error("Choose a slicer before preparing the visible objects.");
+                        }
+                    }
+                }
+                DialogKind::OpenProject => {
+                    if ui.add(dialog_primary_button("Open", palette)).clicked() {
+                        *action = Some(DialogAction::Open(PathBuf::from(self.path_text.trim())));
+                    }
+                }
+                DialogKind::EditAction(command) => {
+                    if ui.add(dialog_primary_button("Apply", palette)).clicked() {
+                        *action = Some(DialogAction::EditAction(command));
+                    }
+                }
+                DialogKind::Settings | DialogKind::SaveProject | DialogKind::Export => {}
+            }
+            if ui.add(dialog_button(self.dismiss_label())).clicked() {
                 *action = Some(DialogAction::Close);
             }
         });
@@ -807,10 +943,10 @@ impl DialogState {
         ui.separator();
         ui.horizontal(|ui| {
             ui.label("Application");
-            if ui.button("About").clicked() {
+            if ui.add(dialog_button("About")).clicked() {
                 self.about_open = true;
             }
-            if ui.button("Close").clicked() {
+            if ui.add(dialog_button("Close")).clicked() {
                 *action = Some(DialogAction::Close);
             }
         });
@@ -820,11 +956,11 @@ impl DialogState {
         self.path_text = path.to_string_lossy().into_owned();
     }
 
-    fn import_dialog(&mut self, ui: &mut egui::Ui, action: &mut Option<DialogAction>) {
+    fn import_dialog(&mut self, ui: &mut egui::Ui) {
         ui.label("Path");
         ui.horizontal(|ui| {
             ui.text_edit_singleline(&mut self.path_text);
-            if ui.button("Browse...").clicked() {
+            if ui.add(dialog_button("Browse...")).clicked() {
                 let selected = rfd::FileDialog::new()
                     .set_title("Import model")
                     .set_directory(
@@ -868,14 +1004,6 @@ impl DialogState {
                     ui.selectable_value(&mut self.import_unit, unit, unit.label());
                 }
             });
-        if ui.button("Import").clicked() {
-            let path = self.path_text.trim();
-            if path.is_empty() {
-                self.message = String::from("Enter an import path.");
-            } else {
-                *action = Some(DialogAction::Import(PathBuf::from(path), self.import_unit));
-            }
-        }
     }
 
     fn settings_dialog(&mut self, ui: &mut egui::Ui, action: &mut Option<DialogAction>) {
@@ -951,7 +1079,10 @@ impl DialogState {
         );
         let mut lighting = self.viewport_lighting;
         let mut lighting_changed = false;
-        if ui.button("Restore 3D Builder defaults").clicked() {
+        if ui
+            .add(dialog_button("Restore 3D Builder defaults"))
+            .clicked()
+        {
             lighting = ViewportLighting::default();
             lighting_changed = true;
         }
@@ -1021,13 +1152,13 @@ impl DialogState {
             }
         }
         ui.horizontal(|ui| {
-            if ui.button("Change Slicer...").clicked() {
+            if ui.add(dialog_button("Change Slicer...")).clicked() {
                 *action = Some(DialogAction::BrowsePreferredSlicer);
             }
             if ui
                 .add_enabled(
                     self.preferred_slicer_path.is_some(),
-                    egui::Button::new("Clear Preference"),
+                    dialog_button("Clear Preference"),
                 )
                 .clicked()
             {
@@ -1039,7 +1170,7 @@ impl DialogState {
         if ui
             .add_enabled(
                 self.recent_file_count > 0,
-                egui::Button::new("Clear Recent Files List"),
+                dialog_button("Clear Recent Files List"),
             )
             .clicked()
         {
@@ -1058,11 +1189,8 @@ impl DialogState {
         }
     }
 
-    fn repair_dialog(&mut self, ui: &mut egui::Ui, action: &mut Option<DialogAction>) {
+    fn repair_dialog(&mut self, ui: &mut egui::Ui) {
         ui.label("Repair validates and applies a bounded best-effort mesh candidate.");
-        if ui.button("Run repair").clicked() {
-            *action = Some(DialogAction::Repair);
-        }
     }
 
     fn print_prep_dialog(&mut self, ui: &mut egui::Ui, action: &mut Option<DialogAction>) {
@@ -1080,7 +1208,7 @@ impl DialogState {
                 self.message.clear();
                 self.message_tone = MessageTone::Info;
             }
-            if ui.button("Run print prep check").clicked() {
+            if ui.add(dialog_button("Run print prep check")).clicked() {
                 match parse_distance_mm(&self.print_bed_size, DisplayUnit::Millimetre) {
                     Ok(value) if value > 0.0 => *action = Some(DialogAction::PrintPrep(value)),
                     Ok(_) => self.set_error("Bed size must be greater than zero."),
@@ -1136,23 +1264,14 @@ impl DialogState {
             }
         }
         ui.horizontal(|ui| {
-            if ui.button("Browse for slicer...").clicked() {
+            if ui.add(dialog_button("Browse for slicer...")).clicked() {
                 *action = Some(DialogAction::BrowsePrintSlicer);
             }
             if !self.print_slicers.is_empty() {
                 ui.checkbox(&mut self.remember_slicer, "Remember this slicer");
             }
         });
-        if !self.print_slicers.is_empty()
-            && self.prepared_print.is_none()
-            && ui.button("Prepare visible objects").clicked()
-        {
-            if let Some((slicer, remember)) = self.selected_print_slicer() {
-                *action = Some(DialogAction::PreparePrint(slicer, remember));
-            } else {
-                self.set_error("Choose a slicer before preparing the visible objects.");
-            }
-        }
+
         if let Some(prepared) = &self.prepared_print {
             ui.separator();
             ui.label(format!(
@@ -1164,15 +1283,6 @@ impl DialogState {
                     .small()
                     .weak(),
             );
-            if ui
-                .add_enabled(
-                    !self.prepared_print_launched,
-                    egui::Button::new("Launch slicer"),
-                )
-                .clicked()
-            {
-                *action = Some(DialogAction::LaunchPrint);
-            }
         }
     }
 
@@ -1182,15 +1292,6 @@ impl DialogState {
             self.selected_object_count
         ));
         color_chooser(ui, &mut self.color);
-        if ui
-            .button(format!(
-                "Apply color to {} selected object(s)",
-                self.selected_object_count
-            ))
-            .clicked()
-        {
-            *action = Some(DialogAction::Color(self.color));
-        }
         ui.separator();
         ui.label("Or use an image's average color as one solid color:");
         ui.horizontal(|ui| {
@@ -1201,7 +1302,7 @@ impl DialogState {
                 self.message.clear();
                 self.message_tone = MessageTone::Info;
             }
-            if ui.button("Browse image...").clicked() {
+            if ui.add(dialog_button("Browse image...")).clicked() {
                 let selected = image_path_picker(&self.color_image_path);
                 self.color_image_path =
                     path_after_browse(&self.color_image_path, selected.as_deref());
@@ -1212,7 +1313,7 @@ impl DialogState {
                     self.set_message("Image selection cancelled; the current path was kept.");
                 }
             }
-            if ui.button("Sample image color").clicked() {
+            if ui.add(dialog_button("Sample image color")).clicked() {
                 let path = self.color_image_path.trim();
                 if path.is_empty() {
                     self.set_error("Enter an image path.");
@@ -1240,7 +1341,7 @@ impl DialogState {
                 self.message.clear();
                 self.message_tone = MessageTone::Info;
             }
-            if ui.button("Browse picture...").clicked() {
+            if ui.add(dialog_button("Browse picture...")).clicked() {
                 let selected = texture_path_picker(&self.texture_path);
                 self.texture_path = path_after_browse(&self.texture_path, selected.as_deref());
                 if selected.is_some() {
@@ -1260,13 +1361,19 @@ impl DialogState {
                     .max_decimals(0),
             );
         });
-        ui.horizontal(|ui| {
+        dialog_actions(ui, |ui| {
             let apply = if self.selection_textured && self.texture_path.trim().is_empty() {
                 "Change repeat size"
             } else {
                 "Apply texture"
             };
-            if ui.button(apply).clicked() {
+            if ui
+                .add(dialog_primary_button(
+                    apply,
+                    ThemePalette::for_mode(self.theme_mode),
+                ))
+                .clicked()
+            {
                 let path = self.texture_path.trim();
                 if path.is_empty() && !self.selection_textured {
                     self.set_error("Choose a picture first.");
@@ -1278,7 +1385,7 @@ impl DialogState {
                 }
             }
             if ui
-                .add_enabled(self.selection_textured, egui::Button::new("Remove texture"))
+                .add_enabled(self.selection_textured, dialog_button("Remove texture"))
                 .clicked()
             {
                 *action = Some(DialogAction::RemoveTexture);
@@ -1340,12 +1447,9 @@ impl DialogState {
         if changed {
             *action = Some(DialogAction::TorusPreview(self.torus.clone()));
         }
-        if ui.button("Apply torus").clicked() {
-            *action = Some(DialogAction::Torus(self.torus.clone()));
-        }
     }
 
-    fn emboss_dialog(&mut self, ui: &mut egui::Ui, action: &mut Option<DialogAction>) {
+    fn emboss_dialog(&mut self, ui: &mut egui::Ui) {
         ui.label("Apply bounded text relief to the selected solid.");
         ui.label("Text");
         ui.text_edit_singleline(&mut self.emboss_text);
@@ -1385,21 +1489,9 @@ impl DialogState {
                 .speed(0.1)
                 .suffix(" mm Z offset"),
         );
-        if ui.button("Apply text emboss").clicked() {
-            *action = Some(DialogAction::Emboss(TextEmbossOptions {
-                text: self.emboss_text.clone(),
-                font_size: self.emboss_font_size,
-                depth_mm: self.emboss_depth_mm,
-                raised: self.emboss_raised,
-                font: self.emboss_font,
-                offset_x_mm: self.emboss_offset_x_mm,
-                offset_z_mm: self.emboss_offset_z_mm,
-                limits: Default::default(),
-            }));
-        }
     }
 
-    fn hollow_dialog(&mut self, ui: &mut egui::Ui, action: &mut Option<DialogAction>) {
+    fn hollow_dialog(&mut self, ui: &mut egui::Ui) {
         ui.label("Create a bounded constant-thickness shell from the selected solid.");
         ui.add(
             egui::DragValue::new(&mut self.hollow_wall_thickness_mm)
@@ -1407,12 +1499,6 @@ impl DialogState {
                 .speed(0.1)
                 .suffix(" mm wall"),
         );
-        if ui.button("Apply hollow").clicked() {
-            *action = Some(DialogAction::Hollow(HollowOptions {
-                wall_thickness_mm: self.hollow_wall_thickness_mm,
-                ..HollowOptions::default()
-            }));
-        }
     }
 
     /// Sets the Hollow window's wall thickness (review harness, OF-61).
@@ -1477,9 +1563,6 @@ impl DialogState {
             crate::desktop_jobs::group_thousands(self.selection_faces),
             crate::desktop_jobs::group_thousands(target)
         ));
-        if ui.button("Simplify").clicked() {
-            *action = Some(DialogAction::Simplify(self.simplify_percent));
-        }
     }
 
     /// The Subdivide window (OF-52): the whole object, or the area brushed
@@ -1508,9 +1591,6 @@ impl DialogState {
                 crate::desktop_jobs::group_thousands(self.selection_faces),
                 crate::desktop_jobs::group_thousands(self.selection_faces.saturating_mul(4))
             ));
-            if ui.button("Subdivide").clicked() {
-                *action = Some(DialogAction::SubdivideWhole);
-            }
         }
     }
 

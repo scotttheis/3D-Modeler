@@ -309,6 +309,8 @@ pub fn apply(ctx: &Context, mode: ThemeMode) {
     visuals.widgets.active.bg_stroke.color = palette.accent;
     visuals.widgets.active.fg_stroke.color = palette.accent_dark;
     visuals.widgets.open.bg_fill = palette.surface_raised;
+    // egui uses this for the active window's title bar, overriding its frame fill.
+    visuals.widgets.open.weak_bg_fill = palette.surface_raised;
     visuals.widgets.open.fg_stroke.color = palette.text;
     // One control language: every state shares a radius, and resting controls
     // carry a hairline outline so fields and buttons read as controls instead
