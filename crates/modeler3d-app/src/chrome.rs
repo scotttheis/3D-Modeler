@@ -7,6 +7,27 @@
 
 use eframe::egui::{self, Color32, Painter, Pos2, Rect, Stroke, StrokeKind, Vec2};
 
+/// Font size for captions and secondary labels.
+pub(crate) const FONT_CAPTION: f32 = 11.0;
+/// Font size for compact control labels.
+pub(crate) const FONT_SMALL: f32 = 12.5;
+/// Font size for body text.
+pub(crate) const FONT_BODY: f32 = 13.0;
+/// Font size for titles.
+pub(crate) const FONT_TITLE: f32 = 15.0;
+/// Font size for prominent headings.
+pub(crate) const FONT_HERO: f32 = 20.0;
+/// Smallest spacing step in logical points.
+pub(crate) const SPACE_1: f32 = 4.0;
+/// Second spacing step in logical points.
+pub(crate) const SPACE_2: f32 = 8.0;
+/// Third spacing step in logical points.
+pub(crate) const SPACE_3: f32 = 12.0;
+/// Fourth spacing step in logical points.
+pub(crate) const SPACE_4: f32 = 16.0;
+/// Largest spacing step in logical points.
+pub(crate) const SPACE_5: f32 = 24.0;
+
 /// Corner radius for inline controls: buttons, fields, list rows.
 pub(crate) const RADIUS_CONTROL: f32 = 6.0;
 /// Corner radius for cards and floating surfaces.
@@ -54,7 +75,8 @@ pub(crate) fn resize_basis_toggle(
     object: bool,
     palette: crate::theme::ThemePalette,
 ) -> egui::Response {
-    let (rect, response) = ui.allocate_exact_size(Vec2::new(60., 26.), egui::Sense::click());
+    let (rect, response) =
+        ui.allocate_exact_size(Vec2::new(60., CONTROL_HEIGHT), egui::Sense::click());
     let tooltip = if object {
         "Resize relative to the object's imported front (first object for a selection). Click to use the front of the floor."
     } else {
@@ -77,7 +99,7 @@ pub(crate) fn resize_basis_toggle(
     );
     painter.rect_filled(
         selected,
-        10.,
+        RADIUS_SURFACE,
         if response.hovered() {
             palette.accent_control_hover
         } else {

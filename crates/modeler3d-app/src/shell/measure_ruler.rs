@@ -11,6 +11,7 @@ use eframe::egui::{self, Color32, FontId, Stroke, Ui, Vec2};
 
 use super::paint_bar::{paint_bar_button, paint_bar_divider};
 use super::{Modeler3dApp, RIBBON_BUTTON_HEIGHT, ViewportRenderer, viewport_pixel_position};
+use crate::chrome::{FONT_CAPTION, FONT_HERO, FONT_TITLE, SPACE_1, SPACE_3, SPACE_4};
 use crate::preferences::DisplayUnit;
 use crate::theme::ThemePalette;
 
@@ -401,7 +402,7 @@ impl Modeler3dApp {
                     ui.label(egui::RichText::new("Distance").color(palette.muted));
                     ui.label(
                         egui::RichText::new(format_length(distance, unit))
-                            .size(20.0)
+                            .size(FONT_HERO)
                             .strong()
                             .color(palette.text),
                     );
@@ -416,7 +417,7 @@ impl Modeler3dApp {
                             egui::RichText::new(format_length(delta[axis].abs(), unit))
                                 .color(palette.text),
                         );
-                        ui.add_space(4.0);
+                        ui.add_space(SPACE_1);
                     }
                     paint_bar_divider(ui, palette);
                     let copied = mode.copied_at.is_some_and(|at| now - at < 1.5);
@@ -643,7 +644,7 @@ fn paint_ruler_label(
     let (delta, distance) = ruler_measurement(start, end);
     let title = painter.layout_no_wrap(
         format_length(distance, unit),
-        FontId::proportional(16.0),
+        FontId::proportional(FONT_TITLE),
         palette.text,
     );
     let parts = ["X", "Y", "Z"]
@@ -652,10 +653,10 @@ fn paint_ruler_label(
         .enumerate()
         .map(|(axis, (name, color))| {
             (
-                painter.layout_no_wrap(name.to_owned(), FontId::proportional(11.0), color),
+                painter.layout_no_wrap(name.to_owned(), FontId::proportional(FONT_CAPTION), color),
                 painter.layout_no_wrap(
                     format_length(delta[axis].abs(), unit),
-                    FontId::proportional(11.0),
+                    FontId::proportional(FONT_CAPTION),
                     palette.muted,
                 ),
             )
@@ -666,8 +667,8 @@ fn paint_ruler_label(
         .map(|(name, value)| name.size().x + 3.0 + value.size().x)
         .sum::<f32>()
         + 10.0 * (parts.len().saturating_sub(1)) as f32;
-    let width = title.size().x.max(parts_width) + 16.0;
-    let height = title.size().y + parts.first().map_or(0.0, |part| part.1.size().y) + 12.0;
+    let width = title.size().x.max(parts_width) + SPACE_4;
+    let height = title.size().y + parts.first().map_or(0.0, |part| part.1.size().y) + SPACE_3;
     // Beside the middle of the ruler (on its upper side, clear of the
     // line), kept inside the view.
     let middle = from + (to - from) * 0.5;
@@ -683,12 +684,12 @@ fn paint_ruler_label(
     let clearance = 0.5 * (normal.x.abs() * width + normal.y.abs() * height) + 10.0;
     let mut center = middle + normal * clearance;
     center.x = center.x.clamp(
-        rect.left() + width * 0.5 + 4.0,
-        rect.right() - width * 0.5 - 4.0,
+        rect.left() + width * 0.5 + SPACE_1,
+        rect.right() - width * 0.5 - SPACE_1,
     );
     center.y = center.y.clamp(
-        rect.top() + height * 0.5 + 4.0,
-        rect.bottom() - height * 0.5 - 4.0,
+        rect.top() + height * 0.5 + SPACE_1,
+        rect.bottom() - height * 0.5 - SPACE_1,
     );
     let frame = egui::Rect::from_center_size(center, Vec2::new(width, height));
     painter.rect_filled(

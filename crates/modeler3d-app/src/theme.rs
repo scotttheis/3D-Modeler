@@ -7,6 +7,9 @@ use eframe::egui::{
 };
 use serde::{Deserialize, Serialize};
 
+use crate::chrome::{
+    FONT_BODY, FONT_CAPTION, FONT_HERO, FONT_SMALL, RADIUS_CONTROL, RADIUS_SURFACE, SPACE_2,
+};
 /// The two supported shell themes.
 #[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub enum ThemeMode {
@@ -277,8 +280,8 @@ pub fn apply(ctx: &Context, mode: ThemeMode) {
     visuals.weak_text_color = Some(palette.muted);
     visuals.window_fill = palette.panel;
     visuals.window_stroke = eframe::egui::Stroke::new(1.0, palette.divider);
-    visuals.window_corner_radius = eframe::egui::CornerRadius::same(10);
-    visuals.menu_corner_radius = eframe::egui::CornerRadius::same(10);
+    visuals.window_corner_radius = eframe::egui::CornerRadius::same(RADIUS_SURFACE as u8);
+    visuals.menu_corner_radius = eframe::egui::CornerRadius::same(RADIUS_SURFACE as u8);
     visuals.panel_fill = palette.background;
     visuals.faint_bg_color = palette.hover;
     visuals.extreme_bg_color = palette.viewport;
@@ -310,7 +313,7 @@ pub fn apply(ctx: &Context, mode: ThemeMode) {
     // One control language: every state shares a radius, and resting controls
     // carry a hairline outline so fields and buttons read as controls instead
     // of loose text on the panel.
-    let control_radius = eframe::egui::CornerRadius::same(6);
+    let control_radius = eframe::egui::CornerRadius::same(RADIUS_CONTROL as u8);
     for widget in [
         &mut visuals.widgets.noninteractive,
         &mut visuals.widgets.inactive,
@@ -363,18 +366,18 @@ pub fn configure_fonts(ctx: &Context) {
         let mut style = (*ctx.style_of(theme)).clone();
         style
             .text_styles
-            .insert(TextStyle::Body, FontId::proportional(13.0));
+            .insert(TextStyle::Body, FontId::proportional(FONT_BODY));
         style
             .text_styles
-            .insert(TextStyle::Button, FontId::proportional(12.7));
+            .insert(TextStyle::Button, FontId::proportional(FONT_SMALL));
         style
             .text_styles
-            .insert(TextStyle::Small, FontId::proportional(11.2));
+            .insert(TextStyle::Small, FontId::proportional(FONT_CAPTION));
         style
             .text_styles
-            .insert(TextStyle::Heading, FontId::proportional(20.0));
+            .insert(TextStyle::Heading, FontId::proportional(FONT_HERO));
         style.spacing.item_spacing = eframe::egui::vec2(6.0, 5.0);
-        style.spacing.button_padding = eframe::egui::vec2(8.0, 6.0);
+        style.spacing.button_padding = eframe::egui::vec2(SPACE_2, 6.0);
         ctx.set_style_of(theme, style);
     }
 }

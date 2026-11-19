@@ -7,6 +7,7 @@
 use eframe::egui::{self, Align2, Color32, FontId, Sense, Stroke, Ui, Vec2};
 
 use super::{Modeler3dApp, RIBBON_BUTTON_HEIGHT, ViewportRenderer, viewport_pixel_position};
+use crate::chrome::{FONT_SMALL, SPACE_2, SPACE_3};
 use crate::theme::ThemePalette;
 
 /// The colour Paint starts with when nothing is selected: 3D Builder's green.
@@ -321,8 +322,10 @@ pub(super) fn paint_bar_button(
     palette: ThemePalette,
     glyph: impl FnOnce(&egui::Painter, egui::Rect, Color32),
 ) -> bool {
-    let (rect, response) =
-        ui.allocate_exact_size(Vec2::new(64.0, RIBBON_BUTTON_HEIGHT - 8.0), Sense::click());
+    let (rect, response) = ui.allocate_exact_size(
+        Vec2::new(64.0, RIBBON_BUTTON_HEIGHT - SPACE_2),
+        Sense::click(),
+    );
     let response = response
         .on_hover_text(hint)
         .on_hover_cursor(egui::CursorIcon::PointingHand);
@@ -336,10 +339,10 @@ pub(super) fn paint_bar_button(
     );
     glyph(ui.painter(), icon, palette.text);
     ui.painter().text(
-        egui::pos2(rect.center().x, rect.bottom() - 12.0),
+        egui::pos2(rect.center().x, rect.bottom() - SPACE_3),
         Align2::CENTER_CENTER,
         label,
-        FontId::proportional(12.0),
+        FontId::proportional(FONT_SMALL),
         palette.text,
     );
     response.clicked()

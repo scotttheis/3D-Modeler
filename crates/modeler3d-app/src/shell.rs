@@ -4,7 +4,10 @@
 //! [`crate::commands::CommandState`]; the shell owns only layout, focus,
 //! preferences, and renderer-neutral interaction cues.
 
-use crate::chrome::{CONTROL_HEIGHT, Glyph, RADIUS_CONTROL, ROW_HEIGHT};
+use crate::chrome::{
+    CONTROL_HEIGHT, FONT_BODY, FONT_CAPTION, FONT_SMALL, FONT_TITLE, Glyph, RADIUS_CONTROL,
+    ROW_HEIGHT, SPACE_1, SPACE_2, SPACE_3, SPACE_4,
+};
 
 mod app_tools;
 mod measure_ruler;
@@ -99,7 +102,7 @@ const TOP_RIGHT_CLUSTER_WIDTH: f32 = SLICER_BUTTON_WIDTH
     + 82.0
     + 2.0 * 36.0
     + 6.0 * TOP_ROW_SPACING
-    + 12.0;
+    + SPACE_3;
 const MOVE_ARROW_HEAD_LENGTH_PIXELS: f32 = 12.0;
 const MOVE_ARROW_SHAFT_LENGTH_PIXELS: f32 = 22.0;
 const MOVE_ARROW_HEAD_HALF_WIDTH_PIXELS: f32 = 5.0;
@@ -2421,7 +2424,7 @@ impl Modeler3dApp {
                 egui::Frame::new()
                     .fill(palette.surface_alt)
                     .stroke(Stroke::new(1.0, palette.divider))
-                    .inner_margin(egui::Margin::symmetric(12, 4)),
+                    .inner_margin(egui::Margin::symmetric(SPACE_3 as i8, SPACE_1 as i8)),
             )
             .show(ui, |ui| {
                 ui.horizontal(|ui| {
@@ -2477,7 +2480,7 @@ impl Modeler3dApp {
                     if response.hovered() || self.menu_open {
                         ui.painter().rect_filled(
                             menu_rect,
-                            6.0,
+                            crate::chrome::RADIUS_CONTROL,
                             if self.menu_open {
                                 palette.pressed
                             } else {
@@ -2588,7 +2591,7 @@ impl Modeler3dApp {
                 )
                 .width(260.0)
                 .show(|ui| {
-                    ui.spacing_mut().item_spacing.y = 4.0;
+                    ui.spacing_mut().item_spacing.y = SPACE_1;
                     ui.label(RichText::new("Choose your slicer").strong());
                     ui.label(
                         RichText::new(
@@ -2598,7 +2601,7 @@ impl Modeler3dApp {
                         .small()
                         .color(palette.muted),
                     );
-                    ui.add_space(4.0);
+                    ui.add_space(SPACE_1);
                     if choices.is_empty() {
                         ui.label(RichText::new("No installed slicers were found.").weak());
                     }
@@ -2697,12 +2700,12 @@ impl Modeler3dApp {
         let response = response.on_hover_cursor(egui::CursorIcon::PointingHand);
         let painter = ui.painter_at(rect);
         if response.hovered() || response.has_focus() {
-            painter.rect_filled(rect, 6.0, palette.hover);
+            painter.rect_filled(rect, crate::chrome::RADIUS_CONTROL, palette.hover);
         }
         if response.has_focus() {
             painter.rect_stroke(
                 rect,
-                6.0,
+                crate::chrome::RADIUS_CONTROL,
                 Stroke::new(1.5, palette.accent_border),
                 egui::StrokeKind::Inside,
             );
@@ -2739,7 +2742,7 @@ impl Modeler3dApp {
 
         let fixed_row_width = TOP_RIGHT_CLUSTER_WIDTH;
         let available_width = (ui.available_width() - fixed_row_width).max(0.0);
-        let horizontal_margins = 8.0;
+        let horizontal_margins = SPACE_2;
         let spacing = TOP_ROW_SPACING;
         let all_width = horizontal_margins
             + current.len() as f32 * FAVORITE_BUTTON_WIDTH
@@ -2763,7 +2766,7 @@ impl Modeler3dApp {
         let zone_left = ui.cursor().left();
         let row = ui.horizontal(|ui| {
             if has_favorites_strip {
-                ui.add_space(4.0);
+                ui.add_space(SPACE_1);
             }
             for key in current.iter().take(visible_count) {
                 if let Some((tab, command)) = find_command_key(key) {
@@ -2784,12 +2787,16 @@ impl Modeler3dApp {
                     });
                     if response.hovered() || response.has_focus() || response.context_menu_opened()
                     {
-                        ui.painter().rect_filled(rect, 6.0, palette.hover);
+                        ui.painter().rect_filled(
+                            rect,
+                            crate::chrome::RADIUS_CONTROL,
+                            palette.hover,
+                        );
                     }
                     if response.has_focus() {
                         ui.painter().rect_stroke(
                             rect,
-                            6.0,
+                            crate::chrome::RADIUS_CONTROL,
                             Stroke::new(1.5, palette.accent_border),
                             egui::StrokeKind::Inside,
                         );
@@ -2848,11 +2855,11 @@ impl Modeler3dApp {
                 });
             }
             if has_favorites_strip {
-                ui.add_space(4.0);
+                ui.add_space(SPACE_1);
             }
             // An empty bar says where shortcuts go, in small dim text.
             if current.is_empty() && available_width >= EMPTY_FAVORITES_HINT_WIDTH {
-                ui.add_space(8.0);
+                ui.add_space(SPACE_2);
                 ui.label(
                     egui::RichText::new(EMPTY_FAVORITES_HINT)
                         .small()
@@ -2933,11 +2940,10 @@ impl Modeler3dApp {
             .and_then(|before| button_rects.get(before))
         {
             Some(before) => before.right() + spacing / 2.0,
-            None => button_rects
-                .first()
-                .map_or(zone.left() + 4.0 + FAVORITE_DROP_MARKER_WIDTH, |first| {
-                    first.left() - spacing / 2.0
-                }),
+            None => button_rects.first().map_or(
+                zone.left() + SPACE_1 + FAVORITE_DROP_MARKER_WIDTH,
+                |first| first.left() - spacing / 2.0,
+            ),
         };
         let marker = egui::Rect::from_center_size(
             egui::pos2(marker_x, zone.center().y),
@@ -2965,17 +2971,21 @@ impl Modeler3dApp {
         };
         egui::Area::new(egui::Id::unique("shortcut-drag-ghost"))
             .order(egui::Order::Tooltip)
-            .fixed_pos(pointer + Vec2::new(12.0, 12.0))
+            .fixed_pos(pointer + Vec2::splat(SPACE_3))
             .interactable(false)
             .show(ctx, |ui| {
                 let (rect, _) = ui.allocate_exact_size(
                     Vec2::new(FAVORITE_BUTTON_WIDTH, FAVORITE_BUTTON_HEIGHT),
                     Sense::hover(),
                 );
-                ui.painter().rect_filled(rect, 6.0, palette.surface_raised);
+                ui.painter().rect_filled(
+                    rect,
+                    crate::chrome::RADIUS_CONTROL,
+                    palette.surface_raised,
+                );
                 ui.painter().rect_stroke(
                     rect,
-                    6.0,
+                    crate::chrome::RADIUS_CONTROL,
                     Stroke::new(1.0, palette.accent_border),
                     egui::StrokeKind::Inside,
                 );
@@ -3048,7 +3058,7 @@ impl Modeler3dApp {
                     rect.center(),
                     Align2::CENTER_CENTER,
                     tab.label(),
-                    FontId::proportional(17.0),
+                    FontId::proportional(FONT_TITLE),
                     if selected {
                         palette.accent_dark
                     } else {
@@ -3138,7 +3148,7 @@ impl Modeler3dApp {
             .painter()
             .layout_no_wrap(
                 command.label.to_owned(),
-                FontId::proportional(12.7),
+                FontId::proportional(FONT_SMALL),
                 text_color,
             )
             .size()
@@ -3184,7 +3194,7 @@ impl Modeler3dApp {
             egui::pos2(rect.center().x, rect.top() + 55.0),
             Align2::CENTER_CENTER,
             command.label,
-            FontId::proportional(12.7),
+            FontId::proportional(FONT_SMALL),
             text_color,
         );
         let favorite_key = command_key(self.active_tab, command);
@@ -3243,20 +3253,20 @@ impl Modeler3dApp {
         let response = response.on_hover_cursor(egui::CursorIcon::PointingHand);
         let painter = ui.painter_at(rect);
         if self.ribbon_pinned {
-            painter.rect_filled(rect, 6.0, palette.pressed);
+            painter.rect_filled(rect, crate::chrome::RADIUS_CONTROL, palette.pressed);
             painter.rect_stroke(
                 rect,
-                6.0,
+                crate::chrome::RADIUS_CONTROL,
                 Stroke::new(1.0, palette.accent_border),
                 egui::StrokeKind::Inside,
             );
         } else if response.hovered() || response.has_focus() {
-            painter.rect_filled(rect, 6.0, palette.hover);
+            painter.rect_filled(rect, crate::chrome::RADIUS_CONTROL, palette.hover);
         }
         if response.has_focus() {
             painter.rect_stroke(
                 rect,
-                6.0,
+                crate::chrome::RADIUS_CONTROL,
                 Stroke::new(1.5, palette.accent_border),
                 egui::StrokeKind::Inside,
             );
@@ -3271,10 +3281,10 @@ impl Modeler3dApp {
             palette,
         );
         painter.text(
-            egui::pos2(rect.center().x, rect.bottom() - 8.0),
+            egui::pos2(rect.center().x, rect.bottom() - SPACE_2),
             Align2::CENTER_CENTER,
             "Pin",
-            FontId::proportional(10.5),
+            FontId::proportional(FONT_CAPTION),
             if self.ribbon_pinned {
                 palette.accent_dark
             } else {
@@ -3337,7 +3347,7 @@ impl Modeler3dApp {
                     rect.center(),
                     Align2::CENTER_CENTER,
                     "!",
-                    FontId::proportional(18.0),
+                    FontId::proportional(FONT_TITLE),
                     Color32::from_rgb(0xC6, 0x42, 0x42),
                 );
             }
@@ -3457,7 +3467,7 @@ impl Modeler3dApp {
                             ui.add_space(20.0);
                             ui.label(
                                 RichText::new("RECENT")
-                                    .size(12.0)
+                                    .size(FONT_SMALL)
                                     .strong()
                                     .color(palette.muted),
                             );
@@ -3467,11 +3477,11 @@ impl Modeler3dApp {
                             egui::Frame::new()
                                 .fill(palette.surface_alt)
                                 .stroke(Stroke::new(1.0, palette.divider))
-                                .corner_radius(10.0)
+                                .corner_radius(crate::chrome::RADIUS_SURFACE)
                                 .outer_margin(egui::Margin::symmetric(20, 0))
                                 .inner_margin(egui::Margin::same(18))
                                 .show(ui, |ui| {
-                                    ui.set_min_width((ui.available_width() - 4.0).max(220.0));
+                                    ui.set_min_width((ui.available_width() - SPACE_1).max(220.0));
                                     ui.label(
                                         RichText::new("Recent projects and models appear here.")
                                             .color(palette.muted),
@@ -3547,14 +3557,14 @@ impl Modeler3dApp {
             egui::pos2(rect.left() + 94.0, rect.center().y - 10.0),
             Align2::LEFT_CENTER,
             title,
-            FontId::proportional(15.0),
+            FontId::proportional(FONT_TITLE),
             palette.text,
         );
         painter.text(
             egui::pos2(rect.left() + 94.0, rect.center().y + 13.0),
             Align2::LEFT_CENTER,
             subtitle,
-            FontId::proportional(11.5),
+            FontId::proportional(FONT_CAPTION),
             palette.muted,
         );
         response.on_hover_text(subtitle).clicked()
@@ -3669,8 +3679,8 @@ impl Modeler3dApp {
         egui::Frame::new()
             .fill(palette.panel)
             .stroke(Stroke::new(1.0, palette.border))
-            .corner_radius(10.0)
-            .inner_margin(egui::Margin::same(12))
+            .corner_radius(crate::chrome::RADIUS_SURFACE)
+            .inner_margin(egui::Margin::same(SPACE_3 as i8))
             .show(ui, |ui| {
                 ui.set_min_size(Vec2::new(256.0, 62.0));
                 ui.horizontal(|ui| {
@@ -3811,7 +3821,7 @@ impl Modeler3dApp {
             palette.disabled_text
         };
         let icon_rect = egui::Rect::from_min_size(
-            egui::pos2(rect.left() + 8.0, rect.center().y - 8.0),
+            egui::pos2(rect.left() + SPACE_2, rect.center().y - 8.0),
             Vec2::splat(16.0),
         );
         let glyph = match command {
@@ -3849,7 +3859,7 @@ impl Modeler3dApp {
             egui::pos2(rect.left() + 32.0, rect.center().y),
             Align2::LEFT_CENTER,
             label,
-            FontId::proportional(13.0),
+            FontId::proportional(FONT_BODY),
             color,
         );
         response
@@ -3912,8 +3922,8 @@ impl Modeler3dApp {
                 egui::Frame::new()
                     .fill(palette.surface_alt)
                     .stroke(Stroke::new(1.0, palette.border))
-                    .corner_radius(10.0)
-                    .inner_margin(egui::Margin::same(8))
+                    .corner_radius(crate::chrome::RADIUS_SURFACE)
+                    .inner_margin(egui::Margin::same(SPACE_2 as i8))
                     .show(ui, |ui| {
                         for (label, command) in [
                             ("Group", CommandId::Group),
@@ -3937,11 +3947,11 @@ impl Modeler3dApp {
                         ui.checkbox(&mut self.sticky_selection, "Sticky selection")
                             .on_hover_text("Keep the current selection when clicking empty space.");
                     });
-                ui.add_space(12.0);
+                ui.add_space(SPACE_3);
                 ui.horizontal(|ui| {
                     ui.label(
                         RichText::new("Items")
-                            .size(15.0)
+                            .size(FONT_TITLE)
                             .strong()
                             .color(palette.text),
                     );
@@ -3970,7 +3980,7 @@ impl Modeler3dApp {
                             ui.horizontal(|ui| {
                                 let visibility_label = if *visible { "Shown" } else { "Hidden" };
                                 let (icon_slot, _) =
-                                    ui.allocate_exact_size(Vec2::splat(28.0), Sense::hover());
+                                    ui.allocate_exact_size(Vec2::splat(ROW_HEIGHT), Sense::hover());
                                 self.paint_object_icon(ui, icon_slot, *index, palette);
                                 let object_id = self.commands.scene().objects()[*index].object_id();
                                 if self.item_health.get(object_id) == Some(&false)
@@ -4057,13 +4067,13 @@ impl Modeler3dApp {
                                 };
                                 let name_galley = ui.painter().layout(
                                     name.clone(),
-                                    FontId::proportional(13.0),
+                                    FontId::proportional(FONT_BODY),
                                     name_color,
                                     f32::INFINITY,
                                 );
-                                ui.painter_at(row_rect.shrink2(Vec2::new(8.0, 0.0))).galley(
+                                ui.painter_at(row_rect.shrink2(Vec2::new(SPACE_2, 0.0))).galley(
                                     egui::pos2(
-                                        row_rect.left() + 8.0,
+                                        row_rect.left() + SPACE_2,
                                         row_rect.center().y - name_galley.size().y * 0.5,
                                     ),
                                     name_galley,
@@ -4476,14 +4486,14 @@ impl Modeler3dApp {
         let response = egui::Area::new(egui::Id::unique("modeler3d-transform-strip"))
             .enabled(!self.interaction_blocked())
             .order(egui::Order::Foreground)
-            .anchor(Align2::CENTER_BOTTOM, Vec2::new(0.0, -12.0))
+            .anchor(Align2::CENTER_BOTTOM, Vec2::new(0.0, -SPACE_3))
             .show(ctx, |ui| {
                 egui::Frame::new()
                     .fill(palette.panel)
                     .stroke(Stroke::new(1.0, palette.border))
                     .corner_radius(crate::chrome::RADIUS_SURFACE)
                     .shadow(theme::floating_shadow(self.theme_mode))
-                    .inner_margin(egui::Margin::symmetric(10, 8))
+                    .inner_margin(egui::Margin::symmetric(10, SPACE_2 as i8))
                     .show(ui, |ui| {
                         // Each tab sits straight above its box, the same
                         // width, with a blank over the axis letter (OF-65).
@@ -4494,7 +4504,7 @@ impl Modeler3dApp {
                                 TransformPanelMode::Resize,
                             ] {
                                 ui.allocate_exact_size(
-                                    Vec2::new(TRANSFORM_AXIS_LABEL_WIDTH, 28.0),
+                                    Vec2::new(TRANSFORM_AXIS_LABEL_WIDTH, ROW_HEIGHT),
                                     egui::Sense::hover(),
                                 );
                                 let selected = mode == self.transform_panel_mode;
@@ -4513,7 +4523,7 @@ impl Modeler3dApp {
                                     Color32::TRANSPARENT
                                 });
                                 if ui
-                                    .add_sized([TRANSFORM_FIELD_WIDTH, 28.0], button)
+                                    .add_sized([TRANSFORM_FIELD_WIDTH, ROW_HEIGHT], button)
                                     .clicked()
                                 {
                                     self.transform_panel_mode = mode;
@@ -4791,7 +4801,7 @@ impl Modeler3dApp {
         // Only an active operation needs progress and cancellation controls.
         egui::Window::new(&status.title)
             .id(egui::Id::unique("modeler3d-operation-progress"))
-            .anchor(Align2::RIGHT_BOTTOM, Vec2::new(-12.0, -12.0))
+            .anchor(Align2::RIGHT_BOTTOM, Vec2::splat(-SPACE_3))
             .resizable(false)
             .collapsible(false)
             .show(ctx, |ui| {
@@ -5019,10 +5029,10 @@ impl Modeler3dApp {
                     }
                     if cpu_fallback {
                         painter.text(
-                            rect.left_top() + egui::vec2(12.0, 10.0),
+                            rect.left_top() + egui::vec2(SPACE_3, 10.0),
                             Align2::LEFT_TOP,
                             "CPU viewport fallback",
-                            FontId::proportional(11.0),
+                            FontId::proportional(FONT_CAPTION),
                             palette.muted,
                         );
                     }
@@ -5084,10 +5094,10 @@ impl Modeler3dApp {
                 }
                 if let Some(error) = self.preview_error.as_ref().or(self.viewport_error.as_ref()) {
                     painter.text(
-                        rect.left_top() + egui::vec2(12.0, 10.0),
+                        rect.left_top() + egui::vec2(SPACE_3, 10.0),
                         Align2::LEFT_TOP,
                         format!("Viewport unavailable: {error}"),
-                        FontId::proportional(12.0),
+                        FontId::proportional(FONT_SMALL),
                         palette.accent_dark,
                     );
                 }
@@ -6725,19 +6735,19 @@ impl Modeler3dApp {
         // Stop above the transform strip when there is room; on a short window
         // (or at Big size) use the full height below the ribbon.
         if let Some(rect) = self.transform_strip_rect
-            && rect.top() - 8.0 - top >= 160.0
+            && rect.top() - SPACE_2 - top >= 160.0
         {
-            bottom = bottom.min(rect.top() - 8.0);
+            bottom = bottom.min(rect.top() - SPACE_2);
         }
         if bottom - top < 160.0 {
             top = safe_top;
             bottom = safe_bottom;
         }
-        let left = screen.left() + 8.0;
-        let width = (screen.width() - 16.0).clamp(240.0, 380.0);
+        let left = screen.left() + SPACE_2;
+        let width = (screen.width() - SPACE_4).clamp(240.0, 380.0);
         egui::Rect::from_min_max(
             egui::pos2(left, top),
-            egui::pos2((left + width).min(screen.right() - 4.0), bottom),
+            egui::pos2((left + width).min(screen.right() - SPACE_1), bottom),
         )
     }
 
@@ -7727,7 +7737,7 @@ fn slicer_button(ui: &mut Ui, tooltip: &str, palette: ThemePalette) -> egui::Res
     } else {
         palette.accent_control
     };
-    painter.rect_filled(rect, 6.0, fill);
+    painter.rect_filled(rect, crate::chrome::RADIUS_CONTROL, fill);
     paint_slicer_symbol(
         &painter,
         egui::Rect::from_min_size(
@@ -7740,13 +7750,13 @@ fn slicer_button(ui: &mut Ui, tooltip: &str, palette: ThemePalette) -> egui::Res
         egui::pos2(rect.left() + 32.0, rect.center().y),
         Align2::LEFT_CENTER,
         "Slicer",
-        FontId::proportional(12.5),
+        FontId::proportional(FONT_SMALL),
         palette.accent_text,
     );
     if response.has_focus() {
         painter.rect_stroke(
             rect,
-            6.0,
+            crate::chrome::RADIUS_CONTROL,
             Stroke::new(1.5, palette.accent_text),
             egui::StrokeKind::Inside,
         );
@@ -7884,7 +7894,7 @@ fn attach_tab_to_ribbon(ui: &Ui, tab: egui::Rect, bar_bottom: f32, palette: Them
 /// outlined.
 fn menu_row(ui: &mut Ui, label: &str, palette: ThemePalette) -> egui::Response {
     let (rect, response) =
-        ui.allocate_exact_size(Vec2::new(ui.available_width(), 28.0), Sense::click());
+        ui.allocate_exact_size(Vec2::new(ui.available_width(), ROW_HEIGHT), Sense::click());
     response.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, true, label));
     let fill = if response.is_pointer_button_down_on() {
         Some(palette.pressed)
@@ -7921,21 +7931,23 @@ fn labelled_save_button(
     tooltip: &str,
     palette: ThemePalette,
 ) -> bool {
-    let galley =
-        ui.painter()
-            .layout_no_wrap(label.to_owned(), FontId::proportional(12.5), palette.text);
-    let width = 8.0 + 18.0 + 6.0 + galley.size().x + 10.0;
+    let galley = ui.painter().layout_no_wrap(
+        label.to_owned(),
+        FontId::proportional(FONT_SMALL),
+        palette.text,
+    );
+    let width = SPACE_2 + 18.0 + 6.0 + galley.size().x + 10.0;
     let (rect, response) = ui.allocate_exact_size(Vec2::new(width, 36.0), Sense::click());
     response.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, true, label));
     let response = response.on_hover_cursor(egui::CursorIcon::PointingHand);
     let painter = ui.painter_at(rect);
     if response.hovered() || response.has_focus() {
-        painter.rect_filled(rect, 6.0, palette.hover);
+        painter.rect_filled(rect, crate::chrome::RADIUS_CONTROL, palette.hover);
     }
     if response.has_focus() {
         painter.rect_stroke(
             rect,
-            6.0,
+            crate::chrome::RADIUS_CONTROL,
             Stroke::new(1.5, palette.accent_border),
             egui::StrokeKind::Inside,
         );
@@ -7943,7 +7955,7 @@ fn labelled_save_button(
     paint_save_symbol(
         &painter,
         egui::Rect::from_min_size(
-            egui::pos2(rect.left() + 8.0, rect.center().y - 9.0),
+            egui::pos2(rect.left() + SPACE_2, rect.center().y - 9.0),
             Vec2::splat(18.0),
         ),
         palette.muted,

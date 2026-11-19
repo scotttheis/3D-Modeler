@@ -14,6 +14,7 @@ use modeler3d_core::{
 use modeler3d_platform::{SlicerInfo, slicer_info_from_path};
 use modeler3d_viewport::ViewportLighting;
 
+use crate::chrome::{SPACE_1, SPACE_5};
 use crate::commands::{CommandState, DialogKind, ImportUnit};
 use crate::numeric_controls::parse_distance_mm;
 use crate::preferences::DisplayUnit;
@@ -893,7 +894,7 @@ impl DialogState {
                     }
                 });
             });
-            ui.add_space(24.0);
+            ui.add_space(SPACE_5);
             ui.vertical(|ui| {
                 ui.label("Size");
                 ui.horizontal(|ui| {
@@ -1657,7 +1658,7 @@ pub(crate) fn color_chooser(ui: &mut egui::Ui, color: &mut [f32; 4]) -> bool {
     let before = *color;
     // Basic colors, as in the Python build's color dialog.
     ui.horizontal_wrapped(|ui| {
-        ui.spacing_mut().item_spacing = egui::vec2(4.0, 4.0);
+        ui.spacing_mut().item_spacing = egui::vec2(SPACE_1, SPACE_1);
         for swatch in MATERIAL_SWATCHES {
             let fill = egui::Color32::from_rgb(swatch[0], swatch[1], swatch[2]);
             let (rect, response) =
@@ -1691,7 +1692,7 @@ pub(crate) fn color_chooser(ui: &mut egui::Ui, color: &mut [f32; 4]) -> bool {
             }
         }
     });
-    ui.add_space(4.0);
+    ui.add_space(SPACE_1);
     let alpha = color[3];
     if let Some([r, g, b]) = hsv_picker(ui, [color[0], color[1], color[2]]) {
         *color = [r, g, b, alpha];
