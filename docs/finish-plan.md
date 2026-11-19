@@ -45,7 +45,7 @@ one commit per task, snapshots, no approval inferred) still apply.
 | M4 | S1-4: Ribbon separators, tab type, overflow menu | Visible; owner review |
 | M5 | S1-5 / S1-6: one dialog style; Welcome screen grid and empty/missing states | Visible; owner review |
 | M6 | S1-8 / S1-9: hover/pressed/focus/disabled states, contrast and keyboard focus | Mostly tests plus small fixes |
-| M8 | Shrink the 48 action icons at 1254 px (and the few odd sizes) to 256 x 256, the smallest size already used | **Approved 2026-11-19.** Keep the originals in `assets/original`; captures before/after must look the same |
+| M8 | Ship every action icon at 128 x 128 in the release package | **Owner 2026-11-19:** keep all project artwork at full size in the source tree; only the shipped package uses 128 px (half of 256) for the first release, to judge reception. Shrink at packaging time, not in `assets/`. Check captures for blur at the largest ribbon size and on high-DPI |
 | M9 | Update repository setup (`updates.md`) so the public build can find updates | Before the first public build |
 
 ### Hard (Codex high + Claude review)
@@ -90,8 +90,8 @@ The overseer reads this file and `STATUS.md` and picks the next unticked task.
 - Change: Smooth moves to the right of Subtract (E7).
 - Emboss and the Material texture dialog: after v1.0.
 - Commit email `scotttheisw@gmail.com` is correct (w = work).
-- Icons: shrink all to one size, the smallest in use (256 x 256). Agreed:
-  256 px is still at least 4x the largest size the ribbon draws, so the
-  icons stay sharp on high-DPI screens.
-- Asked again: the Resize floor/object switch (explained 2026-11-19; owner
-  had forgotten what it was). Waiting for a yes/no after trying it.
+- Icons: project files stay full size; the first release ships them at
+  128 x 128 ("half of the 256 size on our first release and i'll feel out the
+  reception from there").
+- Resize floor/object switch: **approved** ("floor/object is awesome. you did
+  great. approved!").
