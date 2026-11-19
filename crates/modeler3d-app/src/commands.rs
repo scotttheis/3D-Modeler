@@ -3883,6 +3883,81 @@ mod tests {
     }
 
     #[test]
+    fn center_view_runs_with_and_without_objects_and_adds_no_undo_entry() {
+        let mut state = CommandState::default();
+        let empty_history = state.scene.history_state_id();
+        let empty = state.dispatch(CommandId::CenterView);
+        assert!(matches!(empty, Ok(CommandOutcome::Applied(ref text)) if text == "Center View"));
+        assert_eq!(state.view_orientation(), ViewOrientation::Perspective);
+        assert_eq!(state.last_status(), "Center View");
+        assert_eq!(state.scene.history_state_id(), empty_history);
+
+        state
+            .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
+            .expect("add cube");
+        state.dispatch(CommandId::ViewTop).expect("top view");
+        let history = state.scene.history_state_id();
+        let filled = state.dispatch(CommandId::CenterView);
+        assert!(matches!(filled, Ok(CommandOutcome::Applied(ref text)) if text == "Center View"));
+        assert_eq!(state.view_orientation(), ViewOrientation::Perspective);
+        assert_eq!(state.last_status(), "Center View");
+        assert_eq!(state.scene.history_state_id(), history);
+    }
+
+    #[test]
+    fn frame_selection_requires_a_selection_and_adds_no_undo_entry() {
+        let mut state = CommandState::default();
+        assert!(matches!(
+            state.dispatch(CommandId::FrameSelection),
+            Err(CommandError::SelectionRequired("Frame"))
+        ));
+        assert_eq!(state.view_orientation(), ViewOrientation::Perspective);
+
+        state
+            .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
+            .expect("add cube");
+        state.select_index(0);
+        let history = state.scene.history_state_id();
+        let framed = state.dispatch(CommandId::FrameSelection);
+        assert!(matches!(framed, Ok(CommandOutcome::Applied(ref text)) if text == "Frame"));
+        assert_eq!(state.view_orientation(), ViewOrientation::FrameSelection);
+        assert_eq!(state.last_status(), "Frame");
+        assert_eq!(state.scene.history_state_id(), history);
+    }
+
+    #[test]
+    fn snap_toggle_flips_persists_to_preferences_and_adds_no_undo_entry() {
+        let mut state = CommandState::default();
+        assert!(state.snap_enabled());
+        assert!(state.preferences().object_snapping_enabled());
+        let history = state.scene.history_state_id();
+
+        let off = state.dispatch(CommandId::ToggleSnap);
+        assert!(matches!(off, Ok(CommandOutcome::Applied(ref text)) if text == "Snap off"));
+        assert!(!state.snap_enabled());
+        assert!(!state.preferences().object_snapping_enabled());
+        assert_eq!(state.last_status(), "Snap off");
+
+        let directory = temporary_import_directory("snap-toggle");
+        let path = directory.join("settings.json");
+        state
+            .save_preferences_to_path(&path)
+            .expect("save settings");
+        let mut reloaded = CommandState::default();
+        reloaded
+            .load_preferences_from_path(&path)
+            .expect("load settings");
+        let _ = std::fs::remove_dir_all(&directory);
+        assert!(!reloaded.preferences().object_snapping_enabled());
+
+        let on = state.dispatch(CommandId::ToggleSnap);
+        assert!(matches!(on, Ok(CommandOutcome::Applied(ref text)) if text == "Snap on"));
+        assert!(state.snap_enabled());
+        assert!(state.preferences().object_snapping_enabled());
+        assert_eq!(state.scene.history_state_id(), history);
+    }
+
+    #[test]
     fn empty_selection_is_a_typed_error() {
         let mut state = CommandState::default();
         let result = state.dispatch(CommandId::Delete);

@@ -760,6 +760,14 @@ mod tests {
     }
 
     #[test]
+    fn window_icon_decodes_to_a_non_empty_64_square_rgba_image() {
+        let icon = load_native_icon(&original_asset_root()).expect("window icon loads");
+        assert_eq!((icon.width, icon.height), (64, 64));
+        assert_eq!(icon.rgba.len(), 64 * 64 * 4);
+        assert!(icon.rgba.iter().any(|byte| *byte != 0));
+    }
+
+    #[test]
     fn staged_package_artwork_validates_beside_the_executable() {
         let destination = std::env::temp_dir().join(format!(
             "modeler3d-stage-artwork-{}",
