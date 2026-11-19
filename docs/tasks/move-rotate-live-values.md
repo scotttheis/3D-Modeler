@@ -21,3 +21,4 @@ MCP: no change. MCP has no drag; `transform_selection` and friends already
 return the committed values, which the boxes now match on release.
 Out: Resize (done in OF-67), any gesture math, snapping or history change.
 Review pack: `evidence/rebuild/captures/2026-11-18-of70-live-values/`.
+Owner-approved 2026-11-19: "It looks great".

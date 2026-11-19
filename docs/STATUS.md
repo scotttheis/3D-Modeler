@@ -36,8 +36,8 @@ passed (`logs/gate/20261118-200437-full`): 522 workspace tests, fmt, Clippy,
 deny, audit, MCP parity, smoke, 106 captures. Release built (4m22s,
 23,409,152-byte EXE); smoke and both-theme Release captures passed. No MCP
 change. Task: [`move-rotate-live-values.md`](tasks/move-rotate-live-values.md).
-Pack: `evidence/rebuild/captures/2026-11-18-of70-live-values/`. Owner review
-pending. Baseline: `G:D-Modeler_snapshot_20261118-200059_OF70-baseline`
+Pack: `evidence/rebuild/captures/2026-11-18-of70-live-values/`.
+**Owner-approved 2026-11-19 ("It looks great"). Done.** Baseline: `G:D-Modeler_snapshot_20261118-200059_OF70-baseline`
 (14,763 files, 2,162,996,262 bytes verified). Recovery:
 `G:D-Modeler_snapshot_20261119-050616_OF70` (15,005 files,
 2,204,231,534 bytes; counts verified).
@@ -327,7 +327,7 @@ closed.
    shape and history regression verified. Owner review pending; see Now.
 9. Open/closed robot-claw grab cursors implemented 2026-11-18 throughout the
    app's grab feedback. Both-theme review captures checked; owner review pending.
-10. OF-70 live Move/Rotate numbers built 2026-11-19; owner review pending.
+10. Done and approved 2026-11-19: OF-70 live Move/Rotate numbers.
 11. Revisit the Material texture dialog (OF-46 follow-up): the owner wants to
    look at its layout again; ask what to change before building.
 12. Stop before RB-10 (S3). OF-56/57 (Emboss) stay deferred until the owner
