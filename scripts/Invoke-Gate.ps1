@@ -166,7 +166,7 @@ if ($fullScope) {
             $exe = Join-Path $root 'target\review\modeler3d-app.exe'
             $boardDir = Join-Path $root "evidence\rebuild\captures\gate-$stamp"
             New-Item -ItemType Directory -Force $boardDir | Out-Null
-            $states = @('welcome', 'empty', 'move', 'rotate', 'rotate-tilted', 'rotate-drag', 'resize', 'resize-drag', 'multi', 'merge', 'unselected', 'material', 'settings', 'save', 'export', 'menu', 'colors', 'mirror', 'merge-apart', 'repair', 'paste', 'align', 'paint', 'paint-picker', 'xray', 'texture', 'texture-dialog', 'grab', 'crease', 'crease-sharp', 'smooth-brush', 'simplify', 'simplify-area', 'subdivide', 'hollow', 'hollow-dialog', 'hollow-error', 'measure', 'measure-start')
+            $states = @('welcome', 'empty', 'move', 'move-drag', 'rotate', 'rotate-tilted', 'rotate-drag', 'resize', 'resize-drag', 'multi', 'merge', 'unselected', 'material', 'settings', 'save', 'export', 'menu', 'colors', 'mirror', 'merge-apart', 'repair', 'paste', 'align', 'paint', 'paint-picker', 'xray', 'texture', 'texture-dialog', 'grab', 'crease', 'crease-sharp', 'smooth-brush', 'simplify', 'simplify-area', 'subdivide', 'hollow', 'hollow-dialog', 'hollow-error', 'measure', 'measure-start')
             $started = Get-Date
             $states += 'update'
             $states += @('resize-floor', 'resize-object', 'resize-settle-before', 'resize-settle', 'grab-ready', 'grab-held')

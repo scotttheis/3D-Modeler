@@ -397,6 +397,7 @@ pub struct Modeler3dApp {
     position_fields: [String; 3],
     size_fields: [String; 3],
     resize_size_preview: Option<(modeler3d_core::Transform, DisplayUnit, u64)>,
+    move_rotate_preview: Option<(modeler3d_core::Transform, DisplayUnit, u64)>,
     rotation_fields: [String; 3],
     scale_fields: [String; 3],
     arrange_gap_field: String,
@@ -496,6 +497,7 @@ impl Default for Modeler3dApp {
             position_fields: [String::new(), String::new(), String::new()],
             size_fields: [String::new(), String::new(), String::new()],
             resize_size_preview: None,
+            move_rotate_preview: None,
             rotation_fields: [
                 String::from("0 deg"),
                 String::from("0 deg"),
@@ -629,6 +631,7 @@ impl Modeler3dApp {
             | ReviewState::NoShortcuts
             | ReviewState::Update => &[],
             ReviewState::Move
+            | ReviewState::MoveDrag
             | ReviewState::Rotate
             | ReviewState::RotateTilted
             | ReviewState::RotateDrag
@@ -4862,6 +4865,7 @@ impl Modeler3dApp {
                 }
                 let staged_review_drag = self.stage_review_resize_drag(rect);
                 self.sync_resize_size_fields();
+                self.sync_move_rotate_fields();
                 let theme_color = palette
                     .viewport
                     .to_srgba_unmultiplied()
@@ -5524,6 +5528,70 @@ impl Modeler3dApp {
         self.resize_size_preview = preview;
     }
 
+    // OF-70: position and rotation boxes follow the same uncommitted delta
+    // the commit applies (`delta * transform`), so the numbers track the
+    // object while the pointer moves and do not jump on release. Once the
+    // drag ends without a commit (Escape, focus loss, blocked input), the
+    // scene values come back. Idle text is left alone for numeric edits.
+    fn sync_move_rotate_fields(&mut self) {
+        let delta = match &self.viewport_drag {
+            Some(ViewportDrag::Transform(drag)) if drag.active_resize_handle().is_none() => {
+                Some(drag.delta)
+            }
+            _ => None,
+        };
+        if delta.is_none() && self.move_rotate_preview.is_none() {
+            return;
+        }
+        let unit = self.commands.preferences().display_unit();
+        let preview = delta.map(|delta| (delta, unit, self.commands.scene().revision()));
+        if preview.is_some() && preview == self.move_rotate_preview {
+            return;
+        }
+        self.move_rotate_preview = preview;
+        let indices = self
+            .commands
+            .scene()
+            .selection()
+            .iter()
+            .copied()
+            .collect::<Vec<_>>();
+        let Some(first) = indices.first().copied() else {
+            self.move_rotate_preview = None;
+            return;
+        };
+        let delta = delta.unwrap_or_else(modeler3d_core::Transform::identity);
+        let pose = match self.commands.scene().objects().get(first) {
+            Some(object) => delta.multiply(object.transform()),
+            None => return,
+        };
+        let pose = match pose {
+            Ok(pose) => pose,
+            Err(error) => {
+                self.viewport_error = Some(error.to_string());
+                return;
+            }
+        };
+        let position = if indices.len() > 1 {
+            match crate::transforms::world_bounds_with_delta(self.commands.scene(), &indices, delta)
+            {
+                Ok(bounds) => bounds.center(),
+                Err(error) => {
+                    self.viewport_error = Some(error.to_string());
+                    return;
+                }
+            }
+        } else {
+            pose.position()
+        };
+        self.position_fields = position.map(|value| format_distance(value, unit));
+        self.rotation_fields = crate::rotation::degrees(&pose)
+            .unwrap_or([0.0; 3])
+            .map(crate::numeric_controls::format_angle_degrees);
+        self.numeric_edited_axes = [false; 3];
+        self.last_numeric_axis = None;
+    }
+
     fn paint_resize_handles(
         &self,
         painter: &egui::Painter,
@@ -5565,6 +5633,14 @@ impl Modeler3dApp {
         {
             return self.stage_review_rotation_drag().is_some();
         }
+        if self.viewport_drag.is_none()
+            && self
+                .review
+                .as_ref()
+                .is_some_and(|review| review.state() == ReviewState::MoveDrag)
+        {
+            return self.stage_review_move_drag().is_some();
+        }
         if self.viewport_drag.is_some()
             || self.review.as_ref().is_none_or(|review| {
                 !matches!(
@@ -5599,6 +5675,28 @@ impl Modeler3dApp {
         }
         self.viewport_drag = Some(drag);
         true
+    }
+
+    /// For the `move-drag` review capture: holds the selection 25 mm along
+    /// +X for this frame through the ordinary Move gesture; never committed.
+    fn stage_review_move_drag(&mut self) -> Option<()> {
+        use modeler3d_viewport::Ray;
+        let snapshot = self.commands.capture_transform_selection().ok()?;
+        let indices = snapshot.selection.iter().copied().collect::<Vec<_>>();
+        let center = crate::transforms::world_bounds(self.commands.scene(), &indices)
+            .ok()?
+            .center();
+        let ray_at = |offset: f32| {
+            Ray::new(
+                [center[0] + offset, center[1] + 100., center[2]],
+                [0., -1., 0.],
+            )
+            .ok()
+        };
+        let mut drag = TransformGesture::move_axis(snapshot, center, [1., 0., 0.], ray_at(0.)?)?;
+        drag.update(ray_at(25.)?).ok()?;
+        self.viewport_drag = Some(ViewportDrag::Transform(Box::new(drag)));
+        Some(())
     }
 
     fn stage_review_rotation_drag(&mut self) -> Option<()> {
@@ -11526,6 +11624,179 @@ mod tests {
                     app.size_fields[0] = "a numeric edit in progress".into();
                     app.sync_resize_size_fields();
                     assert_eq!(app.size_fields[0], "a numeric edit in progress");
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn move_and_rotate_boxes_follow_the_drag_cancel_and_commit_without_a_jump() {
+        let input = ViewportInput {
+            pointer_position: None,
+            pointer_delta: Vec2::ZERO,
+            primary_pressed: false,
+            primary_down: false,
+            primary_released: false,
+            secondary_pressed: false,
+            secondary_down: false,
+            secondary_released: false,
+            middle_pressed: false,
+            middle_down: false,
+            middle_released: false,
+            scroll_y: 0.,
+            pinch_zoom_factor: 1.,
+            escape_pressed: false,
+            focused: true,
+            modifiers: egui::Modifiers::default(),
+        };
+        let rect = egui::Rect::from_min_size(egui::Pos2::ZERO, Vec2::new(800., 600.));
+        // What the inspector shows for the scene as it stands.
+        let scene_fields = |app: &Modeler3dApp, unit: DisplayUnit| {
+            let indices = app
+                .commands
+                .scene()
+                .selection()
+                .iter()
+                .copied()
+                .collect::<Vec<_>>();
+            let object = &app.commands.scene().objects()[indices[0]];
+            let position = if indices.len() > 1 {
+                world_bounds(app.commands.scene(), &indices)
+                    .expect("bounds")
+                    .center()
+            } else {
+                object.position()
+            };
+            (
+                position.map(|value| format_distance(value, unit)),
+                crate::rotation::degrees(object.transform())
+                    .expect("angles")
+                    .map(crate::numeric_controls::format_angle_degrees),
+            )
+        };
+        for unit in [DisplayUnit::Millimetre, DisplayUnit::Inch] {
+            for count in [1_usize, 2] {
+                for rotate in [false, true] {
+                    for axis in 0..3 {
+                        for finish in 0..4 {
+                            let cancel = finish != 3;
+                            let mut app = Modeler3dApp {
+                                settings_path: repository_test_directory("move-rotate-live")
+                                    .join("settings.json"),
+                                ..Default::default()
+                            };
+                            for _ in 0..count {
+                                app.commands
+                                    .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
+                                    .expect("cube");
+                            }
+                            app.commands.set_selection_indices(0..count);
+                            app.commands.rotate_selected([10., 20., 30.]).expect("tilt");
+                            app.commands.preferences_mut().set_display_unit(unit);
+                            app.transform_panel_mode = if rotate {
+                                TransformPanelMode::Rotate
+                            } else {
+                                TransformPanelMode::Move
+                            };
+                            app.refresh_preview();
+                            app.camera.set_viewport_size(800, 600).expect("viewport");
+                            app.frame_camera_if_pending();
+                            let original = scene_fields(&app, unit);
+                            app.position_fields = original.0.clone();
+                            app.rotation_fields = original.1.clone();
+                            let poses = app
+                                .commands
+                                .scene()
+                                .objects()
+                                .iter()
+                                .map(|object| *object.transform())
+                                .collect::<Vec<_>>();
+                            let history = app.commands.scene().history_state_id();
+                            let indices = (0..count).collect::<Vec<_>>();
+                            let center = world_bounds(app.commands.scene(), &indices)
+                                .expect("bounds")
+                                .center();
+                            let mut direction = [0.; 3];
+                            direction[axis] = 1.;
+                            let (u, v) = ((axis + 1) % 3, (axis + 2) % 3);
+                            // Move: a ray crossing the axis line at `t` mm.
+                            // Rotate: a ray hitting the ring at `t` degrees.
+                            let ray = |t: f32| {
+                                let mut origin = center;
+                                let mut toward = [0.; 3];
+                                if rotate {
+                                    let angle = t.to_radians();
+                                    origin[u] += angle.cos() * 50.;
+                                    origin[v] += angle.sin() * 50.;
+                                    origin[axis] += 100.;
+                                    toward[axis] = -1.;
+                                } else {
+                                    origin[axis] += t;
+                                    origin[u] += 100.;
+                                    toward[u] = -1.;
+                                }
+                                modeler3d_viewport::Ray::new(origin, toward).expect("ray")
+                            };
+                            let snapshot = app
+                                .commands
+                                .capture_transform_selection()
+                                .expect("snapshot");
+                            let mut gesture = if rotate {
+                                TransformGesture::rotate(snapshot, center, direction, ray(0.))
+                            } else {
+                                TransformGesture::move_axis(snapshot, center, direction, ray(0.))
+                            }
+                            .expect("gesture");
+                            let mut previous = original.clone();
+                            for t in [-12., 9., 27.] {
+                                gesture.update(ray(t)).expect("motion");
+                                app.viewport_drag =
+                                    Some(ViewportDrag::Transform(Box::new(gesture.clone())));
+                                app.sync_move_rotate_fields();
+                                let live =
+                                    (app.position_fields.clone(), app.rotation_fields.clone());
+                                if rotate {
+                                    assert_ne!(live.1, previous.1, "angles follow the drag");
+                                } else {
+                                    assert_ne!(live.0, previous.0, "position follows the drag");
+                                    assert_eq!(live.1, original.1, "Move keeps the angles");
+                                    for other in (0..3).filter(|other| *other != axis) {
+                                        assert_eq!(live.0[other], original.0[other]);
+                                    }
+                                }
+                                previous = live;
+                                for (object, pose) in
+                                    app.commands.scene().objects().iter().zip(&poses)
+                                {
+                                    assert_eq!(object.transform(), pose, "scene untouched");
+                                }
+                                assert_eq!(app.commands.scene().history_state_id(), history);
+                            }
+                            let mut end = input;
+                            end.escape_pressed = finish == 0;
+                            end.focused = finish != 1;
+                            end.primary_released = !cancel;
+                            app.route_viewport_input(rect, 1., end, finish != 2);
+                            app.sync_move_rotate_fields();
+                            assert!(app.viewport_drag.is_none());
+                            let shown = (app.position_fields.clone(), app.rotation_fields.clone());
+                            assert_eq!(shown, scene_fields(&app, unit));
+                            if cancel {
+                                assert_eq!(shown, original, "cancel restores scene values");
+                                assert_eq!(app.commands.scene().history_state_id(), history);
+                            } else {
+                                assert_eq!(shown, previous, "no jump on release");
+                                app.commands.dispatch(CommandId::Undo).expect("undo");
+                                assert_eq!(app.commands.scene().history_state_id(), history);
+                                assert_eq!(scene_fields(&app, unit), original);
+                                app.commands.dispatch(CommandId::Redo).expect("redo");
+                                assert_eq!(scene_fields(&app, unit), previous);
+                            }
+                            app.position_fields[0] = "a numeric edit in progress".into();
+                            app.sync_move_rotate_fields();
+                            assert_eq!(app.position_fields[0], "a numeric edit in progress");
+                        }
+                    }
                 }
             }
         }

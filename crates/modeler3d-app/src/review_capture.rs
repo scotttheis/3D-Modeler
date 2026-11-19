@@ -64,6 +64,9 @@ pub(crate) enum ReviewState {
     Empty,
     /// One selected cube with the Move handles.
     Move,
+    /// One selected cube held partway through a +X Move drag, so the
+    /// position boxes show the live, uncommitted value (OF-70).
+    MoveDrag,
     /// One selected cube with the Rotate handles.
     Rotate,
     /// A cube already rotated around several axes.
@@ -191,6 +194,7 @@ impl ReviewState {
             "welcome" => Some(Self::Welcome),
             "empty" => Some(Self::Empty),
             "move" => Some(Self::Move),
+            "move-drag" => Some(Self::MoveDrag),
             "rotate" => Some(Self::Rotate),
             "rotate-tilted" => Some(Self::RotateTilted),
             "rotate-drag" => Some(Self::RotateDrag),

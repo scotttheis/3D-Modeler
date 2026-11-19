@@ -3,7 +3,7 @@
 The only place current status is written. Keep it to one screen. Plan:
 [`product-rebuild-plan.md`](product-rebuild-plan.md).
 
-Updated 2026-11-18 (Resize Settle and robot-claw grab cursors). F5 and F6 closed 2026-11-16 (ledger parity test passed after F6). Full gate passed 2026-11-16 after OF-65 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Before that, full gate passed 2026-11-16 after Phase 6 OF-63/OF-64 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Earlier: full gate passed 2026-11-15 after Phase 5 OF-58 (fmt, clippy, tests, deny, audit, MCP parity with no exemptions, smoke, capture board); a last small fix then passed the Fast gate. Release exe rebuilt from that source (3m49s) and driven live through the real MCP gateway for the Phase 5 review pack.
+Updated 2026-11-19 (OF-70 live Move and Rotate numbers). F5 and F6 closed 2026-11-16 (ledger parity test passed after F6). Full gate passed 2026-11-16 after OF-65 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Before that, full gate passed 2026-11-16 after Phase 6 OF-63/OF-64 (fmt, clippy, tests, deny, audit, MCP parity, smoke, capture board). Earlier: full gate passed 2026-11-15 after Phase 5 OF-58 (fmt, clippy, tests, deny, audit, MCP parity with no exemptions, smoke, capture board); a last small fix then passed the Fast gate. Release exe rebuilt from that source (3m49s) and driven live through the real MCP gateway for the Phase 5 review pack.
 
 Test releases (how-to: [`packaging.md`](packaging.md)): last is **RC1**,
 version 0.1.1, 2026-11-13, `E:\3D-Modeler-RC\Builder3D-RC1.msi` (50 MB),
@@ -26,6 +26,20 @@ checked on the Mac. The app is ad-hoc signed, not notarized. No Windows MSI
 for RC2. Next after RC2: RC3 / 0.1.3.
 
 ## Now
+
+**OF-70 live Move and Rotate numbers (2026-11-19):** while a Move or Rotate
+handle is dragged, the position and angle boxes follow the object (from the
+same uncommitted delta the commit applies). Escape, focus loss or blocked
+input restore the scene values; release shows the committed values with no
+jump; one undo entry as before. New capture state `move-drag`. Full gate
+passed (`logs/gate/20261118-200437-full`): 522 workspace tests, fmt, Clippy,
+deny, audit, MCP parity, smoke, 106 captures. Release built (4m22s,
+23,409,152-byte EXE); smoke and both-theme Release captures passed. No MCP
+change. Task: [`move-rotate-live-values.md`](tasks/move-rotate-live-values.md).
+Pack: `evidence/rebuild/captures/2026-11-18-of70-live-values/`. Owner review
+pending. Baseline: `G:D-Modeler_snapshot_20261118-200059_OF70-baseline`
+(14,763 files, 2,162,996,262 bytes verified). Recovery:
+`G:D-Modeler_snapshot_20261119-050616_OF70`.
 
 **Resize Settle and robot-claw cursors (2026-11-18):** Settle now uses a
 shared core service: rigid world-space support-face rotation, Y=0 contact,
@@ -312,9 +326,10 @@ closed.
    shape and history regression verified. Owner review pending; see Now.
 9. Open/closed robot-claw grab cursors implemented 2026-11-18 throughout the
    app's grab feedback. Both-theme review captures checked; owner review pending.
-10. Revisit the Material texture dialog (OF-46 follow-up): the owner wants to
+10. OF-70 live Move/Rotate numbers built 2026-11-19; owner review pending.
+11. Revisit the Material texture dialog (OF-46 follow-up): the owner wants to
    look at its layout again; ask what to change before building.
-11. Stop before RB-10 (S3). OF-56/57 (Emboss) stay deferred until the owner
+12. Stop before RB-10 (S3). OF-56/57 (Emboss) stay deferred until the owner
    brings them back.
 
 Each phase ends with its review pack and a stop for owner review, as
