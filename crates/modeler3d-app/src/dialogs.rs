@@ -557,7 +557,12 @@ impl DialogState {
             .frame(dialog_frame(self.theme_mode))
             .title_frame(dialog_title_frame(self.theme_mode));
         let shown = window.show(ctx, |ui| {
-            ui.spacing_mut().interact_size.y = CONTROL_HEIGHT;
+            // Keep Settings' dense slider rows at their natural height so the
+            // content fits above its pinned footer. Its action buttons already
+            // get CONTROL_HEIGHT from dialog_button.
+            if self.kind != DialogKind::Settings {
+                ui.spacing_mut().interact_size.y = CONTROL_HEIGHT;
+            }
             let min_width = if self.kind == DialogKind::Settings {
                 settings_work_area.map_or(360.0, |rect| {
                     (rect.width() - (SPACE_4 + 1.0) * 2.0).max(240.0)
