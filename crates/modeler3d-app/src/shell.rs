@@ -3948,13 +3948,19 @@ impl Modeler3dApp {
                             .on_hover_text("Keep the current selection when clicking empty space.");
                     });
                 ui.add_space(SPACE_3);
+                egui::ScrollArea::vertical()
+                    .id_salt("item-inspector")
+                    .auto_shrink([false, false])
+                    .show(ui, |ui| {
+                if !rows.is_empty() {
+                    // Keep the inspector at its natural height. On short windows
+                    // the enclosing area scrolls instead of cutting an Apply row.
+                    self.render_transform_inspector(ui, palette);
+                    self.render_arrange_control(ui, palette);
+                    ui.add_space(SPACE_2);
+                }
+                crate::chrome::section(ui, palette, "Items", |ui| {
                 ui.horizontal(|ui| {
-                    ui.label(
-                        RichText::new("Items")
-                            .size(FONT_TITLE)
-                            .strong()
-                            .color(palette.text),
-                    );
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                         ui.label(
                             RichText::new(format!(
@@ -3967,15 +3973,18 @@ impl Modeler3dApp {
                         );
                     });
                 });
-                ui.add_space(6.0);
-                let inspector_reserved = if rows.is_empty() { 0.0 } else { 210.0 };
-                let list_max_height =
-                    (ui.available_height() - inspector_reserved).clamp(80.0, 150.0);
+                ui.add_space(SPACE_2);
+                let list_max_height = ui.available_height().max(ROW_HEIGHT);
                 egui::ScrollArea::vertical()
                     .id_salt("object-list")
                     .max_height(list_max_height)
+                    .min_scrolled_height(ROW_HEIGHT)
                     .auto_shrink([false, false])
                     .show(ui, |ui| {
+                        if rows.is_empty() {
+                            ui.label(RichText::new("No objects yet").color(palette.muted));
+                            ui.label(RichText::new("Use Insert or Import Model to begin.").weak());
+                        }
                         for (index, name, visible, selected, child_count) in &rows {
                             ui.horizontal(|ui| {
                                 let visibility_label = if *visible { "Shown" } else { "Hidden" };
@@ -3987,7 +3996,7 @@ impl Modeler3dApp {
                                     && crate::chrome::glyph_button(
                                         ui,
                                         Glyph::Warning,
-                                        Color32::from_rgb(0xE0, 0x9A, 0x2B),
+                                        palette.warning_text,
                                         palette.hover,
                                         palette.accent_border,
                                         &format!("Repair {name}"),
@@ -4122,20 +4131,8 @@ impl Modeler3dApp {
                             });
                         }
                     });
-                if rows.is_empty() {
-                    ui.add_space(10.0);
-                    ui.label(RichText::new("No objects yet").color(palette.muted));
-                    ui.label(RichText::new("Use Insert or Import Model to begin.").weak());
-                } else {
-                    ui.separator();
-                    egui::ScrollArea::vertical()
-                        .id_salt("item-inspector")
-                        .max_height(ui.available_height())
-                        .show(ui, |ui| {
-                            self.render_transform_inspector(ui, palette);
-                            self.render_arrange_control(ui, palette);
-                        });
-                }
+                });
+                    });
             });
         if let Some(command) = command_click {
             self.dispatch(command);
@@ -4283,135 +4280,102 @@ impl Modeler3dApp {
         if ui.input(|input| input.key_pressed(Key::Escape)) {
             self.transform_signature.clear();
         }
-        ui.collapsing("Transform", |ui| {
+        crate::chrome::section(ui, palette, "Transform", |ui| {
             ui.label(
                 RichText::new(format!(
                     "{} values (millimetres are authoritative)",
                     self.transform_panel_mode.label()
                 ))
-                .small()
+                .size(FONT_CAPTION)
                 .color(palette.muted),
             );
             match self.transform_panel_mode {
                 TransformPanelMode::Move => {
-                    for (axis_index, (axis, field)) in ["X", "Y", "Z"]
-                        .into_iter()
-                        .zip(&mut self.position_fields)
-                        .enumerate()
-                    {
-                        ui.horizontal(|ui| {
-                            ui.add_sized(
-                                [14.0, CONTROL_HEIGHT],
-                                egui::Label::new(
-                                    RichText::new(axis)
-                                        .strong()
-                                        .color(crate::chrome::AXIS_COLORS[axis_index]),
-                                ),
-                            );
-                            if ui
-                                .add_sized(
-                                    [132.0, CONTROL_HEIGHT],
-                                    egui::TextEdit::singleline(field)
-                                        .align(egui::Align2::LEFT_CENTER),
-                                )
-                                .changed()
-                            {
-                                self.last_numeric_axis = Some(axis_index);
-                                self.numeric_edited_axes[axis_index] = true;
-                            }
-                        });
+                    let changed = crate::chrome::transform_field_grid(
+                        ui,
+                        palette,
+                        "Position",
+                        &mut self.position_fields,
+                        Some(unit.label()),
+                    );
+                    for (axis, changed) in changed.into_iter().enumerate() {
+                        if changed {
+                            self.last_numeric_axis = Some(axis);
+                            self.numeric_edited_axes[axis] = true;
+                        }
                     }
-                    if ui
-                        .button("Apply move")
-                        .on_hover_text("Apply the current position and preserve the size")
-                        .clicked()
+                    if crate::chrome::inspector_apply_button(
+                        ui,
+                        "Apply move",
+                        "Apply the current position and preserve the size",
+                    )
+                    .clicked()
                     {
                         self.apply_transform_fields(index, unit);
                     }
                 }
                 TransformPanelMode::Rotate => {
-                    for (axis_index, (axis, field)) in ["X", "Y", "Z"]
-                        .into_iter()
-                        .zip(&mut self.rotation_fields)
-                        .enumerate()
-                    {
-                        ui.horizontal(|ui| {
-                            ui.add_sized(
-                                [14.0, CONTROL_HEIGHT],
-                                egui::Label::new(
-                                    RichText::new(axis)
-                                        .strong()
-                                        .color(crate::chrome::AXIS_COLORS[axis_index]),
-                                ),
-                            );
-                            if ui
-                                .add_sized(
-                                    [132.0, CONTROL_HEIGHT],
-                                    egui::TextEdit::singleline(field)
-                                        .align(egui::Align2::LEFT_CENTER),
-                                )
-                                .changed()
-                            {
-                                self.last_numeric_axis = Some(axis_index);
-                                self.numeric_edited_axes[axis_index] = true;
-                            }
-                        });
+                    let changed = crate::chrome::transform_field_grid(
+                        ui,
+                        palette,
+                        "Rotation",
+                        &mut self.rotation_fields,
+                        None,
+                    );
+                    for (axis, changed) in changed.into_iter().enumerate() {
+                        if changed {
+                            self.last_numeric_axis = Some(axis);
+                            self.numeric_edited_axes[axis] = true;
+                        }
                     }
-                    if ui
-                        .button("Apply rotation")
-                        .on_hover_text("Apply one rotation history command")
-                        .clicked()
+                    if crate::chrome::inspector_apply_button(
+                        ui,
+                        "Apply rotation",
+                        "Apply one rotation history command",
+                    )
+                    .clicked()
                     {
                         self.apply_rotation_fields();
                     }
                 }
                 TransformPanelMode::Resize => {
                     ui.checkbox(&mut self.proportional_resize, "Keep proportions");
-                    for (axis_index, (axis, field)) in ["X", "Y", "Z"]
-                        .into_iter()
-                        .zip(&mut self.size_fields)
-                        .enumerate()
-                    {
-                        ui.horizontal(|ui| {
-                            ui.add_sized(
-                                [14.0, CONTROL_HEIGHT],
-                                egui::Label::new(
-                                    RichText::new(axis)
-                                        .strong()
-                                        .color(crate::chrome::AXIS_COLORS[axis_index]),
-                                ),
-                            );
-                            if ui
-                                .add_sized(
-                                    [132.0, CONTROL_HEIGHT],
-                                    egui::TextEdit::singleline(field)
-                                        .align(egui::Align2::LEFT_CENTER),
-                                )
-                                .changed()
-                            {
-                                self.last_numeric_axis = Some(axis_index);
-                                self.numeric_edited_axes[axis_index] = true;
-                            }
-                        });
+                    let changed = crate::chrome::transform_field_grid(
+                        ui,
+                        palette,
+                        "Size",
+                        &mut self.size_fields,
+                        Some(unit.label()),
+                    );
+                    for (axis, changed) in changed.into_iter().enumerate() {
+                        if changed {
+                            self.last_numeric_axis = Some(axis);
+                            self.numeric_edited_axes[axis] = true;
+                        }
                     }
-                    if ui
-                        .button("Apply size")
-                        .on_hover_text("Apply the current size and preserve the position")
-                        .clicked()
+                    if crate::chrome::inspector_apply_button(
+                        ui,
+                        "Apply size",
+                        "Apply the current size and preserve the position",
+                    )
+                    .clicked()
                     {
                         self.apply_transform_fields(index, unit);
                     }
-                    ui.label("Scale factors");
-                    for (axis, field) in ["X", "Y", "Z"].into_iter().zip(&mut self.scale_fields) {
-                        ui.horizontal(|ui| {
-                            ui.label(axis);
-                            ui.add_sized([132.0, 22.0], egui::TextEdit::singleline(field));
-                        });
-                    }
-                    if ui
-                        .button("Apply scale")
-                        .on_hover_text("Apply one scale history command")
-                        .clicked()
+                    ui.add_space(SPACE_2);
+                    crate::chrome::transform_field_grid(
+                        ui,
+                        palette,
+                        "Scale",
+                        &mut self.scale_fields,
+                        None,
+                    );
+                    if crate::chrome::inspector_apply_button(
+                        ui,
+                        "Apply scale",
+                        "Apply one scale history command",
+                    )
+                    .clicked()
                     {
                         self.apply_scale_fields();
                     }
@@ -4430,7 +4394,7 @@ impl Modeler3dApp {
                 }
             });
             if let Some(error) = &self.transform_error {
-                ui.label(RichText::new(error).color(Color32::from_rgb(0xB0, 0x35, 0x35)));
+                ui.label(RichText::new(error).color(palette.error_text));
             }
         });
     }
@@ -4606,7 +4570,7 @@ impl Modeler3dApp {
         if self.commands.selected_count() < 2 {
             return;
         }
-        ui.collapsing("Arrange selection", |ui| {
+        crate::chrome::section(ui, palette, "Arrange selection", |ui| {
             ui.label(
                 RichText::new("Place selected objects along X with a bounded gap.")
                     .small()
@@ -12140,18 +12104,18 @@ mod tests {
                 .accesskit_update
                 .expect("accessibility")
                 .nodes;
-            let bounds = |label: &str| {
+            let bounds = |label: &str, prefix: bool| {
                 nodes
                     .iter()
                     .find_map(|(_, node)| {
                         node.label()
-                            .filter(|text| text.starts_with(label))
+                            .filter(|text| *text == label || (prefix && text.starts_with(label)))
                             .and_then(|_| node.bounds())
                     })
                     .expect("control bounds")
             };
-            let toggle = bounds("Resize relative to");
-            let apply = bounds("Apply");
+            let toggle = bounds("Resize relative to", true);
+            let apply = bounds("Apply", false);
             assert!(
                 (toggle.x0 + toggle.x1 - apply.x0 - apply.x1).abs() < 1.0,
                 "above Apply"

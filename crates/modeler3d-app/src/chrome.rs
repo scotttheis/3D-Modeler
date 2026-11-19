@@ -44,6 +44,121 @@ pub(crate) const AXIS_COLORS: [Color32; 3] = [
     Color32::from_rgb(0x5B, 0x7C, 0xF0),
 ];
 
+/// Groups panel content under a strong section title and hairline on every platform.
+pub(crate) fn section<R>(
+    ui: &mut egui::Ui,
+    palette: crate::theme::ThemePalette,
+    title: &str,
+    contents: impl FnOnce(&mut egui::Ui) -> R,
+) -> R {
+    ui.push_id(title, |ui| {
+        let (line, _) =
+            ui.allocate_exact_size(Vec2::new(ui.available_width(), 1.0), egui::Sense::hover());
+        ui.painter().hline(
+            line.x_range(),
+            line.center().y,
+            Stroke::new(1.0, palette.divider),
+        );
+        ui.add_space(SPACE_2);
+        ui.label(
+            egui::RichText::new(title)
+                .size(FONT_SMALL)
+                .strong()
+                .color(palette.text),
+        );
+        ui.add_space(SPACE_2);
+        contents(ui)
+    })
+    .inner
+}
+
+/// Lays out an inspector row with a fixed label and three equal axis fields.
+/// Hides an overflowing distance suffix only when the selector shows that unit;
+/// the original field is preserved until an edit, and parsing stays with the caller.
+/// Returns which fields changed, leaving interpretation to the caller.
+pub(crate) fn transform_field_grid(
+    ui: &mut egui::Ui,
+    palette: crate::theme::ThemePalette,
+    label: &str,
+    fields: &mut [String; 3],
+    selected_unit: Option<&str>,
+) -> [bool; 3] {
+    let label_width = SPACE_5 + SPACE_4;
+    let gap = SPACE_1 * 0.5;
+    let field_width = (ui.available_width() - label_width - gap * 3.0) / 3.0;
+    let field_margin = gap;
+    let font = egui::FontId::proportional(FONT_SMALL);
+    let mut changed = [false; 3];
+    egui::Grid::new(label)
+        .num_columns(4)
+        .min_col_width(0.0)
+        .spacing(egui::vec2(gap, SPACE_1))
+        .min_row_height(CONTROL_HEIGHT)
+        .show(ui, |ui| {
+            ui.allocate_exact_size(Vec2::new(label_width, CONTROL_HEIGHT), egui::Sense::hover());
+            for (axis, color) in ["X", "Y", "Z"].into_iter().zip(AXIS_COLORS) {
+                ui.add_sized(
+                    [field_width, CONTROL_HEIGHT],
+                    egui::Label::new(egui::RichText::new(axis).size(FONT_CAPTION).color(color)),
+                );
+            }
+            ui.end_row();
+            ui.add_sized(
+                [label_width, CONTROL_HEIGHT],
+                egui::Label::new(
+                    egui::RichText::new(label)
+                        .size(FONT_CAPTION)
+                        .color(palette.muted),
+                ),
+            );
+            for (axis, field) in fields.iter_mut().enumerate() {
+                let mut displayed = field.clone();
+                let text_width = ui.fonts_mut(|fonts| {
+                    fonts
+                        .layout_no_wrap(displayed.clone(), font.clone(), AXIS_COLORS[axis])
+                        .size()
+                        .x
+                });
+                if text_width > field_width - field_margin * 2.0 - 1.0
+                    && let Some(unit) = selected_unit
+                    && let Some(value) = displayed.strip_suffix(&format!(" {unit}"))
+                {
+                    displayed = value.to_owned();
+                }
+                changed[axis] = ui
+                    .add_sized(
+                        [field_width, CONTROL_HEIGHT],
+                        egui::TextEdit::singleline(&mut displayed)
+                            .desired_width(field_width)
+                            .margin(egui::vec2(field_margin, field_margin))
+                            .font(font.clone())
+                            .text_color(AXIS_COLORS[axis])
+                            .align(egui::Align2::LEFT_CENTER),
+                    )
+                    .changed();
+                if changed[axis] {
+                    *field = displayed;
+                }
+            }
+            ui.end_row();
+        });
+    changed
+}
+
+/// Sizes each inspector Apply action to the same field-grid width and height.
+pub(crate) fn inspector_apply_button(
+    ui: &mut egui::Ui,
+    label: &str,
+    tooltip: &str,
+) -> egui::Response {
+    ui.add_space(SPACE_2);
+    ui.add_sized(
+        [ui.available_width(), CONTROL_HEIGHT],
+        egui::Button::new(label).corner_radius(RADIUS_CONTROL),
+    )
+    .on_hover_text(tooltip)
+}
+
 /// A line icon drawn on a 16-point grid.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum Glyph {
