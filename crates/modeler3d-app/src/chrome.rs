@@ -64,9 +64,67 @@ pub(crate) fn dialog_button(label: impl Into<egui::WidgetText>) -> egui::Button<
 pub(crate) fn dialog_primary_button(
     label: impl Into<String>,
     palette: crate::theme::ThemePalette,
-) -> egui::Button<'static> {
-    dialog_button(egui::RichText::new(label).color(palette.accent_text))
-        .fill(palette.accent_control)
+) -> impl egui::Widget {
+    let label = label.into();
+    move |ui: &mut egui::Ui| {
+        let response = ui
+            .scope(|ui| {
+                // A Button::fill override hides all state fills. Scope the palette
+                // instead, retaining egui's keyboard activation and accessibility.
+                let enabled = ui.is_enabled();
+                let visuals = ui.visuals_mut();
+                visuals.override_text_color = Some(if enabled {
+                    palette.accent_text
+                } else {
+                    palette.disabled_text
+                });
+                visuals.widgets.inactive.weak_bg_fill = if enabled {
+                    palette.accent_control
+                } else {
+                    palette.disabled_bg
+                };
+                visuals.widgets.hovered.weak_bg_fill = palette.accent_control_hover;
+                visuals.widgets.active.weak_bg_fill = palette.accent_dark;
+                ui.add(dialog_button(egui::RichText::new(label).color(
+                    if enabled {
+                        palette.accent_text
+                    } else {
+                        palette.disabled_text
+                    },
+                )))
+            })
+            .inner;
+        paint_focus_ring(ui, &response, palette);
+        response
+    }
+}
+
+/// The same two-point accent ring around custom controls on every platform.
+pub(crate) fn paint_focus_ring(
+    ui: &egui::Ui,
+    response: &egui::Response,
+    palette: crate::theme::ThemePalette,
+) {
+    if response.enabled() && response.has_focus() {
+        ui.painter().rect_stroke(
+            response.rect.expand(2.0),
+            RADIUS_CONTROL,
+            Stroke::new(2.0, palette.accent_dark),
+            StrokeKind::Outside,
+        );
+    }
+}
+
+fn control_fill(response: &egui::Response, palette: crate::theme::ThemePalette) -> Color32 {
+    if !response.enabled() {
+        palette.disabled_bg
+    } else if response.is_pointer_button_down_on() {
+        palette.pressed
+    } else if response.hovered() {
+        palette.hover
+    } else {
+        palette.surface
+    }
 }
 
 /// A single dialog footer row, with the first action placed at the right edge.
@@ -95,7 +153,7 @@ pub(crate) fn dialog_error(ui: &mut egui::Ui, palette: crate::theme::ThemePalett
     });
 }
 
-/// Axis colours shared by numeric fields and the viewport handles.
+/// Viewport axis colours. Shell text uses the palette's contrast-tested variants.
 pub(crate) const AXIS_COLORS: [Color32; 3] = [
     Color32::from_rgb(0xE5, 0x5C, 0x5C),
     Color32::from_rgb(0x4C, 0xB8, 0x5C),
@@ -154,7 +212,7 @@ pub(crate) fn transform_field_grid(
         .min_row_height(CONTROL_HEIGHT)
         .show(ui, |ui| {
             ui.allocate_exact_size(Vec2::new(label_width, CONTROL_HEIGHT), egui::Sense::hover());
-            for (axis, color) in ["X", "Y", "Z"].into_iter().zip(AXIS_COLORS) {
+            for (axis, color) in ["X", "Y", "Z"].into_iter().zip(palette.axis_text) {
                 ui.add_sized(
                     [field_width, CONTROL_HEIGHT],
                     egui::Label::new(egui::RichText::new(axis).size(FONT_CAPTION).color(color)),
@@ -173,7 +231,7 @@ pub(crate) fn transform_field_grid(
                 let mut displayed = field.clone();
                 let text_width = ui.fonts_mut(|fonts| {
                     fonts
-                        .layout_no_wrap(displayed.clone(), font.clone(), AXIS_COLORS[axis])
+                        .layout_no_wrap(displayed.clone(), font.clone(), palette.axis_text[axis])
                         .size()
                         .x
                 });
@@ -190,7 +248,7 @@ pub(crate) fn transform_field_grid(
                             .desired_width(field_width)
                             .margin(egui::vec2(field_margin, field_margin))
                             .font(font.clone())
-                            .text_color(AXIS_COLORS[axis])
+                            .text_color(palette.axis_text[axis])
                             .align(egui::Align2::LEFT_CENTER),
                     )
                     .changed();
@@ -261,8 +319,15 @@ pub(crate) fn resize_basis_toggle(
     painter.rect(
         rect,
         13.,
-        palette.surface,
-        Stroke::new(1., palette.border),
+        control_fill(&response, palette),
+        Stroke::new(
+            1.0,
+            if response.hovered() || response.is_pointer_button_down_on() {
+                palette.accent_border
+            } else {
+                palette.border
+            },
+        ),
         StrokeKind::Inside,
     );
     let progress = ui.ctx().animate_bool(response.id, object);
@@ -273,7 +338,11 @@ pub(crate) fn resize_basis_toggle(
     painter.rect_filled(
         selected,
         RADIUS_SURFACE,
-        if response.hovered() {
+        if !response.enabled() {
+            palette.disabled_bg
+        } else if response.is_pointer_button_down_on() {
+            palette.accent_dark
+        } else if response.hovered() {
             palette.accent_control_hover
         } else {
             palette.accent_control
@@ -285,13 +354,16 @@ pub(crate) fn resize_basis_toggle(
             painter,
             Rect::from_center_size(center, Vec2::splat(17.)),
             glyph,
-            if (i == 1) == object {
+            if !response.enabled() {
+                palette.disabled_text
+            } else if (i == 1) == object {
                 palette.accent_text
             } else {
                 palette.muted
             },
         );
     }
+    paint_focus_ring(ui, &response, palette);
     response.on_hover_text(tooltip)
 }
 
@@ -434,28 +506,251 @@ pub(crate) fn glyph_button(
     ui: &mut egui::Ui,
     glyph: Glyph,
     color: Color32,
-    hover_fill: Color32,
-    focus_stroke: Color32,
+    palette: crate::theme::ThemePalette,
     accessible_label: &str,
 ) -> egui::Response {
     let (rect, response) = ui.allocate_exact_size(Vec2::splat(24.0), egui::Sense::click());
-    response.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, true, accessible_label));
-    if response.hovered() || response.has_focus() {
-        ui.painter().rect_filled(rect, RADIUS_CONTROL, hover_fill);
-    }
-    if response.has_focus() {
-        ui.painter().rect_stroke(
-            rect,
-            RADIUS_CONTROL,
-            Stroke::new(1.5, focus_stroke),
-            StrokeKind::Inside,
-        );
+    response.widget_info(|| {
+        egui::WidgetInfo::labeled(egui::Role::Button, response.enabled(), accessible_label)
+    });
+    if !response.enabled() || response.hovered() || response.is_pointer_button_down_on() {
+        ui.painter()
+            .rect_filled(rect, RADIUS_CONTROL, control_fill(&response, palette));
     }
     paint_glyph(
         ui.painter(),
         Rect::from_center_size(rect.center(), Vec2::splat(16.0)),
         glyph,
-        color,
+        if response.enabled() {
+            color
+        } else {
+            palette.disabled_text
+        },
     );
+    paint_focus_ring(ui, &response, palette);
     response.on_hover_cursor(egui::CursorIcon::PointingHand)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::theme::{self, ThemeMode, ThemePalette};
+
+    fn key(key: egui::Key) -> egui::Event {
+        egui::Event::Key {
+            key,
+            physical_key: None,
+            pressed: true,
+            repeat: false,
+            modifiers: egui::Modifiers::NONE,
+        }
+    }
+
+    fn gallery(
+        ctx: &egui::Context,
+        palette: ThemePalette,
+        enabled: bool,
+        events: Vec<egui::Event>,
+    ) -> egui::FullOutput {
+        let mut output = ctx.run_ui(
+            egui::RawInput {
+                screen_rect: Some(Rect::from_min_size(Pos2::ZERO, Vec2::new(640.0, 800.0))),
+                events,
+                ..Default::default()
+            },
+            |ui| {
+                ui.add_enabled_ui(enabled, |ui| {
+                    resize_basis_toggle(ui, false, palette);
+                    glyph_button(ui, Glyph::Visible, palette.muted, palette, "Visibility");
+                    section(ui, palette, "Transform", |ui| {
+                        let mut fields = ["1".into(), "2".into(), "3".into()];
+                        transform_field_grid(ui, palette, "Position", &mut fields, Some("mm"));
+                        inspector_apply_button(ui, "Apply", "Apply position");
+                    });
+                    dialog_actions(ui, |ui| {
+                        ui.add(dialog_primary_button("Save", palette));
+                        ui.add(dialog_button("Cancel"));
+                    });
+                });
+            },
+        );
+        output.textures_delta.clear();
+        output
+    }
+
+    #[test]
+    fn every_custom_control_family_is_accessible_and_reachable_with_tab() {
+        for mode in [ThemeMode::Light, ThemeMode::Dark] {
+            let ctx = egui::Context::default();
+            ctx.enable_accesskit();
+            theme::apply(&ctx, mode);
+            let p = ThemePalette::for_mode(mode);
+            let _ = gallery(&ctx, p, true, vec![]);
+            let output = gallery(&ctx, p, true, vec![]);
+            let nodes = output
+                .platform_output
+                .accesskit_update
+                .expect("accessibility tree")
+                .nodes;
+            let mut expected = Vec::new();
+            for label in [
+                "Resize relative to",
+                "Visibility",
+                "Apply",
+                "Save",
+                "Cancel",
+            ] {
+                let (id, node) = nodes
+                    .iter()
+                    .find(|(_, node)| {
+                        node.label().is_some_and(|name| name.starts_with(label))
+                            && node.role() == egui::Role::Button
+                    })
+                    .unwrap_or_else(|| panic!("missing button: {label}"));
+                assert!(
+                    node.supports_action(egui::accesskit::Action::Focus),
+                    "{label}"
+                );
+                assert!(!node.is_disabled(), "{label}");
+                expected.push(*id);
+            }
+            let fields: Vec<_> = nodes
+                .iter()
+                .filter(|(_, node)| node.role() == egui::Role::TextInput)
+                .collect();
+            assert_eq!(
+                fields.len(),
+                3,
+                "section/grid must retain three accessible text inputs"
+            );
+            for (id, field) in fields {
+                assert!(field.supports_action(egui::accesskit::Action::Focus));
+                expected.push(*id);
+            }
+            let mut visited = std::collections::HashSet::new();
+            for _ in 0..expected.len() + 2 {
+                let _ = gallery(&ctx, p, true, vec![key(egui::Key::Tab)]);
+                // egui resolves Tab order at the end of the pass.
+                let output = gallery(&ctx, p, true, vec![]);
+                if let Some(focused) = ctx.memory(|memory| memory.focused()) {
+                    visited.insert(egui::accesskit::NodeId(focused.value()));
+                    assert!(
+                        output.shapes.iter().any(|shape| {
+                            matches!(&shape.shape, egui::Shape::Rect(rect)
+                            if rect.stroke == Stroke::new(2.0, p.accent_dark))
+                        }),
+                        "{mode:?}: focused control {focused:?} needs a two-point accent ring"
+                    );
+                }
+            }
+            for id in expected {
+                assert!(visited.contains(&id), "{mode:?}: Tab missed control {id:?}");
+            }
+        }
+    }
+
+    #[test]
+    fn disabled_custom_controls_report_disabled_and_skip_tab() {
+        for mode in [ThemeMode::Light, ThemeMode::Dark] {
+            let ctx = egui::Context::default();
+            ctx.enable_accesskit();
+            theme::apply(&ctx, mode);
+            let p = ThemePalette::for_mode(mode);
+            let _ = gallery(&ctx, p, false, vec![]);
+            let output = gallery(&ctx, p, false, vec![key(egui::Key::Tab)]);
+            let nodes = output
+                .platform_output
+                .accesskit_update
+                .expect("accessibility tree")
+                .nodes;
+            let controls: Vec<_> = nodes
+                .iter()
+                .filter(|(_, node)| {
+                    matches!(node.role(), egui::Role::Button | egui::Role::TextInput)
+                })
+                .collect();
+            assert_eq!(controls.len(), 8);
+            assert!(controls.iter().all(|(_, node)| node.is_disabled()));
+            assert_eq!(ctx.memory(|memory| memory.focused()), None);
+        }
+    }
+
+    #[test]
+    fn painted_buttons_show_hover_press_and_keyboard_activation() {
+        for mode in [ThemeMode::Light, ThemeMode::Dark] {
+            let p = ThemePalette::for_mode(mode);
+            for family in ["glyph", "resize", "primary"] {
+                let ctx = egui::Context::default();
+                theme::apply(&ctx, mode);
+                let mut response = None;
+                let mut render = |events| {
+                    let mut output = ctx.run_ui(
+                        egui::RawInput {
+                            events,
+                            ..Default::default()
+                        },
+                        |ui| {
+                            response = Some(match family {
+                                "glyph" => {
+                                    glyph_button(ui, Glyph::Visible, p.muted, p, "Visibility")
+                                }
+                                "resize" => resize_basis_toggle(ui, false, p),
+                                _ => ui.add(dialog_primary_button("Save", p)),
+                            });
+                        },
+                    );
+                    output.textures_delta.clear();
+                    output
+                };
+                let _ = render(vec![]);
+                // Match the fixed gallery origin without relying on font metrics.
+                let point = Pos2::new(20.0, 20.0);
+                let _ = render(vec![egui::Event::PointerMoved(point)]);
+                let hovered = render(vec![egui::Event::PointerMoved(point)]);
+                let expected_hover = if family == "primary" {
+                    p.accent_control_hover
+                } else {
+                    p.hover
+                };
+                assert!(
+                    has_fill(&hovered, expected_hover),
+                    "{mode:?} {family}: hover"
+                );
+                let pressed = render(vec![egui::Event::PointerButton {
+                    pos: point,
+                    button: egui::PointerButton::Primary,
+                    pressed: true,
+                    modifiers: egui::Modifiers::NONE,
+                }]);
+                let expected_press = if family == "primary" {
+                    p.accent_dark
+                } else {
+                    p.pressed
+                };
+                assert!(
+                    has_fill(&pressed, expected_press),
+                    "{mode:?} {family}: pressed"
+                );
+                let _ = render(vec![egui::Event::PointerButton {
+                    pos: point,
+                    button: egui::PointerButton::Primary,
+                    pressed: false,
+                    modifiers: egui::Modifiers::NONE,
+                }]);
+                let _ = render(vec![key(egui::Key::Tab)]);
+                let _ = render(vec![key(egui::Key::Enter)]);
+                assert!(
+                    response.as_ref().is_some_and(egui::Response::clicked),
+                    "{family}: Enter activation"
+                );
+            }
+        }
+    }
+
+    fn has_fill(output: &egui::FullOutput, color: Color32) -> bool {
+        output
+            .shapes
+            .iter()
+            .any(|shape| matches!(&shape.shape, egui::Shape::Rect(rect) if rect.fill == color))
+    }
 }

@@ -2706,7 +2706,7 @@ impl Modeler3dApp {
             painter.rect_stroke(
                 rect,
                 crate::chrome::RADIUS_CONTROL,
-                Stroke::new(1.5, palette.accent_border),
+                Stroke::new(2.0, palette.accent_dark),
                 egui::StrokeKind::Inside,
             );
         }
@@ -2797,7 +2797,7 @@ impl Modeler3dApp {
                         ui.painter().rect_stroke(
                             rect,
                             crate::chrome::RADIUS_CONTROL,
-                            Stroke::new(1.5, palette.accent_border),
+                            Stroke::new(2.0, palette.accent_dark),
                             egui::StrokeKind::Inside,
                         );
                     }
@@ -2865,7 +2865,7 @@ impl Modeler3dApp {
                     ui.painter().rect_stroke(
                         rect,
                         RADIUS_CONTROL,
-                        Stroke::new(1.5, palette.accent_border),
+                        Stroke::new(2.0, palette.accent_dark),
                         egui::StrokeKind::Inside,
                     );
                 }
@@ -2903,7 +2903,7 @@ impl Modeler3dApp {
                 ui.label(
                     egui::RichText::new(EMPTY_FAVORITES_HINT)
                         .small()
-                        .color(palette.muted.gamma_multiply(0.7)),
+                        .color(palette.muted),
                 );
             }
         });
@@ -3090,7 +3090,7 @@ impl Modeler3dApp {
                     ui.painter().rect_stroke(
                         rect,
                         RADIUS_CONTROL,
-                        Stroke::new(1.5, palette.accent_border),
+                        Stroke::new(2.0, palette.accent_dark),
                         egui::StrokeKind::Inside,
                     );
                 }
@@ -3220,6 +3220,7 @@ impl Modeler3dApp {
                 egui::StrokeKind::Inside,
             );
         }
+        crate::chrome::paint_focus_ring(ui, &response, palette);
         self.paint_command_icon(
             ui,
             egui::Rect::from_center_size(
@@ -3309,7 +3310,7 @@ impl Modeler3dApp {
             painter.rect_stroke(
                 rect,
                 crate::chrome::RADIUS_CONTROL,
-                Stroke::new(1.5, palette.accent_border),
+                Stroke::new(2.0, palette.accent_dark),
                 egui::StrokeKind::Inside,
             );
         }
@@ -3599,6 +3600,7 @@ impl Modeler3dApp {
             ),
             egui::StrokeKind::Inside,
         );
+        crate::chrome::paint_focus_ring(ui, &response, palette);
         self.paint_original_icon(
             ui,
             egui::Rect::from_center_size(
@@ -3901,7 +3903,7 @@ impl Modeler3dApp {
             ui.painter().rect_stroke(
                 rect,
                 RADIUS_CONTROL,
-                Stroke::new(1.5, palette.accent_border),
+                Stroke::new(2.0, palette.accent_dark),
                 egui::StrokeKind::Inside,
             );
         }
@@ -4087,8 +4089,7 @@ impl Modeler3dApp {
                                         ui,
                                         Glyph::Warning,
                                         palette.warning_text,
-                                        palette.hover,
-                                        palette.accent_border,
+                                        palette,
                                         &format!("Repair {name}"),
                                     )
                                     .on_hover_text(
@@ -4105,13 +4106,8 @@ impl Modeler3dApp {
                                     } else {
                                         Glyph::Hidden
                                     },
-                                    if *visible {
-                                        palette.muted
-                                    } else {
-                                        palette.disabled_text
-                                    },
-                                    palette.hover,
-                                    palette.accent_border,
+                                    palette.muted,
+                                    palette,
                                     &format!("{visibility_label}: {name}"),
                                 )
                                 .on_hover_text(if *visible {
@@ -4153,7 +4149,7 @@ impl Modeler3dApp {
                                     ui.painter().rect_stroke(
                                         row_rect,
                                         RADIUS_CONTROL,
-                                        Stroke::new(1.5, palette.accent_border),
+                                        Stroke::new(2.0, palette.accent_dark),
                                         egui::StrokeKind::Inside,
                                     );
                                 }
@@ -4162,7 +4158,7 @@ impl Modeler3dApp {
                                 } else if *visible {
                                     palette.text
                                 } else {
-                                    palette.disabled_text
+                                    palette.muted
                                 };
                                 let name_galley = ui.painter().layout(
                                     name.clone(),
@@ -4611,7 +4607,7 @@ impl Modeler3dApp {
                                         egui::Label::new(
                                             RichText::new(axis)
                                                 .strong()
-                                                .color(crate::chrome::AXIS_COLORS[axis_index]),
+                                                .color(palette.axis_text[axis_index]),
                                         ),
                                     );
                                     let response = ui.add_sized(
@@ -5082,12 +5078,12 @@ impl Modeler3dApp {
                         );
                     }
                     if cpu_fallback {
-                        painter.text(
+                        paint_viewport_notice(
+                            &painter,
                             rect.left_top() + egui::vec2(SPACE_3, 10.0),
-                            Align2::LEFT_TOP,
                             "CPU viewport fallback",
                             FontId::proportional(FONT_CAPTION),
-                            palette.muted,
+                            palette,
                         );
                     }
                 }
@@ -5147,12 +5143,12 @@ impl Modeler3dApp {
                     self.viewport_drag = None;
                 }
                 if let Some(error) = self.preview_error.as_ref().or(self.viewport_error.as_ref()) {
-                    painter.text(
+                    paint_viewport_notice(
+                        &painter,
                         rect.left_top() + egui::vec2(SPACE_3, 10.0),
-                        Align2::LEFT_TOP,
                         format!("Viewport unavailable: {error}"),
                         FontId::proportional(FONT_SMALL),
-                        palette.accent_dark,
+                        palette,
                     );
                 }
                 if response.clicked_by(egui::PointerButton::Primary)
@@ -7780,6 +7776,21 @@ fn ribbon_separator(ui: &mut Ui, palette: ThemePalette) {
     );
 }
 
+fn paint_viewport_notice(
+    painter: &egui::Painter,
+    position: egui::Pos2,
+    text: impl Into<String>,
+    font: FontId,
+    palette: ThemePalette,
+) {
+    // The viewport contains arbitrary model colours. An opaque backing keeps
+    // this diagnostic legible over both the canvas and rendered geometry.
+    let galley = painter.layout_no_wrap(text.into(), font, palette.text);
+    let rect = egui::Rect::from_min_size(position, galley.size());
+    painter.rect_filled(rect.expand(SPACE_1), RADIUS_CONTROL, palette.surface);
+    painter.galley(position, galley, palette.text);
+}
+
 /// The accent "Slicer" button at the left of the top-right cluster.
 fn slicer_button(ui: &mut Ui, tooltip: &str, palette: ThemePalette) -> egui::Response {
     let (rect, response) =
@@ -7810,14 +7821,7 @@ fn slicer_button(ui: &mut Ui, tooltip: &str, palette: ThemePalette) -> egui::Res
         FontId::proportional(FONT_SMALL),
         palette.accent_text,
     );
-    if response.has_focus() {
-        painter.rect_stroke(
-            rect,
-            crate::chrome::RADIUS_CONTROL,
-            Stroke::new(1.5, palette.accent_text),
-            egui::StrokeKind::Inside,
-        );
-    }
+    crate::chrome::paint_focus_ring(ui, &response, palette);
     response.on_hover_text(tooltip)
 }
 
@@ -7869,14 +7873,9 @@ fn theme_toggle(ui: &mut Ui, mode: ThemeMode, palette: ThemePalette) -> bool {
     let (knob, other) = if dark { (right, left) } else { (left, right) };
     // The mode not in use, faint, on the empty side of the track.
     if dark {
-        paint_sun(&painter, other, palette.muted.gamma_multiply(0.7));
+        paint_sun(&painter, other, palette.muted);
     } else {
-        paint_moon(
-            &painter,
-            other,
-            palette.muted.gamma_multiply(0.7),
-            track_fill,
-        );
+        paint_moon(&painter, other, palette.muted, track_fill);
     }
     painter.circle_filled(knob, 9.5, palette.accent_control);
     if dark {
@@ -7888,7 +7887,7 @@ fn theme_toggle(ui: &mut Ui, mode: ThemeMode, palette: ThemePalette) -> bool {
         painter.rect_stroke(
             track,
             12.0,
-            Stroke::new(1.5, palette.accent_border),
+            Stroke::new(2.0, palette.accent_dark),
             egui::StrokeKind::Inside,
         );
     }
@@ -7967,7 +7966,7 @@ fn menu_row(ui: &mut Ui, label: &str, palette: ThemePalette) -> egui::Response {
         ui.painter().rect_stroke(
             rect,
             RADIUS_CONTROL,
-            Stroke::new(1.5, palette.accent_border),
+            Stroke::new(2.0, palette.accent_dark),
             egui::StrokeKind::Inside,
         );
     }
@@ -8005,7 +8004,7 @@ fn labelled_save_button(
         painter.rect_stroke(
             rect,
             crate::chrome::RADIUS_CONTROL,
-            Stroke::new(1.5, palette.accent_border),
+            Stroke::new(2.0, palette.accent_dark),
             egui::StrokeKind::Inside,
         );
     }

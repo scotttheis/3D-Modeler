@@ -160,6 +160,8 @@ pub struct ThemePalette {
     pub warning_text: Color32,
     /// Error text, readable on this theme's panels (OF-39).
     pub error_text: Color32,
+    /// Axis labels and numeric text on shell surfaces; viewport axes keep their own colours.
+    pub axis_text: [Color32; 3],
     /// Dividers.
     pub divider: Color32,
     /// Control and card border.
@@ -194,7 +196,7 @@ impl ThemePalette {
             accent_control_hover: Color32::from_rgb(0x60, 0x6F, 0xCB),
             accent_dark: Color32::from_rgb(0x40, 0x52, 0xB5),
             accent_hover: Color32::from_rgb(0x6B, 0x7D, 0xED),
-            accent_border: Color32::from_rgb(0x73, 0x84, 0xEF),
+            accent_border: Color32::from_rgb(0x53, 0x67, 0xEB),
             accent_text: Color32::WHITE,
             background: Color32::from_rgb(0xF4, 0xF6, 0xFA),
             panel: Color32::from_rgb(0xFF, 0xFF, 0xFF),
@@ -202,13 +204,18 @@ impl ThemePalette {
             surface_alt: Color32::from_rgb(0xFC, 0xFC, 0xFD),
             surface_raised: Color32::from_rgb(0xE8, 0xEA, 0xF5),
             text: Color32::from_rgb(0x1D, 0x24, 0x33),
-            muted: Color32::from_rgb(0x66, 0x70, 0x85),
+            muted: Color32::from_rgb(0x52, 0x59, 0x6A),
             warning_text: Color32::from_rgb(0x9A, 0x62, 0x00),
             error_text: Color32::from_rgb(0xB4, 0x23, 0x18),
+            axis_text: [
+                Color32::from_rgb(0xDE, 0x2E, 0x2E),
+                Color32::from_rgb(0x35, 0x84, 0x40),
+                Color32::from_rgb(0x45, 0x6A, 0xEE),
+            ],
             divider: Color32::from_rgb(0xDD, 0xE2, 0xEA),
-            border: Color32::from_rgb(0xD5, 0xDA, 0xE4),
+            border: Color32::from_rgb(0x77, 0x87, 0xA8),
             disabled_bg: Color32::from_rgb(0xF4, 0xF5, 0xF7),
-            disabled_text: Color32::from_rgb(0xA0, 0xA8, 0xB8),
+            disabled_text: Color32::from_rgb(0x84, 0x8E, 0xA3),
             // A visible light-grey tile, as on 3D Builder's toolbar.
             hover: Color32::from_rgb(0xE4, 0xE7, 0xF0),
             pressed: Color32::from_rgb(0xE1, 0xE6, 0xFF),
@@ -236,11 +243,16 @@ impl ThemePalette {
             surface_alt: Color32::from_rgb(0x0A, 0x18, 0x31),
             surface_raised: Color32::from_rgb(0x15, 0x31, 0x55),
             text: Color32::from_rgb(0xEA, 0xF7, 0xFF),
-            muted: Color32::from_rgb(0x9D, 0xB5, 0xD6),
+            muted: Color32::from_rgb(0xA4, 0xBB, 0xD9),
             warning_text: Color32::from_rgb(0xF5, 0xC1, 0x5C),
             error_text: Color32::from_rgb(0xFF, 0x9C, 0x92),
+            axis_text: [
+                Color32::from_rgb(0xE6, 0x61, 0x61),
+                Color32::from_rgb(0x4C, 0xB8, 0x5C),
+                Color32::from_rgb(0x67, 0x86, 0xF1),
+            ],
             divider: Color32::from_rgb(0x27, 0x49, 0x76),
-            border: Color32::from_rgb(0x31, 0x59, 0x85),
+            border: Color32::from_rgb(0x44, 0x7C, 0xB9),
             disabled_bg: Color32::from_rgb(0x0B, 0x19, 0x30),
             disabled_text: Color32::from_rgb(0x66, 0x81, 0xA6),
             hover: Color32::from_rgb(0x1B, 0x3A, 0x66),
@@ -288,7 +300,7 @@ pub fn apply(ctx: &Context, mode: ThemeMode) {
     visuals.text_edit_bg_color = Some(palette.surface_alt);
     visuals.code_bg_color = palette.surface_alt;
     visuals.selection.bg_fill = palette.pressed;
-    visuals.selection.stroke.color = palette.accent_dark;
+    visuals.selection.stroke = eframe::egui::Stroke::new(2.0, palette.accent_dark);
     visuals.widgets.noninteractive.bg_fill = palette.panel;
     visuals.widgets.noninteractive.fg_stroke.color = palette.text;
     visuals.widgets.noninteractive.bg_stroke.color = palette.divider;
@@ -301,13 +313,12 @@ pub fn apply(ctx: &Context, mode: ThemeMode) {
     visuals.widgets.inactive.bg_stroke.color = palette.border;
     visuals.widgets.inactive.fg_stroke.color = palette.text;
     visuals.widgets.hovered.bg_fill = palette.hover;
-    visuals.widgets.hovered.weak_bg_fill = palette.navigation_hover;
+    visuals.widgets.hovered.weak_bg_fill = palette.hover;
     visuals.widgets.hovered.bg_stroke.color = palette.accent_border;
-    visuals.widgets.hovered.fg_stroke.color = palette.accent_dark;
+    visuals.widgets.hovered.fg_stroke.color = palette.text;
     visuals.widgets.active.bg_fill = palette.pressed;
     visuals.widgets.active.weak_bg_fill = palette.pressed;
-    visuals.widgets.active.bg_stroke.color = palette.accent;
-    visuals.widgets.active.fg_stroke.color = palette.accent_dark;
+    visuals.widgets.active.fg_stroke.color = palette.text;
     visuals.widgets.open.bg_fill = palette.surface_raised;
     // egui uses this for the active window's title bar, overriding its frame fill.
     visuals.widgets.open.weak_bg_fill = palette.surface_raised;
@@ -327,9 +338,13 @@ pub fn apply(ctx: &Context, mode: ThemeMode) {
     }
     visuals.widgets.inactive.bg_stroke = eframe::egui::Stroke::new(1.0, palette.border);
     visuals.widgets.hovered.bg_stroke = eframe::egui::Stroke::new(1.0, palette.accent_border);
-    visuals.widgets.active.bg_stroke = eframe::egui::Stroke::new(1.0, palette.accent);
-    visuals.widgets.open.bg_stroke = eframe::egui::Stroke::new(1.0, palette.accent_border);
-    visuals.selection.stroke.width = 1.0;
+    // egui uses Active for keyboard focus as well as a pointer press, including
+    // checkbox wells, slider handles and the button that opens a combo box.
+    visuals.widgets.active.bg_stroke = visuals.selection.stroke;
+    visuals.widgets.open.bg_stroke = visuals.selection.stroke;
+    // egui has no disabled WidgetVisuals slot: disabled UIs multiply painter
+    // opacity by disabled_alpha. This intentionally exempt state retains the
+    // palette's resting visuals and cannot hover, press or receive Tab focus.
     visuals.popup_shadow = floating_shadow(mode);
     visuals.window_shadow = floating_shadow(mode);
     ctx.set_visuals(visuals);
@@ -445,15 +460,166 @@ mod tests {
     }
 
     #[test]
-    fn primary_text_and_accent_control_colors_meet_contrast_targets() {
-        for palette in [ThemePalette::light(), ThemePalette::dark()] {
-            assert!(contrast_ratio(palette.text, palette.panel) >= 4.5);
-            assert!(contrast_ratio(palette.text, palette.background) >= 4.5);
-            assert!(contrast_ratio(palette.muted, palette.panel) >= 4.5);
-            assert!(contrast_ratio(palette.muted, palette.background) >= 4.5);
-            assert!(contrast_ratio(palette.accent_text, palette.accent_control) >= 4.5);
-            assert!(contrast_ratio(palette.accent_text, palette.accent_control_hover) >= 4.5);
-            assert!(contrast_ratio(palette.accent_border, palette.panel) >= 3.0);
+    fn shell_palette_pairs_meet_contrast_targets() {
+        let mut failures = Vec::new();
+        for mode in [ThemeMode::Light, ThemeMode::Dark] {
+            let p = ThemePalette::for_mode(mode);
+            // Pair inventory: foreground, actual painted background, minimum.
+            // Viewport notices have an opaque surface backing; toast colours
+            // apply during its steady display (the final fade is transient).
+            // Disabled palette text meets 3:1 before egui's disabled_alpha;
+            // the opacity-reduced, non-interactive result is exempt. Dividers,
+            // shadows and the build-plane grid are decorative, also exempt.
+            let pairs = [
+                ("body / background", p.text, p.background, 4.5),
+                ("body / panel", p.text, p.panel, 4.5),
+                ("body / surface", p.text, p.surface, 4.5),
+                ("body / field", p.text, p.surface_alt, 4.5),
+                ("body / raised title", p.text, p.surface_raised, 4.5),
+                ("body / hover", p.text, p.hover, 4.5),
+                ("body / pressed", p.text, p.pressed, 4.5),
+                ("body / navigation", p.text, p.navigation, 4.5),
+                ("body / navigation hover", p.text, p.navigation_hover, 4.5),
+                ("body / viewport overlay", p.text, p.surface, 4.5),
+                ("toast / raised surface", p.text, p.surface_raised, 4.5),
+                ("muted or weak / background", p.muted, p.background, 4.5),
+                ("muted or weak / panel", p.muted, p.panel, 4.5),
+                ("muted or weak / surface", p.muted, p.surface, 4.5),
+                ("muted or weak / field", p.muted, p.surface_alt, 4.5),
+                ("muted or weak / raised", p.muted, p.surface_raised, 4.5),
+                ("muted or weak / hover", p.muted, p.hover, 4.5),
+                ("muted or weak / pressed", p.muted, p.pressed, 4.5),
+                ("muted or weak / navigation", p.muted, p.navigation, 4.5),
+                (
+                    "muted or weak / navigation hover",
+                    p.muted,
+                    p.navigation_hover,
+                    4.5,
+                ),
+                (
+                    "disabled / disabled surface (before opacity exemption)",
+                    p.disabled_text,
+                    p.disabled_bg,
+                    3.0,
+                ),
+                (
+                    "accent label / button",
+                    p.accent_text,
+                    p.accent_control,
+                    4.5,
+                ),
+                (
+                    "accent label / button hover",
+                    p.accent_text,
+                    p.accent_control_hover,
+                    4.5,
+                ),
+                (
+                    "accent label / button press",
+                    p.accent_text,
+                    p.accent_dark,
+                    4.5,
+                ),
+                (
+                    "accent hero (large) / background",
+                    p.accent,
+                    p.background,
+                    3.0,
+                ),
+                ("selected text / panel", p.accent_dark, p.panel, 4.5),
+                ("selected text / surface", p.accent_dark, p.surface, 4.5),
+                ("selected text / hover", p.accent_dark, p.hover, 4.5),
+                ("selected text / pressed", p.accent_dark, p.pressed, 4.5),
+                (
+                    "selected text / navigation",
+                    p.accent_dark,
+                    p.navigation,
+                    4.5,
+                ),
+                ("error / dialog", p.error_text, p.surface, 4.5),
+                ("error / panel", p.error_text, p.panel, 4.5),
+                ("warning / dialog", p.warning_text, p.surface, 4.5),
+                ("warning / panel", p.warning_text, p.panel, 4.5),
+                (
+                    "warning / alternate surface",
+                    p.warning_text,
+                    p.surface_alt,
+                    4.5,
+                ),
+                ("warning icon / hover", p.warning_text, p.hover, 3.0),
+                ("outline / panel", p.border, p.panel, 3.0),
+                ("outline / surface", p.border, p.surface, 3.0),
+                ("outline / field", p.border, p.surface_alt, 3.0),
+                ("outline / raised", p.border, p.surface_raised, 3.0),
+                ("hover outline / hover", p.accent_border, p.hover, 3.0),
+                (
+                    "hover outline / navigation hover",
+                    p.accent_border,
+                    p.navigation_hover,
+                    3.0,
+                ),
+                ("hover outline / panel", p.accent_border, p.panel, 3.0),
+                (
+                    "selected outline / pressed",
+                    p.accent_border,
+                    p.pressed,
+                    3.0,
+                ),
+                ("focus / panel", p.accent_dark, p.panel, 3.0),
+                ("focus / background", p.accent_dark, p.background, 3.0),
+                ("focus / surface", p.accent_dark, p.surface, 3.0),
+                ("focus / field", p.accent_dark, p.surface_alt, 3.0),
+                ("focus / raised", p.accent_dark, p.surface_raised, 3.0),
+                ("focus / hover", p.accent_dark, p.hover, 3.0),
+                ("focus / pressed", p.accent_dark, p.pressed, 3.0),
+                ("focus / navigation", p.accent_dark, p.navigation, 3.0),
+                (
+                    "focus / navigation hover",
+                    p.accent_dark,
+                    p.navigation_hover,
+                    3.0,
+                ),
+                ("X text / surface", p.axis_text[0], p.surface, 4.5),
+                ("Y text / surface", p.axis_text[1], p.surface, 4.5),
+                ("Z text / surface", p.axis_text[2], p.surface, 4.5),
+                ("X text / field", p.axis_text[0], p.surface_alt, 4.5),
+                ("Y text / field", p.axis_text[1], p.surface_alt, 4.5),
+                ("Z text / field", p.axis_text[2], p.surface_alt, 4.5),
+                ("X text / panel", p.axis_text[0], p.panel, 4.5),
+                ("Y text / panel", p.axis_text[1], p.panel, 4.5),
+                ("Z text / panel", p.axis_text[2], p.panel, 4.5),
+            ];
+            for (name, foreground, background, minimum) in pairs {
+                let ratio = contrast_ratio(foreground, background);
+                if ratio < minimum {
+                    failures.push(format!("{mode:?}: {name}: {ratio:.3}:1 < {minimum}:1"));
+                }
+            }
+        }
+        assert!(failures.is_empty(), "{}", failures.join("\n"));
+    }
+
+    #[test]
+    fn widget_states_and_keyboard_focus_use_the_palette() {
+        for mode in [ThemeMode::Light, ThemeMode::Dark] {
+            let ctx = Context::default();
+            apply(&ctx, mode);
+            let p = ThemePalette::for_mode(mode);
+            let style = ctx.style_of(ctx.theme());
+            let v = &style.visuals;
+            assert_eq!(v.weak_text_color(), p.muted);
+            assert_eq!(v.widgets.inactive.weak_bg_fill, p.surface);
+            assert_eq!(v.widgets.hovered.weak_bg_fill, p.hover);
+            assert_eq!(v.widgets.active.weak_bg_fill, p.pressed);
+            assert_ne!(v.widgets.inactive.bg_fill, v.widgets.hovered.bg_fill);
+            assert_ne!(v.widgets.hovered.bg_fill, v.widgets.active.bg_fill);
+            assert_eq!(
+                v.selection.stroke,
+                eframe::egui::Stroke::new(2.0, p.accent_dark)
+            );
+            assert_eq!(v.widgets.active.bg_stroke, v.selection.stroke);
+            assert_eq!(v.widgets.open.bg_stroke, v.selection.stroke);
+            assert!(v.disabled_alpha() > 0.0 && v.disabled_alpha() < 1.0);
         }
     }
 
