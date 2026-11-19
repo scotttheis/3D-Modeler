@@ -2835,23 +2835,63 @@ impl Modeler3dApp {
                 }
             }
             if has_overflow {
-                let overflow = egui::ComboBox::from_id_salt("favorite-overflow")
-                    .width(FAVORITE_OVERFLOW_WIDTH)
-                    .selected_text("More")
-                    .show_ui(ui, |ui| {
-                        for key in current.iter().skip(visible_count) {
-                            if let Some((tab, command)) = find_command_key(key)
-                                && ui
-                                    .selectable_label(false, command.label)
-                                    .on_hover_text(command_help(command.id))
-                                    .clicked()
-                            {
-                                clicked = Some((tab, command.id));
-                            }
-                        }
-                    });
-                overflow.response.widget_info(|| {
+                let (rect, response) = ui.allocate_exact_size(
+                    Vec2::new(FAVORITE_OVERFLOW_WIDTH, FAVORITE_BUTTON_HEIGHT),
+                    Sense::click(),
+                );
+                response.widget_info(|| {
                     egui::WidgetInfo::labeled(egui::Role::Button, true, "More favorite commands")
+                });
+                let response = response
+                    .on_hover_cursor(egui::CursorIcon::PointingHand)
+                    .on_hover_text("More favorite commands");
+                let popup = egui::Popup::menu(&response)
+                    .id(ui.make_persistent_id("favorite-overflow"))
+                    .close_behavior(egui::PopupCloseBehavior::CloseOnClick)
+                    .frame(
+                        egui::Frame::new()
+                            .fill(palette.panel)
+                            .stroke(Stroke::new(1.0, palette.divider))
+                            .corner_radius(crate::chrome::RADIUS_SURFACE)
+                            .shadow(theme::floating_shadow(self.theme_mode))
+                            .inner_margin(egui::Margin::same(6)),
+                    )
+                    .width(228.0);
+                if popup.is_open() || response.hovered() || response.has_focus() {
+                    ui.painter()
+                        .rect_filled(rect, RADIUS_CONTROL, palette.hover);
+                }
+                if response.has_focus() {
+                    ui.painter().rect_stroke(
+                        rect,
+                        RADIUS_CONTROL,
+                        Stroke::new(1.5, palette.accent_border),
+                        egui::StrokeKind::Inside,
+                    );
+                }
+                for offset in [-SPACE_1, 0.0, SPACE_1] {
+                    ui.painter().circle_filled(
+                        rect.center() + Vec2::new(offset, 0.0),
+                        1.0,
+                        palette.text,
+                    );
+                }
+                popup.show(|ui| {
+                    ui.spacing_mut().item_spacing.y = SPACE_1 * 0.5;
+                    egui::ScrollArea::vertical()
+                        .max_height(ROW_HEIGHT * 8.0)
+                        .show(ui, |ui| {
+                            for key in current.iter().skip(visible_count) {
+                                if let Some((tab, command)) = find_command_key(key)
+                                    && menu_row(ui, command.label, palette)
+                                        .on_hover_text(command_help(command.id))
+                                        .clicked()
+                                {
+                                    clicked = Some((tab, command.id));
+                                    ui.close();
+                                }
+                            }
+                        });
                 });
             }
             if has_favorites_strip {
@@ -3058,7 +3098,7 @@ impl Modeler3dApp {
                     rect.center(),
                     Align2::CENTER_CENTER,
                     tab.label(),
-                    FontId::proportional(FONT_TITLE),
+                    FontId::proportional(FONT_BODY),
                     if selected {
                         palette.accent_dark
                     } else {
@@ -3099,7 +3139,7 @@ impl Modeler3dApp {
         let commands = self.ordered_tab_commands(self.active_tab);
         ui.horizontal(|ui| {
             ui.spacing_mut().item_spacing.x = 2.0;
-            let command_width = (ui.available_width() - 38.0).max(0.0);
+            let command_width = (ui.available_width() - SPACE_4 * 2.0 - SPACE_2).max(0.0);
             ui.allocate_ui_with_layout(
                 Vec2::new(command_width, RIBBON_BUTTON_HEIGHT),
                 Layout::left_to_right(Align::Min),
@@ -3236,8 +3276,10 @@ impl Modeler3dApp {
     }
 
     fn render_pin_control(&mut self, ui: &mut Ui, palette: ThemePalette) {
-        let (rect, response) =
-            ui.allocate_exact_size(Vec2::new(30.0, RIBBON_BUTTON_HEIGHT), Sense::click());
+        let (rect, response) = ui.allocate_exact_size(
+            Vec2::new(SPACE_4 * 2.0, RIBBON_BUTTON_HEIGHT),
+            Sense::click(),
+        );
         response.widget_info(|| {
             egui::WidgetInfo::selected(
                 egui::Role::Button,
@@ -3274,14 +3316,14 @@ impl Modeler3dApp {
         self.paint_original_icon(
             ui,
             egui::Rect::from_center_size(
-                egui::pos2(rect.center().x, rect.top() + 24.0),
+                egui::pos2(rect.center().x, rect.top() + SPACE_3 + SPACE_2),
                 Vec2::splat(20.0),
             ),
             OriginalAsset::Action("Pin.png"),
             palette,
         );
         painter.text(
-            egui::pos2(rect.center().x, rect.bottom() - SPACE_2),
+            egui::pos2(rect.center().x, rect.bottom() - SPACE_3),
             Align2::CENTER_CENTER,
             "Pin",
             FontId::proportional(FONT_CAPTION),
@@ -7682,9 +7724,12 @@ fn recent_grid_layout(available_width: f32, item_spacing: f32) -> (usize, f32) {
 }
 
 fn ribbon_separator(ui: &mut Ui, palette: ThemePalette) {
-    let (rect, _) =
-        ui.allocate_exact_size(Vec2::new(3.0, RIBBON_BUTTON_HEIGHT - 14.0), Sense::hover());
-    ui.painter().rect_filled(rect, 1.0, palette.divider);
+    let (rect, _) = ui.allocate_exact_size(Vec2::new(1.0, RIBBON_BUTTON_HEIGHT), Sense::hover());
+    ui.painter().vline(
+        rect.center().x,
+        rect.top() + SPACE_1..=rect.bottom() - SPACE_1,
+        Stroke::new(1.0, palette.border),
+    );
 }
 
 /// The accent "Slicer" button at the left of the top-right cluster.
