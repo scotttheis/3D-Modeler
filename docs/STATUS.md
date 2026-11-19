@@ -112,9 +112,9 @@ the next stop message, not guessed.
 ## Owner decisions waiting (plan section 8)
 
 D1, D2, D3, D6 (MCP 100% parity, catalog may grow) and D7 (Merge takes the
-top-most color, desktop and MCP) approved 2026-11-12. D4 (somewhat darker
-viewport in dark theme), D5 (progress indicator for emboss), D8 (non-overlapping
-Merge groups + 4 s popup) and D9 (smoothing like Blender's sculpt Smooth)
-decided 2026-11-13, none built yet. D10 (MCP does everything,
+top-most color, desktop and MCP) approved 2026-11-12. D4 (darker
+dark-theme viewport, OF-35) and D8 (non-touching Merge groups + 4 s popup,
+OF-38) are built. D5 (emboss progress, after v1.0) and D9 (smoothing like
+Blender's sculpt Smooth, finish plan H1) decided 2026-11-13, not built. D10 (MCP does everything,
 no "visual only" rows) decided 2026-11-14. Build order for D4/D5/D8/D9/D10:
 owner batch 7.
