@@ -39,7 +39,8 @@ change. Task: [`move-rotate-live-values.md`](tasks/move-rotate-live-values.md).
 Pack: `evidence/rebuild/captures/2026-11-18-of70-live-values/`. Owner review
 pending. Baseline: `G:D-Modeler_snapshot_20261118-200059_OF70-baseline`
 (14,763 files, 2,162,996,262 bytes verified). Recovery:
-`G:D-Modeler_snapshot_20261119-050616_OF70`.
+`G:D-Modeler_snapshot_20261119-050616_OF70` (15,005 files,
+2,204,231,534 bytes; counts verified).
 
 **Resize Settle and robot-claw cursors (2026-11-18):** Settle now uses a
 shared core service: rigid world-space support-face rotation, Y=0 contact,
