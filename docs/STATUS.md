@@ -25,6 +25,8 @@ save/reopen flow, settings location, and MCP gateway were not separately
 checked on the Mac. The app is ad-hoc signed, not notarized. No Windows MSI
 for RC2. Next after RC2: RC3 / 0.1.3.
 
+**Finish plan (2026-11-19):** [`finish-plan.md`](finish-plan.md) — the remaining work by difficulty, in three sessions to a public v1.0. **Owner answers 2026-11-19** (approvals of Settle, claw, edit tools, live numbers and the gizmo arrows; Smooth to move; icons to 256 px; Emboss and Material dialog after v1.0) are recorded at the end of that file.
+
 ## Now
 
 **Claw redraw, Rotate grip reach, Resize handles when zoomed in (owner, 2026-11-19):**
@@ -38,7 +40,7 @@ edge pointing outward, and go away only once the camera is inside the box
 (`resize_overlay.rs`, `project_gizmo_*_in_front` in `shell.rs`). Full gate
 passed (`logs/gate/20261119-104200-full`): fmt, Clippy, workspace tests, deny,
 audit, MCP parity, smoke, 53 states x 2 themes. Not changed: MCP. Debug build
-only; **no Release build or recovery snapshot yet.** Owner tried it:
+gate; **Release rebuilt 2026-11-19 with `scripts/Update-CurrentBuild.ps1`** (old exe in `G:\3D-Modeler-old-builds\20261119-050549_OLD-BUILD`); no recovery snapshot yet. Owner tried it:
 "much better!" (claw, rotate reach and resize arrows). Known limit: the neck
 is a solid block, not the hollow neck in the reference; two pinned handles can
 overlap at extreme zoom. Pack: `evidence/rebuild/captures/2026-11-19-claw-reference/`.
