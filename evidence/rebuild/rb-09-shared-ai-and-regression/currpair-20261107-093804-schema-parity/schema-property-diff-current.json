@@ -37,7 +37,7 @@
         "pid": 13460,
         "parent_pid": 22300,
         "name": "python.exe",
-        "executable": "C:\\Users\\josiph\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+        "executable": "C:\\Users\\USER\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
         "command": "L:\\Builder3D\\scripts\\builder3d_mcp.py",
         "created_local": "2026-11-07T08:35:00",
         "role": "Python 3.12 runtime process"

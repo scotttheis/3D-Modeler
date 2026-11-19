@@ -4582,7 +4582,7 @@ and OF-47 X-ray approved by the owner 2026-11-15 (pack
 2026-11-15: OF-35 keep shade A as built; OF-43 confirmed (10 mm gap beside the
 original); OF-44 keep the "Done" label; OF-46 store the texture image inside
 the project file (`.3dp` format change approved), test textures in
-`C:\Users\josiph\Pictures\textures\` (owner-supplied; do not commit them).
+`C:\Users\USER\Pictures\textures\` (owner-supplied; do not commit them).
 OF-46 done 2026-11-15 (`654872a`) and approved by the owner 2026-11-15 ("it
 works, good enough for now"); the texture dialog is to be revisited later
 (last item below). Phase 2 is closed.
