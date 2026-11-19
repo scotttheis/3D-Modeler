@@ -54,6 +54,31 @@ decision: start fresh).
   reference/shipping build. Keep that tree read-only when using it as a
   reference.
 
+## One current build (owner rule, 2026-11-19)
+
+There is exactly one build of 3D Modeler the owner runs:
+`E:\3D-Modeler\target\release\modeler3d-app.exe`, and it must always be built
+from the current source. An old build must never be mistakable for the current
+one.
+
+- **Before launching the app for the owner, or saying a visible change is
+  done,** run `.\scripts\Update-CurrentBuild.ps1` (add `-Launch` to open it).
+  If the exe is older than any source file it stops a running 3D Modeler,
+  moves the old exe to `G:\3D-Modeler-old-builds\<timestamp>_OLD-BUILD\`
+  (renamed `modeler3d-app.OLD-BUILD.exe`), rebuilds Release, and confirms.
+  `-Check` only reports CURRENT or STALE. Never launch an exe that reports STALE.
+- **Old builds live only in that backup folder,** always labeled `OLD-BUILD`.
+  Never leave an old exe in `target\release`, beside the current one, or
+  anywhere the owner might open it. New backups only; never overwrite one.
+- **Debug and review binaries are test tooling.** Never launch
+  `target\debug` or `target\review` for the owner and never describe them as
+  "the app". If the owner asks to see the app, it is the Release build.
+- **A slice is not done with a Debug-only pass.** After the gate, run the
+  script so the Release exe matches what was tested. Never write "Debug build
+  only" in `docs/STATUS.md` as a resting state.
+- RC installers in `E:\3D-Modeler-RC` are versioned shipping packages, not the
+  working app.
+
 ## Sources of truth
 
 [`docs/product-rebuild-plan.md`](docs/product-rebuild-plan.md) (v2, adopted

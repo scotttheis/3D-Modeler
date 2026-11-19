@@ -8,8 +8,11 @@ host C toolchain and libclang. There is no Python or libclang runtime dependency
 ## Active workspace
 
 The active Rust source/build/run copy is `E:\3D-Modeler`. Run build and
-launch commands from that workspace; the Release desktop is
-`E:\3D-Modeler\target\release\modeler3d-app.exe`. `G:\` is the primary
+launch commands from that workspace. There is one current build, the Release
+desktop `E:\3D-Modeler\target\release\modeler3d-app.exe`, kept in step with the
+source by `scripts\Update-CurrentBuild.ps1` (old builds go to
+`G:\3D-Modeler-old-builds\` labeled `OLD-BUILD`; see "One current build" in
+`AGENTS.md`). `G:\` is the primary
 backup destination. G: snapshots and occasional USB copies are recovery copies,
 not working trees. `L:\Builder3D` is the separate Python reference/shipping
 build.

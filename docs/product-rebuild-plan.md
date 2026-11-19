@@ -162,6 +162,11 @@ D1 approved by the owner on 2026-11-12. In force:
   `target\` (count-and-bytes check, no per-file hash pass, no receipt essay).
   That snapshot is what preserves the ignored binary evidence.
 - Existing `G:\` snapshots stay untouched.
+- One current build (owner rule, 2026-11-19): the only build the owner runs is
+  `target/release/modeler3d-app.exe`, always rebuilt from current source with
+  `scripts/Update-CurrentBuild.ps1`. Old exes go to
+  `G:\3D-Modeler-old-builds\` labeled `OLD-BUILD`, never left beside the
+  current one. See `AGENTS.md`.
 
 ### 3.7 MCP parity (owner requirement, 2026-11-12)
 
