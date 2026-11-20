@@ -185,6 +185,10 @@ struct BrushSettings {
     crease_falloff: BrushFalloff,
     crease_sharpness: f32,
     smooth_radius_mm: f32,
+    /// Smooth Brush size on screen, in points. The stroke's millimetre radius
+    /// comes from it at the zoom where the stroke starts, so zooming in works
+    /// a smaller patch and zooming out a larger one.
+    smooth_screen_radius: f32,
     smooth_strength: f32,
     smooth_shrinkage: f32,
     smooth_falloff: BrushFalloff,
@@ -216,6 +220,7 @@ impl Default for BrushSettings {
             crease_falloff: crease.falloff,
             crease_sharpness: crease.sharpness,
             smooth_radius_mm: smooth.radius_mm,
+            smooth_screen_radius: SMOOTH_SCREEN_RADIUS_DEFAULT,
             smooth_strength: smooth.strength,
             // OF-50 / D9: Blender's sculpt Smooth keeps the whole movement toward
             // the neighbour average; sharp rims are protected in the core instead.
@@ -232,9 +237,15 @@ impl Default for BrushSettings {
     }
 }
 
+/// Default on-screen Smooth Brush size, in points.
+const SMOOTH_SCREEN_RADIUS_DEFAULT: f32 = 40.0;
+
 #[derive(Clone, Debug)]
 struct BrushGesture {
     tool: ActiveBrush,
+    /// Object-millimetre radius locked from the on-screen brush size when the
+    /// stroke starts; `None` for brushes sized in millimetres.
+    screen_radius_mm: Option<f32>,
     object_id: String,
     source_mesh: Mesh,
     source_transform: Transform,
@@ -5137,6 +5148,18 @@ impl Modeler3dApp {
                 {
                     ui.ctx().set_cursor_icon(egui::CursorIcon::Grab);
                 }
+                if hovering
+                    || matches!(self.viewport_drag, Some(ViewportDrag::Brush(_)))
+                {
+                    let pointer = hover.filter(|pointer| rect.contains(*pointer));
+                    let armed = matches!(self.viewport_drag, Some(ViewportDrag::Brush(_)))
+                        || ui.ctx().input(|input| input.modifiers.shift);
+                    if let Some(pointer) = pointer
+                        && self.paint_brush_outline(&painter, rect, pointer, armed, palette)
+                    {
+                        ui.ctx().set_cursor_icon(egui::CursorIcon::Crosshair);
+                    }
+                }
                 self.paint_box_selection(&painter, palette);
                 if staged_review_drag {
                     self.viewport_drag = None;
@@ -5861,12 +5884,33 @@ impl Modeler3dApp {
             "grab plane normal",
         )
         .unwrap_or([0.0, 0.0, 1.0]);
+        let screen_radius_mm = match tool {
+            ActiveBrush::SmoothBrush => {
+                match self.screen_radius_to_local_mm(
+                    rect,
+                    pointer,
+                    size,
+                    hit.position,
+                    &inverse,
+                    self.brush_settings.smooth_screen_radius,
+                ) {
+                    Some(radius) => Some(radius),
+                    None => {
+                        self.commands
+                            .set_status("Brush size could not be measured at this view");
+                        return None;
+                    }
+                }
+            }
+            _ => None,
+        };
         let object_id = object.object_id().to_owned();
         let source_mesh = object.mesh().clone();
         self.commands.select_index(index);
         self.surface = WorkspaceSurface::Scene;
         Some(ViewportDrag::Brush(Box::new(BrushGesture {
             tool,
+            screen_radius_mm,
             object_id,
             source_mesh,
             source_transform: inverse,
@@ -5961,7 +6005,9 @@ impl Modeler3dApp {
             ActiveBrush::SmoothBrush => BrushStroke::SmoothBrush {
                 centers_mm: gesture.centers.clone(),
                 options: SmoothBrushOptions {
-                    radius_mm: settings.smooth_radius_mm,
+                    radius_mm: gesture
+                        .screen_radius_mm
+                        .unwrap_or(settings.smooth_radius_mm),
                     strength: settings.smooth_strength,
                     shrinkage: settings.smooth_shrinkage,
                     falloff: settings.smooth_falloff,
@@ -6622,6 +6668,155 @@ impl Modeler3dApp {
         });
     }
 
+    /// On-screen size in points of the active brush, for the brushes that
+    /// show an on-surface outline.
+    fn brush_outline_screen_radius(&self) -> Option<f32> {
+        match self.active_brush? {
+            ActiveBrush::SmoothBrush => Some(self.brush_settings.smooth_screen_radius),
+            _ => None,
+        }
+    }
+
+    /// Converts an on-screen brush radius in points at `pointer` into object
+    /// millimetres at the depth of `hit_world`: the pointer offset by the
+    /// radius is cast onto the camera-facing plane through the hit, and that
+    /// point is measured in the object's own space.
+    fn screen_radius_to_local_mm(
+        &self,
+        rect: egui::Rect,
+        pointer: egui::Pos2,
+        size: (u32, u32),
+        hit_world: [f32; 3],
+        inverse: &Transform,
+        screen_radius: f32,
+    ) -> Option<f32> {
+        let scene_radius = self.current_scene_radius()?;
+        let view_normal = modeler3d_viewport::normalize(
+            subtract(self.camera.position(), self.camera.center()),
+            "brush size plane normal",
+        )
+        .ok()?;
+        let offset = viewport_pixel_position(pointer + egui::vec2(screen_radius, 0.0), rect, size);
+        let ray = self
+            .camera
+            .screen_ray(offset[0], offset[1], scene_radius)
+            .ok()?;
+        let edge = grab_plane_target(ray, hit_world, view_normal)?;
+        let delta = subtract(
+            inverse.transform_point(edge),
+            inverse.transform_point(hit_world),
+        );
+        let radius = dot(delta, delta).sqrt();
+        (radius.is_finite() && radius > 0.0).then_some(radius)
+    }
+
+    /// Draws the active brush's area of effect where the pointer meets a
+    /// mesh: a dashed disc of the brush radius on the surface tangent plane.
+    /// Returns whether an outline was drawn.
+    fn paint_brush_outline(
+        &self,
+        painter: &egui::Painter,
+        rect: egui::Rect,
+        pointer: egui::Pos2,
+        armed: bool,
+        palette: ThemePalette,
+    ) -> bool {
+        let Some(screen_radius) = self.brush_outline_screen_radius() else {
+            return false;
+        };
+        let Some(scene) = self.preview.as_ref() else {
+            return false;
+        };
+        let size = self
+            .viewport_renderer
+            .as_ref()
+            .map_or(self.camera.viewport_size(), ViewportRenderer::size);
+        let screen = viewport_pixel_position(pointer, rect, size);
+        let Ok(Some(hit)) = pick_scene(scene, &self.camera, screen[0], screen[1]) else {
+            return false;
+        };
+        // During a stroke only the stroked object is affected.
+        if let Some(ViewportDrag::Brush(gesture)) = self.viewport_drag.as_ref()
+            && gesture.object_id != hit.object_id
+        {
+            return false;
+        }
+        let scene_model = self.commands.scene();
+        let Some(object) = scene_model
+            .object_index(&hit.object_id)
+            .ok()
+            .and_then(|index| scene_model.object(index).ok())
+        else {
+            return false;
+        };
+        let Ok(inverse) = object.transform().inverse() else {
+            return false;
+        };
+        // The live preview mesh keeps the stroked object's topology, so the
+        // picked face index is valid against either mesh.
+        let mesh = match &self.preview_mesh_override {
+            Some((id, mesh)) if *id == hit.object_id => mesh,
+            _ => object.mesh(),
+        };
+        let Some(normal) = usize::try_from(hit.face_index)
+            .ok()
+            .and_then(|face| mesh.faces.get(face))
+            .and_then(|face| {
+                let [a, b, c] = face.map(|vertex| mesh.vertices.get(vertex as usize).copied());
+                crate::brush_outline::face_normal(a?, b?, c?)
+            })
+        else {
+            return false;
+        };
+        // During a stroke the outline shows the radius that stroke locked in.
+        let locked = match self.viewport_drag.as_ref() {
+            Some(ViewportDrag::Brush(gesture)) => gesture.screen_radius_mm,
+            _ => None,
+        };
+        let Some(radius) = locked.or_else(|| {
+            self.screen_radius_to_local_mm(
+                rect,
+                pointer,
+                size,
+                hit.position,
+                &inverse,
+                screen_radius,
+            )
+        }) else {
+            return false;
+        };
+        let center = inverse.transform_point(hit.position);
+        let Some(local_points) = crate::brush_outline::disc_points(center, normal, radius) else {
+            return false;
+        };
+        let Some(scene_radius) = self.current_scene_radius() else {
+            return false;
+        };
+        let Ok(matrix) = self.camera.view_projection(scene_radius) else {
+            return false;
+        };
+        let transform = object.transform();
+        let outline: Option<Vec<egui::Pos2>> = local_points
+            .into_iter()
+            .map(|point| {
+                project_gizmo_point_in_front(matrix, rect, transform.transform_point(point))
+            })
+            .collect();
+        let Some(outline) = outline else {
+            return false;
+        };
+        let painter = painter.with_clip_rect(rect);
+        crate::brush_outline::paint(
+            &painter,
+            &outline,
+            pointer,
+            palette.accent_control,
+            Color32::BLACK,
+            armed,
+        );
+        true
+    }
+
     fn paint_box_selection(&self, painter: &egui::Painter, palette: ThemePalette) {
         if let Some(ViewportDrag::BoxSelect { start, current }) = self.viewport_drag {
             let marquee = egui::Rect::from_two_pos(start, current);
@@ -6729,9 +6924,11 @@ impl Modeler3dApp {
                         );
                     }
                     ActiveBrush::SmoothBrush => {
+                        // Sized on screen: zoom in for a smaller patch, out
+                        // for a larger one.
                         ui.add(
-                            egui::Slider::new(&mut settings.smooth_radius_mm, 0.1..=1000.0)
-                                .text("Radius mm"),
+                            egui::Slider::new(&mut settings.smooth_screen_radius, 5.0..=300.0)
+                                .text("Size on screen"),
                         );
                         ui.add(
                             egui::Slider::new(&mut settings.smooth_strength, 0.0..=1.0)

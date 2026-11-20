@@ -8,6 +8,7 @@
 //! `modeler3d-platform`.
 
 mod artwork;
+mod brush_outline;
 mod chrome;
 mod commands;
 mod desktop_jobs;
