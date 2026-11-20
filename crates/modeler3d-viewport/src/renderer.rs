@@ -855,7 +855,16 @@ impl ViewportRenderer {
             }
         }
         self.release_unused_textures(scene);
-        let floor = build_floor(camera, DEFAULT_FLOOR_SIZE, options.grid_visible, true)?;
+        // View > Grid shows or hides the whole floor (owner decision,
+        // 2026-11-20): surface, grid, scale numbers, shadows and reflections.
+        let floor = if options.grid_visible {
+            build_floor(camera, DEFAULT_FLOOR_SIZE, true, true)?
+        } else {
+            crate::floor::FloorGeometry {
+                visible: false,
+                ..crate::floor::FloorGeometry::default()
+            }
+        };
         if interaction == InteractionState::Resting {
             self.contact_cache.settle(scene, scene_revision)?;
         }
@@ -1326,7 +1335,7 @@ impl ViewportRenderer {
                 xray: options.xray,
                 selected_object_ids: options.selected_object_ids.clone(),
                 lighting: options.lighting,
-                floor_enabled: true,
+                floor_enabled: options.grid_visible,
                 grid_visible: options.grid_visible,
                 floor_color: cpu_floor_color(options.theme),
                 grid_major_color: cpu_grid_major_color(options.theme),

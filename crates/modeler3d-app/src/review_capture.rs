@@ -18,7 +18,7 @@
 //! | `MODELER3D_REVIEW_SIZE` | `normal`, `big` (Settings > Size) | `normal` |
 //! | `MODELER3D_REVIEW_GRAB_CURSOR` | `claw`, `hand` (Settings > Grab cursor) | `claw` |
 //! | `MODELER3D_REVIEW_TAB` | a ribbon tab label such as `Object` | `Insert` |
-//! | `MODELER3D_REVIEW_VIEW` | comma list of view toggles to turn on: `wireframe`, `xray` | none |
+//! | `MODELER3D_REVIEW_VIEW` | comma list of view toggles to flip: `wireframe`, `xray` (off by default), `grid` (on by default, so this hides the floor) | none |
 //! | `MODELER3D_REVIEW_POINTER` | `x,y` in window points: rests the pointer there to show a hover state (no button is pressed) | pointer outside |
 //! | `MODELER3D_REVIEW_INTERACTIVE` | `1`: set up the state with isolated settings and stay open for hands-on checks instead of capturing | off |
 //! | `MODELER3D_REVIEW_CAMERA` | `yaw,pitch,distance` in degrees and mm, applied after auto-framing; distance `0` keeps the framed distance | framed view |
@@ -424,7 +424,7 @@ impl ReviewCapture {
         self.tab.as_deref()
     }
 
-    /// View toggles (`wireframe`, `xray`) to switch on.
+    /// View toggles (`wireframe`, `xray`, `grid`) to flip from their defaults.
     pub(crate) fn view_toggles(&self) -> &[String] {
         &self.view
     }

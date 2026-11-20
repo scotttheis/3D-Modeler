@@ -1215,6 +1215,7 @@ impl Modeler3dApp {
             match toggle.as_str() {
                 "wireframe" => self.dispatch(CommandId::ToggleWireframe),
                 "xray" => self.dispatch(CommandId::ToggleXray),
+                "grid" => self.dispatch(CommandId::ToggleGrid),
                 other => eprintln!("review capture: unknown view toggle `{other}`"),
             }
         }
@@ -8464,7 +8465,7 @@ fn command_summary(command: CommandId) -> &'static str {
         CommandId::ResetView => "Return to default view",
         CommandId::ViewTop => "Look from above",
         CommandId::ViewSide => "Look from the side",
-        CommandId::ToggleGrid => "Show or hide floor grid",
+        CommandId::ToggleGrid => "Show or hide the floor",
         CommandId::ToggleWireframe => "Show mesh edges",
         CommandId::ToggleXray => "See through models",
         CommandId::ToggleSnap => "Snap moves to the floor",
@@ -8528,7 +8529,7 @@ fn command_help(command: CommandId) -> &'static str {
         CommandId::ResetView => "Restore the default camera angle and distance.",
         CommandId::ViewTop => "Look down at the scene from above.",
         CommandId::ViewSide => "Look across the scene from the side.",
-        CommandId::ToggleGrid => "Show or hide the metric build-floor grid.",
+        CommandId::ToggleGrid => "Show or hide the floor with its grid, numbers and shadows.",
         CommandId::ToggleWireframe => "Show the edges of the model meshes.",
         CommandId::ToggleXray => "Make models translucent so you can see through them.",
         CommandId::ToggleSnap => "Snap moves to nearby models and the build floor.",
