@@ -4045,10 +4045,7 @@ impl Modeler3dApp {
                     .auto_shrink([false, false])
                     .show(ui, |ui| {
                 if !rows.is_empty() {
-                    // Keep the inspector at its natural height. On short windows
-                    // the enclosing area scrolls instead of cutting an Apply row.
-                    self.render_transform_inspector(ui, palette);
-                    self.render_arrange_control(ui, palette);
+                    // Owner 2026-11-19: no Transform panel in the right column.
                     ui.add_space(SPACE_2);
                 }
                 crate::chrome::section(ui, palette, "Items", |ui| {
@@ -4275,6 +4272,7 @@ impl Modeler3dApp {
             .map(|o| o.object_id().to_owned());
     }
 
+    #[cfg_attr(not(test), allow(dead_code))]
     fn render_transform_inspector(&mut self, ui: &mut Ui, palette: ThemePalette) {
         let selected = self
             .commands
@@ -4652,6 +4650,7 @@ impl Modeler3dApp {
         self.transform_strip_rect = Some(response.response.rect);
     }
 
+    #[allow(dead_code)]
     fn render_arrange_control(&mut self, ui: &mut Ui, palette: ThemePalette) {
         if self.commands.selected_count() < 2 {
             return;
