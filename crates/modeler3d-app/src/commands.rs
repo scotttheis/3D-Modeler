@@ -2638,6 +2638,18 @@ fn project_save_path(path: &Path) -> Result<PathBuf, CommandError> {
     Ok(normalized)
 }
 
+/// Temporary folder for tests. On macOS `$TMPDIR` is under the `/var` symbolic
+/// link, which the MCP approved-roots check refuses, so resolve it first.
+#[cfg(test)]
+fn test_temp_dir() -> std::path::PathBuf {
+    let dir = std::env::temp_dir();
+    if cfg!(windows) {
+        dir
+    } else {
+        dir.canonicalize().unwrap_or(dir)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -2745,7 +2757,7 @@ mod tests {
                 .call_value("import_file", serde_json::json!({"path":path,"unit":"mm"}))
                 .expect("MCP import");
             let mut status = serde_json::Value::Null;
-            for _ in 0..500 {
+            for _ in 0..6000 {
                 status = server
                     .call_value(
                         "operation_status",
@@ -2863,7 +2875,7 @@ mod tests {
 
     #[test]
     fn mcp_texture_tools_match_the_desktop_material_texture() {
-        let root = std::env::temp_dir().join(format!("modeler3d-of46-{}", std::process::id()));
+        let root = test_temp_dir().join(format!("modeler3d-of46-{}", std::process::id()));
         let _ = std::fs::create_dir_all(&root);
         let picture = root.join("stripes.png");
         let image = image::RgbaImage::from_fn(16, 16, |x, _| {
@@ -3106,7 +3118,7 @@ mod tests {
             .expect("operation ID")
             .to_owned();
         let mut status = serde_json::Value::Null;
-        for _ in 0..500 {
+        for _ in 0..6000 {
             status = server
                 .call_value(
                     "operation_status",
@@ -3774,7 +3786,7 @@ mod tests {
         let unique = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .map_or(0, |duration| duration.as_nanos());
-        let path = std::env::temp_dir().join(format!(
+        let path = test_temp_dir().join(format!(
             "modeler3d-import-{label}-{}-{unique}",
             std::process::id()
         ));
@@ -4168,7 +4180,7 @@ mod tests {
         let unique = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .map_or(0, |duration| duration.as_nanos());
-        let directory = std::env::temp_dir().join(format!(
+        let directory = test_temp_dir().join(format!(
             "modeler3d-dirty-savepoint-{}-{unique}",
             std::process::id()
         ));
@@ -4269,7 +4281,7 @@ mod tests {
             .duration_since(std::time::UNIX_EPOCH)
             .map_or(0, |duration| duration.as_nanos());
         let directory =
-            std::env::temp_dir().join(format!("modeler3d-{label}-{}-{unique}", std::process::id()));
+            test_temp_dir().join(format!("modeler3d-{label}-{}-{unique}", std::process::id()));
         assert!(std::fs::create_dir_all(&directory).is_ok());
         directory
     }
@@ -4373,7 +4385,7 @@ mod tests {
         let unique = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .map_or(0, |duration| duration.as_nanos());
-        let directory = std::env::temp_dir().join(format!(
+        let directory = test_temp_dir().join(format!(
             "modeler3d-project-path-{}-{unique}",
             std::process::id()
         ));
@@ -4406,7 +4418,7 @@ mod tests {
         let unique = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .map_or(0, |duration| duration.as_nanos());
-        let directory = std::env::temp_dir().join(format!(
+        let directory = test_temp_dir().join(format!(
             "modeler3d-project-failure-{}-{unique}",
             std::process::id()
         ));
@@ -4783,7 +4795,7 @@ mod tests {
         let unique = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .map_or(0, |duration| duration.as_nanos());
-        let project = std::env::temp_dir().join(format!(
+        let project = test_temp_dir().join(format!(
             "modeler3d-rb02-{}-{unique}.3dp",
             std::process::id()
         ));
@@ -4902,7 +4914,7 @@ mod tests {
                 .is_ok()
         );
         state.set_selection_indices([0, 1]);
-        let path = std::env::temp_dir().join(format!(
+        let path = test_temp_dir().join(format!(
             "modeler3d-command-image-color-{}.ppm",
             std::process::id()
         ));

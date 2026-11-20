@@ -1053,6 +1053,18 @@ fn constant_time_eq(left: &[u8], right: &[u8]) -> bool {
     difference == 0
 }
 
+/// Temporary folder for tests. On macOS `$TMPDIR` is under the `/var` symbolic
+/// link, which the MCP approved-roots check refuses, so resolve it first.
+#[cfg(test)]
+fn test_temp_dir() -> std::path::PathBuf {
+    let dir = std::env::temp_dir();
+    if cfg!(windows) {
+        dir
+    } else {
+        dir.canonicalize().unwrap_or(dir)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1061,7 +1073,7 @@ mod tests {
     use std::net::TcpStream;
 
     fn temporary_descriptor() -> (PathBuf, PathBuf) {
-        let root = std::env::temp_dir().join(format!(
+        let root = test_temp_dir().join(format!(
             "modeler3d-rb09-bridge-{}-{}",
             std::process::id(),
             Uuid::new_v4().simple()
