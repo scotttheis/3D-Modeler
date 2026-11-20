@@ -4795,3 +4795,7 @@ Previous: `G:\3D-Modeler_snapshot_20261116-133446_OF65-followups`.
 
 ## Hand cursor polish — 2026-11-20
 Original curved hand silhouettes in grab_cursor.rs; task card and STATUS updated. 539 workspace tests, fmt, workspace Clippy, deny, audit, parity, smoke passed; 106 full-board captures generated. Initial gate test linker lock resolved by a full workspace rerun. Both hand poses reviewed in both themes; owner approval pending. Release current. Baseline G:\3D-Modeler_snapshot_20261120-070750_hand-polish-baseline verified 15,658 files / 2,331,370,571 bytes. Recovery G:\3D-Modeler_snapshot_20261120-071700_hand-polish verified robocopy success and matching counts: 15873 files / 2369865347 bytes. Snapshot precedes this receipt and final commit. Next: owner review; no further implementation scheduled.
+
+## 2026-11-20 Transform boxes fill on insert/import
+
+Snapshot `G:\3D-Modeler_snapshot_20261120-075551_transform-boxes-fill`, taken 2026-11-20 07:55 after commit `4d15ced`. Robocopy result 1 (copied); source and copy both 16,821 files / 2,430,060,677 bytes (target\ excluded).
