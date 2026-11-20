@@ -274,10 +274,10 @@ pub fn make_cylinder(radius_mm: f32, height_mm: f32, segments: usize) -> Result<
         let top = (segments + index) as u32;
         let top_next = (segments + next) as u32;
         faces.extend_from_slice(&[
-            [bottom, bottom_next, top_next],
-            [bottom, top_next, top],
-            [bottom_center, bottom_next, bottom],
-            [top_center, top, top_next],
+            [bottom, top_next, bottom_next],
+            [bottom, top, top_next],
+            [bottom_center, bottom, bottom_next],
+            [top_center, top_next, top],
         ]);
     }
     Mesh::new(vertices, faces)
@@ -301,8 +301,8 @@ pub fn make_cone(radius_mm: f32, height_mm: f32, segments: usize) -> Result<Mesh
         let next = (index + 1) % segments;
         let current = index as u32;
         let next_vertex = next as u32;
-        faces.push([current, next_vertex, apex]);
-        faces.push([center, next_vertex, current]);
+        faces.push([current, apex, next_vertex]);
+        faces.push([center, current, next_vertex]);
     }
     Mesh::new(vertices, faces)
 }
@@ -319,12 +319,12 @@ pub fn make_pyramid(radius_mm: f32, height_mm: f32) -> Result<Mesh, CoreError> {
         [0.0, height_mm / 2.0, 0.0],
     ];
     let faces = vec![
-        [0, 2, 1],
-        [0, 3, 2],
-        [0, 1, 4],
-        [1, 2, 4],
-        [2, 3, 4],
-        [3, 0, 4],
+        [0, 1, 2],
+        [0, 2, 3],
+        [0, 4, 1],
+        [1, 4, 2],
+        [2, 4, 3],
+        [3, 4, 0],
     ];
     Mesh::new(vertices, faces)
 }
@@ -376,8 +376,8 @@ pub fn make_torus(
             let next_major_vertex = (next_major * minor_sections + minor) as u32;
             let diagonal = (next_major * minor_sections + next_minor) as u32;
             faces.extend_from_slice(&[
-                [current, next_major_vertex, diagonal],
-                [current, diagonal, next_minor_vertex],
+                [current, diagonal, next_major_vertex],
+                [current, next_minor_vertex, diagonal],
             ]);
         }
     }
@@ -409,15 +409,15 @@ pub fn make_hexagon(radius_mm: f32, height_mm: f32) -> Result<Mesh, CoreError> {
     let mut faces = Vec::with_capacity(20);
     for i in 1..5 {
         faces.extend_from_slice(&[
-            [0, (i + 1) as u32, i as u32],
-            [6, (6 + i) as u32, (6 + i + 1) as u32],
+            [0, i as u32, (i + 1) as u32],
+            [6, (6 + i + 1) as u32, (6 + i) as u32],
         ]);
     }
     for i in 0..6 {
         let next = (i + 1) % 6;
         faces.extend_from_slice(&[
-            [i as u32, next as u32, (6 + next) as u32],
-            [i as u32, (6 + next) as u32, (6 + i) as u32],
+            [i as u32, (6 + next) as u32, next as u32],
+            [i as u32, (6 + i) as u32, (6 + next) as u32],
         ]);
     }
     Mesh::new(vertices, faces)

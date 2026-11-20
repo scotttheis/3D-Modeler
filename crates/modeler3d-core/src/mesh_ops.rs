@@ -582,16 +582,29 @@ fn prepare_boolean_operand(
     limits: &MeshOperationLimits,
 ) -> Result<Mesh, CoreError> {
     if health.is_closed_manifold() {
-        return Ok(mesh.clone());
+        return Ok(outward_facing(mesh.clone()));
     }
     let repaired = crate::repair_mesh_with_options(mesh, crate::RepairProfile::Extended, *limits)?;
     if repaired.report.after.is_closed_manifold() {
-        return Ok(repaired.mesh);
+        return Ok(outward_facing(repaired.mesh));
     }
     Err(CoreError::MeshOperation(format!(
         "{label} operand must be watertight with consistent winding after repair: {}",
         repaired.report.after.issues.join("; ")
     )))
+}
+
+/// Turns a closed, consistently wound operand whose faces point inwards
+/// (negative enclosed volume) the right way out. The kernel reads an
+/// inside-out operand as empty space, so a Merge with it would keep every
+/// face of both objects and remove nothing.
+fn outward_facing(mut mesh: Mesh) -> Mesh {
+    if signed_volume_mm3(&mesh) < 0.0 {
+        for face in &mut mesh.faces {
+            face.swap(1, 2);
+        }
+    }
+    mesh
 }
 
 pub(crate) fn manifold_from_mesh(mesh: &Mesh, source: u32) -> Result<Manifold, CoreError> {

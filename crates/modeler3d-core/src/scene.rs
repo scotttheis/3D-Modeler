@@ -1901,14 +1901,17 @@ pub enum ProductBooleanOutcome {
 
 /// Whether a Merge result is still as many separate pieces as its two
 /// inputs together, i.e. the objects did not overlap (touching at a point
-/// or along a line does not join them either).
+/// or along a line does not join them either). An enclosed hollow inside
+/// the result is not a piece: it only exists because the objects joined.
 fn merge_left_pieces_apart(report: &crate::BooleanReport) -> bool {
-    let inputs = report
-        .target_before
-        .body_count
-        .max(1)
-        .saturating_add(report.tool_before.body_count.max(1));
-    report.result_after.body_count >= inputs
+    let pieces = |health: &crate::MeshHealthReport| {
+        health
+            .body_count
+            .saturating_sub(health.cavity_shells)
+            .max(1)
+    };
+    let inputs = pieces(&report.target_before).saturating_add(pieces(&report.tool_before));
+    pieces(&report.result_after) >= inputs
 }
 
 #[cfg(test)]
