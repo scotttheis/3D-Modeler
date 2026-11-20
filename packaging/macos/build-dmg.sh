@@ -65,6 +65,8 @@ lipo -info "$contents/MacOS/Modeler3D"
 # The app looks for assets/ beside its program (artwork::original_asset_root);
 # the files live in Resources, as macOS expects, behind a relative link.
 cp -R crates/modeler3d-app/assets/original "$contents/Resources/assets/original"
+# Release package icons are 128 px; the full-size art stays in the source tree.
+"$contents/MacOS/Modeler3D" --shrink-assets "$contents/Resources/assets/original"
 cp -R packaging/licenses "$contents/Resources/licenses"
 ln -s ../Resources/assets "$contents/MacOS/assets"
 ln -s ../Resources/licenses "$contents/MacOS/licenses"

@@ -31,6 +31,7 @@ mod resize_overlay;
 mod review_capture;
 mod rotation;
 mod shell;
+mod shrink_assets;
 mod signals;
 mod theme;
 mod toast;
@@ -147,6 +148,20 @@ fn run_inner() -> Result<(), AppError> {
     }
     if has_argument("--version") {
         println!("3D Modeler {}", updates::VERSION);
+        return Ok(());
+    }
+    if let Some(directory) = argument_value("--shrink-assets") {
+        let report = shrink_assets::shrink_assets(
+            Path::new(&directory),
+            shrink_assets::RELEASE_ICON_PIXELS,
+        )?;
+        println!(
+            "shrunk {} icons to at most {} px: {} -> {} bytes",
+            report.shrunk,
+            shrink_assets::RELEASE_ICON_PIXELS,
+            report.bytes_before,
+            report.bytes_after
+        );
         return Ok(());
     }
     ThemeArtwork::new(ThemeMode::Light).validate()?;

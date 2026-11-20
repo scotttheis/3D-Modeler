@@ -28,6 +28,8 @@ mkdir -p "$pkg/assets" "$pkg/installers"
 # licenses/ beside it (artwork::original_asset_root looks there).
 install -m 755 "$exe" "$pkg/Modeler3D"
 cp -r "$root/crates/modeler3d-app/assets/original" "$pkg/assets/original"
+# Release package icons are 128 px; the full-size art stays in the source tree.
+"$pkg/Modeler3D" --shrink-assets "$pkg/assets/original"
 cp -r "$root/packaging/licenses" "$pkg/licenses"
 install -m 755 "$root/packaging/launchers/modeler3d.sh" "$pkg/modeler3d.sh"
 cp "$root/packaging/launchers/modeler3d.desktop" "$pkg/modeler3d.desktop"

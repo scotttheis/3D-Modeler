@@ -60,6 +60,9 @@ Copy-Item -LiteralPath $exe -Destination (Join-Path $stage 'Modeler3D.exe')
 New-Item -ItemType Directory -Path (Join-Path $stage 'assets') -Force | Out-Null
 Copy-Item -LiteralPath (Join-Path $projectRoot 'crates\modeler3d-app\assets\original') `
     -Destination (Join-Path $stage 'assets\original') -Recurse
+# Release package icons are 128 px; the full-size art stays in the source tree.
+& (Join-Path $stage 'Modeler3D.exe') --shrink-assets (Join-Path $stage 'assets\original') | Write-Host
+if ($LASTEXITCODE -ne 0) { throw "Icon shrinking failed ($LASTEXITCODE)." }
 Copy-Item -LiteralPath (Join-Path $projectRoot 'packaging\licenses') `
     -Destination (Join-Path $stage 'licenses') -Recurse
 # Piped so PowerShell waits for the windowed exe and sets $LASTEXITCODE (OF-28).
