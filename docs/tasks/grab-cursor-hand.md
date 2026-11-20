@@ -1,7 +1,7 @@
 # Grab cursor: Claw / Hand choice
 
-Status: **owner approved 2026-11-20** ("approved"). Owner wants to **modify
-the hand drawing** next, in a fresh session. Keep everything else as it is.
+Status: **hand redraw owner approved 2026-11-20** ("haha. you did great. approved.").
+Implemented in `318833c`; no further hand changes requested.
 
 ## What exists (commits `2bc8aab`, `587bf62`)
 
