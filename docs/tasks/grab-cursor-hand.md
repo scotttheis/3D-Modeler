@@ -13,23 +13,15 @@ the hand drawing** next, in a fresh session. Keep everything else as it is.
 
 ## Where the hand is drawn
 
-All of it is `paint_hand` in `crates/modeler3d-app/src/grab_cursor.rs`, with
-these constants just above it (units are points before `HAND_SCALE`; y is
-down; (0,0) is the hotspot at the palm centre):
+The original hand was redrawn on 2026-11-20. `OPEN_HAND` and `CLOSED_HAND`
+in `crates/modeler3d-app/src/grab_cursor.rs` are original quadratic contours:
+each segment is `[control_x, control_y, end_x, end_y]`, in points relative to
+the palm-centre hotspot. Both start/end at `(-5, 7)`.
 
-| Constant | Controls |
-|---|---|
-| `FINGERS` | four finger x positions and open fingertip heights |
-| `KNUCKLE_TOP` | knuckle height above the palm when closed (fist) |
-| `FINGER_WIDTH`, `HAND_OUTLINE` | finger thickness and dark outline width |
-| `PALM` | palm rectangle (left, top, right, bottom) |
-| `HAND_SCALE` | overall size (1.2 sits beside the claw) |
-
-Open thumb: `capsule(at(-4.5, 5.), at(-10., -0.5))`. Closed thumb across the
-fist: `capsule(at(-6., 2.), at(1.5, 1.))`. Draw order matters: palm outline,
-open thumb, fingers (outline then fill each), palm fill (hides finger roots),
-then the closed thumb. Colours match the claw (dark outline, light fill).
-Do not change the claw (`paint`) unless the owner asks.
+`hand_geometry` samples and caches each silhouette once, filling concave finger
+gaps with trapezoids (egui's convex fill would bridge them). `paint_hand` adds
+a light outer keyline, dark contour, and thumb/finger creases. Overall scale
+is 1.05. Keep the claw and cursor selection behavior unchanged.
 
 ## How to see a change
 

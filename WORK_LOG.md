@@ -4792,3 +4792,6 @@ OF-59, `fbbfff8` OF-60, `0238ccf` OF-61; Phase 3: `e95dbd3` OF-48,
 snapshot: `G:\3D-Modeler_snapshot_20261116-145640_F5-F6` (10,026
 files, 1,338,525,537 bytes, counts verified; excludes `target\` and `logs\`).
 Previous: `G:\3D-Modeler_snapshot_20261116-133446_OF65-followups`.
+
+## Hand cursor polish — 2026-11-20
+Original curved hand silhouettes in grab_cursor.rs; task card and STATUS updated. 539 workspace tests, fmt, workspace Clippy, deny, audit, parity, smoke passed; 106 full-board captures generated. Initial gate test linker lock resolved by a full workspace rerun. Both hand poses reviewed in both themes; owner approval pending. Release current. Baseline G:\3D-Modeler_snapshot_20261120-070750_hand-polish-baseline verified 15,658 files / 2,331,370,571 bytes. Recovery G:\3D-Modeler_snapshot_20261120-071700_hand-polish verified robocopy success and matching counts: 15873 files / 2369865347 bytes. Snapshot precedes this receipt and final commit. Next: owner review; no further implementation scheduled.
