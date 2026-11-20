@@ -352,7 +352,7 @@ mod tests {
     fn gateway_publishes_the_fixed_catalog_without_owning_a_scene() {
         let gateway = R4Gateway::new(
             Profile::Full,
-            std::env::temp_dir().join(format!(
+            crate::r4::test_temp_dir().join(format!(
                 "modeler3d-r4-gateway-{}-missing.json",
                 std::process::id()
             )),

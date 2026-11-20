@@ -3935,14 +3935,14 @@ fn parse_ppm_average(bytes: &[u8]) -> Option<[f32; 4]> {
 mod tests {
     use super::*;
     use std::{
-        env,
         sync::{Arc, Barrier},
         thread,
         time::Duration,
     };
 
     fn server(profile: Profile) -> R4Server {
-        let root = env::temp_dir().join(format!("modeler3d-r4-server-{}", std::process::id()));
+        let root =
+            crate::r4::test_temp_dir().join(format!("modeler3d-r4-server-{}", std::process::id()));
         let _ = fs::create_dir_all(&root);
         let roots = ApprovedRoots::from_paths([root]).expect("approved root");
         R4Server::new(R4Config::for_profile(profile, roots))
@@ -4083,8 +4083,8 @@ mod tests {
         // The same stand-in the desktop Slicer-button test uses: an empty file
         // is a valid saved path that cannot start, so the failure proves the
         // saved slicer was the one chosen and staged for.
-        let directory =
-            env::temp_dir().join(format!("modeler3d-saved-slicer-{}", std::process::id()));
+        let directory = crate::r4::test_temp_dir()
+            .join(format!("modeler3d-saved-slicer-{}", std::process::id()));
         fs::create_dir_all(&directory).expect("directory");
         let slicer = directory.join("not-a-slicer.exe");
         fs::write(&slicer, b"").expect("stand-in slicer");
@@ -4746,7 +4746,8 @@ mod tests {
 
     #[test]
     fn sample_image_color_applies_a_bounded_ppm_to_selection() {
-        let root = env::temp_dir().join(format!("modeler3d-r4-ppm-{}", std::process::id()));
+        let root =
+            crate::r4::test_temp_dir().join(format!("modeler3d-r4-ppm-{}", std::process::id()));
         let _ = fs::create_dir_all(&root);
         let image = root.join("sample.ppm");
         fs::write(&image, b"P3\n2 1\n255\n255 0 0 0 0 255\n").expect("ppm");

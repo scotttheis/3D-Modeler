@@ -200,8 +200,8 @@ mod tests {
         let policy = ApprovedRoots::from_paths([root.clone()]).expect("policy");
         assert!(policy.contains(&fs::canonicalize(&child).expect("child")));
         assert!(
-            !policy.contains(&fs::canonicalize(env::temp_dir()).expect("temp"))
-                || root == env::temp_dir()
+            !policy.contains(&fs::canonicalize(crate::r4::test_temp_dir()).expect("temp"))
+                || root == crate::r4::test_temp_dir()
         );
         let _ = fs::remove_dir_all(root);
     }
@@ -224,14 +224,17 @@ mod tests {
         ));
         assert!(policy.write_path(child.join("new.stl"), false).is_ok());
         assert!(matches!(
-            policy.write_path(env::temp_dir().join("outside-modeler3d-r4.stl"), false),
+            policy.write_path(
+                crate::r4::test_temp_dir().join("outside-modeler3d-r4.stl"),
+                false
+            ),
             Err(SecurityError::OutsideRoots(_))
         ));
         let _ = fs::remove_dir_all(root);
     }
 
     fn tempfile_dir(prefix: &str) -> PathBuf {
-        let path = env::temp_dir().join(format!("{prefix}-{}", std::process::id()));
+        let path = crate::r4::test_temp_dir().join(format!("{prefix}-{}", std::process::id()));
         let _ = fs::remove_dir_all(&path);
         fs::create_dir_all(&path).expect("temporary directory");
         path
