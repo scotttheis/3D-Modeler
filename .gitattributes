@@ -1,1 +1,16 @@
+* text=auto eol=lf
 *.sh text eol=lf
+*.ps1 text eol=lf
+*.png binary
+*.bmp binary
+*.ico binary
+*.icns binary
+*.stl binary
+*.3mf binary
+*.zip binary
+*.msi binary
+*.ttf binary
+*.otf binary
+*.bin binary
+*.ply binary
+*.3dp binary
