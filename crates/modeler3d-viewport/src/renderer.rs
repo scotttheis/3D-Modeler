@@ -1952,9 +1952,10 @@ fn make_uniform(matrix: Mat4, color: [f32; 4]) -> Vec<u8> {
 const MAX_FLOOR_WINDOWS: usize = 4;
 /// Floor opacity inside a window over a sunken selected object.
 const FLOOR_WINDOW_ALPHA: f32 = 0.35;
-/// Window radius as a multiple of the footprint's half-diagonal: twice as
-/// wide, four times the area, so the sunken part still shows from an angle.
-const FLOOR_WINDOW_RADIUS_SCALE: f32 = 2.0;
+/// Window radius as a multiple of the footprint's half-diagonal: about 2.8x
+/// as wide, eight times the area, so the sunken part still shows from an
+/// angle (owner choice, 2026-11-20).
+const FLOOR_WINDOW_RADIUS_SCALE: f32 = 2.83;
 /// Fraction of the radius that stays fully see-through before the soft fade.
 const FLOOR_WINDOW_CORE: f32 = 0.45;
 /// Below-floor depth, in millimetres, that counts as sunk rather than resting.
