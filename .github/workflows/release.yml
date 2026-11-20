@@ -1,0 +1,103 @@
+name: Release
+
+# Tag v<version> (for example v0.99.0) to build the Windows MSI, the Mac DMG and
+# the Linux tarball and publish a GitHub release. Tags with a hyphen or a
+# 0.x version below 1.0 are published as pre-releases.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to build (for example 0.99.0); builds only, no release"
+        required: true
+
+env:
+  CARGO_TERM_COLOR: always
+  MODELER3D_PUBLIC_RELEASE: "1"
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Version
+        id: v
+        shell: pwsh
+        run: |
+          $v = "${{ github.event.inputs.version || github.ref_name }}".TrimStart('v')
+          echo "version=$v" >> $env:GITHUB_OUTPUT
+      - uses: Swatinem/rust-cache@v2
+      - name: Build
+        shell: pwsh
+        env:
+          LIBCLANG_PATH: C:\Program Files\LLVM\bin
+          MODELER3D_RELEASE_VERSION: ${{ steps.v.outputs.version }}
+        run: cargo build --release -p modeler3d-app --locked
+      - name: Install WiX
+        shell: pwsh
+        run: |
+          dotnet tool install --global wix --version 5.0.2
+          wix extension add -g WixToolset.UI.wixext/5.0.2
+          wix extension add -g WixToolset.Util.wixext/5.0.2
+      - name: MSI
+        shell: pwsh
+        run: ./packaging/msi/Build-Msi.ps1 -Version ${{ steps.v.outputs.version }} -Name 3D-Modeler-${{ steps.v.outputs.version }}-windows-x86_64 -OutDir "$PWD/out" -PublicRelease
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: out/*.msi
+  linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang libclang-dev cmake pkg-config \
+            libx11-dev libxcursor-dev libxrandr-dev libxi-dev libxkbcommon-dev \
+            libxkbcommon-x11-dev libwayland-dev libgl1-mesa-dev libvulkan1 \
+            mesa-vulkan-drivers libgtk-3-dev libxdo-dev
+      - uses: Swatinem/rust-cache@v2
+      - name: Tarball
+        run: |
+          v="${{ github.event.inputs.version || github.ref_name }}"
+          packaging/linux/build-tarball.sh "${v#v}" out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux
+          path: out/*.tar.gz
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2
+      - name: DMG
+        env:
+          LIBCLANG_PATH: /Library/Developer/CommandLineTools/usr/lib
+        run: |
+          v="${{ github.event.inputs.version || github.ref_name }}"
+          packaging/macos/build-dmg.sh "${v#v}" out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos
+          path: out/*.dmg
+  publish:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [windows, linux, macos]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          find dist -type f
+          args=()
+          [[ "$GITHUB_REF_NAME" == v0.* || "$GITHUB_REF_NAME" == *-* ]] && args+=(--prerelease)
+          gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --title "3D Modeler ${GITHUB_REF_NAME#v}" \
+            --generate-notes "${args[@]}" $(find dist -type f -name '*3D-Modeler-*' )
