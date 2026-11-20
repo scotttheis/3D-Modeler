@@ -153,150 +153,361 @@ fn paint(painter: &egui::Painter, pointer: Pos2, closed: bool) {
     painter.circle_filled(hub, 70. * SCALE, fill);
 }
 
-/// Original hand contours in points, with the palm centre as the shared hotspot.
-/// Each quadratic segment is (control x/y, end x/y). Rounded fingertips and
-/// tapered wrists keep the silhouette readable at ordinary cursor sizes.
-const OPEN_HAND: &[[f32; 4]] = &[
-    [-6., 7., -8., 4.],
-    [-10., 1., -11., -1.],
-    [-12., -3., -10., -3.5],
-    [-9., -4., -6., -0.5],
-    [-5., 0., -5.5, -3.],
-    [-6.5, -8., -7., -11.],
-    [-7.5, -13.5, -5.5, -13.5],
-    [-4., -13.5, -3.5, -11.],
-    [-3., -8., -2.5, -5.],
-    [-2., -4., -2., -6.],
-    [-2.5, -12., -2.5, -15.],
-    [-2.5, -17., -0.8, -17.],
-    [1., -17., 1., -15.],
-    [1., -10., 1., -6.],
-    [1.5, -4.5, 2., -6.],
-    [2.5, -10., 3., -13.],
-    [3.3, -15., 5., -14.5],
-    [6.5, -14., 6., -12.],
-    [5.5, -8., 5., -5.],
-    [5.2, -4., 5.8, -5.],
-    [6.5, -7., 7., -9.],
-    [7.6, -11., 9., -10.2],
-    [10.3, -9.5, 9.5, -7.5],
-    [8.5, -3., 8., 1.],
-    [7.5, 5., 5., 7.5],
-    [4.5, 8., 4.5, 10.],
-    [0., 11., -4., 10.],
-    [-4., 8., -5., 7.],
+/// Hand art traced from the owner's two reference drawings (an open hand and a
+/// fist, 2026-11-20), in points with each pose's centroid as the hotspot.
+/// Each pose is the outer silhouette followed by the white interior; the band
+/// between them is the dark outline, and the fist's finger creases are notches
+/// in its interior.
+const OPEN_HAND: &[&[(f32, f32)]] = &[
+    &[
+        (-5.25, -13.34),
+        (-5.70, -13.12),
+        (-6.47, -12.12),
+        (-6.58, -11.68),
+        (-6.47, -10.79),
+        (-2.82, -1.94),
+        (-2.93, -1.83),
+        (-6.47, -7.36),
+        (-7.36, -8.69),
+        (-7.91, -9.24),
+        (-8.91, -9.57),
+        (-9.90, -9.35),
+        (-10.57, -8.80),
+        (-10.79, -8.36),
+        (-10.90, -7.25),
+        (-10.57, -6.37),
+        (-6.58, -0.06),
+        (-6.14, 0.38),
+        (-5.92, 1.05),
+        (-4.48, 3.26),
+        (-4.48, 3.70),
+        (-4.70, 3.92),
+        (-5.25, 3.70),
+        (-8.24, 0.49),
+        (-9.46, -0.39),
+        (-10.23, -0.61),
+        (-11.34, -0.50),
+        (-12.34, 0.27),
+        (-12.67, 1.27),
+        (-12.45, 2.26),
+        (-6.80, 8.13),
+        (-5.92, 9.23),
+        (-4.59, 10.45),
+        (-3.59, 11.11),
+        (-1.60, 12.00),
+        (0.06, 12.33),
+        (2.05, 12.33),
+        (4.26, 11.78),
+        (6.58, 10.56),
+        (8.35, 8.90),
+        (9.02, 8.02),
+        (9.68, 6.69),
+        (10.12, 5.14),
+        (10.23, 4.37),
+        (10.12, 3.92),
+        (10.23, 3.04),
+        (10.12, 2.93),
+        (10.23, 2.82),
+        (9.79, 0.49),
+        (9.46, -0.39),
+        (9.35, -3.49),
+        (9.13, -4.71),
+        (9.24, -5.81),
+        (9.02, -7.69),
+        (9.13, -7.80),
+        (8.91, -9.35),
+        (8.24, -10.24),
+        (7.58, -10.57),
+        (6.58, -10.57),
+        (5.92, -10.24),
+        (5.37, -9.57),
+        (5.26, -9.24),
+        (5.26, -6.70),
+        (5.37, -6.48),
+        (5.26, -6.37),
+        (5.48, -5.15),
+        (5.37, -5.04),
+        (5.48, -2.60),
+        (5.26, -2.49),
+        (4.92, -3.27),
+        (4.92, -3.93),
+        (4.70, -4.37),
+        (4.70, -4.93),
+        (3.15, -12.23),
+        (2.93, -12.67),
+        (1.94, -13.45),
+        (0.83, -13.56),
+        (0.28, -13.34),
+        (-0.39, -12.67),
+        (-0.72, -11.57),
+        (0.94, -3.93),
+        (0.83, -3.38),
+        (-2.93, -12.56),
+        (-3.93, -13.34),
+        (-4.59, -13.45),
+    ],
+    &[
+        (-4.81, -12.67),
+        (-4.15, -12.56),
+        (-3.59, -12.12),
+        (0.28, -2.60),
+        (0.94, -1.94),
+        (1.72, -2.16),
+        (1.83, -3.49),
+        (1.27, -5.48),
+        (0.50, -9.91),
+        (0.06, -11.46),
+        (0.28, -12.23),
+        (0.72, -12.67),
+        (1.49, -12.78),
+        (1.83, -12.67),
+        (2.38, -12.12),
+        (4.48, -2.16),
+        (4.81, -1.83),
+        (5.59, -1.72),
+        (6.25, -2.49),
+        (6.14, -4.93),
+        (6.03, -5.04),
+        (6.14, -5.15),
+        (6.03, -5.26),
+        (6.14, -5.48),
+        (6.03, -9.13),
+        (6.69, -9.80),
+        (7.47, -9.80),
+        (8.02, -9.35),
+        (8.24, -8.91),
+        (8.58, -2.94),
+        (8.69, -2.83),
+        (8.58, -2.38),
+        (8.69, -2.27),
+        (8.58, -2.16),
+        (8.69, -0.50),
+        (9.24, 1.49),
+        (9.46, 2.93),
+        (9.46, 4.37),
+        (9.24, 5.58),
+        (8.69, 7.02),
+        (7.80, 8.35),
+        (6.14, 9.90),
+        (4.15, 11.00),
+        (2.05, 11.56),
+        (0.06, 11.56),
+        (-1.49, 11.23),
+        (-3.37, 10.34),
+        (-4.26, 9.68),
+        (-11.78, 1.82),
+        (-11.89, 1.16),
+        (-11.67, 0.71),
+        (-10.90, 0.16),
+        (-10.23, 0.16),
+        (-9.35, 0.60),
+        (-5.70, 4.37),
+        (-5.03, 4.70),
+        (-4.48, 4.70),
+        (-3.71, 3.92),
+        (-3.71, 3.15),
+        (-4.04, 2.48),
+        (-4.26, 2.37),
+        (-4.48, 1.71),
+        (-6.80, -2.05),
+        (-8.02, -3.71),
+        (-8.13, -4.15),
+        (-10.12, -7.25),
+        (-10.12, -7.92),
+        (-9.79, -8.47),
+        (-9.13, -8.80),
+        (-8.35, -8.58),
+        (-7.47, -7.47),
+        (-3.48, -1.17),
+        (-2.71, -0.50),
+        (-2.05, -0.72),
+        (-1.82, -1.50),
+        (-5.81, -11.23),
+        (-5.59, -12.12),
+        (-5.14, -12.56),
+    ],
 ];
-const CLOSED_HAND: &[[f32; 4]] = &[
-    [-8., 4., -8., 0.],
-    [-8.5, -3., -7., -4.5],
-    [-6., -6., -4., -5.],
-    [-3., -7.5, -0.5, -6.],
-    [1., -8., 3., -6.],
-    [5.5, -7., 6.5, -4.5],
-    [8.5, -4.5, 8.5, -2.],
-    [9., 3.5, 5., 7.],
-    [4.5, 8., 4.5, 10.],
-    [0., 11., -4., 10.],
-    [-4., 8., -5., 7.],
+const CLOSED_HAND: &[&[(f32, f32)]] = &[
+    &[
+        (3.21, -10.31),
+        (2.81, -10.44),
+        (1.22, -10.31),
+        (0.69, -10.04),
+        (-0.24, -8.85),
+        (-1.17, -9.51),
+        (-2.64, -9.64),
+        (-3.57, -9.24),
+        (-4.50, -7.92),
+        (-4.90, -7.92),
+        (-5.29, -8.18),
+        (-6.49, -8.18),
+        (-7.15, -7.92),
+        (-7.82, -7.38),
+        (-8.35, -6.32),
+        (-8.22, -4.73),
+        (-9.41, -4.19),
+        (-9.95, -3.80),
+        (-10.48, -2.73),
+        (-10.34, -1.14),
+        (-8.48, 1.39),
+        (-8.75, 3.12),
+        (-8.75, 4.84),
+        (-8.48, 5.77),
+        (-7.82, 6.97),
+        (-6.76, 8.03),
+        (-5.83, 8.57),
+        (-5.43, 8.57),
+        (-5.03, 8.83),
+        (0.95, 9.63),
+        (3.21, 9.50),
+        (5.21, 8.57),
+        (7.47, 6.84),
+        (8.93, 5.38),
+        (9.72, 4.05),
+        (10.39, 1.52),
+        (10.39, 0.32),
+        (9.72, -2.07),
+        (9.19, -3.00),
+        (4.94, -8.58),
+    ],
+    &[
+        (2.95, -9.38),
+        (8.26, -2.60),
+        (9.06, -1.14),
+        (9.46, 1.39),
+        (9.33, 2.32),
+        (8.66, 4.05),
+        (8.00, 4.98),
+        (6.53, 6.31),
+        (4.01, 8.17),
+        (2.95, 8.57),
+        (1.09, 8.70),
+        (-4.76, 7.90),
+        (-5.96, 7.37),
+        (-6.89, 6.57),
+        (-7.55, 5.51),
+        (-7.82, 4.71),
+        (-7.69, 2.72),
+        (-7.55, 2.58),
+        (-6.22, 4.18),
+        (-5.83, 4.18),
+        (-5.56, 3.65),
+        (-9.55, -1.67),
+        (-9.41, -2.87),
+        (-8.88, -3.40),
+        (-7.95, -3.66),
+        (-7.29, -3.40),
+        (-5.69, -1.40),
+        (-5.43, -1.27),
+        (-5.03, -1.40),
+        (-4.90, -2.07),
+        (-7.42, -5.39),
+        (-7.29, -6.45),
+        (-6.36, -7.25),
+        (-5.56, -7.25),
+        (-5.03, -6.99),
+        (-3.03, -4.33),
+        (-2.37, -3.66),
+        (-1.84, -3.80),
+        (-1.84, -4.46),
+        (-3.57, -6.85),
+        (-3.43, -7.92),
+        (-2.77, -8.58),
+        (-2.37, -8.71),
+        (-1.44, -8.58),
+        (0.29, -6.45),
+        (1.09, -6.05),
+        (1.35, -6.32),
+        (1.35, -6.72),
+        (0.69, -7.78),
+        (0.69, -8.31),
+        (0.95, -8.85),
+        (1.75, -9.51),
+    ],
 ];
 
 /// Fill a fixed concave contour with horizontal trapezoids. Splitting at every
 /// vertex height preserves finger gaps; egui's convex fill cannot do that.
-/// The resulting geometry is cached once per pose, never rebuilt per frame.
-fn hand_geometry(closed: bool) -> &'static (Vec<Pos2>, egui::Mesh) {
-    type Geometry = (Vec<Pos2>, egui::Mesh);
+fn fill_contour(points: &[Pos2]) -> egui::Mesh {
+    let mut closed = points.to_vec();
+    closed.extend(points.first().copied());
+    let mut levels: Vec<_> = points.iter().map(|p| p.y).collect();
+    levels.sort_by(f32::total_cmp);
+    levels.dedup();
+    let mut mesh = egui::Mesh::default();
+    for band in levels.windows(2) {
+        let mid = (band[0] + band[1]) * 0.5;
+        let mut edges = Vec::new();
+        for pair in closed.windows(2) {
+            let (a, b) = (pair[0], pair[1]);
+            if mid > a.y.min(b.y) && mid < a.y.max(b.y) {
+                let x = |y| a.x + (y - a.y) * (b.x - a.x) / (b.y - a.y);
+                edges.push((x(mid), x(band[0]), x(band[1])));
+            }
+        }
+        edges.sort_by(|a, b| a.0.total_cmp(&b.0));
+        for pair in edges.as_chunks::<2>().0 {
+            let base = mesh.vertices.len() as u32;
+            for point in [
+                egui::pos2(pair[0].1, band[0]),
+                egui::pos2(pair[1].1, band[0]),
+                egui::pos2(pair[1].2, band[1]),
+                egui::pos2(pair[0].2, band[1]),
+            ] {
+                mesh.colored_vertex(point, Color32::WHITE);
+            }
+            mesh.add_triangle(base, base + 1, base + 2);
+            mesh.add_triangle(base, base + 2, base + 3);
+        }
+    }
+    mesh
+}
+
+/// Contours and fills for one pose, built once and never rebuilt per frame.
+fn hand_geometry(closed: bool) -> &'static [(Vec<Pos2>, egui::Mesh)] {
+    type Geometry = Vec<(Vec<Pos2>, egui::Mesh)>;
     static OPEN: std::sync::OnceLock<Geometry> = std::sync::OnceLock::new();
     static CLOSED: std::sync::OnceLock<Geometry> = std::sync::OnceLock::new();
-    let cache = if closed { &CLOSED } else { &OPEN };
+    let (cache, art) = if closed {
+        (&CLOSED, CLOSED_HAND)
+    } else {
+        (&OPEN, OPEN_HAND)
+    };
     cache.get_or_init(|| {
-        let mut points = vec![egui::pos2(-5., 7.)];
-        for &[cx, cy, x, y] in if closed { CLOSED_HAND } else { OPEN_HAND } {
-            let start = points[points.len() - 1];
-            for step in 1..=6 {
-                let t = step as f32 / 6.;
-                let q = 1. - t;
-                points.push(egui::pos2(
-                    q * q * start.x + 2. * q * t * cx + t * t * x,
-                    q * q * start.y + 2. * q * t * cy + t * t * y,
-                ));
-            }
-        }
-        let mut levels: Vec<_> = points.iter().map(|p| p.y).collect();
-        levels.sort_by(f32::total_cmp);
-        levels.dedup();
-        let mut mesh = egui::Mesh::default();
-        for band in levels.windows(2) {
-            let mid = (band[0] + band[1]) * 0.5;
-            let mut edges = Vec::new();
-            for pair in points.windows(2) {
-                let (a, b) = (pair[0], pair[1]);
-                if mid > a.y.min(b.y) && mid < a.y.max(b.y) {
-                    let x = |y| a.x + (y - a.y) * (b.x - a.x) / (b.y - a.y);
-                    edges.push((x(mid), x(band[0]), x(band[1])));
-                }
-            }
-            edges.sort_by(|a, b| a.0.total_cmp(&b.0));
-            for pair in edges.as_chunks::<2>().0 {
-                let base = mesh.vertices.len() as u32;
-                for point in [
-                    egui::pos2(pair[0].1, band[0]),
-                    egui::pos2(pair[1].1, band[0]),
-                    egui::pos2(pair[1].2, band[1]),
-                    egui::pos2(pair[0].2, band[1]),
-                ] {
-                    mesh.colored_vertex(point, Color32::WHITE);
-                }
-                mesh.add_triangle(base, base + 1, base + 2);
-                mesh.add_triangle(base, base + 2, base + 3);
-            }
-        }
-        (points, mesh)
+        art.iter()
+            .map(|contour| {
+                let points: Vec<_> = contour.iter().map(|&(x, y)| egui::pos2(x, y)).collect();
+                let mesh = fill_contour(&points);
+                (points, mesh)
+            })
+            .collect()
     })
 }
 
-/// Open palm and compact gripping fist, with a stable palm-centre hotspot.
+/// Open palm and gripping fist, with a stable centre hotspot.
 fn paint_hand(painter: &egui::Painter, pointer: Pos2, closed: bool) {
     let outline = Color32::from_rgb(25, 29, 35);
     let fill = Color32::from_rgb(248, 250, 253);
     let at = |p: Pos2| pointer + p.to_vec2() * 1.05;
-    let (contour, mesh) = hand_geometry(closed);
-    let mut mesh = mesh.clone();
-    for vertex in &mut mesh.vertices {
-        vertex.pos = at(vertex.pos);
-        vertex.color = fill;
-    }
-    // Light outer keyline remains legible over dark objects and the floor.
-    let contour: Vec<_> = contour.iter().copied().map(at).collect();
-    painter.add(Shape::closed_line(
-        contour.clone(),
-        Stroke::new(2.8, Color32::from_white_alpha(180)),
-    ));
-    painter.add(Shape::mesh(mesh));
-    painter.add(Shape::closed_line(contour, Stroke::new(1.25, outline)));
-    let crease = |points: &[(f32, f32)]| {
-        painter.add(Shape::line(
-            points.iter().map(|&(x, y)| at(egui::pos2(x, y))).collect(),
-            Stroke::new(0.9, outline),
-        ));
-    };
-    if closed {
-        // Curled fingers and the thumb laid diagonally across their fronts.
-        for x in [-3.5, 0., 3.5] {
-            crease(&[(x, -4.), (x + 0.2, -1.5)]);
+    for (index, (contour, mesh)) in hand_geometry(closed).iter().enumerate() {
+        let outer = index == 0;
+        let contour: Vec<_> = contour.iter().copied().map(at).collect();
+        if outer {
+            // Light outer keyline remains legible over dark objects and the floor.
+            painter.add(Shape::closed_line(
+                contour.clone(),
+                Stroke::new(2.6, Color32::from_white_alpha(170)),
+            ));
         }
-        crease(&[
-            (-7., 1.),
-            (-5.5, -0.5),
-            (-3., -0.8),
-            (0.5, 0.2),
-            (1.2, 1.2),
-            (0.6, 2.4),
-            (-1., 2.8),
-            (-4., 2.),
-        ]);
-        crease(&[(-4., 2.), (-2.8, 4.)]);
-    } else {
-        crease(&[(-5.5, 0.), (-3.5, 1.5), (-3., 4.)]);
+        let mut mesh = mesh.clone();
+        for vertex in &mut mesh.vertices {
+            vertex.pos = at(vertex.pos);
+            vertex.color = if outer { outline } else { fill };
+        }
+        painter.add(Shape::mesh(mesh));
+        // A thin stroke on every edge smooths the untextured fill.
+        let width = if outer { 0.8 } else { 0.5 };
+        painter.add(Shape::closed_line(contour, Stroke::new(width, outline)));
     }
 }
 
