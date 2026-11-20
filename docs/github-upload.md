@@ -3,6 +3,62 @@
 Owner goal (2026-11-16): a **public** GitHub repository. Not uploaded yet;
 the owner says when. Until then the "no push" rule in `AGENTS.md` stands.
 
+## Release plan (owner, 2026-11-20)
+
+Two stages. When the owner says "put 3D Modeler on GitHub as v0.99" (or
+similar), run **Stage 1**. When they say the friend's feedback is done and
+it is time for v1.00, make the requested edits as normal tasks first, then
+run **Stage 2**.
+
+**Stage 1: v0.99, private test.**
+
+1. Create the repository on GitHub as **private** (`gh repo create
+   <owner>/3D-Modeler --private`). Use the final name now: the repository is
+   later switched to public under the same address, so the update feed in
+   the v0.99 build already points at the right place.
+2. Do the "Steps at upload time" below (gate, history email rewrite after a
+   `G:\` snapshot, licence, README, `Configure-UpdateFeed.ps1`, push `main`).
+3. Build installers at version `0.99.0` (`Build-Msi.ps1 -Version 0.99.0
+   -Name 3D-Modeler-0.99 -Build -PublicRelease -Verify`; Linux/Mac only if
+   the owner asks for them in this stage). 0.99.0 is higher than every RC
+   (0.1.x), so it upgrades an RC install in place.
+4. Tag `v0.99.0` and publish a GitHub **pre-release** with the installers
+   attached (`gh release create v0.99.0 --prerelease ...`).
+5. Give access only to the people the owner names: ask for each tester's
+   GitHub username and run `gh api -X PUT
+   repos/<owner>/3D-Modeler/collaborators/<username> -f permission=pull`.
+   On a personal (non-organisation) account GitHub gives collaborators write
+   access regardless of the permission asked for; tell the owner that in
+   plain words. A tester who has no GitHub account, or who should not get
+   write access, gets the MSI file directly instead (any file share).
+6. Tell the owner, in plain words: what the tester does (accept the GitHub
+   invitation email, open the Releases page, download the installer; Windows
+   SmartScreen shows "More info, Run anyway" because the installer is not
+   code-signed), and that a private repository uses GitHub's limited free
+   build minutes, Mac minutes counting ten times.
+7. Record in `docs/STATUS.md`: repository address, v0.99.0, testers given
+   access, date.
+
+While private, the in-app update check cannot see releases (GitHub hides
+them without a login). That is expected; it starts working when Stage 2
+makes the repository public, so a v0.99 tester is then offered v1.00.
+
+**Stage 2: v1.00, public.**
+
+1. Apply the owner's post-test edits as normal tasks (gate, captures,
+   owner approval).
+2. Rebuild every platform the owner wants at version `1.0.0` with
+   `-PublicRelease`; run the Full gate.
+3. Switch the repository to public (`gh repo edit --visibility public
+   --accept-visibility-change-consequences`), after confirming with the
+   owner that it goes public now.
+4. Tag `v1.0.0` and publish a normal (not pre-release) GitHub release with
+   the installers. Check from an installed v0.99 that Update and Restart
+   offers 1.0.0.
+5. Remove testers' collaborator access if the owner wants (they no longer
+   need it once public). Turn on GitHub Sponsors if the owner is ready.
+6. Record the public release in `docs/STATUS.md`.
+
 ## Decided
 
 - Public repository, free for others to use; not sold. The owner will turn

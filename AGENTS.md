@@ -203,9 +203,10 @@ as shared source.
 
 ## GitHub upload
 
-The owner plans a public GitHub repository. When they say they are ready,
-follow [`docs/github-upload.md`](docs/github-upload.md); until then do not
-push.
+The owner plans a public GitHub repository: first a private v0.99 for
+invited testers, then a public v1.00. When they say they are ready for
+either, follow [`docs/github-upload.md`](docs/github-upload.md) ("Release
+plan"); until then do not push.
 
 ## Test releases and packaging
 

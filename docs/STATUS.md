@@ -32,6 +32,22 @@ for RC2. Next after RC2: RC3 / 0.1.3.
 **Transform boxes fill on insert/import (2026-11-20), owner approved:** the Move/Rotate/Resize boxes at the bottom were sometimes blank after an import, drop or insert. Cause: only a gizmo drag filled them; the code that fills them from the selection ran only in tests. `refresh_transform_fields` in `shell.rs` now runs in the live strip whenever the scene, selection, unit, mode or resize basis changes. Test `transform_strip_boxes_fill_after_insert_and_import` (fails without the fix). 294 app tests, fmt and app Clippy passed; full gate, captures, deny and audit not run (no dependency or MCP change). Release rebuilt with `Update-CurrentBuild.ps1`. Commit `4d15ced`. Recovery: `G:D-Modeler_snapshot_20261120-075551_transform-boxes-fill` (16,821 files, 2,430,060,677 bytes; counts match). Owner tried it in the Release app: "approved." Nothing further requested.
 
 **Hand cursor redraw (2026-11-20), owner approved:** Replaced the bar-shaped hand with original curved open-palm and closed-fist silhouettes, tapered wrist, wrapped thumb and subtle finger creases. Light outer keyline and dark contour maintain visibility on either theme. Palm-centre hotspot, Claw default and Settings choice unchanged; no MCP behavior change. Source: `grab_cursor.rs`; task: [`grab-cursor-hand.md`](tasks/grab-cursor-hand.md). Reviewed both poses in both themes: `evidence/rebuild/captures/2026-11-20-hand-polish/` (`detail.png` is enlarged). Release rebuilt with `Update-CurrentBuild.ps1`. 539 workspace tests, fmt, workspace Clippy, deny, audit, MCP parity and smoke passed. Full board: `gate-20261120-071059` (106 images). Initial full-gate workspace test link failed because the earlier app tests still held its exe; separate complete workspace rerun passed (`logs/hand-polish-workspace-tests.txt`). Baseline snapshot verified: `G:\3D-Modeler_snapshot_20261120-070750_hand-polish-baseline` (15,658 files / 2,331,370,571 bytes). Recovery: G:\3D-Modeler_snapshot_20261120-071700_hand-polish (verification recorded in WORK_LOG). Commit `318833c`. Owner: "haha. you did great. approved." No further hand changes requested.
+**Owner-approved changes, 2026-11-20 (afternoon):**
+- **Hand cursor from the owner's own drawings** ("very very approved"): the
+  hand look is now traced from the owner's two reference pictures (open hand,
+  fist), replacing the redraw above. Commit `119e8f0`.
+- **No ghost below the floor; see-through floor window** (approved): the floor
+  reflection is never drawn above the floor, and a selected object sunk below
+  it shows through a round, soft-edged see-through patch (radius 2.83x the
+  footprint half-diagonal, 35% floor opacity). Review state `sunken`;
+  captures `evidence/rebuild/captures/2026-11-20-sunken-floor/`. Commits
+  `dc2ede0`, `e00ec82`.
+- **View > Grid hides/shows the whole floor** ("works perfect"): surface,
+  grid, scale numbers, shadows and reflections. Review view toggle `grid`;
+  captures `evidence/rebuild/captures/2026-11-20-grid-floor/`. Commit
+  `ca00a9f`. Workspace tests, fmt and Clippy passed; Release rebuilt.
+- **Next:** private GitHub v0.99 for an invited tester, then public v1.00:
+  see the "Release plan" in [`github-upload.md`](github-upload.md).
 
 **Grab cursor choice (2026-11-20), owner approved:** Settings > Grab cursor offers Claw / Hand; saved `grab_cursor` and MCP parity implemented. Original commits `2bc8aab`, `587bf62`. Claw stays the default.
 
