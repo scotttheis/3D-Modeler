@@ -19,6 +19,7 @@ use crate::chrome::{
     dialog_button, dialog_error, dialog_frame, dialog_primary_button, dialog_title_frame,
 };
 use crate::commands::{CommandState, DialogKind, ImportUnit};
+use crate::grab_cursor::GrabCursorStyle;
 use crate::numeric_controls::parse_distance_mm;
 use crate::preferences::DisplayUnit;
 use crate::preferences::import_uses_authoritative_units;
@@ -172,6 +173,8 @@ pub(crate) enum DialogAction {
     UiSize(UiSize),
     /// Update the mesh light, highlights, and floor contact shadows.
     ViewportLighting(ViewportLighting),
+    /// Choose the grab cursor: the robot claw or a hand.
+    GrabCursor(GrabCursorStyle),
 }
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
@@ -217,6 +220,7 @@ pub(crate) struct DialogState {
     file_type: FileType,
     save_picker: SavePicker,
     viewport_lighting: ViewportLighting,
+    grab_cursor: GrabCursorStyle,
     print_bed_size: String,
     print_slicers: Vec<SlicerInfo>,
     selected_slicer_key: String,
@@ -281,6 +285,7 @@ impl DialogState {
             file_type: FileType::Stl,
             save_picker: native_save_picker,
             viewport_lighting: ViewportLighting::default(),
+            grab_cursor: GrabCursorStyle::default(),
             print_bed_size: format!("{DEFAULT_BED_SIZE_MM:.1} mm"),
             print_slicers,
             selected_slicer_key,
@@ -362,6 +367,10 @@ impl DialogState {
 
     /// Supplies the stored slicer path and adds it to the print chooser only
     /// after the platform boundary confirms it is still a file.
+    pub(crate) const fn set_grab_cursor(&mut self, style: GrabCursorStyle) {
+        self.grab_cursor = style;
+    }
+
     pub(crate) fn set_preferred_slicer(&mut self, path: Option<PathBuf>, label: Option<String>) {
         self.preferred_slicer_path = path.clone();
         self.preferred_slicer_label = label.clone();
@@ -581,7 +590,9 @@ impl DialogState {
                 DialogKind::Settings => {
                     let max_height = settings_work_area.map_or_else(
                         || (ctx.content_rect().height() - 160.0).max(280.0),
-                        |rect| (rect.height() - 92.0).max(120.0),
+                        // Room for the title bar, the message-free footer row and
+                        // its separator, so the footer stays inside the area.
+                        |rect| (rect.height() - 108.0).max(120.0),
                     );
                     egui::ScrollArea::vertical()
                         .max_height(max_height)
@@ -1131,6 +1142,23 @@ impl DialogState {
             self.viewport_lighting = lighting.normalized();
             *action = Some(DialogAction::ViewportLighting(self.viewport_lighting));
         }
+        ui.separator();
+        ui.heading("Grab cursor");
+        ui.label(
+            RichText::new("What the pointer turns into when you grab and drag something.").weak(),
+        );
+        ui.horizontal(|ui| {
+            for style in GrabCursorStyle::ALL {
+                if ui
+                    .selectable_label(self.grab_cursor == style, style.label())
+                    .clicked()
+                    && self.grab_cursor != style
+                {
+                    self.grab_cursor = style;
+                    *action = Some(DialogAction::GrabCursor(style));
+                }
+            }
+        });
         ui.separator();
         ui.label("Preferred 3D slicer");
         match &self.preferred_slicer_path {
@@ -2492,9 +2520,29 @@ mod tests {
         let close = widget(&widgets, "Close");
         assert!(same_line(about, close));
         assert!(about.left() > 60.0);
-        assert!(about.bottom() > widget(&widgets, "Clear Recent Files List").bottom());
+        // The footer stays pinned below the scrolling settings and inside
+        // the settings area, however long the settings list grows.
+        assert!(about.bottom() > widget(&widgets, "Restore 3D Builder defaults").bottom());
+        assert!(about.bottom() <= 800.0, "{about:?}");
         let (actions, _) = run_dialog(&mut dialog, Some(close.center()));
         assert_eq!(actions, vec![DialogAction::Close]);
+    }
+
+    #[test]
+    fn settings_grab_cursor_choice_is_its_own_section_below_lighting() {
+        let mut dialog = DialogState::new(DialogKind::Settings, ThemeMode::Light);
+        let (_, widgets) = run_dialog(&mut dialog, None);
+        let hand = widget(&widgets, "Hand");
+        assert!(same_line(widget(&widgets, "Claw"), hand));
+        assert!(hand.top() > widget(&widgets, "Restore 3D Builder defaults").bottom());
+        let (actions, _) = run_dialog(&mut dialog, Some(hand.center()));
+        assert_eq!(
+            actions,
+            vec![DialogAction::GrabCursor(GrabCursorStyle::Hand)]
+        );
+        // Clicking the choice already shown sends nothing.
+        let (actions, _) = run_dialog(&mut dialog, Some(hand.center()));
+        assert!(actions.is_empty());
     }
 
     #[test]

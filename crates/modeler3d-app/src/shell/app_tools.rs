@@ -14,6 +14,7 @@ use serde_json::{Map, Value, json};
 
 use super::{Modeler3dApp, all_command_keys, command_enabled, normalized_tab_order, tab_commands};
 use crate::commands::{CommandDescriptor, CommandId, DialogKind, ImportUnit, RibbonTab};
+use crate::grab_cursor::GrabCursorStyle;
 use crate::preferences::{DisplayUnit, MAX_RIBBON_FAVORITES};
 use crate::theme::{ThemeMode, UiSize};
 use crate::ui_state::{
@@ -92,6 +93,15 @@ impl Modeler3dApp {
             .set_viewport_lighting(lighting);
         if let Some(dialog) = self.dialog.as_mut() {
             dialog.set_viewport_lighting(lighting);
+        }
+        self.persist_preferences();
+    }
+
+    /// The Settings grab cursor choice: robot claw or hand.
+    pub(super) fn apply_grab_cursor(&mut self, style: GrabCursorStyle) {
+        self.commands.preferences_mut().set_grab_cursor(style);
+        if let Some(dialog) = self.dialog.as_mut() {
+            dialog.set_grab_cursor(style);
         }
         self.persist_preferences();
     }
@@ -272,6 +282,7 @@ impl Modeler3dApp {
             },
             "window_title": self.window_title(),
             "lighting": lighting_value(preferences.viewport_lighting()),
+            "grab_cursor": preferences.grab_cursor().key(),
             "saved_slicer": preferences.preferred_slicer_path().map(|path| json!({
                 "path": path.display().to_string(),
                 "label": preferences.preferred_slicer_label(),
@@ -311,6 +322,12 @@ impl Modeler3dApp {
             .transpose()?;
         let resize_basis = optional_str(args, "resize_basis")
             .map(|value| parse_choice(value, &[("grid", false), ("object", true)]))
+            .transpose()?;
+        let grab_cursor = optional_str(args, "grab_cursor")
+            .map(|value| {
+                let choices = GrabCursorStyle::ALL.map(|style| (style.key(), style));
+                parse_choice(value, &choices)
+            })
             .transpose()?;
         let sticky = optional_bool(args, "sticky_selection");
         let keep_proportions = optional_bool(args, "keep_proportions");
@@ -389,6 +406,12 @@ impl Modeler3dApp {
         if lighting != current_lighting {
             self.apply_viewport_lighting(lighting);
             changed.push("lighting");
+        }
+        if let Some(style) =
+            grab_cursor.filter(|style| *style != self.commands.preferences().grab_cursor())
+        {
+            self.apply_grab_cursor(style);
+            changed.push("grab cursor");
         }
         if let Some(slicer) = slicer {
             self.apply_preferred_slicer(Some(slicer.path), Some(slicer.label));
@@ -863,6 +886,7 @@ mod tests {
 
     use super::super::{Modeler3dApp, PendingReplacement};
     use crate::commands::{CommandId, ImportUnit, RibbonTab};
+    use crate::grab_cursor::GrabCursorStyle;
     use crate::preferences::DisplayUnit;
     use crate::theme::{ThemeMode, UiSize};
     use crate::ui_state::{WorkspaceSurface, default_favorites, tab_commands};
@@ -981,13 +1005,16 @@ mod tests {
         desktop.set_resize_basis(true);
         desktop.proportional_resize = true;
         desktop.apply_ribbon_pinned(true);
+        desktop.apply_dialog_action(crate::dialogs::DialogAction::GrabCursor(
+            GrabCursorStyle::Hand,
+        ));
 
         let result = mcp(
             &mut ai,
             "set_app_settings",
             json!({"theme":"light","size":"big","display_unit":"in","default_import_unit":"cm",
                    "sticky_selection":true,"resize_basis":"object","keep_proportions":true,
-                   "ribbon_pinned":true}),
+                   "ribbon_pinned":true,"grab_cursor":"hand"}),
         )
         .expect("set settings");
 
@@ -1001,6 +1028,10 @@ mod tests {
             );
             assert!(app.sticky_selection && app.object_resize_basis && app.proportional_resize);
             assert!(app.ribbon_pinned && app.ribbon_expanded);
+            assert_eq!(
+                app.commands.preferences().grab_cursor(),
+                GrabCursorStyle::Hand
+            );
         }
         // What is saved to disk is the same.
         assert_eq!(saved_settings(&desktop), saved_settings(&ai));
@@ -1017,6 +1048,7 @@ mod tests {
         let read = mcp(&mut ai, "app_settings", json!({})).expect("read");
         assert_eq!(read["size"], json!("big"));
         assert_eq!(read["default_import_unit"], json!("cm"));
+        assert_eq!(read["grab_cursor"], json!("hand"));
         let again = mcp(&mut ai, "set_app_settings", json!({"theme":"light"})).expect("again");
         assert_eq!(again["message"], json!("No settings changed"));
         // A bad value is rejected before anything changes.

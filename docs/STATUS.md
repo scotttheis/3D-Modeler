@@ -3,7 +3,7 @@
 The only place current status is written. Keep it to one screen. Plan:
 [`product-rebuild-plan.md`](product-rebuild-plan.md).
 
-Updated 2026-11-20 (Smooth Brush outline; before that Merge fix; before that finish plan Session 2; before that claw redraw, Rotate grip reach, Resize handles zoomed in; before that OF-70).
+Updated 2026-11-20 (Grab cursor choice; before that Smooth Brush outline; before that Merge fix; before that finish plan Session 2; before that claw redraw, Rotate grip reach, Resize handles zoomed in; before that OF-70).
 
 Test releases (how-to: [`packaging.md`](packaging.md)): last is **RC1**,
 version 0.1.1, 2026-11-13, `E:\3D-Modeler-RC\Builder3D-RC1.msi` (50 MB),
@@ -28,6 +28,8 @@ for RC2. Next after RC2: RC3 / 0.1.3.
 **Finish plan (2026-11-19):** [`finish-plan.md`](finish-plan.md) — the remaining work by difficulty, in three sessions to a public v1.0. **Owner answers 2026-11-19** (approvals of Settle, claw, edit tools, live numbers and the gizmo arrows; Smooth to move; Resize floor/object switch approved; release icons at 128 px, source art unchanged; Emboss and Material dialog after v1.0) are recorded at the end of that file.
 
 ## Now
+
+**Grab cursor choice: claw or hand (owner request, 2026-11-20), awaiting owner review:** Settings has a new "Grab cursor" section directly below "Viewport lighting" with Claw / Hand. Hand is a new traditional hand: open palm with spread fingers, closing into a fist with the thumb across while holding; hotspot at the palm centre (`paint_hand` in `grab_cursor.rs`). The claw is unchanged and stays the default. Saved as `grab_cursor` in settings. MCP parity: `set_app_settings` takes `grab_cursor` (`claw`/`hand`) and `app_settings` reports it (schema contract and parity row updated). Fixed on the way: once Settings needs to scroll, its About/Close footer was pushed 13 px out of the docked area (`dialogs.rs`, reserve 92 -> 108). New capture variable `MODELER3D_REVIEW_GRAB_CURSOR`. 539 workspace tests, fmt, Clippy, deny and audit passed; full capture gate not run. Pack: `evidence/rebuild/captures/2026-11-20-grab-cursor-hand/`.
 
 **Smooth Brush outline and on-screen size, owner approved (2026-11-20):** with Smooth Brush on, a dashed disc on the surface under the pointer shows its area of effect (faint while aiming, bright with Shift or mid-stroke; `brush_outline.rs`, `paint_brush_outline` in `shell.rs`). The brush is now sized on screen ("Size on screen", 5-300 points, default 40): each stroke locks its millimetre radius from the zoom where it starts (`screen_radius_to_local_mm`), so zooming in works a smaller patch. Other brushes unchanged (still mm). MCP `smooth_brush` still takes `radius_mm`; the desktop converts before calling the same core path, so no contract change. 291 app tests, fmt and Clippy (app crate) passed; full gate, captures, deny and audit not run. Release rebuilt with `Update-CurrentBuild.ps1`. Owner: "call it approved and hold there." Commit `0e39a64`. Recovery: `G:D-Modeler_snapshot_20261120-052412_smooth-brush-outline` (16,504 files, 2,387,719,865 bytes; counts match).
 

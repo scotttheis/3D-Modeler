@@ -16,6 +16,7 @@
 //! | `MODELER3D_REVIEW_TEXTURES` | `;`-separated picture paths for the `texture` states (one per object, reused in turn) | a built-in brick picture |
 //! | `MODELER3D_REVIEW_THEME` | `light`, `dark` | `dark` |
 //! | `MODELER3D_REVIEW_SIZE` | `normal`, `big` (Settings > Size) | `normal` |
+//! | `MODELER3D_REVIEW_GRAB_CURSOR` | `claw`, `hand` (Settings > Grab cursor) | `claw` |
 //! | `MODELER3D_REVIEW_TAB` | a ribbon tab label such as `Object` | `Insert` |
 //! | `MODELER3D_REVIEW_VIEW` | comma list of view toggles to turn on: `wireframe`, `xray` | none |
 //! | `MODELER3D_REVIEW_POINTER` | `x,y` in window points: rests the pointer there to show a hover state (no button is pressed) | pointer outside |
@@ -38,6 +39,7 @@ use std::{
 
 use eframe::egui;
 
+use crate::grab_cursor::GrabCursorStyle;
 use crate::theme::{ThemeMode, UiSize};
 
 /// Frames to wait before requesting the framebuffer, so fonts, artwork
@@ -304,6 +306,7 @@ pub(crate) struct ReviewCapture {
     state: ReviewState,
     theme: ThemeMode,
     size: UiSize,
+    grab_cursor: GrabCursorStyle,
     tab: Option<String>,
     camera: Option<[f32; 3]>,
     pointer: Option<[f32; 2]>,
@@ -339,6 +342,10 @@ impl ReviewCapture {
         let size = env::var("MODELER3D_REVIEW_SIZE")
             .ok()
             .and_then(|value| UiSize::from_key(&value))
+            .unwrap_or_default();
+        let grab_cursor = env::var("MODELER3D_REVIEW_GRAB_CURSOR")
+            .ok()
+            .and_then(|value| GrabCursorStyle::from_key(&value))
             .unwrap_or_default();
         let tab = env::var("MODELER3D_REVIEW_TAB")
             .ok()
@@ -380,6 +387,7 @@ impl ReviewCapture {
             state,
             theme,
             size,
+            grab_cursor,
             tab,
             camera,
             pointer,
@@ -402,6 +410,10 @@ impl ReviewCapture {
 
     pub(crate) const fn size(&self) -> UiSize {
         self.size
+    }
+
+    pub(crate) const fn grab_cursor(&self) -> GrabCursorStyle {
+        self.grab_cursor
     }
 
     pub(crate) fn tab(&self) -> Option<&str> {

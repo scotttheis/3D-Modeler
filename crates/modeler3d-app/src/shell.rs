@@ -618,6 +618,9 @@ impl Modeler3dApp {
         self.settings_path = review.isolated_settings_path();
         self.theme_mode = review.theme();
         self.ui_size = review.size();
+        self.commands
+            .preferences_mut()
+            .set_grab_cursor(review.grab_cursor());
         // A real start seeds the shortcut bar when it is empty; do the same so
         // captures show it.
         let favorites = if review.state() == ReviewState::NoShortcuts {
@@ -1811,6 +1814,7 @@ impl Modeler3dApp {
         dialog.set_import_unit(self.commands.preferences().default_import_unit());
         dialog.set_display_unit(self.commands.preferences().display_unit());
         dialog.set_viewport_lighting(self.commands.preferences().viewport_lighting());
+        dialog.set_grab_cursor(self.commands.preferences().grab_cursor());
         dialog.set_preferred_slicer(
             self.commands
                 .preferences()
@@ -7463,6 +7467,10 @@ impl Modeler3dApp {
                 self.apply_viewport_lighting(lighting);
                 Ok(String::new())
             }
+            DialogAction::GrabCursor(style) => {
+                self.apply_grab_cursor(style);
+                Ok(format!("Grab cursor set to {}", style.label()))
+            }
         };
         match result {
             Ok(message) => {
@@ -7815,6 +7823,7 @@ impl eframe::App for Modeler3dApp {
         #[cfg(windows)]
         theme::apply_native_caption(&ctx, _frame, self.theme_mode);
         theme::apply_size(&ctx, self.ui_size);
+        crate::grab_cursor::set_style(&ctx, self.commands.preferences().grab_cursor());
         self.handle_shortcuts(&ctx);
         if self.surface == WorkspaceSurface::Welcome {
             self.update_recent_previews(&ctx);

@@ -8110,6 +8110,15 @@
             "contact_shadow_percent"
           ]
         },
+        "grab_cursor": {
+          "type": "string",
+          "enum": [
+            "claw",
+            "hand"
+          ],
+          "title": "Grab Cursor",
+          "description": "The grab cursor chosen in Settings."
+        },
         "saved_slicer": {
           "anyOf": [
             {
@@ -8185,7 +8194,8 @@
         "recent_file_count",
         "about",
         "window_title",
-        "lighting"
+        "lighting",
+        "grab_cursor"
       ]
     },
     "f4f4e3559aedfd0d0746e41f61a91f00540745e5957121228d43cfaee003a10f": {
@@ -13535,6 +13545,23 @@
             "title": "Reset Lighting",
             "type": "boolean",
             "description": "Put the lighting back to its defaults first."
+          },
+          "grab_cursor": {
+            "anyOf": [
+              {
+                "enum": [
+                  "claw",
+                  "hand"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Grab Cursor",
+            "description": "What the pointer turns into while grabbing, as in Settings: the robot claw or a hand."
           },
           "slicer": {
             "anyOf": [

@@ -11,6 +11,7 @@ use std::{
 };
 
 use crate::ImportUnit;
+use crate::grab_cursor::GrabCursorStyle;
 use crate::theme::{ThemeMode, UiSize};
 use modeler3d_platform::LegacySettings;
 use modeler3d_viewport::ViewportLighting;
@@ -177,6 +178,9 @@ pub struct Preferences {
     /// User's durable mesh light, highlight, and floor contact shadow controls.
     #[serde(default)]
     viewport_lighting: ViewportLighting,
+    /// Grab cursor look chosen in Settings: the robot claw or a hand.
+    #[serde(default)]
+    grab_cursor: GrabCursorStyle,
     #[serde(default)]
     ribbon_orders: BTreeMap<String, Vec<String>>,
     /// Persistent landmark/floor snapping preference used by Move gestures.
@@ -212,6 +216,7 @@ impl Default for Preferences {
             theme_mode: ThemeMode::Dark,
             ui_size: UiSize::Normal,
             viewport_lighting: ViewportLighting::default(),
+            grab_cursor: GrabCursorStyle::Claw,
             ribbon_orders: BTreeMap::new(),
             object_snapping_enabled: true,
             preferred_slicer_path: None,
@@ -331,6 +336,15 @@ impl Preferences {
                 None => push_warning(
                     &mut warnings,
                     "Ignored unsupported setting 'viewport_lighting'.".to_owned(),
+                ),
+            }
+        }
+        if let Some(value) = object.remove("grab_cursor") {
+            match value.as_str().and_then(GrabCursorStyle::from_key) {
+                Some(parsed) => preferences.grab_cursor = parsed,
+                None => push_warning(
+                    &mut warnings,
+                    "Ignored unsupported setting 'grab_cursor'.".to_owned(),
                 ),
             }
         }
@@ -608,6 +622,17 @@ impl Preferences {
     /// Sets viewport lighting after enforcing the renderer's supported ranges.
     pub fn set_viewport_lighting(&mut self, lighting: ViewportLighting) {
         self.viewport_lighting = lighting.normalized();
+    }
+
+    /// Returns the grab cursor look chosen in Settings.
+    #[must_use]
+    pub const fn grab_cursor(&self) -> GrabCursorStyle {
+        self.grab_cursor
+    }
+
+    /// Sets the grab cursor look.
+    pub const fn set_grab_cursor(&mut self, style: GrabCursorStyle) {
+        self.grab_cursor = style;
     }
 
     /// Returns whether landmark and build-floor snapping is enabled.
@@ -1047,9 +1072,11 @@ mod tests {
         );
         preferences.set_ribbon_favorites([String::from("Object:Group")]);
         preferences.set_display_unit(DisplayUnit::Inch);
+        preferences.set_grab_cursor(GrabCursorStyle::Hand);
         assert!(preferences.save_to_path(&path).is_ok());
         let loaded = Preferences::load_from_path(&path).expect("preferences");
         assert_eq!(loaded, preferences);
+        assert_eq!(loaded.grab_cursor(), GrabCursorStyle::Hand);
         assert_eq!(loaded.recent_files().paths().len(), MAX_RECENT_FILES);
         assert_eq!(
             loaded.recent_files().paths().first(),
