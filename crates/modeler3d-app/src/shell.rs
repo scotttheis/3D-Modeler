@@ -4287,8 +4287,11 @@ impl Modeler3dApp {
             .map(|o| o.object_id().to_owned());
     }
 
-    #[cfg_attr(not(test), allow(dead_code))]
-    fn render_transform_inspector(&mut self, ui: &mut Ui, palette: ThemePalette) {
+    /// Fills the Move, Rotate and Resize boxes from the current selection
+    /// whenever the scene, selection, unit, mode or resize basis changes, so
+    /// an imported, inserted or newly selected object never shows blank boxes.
+    /// Text the user is typing is kept until one of those inputs changes.
+    fn refresh_transform_fields(&mut self) {
         let selected = self
             .commands
             .scene()
@@ -4296,11 +4299,12 @@ impl Modeler3dApp {
             .iter()
             .copied()
             .collect::<Vec<_>>();
-        if selected.is_empty() {
-            ui.label(RichText::new("Select an object to edit its transform.").weak());
+        let Some(index) = selected.first().copied() else {
+            return;
+        };
+        if index >= self.commands.scene().objects().len() {
             return;
         }
-        let index = selected[0];
         let unit = self.commands.preferences().display_unit();
         let signature = format!(
             "{}:{selected:?}:{}:{}:{}",
@@ -4353,6 +4357,24 @@ impl Modeler3dApp {
                 String::from("1.0x"),
             ];
         }
+    }
+
+    #[cfg_attr(not(test), allow(dead_code))]
+    fn render_transform_inspector(&mut self, ui: &mut Ui, palette: ThemePalette) {
+        let selected = self
+            .commands
+            .scene()
+            .selection()
+            .iter()
+            .copied()
+            .collect::<Vec<_>>();
+        if selected.is_empty() {
+            ui.label(RichText::new("Select an object to edit its transform.").weak());
+            return;
+        }
+        let index = selected[0];
+        let unit = self.commands.preferences().display_unit();
+        self.refresh_transform_fields();
         if selected.len() == 1 {
             ui.horizontal(|ui| {
                 let rename_width = 64.0;
@@ -4605,6 +4627,7 @@ impl Modeler3dApp {
                             }
                         });
                         if self.commands.selected_count() > 0 {
+                            self.refresh_transform_fields();
                             let mut apply = false;
                             ui.horizontal(|ui| {
                                 let fields = match self.transform_panel_mode {
@@ -9476,6 +9499,51 @@ mod tests {
             }
         }
         (rects, text)
+    }
+
+    /// Inserting or importing an object fills the Move, Rotate and Resize
+    /// boxes on the next frame, with no gizmo drag needed.
+    #[test]
+    fn transform_strip_boxes_fill_after_insert_and_import() {
+        let (mut app, directory) = shell_for_jobs("transform-strip-fill");
+        let assert_filled = |app: &mut Modeler3dApp, label: &str| {
+            for mode in [
+                TransformPanelMode::Move,
+                TransformPanelMode::Rotate,
+                TransformPanelMode::Resize,
+            ] {
+                app.transform_panel_mode = mode;
+                transform_strip_shapes(app);
+                let fields = match mode {
+                    TransformPanelMode::Move => &app.position_fields,
+                    TransformPanelMode::Rotate => &app.rotation_fields,
+                    TransformPanelMode::Resize => &app.size_fields,
+                };
+                assert!(
+                    fields.iter().all(|field| !field.trim().is_empty()),
+                    "{label} {mode:?}: blank box in {fields:?}"
+                );
+            }
+        };
+        app.dispatch(CommandId::AddPrimitive(modeler3d_core::PrimitiveKind::Cube));
+        assert_eq!(app.commands.selected_count(), 1);
+        assert_filled(&mut app, "insert");
+        let size_after_insert = app.size_fields.clone();
+        app.position_fields = [String::new(), String::new(), String::new()];
+        app.size_fields = [String::new(), String::new(), String::new()];
+        app.rotation_fields = [String::new(), String::new(), String::new()];
+        app.commands
+            .import_from_path(&fixture("formats/python_box.stl"))
+            .expect("import fixture");
+        assert_eq!(app.commands.selected_count(), 1);
+        assert_filled(&mut app, "import");
+        app.transform_panel_mode = TransformPanelMode::Resize;
+        transform_strip_shapes(&mut app);
+        assert_ne!(
+            app.size_fields, size_after_insert,
+            "boxes still show the cube after import"
+        );
+        assert!(std::fs::remove_dir_all(directory).is_ok());
     }
 
     #[test]

@@ -3,7 +3,7 @@
 The only place current status is written. Keep it to one screen. Plan:
 [`product-rebuild-plan.md`](product-rebuild-plan.md).
 
-Updated 2026-11-20 (Hand cursor redraw; before that Grab cursor choice; before that Smooth Brush outline; before that Merge fix; before that finish plan Session 2; before that claw redraw, Rotate grip reach, Resize handles zoomed in; before that OF-70).
+Updated 2026-11-20 (Transform boxes fill on insert/import; before that Hand cursor redraw; before that Grab cursor choice; before that Smooth Brush outline; before that Merge fix; before that finish plan Session 2; before that claw redraw, Rotate grip reach, Resize handles zoomed in; before that OF-70).
 
 Test releases (how-to: [`packaging.md`](packaging.md)): last is **RC1**,
 version 0.1.1, 2026-11-13, `E:\3D-Modeler-RC\Builder3D-RC1.msi` (50 MB),
@@ -28,6 +28,8 @@ for RC2. Next after RC2: RC3 / 0.1.3.
 **Finish plan (2026-11-19):** [`finish-plan.md`](finish-plan.md) — the remaining work by difficulty, in three sessions to a public v1.0. **Owner answers 2026-11-19** (approvals of Settle, claw, edit tools, live numbers and the gizmo arrows; Smooth to move; Resize floor/object switch approved; release icons at 128 px, source art unchanged; Emboss and Material dialog after v1.0) are recorded at the end of that file.
 
 ## Now
+
+**Transform boxes fill on insert/import (2026-11-20), awaiting owner check:** the Move/Rotate/Resize boxes at the bottom were sometimes blank after an import, drop or insert. Cause: only a gizmo drag filled them; the code that fills them from the selection ran only in tests. `refresh_transform_fields` in `shell.rs` now runs in the live strip whenever the scene, selection, unit, mode or resize basis changes. Test `transform_strip_boxes_fill_after_insert_and_import` (fails without the fix). 294 app tests, fmt and app Clippy passed; full gate, captures, deny and audit not run (no dependency or MCP change). Release rebuilt with `Update-CurrentBuild.ps1`.
 
 **Hand cursor redraw (2026-11-20), owner approved:** Replaced the bar-shaped hand with original curved open-palm and closed-fist silhouettes, tapered wrist, wrapped thumb and subtle finger creases. Light outer keyline and dark contour maintain visibility on either theme. Palm-centre hotspot, Claw default and Settings choice unchanged; no MCP behavior change. Source: `grab_cursor.rs`; task: [`grab-cursor-hand.md`](tasks/grab-cursor-hand.md). Reviewed both poses in both themes: `evidence/rebuild/captures/2026-11-20-hand-polish/` (`detail.png` is enlarged). Release rebuilt with `Update-CurrentBuild.ps1`. 539 workspace tests, fmt, workspace Clippy, deny, audit, MCP parity and smoke passed. Full board: `gate-20261120-071059` (106 images). Initial full-gate workspace test link failed because the earlier app tests still held its exe; separate complete workspace rerun passed (`logs/hand-polish-workspace-tests.txt`). Baseline snapshot verified: `G:\3D-Modeler_snapshot_20261120-070750_hand-polish-baseline` (15,658 files / 2,331,370,571 bytes). Recovery: G:\3D-Modeler_snapshot_20261120-071700_hand-polish (verification recorded in WORK_LOG). Commit `318833c`. Owner: "haha. you did great. approved." No further hand changes requested.
 
