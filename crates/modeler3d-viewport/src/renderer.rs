@@ -952,7 +952,15 @@ impl ViewportRenderer {
         let view_projection = camera.view_projection(scene_radius)?;
         let light_direction = options.lighting.direction_in_view(view_matrix);
         let material_parameters = options.lighting.shader_parameters();
-        let uniform = make_uniform(view_projection, [1.0, 1.0, 1.0, 1.0]);
+        // A selected object sunk below the floor shows through it instead
+        // of being hidden, and casts no reflection.
+        let floor_windows = if floor.visible {
+            sunken_selection_windows(scene, options, preview_translation)
+        } else {
+            Vec::new()
+        };
+        let mut uniform = make_uniform(view_projection, [1.0, 1.0, 1.0, 1.0]);
+        uniform.extend_from_slice(&floor_window_bytes(&floor_windows));
         let uniform_buffer = self
             .device
             .create_buffer_init(&wgpu::util::BufferInitDescriptor {
@@ -1155,7 +1163,11 @@ impl ViewportRenderer {
                     let Some(gpu) = self.gpu_objects.get(object.object_id()) else {
                         continue;
                     };
-                    if preview_translation.is_some_and(|(id, _)| id == object.object_id()) {
+                    if preview_translation.is_some_and(|(id, _)| id == object.object_id())
+                        || floor_windows
+                            .iter()
+                            .any(|(id, _)| *id == object.object_id())
+                    {
                         continue;
                     }
                     pass.set_vertex_buffer(0, gpu.vertex.slice(..));
@@ -1934,6 +1946,81 @@ fn make_uniform(matrix: Mat4, color: [f32; 4]) -> Vec<u8> {
         bytes.extend_from_slice(&value.to_le_bytes());
     }
     bytes
+}
+
+/// Most sunken selected objects that each open a window in the floor.
+const MAX_FLOOR_WINDOWS: usize = 4;
+/// Floor opacity inside a window over a sunken selected object.
+const FLOOR_WINDOW_ALPHA: f32 = 0.35;
+/// Window radius as a multiple of the footprint's half-diagonal: twice as
+/// wide, four times the area, so the sunken part still shows from an angle.
+const FLOOR_WINDOW_RADIUS_SCALE: f32 = 2.0;
+/// Fraction of the radius that stays fully see-through before the soft fade.
+const FLOOR_WINDOW_CORE: f32 = 0.45;
+/// Below-floor depth, in millimetres, that counts as sunk rather than resting.
+const SUNKEN_TOLERANCE_MM: f32 = 0.01;
+
+/// Round floor windows `(centre x, centre z, radius, 0)` over selected
+/// objects that dip below the floor, at their dragged position while one is
+/// being moved.
+fn sunken_selection_windows<'a>(
+    scene: &'a RenderScene,
+    options: &ViewportRenderOptions,
+    preview_translation: Option<(&str, [f32; 3])>,
+) -> Vec<(&'a str, [f32; 4])> {
+    scene
+        .objects()
+        .iter()
+        .filter(|object| {
+            options
+                .selected_object_ids
+                .iter()
+                .any(|id| id == object.object_id())
+        })
+        .filter_map(|object| {
+            let bounds = object.world_bounds().ok()?;
+            let offset = match preview_translation {
+                Some((id, position)) if id == object.object_id() => {
+                    subtract(position, object.transform().transform_point([0.0; 3]).ok()?)
+                }
+                _ => [0.0; 3],
+            };
+            (bounds.minimum[1] + offset[1] < -SUNKEN_TOLERANCE_MM).then(|| {
+                let half_x = (bounds.maximum[0] - bounds.minimum[0]) * 0.5;
+                let half_z = (bounds.maximum[2] - bounds.minimum[2]) * 0.5;
+                (
+                    object.object_id(),
+                    [
+                        bounds.minimum[0] + half_x + offset[0],
+                        bounds.minimum[2] + half_z + offset[2],
+                        half_x.hypot(half_z).max(1.0) * FLOOR_WINDOW_RADIUS_SCALE,
+                        0.0,
+                    ],
+                )
+            })
+        })
+        .take(MAX_FLOOR_WINDOWS)
+        .collect()
+}
+
+/// Overlay-uniform tail: window count, opacity and core fraction, then the
+/// circles.
+fn floor_window_bytes(windows: &[(&str, [f32; 4])]) -> Vec<u8> {
+    let header = [
+        windows.len().min(MAX_FLOOR_WINDOWS) as f32,
+        FLOOR_WINDOW_ALPHA,
+        FLOOR_WINDOW_CORE,
+        0.0,
+    ];
+    let mut rects = [[0.0f32; 4]; MAX_FLOOR_WINDOWS];
+    for (slot, (_, rect)) in rects.iter_mut().zip(windows) {
+        *slot = *rect;
+    }
+    header
+        .into_iter()
+        .chain(rects.into_iter().flatten())
+        .flat_map(f32::to_le_bytes)
+        .collect()
 }
 
 fn make_mesh_uniform(
@@ -3246,8 +3333,23 @@ const OVERLAY_SHADER: &str = r#"
 struct Uniforms {
     view_projection: mat4x4<f32>,
     color: vec4<f32>,
+    // x = window count, y = floor opacity inside, z = solid core fraction.
+    floor_windows: vec4<f32>,
+    // (centre x, centre z, radius, 0) over each sunken selected object.
+    window_circles: array<vec4<f32>, 4>,
 };
 @group(0) @binding(0) var<uniform> uniforms: Uniforms;
+// 1 near a sunken selected object, easing to 0 at the edge of a round window.
+fn floor_window(p: vec2<f32>) -> f32 {
+    var window = 0.0;
+    let count = u32(uniforms.floor_windows.x);
+    for (var i = 0u; i < count; i = i + 1u) {
+        let c = uniforms.window_circles[i];
+        let t = length(p - c.xy) / max(c.z, 0.001);
+        window = max(window, 1.0 - smoothstep(uniforms.floor_windows.z, 1.0, t));
+    }
+    return window;
+}
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) color: vec4<f32>,
@@ -3290,6 +3392,10 @@ fn fragment_main(input: VertexOutput) -> @location(0) vec4<f32> {
             color.a * (1.0 - smoothstep(0.0, 1.0, input.surface_fade)),
         );
     }
+    if input.floor_pattern > 0.5 {
+        let window = floor_window(input.world_position.xz);
+        color = vec4<f32>(color.rgb, color.a * mix(1.0, uniforms.floor_windows.y, window));
+    }
     let linear = max(color.rgb, vec3<f32>(0.0));
     let low = linear * 12.92;
     let high = 1.055 * pow(linear, vec3<f32>(1.0 / 2.4)) - vec3<f32>(0.055);
@@ -3330,7 +3436,9 @@ fn fragment_main(input: VertexOutput) -> @location(0) vec4<f32> {
     // Mirrored geometry lies below the floor; fade it out with depth.
     let below = -(dot(uniforms.floor_plane.xyz, input.view_position) + uniforms.floor_plane.w);
     let fade = 1.0 - smoothstep(0.0, uniforms.fade.x, below);
-    if fade <= 0.002 {
+    // Mirrored geometry above the floor belongs to a part sunk below it; it
+    // would read as a ghost object, so it is never drawn.
+    if below < 0.0 || fade <= 0.002 {
         discard;
     }
     let normal = normalize(input.normal);
@@ -3473,6 +3581,15 @@ mod tests {
     fn uniform_bytes_match_wgsl_alignment() {
         let bytes = make_uniform(Mat4::identity(), [1.0, 0.5, 0.25, 1.0]);
         assert_eq!(bytes.len(), 80);
+        // floor_windows + window_rects: 16 + 4 * 16 bytes.
+        assert_eq!(floor_window_bytes(&[]).len(), 80);
+        let five = [("a", [0.0, 0.0, 1.0, 1.0]); 5];
+        let tail = floor_window_bytes(&five);
+        assert_eq!(tail.len(), 80);
+        assert_eq!(
+            f32::from_le_bytes([tail[0], tail[1], tail[2], tail[3]]),
+            4.0
+        );
     }
 
     #[test]

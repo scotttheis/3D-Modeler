@@ -679,7 +679,9 @@ impl Modeler3dApp {
             ],
             ReviewState::Colors => &[modeler3d_core::PrimitiveKind::Cube; 4],
             ReviewState::Mirror => &[modeler3d_core::PrimitiveKind::Cube],
-            ReviewState::MergeApart => &[modeler3d_core::PrimitiveKind::Cube; 2],
+            ReviewState::MergeApart | ReviewState::Sunken => {
+                &[modeler3d_core::PrimitiveKind::Cube; 2]
+            }
             ReviewState::Repair | ReviewState::Paste => &[modeler3d_core::PrimitiveKind::Cube],
             ReviewState::Align => &[modeler3d_core::PrimitiveKind::Cube; 2],
             ReviewState::Paint | ReviewState::PaintPicker | ReviewState::Xray => &[
@@ -775,6 +777,21 @@ impl Modeler3dApp {
                 self.ui_size = review.size();
             }
             _ => {}
+        }
+        if review.state() == ReviewState::Sunken {
+            // Sink the first cube by half its height and select it alone.
+            let sunk = self.commands.scene().objects().first().and_then(|cube| {
+                let (low, high) = cube.mesh().bounds()?;
+                let at = cube.position();
+                Some((
+                    cube.object_id().to_owned(),
+                    [at[0], at[1] - (high[1] - low[1]) * 0.5, at[2]],
+                ))
+            });
+            if let Some((id, position)) = sunk {
+                let _ = self.commands.set_object_position_by_id(&id, position);
+            }
+            self.commands.set_selection_indices([0]);
         }
         if review.state() == ReviewState::Colors {
             let colors = [
