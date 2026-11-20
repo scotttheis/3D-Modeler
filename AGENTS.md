@@ -208,6 +208,13 @@ invited testers, then a public v1.00. When they say they are ready for
 either, follow [`docs/github-upload.md`](docs/github-upload.md) ("Release
 plan"); until then do not push.
 
+## Suggestions from other people
+
+Follow [`docs/community-suggestions.md`](docs/community-suggestions.md): fixes go
+on one short list for quick approval; anything that adds something, and
+anything that changes the look, is approved by the owner one by one. The
+product is built on extreme simplicity; added complexity is a risk.
+
 ## Test releases and packaging
 
 When the owner asks for a release candidate, test build, installer, MSI or
