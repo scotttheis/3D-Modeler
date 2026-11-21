@@ -29,7 +29,7 @@ for RC2. Next after RC2: RC3 / 0.1.3.
 
 ## Now
 
-**Final tasks F1-F7 (owner, 2026-11-20):** one task per session, in order, each on its own model; list and ticks in [`finish-plan.md`](finish-plan.md) "Final tasks". Next: F1 (Haiku).
+**Final tasks F1-F7 (owner, 2026-11-20):** one task per session, in order, each on its own model; list and ticks in [`finish-plan.md`](finish-plan.md) "Final tasks". F1 done 2026-11-20 (backup, see WORK_LOG). Next: F2 (Haiku).
 
 **Release icons at 128 px, owner approved ("excellent", 2026-11-20):** every installer (MSI, DMG, tarball) ships the action and insert icons scaled to 128 px by `Modeler3D --shrink-assets` on the staged copy; source art in `assets/` stays full size. Artwork 40 MB to about 4 MB; downloads now Windows 13 MB, Linux 18 MB, Mac 26 MB. v0.99.0 was re-cut with this. Commit `812f135`.
 
