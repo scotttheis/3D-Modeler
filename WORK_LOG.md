@@ -4815,3 +4815,7 @@ Commit `78d875d`. Whole-object Smooth uses the Smooth Brush's shared hard-edge r
 ## 2026-11-21 v1.0.1 (background booleans, empty shortcut bar)
 
 Commits `cd4833f`, `9484ad0`, `8508f03`. Full gate passed (`logs/gate/20261121-064429-full`). Snapshot `G:\3D-Modeler_snapshot_20261121-065316_v1.0.1-background-booleans`: robocopy exit 1 (copied, no failures); source and copy both 17,751 files / 2,568,526,397 bytes (`target\` and `logs\` excluded). Additive only. Released privately as tag `v1.0.1` (owner kept the repository private).
+
+## 2026-11-21 Subtract fix for nearly-perfect meshes
+
+Commit `7641f7a`. A sealed operand whose only flaws are zero-area or duplicate triangles goes straight to the boolean kernel; repair only if the kernel rejects it. Owner file `Secret Book A.3mf`: Subtract failed after ~2 s (repair opened 87 holes), now 0.2-0.7 s. Workspace tests, fmt, Clippy passed; full gate not run. Release rebuilt (CURRENT). Snapshot `G:\3D-Modeler_snapshot_20261121-103943_subtract-nearly-perfect`: robocopy exit 1 (copied, no failures); source and copy both 17,767 files / 2,568,819,564 bytes (`target\` and `logs\` excluded). Owner try pending.
