@@ -4811,3 +4811,7 @@ Windows: RC1 MSI installed, v0.99.0 MSI (from GitHub, digest verified) upgraded 
 ## 2026-11-20 Finish plan F5: whole-object Smooth keeps sharp features (H1 / D9)
 
 Commit `78d875d`. Whole-object Smooth uses the Smooth Brush's shared hard-edge rule, plus a 30° edge-line turn limit for corners; degenerate faces ignored; scale-free normals. Codex (high, read-only) reviewed the diff: four findings, all fixed with tests. Full gate passed (`logs/gate/20261120-191111-full`, 549 workspace tests). Release rebuilt, `Update-CurrentBuild.ps1 -Check` CURRENT. Snapshot `G:\3D-Modeler_snapshot_20261120-192608_F5-smoothing`: robocopy exit 1 (copied, no failures); source and copy both 17,253 files / 2,491,533,733 bytes (`target\` and `logs\` excluded). Owner try in the Release app pending.
+
+## 2026-11-21 v1.0.1 (background booleans, empty shortcut bar)
+
+Commits `cd4833f`, `9484ad0`, `8508f03`. Full gate passed (`logs/gate/20261121-064429-full`). Snapshot `G:\3D-Modeler_snapshot_20261121-065316_v1.0.1-background-booleans`: robocopy exit 1 (copied, no failures); source and copy both 17,751 files / 2,568,526,397 bytes (`target\` and `logs\` excluded). Additive only. Released privately as tag `v1.0.1` (owner kept the repository private).
