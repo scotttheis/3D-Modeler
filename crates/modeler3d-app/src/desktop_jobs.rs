@@ -76,6 +76,11 @@ pub(crate) enum DesktopJobResult {
     },
 }
 
+/// Shown when Smooth finds only flat faces, sharp edges and corners, which it
+/// keeps (H1 / D9), so the shape is left as it is.
+pub(crate) const SMOOTH_NOTHING_TO_SMOOTH_MESSAGE: &str =
+    "Smooth: nothing to smooth. Flat faces, sharp edges and corners are kept";
+
 /// Owns staged output until the UI accepts it. Channel teardown, cancellation,
 /// and stale results automatically remove unclaimed files.
 pub(crate) struct PreparedPrintGuard {
@@ -183,6 +188,11 @@ where
                 }
                 MeshJobOperation::Smooth => {
                     let result = smooth_mesh(&mesh, 1).map_err(|error| error.to_string())?;
+                    if !result.report.changed {
+                        return Ok(DesktopJobResult::Unchanged {
+                            message: SMOOTH_NOTHING_TO_SMOOTH_MESSAGE.to_owned(),
+                        });
+                    }
                     (result.mesh, "one smoothing pass complete".to_owned())
                 }
             };
@@ -307,7 +317,12 @@ mod tests {
     #[test]
     fn worker_uses_an_owned_mesh_and_reports_staged_progress() {
         let mut scene = Scene::new();
-        assert!(scene.add_primitive(PrimitiveKind::Cube, None, None).is_ok());
+        assert!(
+            scene
+                .add_primitive(PrimitiveKind::Sphere, None, None)
+                .is_ok()
+        );
+        let faces = scene.objects()[0].mesh().face_count();
         let mesh = scene.objects()[0].mesh().clone();
         let registry = OperationRegistry::default();
         let handle = registry
@@ -341,7 +356,7 @@ mod tests {
         ));
         assert_eq!(progress.first().map(|item| item.0), Some(5));
         assert_eq!(progress.last().map(|item| item.0), Some(95));
-        assert_eq!(scene.objects()[0].mesh().face_count(), 12);
+        assert_eq!(scene.objects()[0].mesh().face_count(), faces);
     }
 
     #[test]

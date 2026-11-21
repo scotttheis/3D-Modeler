@@ -10103,7 +10103,7 @@ mod tests {
         let (mut app, directory) = shell_for_jobs("mesh-job-success");
         assert!(
             app.commands
-                .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
+                .dispatch(CommandId::AddPrimitive(PrimitiveKind::Sphere))
                 .is_ok()
         );
         let original = app.commands.scene().objects()[0].mesh().clone();
@@ -10186,12 +10186,12 @@ mod tests {
         let (mut app, directory) = shell_for_jobs("mesh-job-selection");
         assert!(
             app.commands
-                .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
+                .dispatch(CommandId::AddPrimitive(PrimitiveKind::Sphere))
                 .is_ok()
         );
         assert!(
             app.commands
-                .dispatch(CommandId::AddPrimitive(PrimitiveKind::Sphere))
+                .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
                 .is_ok()
         );
         app.commands.set_selection_indices([0]);
@@ -10631,6 +10631,26 @@ mod tests {
                 .is_some_and(|dialog| dialog.message().contains("can't lose any faces")),
             "{:?}",
             app.dialog.as_ref().map(DialogState::message)
+        );
+        assert!(std::fs::remove_dir_all(directory).is_ok());
+    }
+
+    #[test]
+    fn smooth_on_a_cube_says_nothing_to_smooth_and_adds_no_history() {
+        // H1 / D9: a cube is all flat faces, sharp edges and corners, which
+        // Smooth keeps, so it reports that instead of melting the cube.
+        let (mut app, directory) = shell_for_jobs("h1-smooth-cube");
+        app.dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube));
+        let original = app.commands.scene().objects()[0].mesh().clone();
+        let history = app.commands.scene().history_state_id();
+        app.dispatch(CommandId::Smooth);
+        wait_for_desktop_job(&mut app);
+        assert_eq!(app.commands.scene().history_state_id(), history);
+        assert_eq!(app.commands.scene().objects()[0].mesh(), &original);
+        assert!(
+            app.commands.last_status().contains("nothing to smooth"),
+            "{}",
+            app.commands.last_status()
         );
         assert!(std::fs::remove_dir_all(directory).is_ok());
     }

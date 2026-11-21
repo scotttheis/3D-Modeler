@@ -117,7 +117,7 @@ effort and hand each task to the model in the table.
 - [x] F2 leftover files
 - [x] F3 Full gate
 - [x] F4 upgrade check (Windows done; Linux/Mac not checkable, see STATUS)
-- [ ] F5 smoothing (H1)
+- [x] F5 smoothing (H1) (built 2026-11-20; owner to try it in the Release app, see STATUS)
 - [ ] F6 small flaws
 - [ ] F7 v1.00 public
 

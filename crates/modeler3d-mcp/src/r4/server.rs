@@ -4536,8 +4536,10 @@ mod tests {
     #[test]
     fn long_operation_reports_bounded_status_and_commits_once() {
         let server = server(Profile::Full);
+        // A sphere, not a cube: Smooth keeps a cube's corners (H1 / D9), so a
+        // cube would be a no-op with no new revision.
         let _ = server
-            .call_value("add_primitive", json!({"primitive":"cube"}))
+            .call_value("add_primitive", json!({"primitive":"sphere"}))
             .expect("add primitive");
         let started = server
             .call_value("smooth", json!({"index":0,"iterations":1}))

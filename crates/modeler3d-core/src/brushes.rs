@@ -766,6 +766,9 @@ fn vertex_adjacency(mesh: &Mesh) -> Vec<Vec<usize>> {
             (face[0] as usize, face[2] as usize),
         ];
         for (first, second) in pairs {
+            if first == second {
+                continue;
+            }
             if let Some(neighbors) = adjacency.get_mut(first) {
                 neighbors.insert(second);
             }
@@ -781,13 +784,28 @@ fn vertex_adjacency(mesh: &Mesh) -> Vec<Vec<usize>> {
 /// sharp (60°): stock rims and box edges are 90°, sculpted bumps are softer.
 const SHARP_EDGE_COSINE: f32 = 0.5;
 
+/// Cosine of the largest turn a sharp edge line may make at a vertex and
+/// still let the vertex slide along it (30°). A sharper turn is a corner and
+/// stays put: an open square's corners (90°) and a hexagon's rim (60°) keep
+/// their shape, while a stock cylinder's rim (about 3° per segment) slides.
+const EDGE_LINE_TURN_COSINE: f64 = 0.866_025_4;
+
 /// Smoothing neighbours that respect sharp features: all neighbours on a
 /// smooth surface; the two neighbours along the edge for a vertex on one
-/// sharp edge line (including open borders); none for a corner, where one
-/// or three or more sharp edges meet.
-fn feature_neighbors(mesh: &Mesh) -> Vec<Vec<usize>> {
+/// sharp edge line (including open borders) that turns by at most 30°
+/// there; none for a corner, where one or three or more sharp edges meet or
+/// the line turns more sharply. Degenerate faces add no edges and no normal.
+pub(crate) fn feature_neighbors(mesh: &Mesh) -> Vec<Vec<usize>> {
+    let face_normals: Vec<Option<[f64; 3]>> = mesh
+        .faces
+        .iter()
+        .map(|face| unit_face_normal(&mesh.vertices, *face))
+        .collect();
     let mut edges = BTreeMap::<(u32, u32), Vec<usize>>::new();
     for (index, face) in mesh.faces.iter().enumerate() {
+        if face_normals[index].is_none() {
+            continue;
+        }
         for (first, second) in [(face[0], face[1]), (face[1], face[2]), (face[2], face[0])] {
             edges
                 .entry((first.min(second), first.max(second)))
@@ -795,23 +813,13 @@ fn feature_neighbors(mesh: &Mesh) -> Vec<Vec<usize>> {
                 .push(index);
         }
     }
-    let face_normals: Vec<[f32; 3]> = mesh
-        .faces
-        .iter()
-        .map(|face| {
-            let normal = mesh.face_normal(*face);
-            let magnitude = length(normal);
-            if magnitude > 1.0e-12 {
-                scale(normal, 1.0 / magnitude)
-            } else {
-                [0.0; 3]
-            }
-        })
-        .collect();
     let mut sharp = vec![Vec::<usize>::new(); mesh.vertex_count()];
     for ((first, second), faces) in &edges {
         let is_sharp = match faces.as_slice() {
-            [one, two] => dot(face_normals[*one], face_normals[*two]) < SHARP_EDGE_COSINE,
+            [one, two] => match (face_normals[*one], face_normals[*two]) {
+                (Some(a), Some(b)) => dot64(a, b) < f64::from(SHARP_EDGE_COSINE),
+                _ => true,
+            },
             _ => true,
         };
         if is_sharp {
@@ -826,12 +834,71 @@ fn feature_neighbors(mesh: &Mesh) -> Vec<Vec<usize>> {
     vertex_adjacency(mesh)
         .into_iter()
         .zip(sharp)
-        .map(|(all, sharp)| match sharp.len() {
+        .enumerate()
+        .map(|(index, (all, sharp))| match sharp.len() {
             0 => all,
-            2 => sharp,
+            2 if edge_line_is_straight_enough(&mesh.vertices, sharp[0], index, sharp[1]) => sharp,
             _ => Vec::new(),
         })
         .collect()
+}
+
+/// Whether the edge line `before -> at -> after` turns by at most 30° at
+/// `at`. Computed in f64 from directions only, so mesh scale does not matter.
+fn edge_line_is_straight_enough(
+    vertices: &[[f32; 3]],
+    before: usize,
+    at: usize,
+    after: usize,
+) -> bool {
+    let (Some(before), Some(at), Some(after)) =
+        (vertices.get(before), vertices.get(at), vertices.get(after))
+    else {
+        return false;
+    };
+    let incoming = unit64(sub64(*at, *before));
+    let outgoing = unit64(sub64(*after, *at));
+    match (incoming, outgoing) {
+        (Some(incoming), Some(outgoing)) => dot64(incoming, outgoing) >= EDGE_LINE_TURN_COSINE,
+        _ => false,
+    }
+}
+
+/// Unit face normal in f64, or `None` for a face with repeated or missing
+/// vertices or no area. Relative, not absolute, so tiny meshes keep normals.
+fn unit_face_normal(vertices: &[[f32; 3]], face: [u32; 3]) -> Option<[f64; 3]> {
+    if face[0] == face[1] || face[1] == face[2] || face[2] == face[0] {
+        return None;
+    }
+    let a = *vertices.get(face[0] as usize)?;
+    let b = *vertices.get(face[1] as usize)?;
+    let c = *vertices.get(face[2] as usize)?;
+    let first = sub64(b, a);
+    let second = sub64(c, a);
+    let cross = [
+        first[1] * second[2] - first[2] * second[1],
+        first[2] * second[0] - first[0] * second[2],
+        first[0] * second[1] - first[1] * second[0],
+    ];
+    let scale = (dot64(first, first) * dot64(second, second)).sqrt();
+    let magnitude = dot64(cross, cross).sqrt();
+    if !magnitude.is_finite() || scale <= 0.0 || magnitude <= scale * 1.0e-12 {
+        return None;
+    }
+    Some(cross.map(|value| value / magnitude))
+}
+
+fn sub64(first: [f32; 3], second: [f32; 3]) -> [f64; 3] {
+    [0, 1, 2].map(|axis| f64::from(first[axis]) - f64::from(second[axis]))
+}
+
+fn dot64(first: [f64; 3], second: [f64; 3]) -> f64 {
+    first[0] * second[0] + first[1] * second[1] + first[2] * second[2]
+}
+
+fn unit64(value: [f64; 3]) -> Option<[f64; 3]> {
+    let magnitude = dot64(value, value).sqrt();
+    (magnitude.is_finite() && magnitude > 0.0).then(|| value.map(|item| item / magnitude))
 }
 
 fn vertex_normals(vertices: &[[f32; 3]], faces: &[[u32; 3]]) -> Vec<[f32; 3]> {

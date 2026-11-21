@@ -1,7 +1,6 @@
-//! Bounded uniform Laplacian mesh smoothing.
+//! Bounded Laplacian mesh smoothing that keeps sharp features (H1 / D9).
 
-use std::collections::BTreeSet;
-
+use crate::brushes::feature_neighbors;
 use crate::{CoreError, Mesh, MeshOperationLimits};
 
 /// Maximum smoothing iterations accepted by the portable core.
@@ -82,7 +81,11 @@ pub fn smooth_mesh_with_options(
         .and_then(|units| units.checked_mul(4))
         .ok_or_else(|| CoreError::MeshOperation("smooth work count overflow".to_owned()))?;
     limits.check_work("smooth", work_units)?;
-    let adjacency = vertex_adjacency(mesh);
+    // H1 / D9: Blender's sculpt Smooth with the Smooth Brush's hard-edge
+    // rule, so sparse stock shapes keep their form instead of melting: a
+    // vertex on a sharp edge only slides along that edge, and a corner stays
+    // put. Sharp edges are found once on the source mesh.
+    let adjacency = feature_neighbors(mesh);
     let source_vertices = mesh.vertices.clone();
     let mut vertices = source_vertices.clone();
     for _ in 0..iterations {
@@ -93,7 +96,7 @@ pub fn smooth_mesh_with_options(
             }
             let mut average = [0.0_f32; 3];
             for neighbor in neighbors {
-                let Some(vertex) = vertices.get(*neighbor as usize) else {
+                let Some(vertex) = vertices.get(*neighbor) else {
                     return Err(CoreError::InvalidMesh(
                         "smooth adjacency references a missing vertex".to_owned(),
                     ));
@@ -151,29 +154,6 @@ pub fn smooth_mesh_with_options(
         },
         mesh: result,
     })
-}
-
-fn vertex_adjacency(mesh: &Mesh) -> Vec<Vec<u32>> {
-    let mut adjacency = vec![BTreeSet::<u32>::new(); mesh.vertex_count()];
-    for face in &mesh.faces {
-        let pairs = [
-            (face[0], face[1]),
-            (face[1], face[0]),
-            (face[1], face[2]),
-            (face[2], face[1]),
-            (face[2], face[0]),
-            (face[0], face[2]),
-        ];
-        for (first, second) in pairs {
-            if let Some(neighbors) = adjacency.get_mut(first as usize) {
-                neighbors.insert(second);
-            }
-        }
-    }
-    adjacency
-        .into_iter()
-        .map(|neighbors| neighbors.into_iter().collect())
-        .collect()
 }
 
 fn signed_volume(mesh: &Mesh) -> f64 {
