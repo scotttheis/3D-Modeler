@@ -4803,3 +4803,7 @@ Snapshot `G:\3D-Modeler_snapshot_20261120-075551_transform-boxes-fill`, taken 20
 ## 2026-11-20 Finish plan F1: backup
 
 Snapshot `G:\3D-Modeler_snapshot_20261120-184406_F1-backup-128px-icons`, taken 2026-11-20 18:44 at HEAD `45dde73` (includes the 128 px icon commit `812f135`). Robocopy exit 1 (files copied, no failures). Source and copy both 16,770 files / 2,415,729,713 bytes (`target\` and `logs\` excluded; `.git`, `erros\` and the 216 untracked evidence captures included). Counts match; snapshot git head matches; snapshot shows the same 216 untracked entries. Additive only; no existing `G:\` snapshot touched.
+
+## 2026-11-20 F4 installed-upgrade check (Sonnet, medium)
+
+Windows: RC1 MSI installed, v0.99.0 MSI (from GitHub, digest verified) upgraded it in place; one "3D Modeler 0.99.0" entry, RC1 folder removed, `--smoke` 0, shortcuts correct, settings kept, clean uninstall. Linux helper test passed in WSL. Linux/Mac installed upgrade and in-app update prompts not checked (need a second, higher release). Scratch MSI download left in the session scratchpad only.

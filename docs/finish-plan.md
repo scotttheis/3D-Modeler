@@ -116,7 +116,7 @@ effort and hand each task to the model in the table.
 - [x] F1 backup
 - [x] F2 leftover files
 - [x] F3 Full gate
-- [ ] F4 upgrade check
+- [x] F4 upgrade check (Windows done; Linux/Mac not checkable, see STATUS)
 - [ ] F5 smoothing (H1)
 - [ ] F6 small flaws
 - [ ] F7 v1.00 public
