@@ -238,7 +238,7 @@ impl Default for BrushSettings {
 }
 
 /// Default on-screen Smooth Brush size, in points.
-const SMOOTH_SCREEN_RADIUS_DEFAULT: f32 = 40.0;
+const SMOOTH_SCREEN_RADIUS_DEFAULT: f32 = 65.0;
 
 #[derive(Clone, Debug)]
 struct BrushGesture {

@@ -119,7 +119,7 @@ effort and hand each task to the model in the table.
 - [x] F4 upgrade check (Windows done; Linux/Mac not checkable, see STATUS)
 - [x] F5 smoothing (H1) (built 2026-11-20; owner to try it in the Release app, see STATUS)
 - [x] F6 small flaws (built 2026-11-20; owner to approve in the Release app, see STATUS)
-- [ ] F7 v1.00 public
+- [ ] F7 v1.00 public (v1.0.0 built and released privately 2026-11-21; waiting on the owner's home-PC install test, then go public)
 
 Waiting on the owner, not a session: whether `AGENTS.md` should allow
 pushing to GitHub; OK to download `appimagetool`; the tester's feedback;
