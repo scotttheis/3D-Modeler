@@ -29,6 +29,8 @@ for RC2. Next after RC2: RC3 / 0.1.3.
 
 ## Now
 
+**Final tasks F1-F7 (owner, 2026-11-20):** one task per session, in order, each on its own model; list and ticks in [`finish-plan.md`](finish-plan.md) "Final tasks". Next: F1 (Haiku).
+
 **Release icons at 128 px, owner approved ("excellent", 2026-11-20):** every installer (MSI, DMG, tarball) ships the action and insert icons scaled to 128 px by `Modeler3D --shrink-assets` on the staged copy; source art in `assets/` stays full size. Artwork 40 MB to about 4 MB; downloads now Windows 13 MB, Linux 18 MB, Mac 26 MB. v0.99.0 was re-cut with this. Commit `812f135`.
 
 **GitHub v0.99 private pre-release (2026-11-20):** repository `scotttheis/3D-Modeler` (private), tag `v0.99.0`, pre-release with the Windows MSI, Mac DMG and Linux tarball built by GitHub Actions (`.github/workflows/release.yml`); CI (`ci.yml`) passes on Windows, Linux and macOS. History email rewritten to the work address after snapshot `G:D-Modeler_snapshot_20261120-115639_pre-github-v099`. Update feed points at the repository. Testers given access: `jackharvest` (invited 2026-11-20, write access; owner trusts them). Not done: local Full gate (its failures were CRLF fixtures, fixed with an LF `.gitattributes`; plain workspace tests pass); installed-upgrade checks per OS; not run on real Linux/Mac hardware. A stale pre-rewrite `main` was briefly pushed and replaced (private repo). `AGENTS.md` "no push" rule not yet updated (owner to decide).

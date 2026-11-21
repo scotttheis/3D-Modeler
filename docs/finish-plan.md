@@ -90,6 +90,41 @@ the next session and giving the prompt to paste.
 Each session starts with the owner saying "carry on with the finish plan".
 The overseer reads this file and `STATUS.md` and picks the next unticked task.
 
+## Final tasks, one session each (owner, 2026-11-20)
+
+After the v0.99 private pre-release, the rest of the work runs as **one task
+per session**, in this order. Each session starts with the owner pasting
+"carry on with the finish plan" on the model in the table. It reads this
+section, does the first task not ticked, ticks it here, records the result in
+`STATUS.md`, commits, and stops. Its last message gives the owner the prompt
+for the next session and ends with the next session's model and effort, in
+bold, on a line of its own, so it cannot be missed.
+
+| Order | Task | Model and effort | Notes |
+|---|---|---|---|
+| F1 | Backup: `G:\3D-Modeler_snapshot_*` covering the 128 px icon commit `812f135` and later | Haiku | Copy, then check file and byte counts; record in `WORK_LOG.md` |
+| F2 | Leftover files: the untracked captures and review settings under `evidence/rebuild/captures/` (216 on 2026-11-20) | Haiku | Commit the ones a STATUS entry or task card names; list the rest for the owner; delete nothing |
+| F3 | Full gate on the current source | Haiku | If anything fails, stop and hand the fix to Sonnet (medium) as its own task |
+| F4 | Installed-upgrade check: install an RC or v0.99 build, then upgrade in place, on Windows; Linux and Mac through GitHub Actions | Sonnet, medium | Record what passed and what could not be checked |
+| F5 | H1 / D9: smoothing that behaves like Blender's sculpt Smooth on sparse meshes | Opus 5.5, high, plus a Codex review of the diff | Golden tests; desktop and MCP stay on one core path; owner tries it in the Release app |
+| F6 | Small flaws: hollow claw neck as in `erros/claw.png`; pinned Resize handles overlapping at extreme zoom | Sonnet, medium | Visible: both-theme captures and owner approval |
+| F7 | Stage 2 of the release plan in [`github-upload.md`](github-upload.md): the tester's edits, v1.0.0 build, go public, update check from v0.99 | Opus 5.5, medium; each tester edit gets the model its size needs | Confirm with the owner before switching to public |
+
+A session that coordinates several of these can run on Opus 5.5 at low
+effort and hand each task to the model in the table.
+
+- [ ] F1 backup
+- [ ] F2 leftover files
+- [ ] F3 Full gate
+- [ ] F4 upgrade check
+- [ ] F5 smoothing (H1)
+- [ ] F6 small flaws
+- [ ] F7 v1.00 public
+
+Waiting on the owner, not a session: whether `AGENTS.md` should allow
+pushing to GitHub; OK to download `appimagetool`; the tester's feedback;
+tests on real Linux and Mac machines.
+
 ## Progress
 
 - [x] Session 1 (2026-11-19: E1-E3, E5-E7 done; E4 and M1 were already built as OF-35 and OF-38)
