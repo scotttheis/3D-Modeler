@@ -621,8 +621,7 @@ impl Modeler3dApp {
         self.commands
             .preferences_mut()
             .set_grab_cursor(review.grab_cursor());
-        // A real start seeds the shortcut bar when it is empty; do the same so
-        // captures show it.
+        // Captures start with the same shortcut bar a real first start gets.
         let favorites = if review.state() == ReviewState::NoShortcuts {
             Vec::new()
         } else {
@@ -9287,7 +9286,7 @@ mod tests {
     }
 
     #[test]
-    fn shortcut_bar_starts_with_the_owner_set_and_then_keeps_what_the_person_chose() {
+    fn shortcut_bar_starts_empty_and_then_keeps_what_the_person_chose() {
         let (mut app, directory) = shell_for_jobs("shortcut-bar-defaults-kept");
         let legacy = modeler3d_platform::LegacySettings::default();
         let restart = |app: &Modeler3dApp| {
@@ -9299,23 +9298,18 @@ mod tests {
             next.commands.preferences().ribbon_favorites().to_vec()
         };
 
-        // First start: no saved bar, so the default six.
+        // First start: no saved bar, so the bar starts empty.
         app.load_preferences_from_legacy(&legacy);
-        let defaults = [
-            "Insert:Cube",
-            "Insert:Sphere",
-            "Object:Settle",
-            "Object:Mirror",
-            "Edit:Merge",
-            "Edit:Subtract",
-        ];
-        assert_eq!(app.commands.preferences().ribbon_favorites(), defaults);
+        assert!(app.commands.preferences().ribbon_favorites().is_empty());
 
         // A change is kept across a restart.
-        app.set_favorite("Object:Mirror", false);
+        app.set_favorite("Object:Mirror", true);
+        app.set_favorite("Insert:Cube", true);
         app.set_favorite("Insert:Torus", true);
+        app.set_favorite("Object:Mirror", false);
         let changed = app.commands.preferences().ribbon_favorites().to_vec();
         assert!(!changed.iter().any(|key| key == "Object:Mirror"));
+        assert_eq!(changed, ["Insert:Cube", "Insert:Torus"]);
         assert_eq!(restart(&app), changed);
 
         // Changing it again replaces the earlier choice.

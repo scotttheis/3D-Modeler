@@ -171,26 +171,13 @@ pub(crate) fn normalized_tab_order(
     order
 }
 
-/// Returns the shortcut bar a person starts with (owner's choice,
-/// 2026-11-16). After that the bar is theirs: it is saved as they change it.
+/// Returns the shortcut bar a person starts with: empty (owner's choice,
+/// 2026-11-21; it replaced a six-shortcut starter set). The empty bar shows
+/// "Drag shortcuts here". After that the bar is theirs: it is saved as they
+/// change it, and "Reset defaults" empties it again.
 #[must_use]
 pub(crate) fn default_favorites() -> Vec<String> {
-    [
-        (RibbonTab::Insert, "Cube"),
-        (RibbonTab::Insert, "Sphere"),
-        (RibbonTab::Object, "Settle"),
-        (RibbonTab::Object, "Mirror"),
-        (RibbonTab::Edit, "Merge"),
-        (RibbonTab::Edit, "Subtract"),
-    ]
-    .into_iter()
-    .filter_map(|(tab, label)| {
-        tab_commands(tab)
-            .into_iter()
-            .find(|command| command.label == label)
-            .map(|command| command_key(tab, command))
-    })
-    .collect()
+    Vec::new()
 }
 
 #[cfg(test)]
