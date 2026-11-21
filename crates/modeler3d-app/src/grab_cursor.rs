@@ -126,18 +126,25 @@ fn paint(painter: &egui::Painter, pointer: Pos2, closed: bool) {
             })
             .collect()
     };
-    for (rounding, rect) in [
-        (1.8, ((360., 720.), (620., 870.))),
-        (0.8, ((430., 625.), (550., 705.))),
-    ] {
-        painter.rect(
-            egui::Rect::from_min_max(at(rect.0.0, rect.0.1), at(rect.1.0, rect.1.1)),
-            rounding,
-            fill,
-            Stroke::new(1.8, outline),
-            egui::StrokeKind::Inside,
-        );
-    }
+    // Flared base: dark outline round a light dome, as in the reference.
+    painter.rect(
+        egui::Rect::from_min_max(at(360., 720.), at(620., 870.)),
+        1.8,
+        fill,
+        Stroke::new(1.8, outline),
+        egui::StrokeKind::Inside,
+    );
+    // Hollow neck: a dark block with a small light window, not a plain box.
+    painter.rect_filled(
+        egui::Rect::from_min_max(at(425., 620.), at(555., 710.)),
+        0.8,
+        outline,
+    );
+    painter.rect_filled(
+        egui::Rect::from_min_max(at(468., 645.), at(512., 685.)),
+        0.,
+        fill,
+    );
     // Dark pass first, then the light pass, so the arms read as outlined tubes.
     for (width, color) in [(150. * SCALE, outline), (70. * SCALE, fill)] {
         for mirror in [false, true] {

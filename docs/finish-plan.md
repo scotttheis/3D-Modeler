@@ -118,7 +118,7 @@ effort and hand each task to the model in the table.
 - [x] F3 Full gate
 - [x] F4 upgrade check (Windows done; Linux/Mac not checkable, see STATUS)
 - [x] F5 smoothing (H1) (built 2026-11-20; owner to try it in the Release app, see STATUS)
-- [ ] F6 small flaws
+- [x] F6 small flaws (built 2026-11-20; owner to approve in the Release app, see STATUS)
 - [ ] F7 v1.00 public
 
 Waiting on the owner, not a session: whether `AGENTS.md` should allow

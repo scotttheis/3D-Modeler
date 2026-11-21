@@ -186,6 +186,7 @@ impl ResizeOverlay {
                 *face_slot = Some(centers);
             }
         }
+        separate_pinned(&mut faces, viewport);
         Some(Self {
             bounds,
             corners,
@@ -276,6 +277,38 @@ fn keep_in_view(point: egui::Pos2, viewport: egui::Rect) -> egui::Pos2 {
         point.x.clamp(area.left(), area.right()),
         point.y.clamp(area.top(), area.bottom()),
     )
+}
+
+/// Handles pinned to the viewport edge at extreme zoom can land on top of one
+/// another. Pushes overlapping ones apart (along the line between them, or
+/// across their pointing direction when they coincide) so each stays visible
+/// and grabbable, then keeps them inside the viewport.
+fn separate_pinned(faces: &mut [FaceHandle], viewport: egui::Rect) {
+    let gap = FACE_HIT_RADIUS * 1.6;
+    for _ in 0..4 {
+        let mut moved = false;
+        for i in 1..faces.len() {
+            for j in 0..i {
+                let offset = faces[i].center - faces[j].center;
+                let distance = offset.length();
+                if distance >= gap {
+                    continue;
+                }
+                let push = if distance > 1.0e-3 {
+                    offset / distance
+                } else {
+                    faces[i].direction.rot90()
+                };
+                let shortfall = (gap - distance) * 0.5;
+                faces[i].center = keep_in_view(faces[i].center + push * shortfall, viewport);
+                faces[j].center = keep_in_view(faces[j].center - push * shortfall, viewport);
+                moved = true;
+            }
+        }
+        if !moved {
+            break;
+        }
+    }
 }
 
 /// How far a ray from `point` along unit `direction` travels before it
@@ -502,6 +535,37 @@ mod tests {
             assert!(viewport.contains(face.center), "{:?}", face.center);
             // Pinned handles can overlap; whichever is nearest is grabbed.
             assert!(overlay.handle_at(face.center).is_some());
+        }
+    }
+
+    #[test]
+    fn pinned_handles_do_not_overlap_at_extreme_zoom() {
+        let viewport = egui::Rect::from_min_size(egui::Pos2::ZERO, Vec2::new(800.0, 600.0));
+        let zoomed = |point: [f32; 3]| {
+            Some(egui::pos2(
+                400.0 + point[0] * 900.0,
+                300.0 - (point[1] - 20.0) * 900.0 + point[2] * 300.0,
+            ))
+        };
+        let overlay = ResizeOverlay::layout(
+            &frame(),
+            None,
+            zoomed,
+            |a, b| Some([zoomed(a)?, zoomed(b)?]),
+            viewport,
+            VIEW,
+        )
+        .expect("overlay");
+        for (i, a) in overlay.faces.iter().enumerate() {
+            assert!(viewport.contains(a.center));
+            for b in &overlay.faces[i + 1..] {
+                assert!(
+                    a.center.distance(b.center) >= FACE_HIT_RADIUS,
+                    "{:?} overlaps {:?}",
+                    a,
+                    b
+                );
+            }
         }
     }
 }
