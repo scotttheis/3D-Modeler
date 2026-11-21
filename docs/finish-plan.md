@@ -114,7 +114,7 @@ A session that coordinates several of these can run on Opus 5.5 at low
 effort and hand each task to the model in the table.
 
 - [x] F1 backup
-- [ ] F2 leftover files
+- [x] F2 leftover files
 - [ ] F3 Full gate
 - [ ] F4 upgrade check
 - [ ] F5 smoothing (H1)

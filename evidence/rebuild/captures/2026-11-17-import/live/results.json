@@ -1,0 +1,37 @@
+[
+  {
+    "format": "stl",
+    "export_import_undo_redo": "pass"
+  },
+  {
+    "format": "obj",
+    "export_import_undo_redo": "pass"
+  },
+  {
+    "format": "ply",
+    "export_import_undo_redo": "pass"
+  },
+  {
+    "format": "3mf",
+    "export_import_undo_redo": "pass"
+  },
+  {
+    "format": "gltf",
+    "export_import_undo_redo": "pass"
+  },
+  {
+    "format": "glb",
+    "export_import_undo_redo": "pass"
+  },
+  {
+    "format": "wrl",
+    "export_import_undo_redo": "pass"
+  },
+  {
+    "format": "3dp",
+    "export_import_undo_redo": "pass"
+  },
+  {
+    "invalid_import_preserves_scene_and_revision": "pass"
+  }
+]
