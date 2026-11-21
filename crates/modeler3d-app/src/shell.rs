@@ -2385,6 +2385,7 @@ impl Modeler3dApp {
 
     fn fail_desktop_job(&mut self, job: &mut RunningDesktopJob, error: String) {
         let message = format!("{} failed: {error}", job.title);
+        crate::diagnostics::record_warning("desktop job failed", &message);
         let _ = self.commands.operations().fail(
             &job.handle.operation_id,
             OperationFailure::new("desktop_job_failed", error.clone()).retryable(true),

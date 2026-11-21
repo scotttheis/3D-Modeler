@@ -466,3 +466,50 @@ fn prepared_boolean_commits_like_apply_and_refuses_a_changed_scene() {
     let stopped = prepared.compute(&mut |step| Err(CoreError::OperationCancelled(step.to_owned())));
     assert!(matches!(stopped, Err(CoreError::OperationCancelled(_))));
 }
+
+/// A box whose one edge is split by a vertex sitting on a corner, which
+/// leaves it sealed but with two zero-area triangles.
+fn sealed_box_with_zero_area_faces() -> Mesh {
+    let mut target = mesh(make_box([1.0, 1.0, 1.0]));
+    let [a, b, c] = target.faces[0];
+    let Some(neighbor) = target
+        .faces
+        .iter()
+        .position(|face| (0..3).any(|i| face[i] == b && face[(i + 1) % 3] == a))
+    else {
+        panic!("box edge has no neighbor");
+    };
+    let d = target.faces[neighbor]
+        .into_iter()
+        .find(|index| *index != a && *index != b)
+        .unwrap_or_else(|| panic!("neighbor has no third vertex"));
+    let m = u32::try_from(target.vertices.len()).unwrap_or_else(|_| panic!("index"));
+    target.vertices.push(target.vertices[a as usize]);
+    target.faces[0] = [a, m, c];
+    target.faces.push([m, b, c]);
+    target.faces[neighbor] = [b, m, d];
+    target.faces.push([m, a, d]);
+    target
+}
+
+#[test]
+fn difference_cuts_a_sealed_mesh_with_zero_area_faces_without_repair() {
+    let target = sealed_box_with_zero_area_faces();
+    let health = match inspect_mesh(&target) {
+        Ok(health) => health,
+        Err(error) => panic!("health failed: {error}"),
+    };
+    assert!(health.watertight && health.degenerate_faces > 0);
+    let tool = translated_box([0.5, 0.0, 0.0]);
+    let result = match boolean_operation(
+        &target,
+        &tool,
+        BooleanOperation::Difference,
+        BooleanOptions::default(),
+    ) {
+        Ok(result) => result,
+        Err(error) => panic!("difference failed: {error}"),
+    };
+    assert!(result.report.result_after.is_closed_manifold());
+    assert!((result.report.result_volume_mm3 - 0.5).abs() < 1.0e-4);
+}

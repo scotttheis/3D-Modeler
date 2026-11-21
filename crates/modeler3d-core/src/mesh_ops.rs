@@ -551,8 +551,22 @@ pub fn boolean_operation_observed(
 
     timer.mark("check limits");
     on_step("check limits")?;
-    let target_manifold = manifold_from_mesh(&target_operand, 0)?;
-    let tool_manifold = manifold_from_mesh(&tool_operand, 1)?;
+    let target_manifold = kernel_operand(
+        target,
+        &target_operand,
+        &target_health,
+        "target",
+        &options.limits,
+        0,
+    )?;
+    let tool_manifold = kernel_operand(
+        tool,
+        &tool_operand,
+        &tool_health,
+        "tool",
+        &options.limits,
+        1,
+    )?;
     timer.mark("build kernel input");
     on_step("build kernel input")?;
     let result_manifold = match operation {
@@ -659,9 +673,28 @@ fn prepare_boolean_operand(
     label: &str,
     limits: &MeshOperationLimits,
 ) -> Result<Mesh, CoreError> {
-    if health.is_closed_manifold() {
+    if health.is_closed_manifold() || is_kernel_ready(health) {
         return Ok(outward_facing(mesh.clone()));
     }
+    repair_boolean_operand(mesh, label, limits)
+}
+
+/// A sealed, consistently wound mesh whose only defects are zero-area or
+/// duplicate triangles goes straight to the kernel, which tolerates them.
+/// Running the full repair on such a mesh is slow and can open holes in it.
+const fn is_kernel_ready(health: &MeshHealthReport) -> bool {
+    health.is_volume
+        && health.watertight
+        && health.winding_consistent
+        && health.non_manifold_edges == 0
+        && health.boundary_edges == 0
+}
+
+fn repair_boolean_operand(
+    mesh: &Mesh,
+    label: &str,
+    limits: &MeshOperationLimits,
+) -> Result<Mesh, CoreError> {
     let repaired = crate::repair_mesh_with_options(mesh, crate::RepairProfile::Extended, *limits)?;
     if repaired.report.after.is_closed_manifold() {
         return Ok(outward_facing(repaired.mesh));
@@ -670,6 +703,23 @@ fn prepare_boolean_operand(
         "{label} operand must be watertight with consistent winding after repair: {}",
         repaired.report.after.issues.join("; ")
     )))
+}
+
+/// Builds the kernel input. An operand that skipped repair because it was
+/// only lightly flawed is repaired and retried if the kernel rejects it.
+fn kernel_operand(
+    original: &Mesh,
+    operand: &Mesh,
+    health: &MeshHealthReport,
+    label: &str,
+    limits: &MeshOperationLimits,
+    source: u32,
+) -> Result<Manifold, CoreError> {
+    match manifold_from_mesh(operand, source) {
+        Ok(manifold) => Ok(manifold),
+        Err(error) if health.is_closed_manifold() => Err(error),
+        Err(_) => manifold_from_mesh(&repair_boolean_operand(original, label, limits)?, source),
+    }
 }
 
 /// Turns a closed, consistently wound operand whose faces point inwards
