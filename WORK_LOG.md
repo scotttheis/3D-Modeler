@@ -4807,3 +4807,7 @@ Snapshot `G:\3D-Modeler_snapshot_20261120-184406_F1-backup-128px-icons`, taken 2
 ## 2026-11-20 F4 installed-upgrade check (Sonnet, medium)
 
 Windows: RC1 MSI installed, v0.99.0 MSI (from GitHub, digest verified) upgraded it in place; one "3D Modeler 0.99.0" entry, RC1 folder removed, `--smoke` 0, shortcuts correct, settings kept, clean uninstall. Linux helper test passed in WSL. Linux/Mac installed upgrade and in-app update prompts not checked (need a second, higher release). Scratch MSI download left in the session scratchpad only.
+
+## 2026-11-20 Finish plan F5: whole-object Smooth keeps sharp features (H1 / D9)
+
+Commit `78d875d`. Whole-object Smooth uses the Smooth Brush's shared hard-edge rule, plus a 30° edge-line turn limit for corners; degenerate faces ignored; scale-free normals. Codex (high, read-only) reviewed the diff: four findings, all fixed with tests. Full gate passed (`logs/gate/20261120-191111-full`, 549 workspace tests). Release rebuilt, `Update-CurrentBuild.ps1 -Check` CURRENT. Snapshot `G:\3D-Modeler_snapshot_20261120-192608_F5-smoothing`: robocopy exit 1 (copied, no failures); source and copy both 17,253 files / 2,491,533,733 bytes (`target\` and `logs\` excluded). Owner try in the Release app pending.
