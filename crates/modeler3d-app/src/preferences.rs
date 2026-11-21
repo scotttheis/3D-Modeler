@@ -216,7 +216,7 @@ impl Default for Preferences {
             theme_mode: ThemeMode::Dark,
             ui_size: UiSize::Normal,
             viewport_lighting: ViewportLighting::default(),
-            grab_cursor: GrabCursorStyle::Claw,
+            grab_cursor: GrabCursorStyle::Hand,
             ribbon_orders: BTreeMap::new(),
             object_snapping_enabled: true,
             preferred_slicer_path: None,

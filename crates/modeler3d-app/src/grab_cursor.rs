@@ -11,9 +11,10 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "lowercase")]
 pub enum GrabCursorStyle {
     /// The robot claw: two pincer arms that swing shut while holding.
-    #[default]
     Claw,
-    /// A traditional hand: open palm, closing into a fist while holding.
+    /// A traditional hand: open palm, closing into a fist while holding. The
+    /// default.
+    #[default]
     Hand,
 }
 
@@ -586,7 +587,7 @@ mod tests {
         assert_eq!(GrabCursorStyle::from_key("paw"), None);
         let ctx = egui::Context::default();
         ctx.add_plugin(GrabCursor);
-        assert_eq!(style(&ctx), GrabCursorStyle::Claw);
+        assert_eq!(style(&ctx), GrabCursorStyle::Hand);
         let mut counts = Vec::new();
         for chosen in GrabCursorStyle::ALL {
             set_style(&ctx, chosen);

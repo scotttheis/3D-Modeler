@@ -2535,14 +2535,15 @@ mod tests {
         let hand = widget(&widgets, "Hand");
         assert!(same_line(widget(&widgets, "Claw"), hand));
         assert!(hand.top() > widget(&widgets, "Restore 3D Builder defaults").bottom());
-        let (actions, _) = run_dialog(&mut dialog, Some(hand.center()));
-        assert_eq!(
-            actions,
-            vec![DialogAction::GrabCursor(GrabCursorStyle::Hand)]
-        );
-        // Clicking the choice already shown sends nothing.
+        // Hand is the default, so clicking it sends nothing.
         let (actions, _) = run_dialog(&mut dialog, Some(hand.center()));
         assert!(actions.is_empty());
+        let claw = widget(&widgets, "Claw");
+        let (actions, _) = run_dialog(&mut dialog, Some(claw.center()));
+        assert_eq!(
+            actions,
+            vec![DialogAction::GrabCursor(GrabCursorStyle::Claw)]
+        );
     }
 
     #[test]
