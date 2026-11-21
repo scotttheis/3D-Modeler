@@ -491,6 +491,11 @@ pub struct RenderObject {
     transform: Mat4,
     full_geometry: Arc<MeshGeometry>,
     interaction_geometry: Arc<MeshGeometry>,
+    /// The source object's shape and look versions, so the next
+    /// [`RenderScene::from_core_reusing`] can keep this object's derived
+    /// data. Zero means "never reuse" (for example a preview mesh).
+    shape_version: u64,
+    look_version: u64,
 }
 
 impl RenderObject {
@@ -582,9 +587,26 @@ pub struct RenderScene {
 impl RenderScene {
     /// Converts a core scene without changing its authoritative contents.
     pub fn from_core(scene: &Scene) -> Result<Self, ViewportError> {
+        Self::from_core_reusing(scene, None)
+    }
+
+    /// [`Self::from_core`] that keeps the display geometry, face colors and
+    /// texture of every object in `previous` whose shape and look have not
+    /// changed, so editing one object does not rebuild (or re-upload to the
+    /// GPU) the others.
+    pub fn from_core_reusing(
+        scene: &Scene,
+        previous: Option<&Self>,
+    ) -> Result<Self, ViewportError> {
         let mut result = Self::default();
         for object in scene.objects() {
-            flatten_object(object, &mut result)?;
+            let earlier = previous.and_then(|previous| {
+                previous
+                    .objects
+                    .iter()
+                    .find(|candidate| candidate.object_id == object.object_id())
+            });
+            flatten_object(object, earlier, &mut result)?;
         }
         Ok(result)
     }
@@ -703,6 +725,8 @@ impl RenderScene {
         object.interaction_geometry = interaction;
         object.face_colors = None;
         object.face_color_identity = 0;
+        object.shape_version = 0;
+        object.look_version = 0;
         Ok(preview)
     }
 
@@ -717,7 +741,11 @@ impl RenderScene {
     }
 }
 
-fn flatten_object(object: &SceneObject, scene: &mut RenderScene) -> Result<(), ViewportError> {
+fn flatten_object(
+    object: &SceneObject,
+    earlier: Option<&RenderObject>,
+    scene: &mut RenderScene,
+) -> Result<(), ViewportError> {
     if !object.is_visible() {
         return Ok(());
     }
@@ -730,27 +758,58 @@ fn flatten_object(object: &SceneObject, scene: &mut RenderScene) -> Result<(), V
     // The reference renders the combined top-level mesh. Children retain
     // their identities/metadata for ungrouping; drawing them again duplicates
     // geometry and makes exact picking return non-top-level IDs.
-    let full = Arc::new(MeshGeometry::from_mesh(object.mesh())?);
-    let target = interactive_viewport_face_target(full.face_count() as u64);
-    let interaction = Arc::new(full.interaction_lod(target)?);
-    // Region paint (OF-44) or the source colours of a boolean result.
-    let face_colors = modeler3d_core::object_face_colors(object).map(Arc::<[[u8; 4]]>::from);
-    let mut palette_hasher = DefaultHasher::new();
-    face_colors.hash(&mut palette_hasher);
-    let face_color_identity = if face_colors.is_some() {
-        palette_hasher.finish()
-    } else {
-        0
+    let (full, interaction) =
+        match earlier.filter(|earlier| earlier.shape_version == object.shape_version()) {
+            Some(earlier) => (
+                Arc::clone(&earlier.full_geometry),
+                Arc::clone(&earlier.interaction_geometry),
+            ),
+            None => {
+                let full = Arc::new(MeshGeometry::from_mesh(object.mesh())?);
+                let target = interactive_viewport_face_target(full.face_count() as u64);
+                let interaction = Arc::new(full.interaction_lod(target)?);
+                (full, interaction)
+            }
+        };
+    // Region paint (OF-44) or the source colours of a boolean result. They
+    // depend on the look and on the face count.
+    let (face_colors, face_color_identity, texture) = match earlier.filter(|earlier| {
+        earlier.look_version == object.look_version()
+            && earlier.shape_version == object.shape_version()
+    }) {
+        Some(earlier) => (
+            earlier.face_colors.clone(),
+            earlier.face_color_identity,
+            earlier.texture.clone(),
+        ),
+        None => {
+            let face_colors =
+                modeler3d_core::object_face_colors(object).map(Arc::<[[u8; 4]]>::from);
+            let mut palette_hasher = DefaultHasher::new();
+            face_colors.hash(&mut palette_hasher);
+            let face_color_identity = if face_colors.is_some() {
+                palette_hasher.finish()
+            } else {
+                0
+            };
+            (
+                face_colors,
+                face_color_identity,
+                modeler3d_core::resolved_texture(object.metadata()),
+            )
+        }
     };
     scene.push(RenderObject {
         object_id: object.object_id().to_owned(),
         color,
         face_colors,
         face_color_identity,
-        texture: modeler3d_core::resolved_texture(object.metadata()),
+        texture,
         transform: Mat4::from_rows(object.transform().rows())?,
         full_geometry: full,
         interaction_geometry: interaction,
+        shape_version: object.shape_version(),
+        look_version: object.look_version(),
     })
 }
 

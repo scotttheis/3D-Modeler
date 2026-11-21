@@ -392,3 +392,77 @@ fn difference_can_regularize_a_flat_tool_cap_without_changing_volume() {
     );
     assert!(regularized.report.result_after.is_closed_manifold());
 }
+
+#[test]
+fn prepared_boolean_commits_like_apply_and_refuses_a_changed_scene() {
+    let mut scene = Scene::new();
+    for offset in [[0.0, 0.0, 0.0], [0.5, 0.0, 0.0]] {
+        let result = scene.add_object(SceneObject::new(translated_box(offset)));
+        assert!(result.is_ok());
+    }
+    let mut direct = scene.isolated_copy();
+    let applied = direct.apply_product_boolean(
+        0,
+        1,
+        BooleanOperation::Difference,
+        BooleanOptions::default(),
+    );
+    assert!(applied.is_ok());
+
+    // Computed away from the scene, then committed: the same result.
+    let prepared = scene
+        .prepare_product_boolean(
+            0,
+            1,
+            BooleanOperation::Difference,
+            BooleanOptions::default(),
+        )
+        .unwrap_or_else(|error| panic!("prepare: {error}"));
+    let mut steps = Vec::new();
+    let result = prepared
+        .compute(&mut |step| {
+            steps.push(step);
+            Ok(())
+        })
+        .unwrap_or_else(|error| panic!("compute: {error}"));
+    assert!(steps.contains(&"kernel boolean"));
+    assert_eq!(scene.objects().len(), 2);
+    assert!(scene.commit_boolean(prepared, result).is_ok());
+    assert_eq!(scene.objects().len(), 1);
+    assert_eq!(scene.objects()[0].mesh(), direct.objects()[0].mesh());
+
+    // A scene that changed while the boolean ran is left alone.
+    let mut changed = Scene::new();
+    for offset in [[0.0, 0.0, 0.0], [0.5, 0.0, 0.0]] {
+        let result = changed.add_object(SceneObject::new(translated_box(offset)));
+        assert!(result.is_ok());
+    }
+    let prepared = changed
+        .prepare_product_boolean(
+            0,
+            1,
+            BooleanOperation::Difference,
+            BooleanOptions::default(),
+        )
+        .unwrap_or_else(|error| panic!("prepare: {error}"));
+    let result = prepared
+        .compute(&mut |_| Ok(()))
+        .unwrap_or_else(|error| panic!("compute: {error}"));
+    assert!(changed.translate(1, [0.1, 0.0, 0.0]).is_ok());
+    let history = changed.history_state_id();
+    assert!(changed.commit_boolean(prepared, result).is_err());
+    assert_eq!(changed.objects().len(), 2);
+    assert_eq!(changed.history_state_id(), history);
+
+    // Stopping at a step boundary returns the stop error and changes nothing.
+    let prepared = changed
+        .prepare_product_boolean(
+            0,
+            1,
+            BooleanOperation::Difference,
+            BooleanOptions::default(),
+        )
+        .unwrap_or_else(|error| panic!("prepare: {error}"));
+    let stopped = prepared.compute(&mut |step| Err(CoreError::OperationCancelled(step.to_owned())));
+    assert!(matches!(stopped, Err(CoreError::OperationCancelled(_))));
+}

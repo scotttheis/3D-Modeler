@@ -423,6 +423,9 @@ pub struct Modeler3dApp {
     name_field: String,
     preview_revision: u64,
     preview: Option<RenderScene>,
+    /// The scene as display data without any brush preview mesh; the next
+    /// refresh reuses its unchanged objects.
+    preview_base: Option<RenderScene>,
     preview_mesh_override: Option<(String, Mesh)>,
     preview_error: Option<String>,
     wgpu_render_state: Option<eframe::egui_wgpu::RenderState>,
@@ -464,6 +467,9 @@ pub struct Modeler3dApp {
     item_textures: HashMap<String, egui::TextureHandle>,
     item_revision: u64,
     item_health: HashMap<String, bool>,
+    /// What each side-bar icon and health mark was made from, so a change
+    /// to one object redoes only that object's work.
+    item_keys: HashMap<String, ItemKey>,
     desktop_job: Option<RunningDesktopJob>,
     mcp_bridge: Option<crate::mcp_bridge::McpDesktopIntegration>,
     dialog_generation: u64,
@@ -531,6 +537,7 @@ impl Default for Modeler3dApp {
             name_field: String::new(),
             preview_revision: u64::MAX,
             preview: None,
+            preview_base: None,
             preview_mesh_override: None,
             preview_error: None,
             wgpu_render_state: None,
@@ -568,6 +575,7 @@ impl Default for Modeler3dApp {
             item_textures: HashMap::new(),
             item_revision: u64::MAX,
             item_health: HashMap::new(),
+            item_keys: HashMap::new(),
             desktop_job: None,
             mcp_bridge: None,
             dialog_generation: 0,
@@ -1662,20 +1670,23 @@ impl Modeler3dApp {
         operation: modeler3d_core::BooleanOperation,
         clear_selection: bool,
     ) {
+        // The boolean runs on a worker so the window stays responsive; the
+        // notification area shows its progress and an Abort button.
         match self
             .commands
-            .apply_boolean_pair(target_index, tool_index, operation, clear_selection)
+            .prepare_boolean_pair(target_index, tool_index, operation)
         {
-            Ok(CommandOutcome::Applied(message)) | Ok(CommandOutcome::Noop(message)) => {
-                self.commands.set_status(message);
+            Ok(prepared) => {
                 self.boolean_pick = None;
-                self.invalidate_presentation();
-                self.persist_preferences();
-            }
-            Ok(CommandOutcome::OpenDialog(_) | CommandOutcome::ExitRequested) => {
-                self.commands
-                    .set_status("Boolean route returned an unexpected shell action");
-                self.boolean_pick = None;
+                self.start_desktop_job(
+                    boolean_label(operation),
+                    DesktopJobRequest::Boolean {
+                        prepared,
+                        clear_selection,
+                    },
+                    None,
+                    false,
+                );
             }
             Err(error) => self.report_command_error(error),
         }
@@ -1795,6 +1806,7 @@ impl Modeler3dApp {
         self.item_revision = u64::MAX;
         self.item_textures.clear();
         self.item_health.clear();
+        self.item_keys.clear();
         self.gizmo_frame = None;
         self.measure_mode = None;
     }
@@ -2208,6 +2220,44 @@ impl Modeler3dApp {
                     Err(error) => self.fail_desktop_job(&mut job, error.to_string()),
                 }
             }
+            DesktopJobResult::Boolean {
+                prepared,
+                result,
+                clear_selection,
+            } => {
+                // The core also refuses a result if the two objects changed;
+                // this check covers every other scene change.
+                if !self.job_source_is_current(&job) {
+                    self.fail_desktop_job(
+                        &mut job,
+                        String::from(
+                            "scene changed while the operation was running; result was discarded",
+                        ),
+                    );
+                    return;
+                }
+                match self
+                    .commands
+                    .commit_boolean_pair(*prepared, *result, clear_selection)
+                {
+                    Ok(CommandOutcome::Applied(message) | CommandOutcome::Noop(message)) => {
+                        let _ = self.commands.operations().complete(
+                            &job.handle.operation_id,
+                            Some(serde_json::json!({ "changed": true })),
+                        );
+                        self.commands.set_status(message);
+                        self.invalidate_presentation();
+                        self.persist_preferences();
+                    }
+                    Ok(CommandOutcome::OpenDialog(_) | CommandOutcome::ExitRequested) => {
+                        self.fail_desktop_job(
+                            &mut job,
+                            String::from("Boolean route returned an unexpected shell action"),
+                        );
+                    }
+                    Err(error) => self.fail_desktop_job(&mut job, error.to_string()),
+                }
+            }
             DesktopJobResult::Unchanged { message } => {
                 let _ = self.commands.operations().complete(
                     &job.handle.operation_id,
@@ -2393,12 +2443,16 @@ impl Modeler3dApp {
             return;
         }
         self.preview_revision = revision;
-        match RenderScene::from_core(self.commands.scene()) {
+        // Reuse the display data of objects that did not change, which also
+        // keeps their GPU buffers.
+        let previous = self.preview_base.take();
+        match RenderScene::from_core_reusing(self.commands.scene(), previous.as_ref()) {
             Ok(scene) => {
                 self.preview = match self.preview_mesh_override.as_ref() {
                     Some((object_id, mesh)) => scene.with_mesh_preview(object_id, mesh).ok(),
-                    None => Some(scene),
+                    None => Some(scene.clone()),
                 };
+                self.preview_base = Some(scene);
                 self.preview_error = None;
             }
             Err(error) => {
@@ -4015,14 +4069,27 @@ impl Modeler3dApp {
             })
             .collect::<Vec<_>>();
         if self.item_revision != self.commands.scene().revision() {
-            self.item_textures.clear();
-            self.item_health.clear();
+            // Only objects whose shape changed are checked again, and only
+            // objects that look different get a new icon.
+            let mut keys = HashMap::with_capacity(self.item_keys.len());
             for object in self.commands.scene().objects() {
-                if object.mesh().faces.len() <= 1_000_000 {
-                    self.item_health
-                        .insert(object.object_id().to_owned(), item_is_healthy(object));
+                let id = object.object_id().to_owned();
+                let key = ItemKey::of(object);
+                let earlier = self.item_keys.get(&id);
+                if earlier.is_none_or(|earlier| earlier.shape != key.shape) {
+                    self.item_health.remove(&id);
+                    if object.mesh().faces.len() <= 1_000_000 {
+                        self.item_health.insert(id.clone(), item_is_healthy(object));
+                    }
                 }
+                if earlier != Some(&key) {
+                    self.item_textures.remove(&id);
+                }
+                keys.insert(id, key);
             }
+            self.item_health.retain(|id, _| keys.contains_key(id));
+            self.item_textures.retain(|id, _| keys.contains_key(id));
+            self.item_keys = keys;
             self.item_revision = self.commands.scene().revision();
         }
         let modifiers = ui.ctx().input(|input| input.modifiers);
@@ -4032,6 +4099,7 @@ impl Modeler3dApp {
         let mut visibility_toggle = None;
         let mut command_click = None;
         let mut context_command = None;
+        let mut abort_click = None;
         egui::Panel::right("modeler3d-items")
             .resizable(true)
             .default_size(236.0)
@@ -4072,9 +4140,18 @@ impl Modeler3dApp {
                             .on_hover_text("Keep the current selection when clicking empty space.");
                     });
                 ui.add_space(SPACE_3);
+                // The notification area sits under the item list while work
+                // is running.
+                let activity = self.commands.operations().active_status().ok().flatten();
+                let activity_reserve = if activity.is_some() {
+                    ACTIVITY_AREA_HEIGHT + SPACE_3
+                } else {
+                    0.0
+                };
                 egui::ScrollArea::vertical()
                     .id_salt("item-inspector")
                     .auto_shrink([false, false])
+                    .max_height((ui.available_height() - activity_reserve).max(ROW_HEIGHT))
                     .show(ui, |ui| {
                 if !rows.is_empty() {
                     // Owner 2026-11-19: no Transform panel in the right column.
@@ -4248,7 +4325,16 @@ impl Modeler3dApp {
                     });
                 });
                     });
+                if let Some(status) = &activity {
+                    ui.add_space(SPACE_3);
+                    if render_activity_area(ui, status, palette) {
+                        abort_click = Some(status.operation_id.clone());
+                    }
+                }
             });
+        if let Some(operation_id) = abort_click {
+            self.abort_operation(&operation_id);
+        }
         if let Some(command) = command_click {
             self.dispatch(command);
         }
@@ -4898,7 +4984,31 @@ impl Modeler3dApp {
         }
     }
 
+    /// Stops a running operation from the notification area. A desktop job
+    /// is let go at once: the window is free straight away and whatever the
+    /// worker still produces is discarded.
+    fn abort_operation(&mut self, operation_id: &str) {
+        let _ = self.commands.operations().cancel(operation_id);
+        if let Some(job) = self
+            .desktop_job
+            .take_if(|job| job.handle.operation_id == operation_id)
+        {
+            self.finish_desktop_job(
+                job,
+                Err(String::from(
+                    "operation was cancelled; no scene changes were applied",
+                )),
+            );
+        }
+    }
+
+    /// Progress and Abort for work started where there is no side bar (the
+    /// welcome screen). In the scene the side bar's notification area shows
+    /// them instead.
     fn render_operation_progress(&mut self, ctx: &egui::Context) {
+        if self.surface == WorkspaceSurface::Scene {
+            return;
+        }
         let Ok(Some(status)) = self.commands.operations().active_status() else {
             return;
         };
@@ -4919,13 +5029,11 @@ impl Modeler3dApp {
                     status.phase,
                     OperationPhase::Queued | OperationPhase::Running
                 ) {
-                    if ui.button("Cancel").clicked() {
-                        let _ = self.commands.operations().cancel(&status.operation_id);
-                        self.commands
-                            .set_status(format!("{} cancellation requested", status.title));
+                    if ui.button("Abort").clicked() {
+                        self.abort_operation(&status.operation_id);
                     }
                 } else if status.phase == OperationPhase::Cancelling {
-                    ui.add_enabled(false, egui::Button::new("Cancelling..."));
+                    ui.add_enabled(false, egui::Button::new("Stopping..."));
                 } else if status.phase == OperationPhase::Committing {
                     ui.add_enabled(false, egui::Button::new("Applying..."));
                 }
@@ -8718,6 +8826,67 @@ fn viewport_input(ctx: &egui::Context) -> ViewportInput {
 /// Whether an Items row is free of the "needs repair" marker. A group is
 /// separate pieces by design, so it needs repair only when one of its parts
 /// does (nested groups are not inspected).
+/// Height kept free at the bottom of the side bar for the notification area.
+const ACTIVITY_AREA_HEIGHT: f32 = 72.0;
+
+/// The side bar's notification area (owner request, 2026-11-21): unlabelled,
+/// it shows the running action, its current step and progress, and Abort.
+/// Returns true when Abort was clicked.
+fn render_activity_area(
+    ui: &mut Ui,
+    status: &crate::OperationStatus,
+    palette: ThemePalette,
+) -> bool {
+    let mut abort = false;
+    egui::Frame::new()
+        .fill(palette.surface_alt)
+        .stroke(Stroke::new(1.0, palette.border))
+        .corner_radius(crate::chrome::RADIUS_SURFACE)
+        .inner_margin(egui::Margin::same(SPACE_2 as i8))
+        .show(ui, |ui| {
+            ui.set_width(ui.available_width());
+            ui.set_min_height(ACTIVITY_AREA_HEIGHT - 2.0 * SPACE_2);
+            ui.horizontal(|ui| {
+                ui.label(RichText::new(&status.title).strong());
+                ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                    let (label, enabled) = match status.phase {
+                        OperationPhase::Cancelling => ("Stopping", false),
+                        OperationPhase::Committing => ("Applying", false),
+                        _ => ("Abort", true),
+                    };
+                    abort = ui
+                        .add_enabled(enabled, egui::Button::new(label))
+                        .on_hover_text("Stop and keep the model as it was")
+                        .clicked();
+                });
+            });
+            ui.label(RichText::new(&status.message).small().color(palette.muted));
+            ui.add(
+                egui::ProgressBar::new(f32::from(status.progress.unwrap_or(0)) / 100.0)
+                    .desired_height(6.0),
+            );
+        });
+    abort
+}
+
+/// The inputs of one side-bar row's icon and health mark.
+#[derive(Clone, Copy, Debug, PartialEq)]
+struct ItemKey {
+    shape: u64,
+    look: u64,
+    transform: [[f32; 4]; 4],
+}
+
+impl ItemKey {
+    fn of(object: &modeler3d_core::SceneObject) -> Self {
+        Self {
+            shape: object.shape_version(),
+            look: object.look_version(),
+            transform: object.transform().rows(),
+        }
+    }
+}
+
 fn item_is_healthy(object: &modeler3d_core::SceneObject) -> bool {
     let mesh_healthy = |mesh: &modeler3d_core::Mesh| {
         modeler3d_core::inspect_mesh(mesh).is_ok_and(|report| report.valid)
@@ -9275,6 +9444,223 @@ mod tests {
         ))
     }
 
+    /// Times a Subtract of two dense spheres and the app frames around it.
+    /// Run with `cargo test --release -p modeler3d-app --lib
+    /// dense_subtract_timing -- --ignored --nocapture`. Set
+    /// `MODELER3D_BENCH_SUBDIVIDE` to 0, 1 or 2 extra subdivisions
+    /// (81,920 faces per sphere at 0; default 1 = 327,680).
+    #[test]
+    #[ignore = "timing harness, not a correctness test"]
+    fn dense_subtract_timing() {
+        use std::time::Instant;
+        // Show the "boolean timing" log line on the console too.
+        crate::diagnostics::echo_to_console();
+        let extra = std::env::var("MODELER3D_BENCH_SUBDIVIDE")
+            .ok()
+            .and_then(|value| value.parse::<u32>().ok())
+            .unwrap_or(1);
+        let mut sphere = modeler3d_core::make_sphere(20.0, 6).expect("sphere");
+        for _ in 0..extra {
+            sphere = modeler3d_core::subdivide_mesh_even(
+                &sphere,
+                None,
+                modeler3d_core::MeshOperationLimits::default(),
+            )
+            .expect("subdivide")
+            .mesh;
+        }
+        let mut tool = sphere.clone();
+        for vertex in &mut tool.vertices {
+            vertex[0] += 15.0;
+            vertex[1] += 5.0;
+        }
+        let mut scene = modeler3d_core::Scene::new();
+        scene
+            .add_object(modeler3d_core::SceneObject::new(sphere))
+            .expect("target");
+        scene
+            .add_object(modeler3d_core::SceneObject::new(tool))
+            .expect("tool");
+        let directory = test_directory("dense-subtract-timing");
+        assert!(std::fs::create_dir_all(&directory).is_ok());
+        let path = directory.join("dense.3dp");
+        std::fs::write(
+            &path,
+            modeler3d_core::save_project_bytes(&scene).expect("save"),
+        )
+        .expect("write");
+        let mut app = Modeler3dApp {
+            settings_path: directory.join("settings.json"),
+            surface: WorkspaceSurface::Scene,
+            ..Modeler3dApp::default()
+        };
+        app.commands.open_from_path(&path).expect("open");
+        let faces: Vec<usize> = app
+            .commands
+            .scene()
+            .objects()
+            .iter()
+            .map(|object| object.mesh().face_count())
+            .collect();
+        println!("input faces per object: {faces:?}");
+        let ctx = egui::Context::default();
+        let run_frame = |app: &mut Modeler3dApp, label: &str| {
+            let started = Instant::now();
+            let _ = ctx.run_ui(
+                egui::RawInput {
+                    screen_rect: Some(egui::Rect::from_min_size(
+                        egui::Pos2::ZERO,
+                        Vec2::new(1280., 840.),
+                    )),
+                    ..Default::default()
+                },
+                |ui| {
+                    app.poll_desktop_job(ui.ctx());
+                    theme::apply(ui.ctx(), app.theme_mode);
+                    app.render_background(ui);
+                    app.render_dialog(ui.ctx());
+                },
+            );
+            println!("{label}: {} ms", started.elapsed().as_millis());
+        };
+        for frame in 0..3 {
+            run_frame(&mut app, &format!("frame before {frame}"));
+        }
+        let started = Instant::now();
+        app.apply_boolean_pair(0, 1, modeler3d_core::BooleanOperation::Difference, false);
+        println!(
+            "subtract call on UI thread: {} ms",
+            started.elapsed().as_millis()
+        );
+        let waited = Instant::now();
+        let mut frames = 0;
+        while app.desktop_job.is_some() && waited.elapsed() < Duration::from_secs(600) {
+            run_frame(&mut app, &format!("frame while running {frames}"));
+            frames += 1;
+            std::thread::sleep(Duration::from_millis(50));
+        }
+        println!(
+            "subtract finished after {} ms; status: {}",
+            started.elapsed().as_millis(),
+            app.commands.last_status()
+        );
+        for frame in 0..5 {
+            run_frame(&mut app, &format!("frame after {frame}"));
+        }
+        let _ = std::fs::remove_dir_all(directory);
+    }
+
+    /// Times resting GPU viewport frames for two dense spheres, then for
+    /// their Subtract result. Same run command and size setting as
+    /// `dense_subtract_timing`, with `dense_subtract_viewport_timing`.
+    #[test]
+    #[ignore = "timing harness, needs a graphics adapter"]
+    fn dense_subtract_viewport_timing() {
+        use std::time::Instant;
+        let extra = std::env::var("MODELER3D_BENCH_SUBDIVIDE")
+            .ok()
+            .and_then(|value| value.parse::<u32>().ok())
+            .unwrap_or(1);
+        let mut sphere = modeler3d_core::make_sphere(20.0, 6).expect("sphere");
+        for _ in 0..extra {
+            sphere = modeler3d_core::subdivide_mesh_even(
+                &sphere,
+                None,
+                modeler3d_core::MeshOperationLimits::default(),
+            )
+            .expect("subdivide")
+            .mesh;
+        }
+        let mut tool = sphere.clone();
+        for vertex in &mut tool.vertices {
+            vertex[0] += 15.0;
+            vertex[1] += 5.0;
+        }
+        let mut scene = modeler3d_core::Scene::new();
+        scene
+            .add_object(modeler3d_core::SceneObject::new(sphere))
+            .expect("target");
+        scene
+            .add_object(modeler3d_core::SceneObject::new(tool))
+            .expect("tool");
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .build()
+            .expect("runtime");
+        let profile = runtime
+            .block_on(modeler3d_platform::discover_capability_profile())
+            .expect("profile");
+        let mut renderer = runtime
+            .block_on(modeler3d_viewport::ViewportRenderer::new(
+                &profile,
+                &modeler3d_viewport::RendererConfig {
+                    width: 1600,
+                    height: 1000,
+                    adapter_index: None,
+                    capture_path: None,
+                },
+            ))
+            .expect("renderer");
+        let mut camera = modeler3d_viewport::Camera::new();
+        camera.set_viewport_size(1600, 1000).expect("size");
+        let mut render = |scene: &modeler3d_core::Scene, label: &str| {
+            let started = Instant::now();
+            let render_scene = RenderScene::from_core(scene).expect("render scene");
+            println!(
+                "{label}: prepare scene for display {} ms",
+                started.elapsed().as_millis()
+            );
+            if let Some(bounds) = render_scene.world_bounds().expect("bounds") {
+                camera.frame_bounds(&[bounds]).expect("frame");
+            }
+            let options = ViewportRenderOptions {
+                selected_object_ids: scene
+                    .selection()
+                    .iter()
+                    .map(|index| scene.objects()[*index].object_id().to_owned())
+                    .collect(),
+                ..ViewportRenderOptions::default()
+            };
+            for frame in 0..6 {
+                let started = Instant::now();
+                let report = renderer
+                    .render_with_options(
+                        &render_scene,
+                        &camera,
+                        InteractionState::Resting,
+                        scene.revision(),
+                        None,
+                        GizmoMode::Move,
+                        None,
+                        &options,
+                    )
+                    .expect("render");
+                println!(
+                    "{label} frame {frame}: {} ms (renderer says {:.0} ms, cpu fallback {}, triangles {})",
+                    started.elapsed().as_millis(),
+                    report.frame_time_ms,
+                    report.cpu_fallback,
+                    report.submitted_triangles
+                );
+            }
+        };
+        render(&scene, "before");
+        scene.set_selection([0]);
+        render(&scene, "before, selected");
+        let started = Instant::now();
+        let _ = scene
+            .apply_product_boolean(
+                0,
+                1,
+                modeler3d_core::BooleanOperation::Difference,
+                modeler3d_core::BooleanOptions::default(),
+            )
+            .expect("subtract");
+        println!("subtract: {} ms", started.elapsed().as_millis());
+        render(&scene, "after");
+        scene.set_selection(std::iter::empty::<usize>());
+        render(&scene, "after, not selected");
+    }
+
     fn shell_for_jobs(label: &str) -> (Modeler3dApp, PathBuf) {
         let directory = test_directory(label);
         assert!(std::fs::create_dir_all(&directory).is_ok());
@@ -9477,12 +9863,106 @@ mod tests {
             .expect("start operation");
         let text = painted_text(&mut app, &ctx);
         assert!(text.contains("Repair model"), "{text}");
-        assert!(text.contains("Cancel"), "{text}");
+        assert!(text.contains("Abort"), "{text}");
         app.commands
             .operations()
             .complete(&operation.operation_id, None)
             .expect("complete operation");
         assert!(painted_text(&mut app, &ctx).is_empty());
+        assert!(std::fs::remove_dir_all(directory).is_ok());
+    }
+
+    /// Two overlapping cubes in the scene workspace, both selected.
+    fn shell_with_overlapping_cubes(label: &str) -> (Modeler3dApp, PathBuf) {
+        let (mut app, directory) = shell_for_jobs(label);
+        app.surface = WorkspaceSurface::Scene;
+        for _ in 0..2 {
+            app.commands
+                .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
+                .expect("cube");
+        }
+        app.commands.set_selection_indices([1]);
+        app.commands
+            .set_selected_position([5., 5., 5.])
+            .expect("move");
+        (app, directory)
+    }
+
+    #[test]
+    fn subtract_runs_in_the_background_and_then_applies_once() {
+        let (mut app, directory) = shell_with_overlapping_cubes("background-subtract");
+        let history = app.commands.scene().history_state_id();
+        app.apply_boolean_pair(0, 1, modeler3d_core::BooleanOperation::Difference, false);
+        assert!(app.desktop_job.is_some(), "{}", app.commands.last_status());
+        // Nothing changes until the worker's result is applied.
+        assert_eq!(app.commands.scene().objects().len(), 2);
+        wait_for_desktop_job(&mut app);
+        assert_eq!(app.commands.scene().objects().len(), 1);
+        assert_eq!(app.commands.scene().history_state_id(), history + 1);
+        assert!(
+            app.commands.last_status().starts_with("Subtract"),
+            "{}",
+            app.commands.last_status()
+        );
+        app.commands.dispatch(CommandId::Undo).expect("undo");
+        assert_eq!(app.commands.scene().objects().len(), 2);
+        assert!(std::fs::remove_dir_all(directory).is_ok());
+    }
+
+    #[test]
+    fn side_bar_shows_running_work_and_abort_keeps_the_model() {
+        fn side_bar_text(app: &mut Modeler3dApp, ctx: &egui::Context) -> String {
+            fn collect(shape: &egui::Shape, text: &mut String) {
+                match shape {
+                    egui::Shape::Text(shape) => {
+                        text.push_str(shape.galley.text());
+                        text.push('|');
+                    }
+                    egui::Shape::Vec(shapes) => {
+                        for shape in shapes {
+                            collect(shape, text);
+                        }
+                    }
+                    _ => {}
+                }
+            }
+            let mut output = ctx.run_ui(egui::RawInput::default(), |ui| app.render_objects(ui));
+            output.textures_delta.clear();
+            let mut text = String::new();
+            for clipped in &output.shapes {
+                collect(&clipped.shape, &mut text);
+            }
+            text
+        }
+        let (mut app, directory) = shell_with_overlapping_cubes("abort-subtract");
+        let ctx = egui::Context::default();
+        assert!(!side_bar_text(&mut app, &ctx).contains("Abort"));
+        let history = app.commands.scene().history_state_id();
+        app.apply_boolean_pair(0, 1, modeler3d_core::BooleanOperation::Difference, false);
+        let operation_id = app
+            .desktop_job
+            .as_ref()
+            .map(|job| job.handle.operation_id.clone())
+            .expect("subtract started");
+        let text = side_bar_text(&mut app, &ctx);
+        assert!(
+            text.contains("Subtract|") && text.contains("Abort"),
+            "{text}"
+        );
+        // Abort lets go of the job at once, whatever the worker is doing.
+        app.abort_operation(&operation_id);
+        assert!(app.desktop_job.is_none());
+        assert_eq!(
+            app.commands
+                .operations()
+                .status(&operation_id)
+                .map(|status| status.phase),
+            Ok(OperationPhase::Cancelled)
+        );
+        assert!(app.commands.last_status().contains("cancelled"));
+        assert_eq!(app.commands.scene().objects().len(), 2);
+        assert_eq!(app.commands.scene().history_state_id(), history);
+        assert!(!side_bar_text(&mut app, &ctx).contains("Abort"));
         assert!(std::fs::remove_dir_all(directory).is_ok());
     }
 

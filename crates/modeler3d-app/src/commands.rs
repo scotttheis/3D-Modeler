@@ -2043,12 +2043,55 @@ impl CommandState {
     ) -> Result<CommandOutcome, CommandError> {
         // The core owns the OF-9 Merge color rule and the D8 rule for
         // objects that are not touching, so MCP gets the same result.
-        let (command_result, report) = match self.scene.apply_product_boolean(
+        let outcome = self.scene.apply_product_boolean(
             target_index,
             tool_index,
             operation,
             BooleanOptions::default(),
-        )? {
+        )?;
+        self.finish_boolean(operation, outcome)
+    }
+
+    /// Copies a boolean's operands so the desktop can compute it on a worker
+    /// thread. Nothing changes until [`Self::commit_boolean_pair`].
+    pub(crate) fn prepare_boolean_pair(
+        &self,
+        target_index: usize,
+        tool_index: usize,
+        operation: BooleanOperation,
+    ) -> Result<modeler3d_core::PreparedBoolean, CommandError> {
+        Ok(self.scene.prepare_product_boolean(
+            target_index,
+            tool_index,
+            operation,
+            BooleanOptions::default(),
+        )?)
+    }
+
+    /// Applies a boolean computed on a worker thread, exactly as
+    /// [`Self::apply_boolean_pair`] would have. Fails without changes if the
+    /// scene changed while it ran.
+    pub(crate) fn commit_boolean_pair(
+        &mut self,
+        prepared: modeler3d_core::PreparedBoolean,
+        result: modeler3d_core::BooleanResult,
+        clear_selection: bool,
+    ) -> Result<CommandOutcome, CommandError> {
+        let operation = prepared.operation();
+        let outcome = self.scene.commit_boolean(prepared, result)?;
+        let outcome = self.finish_boolean(operation, outcome)?;
+        if clear_selection && matches!(outcome, CommandOutcome::Applied(_)) {
+            self.scene.set_selection(std::iter::empty::<usize>());
+        }
+        Ok(outcome)
+    }
+
+    fn finish_boolean(
+        &mut self,
+        operation: BooleanOperation,
+        outcome: modeler3d_core::ProductBooleanOutcome,
+    ) -> Result<CommandOutcome, CommandError> {
+        let (command_result, report) = match outcome {
             modeler3d_core::ProductBooleanOutcome::Applied { result, report, .. } => {
                 (result, report)
             }
@@ -2063,6 +2106,7 @@ impl CommandState {
                 return Ok(CommandOutcome::Applied(message));
             }
         };
+        log_boolean_timings(&report);
         if !command_result.changed {
             return Ok(CommandOutcome::Noop(String::from(
                 "Boolean made no geometry change",
@@ -2506,6 +2550,27 @@ fn primitive_label(kind: PrimitiveKind) -> &'static str {
         PrimitiveKind::Wedge => "Wedge",
         PrimitiveKind::Tetrahedron => "Tetrahedron",
     }
+}
+
+/// Writes one log line naming how long each boolean step took, so a slow
+/// Merge, Subtract or Intersect shows which step was slow.
+fn log_boolean_timings(report: &modeler3d_core::BooleanReport) {
+    let steps = report
+        .step_timings
+        .iter()
+        .map(|(step, duration)| format!("{step} {} ms", duration.as_millis()))
+        .collect::<Vec<_>>()
+        .join("; ");
+    crate::diagnostics::record_info(
+        "boolean timing",
+        format!(
+            "{}: {} + {} -> {} faces; {steps}",
+            report.operation,
+            report.target_before.triangles,
+            report.tool_before.triangles,
+            report.result_after.triangles
+        ),
+    );
 }
 
 fn boolean_label(operation: BooleanOperation) -> &'static str {

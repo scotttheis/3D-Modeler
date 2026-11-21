@@ -6,8 +6,8 @@
 use std::path::PathBuf;
 
 use modeler3d_core::{
-    Mesh, MeshOperationLimits, Scene, SceneSnapshot, repair_mesh, simplify_mesh_by_percent,
-    smooth_mesh, subdivide_mesh_even,
+    BooleanResult, CoreError, Mesh, MeshOperationLimits, PreparedBoolean, Scene, SceneSnapshot,
+    repair_mesh, simplify_mesh_by_percent, smooth_mesh, subdivide_mesh_even,
 };
 use modeler3d_platform::SlicerInfo;
 
@@ -56,6 +56,11 @@ pub(crate) enum DesktopJobRequest {
         temp_root: PathBuf,
         document_generation: u64,
     },
+    /// Merge, Subtract or Intersect on owned copies of the two objects.
+    Boolean {
+        prepared: PreparedBoolean,
+        clear_selection: bool,
+    },
 }
 
 /// Result that must be applied or retained by the UI thread.
@@ -70,6 +75,12 @@ pub(crate) enum DesktopJobResult {
         report: PrintPrepReport,
     },
     PreparedPrint(PreparedPrintGuard),
+    /// A computed boolean, applied on the UI thread.
+    Boolean {
+        prepared: Box<PreparedBoolean>,
+        result: Box<BooleanResult>,
+        clear_selection: bool,
+    },
     /// The operation found nothing to do; the scene is left untouched.
     Unchanged {
         message: String,
@@ -274,7 +285,52 @@ where
                 prepared,
             )))
         }
+        DesktopJobRequest::Boolean {
+            prepared,
+            clear_selection,
+        } => {
+            report(
+                5,
+                &format!("Checking {} faces", group_thousands(prepared.input_faces())),
+            );
+            let result = prepared
+                .compute(&mut |step| {
+                    if handle.is_cancelled() {
+                        return Err(CoreError::OperationCancelled(step.to_owned()));
+                    }
+                    if let Some((percent, next)) = boolean_progress(step) {
+                        report(percent, next);
+                    }
+                    Ok(())
+                })
+                .map_err(|error| match error {
+                    CoreError::OperationCancelled(_) => {
+                        String::from("operation was cancelled; no scene changes were applied")
+                    }
+                    error => error.to_string(),
+                })?;
+            check_cancelled(handle)?;
+            report(95, "Applying the result");
+            Ok(DesktopJobResult::Boolean {
+                prepared: Box::new(prepared),
+                result: Box::new(result),
+                clear_selection,
+            })
+        }
     }
+}
+
+/// Progress after a finished boolean step, and what the boolean does next.
+fn boolean_progress(finished_step: &str) -> Option<(u8, &'static str)> {
+    Some(match finished_step {
+        "check input health" => (25, "Preparing the shapes"),
+        "prepare operands" | "check limits" => (30, "Preparing the shapes"),
+        "build kernel input" => (45, "Cutting"),
+        "kernel boolean" => (70, "Reading the result"),
+        "read kernel result" => (75, "Tidying the cut faces"),
+        "regularize cut caps" => (85, "Checking the result"),
+        _ => return None,
+    })
 }
 
 fn scene_from_snapshot(snapshot: SceneSnapshot) -> Result<Scene, String> {

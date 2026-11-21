@@ -17,6 +17,16 @@ pub type ObjectId = String;
 pub const DEFAULT_MESH_COLOR: [f32; 4] = [33.0 / 255.0, 187.0 / 255.0, 76.0 / 255.0, 1.0];
 
 static NEXT_OBJECT_NUMBER: AtomicU64 = AtomicU64::new(1);
+static NEXT_SHAPE_VERSION: AtomicU64 = AtomicU64::new(1);
+static NEXT_LOOK_VERSION: AtomicU64 = AtomicU64::new(1);
+
+fn next_shape_version() -> u64 {
+    NEXT_SHAPE_VERSION.fetch_add(1, Ordering::Relaxed)
+}
+
+fn next_look_version() -> u64 {
+    NEXT_LOOK_VERSION.fetch_add(1, Ordering::Relaxed)
+}
 
 /// A nested group child persisted inside a scene object.
 #[derive(Clone, Debug)]
@@ -154,6 +164,8 @@ pub struct SceneObject {
     visible: bool,
     metadata: Value,
     children: Vec<SceneChild>,
+    shape_version: u64,
+    look_version: u64,
 }
 
 impl SceneObject {
@@ -171,6 +183,8 @@ impl SceneObject {
             visible: true,
             metadata: empty_metadata(),
             children: Vec::new(),
+            shape_version: next_shape_version(),
+            look_version: next_look_version(),
         }
     }
 
@@ -301,7 +315,25 @@ impl SceneObject {
             visible,
             metadata,
             children,
+            shape_version: next_shape_version(),
+            look_version: next_look_version(),
         })
+    }
+
+    /// A number that changes whenever this object's mesh or group children
+    /// are replaced. Two equal values mean the same mesh, so adapters can
+    /// keep work derived from it (display geometry, health checks, item
+    /// icons). Values are only meaningful within one running process.
+    #[must_use]
+    pub const fn shape_version(&self) -> u64 {
+        self.shape_version
+    }
+
+    /// Like [`Self::shape_version`], for the color and metadata (which hold
+    /// painted and boolean face colors).
+    #[must_use]
+    pub const fn look_version(&self) -> u64 {
+        self.look_version
     }
 
     pub(crate) fn set_transform_raw(&mut self, transform: Transform) {
@@ -310,14 +342,17 @@ impl SceneObject {
 
     pub(crate) fn set_color_raw(&mut self, color: [f32; 4]) {
         self.color = color;
+        self.look_version = next_look_version();
     }
 
     pub(crate) fn set_mesh_raw(&mut self, mesh: Mesh) {
         self.mesh = mesh;
+        self.shape_version = next_shape_version();
     }
 
     pub(crate) fn set_metadata_raw(&mut self, metadata: Value) {
         self.metadata = metadata;
+        self.look_version = next_look_version();
     }
 
     pub(crate) fn set_visible_raw(&mut self, visible: bool) {
@@ -1270,20 +1305,10 @@ impl Scene {
         operation: crate::BooleanOperation,
         options: crate::BooleanOptions,
     ) -> Result<ProductBooleanOutcome, CoreError> {
-        let merge = operation == crate::BooleanOperation::Union;
-        let uniform_color = if merge {
-            Some(self.object(target_index.min(tool_index))?.color())
-        } else {
-            None
-        };
-        self.apply_boolean_inner(
-            target_index,
-            tool_index,
-            operation,
-            options,
-            uniform_color,
-            merge,
-        )
+        let prepared =
+            self.prepare_product_boolean(target_index, tool_index, operation, options)?;
+        let result = prepared.compute(&mut |_| Ok(()))?;
+        self.commit_boolean(prepared, result)
     }
 
     /// [`Self::apply_boolean`] with an optional single result color. With
@@ -1329,11 +1354,119 @@ impl Scene {
         uniform_color: Option<[f32; 4]>,
         group_if_apart: bool,
     ) -> Result<ProductBooleanOutcome, CoreError> {
+        let prepared = self.prepare_boolean(
+            target_index,
+            tool_index,
+            operation,
+            options,
+            uniform_color,
+            group_if_apart,
+        )?;
+        let result = prepared.compute(&mut |_| Ok(()))?;
+        self.commit_boolean(prepared, result)
+    }
+
+    /// Copies what a product boolean (see [`Self::apply_product_boolean`])
+    /// needs into an owned [`PreparedBoolean`], so the slow part can run away
+    /// from the scene, for example on a worker thread. Commit the result
+    /// with [`Self::commit_boolean`]; nothing in the scene changes until then.
+    pub fn prepare_product_boolean(
+        &self,
+        target_index: usize,
+        tool_index: usize,
+        operation: crate::BooleanOperation,
+        options: crate::BooleanOptions,
+    ) -> Result<PreparedBoolean, CoreError> {
+        let merge = operation == crate::BooleanOperation::Union;
+        let uniform_color = if merge {
+            Some(self.object(target_index.min(tool_index))?.color())
+        } else {
+            None
+        };
+        self.prepare_boolean(
+            target_index,
+            tool_index,
+            operation,
+            options,
+            uniform_color,
+            merge,
+        )
+    }
+
+    fn prepare_boolean(
+        &self,
+        target_index: usize,
+        tool_index: usize,
+        operation: crate::BooleanOperation,
+        options: crate::BooleanOptions,
+        uniform_color: Option<[f32; 4]>,
+        group_if_apart: bool,
+    ) -> Result<PreparedBoolean, CoreError> {
         if target_index == tool_index {
             return Err(CoreError::MeshOperation(
                 "boolean target and tool must be different objects".to_owned(),
             ));
         }
+        let started = std::time::Instant::now();
+        let target = self.object(target_index)?;
+        let tool = self.object(tool_index)?;
+        Ok(PreparedBoolean {
+            target_index,
+            tool_index,
+            target_id: target.object_id().to_owned(),
+            tool_id: tool.object_id().to_owned(),
+            revision: self.revision,
+            operation,
+            options,
+            uniform_color,
+            group_if_apart,
+            target_world: target.transformed_mesh()?,
+            tool_world: tool.transformed_mesh()?,
+            prepare_time: started.elapsed(),
+        })
+    }
+
+    /// Applies a boolean computed from [`Self::prepare_product_boolean`] as
+    /// one grouped history entry. Fails, leaving the scene untouched, if the
+    /// scene changed after the boolean was prepared.
+    pub fn commit_boolean(
+        &mut self,
+        prepared: PreparedBoolean,
+        mut result: crate::BooleanResult,
+    ) -> Result<ProductBooleanOutcome, CoreError> {
+        let PreparedBoolean {
+            target_index,
+            tool_index,
+            target_id,
+            tool_id,
+            revision,
+            operation,
+            uniform_color,
+            group_if_apart,
+            prepare_time,
+            ..
+        } = prepared;
+        let unchanged = self.revision == revision
+            && self
+                .objects
+                .get(target_index)
+                .is_some_and(|object| object.object_id() == target_id)
+            && self
+                .objects
+                .get(tool_index)
+                .is_some_and(|object| object.object_id() == tool_id);
+        if !unchanged {
+            return Err(CoreError::CommandFailed {
+                command: match operation {
+                    crate::BooleanOperation::Union => "merge",
+                    crate::BooleanOperation::Difference => "subtract",
+                    crate::BooleanOperation::Intersection => "intersect",
+                }
+                .to_owned(),
+                reason: "the scene changed while the boolean was running".to_owned(),
+            });
+        }
+        let mut timer = crate::mesh_ops::StepTimer::start();
         let target = self.object(target_index)?;
         let tool = self.object(tool_index)?;
         let target_transform = *target.transform();
@@ -1344,9 +1477,10 @@ impl Scene {
             crate::BooleanOperation::Intersection => "intersect",
         };
         let target_metadata = target.metadata().clone();
-        let target_world = target.transformed_mesh()?;
-        let tool_world = tool.transformed_mesh()?;
-        let result = crate::boolean_operation(&target_world, &tool_world, operation, options)?;
+        result
+            .report
+            .step_timings
+            .insert(0, ("copy operands to world space", prepare_time));
         if group_if_apart && merge_left_pieces_apart(&result.report) {
             self.set_selection([target_index, tool_index]);
             let command_result = self.group_selected()?;
@@ -1385,7 +1519,9 @@ impl Scene {
         } else {
             with_boolean_color_provenance(&target_metadata, &provenance)
         };
+        timer.mark("record face colors");
         let target_local = result.mesh.transformed(&target_transform.inverse()?)?;
+        timer.mark("copy result to object space");
         let new_target_index = if target_index < tool_index {
             target_index
         } else {
@@ -1404,6 +1540,8 @@ impl Scene {
             commands,
             after_selection,
         ))?;
+        timer.mark("commit to scene and undo history");
+        result.report.step_timings.extend(timer.steps);
         Ok(ProductBooleanOutcome::Applied {
             index: new_target_index,
             result: command_result,
@@ -1873,6 +2011,56 @@ pub const PLACEMENT_NEEDS_TWO_MESSAGE: &str =
 /// returns it as the result's `message`.
 pub const MERGE_NOT_TOUCHING_MESSAGE: &str =
     "These objects weren't touching, so they were grouped instead of merged.";
+
+/// Owned inputs for one boolean, made by [`Scene::prepare_product_boolean`].
+/// It holds world-space copies of both operands, so it can be computed on
+/// another thread while the scene stays usable.
+#[derive(Debug)]
+#[must_use]
+pub struct PreparedBoolean {
+    target_index: usize,
+    tool_index: usize,
+    target_id: String,
+    tool_id: String,
+    revision: u64,
+    operation: crate::BooleanOperation,
+    options: crate::BooleanOptions,
+    uniform_color: Option<[f32; 4]>,
+    group_if_apart: bool,
+    target_world: Mesh,
+    tool_world: Mesh,
+    prepare_time: std::time::Duration,
+}
+
+impl PreparedBoolean {
+    /// Runs the boolean on the owned copies. `on_step` is called after each
+    /// step and may stop the work by returning an error (see
+    /// [`crate::boolean_operation_observed`]).
+    pub fn compute(
+        &self,
+        on_step: &mut dyn FnMut(&'static str) -> Result<(), CoreError>,
+    ) -> Result<crate::BooleanResult, CoreError> {
+        crate::boolean_operation_observed(
+            &self.target_world,
+            &self.tool_world,
+            self.operation,
+            self.options,
+            on_step,
+        )
+    }
+
+    /// The operation this boolean performs.
+    pub const fn operation(&self) -> crate::BooleanOperation {
+        self.operation
+    }
+
+    /// Faces in both operands together, for progress text.
+    pub fn input_faces(&self) -> usize {
+        self.target_world
+            .face_count()
+            .saturating_add(self.tool_world.face_count())
+    }
+}
 
 /// Result of [`Scene::apply_product_boolean`].
 #[derive(Debug)]

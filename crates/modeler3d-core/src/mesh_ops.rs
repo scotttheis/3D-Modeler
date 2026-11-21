@@ -256,6 +256,31 @@ pub struct BooleanReport {
     pub work_units: u64,
     /// Number of cap patches regularized after the kernel result.
     pub regularized_cap_patches: usize,
+    /// Wall-clock time of each boolean step, in order, for the diagnostics
+    /// log. Callers may append their own steps (for example the scene
+    /// commit).
+    pub step_timings: Vec<(&'static str, std::time::Duration)>,
+}
+
+/// Records how long each named step of an operation takes.
+pub(crate) struct StepTimer {
+    last: std::time::Instant,
+    pub(crate) steps: Vec<(&'static str, std::time::Duration)>,
+}
+
+impl StepTimer {
+    pub(crate) fn start() -> Self {
+        Self {
+            last: std::time::Instant::now(),
+            steps: Vec::new(),
+        }
+    }
+
+    pub(crate) fn mark(&mut self, step: &'static str) {
+        let now = std::time::Instant::now();
+        self.steps.push((step, now.duration_since(self.last)));
+        self.last = now;
+    }
 }
 
 type CapReplacement = (Vec<[u32; 3]>, Vec<BooleanFaceSource>, [f32; 3], u32);
@@ -267,8 +292,10 @@ pub fn inspect_mesh(mesh: &Mesh) -> Result<MeshHealthReport, CoreError> {
     let faces = &mesh.faces;
     let mut issues = Vec::new();
     let mut degenerate_faces = 0_usize;
-    let mut canonical_faces: BTreeMap<[u32; 3], usize> = BTreeMap::new();
-    let mut edges: BTreeMap<(u32, u32), Vec<(usize, bool)>> = BTreeMap::new();
+    // Flat sorted lists instead of maps: one entry per face and one per face
+    // edge, so large meshes need no per-edge allocation.
+    let mut canonical_faces: Vec<[u32; 3]> = Vec::with_capacity(faces.len());
+    let mut edge_uses: Vec<EdgeUse> = Vec::with_capacity(faces.len().saturating_mul(3));
 
     for (face_index, face) in faces.iter().copied().enumerate() {
         let Some(first) = vertices.get(face[0] as usize) else {
@@ -293,20 +320,26 @@ pub fn inspect_mesh(mesh: &Mesh) -> Result<MeshHealthReport, CoreError> {
         }
         let mut canonical = face;
         canonical.sort_unstable();
-        *canonical_faces.entry(canonical).or_default() += 1;
+        canonical_faces.push(canonical);
         for (first_index, second_index) in
             [(face[0], face[1]), (face[1], face[2]), (face[2], face[0])]
         {
-            let key = ordered_edge(first_index, second_index);
-            let forward = first_index <= second_index;
-            edges.entry(key).or_default().push((face_index, forward));
+            let (low, high) = ordered_edge(first_index, second_index);
+            edge_uses.push(EdgeUse {
+                key: (u64::from(low) << 32) | u64::from(high),
+                face: face_index,
+                forward: first_index <= second_index,
+            });
         }
     }
 
+    canonical_faces.sort_unstable();
     let duplicate_faces = canonical_faces
-        .values()
-        .map(|count| count.saturating_sub(1))
-        .sum();
+        .windows(2)
+        .filter(|pair| pair[0] == pair[1])
+        .count();
+    drop(canonical_faces);
+    edge_uses.sort_unstable_by_key(|edge| edge.key);
     if duplicate_faces > 0 {
         issues.push(format!("{duplicate_faces} duplicate faces"));
     }
@@ -318,15 +351,21 @@ pub fn inspect_mesh(mesh: &Mesh) -> Result<MeshHealthReport, CoreError> {
     let mut non_manifold_edges = 0_usize;
     let mut winding_consistent = true;
     let mut boundary_adjacency: BTreeMap<u32, BTreeSet<u32>> = BTreeMap::new();
-    for (&(first, second), owners) in &edges {
+    // Faces that share an edge belong to the same shell. Joining each owner
+    // to the edge's first owner keeps this linear even when many faces share
+    // one edge.
+    let mut shells = FaceUnion::new(faces.len());
+    for owners in edge_uses.chunk_by(|left, right| left.key == right.key) {
         match owners.len() {
             1 => {
                 boundary_edges = boundary_edges.saturating_add(1);
+                let first = (owners[0].key >> 32) as u32;
+                let second = owners[0].key as u32;
                 boundary_adjacency.entry(first).or_default().insert(second);
                 boundary_adjacency.entry(second).or_default().insert(first);
             }
             2 => {
-                if owners[0].1 == owners[1].1 {
+                if owners[0].forward == owners[1].forward {
                     winding_consistent = false;
                 }
             }
@@ -335,10 +374,18 @@ pub fn inspect_mesh(mesh: &Mesh) -> Result<MeshHealthReport, CoreError> {
                 winding_consistent = false;
             }
         }
+        for owner in &owners[1..] {
+            shells.join(owners[0].face, owner.face);
+        }
     }
+    drop(edge_uses);
+    let boundary_edge_loops = if boundary_edges == 0 {
+        0
+    } else {
+        count_boundary_loops(&boundary_adjacency)
+    };
     if boundary_edges > 0 {
-        let loops = count_boundary_loops(&boundary_adjacency);
-        issues.push(format!("{loops} boundary edge loops"));
+        issues.push(format!("{boundary_edge_loops} boundary edge loops"));
     }
     if non_manifold_edges > 0 {
         issues.push(format!("{non_manifold_edges} non-manifold edges"));
@@ -347,10 +394,11 @@ pub fn inspect_mesh(mesh: &Mesh) -> Result<MeshHealthReport, CoreError> {
         issues.push("winding inconsistent".to_owned());
     }
 
-    let body_count = connected_face_components(faces, &edges) as i32;
-    let tiny_shells = count_tiny_components(mesh, faces, &edges, 0.01);
+    let shell_stats = ShellStats::measure(mesh, &mut shells, winding_consistent);
+    let body_count = i32::try_from(shell_stats.bounds.len()).unwrap_or(i32::MAX);
+    let tiny_shells = shell_stats.tiny_count(0.01);
     let cavity_shells = if body_count > 1 && winding_consistent {
-        count_cavity_shells(mesh, faces, &edges)
+        shell_stats.cavity_count()
     } else {
         0
     };
@@ -392,11 +440,7 @@ pub fn inspect_mesh(mesh: &Mesh) -> Result<MeshHealthReport, CoreError> {
         duplicate_faces,
         non_manifold_edges,
         boundary_edges,
-        boundary_edge_loops: if boundary_edges == 0 {
-            0
-        } else {
-            count_boundary_loops(&boundary_adjacency)
-        },
+        boundary_edge_loops,
         tiny_shells,
         self_intersections: None,
         self_intersection_status: "not checked: optional self-intersection accelerator unavailable"
@@ -412,7 +456,22 @@ pub fn boolean_operation(
     operation: BooleanOperation,
     options: BooleanOptions,
 ) -> Result<BooleanResult, CoreError> {
+    boolean_operation_observed(target, tool, operation, options, &mut |_| Ok(()))
+}
+
+/// [`boolean_operation`] that calls `on_step` with the name of each step as
+/// it finishes. Returning an error from `on_step` (for example
+/// [`CoreError::OperationCancelled`]) stops the operation at that point. The
+/// kernel step itself cannot be interrupted; a stop takes effect after it.
+pub fn boolean_operation_observed(
+    target: &Mesh,
+    tool: &Mesh,
+    operation: BooleanOperation,
+    options: BooleanOptions,
+    on_step: &mut dyn FnMut(&'static str) -> Result<(), CoreError>,
+) -> Result<BooleanResult, CoreError> {
     let operation_name = operation.name();
+    let mut timer = StepTimer::start();
     options.limits.validate(operation_name)?;
     target.validate_non_empty()?;
     tool.validate_non_empty()?;
@@ -439,9 +498,13 @@ pub fn boolean_operation(
     }
     let target_health = inspect_mesh(target)?;
     let tool_health = inspect_mesh(tool)?;
+    timer.mark("check input health");
+    on_step("check input health")?;
     let target_operand =
         prepare_boolean_operand(target, &target_health, "target", &options.limits)?;
     let tool_operand = prepare_boolean_operand(tool, &tool_health, "tool", &options.limits)?;
+    timer.mark("prepare operands");
+    on_step("prepare operands")?;
     options
         .limits
         .check_mesh(operation_name, &target_operand)
@@ -486,8 +549,12 @@ pub fn boolean_operation(
         });
     }
 
+    timer.mark("check limits");
+    on_step("check limits")?;
     let target_manifold = manifold_from_mesh(&target_operand, 0)?;
     let tool_manifold = manifold_from_mesh(&tool_operand, 1)?;
+    timer.mark("build kernel input");
+    on_step("build kernel input")?;
     let result_manifold = match operation {
         BooleanOperation::Union => target_manifold.union(&tool_manifold),
         BooleanOperation::Difference => target_manifold.difference(&tool_manifold),
@@ -501,13 +568,19 @@ pub fn boolean_operation(
             "boolean result is empty; check operand order and overlap".to_owned(),
         ));
     }
+    timer.mark("kernel boolean");
+    on_step("kernel boolean")?;
     let (mut result_mesh, mut face_sources) = mesh_from_manifold(&result_manifold)?;
+    timer.mark("read kernel result");
+    on_step("read kernel result")?;
     let mut regularized_cap_patches = 0_usize;
     if options.regularize_cut_caps && operation == BooleanOperation::Difference {
         let regularized = regularize_tool_caps(&result_mesh, &face_sources)?;
         result_mesh = regularized.0;
         face_sources = regularized.1;
         regularized_cap_patches = regularized.2;
+        timer.mark("regularize cut caps");
+        on_step("regularize cut caps")?;
     }
     let output_bytes = options.limits.check_mesh(operation_name, &result_mesh)?;
     let peak_bytes = input_bytes.checked_add(output_bytes).ok_or_else(|| {
@@ -524,13 +597,17 @@ pub fn boolean_operation(
     }
     let result_after = inspect_mesh(&result_mesh)?;
     let result_volume_mm3 = signed_volume_mm3(&result_mesh);
+    let target_volume_mm3 = signed_volume_mm3(&target_operand);
+    let tool_volume_mm3 = signed_volume_mm3(&tool_operand);
+    timer.mark("check result health");
+    on_step("check result health")?;
     Ok(BooleanResult {
         mesh: result_mesh,
         face_sources,
         report: BooleanReport {
             operation: operation_name.to_owned(),
-            target_volume_mm3: signed_volume_mm3(&target_operand),
-            tool_volume_mm3: signed_volume_mm3(&tool_operand),
+            target_volume_mm3,
+            tool_volume_mm3,
             result_volume_mm3,
             target_before: target_health,
             tool_before: tool_health,
@@ -538,6 +615,7 @@ pub fn boolean_operation(
             estimated_peak_bytes: peak_bytes,
             work_units,
             regularized_cap_patches,
+            step_timings: timer.steps,
         },
     })
 }
@@ -1056,165 +1134,113 @@ fn count_boundary_loops(adjacency: &BTreeMap<u32, BTreeSet<u32>>) -> usize {
     components
 }
 
-fn connected_face_components(
-    faces: &[[u32; 3]],
-    edges: &BTreeMap<(u32, u32), Vec<(usize, bool)>>,
-) -> usize {
-    if faces.is_empty() {
-        return 0;
-    }
-    let mut adjacency = vec![Vec::<usize>::new(); faces.len()];
-    for owners in edges.values() {
-        for (first_index, &(first_face, _)) in owners.iter().enumerate() {
-            for &(second_face, _) in owners.iter().skip(first_index + 1) {
-                adjacency[first_face].push(second_face);
-                adjacency[second_face].push(first_face);
-            }
-        }
-    }
-    let mut seen = vec![false; faces.len()];
-    let mut components = 0_usize;
-    for start in 0..faces.len() {
-        if seen[start] {
-            continue;
-        }
-        components = components.saturating_add(1);
-        seen[start] = true;
-        let mut queue = VecDeque::from([start]);
-        while let Some(face) = queue.pop_front() {
-            if let Some(neighbors) = adjacency.get(face) {
-                for neighbor in neighbors {
-                    if let Some(was_seen) = seen.get_mut(*neighbor)
-                        && !*was_seen
-                    {
-                        *was_seen = true;
-                        queue.push_back(*neighbor);
-                    }
-                }
-            }
-        }
-    }
-    components
+/// One use of an edge by a face: the edge's sorted vertex pair packed into a
+/// key, the face, and whether the face runs along the pair in sorted order.
+struct EdgeUse {
+    key: u64,
+    face: usize,
+    forward: bool,
 }
 
-/// Number of closed shells whose signed volume is negative (they face
-/// inward), when at least one shell faces outward.
-fn count_cavity_shells(
-    mesh: &Mesh,
-    faces: &[[u32; 3]],
-    edges: &BTreeMap<(u32, u32), Vec<(usize, bool)>>,
-) -> i32 {
-    let mut label = vec![usize::MAX; faces.len()];
-    let mut adjacency = vec![Vec::<usize>::new(); faces.len()];
-    for owners in edges.values() {
-        for (first_index, &(first_face, _)) in owners.iter().enumerate() {
-            for &(second_face, _) in owners.iter().skip(first_index + 1) {
-                adjacency[first_face].push(second_face);
-                adjacency[second_face].push(first_face);
-            }
+/// Groups faces into shells (union-find with path halving).
+struct FaceUnion {
+    parent: Vec<usize>,
+    size: Vec<u32>,
+}
+
+impl FaceUnion {
+    fn new(count: usize) -> Self {
+        Self {
+            parent: (0..count).collect(),
+            size: vec![1; count],
         }
     }
-    let mut volumes = Vec::<f64>::new();
-    for start in 0..faces.len() {
-        if label[start] != usize::MAX {
-            continue;
+
+    fn root(&mut self, mut face: usize) -> usize {
+        while self.parent[face] != face {
+            self.parent[face] = self.parent[self.parent[face]];
+            face = self.parent[face];
         }
-        let component = volumes.len();
-        volumes.push(0.0);
-        label[start] = component;
-        let mut queue = VecDeque::from([start]);
-        while let Some(face) = queue.pop_front() {
-            let corners = faces[face].map(|index| mesh.vertices.get(index as usize).copied());
-            if let [Some(a), Some(b), Some(c)] = corners {
+        face
+    }
+
+    fn join(&mut self, first: usize, second: usize) {
+        let (mut first, mut second) = (self.root(first), self.root(second));
+        if first == second {
+            return;
+        }
+        if self.size[first] < self.size[second] {
+            std::mem::swap(&mut first, &mut second);
+        }
+        self.parent[second] = first;
+        self.size[first] = self.size[first].saturating_add(self.size[second]);
+    }
+}
+
+/// Bounds and enclosed volume of every shell, in order of each shell's
+/// lowest face index.
+struct ShellStats {
+    bounds: Vec<([f32; 3], [f32; 3])>,
+    volumes: Vec<f64>,
+}
+
+impl ShellStats {
+    fn measure(mesh: &Mesh, shells: &mut FaceUnion, with_volumes: bool) -> Self {
+        let mut shell_of_root = vec![usize::MAX; mesh.faces.len()];
+        let mut stats = Self {
+            bounds: Vec::new(),
+            volumes: Vec::new(),
+        };
+        for (face_index, face) in mesh.faces.iter().enumerate() {
+            let root = shells.root(face_index);
+            if shell_of_root[root] == usize::MAX {
+                shell_of_root[root] = stats.bounds.len();
+                stats
+                    .bounds
+                    .push(([f32::INFINITY; 3], [f32::NEG_INFINITY; 3]));
+                stats.volumes.push(0.0);
+            }
+            let shell = shell_of_root[root];
+            let corners = face.map(|index| mesh.vertices.get(index as usize).copied());
+            let (minimum, maximum) = &mut stats.bounds[shell];
+            for vertex in corners.iter().flatten() {
+                for axis in 0..3 {
+                    minimum[axis] = minimum[axis].min(vertex[axis]);
+                    maximum[axis] = maximum[axis].max(vertex[axis]);
+                }
+            }
+            if with_volumes && let [Some(a), Some(b), Some(c)] = corners {
                 let [a, b, c] = [a, b, c].map(|v| v.map(f64::from));
-                volumes[component] += (a[0] * (b[1] * c[2] - b[2] * c[1])
+                stats.volumes[shell] += (a[0] * (b[1] * c[2] - b[2] * c[1])
                     + a[1] * (b[2] * c[0] - b[0] * c[2])
                     + a[2] * (b[0] * c[1] - b[1] * c[0]))
                     / 6.0;
             }
-            for neighbor in &adjacency[face] {
-                if label[*neighbor] == usize::MAX {
-                    label[*neighbor] = component;
-                    queue.push_back(*neighbor);
-                }
-            }
         }
+        stats
     }
-    let outward = volumes.iter().filter(|volume| **volume > 0.0).count();
-    if outward == 0 {
-        return 0;
-    }
-    i32::try_from(volumes.iter().filter(|volume| **volume < 0.0).count()).unwrap_or(0)
-}
 
-fn count_tiny_components(
-    mesh: &Mesh,
-    faces: &[[u32; 3]],
-    edges: &BTreeMap<(u32, u32), Vec<(usize, bool)>>,
-    threshold: f32,
-) -> usize {
-    if faces.is_empty() {
-        return 0;
+    /// Shells no larger than `threshold` millimetres along any axis.
+    fn tiny_count(&self, threshold: f32) -> usize {
+        self.bounds
+            .iter()
+            .filter(|(minimum, maximum)| {
+                let scale = (0..3)
+                    .map(|axis| maximum[axis] - minimum[axis])
+                    .fold(0.0_f32, f32::max);
+                scale.is_finite() && scale <= threshold
+            })
+            .count()
     }
-    let mut adjacency = vec![Vec::<usize>::new(); faces.len()];
-    for owners in edges.values() {
-        for first_index in 0..owners.len() {
-            for second_index in (first_index + 1)..owners.len() {
-                let first = owners[first_index].0;
-                let second = owners[second_index].0;
-                if let Some(neighbors) = adjacency.get_mut(first) {
-                    neighbors.push(second);
-                }
-                if let Some(neighbors) = adjacency.get_mut(second) {
-                    neighbors.push(first);
-                }
-            }
+
+    /// Shells whose signed volume is negative (they face inward), when at
+    /// least one shell faces outward.
+    fn cavity_count(&self) -> i32 {
+        if !self.volumes.iter().any(|volume| *volume > 0.0) {
+            return 0;
         }
+        i32::try_from(self.volumes.iter().filter(|volume| **volume < 0.0).count()).unwrap_or(0)
     }
-    let mut seen = vec![false; faces.len()];
-    let mut tiny = 0_usize;
-    for start in 0..faces.len() {
-        if seen[start] {
-            continue;
-        }
-        let mut component_faces = Vec::new();
-        seen[start] = true;
-        let mut queue = VecDeque::from([start]);
-        while let Some(face_index) = queue.pop_front() {
-            component_faces.push(face_index);
-            if let Some(neighbors) = adjacency.get(face_index) {
-                for neighbor in neighbors {
-                    if let Some(was_seen) = seen.get_mut(*neighbor)
-                        && !*was_seen
-                    {
-                        *was_seen = true;
-                        queue.push_back(*neighbor);
-                    }
-                }
-            }
-        }
-        let mut minimum = [f32::INFINITY; 3];
-        let mut maximum = [f32::NEG_INFINITY; 3];
-        for face_index in component_faces {
-            if let Some(face) = faces.get(face_index) {
-                for index in face {
-                    if let Some(vertex) = mesh.vertices.get(*index as usize) {
-                        for axis in 0..3 {
-                            minimum[axis] = minimum[axis].min(vertex[axis]);
-                            maximum[axis] = maximum[axis].max(vertex[axis]);
-                        }
-                    }
-                }
-            }
-        }
-        let scale = (0..3)
-            .map(|axis| maximum[axis] - minimum[axis])
-            .fold(0.0_f32, f32::max);
-        if scale.is_finite() && scale <= threshold {
-            tiny = tiny.saturating_add(1);
-        }
-    }
-    tiny
 }
 
 fn signed_volume_mm3(mesh: &Mesh) -> f64 {

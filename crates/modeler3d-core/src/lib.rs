@@ -84,7 +84,7 @@ pub use mesh::Mesh;
 pub use mesh_ops::{
     BooleanFaceSource, BooleanOperation, BooleanOptions, BooleanReport, BooleanResult,
     MeshHealthReport, MeshOperationLimits, boolean_difference, boolean_intersection,
-    boolean_operation, boolean_union, inspect_mesh,
+    boolean_operation, boolean_operation_observed, boolean_union, inspect_mesh,
 };
 pub use paint::{
     FACE_PAINT_KEY, FacePaint, MAX_FACE_PAINT_COLORS, PaintFacesCommand, face_paint,
@@ -116,8 +116,8 @@ pub use repair::{
 };
 pub use scene::{
     COPY_GAP_MM, CommandResult, DEFAULT_MESH_COLOR, MERGE_NOT_TOUCHING_MESSAGE, ObjectId,
-    PLACEMENT_MIN_OBJECTS, PLACEMENT_NEEDS_TWO_MESSAGE, ProductBooleanOutcome, Scene, SceneChild,
-    SceneObject, SceneSnapshot,
+    PLACEMENT_MIN_OBJECTS, PLACEMENT_NEEDS_TWO_MESSAGE, PreparedBoolean, ProductBooleanOutcome,
+    Scene, SceneChild, SceneObject, SceneSnapshot,
 };
 pub use shell_ops::{
     EMBOSS_DEPTH_MAX_MM, EMBOSS_FONT_SIZE_MAX, EMBOSS_FONT_SIZE_MIN, EMBOSS_MAX_TEXT_LENGTH,
