@@ -1,0 +1,26 @@
+name: Idea
+description: Suggest something new. Ideas are decided one at a time.
+labels: [idea]
+body:
+  - type: markdown
+    attributes:
+      value: 3D Modeler is built on extreme simplicity. Please read CONTRIBUTING.md first.
+  - type: textarea
+    id: what
+    attributes:
+      label: What would it add?
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: What problem does it solve for you?
+    validations:
+      required: true
+  - type: textarea
+    id: cost
+    attributes:
+      label: What does it cost in simplicity?
+      description: Another button, option, dialog or dependency? Could it be done with what is already there?
+    validations:
+      required: true

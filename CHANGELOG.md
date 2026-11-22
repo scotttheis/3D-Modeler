@@ -1,0 +1,40 @@
+# Changelog
+
+All notable changes, in plain words. Newest first.
+
+## 1.0.2 (2026-11-21)
+
+- **Subtract is simpler.** Select one object and click Subtract: it cuts away
+  everything it touches, then disappears. No second click needed. If nothing is
+  touching it, nothing changes and the status says so.
+- **Home screen:** click a recent project's tile to open it. The separate Open
+  button is gone.
+- **Save** now saves an opened STL or 3MF file back to where it came from.
+  Save As is for a new file.
+- **Side bar:** a status line at the bottom shows what the app is doing, with
+  Abort while a job can be stopped. The Items list has a new row layout: icon,
+  name, a warning mark for models needing repair, and the show/hide eye.
+- Left-dragging in the view works during Subtract; a plain click picks.
+- Boolean operations write clearer entries to the log file.
+
+## 1.0.1 (2026-11-21)
+
+- Merge, Subtract and Intersect run in the background with a progress area and
+  an Abort button, so the window no longer freezes while they work.
+- Faster mesh checks and fewer redraws of unchanged objects.
+- New users start with an empty shortcut bar.
+
+## 1.0.0 (2026-11-21)
+
+- First full release for Windows, macOS and Linux.
+- Smooth Brush default size raised so strokes feel stronger.
+- Whole-object Smooth keeps sharp edges and corners instead of melting shapes.
+- The Hand is the default grab cursor (the Claw is one click away in Settings).
+- Resize handles no longer pile up when zoomed far in.
+- Subtract now works on nearly perfect meshes (for example, with one empty triangle).
+
+## 0.99.0 (2026-11-20)
+
+- First private test release, with installers for all three systems and
+  built-in updates. Installer icons are shrunk to 128 px (downloads of 13 to
+  26 MB).

@@ -97,7 +97,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           find dist -type f
+          for f in $(find dist -type f \( -name '*.msi' -o -name '*.dmg' -o -name '*.tar.gz' \) | sort); do
+            (cd "$(dirname "$f")" && sha256sum "$(basename "$f")")
+          done > 3D-Modeler-SHA256SUMS.txt
+          cat 3D-Modeler-SHA256SUMS.txt
           args=()
           [[ "$GITHUB_REF_NAME" == v0.* || "$GITHUB_REF_NAME" == *-* ]] && args+=(--prerelease)
           gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --title "3D Modeler ${GITHUB_REF_NAME#v}" \
-            --generate-notes "${args[@]}" $(find dist -type f -name '*3D-Modeler-*' )
+            --generate-notes "${args[@]}" $(find dist -type f -name '*3D-Modeler-*' ) 3D-Modeler-SHA256SUMS.txt
