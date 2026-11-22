@@ -1,0 +1,146 @@
+== snap: lattice origin and step
+ r=15 off=(0.00037, 0.00113, -0.00071): off-lattice (origin=input bbox min, step 0.002) 0.0013 cells; out cell - floor cell: {-1.0: 189, 0.0: 5571, 1.0: 198}; max move 0.0034 mm
+ r=15 off=(7.3, 2.1, -4.4): off-lattice (origin=input bbox min, step 0.002) 0.0017 cells; out cell - floor cell: {-1.0: 206, 0.0: 5583, 1.0: 169}; max move 0.0034 mm
+ r=40 off=(0.3, 0.7, 0.1): off-lattice (origin=input bbox min, step 0.002) 0.0039 cells; out cell - floor cell: {-1.0: 510, 0.0: 4965, 1.0: 483}; max move 0.0038 mm
+== snap: step vs largest bbox extent L (smallest coordinate spacing in the result)
+ dims (1, 1, 1): spacing x,y,z [0.0004, 0.0004, 0.0004]; L/2500=0.000400
+ dims (2, 2, 2): spacing x,y,z [0.0008, 0.0008, 0.0008]; L/2500=0.000800
+ dims (3, 3, 3): spacing x,y,z [0.0012, 0.0012, 0.0012]; L/2500=0.001200
+ dims (4, 4, 4): spacing x,y,z [0.0016, 0.0016, 0.0016]; L/2500=0.001600
+ dims (1, 2, 3): spacing x,y,z [0.0012, 0.0012, 0.0012]; L/2500=0.001200
+ dims (0.5, 4, 4): spacing x,y,z [0.0016, 0.0016, 0.0016]; L/2500=0.001600
+ dims (4, 1, 1): spacing x,y,z [0.0016, 0.0016, 0.0016]; L/2500=0.001600
+ dims (5, 1, 1): spacing x,y,z [0.001999, 0.002, 0.002]; L/2500=0.002000
+ dims (10, 10, 10): spacing x,y,z [0.002, 0.002, 0.002]; L/2500=0.004001
+ dims (1, 1, 100): spacing x,y,z [0.002, 0.002, 0.001999]; L/2500=0.040001
+ sphere L=50: spacing 0.001999
+ sphere L=200: spacing 0.001999
+ sphere L=230: spacing 0.001999
+ sphere L=250: spacing 0.003990
+ sphere L=330: spacing 0.003998
+ sphere L=360: spacing 0.005981
+ sphere L=400: spacing 0.005981
+ sphere L=1000: spacing 0.014954
+ sphere L=2000: spacing 0.029907
+ sphere L=4000: spacing 0.059814
+ sphere L=8000: spacing 0.119629
+== snap: single-vertex sweep (tetrahedron apex x)
+  x 4.9940 -> 4.994000
+  x 4.9961 -> 4.996000
+  x 4.9979 -> 4.998000
+  x 5.0000 -> 5.000000
+  x 5.0021 -> 5.002000
+  x 5.0039 -> 5.004000
+  x 5.0060 -> 5.006000
+  x 5.0081 -> 5.008000
+  x 5.0099 -> 5.010000
+== recut: small cube beside a fine sphere (threshold vs bbox diagonal D)
+  R=15 e= 17.00 cube faces 12 longest edge/D 0.2827
+  R=15 e= 17.25 cube faces 12 longest edge/D 0.2855
+  R=15 e= 17.50 cube faces 12 longest edge/D 0.2883
+  R=15 e= 17.75 cube faces 12 longest edge/D 0.2911
+  R=15 e= 18.00 cube faces 12 longest edge/D 0.2938
+  R=15 e= 18.25 cube faces 12 longest edge/D 0.2965
+  R=15 e= 18.50 cube faces 12 longest edge/D 0.2992
+  R=15 e= 18.75 cube faces 12 longest edge/D 0.3018
+  R=15 e= 19.00 cube faces 24 longest edge/D 0.3045
+  R=15 e= 19.25 cube faces 24 longest edge/D 0.3071
+  R=15 e= 19.50 cube faces 24 longest edge/D 0.3097
+  R=15 e= 19.75 cube faces 24 longest edge/D 0.3122
+  R=15 e= 20.00 cube faces 24 longest edge/D 0.3148
+  R=30 e= 28.00 cube faces 12 longest edge/D 0.2802
+  R=30 e= 29.00 cube faces 12 longest edge/D 0.2886
+  R=30 e= 30.00 cube faces 12 longest edge/D 0.2969
+  R=30 e= 31.00 cube faces 12 longest edge/D 0.3033
+  R=30 e= 32.00 cube faces 24 longest edge/D 0.3095
+  R=30 e= 33.00 cube faces 24 longest edge/D 0.3156
+  R=30 e= 34.00 cube faces 24 longest edge/D 0.3216
+  R=30 e= 35.00 cube faces 24 longest edge/D 0.3274
+  R=30 e= 36.00 cube faces 24 longest edge/D 0.3332
+  R=30 e= 37.00 cube faces 24 longest edge/D 0.3387
+  R=30 e= 38.00 cube faces 24 longest edge/D 0.3442
+  R=30 e= 39.00 cube faces 24 longest edge/D 0.3495
+  box 10: F 12 -> 96
+  box 10x1x1: F 12 -> 76
+  box 1x10x10: F 12 -> 136
+  sphere 8x4: F 48 -> 48
+  sphere 6x3: F 24 -> 72
+== weld: one vertex duplicated at distance d (half its fan uses the copy)
+  R=1.5: [(0.001, 'merged'), (0.002, 'merged'), (0.004, 'merged'), (0.006, 'kept'), (0.008, 'kept'), (0.01, 'kept'), (0.012, 'kept'), (0.02, 'kept'), (0.05, 'kept')]
+  R=15: [(0.001, 'merged'), (0.002, 'merged'), (0.004, 'merged'), (0.006, 'merged'), (0.008, 'merged'), (0.01, 'merged'), (0.012, 'kept'), (0.02, 'kept'), (0.05, 'kept')]
+  R=150: [(0.001, 'merged'), (0.002, 'merged'), (0.004, 'merged'), (0.006, 'merged'), (0.008, 'merged'), (0.01, 'merged'), (0.012, 'kept'), (0.02, 'kept'), (0.05, 'kept')]
+== weld: unwelded soup sphere r=15, corners jittered +-j
+  j=0.0005: {'V': 1986, 'F': 3968, 'open': 0, 'nonman': 0, 'vol': 14080.4391, 'lo': [-15.00035, -15.000487, -15.000497], 'hi': [14.999652, 14.999515, 14.999505]}
+  j=0.002: {'V': 1986, 'F': 3968, 'open': 0, 'nonman': 0, 'vol': 14080.3356, 'lo': [-15.001336, -15.001939, -14.999968], 'hi': [15.000665, 15.000062, 14.998034]}
+  j=0.004: {'V': 2008, 'F': 4022, 'open': 0, 'nonman': 0, 'vol': 14080.3672, 'lo': [-15.001393, -15.000217, -15.003967], 'hi': [15.000608, 14.997784, 15.002033]}
+  j=0.01: {'V': 3225, 'F': 6082, 'open': 0, 'nonman': 0, 'vol': 1.1949, 'lo': [-15.003799, -14.997564, -15.005448], 'hi': [15.002202, 15.008436, 15.004554]}
+  j=0.02: {'V': 2617, 'F': 4672, 'open': 0, 'nonman': 0, 'vol': 0.7005, 'lo': [-14.941832, -14.932157, -14.947386], 'hi': [14.99417, 14.937844, 15.014617]}
+== stitch: sphere cap detached (own vertices) and lifted by g
+  g=0.005: shells [(3968, 14081.119, 15.004)]
+  g=0.02: shells [(3582, 14022.149, 13.858), (510, 58.434, 15.02)]
+  g=1.0: shells [(3582, 14022.525, 13.858), (510, 58.433, 16.0)]
+== T-junction: midpoint of box edge 4-5 used only by the top face, dropped by dz
+  dz=0: {'V': 56, 'F': 108, 'open': 0, 'nonman': 0, 'vol': 999.4002, 'lo': [0.0, 0.0, 0.0], 'hi': [9.998, 9.998, 9.998]}
+  dz=0.005: {'V': 56, 'F': 108, 'open': 0, 'nonman': 0, 'vol': 999.3471, 'lo': [0.0, 0.0, 0.0], 'hi': [9.998, 9.998, 9.998]}
+  dz=0.02: {'V': 55, 'F': 106, 'open': 0, 'nonman': 0, 'vol': 999.0948, 'lo': [0.0, 0.0, 0.0], 'hi': [9.998, 9.998, 9.998]}
+  dz=0.1: {'V': 55, 'F': 106, 'open': 0, 'nonman': 0, 'vol': 997.7627, 'lo': [0.0, 0.0, 0.0], 'hi': [9.998, 9.998, 9.998]}
+== slivers (cap) and needles
+  cap sliver height 0.0001: F=102 V=53 open=0 nearest out vertex to apex [5.0, 0.0, 9.998]
+  cap sliver height 0.001: F=102 V=53 open=0 nearest out vertex to apex [5.0, 0.0, 9.998]
+  cap sliver height 0.002: F=104 V=54 open=0 nearest out vertex to apex [5.0, 0.002, 9.998]
+  cap sliver height 0.01: F=104 V=54 open=0 nearest out vertex to apex [5.0, 0.01, 9.998]
+  cap sliver height 0.2: F=104 V=54 open=0 nearest out vertex to apex [5.0, 0.2, 9.998]
+  needle short edge 0.0001: F=100 V=52 (52 = merged into corner)
+  needle short edge 0.002: F=100 V=52 (52 = merged into corner)
+  needle short edge 0.004: F=102 V=53 (52 = merged into corner)
+  needle short edge 0.01: F=102 V=53 (52 = merged into corner)
+  needle short edge 0.2: F=102 V=53 (52 = merged into corner)
+== holes: open cylinder, re-cut suppressed
+  n=3: patch faces 1 (n-2=1) interior points 0 z spread 0.0000 ms=6
+  n=4: patch faces 2 (n-2=2) interior points 0 z spread 0.0000 ms=7
+  n=10: patch faces 8 (n-2=8) interior points 0 z spread 0.0000 ms=11
+  n=64: patch faces 62 (n-2=62) interior points 0 z spread 0.0000 ms=53
+  n=500: patch faces 498 (n-2=498) interior points 0 z spread 0.0000 ms=1179
+== holes: random non-planar holes (cup), compare with min-area and Liepa DP
+  identical triangulation out of 12: {'area': 10, 'liepa': 0}
+== holes: curved window cut in a tube wall
+  window 4 cols: patch faces 14, patch centroid radius 9.829..9.990 (surface 10)
+  window 16 cols: patch faces 38, patch centroid radius 9.733..9.990 (surface 10)
+  window 32 cols: patch faces 70, patch centroid radius 9.733..9.991 (surface 10)
+== orientation, nesting, overlaps, fins
+two disjoint spheres, second inside-out              F 1920->1920 open=0 nonman=0 vol in   11801.12 out   16022.07 ms=52 shells: [(960, 13911.638), (960, 2110.43)]
+hollow ball: outer out + inner inward (cavity)       F 1920->960 open=0 nonman=0 vol in   11801.12 out   13911.97 ms=50 shells: [(960, 13911.97)]
+nested both outward                                  F 1920->960 open=0 nonman=0 vol in   16021.99 out   13911.97 ms=48 shells: [(960, 13911.97)]
+nested both inside-out                               F 1920->960 open=0 nonman=0 vol in  -16021.99 out   13911.97 ms=49 shells: [(960, 13911.97)]
+ball inside a cavity (15 out, 10 in, 5 out)          F 2880->960 open=0 nonman=0 vol in   10304.85 out   13911.97 ms=74 shells: [(960, 13911.97)]
+two overlapping spheres                              F 1920->1712 open=0 nonman=0 vol in   27823.11 out   23526.03 ms=147 shells: [(1712, 23526.032)]
+overlapping spheres, one inside-out                  F 1920->1712 open=0 nonman=0 vol in       0.00 out   23526.03 ms=150 shells: [(1712, 23526.032)]
+f6 overlapping boxes                                 F 24->84 open=0 nonman=0 vol in   16000.00 out   14997.60 ms=13 shells: [(84, 14997.602)]
+fin triangle on a box edge                           F 13->48 open=0 nonman=0 vol in     916.67 out     999.60 ms=7 shells: [(48, 999.6)]
+fin pointing inside the box                          F 13->96 open=0 nonman=0 vol in    1083.33 out     999.40 ms=11 shells: [(96, 999.4)]
+box with loose internal sheet                        F 14->96 open=0 nonman=0 vol in    1166.67 out     999.40 ms=12 shells: [(96, 999.4)]
+loose flat sheet beside box                          F 14->24 open=0 nonman=0 vol in    1000.00 out     999.43 ms=5 shells: [(24, 999.433)]
+open hemisphere beside box                           F 1996->2070 open=0 nonman=0 vol in    1260.75 out    1260.25 ms=55 shells: [(2046, 260.654), (24, 999.6)]
+two cubes sharing one edge (welded)                  F 24->100 open=0 nonman=0 vol in    2000.00 out    1999.60 ms=11 shells: [(100, 1999.6)]
+two cubes face to face                               F 24->80 open=0 nonman=0 vol in    2000.00 out    2000.00 ms=11 shells: [(80, 2000.0)]
+two cubes face to face, gap 0.005                    F 24->96 open=0 nonman=0 vol in    1999.50 out    1999.60 ms=14 shells: [(48, 999.6), (48, 1000.0)]
+one shell folded through itself                      F 12->122 open=0 nonman=0 vol in     500.00 out     536.83 ms=18 shells: [(122, 536.827)]
+== tiny shells: smallest kept cube beside a big cube of side B (gap B)
+  B=0.5: removed at 0.0205414858014139, kept at 0.02126; scene diagonal 1.242
+  B=1: removed at 0.039657706732064944, kept at 0.0414; scene diagonal 2.483
+  B=2: removed at 0.07949315738155402, kept at 0.08372; scene diagonal 4.968
+  B=3: removed at 0.09760900331058596, kept at 0.1033; scene diagonal 7.433
+  B=10: removed at 0.09376374017334574, kept at 0.1008; scene diagonal 24.58
+  B=100: removed at 0.09296345332768974, kept at 0.1029; scene diagonal 245
+  B=300: removed at 0.14165606089567262, kept at 0.159; scene diagonal 735
+  B=1000: removed at 0.5013864909024285, kept at 0.5713; scene diagonal 2450
+  B=3000: removed at 1.3558312419117395, kept at 1.566; scene diagonal 7350
+  1 x 1 x 0.01 plate beside cube 10: shells 2
+== time vs faces
+  F=3968: clean 108 ms, holes 103 ms, soup 234 ms
+  F=16128: clean 434 ms, holes 436 ms, soup 1108 ms
+  F=65024: clean 1892 ms, holes 1894 ms, soup 6051 ms
+  F=261120: clean 11615 ms, holes 12107 ms, soup 31344 ms
+  one flat hole of 500 edges: 1449 ms
+  one flat hole of 1000 edges: 9243 ms
+exit 0

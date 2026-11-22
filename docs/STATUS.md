@@ -29,6 +29,8 @@ for RC2. Next after RC2: RC3 / 0.1.3.
 
 ## Now
 
+**Repair (owner, 2026-11-22), not fixed, plan ready:** Repair can make models worse (book: 87 holes opened). Evaluation: ours fixed 3 of 10 test models and damaged 3; the Windows built-in engine (same as 3D Builder) fixed 10 of 10. Owner answered all decisions. Work runs in phases R1-R7 from [`tasks/repair-plan.md`](tasks/repair-plan.md); findings in [`tasks/fixrepair.md`](tasks/fixrepair.md). **R1 done (2026-11-22):** Windows engine behaviour measured through its public API only, written in [`tasks/repair-spec.md`](tasks/repair-spec.md) (snap grid 0.002 mm, weld 0.01 mm, min-area hole fill, union of all parts, tiny parts under 0.1 mm removed, time about F^1.28, 1M faces 128 s); no product code changed. Found: Windows fills every cavity, even a correct one (hollowed models turn solid), and an unwelded model with gaps over 0.01 mm comes back almost empty. Owner question open: keep correct cavities? (needed before R6). Next: R2 (Sonnet 5.5, medium; Codex worker).
+
 **Home Open File tile (owner, 2026-11-22):** added between New Scene and Open
 Project, using the existing Add/Open native file picker and import flow.
 Tiles wrap in the same order on narrow windows. Fast gate passed

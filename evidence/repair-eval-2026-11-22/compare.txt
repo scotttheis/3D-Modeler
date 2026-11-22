@@ -1,0 +1,51 @@
+f10_sealed_slivers         orig     faces=     14 holes_edges=   0 nonman=  0 flips=   0 shells=  1 vol=    1000.0 zero=0 dup=0 out->orig=0.0000 orig->out=0.0000
+f10_sealed_slivers         ours     faces=     13 holes_edges=   3 nonman=  0 flips=   0 shells=  1 vol=   999.999 zero=0 dup=0 out->orig=0.0000 orig->out=0.0000
+f10_sealed_slivers         win      faces=    102 holes_edges=   0 nonman=  0 flips=   0 shells=  1 vol=     999.4 zero=0 dup=0 out->orig=0.0020 orig->out=0.0035
+f10_sealed_slivers         blender  faces=     14 holes_edges=   0 nonman=  0 flips=   0 shells=  1 vol=    1000.0 zero=0 dup=0 out->orig=0.0000 orig->out=0.0000
+
+
+f2_open_cylinder           orig     faces=    192 holes_edges=  64 nonman=  0 flips=   0 shells=  1 vol=  4182.065 zero=0 dup=0 out->orig=0.0000 orig->out=0.0000
+f2_open_cylinder           ours     faces=    194 holes_edges=  64 nonman=  0 flips=   0 shells=  1 vol=  4182.065 zero=0 dup=0 out->orig=0.0000 orig->out=9.9880
+f2_open_cylinder           win      faces=    562 holes_edges=   0 nonman=  0 flips=   0 shells=  1 vol=  6272.146 zero=0 dup=0 out->orig=9.4982 orig->out=0.0035
+f2_open_cylinder           blender  faces=    254 holes_edges=   0 nonman=  0 flips=   0 shells=  1 vol=  6273.097 zero=0 dup=0 out->orig=0.0000 orig->out=0.0000
+
+f3_holey_sphere            orig     faces=   3857 holes_edges= 329 nonman=  0 flips=   0 shells=  1 vol= 13687.686 zero=0 dup=0 out->orig=0.0000 orig->out=0.0000
+f3_holey_sphere            ours     faces=   3857 holes_edges= 329 nonman=  0 flips=   0 shells=  1 vol= 13687.686 zero=0 dup=0 out->orig=0.0000 orig->out=0.0000
+f3_holey_sphere            win      faces=   3968 holes_edges=   0 nonman=  0 flips=   0 shells=  1 vol= 14080.733 zero=0 dup=0 out->orig=0.0032 orig->out=0.0031
+f3_holey_sphere            blender  faces=   3968 holes_edges=   0 nonman=  0 flips=   0 shells=  1 vol= 14080.486 zero=0 dup=0 out->orig=0.0000 orig->out=0.0000
+
+f4_flipped_sphere          orig     faces=   3968 holes_edges=   0 nonman=  0 flips=1858 shells=  1 vol=  8574.292 zero=0 dup=0 out->orig=0.0000 orig->out=0.0000
+f4_flipped_sphere          ours     faces=   3968 holes_edges=   0 nonman=  0 flips=   0 shells=  1 vol= 14080.486 zero=0 dup=0 out->orig=0.0000 orig->out=0.0000
+f4_flipped_sphere          win      faces=   3968 holes_edges=   0 nonman=  0 flips=   0 shells=  1 vol= 14080.733 zero=0 dup=0 out->orig=0.0032 orig->out=0.0031
+f4_flipped_sphere          blender  faces=   3968 holes_edges=   0 nonman=  0 flips=   0 shells=  1 vol= 14080.486 zero=0 dup=0 out->orig=0.0000 orig->out=0.0000
+
+f5_soup_cracked_cylinder   orig     faces=    256 holes_edges= 768 nonman=  0 flips=   0 shells=256 vol=  6272.111 zero=0 dup=0 out->orig=0.0000 orig->out=0.0000
+f5_soup_cracked_cylinder   ours     faces=    276 holes_edges= 146 nonman=  0 flips=   0 shells= 11 vol=  6272.081 zero=0 dup=0 out->orig=0.0003 orig->out=0.0007
+f5_soup_cracked_cylinder   win      faces=    520 holes_edges=   0 nonman=  0 flips=   0 shells=  1 vol=  6273.039 zero=0 dup=0 out->orig=0.0039 orig->out=0.0024
+f5_soup_cracked_cylinder   blender  faces=    260 holes_edges=   0 nonman=  0 flips=   0 shells=  1 vol=  6272.742 zero=0 dup=0 out->orig=0.0000 orig->out=0.0007
+
+f6_overlapping_boxes       orig     faces=     24 holes_edges=   0 nonman=  0 flips=   0 shells=  2 vol=   16000.0 zero=0 dup=0 out->orig=0.0000 orig->out=0.0000
+f6_overlapping_boxes       ours     faces=     24 holes_edges=   0 nonman=  0 flips=   0 shells=  2 vol=   16000.0 zero=0 dup=0 out->orig=0.0000 orig->out=0.0000
+f6_overlapping_boxes       win      faces=     84 holes_edges=   0 nonman=  0 flips=   0 shells=  1 vol= 14997.602 zero=0 dup=0 out->orig=0.0028 orig->out=9.9980
+f6_overlapping_boxes       blender  faces=     24 holes_edges=   0 nonman=  0 flips=   0 shells=  2 vol=   16000.0 zero=0 dup=0 out->orig=0.0000 orig->out=0.0000
+
+f7_nonmanifold             orig     faces=     25 holes_edges=   2 nonman=  2 flips=   0 shells=  1 vol=  2083.333 zero=0 dup=0 out->orig=0.0000 orig->out=0.0000
+f7_nonmanifold             ours     faces=     27 holes_edges=   2 nonman=  2 flips=   3 shells=  1 vol=  2083.333 zero=0 dup=0 out->orig=0.0000 orig->out=0.0000
+f7_nonmanifold             win      faces=    100 holes_edges=   0 nonman=  0 flips=   0 shells=  1 vol=    2000.0 zero=0 dup=0 out->orig=0.0000 orig->out=5.0000
+f7_nonmanifold             blender  faces=     25 holes_edges=   2 nonman=  2 flips=   0 shells=  1 vol=  1916.667 zero=0 dup=0 out->orig=0.0000 orig->out=0.0000
+
+f8_duplicates              orig     faces=     14 holes_edges=   0 nonman=  5 flips=   0 shells=  1 vol=    1000.0 zero=0 dup=2 out->orig=0.0000 orig->out=0.0000
+f8_duplicates              ours     faces=     12 holes_edges=   0 nonman=  0 flips=   0 shells=  1 vol=    1000.0 zero=0 dup=0 out->orig=0.0000 orig->out=0.0000
+f8_duplicates              win      faces=     96 holes_edges=   0 nonman=  0 flips=   0 shells=  1 vol=     999.4 zero=0 dup=0 out->orig=0.0020 orig->out=0.0035
+f8_duplicates              blender  faces=     12 holes_edges=   0 nonman=  0 flips=   0 shells=  1 vol=    1000.0 zero=0 dup=0 out->orig=0.0000 orig->out=0.0000
+
+f9_inside_out              orig     faces=   3968 holes_edges=   0 nonman=  0 flips=   0 shells=  1 vol=-14080.486 zero=0 dup=0 out->orig=0.0000 orig->out=0.0000
+f9_inside_out              ours     faces=   3968 holes_edges=   0 nonman=  0 flips=   0 shells=  1 vol= 14080.486 zero=0 dup=0 out->orig=0.0000 orig->out=0.0000
+f9_inside_out              win      faces=   3968 holes_edges=   0 nonman=  0 flips=   0 shells=  1 vol= 14080.733 zero=0 dup=0 out->orig=0.0032 orig->out=0.0031
+f9_inside_out              blender  faces=   3968 holes_edges=   0 nonman=  0 flips=   0 shells=  1 vol= 14080.486 zero=0 dup=0 out->orig=0.0000 orig->out=0.0000
+
+
+f1_book                    orig     faces= 334180 holes_edges=   0 nonman=  0 flips=   0 shells=  1 vol= 36872.744 zero=1 dup=0 out->orig=0.0000 orig->out=0.0000
+f1_book                    ours     faces= 333984 holes_edges= 402 nonman=  0 flips=   0 shells=  2 vol= 36872.544 zero=0 dup=0 out->orig=0.0000 orig->out=0.0005
+f1_book                    win      faces= 336652 holes_edges=   0 nonman=  0 flips=   0 shells=  1 vol= 36865.516 zero=0 dup=0 out->orig=0.0273 orig->out=0.0036
+f1_book                    blender  faces= 334168 holes_edges=   0 nonman=  0 flips=   0 shells=  1 vol= 36872.739 zero=0 dup=0 out->orig=0.0001 orig->out=0.0005
