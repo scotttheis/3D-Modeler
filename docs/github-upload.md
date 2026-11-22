@@ -59,6 +59,28 @@ makes the repository public, so a v0.99 tester is then offered v1.00.
    need it once public). Turn on GitHub Sponsors if the owner is ready.
 6. Record the public release in `docs/STATUS.md`.
 
+## Right after going public: remind the owner (owner rule, 2026-11-21)
+
+The moment the repository is switched to public, the session tells the owner,
+in plain words, about each of these, and does not treat the switch as done
+until they are listed. Things only the owner can click are marked (owner).
+
+1. (owner) **Upload the social preview image.** Settings, General, "Social
+   preview", Edit, Upload an image, pick `docs/images/social-preview.png`. The
+   option does not exist while the repository is private.
+2. **Turn on private vulnerability reporting.** Settings, Code security.
+   GitHub refuses it while private. The session tries it with `gh api -X PUT
+   repos/scotttheis/3D-Modeler/private-vulnerability-reporting` first and
+   tells the owner if it still fails. `SECURITY.md` points reporters at it.
+3. **Check the page as a stranger sees it:** README pictures and badges,
+   Releases page, download links, the Security tab. Badges and links 404
+   while private.
+4. **Check the in-app update check** now sees the newest release (it cannot
+   while private).
+5. (owner) Decide on GitHub Sponsors, Discussions or Discord, and removing
+   tester access.
+6. Repeat the stale-rule check: `AGENTS.md` "no push" wording.
+
 ## Every release says what changed (owner rule, 2026-11-21)
 
 No release goes out without plain-language notes of what changed in it.

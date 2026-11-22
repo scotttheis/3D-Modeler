@@ -213,6 +213,10 @@ Every release must carry plain-language notes of what changed: add the
 publishes it and fails without it). See "Every release says what changed" in
 [`docs/github-upload.md`](docs/github-upload.md). The MCP gateway
 (`modeler3d-mcp`) ships in every installer beside the app.
+When the owner says the repository is going public, or it has just been made
+public, follow "Right after going public" in `docs/github-upload.md` and
+remind the owner of every item there (social preview upload, vulnerability
+reporting, and the rest).
 
 ## Suggestions from other people
 
