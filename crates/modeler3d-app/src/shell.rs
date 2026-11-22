@@ -3730,7 +3730,7 @@ impl Modeler3dApp {
         });
         ui.add_space(SPACE_2);
         let (columns, column_width) = recent_grid_layout(width, SPACE_4);
-        let action_columns = columns.min(2);
+        let action_columns = columns.min(3);
         egui::Grid::new("welcome-actions")
             .num_columns(action_columns)
             .spacing(Vec2::splat(SPACE_4))
@@ -3746,6 +3746,19 @@ impl Modeler3dApp {
                     self.dispatch(CommandId::NewScene);
                 }
                 if action_columns == 1 {
+                    ui.end_row();
+                }
+                if self.welcome_action_card(
+                    ui,
+                    palette,
+                    OriginalAsset::Action("Folder and Open.png"),
+                    "Open File",
+                    "Insert a 3D model from a file",
+                    column_width,
+                ) {
+                    self.dispatch(CommandId::ImportModel);
+                }
+                if action_columns <= 2 {
                     ui.end_row();
                 }
                 if self.welcome_action_card(
@@ -3778,7 +3791,7 @@ impl Modeler3dApp {
                     ui.set_width((width - 2.0 * (SPACE_4 + 1.0)).max(0.0));
                     ui.label(
                         RichText::new(
-                            "Your next idea starts here. Create a scene or open a project above.",
+                            "Your next idea starts here. Create a scene, open a model, or open a project above.",
                         )
                         .color(palette.muted),
                     );

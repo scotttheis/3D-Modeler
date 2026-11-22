@@ -3,7 +3,7 @@
 The only place current status is written. Keep it to one screen. Plan:
 [`product-rebuild-plan.md`](product-rebuild-plan.md).
 
-Updated 2026-11-21 (Subtract fix for nearly-perfect meshes; before that F7 v1.0.0 upload; Smooth Brush default 65; before that F5 smoothing; before that F4 upgrade check; before that Transform boxes fill on insert/import; before that Hand cursor redraw; before that Grab cursor choice; before that Smooth Brush outline; before that Merge fix; before that finish plan Session 2; before that claw redraw, Rotate grip reach, Resize handles zoomed in; before that OF-70).
+Updated 2026-11-22 (Hide Emboss; home Open File tile; before that Subtract fix for nearly-perfect meshes; before that F7 v1.0.0 upload; Smooth Brush default 65; before that F5 smoothing; before that F4 upgrade check; before that Transform boxes fill on insert/import; before that Hand cursor redraw; before that Grab cursor choice; before that Smooth Brush outline; before that Merge fix; before that finish plan Session 2; before that claw redraw, Rotate grip reach, Resize handles zoomed in; before that OF-70).
 
 Test releases (how-to: [`packaging.md`](packaging.md)): last is **RC1**,
 version 0.1.1, 2026-11-13, `E:\3D-Modeler-RC\Builder3D-RC1.msi` (50 MB),
@@ -29,6 +29,19 @@ for RC2. Next after RC2: RC3 / 0.1.3.
 
 ## Now
 
+**Home Open File tile (owner, 2026-11-22):** added between New Scene and Open
+Project, using the existing Add/Open native file picker and import flow.
+Tiles wrap in the same order on narrow windows. Fast gate passed
+(`logs/gate/20261122-063623-fast`): fmt, app Clippy, 305 app tests passed,
+2 existing tests ignored. Before/after home captures in both themes and
+after captures with Big UI reviewed:
+`evidence/rebuild/captures/2026-11-22-home-open-file/`. Big UI stacks the
+tiles in the existing scroll area. Current Release rebuilt, smoke passed,
+and both-theme home captures verified. The Full capture-board limitation
+at Save is recorded below; no dependencies or model behavior changed.
+Task: [`home-open-file.md`](tasks/home-open-file.md). Owner visual approval
+pending. Recovery: `G:\3D-Modeler_snapshot_20261122-064200_home-open-file`.
+
 **Hide Emboss (owner, 2026-11-22):** removed the Edit ribbon button until the
 feature works correctly; implementation retained for later restoration.
 Updated the existing ribbon availability test from 12 to 11 buttons.
@@ -43,6 +56,8 @@ Task: [`hide-emboss-button.md`](tasks/hide-emboss-button.md). Owner visual
 approval pending. Baseline snapshot verified:
 `G:\3D-Modeler_snapshot_20261122-062640_hide-emboss-baseline`
 (17,627 files / 2,570,001,107 bytes).
+Recovery snapshot verified: `G:\3D-Modeler_snapshot_20261122-063535_hide-emboss`
+(17,681 files / 2,576,309,343 bytes); local commit `8d01d8f`.
 
 **GitHub page published (owner, 2026-11-21), private repo:** built from the owner's mockup `Desktop\3d.html` (its `launch-readiness` clone was not on this PC, so redone on `rebuild/work`, then `main` fast-forwarded and pushed so the owner can see the page and decide what to change). New: README rewrite with review-harness screenshots (`docs/images/`, stock shapes as placeholders until the owner supplies models) and the full-size 1254 px shape and tool icons straight from `assets/original`, `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, issue forms, PR template, Dependabot, `CHANGELOG.md`, `THIRD_PARTY_NOTICES.md` (510 crates, 31 licences), `docs/mcp.md`, `docs/launch-pictures.md`, social preview image, Manifold Apache-2.0 text, repo description and topics. **New rules:** every release must have plain-language notes: add the `## X.Y.Z` section to `CHANGELOG.md` before tagging; `release.yml` publishes that section as the release notes and fails without it (AGENTS.md, `github-upload.md`). Notes for v0.99.0 to v1.0.2 were written onto the four existing releases. **MCP ships with the app (owner decision):** the gateway binary is renamed `r4_mcp` to `modeler3d-mcp` and is now in the MSI (checked by extracting a test MSI), the Mac DMG and the Linux tarball (those two untested here; the next tag is their first real run) and built by `release.yml`. It takes effect from the next release; 1.0.2 does not include it. `r0b_mcp` is an old prototype binary, not shipped. Not done: checksums file and the notes step in `release.yml` have only been run on fake files; private vulnerability reporting (GitHub returns 404 for this private repo, try again when it is public); social preview upload (GitHub has no API, owner uploads by hand). No app code changed; nothing run beyond a Release build of `modeler3d-mcp`. **Next update (owner, 2026-11-21): edit the Save screens** (Save As / Export dialogs); not started. `AGENTS.md` push rule still stale (owner's rule, untouched).
 
