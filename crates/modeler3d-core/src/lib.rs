@@ -110,9 +110,9 @@ pub use project::{
 };
 pub use repair::{
     PlanarCleanupDetail, PlanarCleanupReport, REPAIR_DEFAULT_PROFILE,
-    REPAIR_NOTHING_TO_FIX_MESSAGE, REPAIR_TINY_SHELL_TOLERANCE_MM, REPAIR_TOLERANCE_MM,
-    RepairProfile, RepairReport, RepairResult, RepairStageReport, repair_mesh,
-    repair_mesh_with_options, repair_mesh_with_profile,
+    REPAIR_NOTHING_TO_FIX_MESSAGE, REPAIR_REFUSED_MESSAGE, REPAIR_TINY_SHELL_TOLERANCE_MM,
+    REPAIR_TOLERANCE_MM, RepairProfile, RepairReport, RepairResult, RepairScore, RepairStageReport,
+    RepairVerdict, repair_mesh, repair_mesh_with_options, repair_mesh_with_profile,
 };
 pub use scene::{
     COPY_GAP_MM, CommandResult, DEFAULT_MESH_COLOR, MERGE_NOT_TOUCHING_MESSAGE, ObjectId,

@@ -153,6 +153,11 @@ where
                             message: modeler3d_core::REPAIR_NOTHING_TO_FIX_MESSAGE.to_owned(),
                         });
                     }
+                    if result.report.refused() {
+                        return Ok(DesktopJobResult::Unchanged {
+                            message: modeler3d_core::REPAIR_REFUSED_MESSAGE.to_owned(),
+                        });
+                    }
                     let stage_count = result.report.stages.len();
                     (result.mesh, format!("{stage_count} repair stage(s)"))
                 }

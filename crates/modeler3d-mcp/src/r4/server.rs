@@ -2393,6 +2393,12 @@ impl R4Server {
                         json!({"action":action,"operation_id":id,"index":index,"object_id":object_id,"report":repair_report(&result.report),"changed":false,"scene_revision":state.scene.revision(),"message":modeler3d_core::REPAIR_NOTHING_TO_FIX_MESSAGE}),
                     );
                 }
+                if result.report.refused() {
+                    let state = self.lock_state()?;
+                    return Ok(
+                        json!({"action":action,"operation_id":id,"index":index,"object_id":object_id,"report":repair_report(&result.report),"changed":false,"scene_revision":state.scene.revision(),"message":modeler3d_core::REPAIR_REFUSED_MESSAGE}),
+                    );
+                }
                 (
                     result.mesh,
                     json!({"action":action,"operation_id":id,"index":index,"object_id":object_id,"report":repair_report(&result.report)}),
@@ -3757,12 +3763,32 @@ fn normalize_report(report: &modeler3d_core::NormalizeDensityReport) -> Value {
 }
 
 fn repair_report(report: &modeler3d_core::RepairReport) -> Value {
+    let score = |score: &modeler3d_core::RepairScore| {
+        json!({
+            "open_edges":score.open_edges,
+            "non_manifold_edges":score.non_manifold_edges,
+            "flipped_edges":score.flipped_edges,
+            "degenerate_faces":score.degenerate_faces,
+            "duplicate_faces":score.duplicate_faces,
+            "inside_out_shells":score.inside_out_shells,
+            "tiny_shells":score.tiny_shells,
+            "shells":score.shells
+        })
+    };
+    let verdict = match report.verdict {
+        modeler3d_core::RepairVerdict::Improved => "Improved",
+        modeler3d_core::RepairVerdict::NoBetter => "NoBetter",
+        modeler3d_core::RepairVerdict::Worse => "Worse",
+    };
     json!({
         "profile":report.profile,
         "tolerance_mm":report.tolerance_mm,
         "tiny_shell_tolerance_mm":report.tiny_shell_tolerance_mm,
         "before":health_value(&report.before),
         "after":health_value(&report.after),
+        "score_before":score(&report.score_before),
+        "score_after":score(&report.score_after),
+        "verdict":verdict,
         "candidate_safe":report.candidate_safe,
         "candidate_changed":report.candidate_changed,
         "can_apply":report.can_apply,

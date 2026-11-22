@@ -1,5 +1,6 @@
 use modeler3d_core::{
-    CoreError, Mesh, RepairProfile, inspect_mesh, make_box, repair_mesh, repair_mesh_with_profile,
+    CoreError, Mesh, RepairProfile, RepairScore, RepairVerdict, inspect_mesh, make_box,
+    make_sphere, repair_mesh, repair_mesh_with_profile,
 };
 
 fn box_mesh(extents: [f32; 3]) -> Mesh {
@@ -243,4 +244,162 @@ fn grid_for_health() -> Mesh {
         vec![[0, 1, 2], [1, 3, 2]],
     )
     .expect("health grid")
+}
+
+// Replace one triangle by a sealed fan whose point is 1e-5 mm from an edge.
+fn add_sealed_slivers(mesh: &Mesh, count: usize) -> Mesh {
+    let mut vertices = mesh.vertices.clone();
+    let mut faces = Vec::new();
+    for (index, &[a, b, c]) in mesh.faces.iter().enumerate() {
+        if index >= count {
+            faces.push([a, b, c]);
+            continue;
+        }
+        let a_point = mesh.vertices[a as usize];
+        let b_point = mesh.vertices[b as usize];
+        let c_point = mesh.vertices[c as usize];
+        let middle = std::array::from_fn::<_, 3, _>(|axis| (a_point[axis] + b_point[axis]) * 0.5);
+        let distance = (0..3)
+            .map(|axis| (c_point[axis] - middle[axis]).powi(2))
+            .sum::<f32>()
+            .sqrt();
+        let point = std::array::from_fn(|axis| {
+            middle[axis] + (c_point[axis] - middle[axis]) * (1.0e-5 / distance)
+        });
+        let p = vertices.len() as u32;
+        vertices.push(point);
+        faces.extend([[a, b, p], [b, c, p], [c, a, p]]);
+    }
+    Mesh::new(vertices, faces).expect("sealed slivers")
+}
+
+#[test]
+fn f10_repair_preserves_a_sealed_box_sliver() {
+    let source = add_sealed_slivers(&box_mesh([10.0; 3]), 1);
+    let before = inspect_mesh(&source).expect("health");
+    assert!(before.valid);
+    let result = repair_mesh(&source).expect("repair");
+    assert!(
+        result.report.after.boundary_edges == 0 || result.report.refused(),
+        "{:?}",
+        result.report
+    );
+    assert_eq!(source.face_count(), 14);
+}
+
+#[test]
+fn book_like_fifty_sealed_slivers_stay_sealed() {
+    let source = add_sealed_slivers(&make_sphere(15.0, 2).expect("sphere"), 50);
+    assert_eq!(inspect_mesh(&source).expect("health").boundary_edges, 0);
+    let result = repair_mesh(&source).expect("repair book-like mesh");
+    assert_eq!(result.report.after.boundary_edges, 0, "{:?}", result.report);
+}
+
+#[test]
+fn f3_repair_closes_triangle_holes_including_two_sharing_one_vertex() {
+    let mut source = make_sphere(15.0, 2).expect("sphere");
+    let first = source.faces[0];
+    let second_index = source
+        .faces
+        .iter()
+        .position(|face| {
+            face.contains(&first[0])
+                && face.iter().filter(|vertex| first.contains(vertex)).count() == 1
+        })
+        .expect("a hole sharing just a vertex");
+    let second = source.faces[second_index];
+    let third_index = source
+        .faces
+        .iter()
+        .position(|face| {
+            face.iter()
+                .all(|vertex| !first.contains(vertex) && !second.contains(vertex))
+        })
+        .expect("separate hole");
+    source.faces = source
+        .faces
+        .iter()
+        .enumerate()
+        .filter(|(index, _)| ![0, second_index, third_index].contains(index))
+        .map(|(_, face)| *face)
+        .collect();
+    assert_eq!(inspect_mesh(&source).expect("health").boundary_edges, 9);
+    let result = repair_mesh(&source).expect("repair holes");
+    assert!(result.report.can_apply, "{:?}", result.report);
+    assert_eq!(result.report.after.boundary_edges, 0);
+    assert!(result.report.after.valid);
+}
+
+#[test]
+fn f9_inside_out_sphere_is_flagged_and_repaired_outward() {
+    let mut source = make_sphere(15.0, 2).expect("sphere");
+    for face in &mut source.faces {
+        face.swap(1, 2);
+    }
+    let before = inspect_mesh(&source).expect("health");
+    assert!(!before.valid);
+    assert_eq!(before.inside_out_shells, 1);
+    assert!(before.issues.contains(&"1 inside-out shells".to_owned()));
+    let result = repair_mesh(&source).expect("repair inside out");
+    assert_eq!(result.report.verdict, RepairVerdict::Improved);
+    assert!(result.report.can_apply);
+    assert!(result.report.after.valid);
+    assert_eq!(result.report.after.inside_out_shells, 0);
+    // signed_volume's absolute value alone would also pass for inward faces.
+    let outward = result
+        .mesh
+        .faces
+        .iter()
+        .map(|face| {
+            let a = result.mesh.vertices[face[0] as usize];
+            let normal = result.mesh.face_normal(*face);
+            (0..3)
+                .map(|axis| f64::from(a[axis]) * f64::from(normal[axis]))
+                .sum::<f64>()
+        })
+        .sum::<f64>();
+    assert!(outward > 0.0);
+}
+
+#[test]
+fn six_edge_hole_is_refused_without_claiming_an_improvement() {
+    let mut source = make_sphere(15.0, 1).expect("sphere");
+    source.faces.retain(|face| !face.contains(&12));
+    assert_eq!(inspect_mesh(&source).expect("health").boundary_edges, 6);
+    let original = source.clone();
+    let result = repair_mesh(&source).expect("repair");
+    assert_eq!(result.report.verdict, RepairVerdict::NoBetter);
+    assert!(result.report.refused());
+    assert!(!result.report.can_apply);
+    assert_eq!(result.report.score_before, result.report.score_after);
+    assert_eq!(source, original);
+}
+
+#[test]
+fn health_counts_flipped_edges_and_keeps_correct_cavities_out_of_the_score() {
+    let outer = box_mesh([10.0; 3]);
+    let mut flipped = outer.clone();
+    flipped.faces[0].swap(1, 2);
+    let health = inspect_mesh(&flipped).expect("health");
+    assert_eq!(health.flipped_edges, 3);
+    assert_eq!(health.inside_out_shells, 0);
+    let repaired = repair_mesh(&flipped).expect("repair");
+    assert!(repaired.report.can_apply);
+    assert_eq!(repaired.report.score_after.flipped_edges, 0);
+
+    let inner = box_mesh([5.0; 3]);
+    let mut hollow = outer;
+    let offset = hollow.vertices.len() as u32;
+    hollow.vertices.extend(inner.vertices);
+    hollow.faces.extend(
+        inner
+            .faces
+            .iter()
+            .map(|[a, b, c]| [a + offset, c + offset, b + offset]),
+    );
+    let health = inspect_mesh(&hollow).expect("hollow health");
+    assert!(health.valid);
+    assert_eq!(health.cavity_shells, 1);
+    assert_eq!(health.inside_out_shells, 0);
+    assert_eq!(RepairScore::from_health(&health).shells, 1);
 }

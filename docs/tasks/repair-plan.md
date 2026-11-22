@@ -107,7 +107,7 @@ pasting the previous session's prompt.
   no zipping of open edges, min-area hole fill with no refine or smooth, no
   re-cut. Owner answered: keep correct cavities (answer 6).
 
-### [ ] R2: stop the damage (fix plan Step 1)
+### [x] R2: stop the damage (fix plan Step 1)
 
 - Session: **Claude Sonnet 5.5, medium** (overseer). Worker: **Codex,
   medium.** Review: the Sonnet session (cross-family).
@@ -123,6 +123,12 @@ pasting the previous session's prompt.
   MCP test. Re-run `compare.py` on all fixtures: **nothing may get worse**.
 - Ships: Release rebuilt. Owner can retry the book: Repair now refuses or
   fixes, never damages.
+- Done 2026-11-22: [`repair-r2-card.md`](repair-r2-card.md). Fast gate passed
+  (fmt, clippy, core/app/mcp tests). Fixtures (generated, `genfx.py`): f3, f4,
+  f8, f9 fixed; f10 stays sealed; f2, f5, f6, f7 refused and unchanged (R4-R6
+  fix them); none worse. Gate allows float32 shifts: it counts defects only,
+  so the R3 Windows result still needs the volume/bounding-box collapse check
+  from the spec added in R3. Boolean operand repair left as it was.
 
 ### [ ] R3: Windows engine route (fix plan Step 2)
 

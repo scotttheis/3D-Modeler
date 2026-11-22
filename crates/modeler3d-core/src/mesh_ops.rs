@@ -134,6 +134,10 @@ pub struct MeshHealthReport {
     /// shell (Hollow's inner surface, OF-54). They are counted in
     /// `body_count` but are not reported as disconnected pieces.
     pub cavity_shells: i32,
+    /// Shared edges with exactly two owners traversing in the same direction.
+    pub flipped_edges: usize,
+    /// Negative-volume shells when winding is consistent and no shell faces outward.
+    pub inside_out_shells: usize,
     /// Whether the mesh encloses a non-zero signed volume.
     pub is_volume: bool,
     /// Number of zero-area or non-finite triangles.
@@ -313,9 +317,7 @@ pub fn inspect_mesh(mesh: &Mesh) -> Result<MeshHealthReport, CoreError> {
                 "face {face_index} references a missing vertex"
             )));
         };
-        let cross = cross_product(subtract(*second, *first), subtract(*third, *first));
-        let area_measure = dot(cross, cross);
-        if !area_measure.is_finite() || area_measure <= 1.0e-24 {
+        if is_degenerate_triangle(*first, *second, *third) {
             degenerate_faces = degenerate_faces.saturating_add(1);
         }
         let mut canonical = face;
@@ -349,6 +351,7 @@ pub fn inspect_mesh(mesh: &Mesh) -> Result<MeshHealthReport, CoreError> {
 
     let mut boundary_edges = 0_usize;
     let mut non_manifold_edges = 0_usize;
+    let mut flipped_edges = 0_usize;
     let mut winding_consistent = true;
     let mut boundary_adjacency: BTreeMap<u32, BTreeSet<u32>> = BTreeMap::new();
     // Faces that share an edge belong to the same shell. Joining each owner
@@ -366,6 +369,7 @@ pub fn inspect_mesh(mesh: &Mesh) -> Result<MeshHealthReport, CoreError> {
             }
             2 => {
                 if owners[0].forward == owners[1].forward {
+                    flipped_edges = flipped_edges.saturating_add(1);
                     winding_consistent = false;
                 }
             }
@@ -403,6 +407,19 @@ pub fn inspect_mesh(mesh: &Mesh) -> Result<MeshHealthReport, CoreError> {
         0
     };
     let pieces = body_count - cavity_shells;
+    let inside_out_shells =
+        if winding_consistent && !shell_stats.volumes.iter().any(|volume| *volume > 0.0) {
+            shell_stats
+                .volumes
+                .iter()
+                .filter(|volume| **volume < 0.0)
+                .count()
+        } else {
+            0
+        };
+    if inside_out_shells > 0 {
+        issues.push(format!("{inside_out_shells} inside-out shells"));
+    }
     if pieces > 1 {
         issues.push(format!("{pieces} disconnected shells"));
     }
@@ -435,6 +452,8 @@ pub fn inspect_mesh(mesh: &Mesh) -> Result<MeshHealthReport, CoreError> {
         winding_consistent,
         body_count,
         cavity_shells,
+        flipped_edges,
+        inside_out_shells,
         is_volume,
         degenerate_faces,
         duplicate_faces,
@@ -447,6 +466,13 @@ pub fn inspect_mesh(mesh: &Mesh) -> Result<MeshHealthReport, CoreError> {
             .to_owned(),
         issues,
     })
+}
+
+/// Shared health threshold, in millimetres, independent of repair's weld tolerance.
+pub(crate) fn is_degenerate_triangle(a: [f32; 3], b: [f32; 3], c: [f32; 3]) -> bool {
+    let cross = cross_product(subtract(b, a), subtract(c, a));
+    let area_measure = dot(cross, cross);
+    !area_measure.is_finite() || area_measure <= 1.0e-24
 }
 
 /// Performs one bounded boolean and returns source-labelled result faces.

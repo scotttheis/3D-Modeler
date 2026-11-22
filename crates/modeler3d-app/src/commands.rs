@@ -1231,6 +1231,17 @@ impl CommandState {
         let index = self.first_selected("Repair")?;
         let source = self.scene.object(index)?.mesh().clone();
         let result = repair_mesh(&source)?;
+        let unchanged_message = if result.report.nothing_to_fix() {
+            Some(modeler3d_core::REPAIR_NOTHING_TO_FIX_MESSAGE)
+        } else if result.report.refused() {
+            Some(modeler3d_core::REPAIR_REFUSED_MESSAGE)
+        } else {
+            None
+        };
+        if let Some(message) = unchanged_message {
+            self.status(message);
+            return Ok(message.to_owned());
+        }
         let command_result = self.scene.replace_mesh(index, result.mesh)?;
         let message = if command_result.changed {
             self.dirty = true;
@@ -3231,6 +3242,61 @@ mod tests {
             Some(modeler3d_core::REPAIR_NOTHING_TO_FIX_MESSAGE)
         );
         assert_eq!(mcp.scene().history_state_id(), history);
+    }
+
+    fn model_with_unrepairable_hole() -> CommandState {
+        let (mut state, _) = one_cube_pair();
+        let mut mesh = modeler3d_core::make_sphere(15.0, 1).expect("sphere");
+        mesh.faces.retain(|face| !face.contains(&12));
+        assert_eq!(
+            modeler3d_core::inspect_mesh(&mesh)
+                .expect("health")
+                .boundary_edges,
+            6
+        );
+        state.scene.replace_mesh(0, mesh).expect("open sphere");
+        state.dirty = false;
+        state
+    }
+
+    #[test]
+    fn refused_repair_leaves_desktop_mesh_and_history_unchanged() {
+        let mut desktop = model_with_unrepairable_hole();
+        let source = desktop.scene().objects()[0].mesh().clone();
+        let history = desktop.scene().history_state_id();
+        let revision = desktop.scene().revision();
+        assert_eq!(
+            desktop.repair_selected().expect("refused repair"),
+            modeler3d_core::REPAIR_REFUSED_MESSAGE
+        );
+        assert_eq!(desktop.scene().history_state_id(), history);
+        assert_eq!(desktop.scene().revision(), revision);
+        assert_eq!(desktop.scene().objects()[0].mesh(), &source);
+        assert!(!desktop.is_dirty());
+    }
+
+    #[test]
+    fn mcp_refused_repair_matches_desktop_and_leaves_history_unchanged() {
+        let mut mcp = model_with_unrepairable_hole();
+        let source = mcp.scene().objects()[0].mesh().clone();
+        let history = mcp.scene().history_state_id();
+        let revision = mcp.scene().revision();
+        let id = mcp.scene().objects()[0].object_id().to_owned();
+        let result = run_mcp_operation(&mut mcp, "repair", serde_json::json!({"object_id": id}));
+        assert_eq!(result["changed"], serde_json::json!(false), "{result}");
+        assert_eq!(
+            result["message"].as_str(),
+            Some(modeler3d_core::REPAIR_REFUSED_MESSAGE)
+        );
+        assert_eq!(result["report"]["verdict"], "NoBetter");
+        assert_eq!(
+            result["report"]["score_before"],
+            result["report"]["score_after"]
+        );
+        assert_eq!(mcp.scene().history_state_id(), history);
+        assert_eq!(mcp.scene().revision(), revision);
+        assert_eq!(mcp.scene().objects()[0].mesh(), &source);
+        assert!(!mcp.is_dirty());
     }
 
     #[test]

@@ -6,6 +6,7 @@
 
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
+use crate::mesh_ops::is_degenerate_triangle;
 use crate::{CoreError, Mesh, MeshHealthReport, MeshOperationLimits, inspect_mesh};
 
 /// The repair tolerance used by the Python reference, in millimetres.
@@ -97,6 +98,87 @@ pub struct PlanarCleanupReport {
     pub details: Vec<PlanarCleanupDetail>,
 }
 
+/// Portable topology defects used to compare repair candidates; lower is better.
+#[must_use]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct RepairScore {
+    /// Boundary edges.
+    pub open_edges: usize,
+    /// Edges with more than two owners.
+    pub non_manifold_edges: usize,
+    /// Two-owner edges with agreeing directions.
+    pub flipped_edges: usize,
+    /// Triangles below the shared health threshold.
+    pub degenerate_faces: usize,
+    /// Repeated triangles, ignoring winding.
+    pub duplicate_faces: usize,
+    /// Inward shells when the entire model is inside out.
+    pub inside_out_shells: usize,
+    /// Components below the tiny-shell scale.
+    pub tiny_shells: usize,
+    /// Connected components excluding cavity surfaces.
+    pub shells: usize,
+}
+
+impl RepairScore {
+    /// Builds the same repair score on every platform, excluding correct cavities.
+    pub fn from_health(health: &MeshHealthReport) -> Self {
+        Self {
+            open_edges: health.boundary_edges,
+            non_manifold_edges: health.non_manifold_edges,
+            flipped_edges: health.flipped_edges,
+            degenerate_faces: health.degenerate_faces,
+            duplicate_faces: health.duplicate_faces,
+            inside_out_shells: health.inside_out_shells,
+            tiny_shells: health.tiny_shells,
+            shells: health
+                .body_count
+                .saturating_sub(health.cavity_shells)
+                .max(0) as usize,
+        }
+    }
+
+    fn fields(self) -> [usize; 8] {
+        [
+            self.open_edges,
+            self.non_manifold_edges,
+            self.flipped_edges,
+            self.degenerate_faces,
+            self.duplicate_faces,
+            self.inside_out_shells,
+            self.tiny_shells,
+            self.shells,
+        ]
+    }
+}
+
+/// A candidate must reduce at least one defect without increasing any other.
+#[must_use]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum RepairVerdict {
+    /// At least one score improved and none got worse.
+    Improved,
+    /// Every score stayed the same.
+    NoBetter,
+    /// At least one score got worse, even if another improved.
+    Worse,
+}
+
+fn gate(before: RepairScore, after: RepairScore) -> RepairVerdict {
+    let mut better = false;
+    for (before, after) in before.fields().into_iter().zip(after.fields()) {
+        if after > before {
+            return RepairVerdict::Worse;
+        }
+        better |= after < before;
+    }
+    if better {
+        RepairVerdict::Improved
+    } else {
+        RepairVerdict::NoBetter
+    }
+}
+
 /// Health and commit-safety evidence for a repair attempt.
 #[derive(Clone, Debug, PartialEq)]
 pub struct RepairReport {
@@ -114,13 +196,19 @@ pub struct RepairReport {
     pub planar_cleanup: PlanarCleanupReport,
     /// Health after all stages.
     pub after: MeshHealthReport,
+    /// Topology score before repair.
+    pub score_before: RepairScore,
+    /// Topology score of the proposed candidate.
+    pub score_after: RepairScore,
+    /// Whether the candidate improves health without worsening another defect.
+    pub verdict: RepairVerdict,
     /// Recoverable stage errors.
     pub errors: Vec<String>,
     /// Whether the candidate has usable finite indexed geometry.
     pub candidate_safe: bool,
     /// Whether indexed geometry changed.
     pub candidate_changed: bool,
-    /// Whether a caller may commit the candidate as a best-effort result.
+    /// Whether the candidate is safe and strictly improves the topology score.
     pub can_apply: bool,
 }
 
@@ -129,12 +217,21 @@ pub struct RepairReport {
 pub const REPAIR_NOTHING_TO_FIX_MESSAGE: &str =
     "No problems found — your model was already clean. Nothing was changed.";
 
+/// Shared desktop/MCP message when a flawed mesh cannot be improved safely.
+pub const REPAIR_REFUSED_MESSAGE: &str = "Repair couldn't improve this model. Nothing was changed.";
+
 impl RepairReport {
     /// Whether the mesh had no problems to begin with (OF-40). Adapters then
     /// apply nothing, so Repair on a clean model leaves no history entry.
     #[must_use]
     pub fn nothing_to_fix(&self) -> bool {
         self.before.valid
+    }
+
+    /// Whether adapters must leave a flawed source unchanged, including its history.
+    #[must_use]
+    pub fn refused(&self) -> bool {
+        !self.nothing_to_fix() && !self.can_apply
     }
 }
 
@@ -190,9 +287,9 @@ pub fn repair_mesh_with_options(
                 "RemoveDoubleTriangles" => remove_duplicate_faces(value),
                 "FixFlippedTriangles" | "FixFlippedTriangles (second pass)" => fix_winding(value),
                 "Wrap" => wrap_mesh(value),
-                "RemoveDegeneratedFaces" => remove_degenerate_faces(value, REPAIR_TOLERANCE_MM),
+                "RemoveDegeneratedFaces" => remove_degenerate_faces(value),
                 "RemoveTinyShells" => remove_tiny_shells(value),
-                "PrepareForExport" => prepare_for_export(value, REPAIR_TOLERANCE_MM),
+                "PrepareForExport" => prepare_for_export(value),
                 _ => Err(CoreError::MeshOperation(format!(
                     "unknown internal repair stage: {name}"
                 ))),
@@ -209,6 +306,9 @@ pub fn repair_mesh_with_options(
     let after = inspect_mesh(&current)?;
     let candidate_safe = is_safe_candidate(&current);
     let candidate_changed = current != *mesh;
+    let score_before = RepairScore::from_health(&before);
+    let score_after = RepairScore::from_health(&after);
+    let verdict = gate(score_before, score_after);
     Ok(RepairResult {
         mesh: current,
         report: RepairReport {
@@ -219,10 +319,13 @@ pub fn repair_mesh_with_options(
             stages,
             planar_cleanup,
             after,
+            score_before,
+            score_after,
+            verdict,
             errors,
             candidate_safe,
             candidate_changed,
-            can_apply: candidate_safe,
+            can_apply: candidate_safe && verdict == RepairVerdict::Improved,
         },
     })
 }
@@ -352,24 +455,15 @@ fn remove_duplicate_faces(mesh: &Mesh) -> Result<Mesh, CoreError> {
     compact_mesh(&mesh.vertices, &faces)
 }
 
-fn remove_degenerate_faces(mesh: &Mesh, tolerance: f32) -> Result<Mesh, CoreError> {
-    let threshold = f64::from(tolerance) * f64::from(tolerance);
-    let mut faces = Vec::with_capacity(mesh.face_count());
-    for face in &mesh.faces {
-        let Some(first) = mesh.vertices.get(face[0] as usize) else {
-            continue;
-        };
-        let Some(second) = mesh.vertices.get(face[1] as usize) else {
-            continue;
-        };
-        let Some(third) = mesh.vertices.get(face[2] as usize) else {
-            continue;
-        };
-        let cross = cross(subtract(*second, *first), subtract(*third, *first));
-        if f64::from(dot(cross, cross)) > threshold {
-            faces.push(*face);
-        }
-    }
+fn remove_degenerate_faces(mesh: &Mesh) -> Result<Mesh, CoreError> {
+    // Geometrically thin triangles can seal a solid. Only welding's repeated
+    // indices may be discarded here; health reports retain the shared area rule.
+    let faces = mesh
+        .faces
+        .iter()
+        .copied()
+        .filter(|[a, b, c]| a != b && b != c && c != a)
+        .collect::<Vec<_>>();
     compact_mesh(&mesh.vertices, &faces)
 }
 
@@ -487,11 +581,7 @@ fn close_small_holes(mesh: &Mesh) -> Result<Mesh, CoreError> {
                 valid = false;
                 break;
             };
-            let cross_value = cross(
-                subtract(*second_point, *first_point),
-                subtract(center, *first_point),
-            );
-            if dot(cross_value, cross_value) <= 1.0e-20 {
+            if is_degenerate_triangle(*first_point, *second_point, center) {
                 valid = false;
                 break;
             }
@@ -561,8 +651,8 @@ fn remove_tiny_shells(mesh: &Mesh) -> Result<Mesh, CoreError> {
     compact_mesh(&mesh.vertices, &faces)
 }
 
-fn prepare_for_export(mesh: &Mesh, tolerance: f32) -> Result<Mesh, CoreError> {
-    let cleaned = remove_degenerate_faces(mesh, tolerance)?;
+fn prepare_for_export(mesh: &Mesh) -> Result<Mesh, CoreError> {
+    let cleaned = remove_degenerate_faces(mesh)?;
     let cleaned = remove_duplicate_faces(&cleaned)?;
     let cleaned = compact_mesh(&cleaned.vertices, &cleaned.faces)?;
     fix_winding(&cleaned)
@@ -845,7 +935,7 @@ fn planar_components(mesh: &Mesh) -> Vec<Vec<usize>> {
 
 fn boundary_loops(mesh: &Mesh) -> Vec<Vec<u32>> {
     let edges = edge_map(mesh);
-    let mut outgoing = BTreeMap::<u32, u32>::new();
+    let mut outgoing = BTreeMap::<u32, Vec<u32>>::new();
     for (&key, owners) in &edges {
         if owners.len() != 1 {
             continue;
@@ -860,11 +950,74 @@ fn boundary_loops(mesh: &Mesh) -> Vec<Vec<u32>> {
         let Some((first, second)) = directed else {
             continue;
         };
-        if outgoing.insert(first, second).is_some() {
-            return Vec::new();
+        outgoing.entry(first).or_default().push(second);
+    }
+    let mut visited = BTreeSet::new();
+    let mut loops = Vec::new();
+    for (&start, neighbors) in &outgoing {
+        for &first in neighbors {
+            if visited.contains(&(start, first)) {
+                continue;
+            }
+            let mut path = vec![start];
+            let mut positions = BTreeMap::from([(start, 0)]);
+            let mut previous = start;
+            let mut current = first;
+            visited.insert((start, first));
+            loop {
+                // Split a closed subloop even when a walk meets a shared
+                // vertex before returning to its starting edge.
+                if let Some(&position) = positions.get(&current) {
+                    let cycle = path.split_off(position);
+                    for vertex in &cycle {
+                        positions.remove(vertex);
+                    }
+                    if cycle.len() >= 3 {
+                        loops.push(cycle);
+                    }
+                }
+                positions.insert(current, path.len());
+                path.push(current);
+                let Some(next) = outgoing.get(&current).and_then(|neighbors| {
+                    neighbors
+                        .iter()
+                        .copied()
+                        .filter(|next| !visited.contains(&(current, *next)))
+                        .min_by(|left, right| {
+                            // Smallest angle to the reverse incoming edge:
+                            // maximize the normalized dot product. Compare in
+                            // f64 so short boundary edges retain their direction.
+                            let turn = |next: u32| {
+                                let origin = mesh.vertices[current as usize].map(f64::from);
+                                let incoming = mesh.vertices[previous as usize].map(f64::from);
+                                let target = mesh.vertices[next as usize].map(f64::from);
+                                let back = std::array::from_fn::<_, 3, _>(|axis| {
+                                    incoming[axis] - origin[axis]
+                                });
+                                let forward = std::array::from_fn::<_, 3, _>(|axis| {
+                                    target[axis] - origin[axis]
+                                });
+                                let length = (dot64(back, back) * dot64(forward, forward)).sqrt();
+                                if length > 0.0 {
+                                    dot64(back, forward) / length
+                                } else {
+                                    -1.0
+                                }
+                            };
+                            turn(*right)
+                                .total_cmp(&turn(*left))
+                                .then_with(|| left.cmp(right))
+                        })
+                }) else {
+                    break;
+                };
+                visited.insert((current, next));
+                previous = current;
+                current = next;
+            }
         }
     }
-    collect_loops(&outgoing)
+    loops
 }
 
 fn component_boundary_loop(mesh: &Mesh, component: &[usize]) -> Option<Vec<u32>> {
@@ -1079,4 +1232,34 @@ fn cross64(first: [f64; 3], second: [f64; 3]) -> [f64; 3] {
 
 fn dot64(first: [f64; 3], second: [f64; 3]) -> f64 {
     first[0] * second[0] + first[1] * second[1] + first[2] * second[2]
+}
+
+#[cfg(test)]
+mod gate_tests {
+    use super::{RepairScore, RepairVerdict, gate};
+
+    #[test]
+    fn every_defect_is_gated_and_improvements_cannot_mask_damage() {
+        let score = |fields: [usize; 8]| RepairScore {
+            open_edges: fields[0],
+            non_manifold_edges: fields[1],
+            flipped_edges: fields[2],
+            degenerate_faces: fields[3],
+            duplicate_faces: fields[4],
+            inside_out_shells: fields[5],
+            tiny_shells: fields[6],
+            shells: fields[7],
+        };
+        let before = score([2; 8]);
+        assert_eq!(gate(before, before), RepairVerdict::NoBetter);
+        for field in 0..8 {
+            let mut after = [2; 8];
+            after[field] -= 1;
+            assert_eq!(gate(before, score(after)), RepairVerdict::Improved);
+            after[field] += 2;
+            assert_eq!(gate(before, score(after)), RepairVerdict::Worse);
+            after[(field + 1) % 8] -= 1;
+            assert_eq!(gate(before, score(after)), RepairVerdict::Worse);
+        }
+    }
 }
