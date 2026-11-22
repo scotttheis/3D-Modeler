@@ -1420,6 +1420,7 @@ impl Scene {
             options,
             uniform_color,
             group_if_apart,
+            keep_tool: false,
             target_world: target.transformed_mesh()?,
             tool_world: tool.transformed_mesh()?,
             prepare_time: started.elapsed(),
@@ -1443,6 +1444,7 @@ impl Scene {
             operation,
             uniform_color,
             group_if_apart,
+            keep_tool,
             prepare_time,
             ..
         } = prepared;
@@ -1522,12 +1524,16 @@ impl Scene {
         timer.mark("record face colors");
         let target_local = result.mesh.transformed(&target_transform.inverse()?)?;
         timer.mark("copy result to object space");
-        let new_target_index = if target_index < tool_index {
+        let new_target_index = if keep_tool || target_index < tool_index {
             target_index
         } else {
             target_index.saturating_sub(1)
         };
-        let after_selection = [new_target_index].into_iter().collect();
+        let after_selection = if keep_tool {
+            [tool_index].into_iter().collect()
+        } else {
+            [new_target_index].into_iter().collect()
+        };
         let mut commands: Vec<Box<dyn crate::Command>> = vec![
             Box::new(crate::ReplaceMeshCommand::new(target_index, target_local)),
             Box::new(crate::SetMetadataCommand::new(target_index, metadata)),
@@ -1535,7 +1541,9 @@ impl Scene {
         if let Some(color) = uniform_color {
             commands.push(Box::new(crate::SetColorCommand::new(target_index, color)));
         }
-        commands.push(Box::new(crate::RemoveObjectCommand::new(tool_index)));
+        if !keep_tool {
+            commands.push(Box::new(crate::RemoveObjectCommand::new(tool_index)));
+        }
         let command_result = self.execute(crate::GroupedCommand::with_after_selection(
             commands,
             after_selection,
@@ -2027,12 +2035,21 @@ pub struct PreparedBoolean {
     options: crate::BooleanOptions,
     uniform_color: Option<[f32; 4]>,
     group_if_apart: bool,
+    keep_tool: bool,
     target_world: Mesh,
     tool_world: Mesh,
     prepare_time: std::time::Duration,
 }
 
 impl PreparedBoolean {
+    /// Keeps the tool object in the scene (and selected) when the result is
+    /// committed, instead of removing it. Used to cut one tool through
+    /// several objects in turn; the caller removes the tool afterwards.
+    pub fn keeping_tool(mut self) -> Self {
+        self.keep_tool = true;
+        self
+    }
+
     /// Runs the boolean on the owned copies. `on_step` is called after each
     /// step and may stop the work by returning an error (see
     /// [`crate::boolean_operation_observed`]).

@@ -305,6 +305,14 @@ struct ViewportInput {
     modifiers: egui::Modifiers,
 }
 
+/// The rest of a Subtract that cuts several objects with the selected one.
+#[derive(Debug)]
+struct SubtractQueue {
+    tool_id: String,
+    /// Object ids still to cut; the next one is last.
+    remaining: Vec<String>,
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 enum PendingReplacement {
     NewScene,
@@ -444,6 +452,12 @@ pub struct Modeler3dApp {
     /// a real OS dialog.
     brush_settings: BrushSettings,
     boolean_pick: Option<BooleanPick>,
+    /// Cuts still to run for a Subtract whose selected object cuts several
+    /// objects in turn.
+    subtract_queue: Option<SubtractQueue>,
+    /// Where the left button went down while a Boolean waits for its second
+    /// object; a release close to it counts as a click that picks.
+    boolean_pick_press: Option<egui::Pos2>,
     /// Paint mode (OF-44); `None` when the Paint bar is closed.
     paint_mode: Option<PaintMode>,
     /// Last paint colour and coverage, kept between Paint sessions.
@@ -554,6 +568,8 @@ impl Default for Modeler3dApp {
             brush_settings_open: false,
             brush_settings: BrushSettings::default(),
             boolean_pick: None,
+            subtract_queue: None,
+            boolean_pick_press: None,
             paint_mode: None,
             paint_color: paint_bar::DEFAULT_PAINT_COLOR,
             paint_coverage: 1.0,
@@ -1606,6 +1622,14 @@ impl Modeler3dApp {
 
     fn dispatch_boolean(&mut self, operation: modeler3d_core::BooleanOperation) {
         let selected = self.commands.scene().ordered_selection();
+        crate::diagnostics::record_info(
+            "boolean requested",
+            format!(
+                "{} with {} selected",
+                boolean_label(operation),
+                selected.len()
+            ),
+        );
         match selected.len() {
             0 => self.commands.set_status(format!(
                 "{} requires a selected object",
@@ -1614,20 +1638,9 @@ impl Modeler3dApp {
             1 => {
                 let source_index = selected[0];
                 if operation == modeler3d_core::BooleanOperation::Difference {
-                    let candidates = self
-                        .commands
-                        .scene()
-                        .objects()
-                        .iter()
-                        .enumerate()
-                        .filter(|(index, object)| *index != source_index && object.is_visible())
-                        .map(|(index, _)| index)
-                        .collect::<Vec<_>>();
-                    if candidates.len() == 1 {
-                        self.apply_boolean_pair(candidates[0], source_index, operation, true);
-                    } else {
-                        self.start_boolean_pick(operation, source_index, true, true);
-                    }
+                    // The selected object is the cutter: it cuts away
+                    // everything it touches and then disappears.
+                    self.start_subtract_from_touching(source_index);
                 } else {
                     self.start_boolean_pick(operation, source_index, false, false);
                 }
@@ -1637,6 +1650,106 @@ impl Modeler3dApp {
                 "{} requires exactly two selected objects",
                 boolean_label(operation)
             )),
+        }
+    }
+
+    /// Subtract with one object selected: the selection cuts every other
+    /// visible object whose bounds overlap it, one after the other, and is
+    /// removed with the last cut. Nothing touching it changes nothing.
+    fn start_subtract_from_touching(&mut self, tool_index: usize) {
+        let scene = self.commands.scene();
+        let Ok(tool_bounds) = world_bounds(scene, &[tool_index]) else {
+            self.commands
+                .set_status("Subtract: the selection has no shape");
+            return;
+        };
+        let tool_id = scene.objects()[tool_index].object_id().to_owned();
+        let touching = scene
+            .objects()
+            .iter()
+            .enumerate()
+            .filter(|(index, object)| *index != tool_index && object.is_visible())
+            .filter(|(index, _)| {
+                world_bounds(scene, &[*index]).is_ok_and(|bounds| {
+                    (0..3).all(|axis| {
+                        bounds.minimum[axis] <= tool_bounds.maximum[axis]
+                            && bounds.maximum[axis] >= tool_bounds.minimum[axis]
+                    })
+                })
+            })
+            .map(|(_, object)| object.object_id().to_owned())
+            .collect::<Vec<_>>();
+        crate::diagnostics::record_info(
+            "subtract touching",
+            format!("tool {tool_id}, {} object(s) touching", touching.len()),
+        );
+        if touching.is_empty() {
+            self.commands
+                .set_status("Subtract: nothing is touching the selected object");
+            return;
+        }
+        // Cut from the bottom of the list up so `pop` takes them in list order.
+        let mut remaining = touching;
+        remaining.reverse();
+        self.subtract_queue = Some(SubtractQueue { tool_id, remaining });
+        self.subtract_step();
+    }
+
+    /// Starts the next cut of a running Subtract; does nothing when none is
+    /// queued. The tool is kept for every cut but the last.
+    fn subtract_step(&mut self) {
+        let Some(queue) = self.subtract_queue.as_mut() else {
+            return;
+        };
+        let Ok(tool_index) = self.commands.scene().object_index(&queue.tool_id) else {
+            self.subtract_queue = None;
+            return;
+        };
+        let mut next = None;
+        while let Some(id) = queue.remaining.pop() {
+            if let Ok(index) = self.commands.scene().object_index(&id) {
+                next = Some(index);
+                break;
+            }
+        }
+        let last = queue.remaining.is_empty();
+        let Some(target_index) = next else {
+            self.subtract_queue = None;
+            return;
+        };
+        if last {
+            self.subtract_queue = None;
+        }
+        let operation = modeler3d_core::BooleanOperation::Difference;
+        crate::diagnostics::record_info(
+            "boolean pair",
+            format!(
+                "Subtract target object #{target_index}, tool object #{tool_index}, last={last}"
+            ),
+        );
+        match self
+            .commands
+            .prepare_boolean_pair(target_index, tool_index, operation)
+        {
+            Ok(prepared) => {
+                self.start_desktop_job(
+                    boolean_label(operation),
+                    DesktopJobRequest::Boolean {
+                        prepared: if last {
+                            prepared
+                        } else {
+                            prepared.keeping_tool()
+                        },
+                        clear_selection: last,
+                    },
+                    None,
+                    false,
+                );
+            }
+            Err(error) => {
+                self.subtract_queue = None;
+                self.report_command_error(error);
+            }
         }
     }
 
@@ -1671,7 +1784,14 @@ impl Modeler3dApp {
         clear_selection: bool,
     ) {
         // The boolean runs on a worker so the window stays responsive; the
-        // notification area shows its progress and an Abort button.
+        // status strip shows its progress and an Abort button.
+        crate::diagnostics::record_info(
+            "boolean pair",
+            format!(
+                "{} target object #{target_index}, tool object #{tool_index}",
+                boolean_label(operation)
+            ),
+        );
         match self
             .commands
             .prepare_boolean_pair(target_index, tool_index, operation)
@@ -1999,6 +2119,7 @@ impl Modeler3dApp {
             }
         };
         let operation_id = handle.operation_id.clone();
+        crate::diagnostics::record_info("desktop job started", title);
         let _ = self.commands.operations().update(
             &operation_id,
             Some(OperationPhase::Running),
@@ -2089,6 +2210,10 @@ impl Modeler3dApp {
         }
         if let Some(job) = self.desktop_job.as_ref() {
             for (percent, message) in progress {
+                crate::diagnostics::record_info(
+                    "desktop job step",
+                    format!("{}: {percent}% {message}", job.title),
+                );
                 let _ = self.commands.operations().update(
                     &job.handle.operation_id,
                     Some(OperationPhase::Running),
@@ -2137,7 +2262,22 @@ impl Modeler3dApp {
         result: Result<DesktopJobResult, String>,
     ) {
         job.cancel_on_drop = false;
+        crate::diagnostics::record_info(
+            "desktop job finished",
+            format!(
+                "{}: cancelled={}, worker result={}",
+                job.title,
+                job.handle.is_cancelled(),
+                match &result {
+                    Ok(DesktopJobResult::Boolean { .. }) => "boolean computed",
+                    Ok(DesktopJobResult::Unchanged { .. }) => "unchanged",
+                    Ok(_) => "ok",
+                    Err(error) => error.as_str(),
+                }
+            ),
+        );
         if job.handle.is_cancelled() {
+            self.subtract_queue = None;
             if let Ok(result) = result {
                 discard_uncommitted_job_result(result);
             }
@@ -2241,6 +2381,10 @@ impl Modeler3dApp {
                     .commit_boolean_pair(*prepared, *result, clear_selection)
                 {
                     Ok(CommandOutcome::Applied(message) | CommandOutcome::Noop(message)) => {
+                        crate::diagnostics::record_info(
+                            "desktop job committed",
+                            format!("{}: {message}", job.title),
+                        );
                         let _ = self.commands.operations().complete(
                             &job.handle.operation_id,
                             Some(serde_json::json!({ "changed": true })),
@@ -2248,6 +2392,8 @@ impl Modeler3dApp {
                         self.commands.set_status(message);
                         self.invalidate_presentation();
                         self.persist_preferences();
+                        // A Subtract that cuts several objects goes on.
+                        self.subtract_step();
                     }
                     Ok(CommandOutcome::OpenDialog(_) | CommandOutcome::ExitRequested) => {
                         self.fail_desktop_job(
@@ -2385,6 +2531,7 @@ impl Modeler3dApp {
 
     fn fail_desktop_job(&mut self, job: &mut RunningDesktopJob, error: String) {
         let message = format!("{} failed: {error}", job.title);
+        self.subtract_queue = None;
         crate::diagnostics::record_warning("desktop job failed", &message);
         let _ = self.commands.operations().fail(
             &job.handle.operation_id,
@@ -3829,7 +3976,7 @@ impl Modeler3dApp {
             RecentEntryKind::Unsupported => "Unsupported format",
         };
         let width = (ui.available_width() - 2.0 * (SPACE_3 + 1.0)).max(0.0);
-        egui::Frame::new()
+        let tile = egui::Frame::new()
             .fill(palette.panel)
             .stroke(Stroke::new(1.0, palette.border))
             .corner_radius(RADIUS_SURFACE)
@@ -3879,11 +4026,10 @@ impl Modeler3dApp {
                         );
                     }
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                        if entry.kind == RecentEntryKind::Supported {
-                            if ui.small_button("Open").clicked() {
-                                self.open_recent(&entry.path);
-                            }
-                        } else if ui.small_button("Remove").clicked() {
+                        // A usable entry has no button: the whole tile opens it.
+                        if entry.kind != RecentEntryKind::Supported
+                            && ui.small_button("Remove").clicked()
+                        {
                             self.remove_recent_file(&entry.path);
                             if entry.kind == RecentEntryKind::Missing {
                                 self.commands.set_status(format!(
@@ -3924,6 +4070,27 @@ impl Modeler3dApp {
                     .wrap(),
                 );
             });
+        if entry.kind == RecentEntryKind::Supported {
+            let response = ui
+                .interact(
+                    tile.response.rect,
+                    ui.scope_id().with(("recent-tile", &entry.path)),
+                    Sense::click(),
+                )
+                .on_hover_cursor(egui::CursorIcon::PointingHand)
+                .on_hover_text(format!("Open {}", entry.label));
+            if response.hovered() {
+                ui.painter().rect_stroke(
+                    tile.response.rect,
+                    RADIUS_SURFACE,
+                    Stroke::new(1.5, palette.accent_dark),
+                    egui::StrokeKind::Inside,
+                );
+            }
+            if response.clicked() {
+                self.open_recent(&entry.path);
+            }
+        }
     }
 
     fn open_recent(&mut self, path: &Path) {
@@ -4141,18 +4308,13 @@ impl Modeler3dApp {
                             .on_hover_text("Keep the current selection when clicking empty space.");
                     });
                 ui.add_space(SPACE_3);
-                // The notification area sits under the item list while work
-                // is running.
+                // The status strip is always the last thing in the bar.
                 let activity = self.commands.operations().active_status().ok().flatten();
-                let activity_reserve = if activity.is_some() {
-                    ACTIVITY_AREA_HEIGHT + SPACE_3
-                } else {
-                    0.0
-                };
+                let strip_reserve = STATUS_STRIP_HEIGHT + SPACE_3;
                 egui::ScrollArea::vertical()
                     .id_salt("item-inspector")
                     .auto_shrink([false, false])
-                    .max_height((ui.available_height() - activity_reserve).max(ROW_HEIGHT))
+                    .max_height((ui.available_height() - strip_reserve).max(ROW_HEIGHT))
                     .show(ui, |ui| {
                 if !rows.is_empty() {
                     // Owner 2026-11-19: no Transform panel in the right column.
@@ -4185,50 +4347,14 @@ impl Modeler3dApp {
                             ui.label(RichText::new("Use Insert or Import Model to begin.").weak());
                         }
                         for (index, name, visible, selected, child_count) in &rows {
-                            ui.horizontal(|ui| {
+                            {
+                                // One row: [icon] [name] ...... [warning] [eye].
+                                // The whole row is one click target (select);
+                                // the warning and the eye sit on top of it at
+                                // fixed places on the right so every eye lines up.
                                 let visibility_label = if *visible { "Shown" } else { "Hidden" };
-                                let (icon_slot, _) =
-                                    ui.allocate_exact_size(Vec2::splat(ROW_HEIGHT), Sense::hover());
-                                self.paint_object_icon(ui, icon_slot, *index, palette);
-                                let object_id = self.commands.scene().objects()[*index].object_id();
-                                if self.item_health.get(object_id) == Some(&false)
-                                    && crate::chrome::glyph_button(
-                                        ui,
-                                        Glyph::Warning,
-                                        palette.warning_text,
-                                        palette,
-                                        &format!("Repair {name}"),
-                                    )
-                                    .on_hover_text(
-                                        "Mesh needs repair; select and repair this object",
-                                    )
-                                    .clicked()
-                                {
-                                    repair_click = Some(*index);
-                                }
-                                if crate::chrome::glyph_button(
-                                    ui,
-                                    if *visible {
-                                        Glyph::Visible
-                                    } else {
-                                        Glyph::Hidden
-                                    },
-                                    palette.muted,
-                                    palette,
-                                    &format!("{visibility_label}: {name}"),
-                                )
-                                .on_hover_text(if *visible {
-                                    format!("Hide {name}")
-                                } else {
-                                    format!("Show {name}")
-                                })
-                                .clicked()
-                                {
-                                    visibility_toggle = Some((*index, !*visible));
-                                }
-                                let trailing = if *child_count > 0 { 34.0 } else { 0.0 };
                                 let (row_rect, row_response) = ui.allocate_exact_size(
-                                    Vec2::new((ui.available_width() - trailing).max(40.0), 24.0),
+                                    Vec2::new(ui.available_width(), ROW_HEIGHT),
                                     Sense::click(),
                                 );
                                 row_response.widget_info(|| {
@@ -4260,6 +4386,71 @@ impl Modeler3dApp {
                                         egui::StrokeKind::Inside,
                                     );
                                 }
+                                let icon_slot = egui::Rect::from_min_size(
+                                    row_rect.min,
+                                    Vec2::splat(ROW_HEIGHT),
+                                );
+                                self.paint_object_icon(ui, icon_slot, *index, palette);
+                                let button = Vec2::splat(ITEM_ROW_BUTTON);
+                                let eye_rect = egui::Rect::from_min_size(
+                                    egui::pos2(
+                                        row_rect.right() - SPACE_1 - ITEM_ROW_BUTTON,
+                                        row_rect.center().y - ITEM_ROW_BUTTON * 0.5,
+                                    ),
+                                    button,
+                                );
+                                let warning_rect =
+                                    eye_rect.translate(Vec2::new(-ITEM_ROW_BUTTON, 0.0));
+                                let object_id = self.commands.scene().objects()[*index].object_id();
+                                if self.item_health.get(object_id) == Some(&false)
+                                    && ui
+                                        .scope_builder(
+                                            egui::UiBuilder::new().max_rect(warning_rect),
+                                            |ui| {
+                                                crate::chrome::glyph_button(
+                                                    ui,
+                                                    Glyph::Warning,
+                                                    palette.warning_text,
+                                                    palette,
+                                                    &format!("Repair {name}"),
+                                                )
+                                                .on_hover_text(
+                                                    "Mesh needs repair; select and repair this object",
+                                                )
+                                                .clicked()
+                                            },
+                                        )
+                                        .inner
+                                {
+                                    repair_click = Some(*index);
+                                }
+                                if ui
+                                    .scope_builder(
+                                        egui::UiBuilder::new().max_rect(eye_rect),
+                                        |ui| {
+                                            crate::chrome::glyph_button(
+                                                ui,
+                                                if *visible {
+                                                    Glyph::Visible
+                                                } else {
+                                                    Glyph::Hidden
+                                                },
+                                                palette.muted,
+                                                palette,
+                                                &format!("{visibility_label}: {name}"),
+                                            )
+                                            .on_hover_text(if *visible {
+                                                format!("Hide {name}")
+                                            } else {
+                                                format!("Show {name}")
+                                            })
+                                            .clicked()
+                                        },
+                                    )
+                                    .inner
+                                {
+                                    visibility_toggle = Some((*index, !*visible));
+                                }
                                 let name_color = if *selected {
                                     palette.accent_dark
                                 } else if *visible {
@@ -4267,24 +4458,35 @@ impl Modeler3dApp {
                                 } else {
                                     palette.muted
                                 };
+                                let label = if *child_count > 0 {
+                                    format!("{name} ({child_count})")
+                                } else {
+                                    name.clone()
+                                };
+                                let name_left = icon_slot.right() + SPACE_1;
+                                let name_right = warning_rect.left() - SPACE_1;
                                 let name_galley = ui.painter().layout(
-                                    name.clone(),
+                                    label,
                                     FontId::proportional(FONT_BODY),
                                     name_color,
                                     f32::INFINITY,
                                 );
-                                ui.painter_at(row_rect.shrink2(Vec2::new(SPACE_2, 0.0))).galley(
+                                ui.painter_at(egui::Rect::from_min_max(
+                                    egui::pos2(name_left, row_rect.top()),
+                                    egui::pos2(name_right.max(name_left), row_rect.bottom()),
+                                ))
+                                .galley(
                                     egui::pos2(
-                                        row_rect.left() + SPACE_2,
+                                        name_left,
                                         row_rect.center().y - name_galley.size().y * 0.5,
                                     ),
                                     name_galley,
                                     name_color,
                                 );
                                 let response = row_response.on_hover_text(if *child_count > 0 {
-                                    "Click to select; Ctrl/Command adds; Shift selects a range;                                      double-click centres on the whole group"
+                                    "Click to select; Ctrl/Command adds; Shift selects a range; double-click centres on the whole group"
                                 } else {
-                                    "Click to select; Ctrl/Command adds; Shift selects a range;                                      double-click centres on it"
+                                    "Click to select; Ctrl/Command adds; Shift selects a range; double-click centres on it"
                                 });
                                 if response.clicked() {
                                     selection_click = Some(*index);
@@ -4314,23 +4516,23 @@ impl Modeler3dApp {
                                         }
                                     }
                                 });
-                                if *child_count > 0 {
-                                    ui.label(
-                                        RichText::new(format!("({child_count})"))
-                                            .small()
-                                            .color(palette.muted),
-                                    );
-                                }
-                            });
+                            }
                         }
                     });
                 });
                     });
-                if let Some(status) = &activity {
-                    ui.add_space(SPACE_3);
-                    if render_activity_area(ui, status, palette) {
-                        abort_click = Some(status.operation_id.clone());
-                    }
+                ui.add_space(SPACE_2);
+                let status_text = self.commands.last_status().to_owned();
+                let abortable = activity.as_ref().filter(|status| {
+                    matches!(
+                        status.phase,
+                        OperationPhase::Queued | OperationPhase::Running
+                    )
+                });
+                if render_status_strip(ui, &status_text, abortable.is_some(), palette)
+                    && let Some(status) = abortable
+                {
+                    abort_click = Some(status.operation_id.clone());
                 }
             });
         if let Some(operation_id) = abort_click {
@@ -6321,18 +6523,6 @@ impl Modeler3dApp {
             self.commands.set_status("Viewport gesture cancelled");
             return;
         }
-        if self.boolean_pick.is_some()
-            && input.primary_pressed
-            && input
-                .pointer_position
-                .is_some_and(|position| rect.contains(position))
-        {
-            if let Some(position) = input.pointer_position {
-                self.handle_boolean_pick(rect, position);
-            }
-            self.viewport_gizmo_consumed = true;
-            return;
-        }
         if !interactions_allowed || !input.focused {
             if self.viewport_drag.take().is_some() {
                 self.preview_mesh_override = None;
@@ -6364,7 +6554,13 @@ impl Modeler3dApp {
                 .pointer_position
                 .filter(|position| rect.contains(*position))
         {
-            if self.active_brush.is_some() && input.modifiers.shift {
+            if self.boolean_pick.is_some() {
+                // While a Boolean waits for its second object a click picks
+                // it and a drag turns the view, like everywhere else.
+                self.boolean_pick_press = Some(position);
+                self.viewport_drag = Some(ViewportDrag::Orbit);
+                self.viewport_gizmo_consumed = true;
+            } else if self.active_brush.is_some() && input.modifiers.shift {
                 self.preview_mesh_override = None;
                 self.viewport_drag = self.begin_brush_gesture(rect, position, size);
                 self.viewport_gizmo_consumed = true;
@@ -6475,8 +6671,19 @@ impl Modeler3dApp {
                         self.viewport_gizmo_consumed = true;
                     }
                 }
-                Some(ViewportDrag::Orbit | ViewportDrag::Pan) | None => {}
+                Some(ViewportDrag::Orbit) => {
+                    if let Some(press) = self.boolean_pick_press.take()
+                        && self.boolean_pick.is_some()
+                        && let Some(position) = input.pointer_position
+                        && position.distance(press) <= BOOLEAN_PICK_CLICK_SLOP
+                    {
+                        self.handle_boolean_pick(rect, position);
+                        self.viewport_gizmo_consumed = true;
+                    }
+                }
+                Some(ViewportDrag::Pan) | None => {}
             }
+            self.boolean_pick_press = None;
         }
         if input.middle_released || input.secondary_released {
             self.viewport_drag = None;
@@ -8824,49 +9031,42 @@ fn viewport_input(ctx: &egui::Context) -> ViewportInput {
     })
 }
 
-/// Whether an Items row is free of the "needs repair" marker. A group is
-/// separate pieces by design, so it needs repair only when one of its parts
-/// does (nested groups are not inspected).
-/// Height kept free at the bottom of the side bar for the notification area.
-const ACTIVITY_AREA_HEIGHT: f32 = 72.0;
+/// Size (points) of the warning and eye buttons at the right of an Items row.
+const ITEM_ROW_BUTTON: f32 = 24.0;
 
-/// The side bar's notification area (owner request, 2026-11-21): unlabelled,
-/// it shows the running action, its current step and progress, and Abort.
-/// Returns true when Abort was clicked.
-fn render_activity_area(
-    ui: &mut Ui,
-    status: &crate::OperationStatus,
-    palette: ThemePalette,
-) -> bool {
+/// How far (points) the pointer may move between press and release and still
+/// count as a click when picking the second object of a Boolean.
+const BOOLEAN_PICK_CLICK_SLOP: f32 = 4.0;
+
+/// Height of the status strip at the bottom of the side bar (owner request,
+/// 2026-11-21): a separator, then one row.
+const STATUS_STRIP_HEIGHT: f32 = 32.0;
+
+/// The status strip at the bottom of the side bar: a separator like the other
+/// side-bar separators, then the status text on the left and, only while
+/// something can be aborted, the Abort button at the far right. Returns true
+/// when Abort was clicked.
+fn render_status_strip(ui: &mut Ui, text: &str, abortable: bool, palette: ThemePalette) -> bool {
     let mut abort = false;
-    egui::Frame::new()
-        .fill(palette.surface_alt)
-        .stroke(Stroke::new(1.0, palette.border))
-        .corner_radius(crate::chrome::RADIUS_SURFACE)
-        .inner_margin(egui::Margin::same(SPACE_2 as i8))
-        .show(ui, |ui| {
-            ui.set_width(ui.available_width());
-            ui.set_min_height(ACTIVITY_AREA_HEIGHT - 2.0 * SPACE_2);
-            ui.horizontal(|ui| {
-                ui.label(RichText::new(&status.title).strong());
-                ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                    let (label, enabled) = match status.phase {
-                        OperationPhase::Cancelling => ("Stopping", false),
-                        OperationPhase::Committing => ("Applying", false),
-                        _ => ("Abort", true),
-                    };
-                    abort = ui
-                        .add_enabled(enabled, egui::Button::new(label))
-                        .on_hover_text("Stop and keep the model as it was")
-                        .clicked();
-                });
+    ui.separator();
+    ui.allocate_ui_with_layout(
+        Vec2::new(ui.available_width(), STATUS_STRIP_HEIGHT - SPACE_2),
+        Layout::right_to_left(Align::Center),
+        |ui| {
+            if abortable {
+                abort = ui
+                    .button("Abort")
+                    .on_hover_text("Stop and keep the model as it was")
+                    .clicked();
+            }
+            ui.with_layout(Layout::left_to_right(Align::Center), |ui| {
+                ui.add(
+                    egui::Label::new(RichText::new(text).small().color(palette.muted)).truncate(),
+                )
+                .on_hover_text(text);
             });
-            ui.label(RichText::new(&status.message).small().color(palette.muted));
-            ui.add(
-                egui::ProgressBar::new(f32::from(status.progress.unwrap_or(0)) / 100.0)
-                    .desired_height(6.0),
-            );
-        });
+        },
+    );
     abort
 }
 
@@ -8888,6 +9088,9 @@ impl ItemKey {
     }
 }
 
+/// Whether an Items row is free of the "needs repair" marker. A group is
+/// separate pieces by design, so it needs repair only when one of its parts
+/// does (nested groups are not inspected).
 fn item_is_healthy(object: &modeler3d_core::SceneObject) -> bool {
     let mesh_healthy = |mesh: &modeler3d_core::Mesh| {
         modeler3d_core::inspect_mesh(mesh).is_ok_and(|report| report.valid)
@@ -9911,6 +10114,59 @@ mod tests {
     }
 
     #[test]
+    fn subtract_with_one_selected_cuts_everything_it_touches_then_disappears() {
+        let (mut app, directory) = shell_for_jobs("subtract-touching");
+        app.surface = WorkspaceSurface::Scene;
+        for _ in 0..3 {
+            app.commands
+                .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
+                .expect("cube");
+        }
+        // A fourth cube far away is not touched and must stay as it is.
+        app.commands
+            .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
+            .expect("cube");
+        app.commands
+            .set_selected_position([500., 0., 0.])
+            .expect("move far cube");
+        app.commands.set_selection_indices([2]);
+        app.commands
+            .set_selected_position([5., 5., 5.])
+            .expect("move tool");
+        let far_id = app.commands.scene().objects()[3].object_id().to_owned();
+        app.dispatch_boolean(modeler3d_core::BooleanOperation::Difference);
+        assert!(app.boolean_pick.is_none(), "no picking is needed");
+        wait_for_desktop_job(&mut app);
+        // Two cuts and the cutter is gone; the far cube is untouched.
+        assert_eq!(app.commands.scene().objects().len(), 3);
+        assert!(app.commands.scene().object_index(&far_id).is_ok());
+        assert!(app.subtract_queue.is_none());
+        assert!(std::fs::remove_dir_all(directory).is_ok());
+    }
+
+    #[test]
+    fn subtract_with_nothing_touching_changes_nothing() {
+        let (mut app, directory) = shell_for_jobs("subtract-nothing");
+        app.surface = WorkspaceSurface::Scene;
+        for _ in 0..2 {
+            app.commands
+                .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
+                .expect("cube");
+        }
+        app.commands.set_selection_indices([1]);
+        app.commands
+            .set_selected_position([500., 0., 0.])
+            .expect("move");
+        let history = app.commands.scene().history_state_id();
+        app.dispatch_boolean(modeler3d_core::BooleanOperation::Difference);
+        assert!(app.desktop_job.is_none());
+        assert_eq!(app.commands.scene().objects().len(), 2);
+        assert_eq!(app.commands.scene().history_state_id(), history);
+        assert!(app.commands.last_status().contains("nothing is touching"));
+        assert!(std::fs::remove_dir_all(directory).is_ok());
+    }
+
+    #[test]
     fn side_bar_shows_running_work_and_abort_keeps_the_model() {
         fn side_bar_text(app: &mut Modeler3dApp, ctx: &egui::Context) -> String {
             fn collect(shape: &egui::Shape, text: &mut String) {
@@ -9947,7 +10203,7 @@ mod tests {
             .expect("subtract started");
         let text = side_bar_text(&mut app, &ctx);
         assert!(
-            text.contains("Subtract|") && text.contains("Abort"),
+            text.contains("Subtract") && text.contains("Abort"),
             "{text}"
         );
         // Abort lets go of the job at once, whatever the worker is doing.
@@ -11851,6 +12107,83 @@ mod tests {
         assert_eq!(app.commands.scene().objects().len(), 2);
         assert_eq!(app.commands.scene().history_state_id(), history);
         assert_eq!(app.commands.scene().revision(), revision);
+        app.boolean_pick = None;
+    }
+
+    #[test]
+    fn status_strip_shows_status_text_and_abort_only_while_abortable() {
+        let palette = ThemePalette::for_mode(ThemeMode::Dark);
+        for abortable in [false, true] {
+            let ctx = egui::Context::default();
+            let mut texts = String::new();
+            let mut clicked = true;
+            let mut output = ctx.run_ui(egui::RawInput::default(), |ui| {
+                clicked =
+                    render_status_strip(ui, "Boolean pick: click the object", abortable, palette);
+            });
+            fn collect(shape: &egui::Shape, text: &mut String) {
+                match shape {
+                    egui::Shape::Text(shape) => {
+                        text.push_str(shape.galley.text());
+                        text.push('|');
+                    }
+                    egui::Shape::Vec(shapes) => shapes.iter().for_each(|s| collect(s, text)),
+                    _ => {}
+                }
+            }
+            output.textures_delta.clear();
+            for clipped in &output.shapes {
+                collect(&clipped.shape, &mut texts);
+            }
+            assert!(texts.contains("Boolean pick"), "{texts}");
+            assert_eq!(texts.contains("Abort"), abortable, "{texts}");
+            assert!(!clicked);
+        }
+    }
+
+    #[test]
+    fn boolean_pick_waits_for_a_click_and_lets_a_drag_turn_the_view() {
+        let mut app = Modeler3dApp::default();
+        app.dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube));
+        app.dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube));
+        app.commands.select_index(0);
+        app.dispatch(CommandId::Intersect);
+        assert!(app.boolean_pick.is_some());
+        let rect = egui::Rect::from_min_size(egui::pos2(0.0, 0.0), Vec2::new(400.0, 300.0));
+        let neutral = ViewportInput {
+            pointer_position: None,
+            pointer_delta: Vec2::ZERO,
+            primary_pressed: false,
+            primary_down: false,
+            primary_released: false,
+            secondary_pressed: false,
+            secondary_down: false,
+            secondary_released: false,
+            middle_pressed: false,
+            middle_down: false,
+            middle_released: false,
+            scroll_y: 0.0,
+            pinch_zoom_factor: 1.0,
+            escape_pressed: false,
+            focused: true,
+            modifiers: egui::Modifiers::default(),
+        };
+        let mut input = neutral;
+        input.primary_pressed = true;
+        input.primary_down = true;
+        input.pointer_position = Some(egui::pos2(100.0, 100.0));
+        app.route_viewport_input(rect, 1.0, input, true);
+        // The press alone does not pick; it starts a view turn.
+        assert!(app.boolean_pick.is_some());
+        assert!(matches!(app.viewport_drag, Some(ViewportDrag::Orbit)));
+        // Dragging far away and releasing is a turn, not a pick.
+        let mut release = neutral;
+        release.primary_released = true;
+        release.pointer_position = Some(egui::pos2(160.0, 140.0));
+        app.route_viewport_input(rect, 1.0, release, true);
+        assert!(app.boolean_pick.is_some());
+        assert!(app.viewport_drag.is_none());
+        assert!(app.boolean_pick_press.is_none());
         app.boolean_pick = None;
     }
 

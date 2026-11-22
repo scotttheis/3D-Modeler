@@ -1150,9 +1150,18 @@ impl CommandState {
         unit: ImportUnit,
     ) -> Result<String, CommandError> {
         validate_path(path)?;
+        // A model opened into an empty, unsaved scene is the document: Save
+        // writes it back (Save As is for a new file). Importing into a scene
+        // that already has content just adds to it.
+        let opens_as_document = self.scene.objects().is_empty()
+            && self.project_path.is_none()
+            && (has_extension(path, "stl") || has_extension(path, "3mf"));
         let imported = modeler3d_core::import_model(&mut self.scene, path, unit.scale_mm())?;
         let count = imported.len();
         self.preferences.recent_files_mut().record(path);
+        if opens_as_document {
+            self.project_path = Some(path.to_path_buf());
+        }
         self.dirty = true;
         let message = format!("Imported {count} object(s)");
         self.status(message.clone());
@@ -2108,6 +2117,10 @@ impl CommandState {
         };
         log_boolean_timings(&report);
         if !command_result.changed {
+            crate::diagnostics::record_warning(
+                "boolean no change",
+                "the core reported no geometry change; the objects may not overlap",
+            );
             return Ok(CommandOutcome::Noop(String::from(
                 "Boolean made no geometry change",
             )));
@@ -4646,6 +4659,33 @@ mod tests {
     }
 
     #[test]
+    fn a_model_opened_into_an_empty_scene_is_saved_back_not_saved_as() {
+        let fixture = import_fixture("formats/python_box.stl");
+        let directory =
+            std::env::temp_dir().join(format!("modeler3d-open-save-{}", std::process::id()));
+        assert!(std::fs::create_dir_all(&directory).is_ok());
+        let copy = directory.join("opened.stl");
+        assert!(std::fs::copy(&fixture, &copy).is_ok());
+        let mut state = CommandState::default();
+        assert!(state.import_from_path(&copy).is_ok());
+        assert_eq!(state.project_path(), Some(copy.as_path()));
+        // Save writes straight back to the opened file: no Save As dialog.
+        assert!(matches!(
+            state.dispatch(CommandId::SaveProject),
+            Ok(CommandOutcome::Applied(_))
+        ));
+        assert!(!state.is_dirty());
+        // Importing into a scene that already has content does not rebind.
+        let mut other = CommandState::default();
+        assert!(other.import_from_path(&fixture).is_ok());
+        let second = directory.join("second.stl");
+        assert!(std::fs::copy(&fixture, &second).is_ok());
+        assert!(other.import_from_path(&second).is_ok());
+        assert_eq!(other.project_path(), Some(fixture.as_path()));
+        assert!(std::fs::remove_dir_all(directory).is_ok());
+    }
+
+    #[test]
     fn unitless_stl_import_uses_each_reference_scale_once() {
         let fixture = import_fixture("formats/python_box.stl");
         for unit in ImportUnit::all() {
@@ -4736,7 +4776,10 @@ mod tests {
             assert_eq!(state.scene().objects().len(), 2, "{relative}");
             assert_eq!(state.selected_count(), 2, "{relative}");
             assert!(state.is_dirty(), "{relative}");
-            assert_eq!(state.project_path(), None, "{relative}");
+            // An opened STL or 3MF becomes the document, so Save writes it
+            // back; formats this app cannot write (glTF) stay unbound.
+            let expected = relative.ends_with(".3mf").then_some(fixture.as_path());
+            assert_eq!(state.project_path(), expected, "{relative}");
             assert_eq!(
                 state.preferences().recent_files().paths().first(),
                 Some(&fixture),
