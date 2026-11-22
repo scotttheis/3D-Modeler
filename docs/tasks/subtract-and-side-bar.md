@@ -1,8 +1,12 @@
 # Subtract still hangs; side-bar status and item rows
 
-Status: **open, owner requests 2026-11-21.** Nothing below is built yet except
-part 1's first fix (commit `7641f7a`), which did not solve the problem in the
-app. Do part 1 first.
+Status (2026-11-21): **parts 2-4 done and owner-approved, shipped in v1.0.2.**
+Part 1 (the UI-thread freeze, 5-12 s slow frames on `Secret Book A`) is **still
+open**. Subtract itself now works for the owner: with one object selected it
+cuts everything it touches and disappears (no pick step); the earlier "never
+finishes" was the invisible pick prompt. Also done this session at the owner's
+request: Home tiles open on click (no Open button), Save writes back an opened
+STL/3MF, boolean error logging. Left: full gate, deny, audit, G: snapshot.
 
 ## 1. Subtract never finishes on the owner's file (top priority)
 
