@@ -44,7 +44,7 @@ The engine is simpler than the plan assumed. In order:
 6. Edges longer than `0.303 D` are bisected (the "re-cut"). It changes no
    shape; we do not copy it.
 
-One owner decision is needed (cavities, end of this file). One risk for R3:
+Owner decision (2026-11-22): keep correct cavities (end of this file). One risk for R3:
 an unwelded "soup" model with gaps over 0.01 mm comes back almost empty, so
 the R2 gate must check volume (section 3).
 
@@ -238,7 +238,7 @@ winding combination; three nested spheres.
 
 **We implement.** Same: fix winding per part by flood fill, then make each
 closed part face outward by its signed volume, then the union of section 7
-decides what survives. Exception: cavities, see the owner question below.
+decides what survives. Exception: correct cavities are kept (owner decision below).
 
 ## 7. Overlaps ("Wrap"), cavities, fins and non-manifold edges
 
@@ -273,8 +273,10 @@ outward-winding step, so overlaps and nested parts merge and self-crossing
 parts resolve. Before the union: remove open fragments that close to zero
 volume (fins, loose and internal sheets, double-sided triangles); close a
 curved open sheet with the hole fill and keep it. Non-manifold edges are
-split into separate sheets before winding repair. Cavities: per the owner's
-answer below.
+split into separate sheets before winding repair. Cavities: a correct cavity (an
+inward-facing closed part fully inside another part, not overlapping it) is
+kept; the union is taken over the outward parts and the kept cavities are
+put back afterwards. Wrong-way or overlapping inner parts are merged as above.
 
 ## 8. Tiny parts
 
@@ -337,11 +339,11 @@ progress, so the dialog shows elapsed time against the estimate.
   0.1 mm, unless the input had overlaps or open sheets that explain it. The
   ±0.01 mm soup test (14,080 mm³ → 1.3 mm³) shows the engine can wipe out a
   model without reporting an error.
-- It fills cavities. Until the owner answers below, the Windows route should
+- It fills cavities. Per the owner decision below, the Windows route must
   not be used on a model with a correct inner cavity (a closed part fully
   inside another, facing inward). Use the native engine for those.
 
-## Owner question (needed before R6)
+## Owner decision: hollow models (2026-11-22)
 
 **Hollow models.** Windows' repair fills every cavity, including a correct
 one, for example a model made hollow with our Hollow tool for printing. After
@@ -349,6 +351,9 @@ a Windows repair that model would be solid again. Recommendation: **keep
 correct cavities** (an inward-facing closed part fully inside another part),
 and only fill inner parts that face the wrong way or overlap. That differs
 from Windows on purpose, and only for hollow models.
+
+**Owner answer (2026-11-22): go with the recommendation.** Keep correct
+cavities.
 
 ## Questions from the plan, answered
 

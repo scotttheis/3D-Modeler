@@ -18,6 +18,9 @@ Evidence and reusable scripts: `evidence/repair-eval-2026-11-22/`.
    option for these models: it ignores the errors and only repairs on its own
    when an STL is badly broken. So the Windows engine (same engine, called
    directly) is our reference, not the 3D Builder app.
+6. **Keep correct cavities** (asked after R1). A hollow model stays hollow:
+   Repair keeps an inward-facing closed part fully inside another part, unlike
+   Windows, which fills it. The Windows route (R3) skips such models.
 
 ## How we learn what Windows does
 
@@ -102,7 +105,7 @@ pasting the previous session's prompt.
 - Done 2026-11-22: [`repair-spec.md`](repair-spec.md). Where it differs from
   `fixrepair.md` Step 3, the spec wins: weld radius 5 grid steps (0.01 mm),
   no zipping of open edges, min-area hole fill with no refine or smooth, no
-  re-cut. Owner question open: keep correct cavities (needed before R6).
+  re-cut. Owner answered: keep correct cavities (answer 6).
 
 ### [ ] R2: stop the damage (fix plan Step 1)
 
@@ -130,7 +133,8 @@ pasting the previous session's prompt.
   probe `windows_repair_probe.rs` shows a working call sequence), worker
   thread, progress, cancel, time limit from R1, fall back to native on any
   failure, gate from R2 on the result, `engine` field in the report and MCP
-  result. Capability check in `modeler3d-platform`.
+  result. Models with a correct cavity go to the native engine (owner
+  answer 6). Capability check in `modeler3d-platform`.
 - `Cargo.toml` changes: run `cargo deny check` and `cargo audit`; record the
   size change.
 - Gate: **Full.** All 10 fixtures + book: Windows route matches the R0 table
@@ -162,7 +166,7 @@ pasting the previous session's prompt.
 
 - Session: **Claude Opus 5.5, medium.** Worker: **Codex, high.**
 - Fix plan Step 3 item 8: union closed shells with Manifold (already a
-  dependency); add the BVH self-intersection check to `inspect_mesh` so
+  dependency), keeping correct cavities (owner answer 6, spec section 7); add the BVH self-intersection check to `inspect_mesh` so
   health stops saying "not checked" and the needs-repair marker shows for
   self-intersecting models.
 - Acceptance: native fixes f6 (one solid, volume 15,000) and all of
