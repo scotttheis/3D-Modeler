@@ -2491,7 +2491,7 @@ pub fn ribbon_spec() -> Vec<(RibbonTab, Vec<RibbonItem>)> {
                 // Subdivide by area cover it. MCP keeps normalize_face_density.
                 RibbonItem::Separator,
                 command(CommandId::Merge, "Merge", IconKey::Edit),
-                command(CommandId::Emboss, "Emboss", IconKey::Edit),
+                // Emboss is hidden until it works correctly (owner, 2026-11-22).
                 command(CommandId::Hollow, "Hollow", IconKey::Edit),
                 command(CommandId::Intersect, "Intersect", IconKey::Edit),
                 command(CommandId::Subtract, "Subtract", IconKey::Subtract),

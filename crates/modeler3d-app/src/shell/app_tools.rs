@@ -983,7 +983,7 @@ mod tests {
             .find(|tab| tab["tab"] == "Edit")
             .expect("Edit");
         let commands = edit["commands"].as_array().expect("commands");
-        assert_eq!(commands.len(), 12);
+        assert_eq!(commands.len(), 11);
         for command in commands {
             assert_eq!(command["enabled"], true, "{command}");
         }

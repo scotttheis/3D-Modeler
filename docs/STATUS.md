@@ -29,6 +29,21 @@ for RC2. Next after RC2: RC3 / 0.1.3.
 
 ## Now
 
+**Hide Emboss (owner, 2026-11-22):** removed the Edit ribbon button until the
+feature works correctly; implementation retained for later restoration.
+Updated the existing ribbon availability test from 12 to 11 buttons.
+Fast gate passed (`logs/gate/20261122-063301-fast`); all other workspace
+tests, workspace Clippy, fmt, deny, audit, MCP parity and smoke passed in
+`logs/gate/20261122-062801-full`. That Full run initially failed the old
+button-count assertion, then its capture board was stopped at Save because
+the native Save picker waits for input (14 images; remaining board not run).
+Before/after Edit captures in both themes reviewed:
+`evidence/rebuild/captures/2026-11-22-hide-emboss/`. Current Release rebuilt.
+Task: [`hide-emboss-button.md`](tasks/hide-emboss-button.md). Owner visual
+approval pending. Baseline snapshot verified:
+`G:\3D-Modeler_snapshot_20261122-062640_hide-emboss-baseline`
+(17,627 files / 2,570,001,107 bytes).
+
 **GitHub page published (owner, 2026-11-21), private repo:** built from the owner's mockup `Desktop\3d.html` (its `launch-readiness` clone was not on this PC, so redone on `rebuild/work`, then `main` fast-forwarded and pushed so the owner can see the page and decide what to change). New: README rewrite with review-harness screenshots (`docs/images/`, stock shapes as placeholders until the owner supplies models) and the full-size 1254 px shape and tool icons straight from `assets/original`, `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, issue forms, PR template, Dependabot, `CHANGELOG.md`, `THIRD_PARTY_NOTICES.md` (510 crates, 31 licences), `docs/mcp.md`, `docs/launch-pictures.md`, social preview image, Manifold Apache-2.0 text, repo description and topics. **New rules:** every release must have plain-language notes: add the `## X.Y.Z` section to `CHANGELOG.md` before tagging; `release.yml` publishes that section as the release notes and fails without it (AGENTS.md, `github-upload.md`). Notes for v0.99.0 to v1.0.2 were written onto the four existing releases. **MCP ships with the app (owner decision):** the gateway binary is renamed `r4_mcp` to `modeler3d-mcp` and is now in the MSI (checked by extracting a test MSI), the Mac DMG and the Linux tarball (those two untested here; the next tag is their first real run) and built by `release.yml`. It takes effect from the next release; 1.0.2 does not include it. `r0b_mcp` is an old prototype binary, not shipped. Not done: checksums file and the notes step in `release.yml` have only been run on fake files; private vulnerability reporting (GitHub returns 404 for this private repo, try again when it is public); social preview upload (GitHub has no API, owner uploads by hand). No app code changed; nothing run beyond a Release build of `modeler3d-mcp`. **Next update (owner, 2026-11-21): edit the Save screens** (Save As / Export dialogs); not started. `AGENTS.md` push rule still stale (owner's rule, untouched).
 
 **v1.0.2 (owner, 2026-11-21), private release, owner tried it: "You did it! Yes! finally!"** Subtract with one object selected now cuts everything it touches (bounding boxes overlap) and then removes itself, no picking (`start_subtract_from_touching` in `shell.rs`, `keeping_tool` in core `scene.rs`; several touched objects are several undo steps); Home tiles open on click and have no Open button; a STL/3MF opened into an empty scene is saved back by Save (`import_from_path_with_unit`); side-bar status strip and item rows (below); error logging for booleans ("boolean requested", "subtract touching", "boolean pair", "desktop job started/step/finished/committed", "boolean no change"). Workspace tests, fmt and Clippy passed; full gate, deny, audit and the G: snapshot were NOT run (owner asked to hurry). The 5-12 s UI-thread freeze on `Secret Book A` (task card part 1) is still open.
