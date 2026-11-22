@@ -4,8 +4,18 @@ All notable changes, in plain words. Newest first.
 
 ## Unreleased
 
-- The AI (MCP) gateway now comes inside the Windows, Mac and Linux installers,
+## 1.0.3 (2026-11-22)
+
+- **The AI (MCP) gateway now comes inside the Windows, Mac and Linux installers,**
   next to the app, so there is nothing extra to build.
+- **Paste goes where the original was.** If you move a model after copying it,
+  the pasted copy appears at the spot it was copied from. A model you have not
+  moved still pastes beside itself, as before.
+- **Settle drops straight down.** It keeps the model where it is and only lowers
+  it until it rests on the floor, instead of sending it back to the middle.
+- **Save opens the Windows save window straight away**, with a "Save as type"
+  list (STL or 3MF), instead of showing a dialog of ours first. Cancel simply
+  closes it. Export is unchanged.
 
 ## 1.0.2 (2026-11-21)
 

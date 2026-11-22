@@ -68,19 +68,6 @@ impl FileType {
         }
     }
 
-    const fn short_label(self) -> &'static str {
-        match self {
-            Self::Stl => "STL",
-            Self::ThreeMf => "3MF",
-            Self::Obj => "OBJ",
-            Self::Ply => "PLY",
-            Self::Gltf => "glTF",
-            Self::Glb => "GLB",
-            Self::Wrl => "VRML",
-            Self::Project => "3D Modeler project",
-        }
-    }
-
     const fn label(self) -> &'static str {
         match self {
             Self::Stl => "STL mesh (.stl)",
@@ -101,6 +88,9 @@ impl FileType {
 pub(crate) struct SavePickerRequest {
     pub(crate) title: &'static str,
     pub(crate) file_type: FileType,
+    /// Every type listed in the window's "Save as type" drop-down, the
+    /// default (`file_type`) first.
+    pub(crate) offered: Vec<FileType>,
     pub(crate) suggested: PathBuf,
 }
 
@@ -219,6 +209,7 @@ pub(crate) struct DialogState {
     ui_size: UiSize,
     file_type: FileType,
     save_picker: SavePicker,
+    save_window_opened: bool,
     viewport_lighting: ViewportLighting,
     grab_cursor: GrabCursorStyle,
     print_bed_size: String,
@@ -284,6 +275,7 @@ impl DialogState {
             ui_size: UiSize::Normal,
             file_type: FileType::Stl,
             save_picker: native_save_picker,
+            save_window_opened: false,
             viewport_lighting: ViewportLighting::default(),
             grab_cursor: GrabCursorStyle::default(),
             print_bed_size: format!("{DEFAULT_BED_SIZE_MM:.1} mm"),
@@ -539,6 +531,15 @@ impl DialogState {
         ctx: &Context,
         settings_work_area: Option<egui::Rect>,
     ) -> Option<DialogAction> {
+        // Save goes straight to the native save window with a "Save as type"
+        // list, like 3D Builder; there is no dialog of our own in between.
+        if self.kind == DialogKind::SaveProject {
+            if !self.save_window_opened {
+                self.save_window_opened = true;
+                return Some(self.open_file_window().unwrap_or(DialogAction::Close));
+            }
+            return None;
+        }
         let mut action = None;
         let palette = ThemePalette::for_mode(self.theme_mode);
         let title = RichText::new(self.title())
@@ -747,58 +748,62 @@ impl DialogState {
         ui.label(RichText::new("The path is validated before the core file operation.").weak());
     }
 
-    /// Save: quick-pick STL or 3MF (STL default). Export: a drop-down of every
-    /// type. The file window opens from the Save / Export button (OF-22..25).
+    /// Export: a drop-down of every type. The file window opens from the
+    /// Export button (OF-25). Save has no dialog of its own.
     fn file_type_dialog(&mut self, ui: &mut egui::Ui) {
-        if self.kind == DialogKind::SaveProject {
-            ui.label("Save as");
-            ui.horizontal(|ui| {
-                for file_type in FileType::SAVE {
-                    let button = egui::Button::selectable(
-                        self.file_type == file_type,
-                        RichText::new(file_type.short_label()).strong(),
-                    )
-                    .min_size(egui::vec2(72.0, CONTROL_HEIGHT));
-                    if ui.add(button).on_hover_text(file_type.label()).clicked() {
-                        self.file_type = file_type;
-                    }
+        ui.label("File type");
+        let combo = egui::ComboBox::from_id_salt("export-file-type")
+            .width(240.0)
+            .selected_text(self.file_type.label())
+            .show_ui(ui, |ui| {
+                for file_type in FileType::EXPORT {
+                    ui.selectable_value(&mut self.file_type, file_type, file_type.label());
                 }
             });
-        } else {
-            ui.label("File type");
-            let combo = egui::ComboBox::from_id_salt("export-file-type")
-                .width(240.0)
-                .selected_text(self.file_type.label())
-                .show_ui(ui, |ui| {
-                    for file_type in FileType::EXPORT {
-                        ui.selectable_value(&mut self.file_type, file_type, file_type.label());
-                    }
-                });
-            combo.response.widget_info(|| {
-                egui::WidgetInfo::labeled(egui::Role::ComboBox, true, "Export file type")
-            });
-        }
+        combo.response.widget_info(|| {
+            egui::WidgetInfo::labeled(egui::Role::ComboBox, true, "Export file type")
+        });
     }
 
-    /// The Save / Export button and Cancel on one line (OF-22, OF-25).
+    /// Opens the native save window for the current kind and turns the chosen
+    /// path into Save / Export; `None` when the window is cancelled.
+    fn open_file_window(&mut self) -> Option<DialogAction> {
+        let title = if self.kind == DialogKind::SaveProject {
+            "Save 3D Modeler model"
+        } else {
+            "Export 3D Modeler model"
+        };
+        let mut offered = if self.kind == DialogKind::SaveProject {
+            FileType::SAVE.to_vec()
+        } else {
+            vec![self.file_type]
+        };
+        if let Some(position) = offered.iter().position(|kind| *kind == self.file_type) {
+            offered.swap(0, position);
+        }
+        let request = SavePickerRequest {
+            title,
+            file_type: self.file_type,
+            offered,
+            suggested: Path::new(self.path_text.trim()).with_extension(self.file_type.extension()),
+        };
+        let selected = (self.save_picker)(&request)?;
+        Some(self.file_action(selected))
+    }
+
+    /// The Export button and Cancel on one line (OF-22, OF-25).
     fn file_type_footer(&mut self, ui: &mut egui::Ui, action: &mut Option<DialogAction>) {
         let palette = ThemePalette::for_mode(self.theme_mode);
-        let (label, title) = if self.kind == DialogKind::SaveProject {
-            ("Save", "Save 3D Modeler model")
+        let label = if self.kind == DialogKind::SaveProject {
+            "Save"
         } else {
-            ("Export", "Export 3D Modeler model")
+            "Export"
         };
         dialog_actions(ui, |ui| {
-            if ui.add(dialog_primary_button(label, palette)).clicked() {
-                let request = SavePickerRequest {
-                    title,
-                    file_type: self.file_type,
-                    suggested: Path::new(self.path_text.trim())
-                        .with_extension(self.file_type.extension()),
-                };
-                if let Some(selected) = (self.save_picker)(&request) {
-                    *action = Some(self.file_action(selected));
-                }
+            if ui.add(dialog_primary_button(label, palette)).clicked()
+                && let Some(chosen) = self.open_file_window()
+            {
+                *action = Some(chosen);
             }
             if ui.add(dialog_button("Cancel")).clicked() {
                 *action = Some(DialogAction::Close);
@@ -1722,9 +1727,10 @@ fn native_path_picker(kind: DialogKind, current: &str) -> Option<PathBuf> {
 
 /// The native save window for Save and Export, filtered to one file type.
 fn native_save_picker(request: &SavePickerRequest) -> Option<PathBuf> {
-    let mut dialog = rfd::FileDialog::new()
-        .set_title(request.title)
-        .add_filter(request.file_type.label(), &[request.file_type.extension()]);
+    let mut dialog = rfd::FileDialog::new().set_title(request.title);
+    for file_type in &request.offered {
+        dialog = dialog.add_filter(file_type.label(), &[file_type.extension()]);
+    }
     if let Some(parent) = request
         .suggested
         .parent()
@@ -2344,32 +2350,17 @@ mod tests {
     }
 
     #[test]
-    fn save_dialog_offers_stl_and_3mf_with_save_and_cancel_on_one_line() {
-        let mut dialog = DialogState::new(DialogKind::SaveProject, ThemeMode::Light);
-        let (actions, widgets) = run_dialog(&mut dialog, None);
-        assert!(actions.is_empty());
-        assert!(has_widget(&widgets, "STL"));
-        assert!(has_widget(&widgets, "3MF"));
-        assert!(same_line(
-            widget(&widgets, "Save"),
-            widget(&widgets, "Cancel")
-        ));
-        assert!(!has_widget(&widgets, "Browse..."));
-        assert_eq!(dialog.file_type, FileType::Stl);
-    }
-
-    #[test]
-    fn save_click_opens_the_file_window_for_stl_by_default() {
+    fn save_opens_the_file_window_at_once_with_stl_and_3mf_types() {
         take_picked();
         let mut dialog = DialogState::new(DialogKind::SaveProject, ThemeMode::Light);
         dialog.set_save_picker(stub_picker);
         dialog.set_suggested_path(Some(Path::new("models/part.3dp")));
-        let (_, widgets) = run_dialog(&mut dialog, None);
-        let save = widget(&widgets, "Save").center();
-        let (actions, _) = run_dialog(&mut dialog, Some(save));
+        let (actions, widgets) = run_dialog(&mut dialog, None);
+        assert!(!has_widget(&widgets, "Cancel"));
         let picked = take_picked();
         assert_eq!(picked.len(), 1);
         assert_eq!(picked[0].file_type, FileType::Stl);
+        assert_eq!(picked[0].offered, vec![FileType::Stl, FileType::ThreeMf]);
         assert_eq!(picked[0].suggested, Path::new("models").join("part.stl"));
         assert_eq!(
             actions,
@@ -2378,25 +2369,18 @@ mod tests {
                 false
             )]
         );
+        // The window opens once, not every frame.
+        let (actions, _) = run_dialog(&mut dialog, None);
+        assert!(actions.is_empty());
+        assert!(take_picked().is_empty());
     }
 
     #[test]
-    fn save_as_3mf_is_one_click() {
-        take_picked();
+    fn cancelling_the_save_window_closes_the_dialog() {
         let mut dialog = DialogState::new(DialogKind::SaveProject, ThemeMode::Light);
-        dialog.set_save_picker(stub_picker);
-        let (_, widgets) = run_dialog(&mut dialog, None);
-        let three_mf = widget(&widgets, "3MF").center();
-        let (actions, _) = run_dialog(&mut dialog, Some(three_mf));
-        assert!(actions.is_empty());
-        assert_eq!(dialog.file_type, FileType::ThreeMf);
-        let (_, widgets) = run_dialog(&mut dialog, None);
-        let (actions, _) = run_dialog(&mut dialog, Some(widget(&widgets, "Save").center()));
-        assert_eq!(take_picked()[0].file_type, FileType::ThreeMf);
-        assert_eq!(
-            actions,
-            vec![DialogAction::Save(PathBuf::from("Modeler3D.3mf"), false)]
-        );
+        dialog.set_save_picker(|_| None);
+        let (actions, _) = run_dialog(&mut dialog, None);
+        assert_eq!(actions, vec![DialogAction::Close]);
     }
 
     #[test]

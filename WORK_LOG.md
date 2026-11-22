@@ -4819,3 +4819,7 @@ Commits `cd4833f`, `9484ad0`, `8508f03`. Full gate passed (`logs/gate/20261121-0
 ## 2026-11-21 Subtract fix for nearly-perfect meshes
 
 Commit `7641f7a`. A sealed operand whose only flaws are zero-area or duplicate triangles goes straight to the boolean kernel; repair only if the kernel rejects it. Owner file `Secret Book A.3mf`: Subtract failed after ~2 s (repair opened 87 holes), now 0.2-0.7 s. Workspace tests, fmt, Clippy passed; full gate not run. Release rebuilt (CURRENT). Snapshot `G:\3D-Modeler_snapshot_20261121-103943_subtract-nearly-perfect`: robocopy exit 1 (copied, no failures); source and copy both 17,767 files / 2,568,819,564 bytes (`target\` and `logs\` excluded). Owner try pending.
+
+## 2026-11-21 Save opens the native save window directly (like 3D Builder)
+
+Save / Save As no longer show our own STL/3MF dialog first; they open the Windows save window at once with a "Save as type" list (STL default, 3MF). Cancel closes with no dialog left behind. Export unchanged (type drop-down + Export/Cancel). Tests `save_opens_the_file_window_at_once_with_stl_and_3mf_types`, `cancelling_the_save_window_closes_the_dialog`; app tests (303), fmt, Clippy passed; full gate and snapshot not run. Release rebuilt (CURRENT). Not compared side by side with 3D Builder; owner try pending. Supersedes the quick-pick buttons of OF-22/OF-24 for Save.

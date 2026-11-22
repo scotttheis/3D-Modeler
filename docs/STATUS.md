@@ -152,7 +152,10 @@ Cargo bloat: 22.3 MiB file / estimated 18.1 MiB code. Recovery: `G:\3D-Modeler_s
 10. Done and approved 2026-11-19: OF-70 live Move/Rotate numbers.
 11. Revisit the Material texture dialog (OF-46 follow-up): the owner wants to
    look at its layout again; ask what to change before building.
-12. Stop before RB-10 (S3). OF-56/57 (Emboss) stay deferred until the owner
+12. Owner request 2026-11-21, DONE and approved ("FIXED! I love it"), released in v1.0.3: paste lands where the moved original
+   was; Settle drops straight down from the current spot:
+   [`paste-in-place-and-settle-down.md`](tasks/paste-in-place-and-settle-down.md).
+13. Stop before RB-10 (S3). OF-56/57 (Emboss) stay deferred until the owner
    brings them back.
 
 Each phase ends with its review pack and a stop for owner review, as
