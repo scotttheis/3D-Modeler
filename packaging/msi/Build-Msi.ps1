@@ -11,6 +11,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $projectRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..\..')).Path
 $exe = Join-Path $projectRoot 'target\release\modeler3d-app.exe'
+$mcpExe = Join-Path $projectRoot 'target\release\modeler3d-mcp.exe'
 
 if ($Version -notmatch '^\d+\.\d+\.\d+$') { throw 'Version must be major.minor.patch, e.g. 0.1.2.' }
 if (-not (Get-Command wix -ErrorAction SilentlyContinue)) {
@@ -33,7 +34,7 @@ if ($Build) {
         $previousReleaseVersion = $env:MODELER3D_RELEASE_VERSION
         $env:MODELER3D_RELEASE_VERSION = $Version
         . (Join-Path $projectRoot 'scripts\Initialize-BuildClang.ps1') | Out-Null
-        cmd /c "cargo build --release -p modeler3d-app --locked 2>&1"
+        cmd /c "cargo build --release -p modeler3d-app -p modeler3d-mcp --locked 2>&1"
         if ($LASTEXITCODE -ne 0) { throw "cargo build failed ($LASTEXITCODE)." }
     } finally { $env:MODELER3D_RELEASE_VERSION = $previousReleaseVersion; Pop-Location }
 }
@@ -57,6 +58,8 @@ if (Test-Path -LiteralPath $stage) { Remove-Item -LiteralPath $stage -Recurse -F
 # (the full-size action icons alone are ~32 MB).
 New-Item -ItemType Directory -Path $stage -Force | Out-Null
 Copy-Item -LiteralPath $exe -Destination (Join-Path $stage 'Modeler3D.exe')
+if (-not (Test-Path -LiteralPath $mcpExe)) { throw "MCP gateway not found: $mcpExe (build -p modeler3d-mcp)." }
+Copy-Item -LiteralPath $mcpExe -Destination (Join-Path $stage 'modeler3d-mcp.exe')
 New-Item -ItemType Directory -Path (Join-Path $stage 'assets') -Force | Out-Null
 Copy-Item -LiteralPath (Join-Path $projectRoot 'crates\modeler3d-app\assets\original') `
     -Destination (Join-Path $stage 'assets\original') -Recurse

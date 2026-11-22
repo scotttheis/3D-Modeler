@@ -59,6 +59,35 @@ makes the repository public, so a v0.99 tester is then offered v1.00.
    need it once public). Turn on GitHub Sponsors if the owner is ready.
 6. Record the public release in `docs/STATUS.md`.
 
+## Every release says what changed (owner rule, 2026-11-21)
+
+No release goes out without plain-language notes of what changed in it.
+
+1. Before tagging `vX.Y.Z`, add a `## X.Y.Z (date)` section to `CHANGELOG.md`
+   (short bullets a non-programmer can read: what is new, what is fixed, what
+   changed for the person using the app). Anything waiting under
+   `## Unreleased` moves into it.
+2. Tag and push. `release.yml` copies that section into the GitHub release
+   notes, and stops with an error if the section is missing, so a release
+   without notes cannot be published by accident.
+3. After publishing, open the release page and check the notes show.
+4. Record the version in `docs/STATUS.md` as usual.
+
+The notes for v0.99.0 to v1.0.2 were written after the fact from
+`docs/STATUS.md` (2026-11-21).
+
+## The GitHub page (2026-11-21)
+
+The repository front page is `README.md` (logo, screenshots, download table,
+MCP section). Community files: `CONTRIBUTING.md`, `SECURITY.md`,
+`CODE_OF_CONDUCT.md`, issue forms and a PR template in `.github/`,
+`CHANGELOG.md`, `THIRD_PARTY_NOTICES.md` (regenerate when dependencies
+change). Pictures live in `docs/images/` and are retaken with the review
+harness; see [`launch-pictures.md`](launch-pictures.md). The social preview
+image (`docs/images/social-preview.png`) is uploaded by hand in the repository
+settings. The 3D Modeler MCP gateway (`modeler3d-mcp`) ships inside every
+installer next to the app, and [`mcp.md`](mcp.md) explains it.
+
 ## Decided
 
 - Public repository, free for others to use; not sold. The owner will turn

@@ -1,6 +1,6 @@
 """Exercise update tools through the real stdio gateway and isolated desktop.
 
-Build the debug modeler3d-app and r4_mcp binaries first. Standard library only;
+Build the debug modeler3d-app and modeler3d-mcp binaries first. Standard library only;
 all settings, descriptors and logs stay in a fresh project logs/ directory.
 """
 
@@ -32,7 +32,7 @@ def main():
                 if desktop.poll() is not None or time.monotonic() >= deadline:
                     raise RuntimeError("Isolated desktop did not start; inspect its log")
                 time.sleep(0.1)
-            gateway = subprocess.Popen([str(root / "target/debug/r4_mcp.exe")], cwd=root, env=environment, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=gateway_log, text=True, encoding="utf-8")
+            gateway = subprocess.Popen([str(root / "target/debug/modeler3d-mcp.exe")], cwd=root, env=environment, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=gateway_log, text=True, encoding="utf-8")
             children.append(gateway)
             replies = queue.Queue()
 

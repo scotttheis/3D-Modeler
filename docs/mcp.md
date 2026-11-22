@@ -8,12 +8,12 @@ and every change can be undone from the desktop. The catalog has **76 tools**
 ## How it fits together
 
 ```
-AI client  <--stdio-->  r4_mcp (gateway)  <--loopback HTTP-->  3D Modeler desktop app
+AI client  <--stdio-->  modeler3d-mcp (gateway)  <--loopback HTTP-->  3D Modeler desktop app
 ```
 
 - The desktop app starts a small server on `127.0.0.1` (this computer only)
   and writes a descriptor file, `mcp-runtime.json`, in its settings folder.
-- `r4_mcp` is a small program the AI client starts. It reads the descriptor,
+- `modeler3d-mcp` is a small program the AI client starts. It reads the descriptor,
   checks the app is alive and answers MCP calls by forwarding them to the app.
 - Both the desktop and the MCP call the same command layer, so a result is the
   same either way, in millimetres.
@@ -22,18 +22,25 @@ The app must be running. If it is not, tools answer that the desktop is unavaila
 
 ## Setup
 
-1. Build the gateway from source (it is not in the installers yet):
-   `cargo build --release -p modeler3d-mcp` gives `target/release/r4_mcp`
-   (`r4_mcp.exe` on Windows).
-2. Start 3D Modeler.
-3. Add the gateway to your MCP client. For Claude Desktop or Claude Code, an
-   entry like this:
+The gateway, `modeler3d-mcp`, is installed with the app (from the first release
+after 1.0.2; older versions need it built from source with
+`cargo build --release -p modeler3d-mcp`).
+
+| System | Where it is |
+|---|---|
+| Windows | `%LOCALAPPDATA%\Programs\Modeler3D\modeler3d-mcp.exe` |
+| macOS | `/Applications/3D Modeler.app/Contents/MacOS/modeler3d-mcp` |
+| Linux | `modeler3d-mcp` in the install folder (`~/.local/opt/modeler3d` by default) |
+
+1. Start 3D Modeler.
+2. Add the gateway to your MCP client. For Claude Desktop or Claude Code, an
+   entry like this (change the path for your system):
 
 ```json
 {
   "mcpServers": {
     "modeler3d": {
-      "command": "E:\\3D-Modeler\\target\\release\\r4_mcp.exe",
+      "command": "C:\\Users\\you\\AppData\\Local\\Programs\\Modeler3D\\modeler3d-mcp.exe",
       "env": {
         "MODELER3D_MCP_PROFILE": "model",
         "MODELER3D_AI_APPROVED_ROOTS": "C:\\Users\\you\\Documents\\Models"

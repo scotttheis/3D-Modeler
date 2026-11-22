@@ -45,9 +45,9 @@ for target in "${targets[@]}"; do
             fi
         done
         CXX="$root/packaging/macos/clang-x86_64.sh" \
-            cargo build --release --locked -p modeler3d-app --target "$target"
+            cargo build --release --locked -p modeler3d-app -p modeler3d-mcp --target "$target"
     else
-        cargo build --release --locked -p modeler3d-app --target "$target"
+        cargo build --release --locked -p modeler3d-app -p modeler3d-mcp --target "$target"
     fi
 done
 
@@ -61,6 +61,9 @@ lipo -create -output "$contents/MacOS/Modeler3D" \
     "target/aarch64-apple-darwin/release/modeler3d-app" \
     "target/x86_64-apple-darwin/release/modeler3d-app"
 lipo -info "$contents/MacOS/Modeler3D"
+lipo -create -output "$contents/MacOS/modeler3d-mcp" \
+    "target/aarch64-apple-darwin/release/modeler3d-mcp" \
+    "target/x86_64-apple-darwin/release/modeler3d-mcp"
 
 # The app looks for assets/ beside its program (artwork::original_asset_root);
 # the files live in Resources, as macOS expects, behind a relative link.

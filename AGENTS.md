@@ -208,6 +208,12 @@ invited testers, then a public v1.00. When they say they are ready for
 either, follow [`docs/github-upload.md`](docs/github-upload.md) ("Release
 plan"); until then do not push.
 
+Every release must carry plain-language notes of what changed: add the
+`## X.Y.Z` section to `CHANGELOG.md` before tagging (the release workflow
+publishes it and fails without it). See "Every release says what changed" in
+[`docs/github-upload.md`](docs/github-upload.md). The MCP gateway
+(`modeler3d-mcp`) ships in every installer beside the app.
+
 ## Suggestions from other people
 
 Follow [`docs/community-suggestions.md`](docs/community-suggestions.md): fixes go

@@ -12,7 +12,7 @@ out_dir=${2:?output directory}
 root=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 exe="$root/target/release/modeler3d-app"
 cd "$root"
-MODELER3D_RELEASE_VERSION="$version" cargo build --release --locked -p modeler3d-app
+MODELER3D_RELEASE_VERSION="$version" cargo build --release --locked -p modeler3d-app -p modeler3d-mcp
 if [ "${MODELER3D_PUBLIC_RELEASE:-0}" = 1 ]; then "$exe" --require-update-feed; fi
 
 [ -x "$exe" ] || { echo "release build missing: $exe" >&2; exit 2; }
@@ -27,6 +27,7 @@ mkdir -p "$pkg/assets" "$pkg/installers"
 # Same layout as the Windows package: the program with assets/ and
 # licenses/ beside it (artwork::original_asset_root looks there).
 install -m 755 "$exe" "$pkg/Modeler3D"
+install -m 755 "$root/target/release/modeler3d-mcp" "$pkg/modeler3d-mcp"
 cp -r "$root/crates/modeler3d-app/assets/original" "$pkg/assets/original"
 # Release package icons are 128 px; the full-size art stays in the source tree.
 "$pkg/Modeler3D" --shrink-assets "$pkg/assets/original"

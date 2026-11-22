@@ -2,6 +2,11 @@
 
 All notable changes, in plain words. Newest first.
 
+## Unreleased
+
+- The AI (MCP) gateway now comes inside the Windows, Mac and Linux installers,
+  next to the app, so there is nothing extra to build.
+
 ## 1.0.2 (2026-11-21)
 
 - **Subtract is simpler.** Select one object and click Subtract: it cuts away

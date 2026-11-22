@@ -21,6 +21,10 @@
 
 <!-- HERO-GIF: replace the picture above with a short demo GIF (see docs/launch-pictures.md, B1). -->
 
+<table align="center"><tr><td align="center"><img src="crates/modeler3d-app/assets/original/insert_icons/Cube.png" width="96" alt="Cube"><br><sub>Cube</sub></td><td align="center"><img src="crates/modeler3d-app/assets/original/insert_icons/Cylinder.png" width="96" alt="Cylinder"><br><sub>Cylinder</sub></td><td align="center"><img src="crates/modeler3d-app/assets/original/insert_icons/Pyramid.png" width="96" alt="Pyramid"><br><sub>Pyramid</sub></td><td align="center"><img src="crates/modeler3d-app/assets/original/insert_icons/Cone.png" width="96" alt="Cone"><br><sub>Cone</sub></td><td align="center"><img src="crates/modeler3d-app/assets/original/insert_icons/Sphere.png" width="96" alt="Sphere"><br><sub>Sphere</sub></td><td align="center"><img src="crates/modeler3d-app/assets/original/insert_icons/Torus.png" width="96" alt="Torus"><br><sub>Torus</sub></td><td align="center"><img src="crates/modeler3d-app/assets/original/insert_icons/Hexagon.png" width="96" alt="Hexagon"><br><sub>Hexagon</sub></td><td align="center"><img src="crates/modeler3d-app/assets/original/insert_icons/Wedge.png" width="96" alt="Wedge"><br><sub>Wedge</sub></td></tr></table>
+
+<table align="center"><tr><td align="center"><img src="crates/modeler3d-app/assets/original/action_icons/Merge.png" width="96" alt="Merge"><br><sub>Merge</sub></td><td align="center"><img src="crates/modeler3d-app/assets/original/action_icons/Subtract.png" width="96" alt="Subtract"><br><sub>Subtract</sub></td><td align="center"><img src="crates/modeler3d-app/assets/original/action_icons/Intersect.png" width="96" alt="Intersect"><br><sub>Intersect</sub></td><td align="center"><img src="crates/modeler3d-app/assets/original/action_icons/Hollow.png" width="96" alt="Hollow"><br><sub>Hollow</sub></td><td align="center"><img src="crates/modeler3d-app/assets/original/action_icons/Repair.png" width="96" alt="Repair"><br><sub>Repair</sub></td><td align="center"><img src="crates/modeler3d-app/assets/original/action_icons/Material.png" width="96" alt="Material"><br><sub>Material</sub></td></tr></table>
+
 ## Why
 
 3D Builder was the easiest way to make something printable. It is gone from
@@ -82,10 +86,12 @@ session before Cargo. Run the tests with `cargo test --workspace`.
 
 ## Use it with an AI assistant
 
-The desktop app runs a local server that only your own computer can reach. The
-`r4_mcp` program connects an MCP client to it, with four safety profiles
-(observe, model, files, full) and file access limited to folders you approve.
-Setup and the full tool list are in [`docs/mcp.md`](docs/mcp.md).
+The AI (MCP) gateway is part of the app: every installer includes
+`modeler3d-mcp` right beside 3D Modeler. Point your AI client at it while the
+app is running and the assistant can use the same tools you click. There are
+four safety profiles (observe, model, files, full), and file access is limited
+to folders you approve. Setup and the full tool list are in
+[`docs/mcp.md`](docs/mcp.md).
 
 ## Status
 
