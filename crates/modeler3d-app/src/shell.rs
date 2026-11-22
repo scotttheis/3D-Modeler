@@ -13842,8 +13842,8 @@ mod tests {
         }
         // Settings is deliberately non-modal (see
         // `settings_stays_non_modal_until_about_is_opened`), so block with a
-        // modal dialog instead.
-        app.open_dialog(DialogKind::SaveProject);
+        // modal dialog instead. (Not Save: it opens the native save window.)
+        app.open_dialog(DialogKind::PrintPrep);
         assert!(app.modal_active());
         let blocked = frame(&mut app, &ctx, Vec::new());
         app.position_fields[0] = "12 mm".into();

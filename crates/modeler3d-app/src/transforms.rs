@@ -660,12 +660,13 @@ mod rb04_placement_oracle {
                 .zip(&case.after)
                 .filter(|_| indices.len() > 1)
             {
-                for (a, b) in object
-                    .transform()
-                    .f64_rows()
-                    .iter()
-                    .flatten()
-                    .zip(expected.iter().flatten())
+                // Settle now drops straight down (OWNER-2026-11-21-PASTE-SETTLE),
+                // so the Python oracle's X/Z recentring is not compared.
+                let actual = object.transform().f64_rows();
+                for (a, b) in (0..3)
+                    .flat_map(|r| (0..4).map(move |c| (r, c)))
+                    .filter(|&(r, c)| !(c == 3 && r != 1))
+                    .map(|(r, c)| (actual[r][c], expected[r][c]))
                 {
                     assert!(
                         (a - b).abs() < 0.002,

@@ -5182,6 +5182,62 @@ mod rb04_regressions {
         assert_eq!(state.scene.objects().len(), 3);
     }
     #[test]
+    fn paste_after_moving_original_lands_where_it_was_copied_with_one_undo() {
+        let mut state = CommandState::default();
+        state
+            .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
+            .expect("cube");
+        state
+            .set_selected_position([12., 24., 36.])
+            .expect("position");
+        state.dispatch(CommandId::Copy).expect("copy");
+        state
+            .set_selected_position([300., 24., -50.])
+            .expect("move original");
+        let before = state.scene.history_state_id();
+        state.dispatch(CommandId::Paste).expect("paste");
+        assert_eq!(state.scene.objects().len(), 2);
+        assert_eq!(state.scene.objects()[1].position(), [12., 24., 36.]);
+        assert_ne!(state.scene.history_state_id(), before);
+        state.dispatch(CommandId::Undo).expect("undo");
+        assert_eq!(state.scene.objects().len(), 1);
+        assert_eq!(state.scene.history_state_id(), before);
+        // Undo then paste lands on the same spot again.
+        state.dispatch(CommandId::Paste).expect("paste again");
+        assert_eq!(state.scene.objects()[1].position(), [12., 24., 36.]);
+    }
+
+    #[test]
+    fn settle_after_moving_keeps_x_z_and_is_one_undo_entry() {
+        let mut state = CommandState::default();
+        state
+            .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
+            .expect("cube");
+        state
+            .set_selected_position([120., 55., -70.])
+            .expect("move");
+        let before = state.scene.history_state_id();
+        state.dispatch(CommandId::Settle).expect("settle");
+        let position = state.scene.objects()[0].position();
+        assert!((position[0] - 120.).abs() < 1e-3, "{position:?}");
+        assert!((position[2] + 70.).abs() < 1e-3, "{position:?}");
+        let floor = transforms::world_bounds(&state.scene, &[0])
+            .expect("bounds")
+            .minimum[1];
+        assert!(floor.abs() < 1e-3, "{position:?}");
+        state.dispatch(CommandId::Undo).expect("undo");
+        assert_eq!(state.scene.history_state_id(), before);
+        state.dispatch(CommandId::Redo).expect("redo");
+        // Already resting: a second Settle is a no-op with no history entry.
+        let settled = state.scene.history_state_id();
+        assert!(matches!(
+            state.dispatch(CommandId::Settle),
+            Ok(CommandOutcome::Noop(_))
+        ));
+        assert_eq!(state.scene.history_state_id(), settled);
+    }
+
+    #[test]
     fn absolute_rotation_is_repeatable_and_resize_preserves_translation() {
         let mut state = CommandState::default();
         state
@@ -5377,14 +5433,14 @@ mod rb04_scene_order {
         {
             let expected: [[f64; 4]; 4] =
                 serde_json::from_value(expected.clone()).expect("expected");
-            for (a, b) in object
-                .transform()
-                .f64_rows()
-                .iter()
-                .flatten()
-                .zip(expected.iter().flatten())
-            {
-                assert!((a - b).abs() < 0.002);
+            // Settle drops straight down (OWNER-2026-11-21-PASTE-SETTLE); the
+            // Python oracle's X/Z recentring is not compared.
+            let actual = object.transform().f64_rows();
+            for (r, c) in (0..3).flat_map(|r| (0..4).map(move |c| (r, c))) {
+                if c == 3 && r != 1 {
+                    continue;
+                }
+                assert!((actual[r][c] - expected[r][c]).abs() < 0.002);
             }
         }
         let history = state.scene.history_state_id();

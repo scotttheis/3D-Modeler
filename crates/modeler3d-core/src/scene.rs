@@ -932,21 +932,36 @@ impl Scene {
             .collect()
     }
 
-    /// Pastes copied objects as one undoable command with fresh durable IDs,
-    /// beside where the clipboard objects stand ([`beside_offset`], OF-43).
-    /// The clipboard then moves along with the pasted copies, so pasting
-    /// again places the next copy beside the previous one. The desktop and
-    /// MCP both paste through this.
+    /// Pastes copied objects as one undoable command with fresh durable IDs.
+    ///
+    /// If an original is still in the scene and has been moved since it was
+    /// copied, the copies land exactly where the original stood at copy time.
+    /// Otherwise (original unmoved, or gone after a cut) they land beside the
+    /// clipboard objects ([`beside_offset`], OF-43). After a beside paste the
+    /// clipboard follows the pasted copies, so pasting again places the next
+    /// copy beside the previous one. The desktop and MCP both paste through this.
     pub fn paste_beside(
         &mut self,
         clipboard: &mut [SceneObject],
     ) -> Result<CommandResult, CoreError> {
-        let step = beside_offset(clipboard.iter());
+        let original_moved = clipboard.iter().any(|source| {
+            self.objects
+                .iter()
+                .find(|object| object.object_id() == source.object_id())
+                .is_some_and(|original| original.transform().rows() != source.transform().rows())
+        });
+        let step = if original_moved {
+            [0.0; 3]
+        } else {
+            beside_offset(clipboard.iter())
+        };
+        let start = self.objects.len();
         let result = self.paste_objects_offset(clipboard, step)?;
-        if result.changed {
-            for object in clipboard.iter_mut() {
-                let moved = object.translated_transform(step)?;
-                object.set_transform_raw(moved);
+        // Only the beside case follows the copies; an in-place paste keeps the
+        // clipboard so undo-then-paste lands on the same spot again.
+        if result.changed && !original_moved {
+            for (offset, slot) in clipboard.iter_mut().enumerate() {
+                *slot = self.object(start + offset)?.clone();
             }
         }
         Ok(result)

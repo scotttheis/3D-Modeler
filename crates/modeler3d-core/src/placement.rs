@@ -138,7 +138,9 @@ fn build_hull(points: &[[f64; 3]], flags: &[&str]) -> Result<qhull::Qh<'static>,
 }
 
 /// Rigidly settles a selection's combined support face on the Y=0 build floor.
-/// Centers X/Z, preserves resized/mirrored shape and relative placement, and
+/// Drops it straight down: the rotation that lays the support face flat is
+/// pivoted about the selection's current X/Z centre, so the horizontal spot
+/// does not change (OWNER-2026-11-21-PASTE-SETTLE). Preserves resized/mirrored shape and relative placement, and
 /// commits once (no history for a no-op). Invalid targets or resource limits
 /// leave the scene unchanged. Shared by desktop and MCP on every platform.
 pub fn settle_on_floor(
@@ -181,17 +183,22 @@ pub fn settle_on_floor(
     // object rotates its local axes through that scale and deforms the mesh.
     let mut minimum = [f64::INFINITY; 3];
     let mut maximum = [f64::NEG_INFINITY; 3];
+    let mut before_min = [f64::INFINITY; 3];
+    let mut before_max = [f64::NEG_INFINITY; 3];
     for point in points {
         for axis in 0..3 {
+            before_min[axis] = before_min[axis].min(point[axis]);
+            before_max[axis] = before_max[axis].max(point[axis]);
             let value = (0..3).map(|i| rotation[axis][i] * point[i]).sum::<f64>();
             minimum[axis] = minimum[axis].min(value);
             maximum[axis] = maximum[axis].max(value);
         }
     }
+    // Keep the current horizontal centre; only the height changes to rest on Y=0.
     let offset = [
-        -(minimum[0] + maximum[0]) * 0.5,
+        (before_min[0] + before_max[0]) * 0.5 - (minimum[0] + maximum[0]) * 0.5,
         -minimum[1],
-        -(minimum[2] + maximum[2]) * 0.5,
+        (before_min[2] + before_max[2]) * 0.5 - (minimum[2] + maximum[2]) * 0.5,
     ];
     let mut transforms = Vec::with_capacity(indices.len());
     for index in &indices {
@@ -281,5 +288,51 @@ mod tests {
         assert_eq!(*scene.object(0).expect("object").transform(), transform);
         assert_eq!(scene.revision(), revision);
         assert_eq!(scene.history_state_id(), history);
+    }
+
+    #[test]
+    fn settle_keeps_horizontal_position_and_drops_straight_down() {
+        let mut scene = Scene::new();
+        scene
+            .add_primitive(crate::PrimitiveKind::Cube, None, None)
+            .expect("cube");
+        scene.translate(0, [150.0, 40.0, -90.0]).expect("move");
+        let before = scene.object(0).expect("object").position();
+        let history = scene.history_state_id();
+        assert!(settle_on_floor(&mut scene, &[0]).expect("settle").changed);
+        let after = scene.object(0).expect("object").position();
+        assert!((after[0] - before[0]).abs() < 1e-4);
+        assert!((after[2] - before[2]).abs() < 1e-4);
+        assert!((after[1] - (before[1] - 40.0)).abs() < 1e-3);
+        scene.undo().expect("undo");
+        assert_eq!(scene.history_state_id(), history);
+        assert!(settle_on_floor(&mut scene, &[0]).expect("again").changed);
+        let rested = scene.history_state_id();
+        assert!(!settle_on_floor(&mut scene, &[0]).expect("noop").changed);
+        assert_eq!(scene.history_state_id(), rested);
+    }
+
+    #[test]
+    fn paste_lands_at_copy_time_spot_only_when_original_moved() {
+        let mut scene = Scene::new();
+        scene
+            .add_primitive(crate::PrimitiveKind::Cube, None, None)
+            .expect("cube");
+        scene.set_selection([0]);
+        let mut clipboard = scene.copy_selected().expect("copy");
+        let copy_spot = clipboard[0].position();
+        let unmoved = scene.paste_beside(&mut clipboard).expect("paste");
+        assert!(unmoved.changed);
+        assert!(scene.object(1).expect("copy").position()[0] > copy_spot[0]);
+        scene
+            .translate(0, [500.0, 0.0, 0.0])
+            .expect("move original");
+        scene.set_selection([0]);
+        let mut clipboard = scene.copy_selected().expect("copy");
+        let spot = clipboard[0].position();
+        scene.translate(0, [-200.0, 0.0, 30.0]).expect("move again");
+        let moved = scene.paste_beside(&mut clipboard).expect("paste");
+        assert!(moved.changed);
+        assert_eq!(scene.object(2).expect("copy").position(), spot);
     }
 }
