@@ -8,6 +8,7 @@ use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::time::Duration;
 
 use crate::mesh_ops::is_degenerate_triangle;
+use crate::repair_native::{self as native, RepairGrid};
 use crate::windows_repair::{WindowsRepairError, run_windows_repair};
 use crate::{CoreError, Mesh, MeshHealthReport, MeshOperationLimits, inspect_mesh};
 
@@ -199,11 +200,12 @@ impl RepairScore {
     }
 }
 
-/// A candidate must reduce at least one defect without increasing any other.
+/// A candidate must reduce a defect without increasing any other. Shells may
+/// increase when separating strictly fewer non-manifold edges into parts.
 #[must_use]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum RepairVerdict {
-    /// At least one score improved and none got worse.
+    /// A score improved and none got worse, allowing non-manifold separation.
     Improved,
     /// Every score stayed the same.
     NoBetter,
@@ -213,11 +215,11 @@ pub enum RepairVerdict {
 
 fn gate(before: RepairScore, after: RepairScore) -> RepairVerdict {
     let mut better = false;
-    for (before, after) in before.fields().into_iter().zip(after.fields()) {
-        if after > before {
+    for (field, (old, new)) in before.fields().into_iter().zip(after.fields()).enumerate() {
+        if new > old && !(field == 7 && after.non_manifold_edges < before.non_manifold_edges) {
             return RepairVerdict::Worse;
         }
-        better |= after < before;
+        better |= new < old;
     }
     if better {
         RepairVerdict::Improved
@@ -568,6 +570,7 @@ pub fn repair_mesh_with_options(
     }
 
     let before = inspect_mesh(mesh)?;
+    let grid = RepairGrid::from_mesh(mesh);
     let mut current = mesh.clone();
     let mut stages = Vec::new();
     let mut errors = Vec::new();
@@ -575,16 +578,18 @@ pub fn repair_mesh_with_options(
     for name in pipeline {
         let operation = |value: &Mesh| -> Result<Mesh, CoreError> {
             let result = match name {
-                "StitchGaps (insert vertices)" | "StitchGaps (reuse vertices)" => {
-                    weld_vertices(value, REPAIR_TOLERANCE_MM)
-                }
+                "StitchGaps (insert vertices)" => native::stitch(value, grid, true),
+                "StitchGaps (reuse vertices)" => native::stitch(value, grid, false),
                 "CloseTrivialHoles" | "CloseTrivialHoles (second pass)" | "CloseAllHoles" => {
                     close_small_holes(value)
                 }
-                "RemoveDoubleTriangles" => remove_duplicate_faces(value),
+                "RemoveDoubleTriangles" => native::clean_faces(value),
+                "SplitNonManifoldEdges" => native::split_non_manifold(value, grid),
                 "FixFlippedTriangles" | "FixFlippedTriangles (second pass)" => fix_winding(value),
                 "Wrap" => wrap_mesh(value),
-                "RemoveDegeneratedFaces" => remove_degenerate_faces(value),
+                "RemoveDegeneratedFaces" => {
+                    remove_degenerate_faces(&native::collapse(value, grid)?)
+                }
                 "RemoveTinyShells" => remove_tiny_shells(value),
                 "PrepareForExport" => prepare_for_export(value),
                 _ => Err(CoreError::MeshOperation(format!(
@@ -597,9 +602,15 @@ pub fn repair_mesh_with_options(
         current = run_stage(current, name, operation, &mut stages, &mut errors);
     }
 
-    let (planar_mesh, planar_cleanup) = regularize_planar_regions(&current, &limits)?;
-    limits.check_mesh("repair", &planar_mesh)?;
-    current = planar_mesh;
+    // Flat-patch re-triangulation was removed from Repair in R4: it added
+    // faces and fixed nothing (repair plan, fix plan Step 3 item 10).
+    let planar_cleanup = PlanarCleanupReport {
+        changed: false,
+        patches: 0,
+        faces_before: 0,
+        faces_after: 0,
+        details: Vec::new(),
+    };
     let after = inspect_mesh(&current)?;
     let candidate_safe = is_safe_candidate(&current);
     let candidate_changed = current != *mesh;
@@ -641,6 +652,7 @@ fn stage_names(profile: RepairProfile) -> Vec<&'static str> {
             "StitchGaps (insert vertices)",
             "CloseTrivialHoles",
             "RemoveDoubleTriangles",
+            "SplitNonManifoldEdges",
             "FixFlippedTriangles",
             "CloseTrivialHoles (second pass)",
             "StitchGaps (reuse vertices)",
@@ -687,58 +699,6 @@ where
         error,
     });
     next
-}
-
-fn weld_vertices(mesh: &Mesh, tolerance: f32) -> Result<Mesh, CoreError> {
-    if mesh.vertices.is_empty() {
-        return Ok(mesh.clone());
-    }
-    let scale = f64::from(tolerance);
-    let mut keys = Vec::with_capacity(mesh.vertices.len());
-    for vertex in &mesh.vertices {
-        let mut key = [0_i64; 3];
-        for axis in 0..3 {
-            let scaled = f64::from(vertex[axis]) / scale;
-            if !scaled.is_finite() || scaled.abs() > i64::MAX as f64 {
-                return Ok(mesh.clone());
-            }
-            key[axis] = scaled.round() as i64;
-        }
-        keys.push(key);
-    }
-    let mut representatives = BTreeMap::<[i64; 3], u32>::new();
-    let mut remap = Vec::with_capacity(mesh.vertices.len());
-    let mut vertices = Vec::new();
-    for (index, key) in keys.into_iter().enumerate() {
-        let source = match representatives.get(&key).copied() {
-            Some(value) => value,
-            None => {
-                let value = u32::try_from(vertices.len()).map_err(|_| {
-                    CoreError::OperationResourceLimit {
-                        operation: "repair".to_owned(),
-                        reason: "welded vertex index overflow".to_owned(),
-                    }
-                })?;
-                representatives.insert(key, value);
-                vertices.push(mesh.vertices[index]);
-                value
-            }
-        };
-        remap.push(source);
-    }
-    let faces = mesh
-        .faces
-        .iter()
-        .map(|face| {
-            [
-                remap[face[0] as usize],
-                remap[face[1] as usize],
-                remap[face[2] as usize],
-            ]
-        })
-        .collect();
-    let welded = Mesh::new(vertices, faces)?;
-    remove_duplicate_faces(&welded)
 }
 
 fn remove_duplicate_faces(mesh: &Mesh) -> Result<Mesh, CoreError> {
@@ -957,139 +917,6 @@ fn prepare_for_export(mesh: &Mesh) -> Result<Mesh, CoreError> {
     fix_winding(&cleaned)
 }
 
-fn regularize_planar_regions(
-    mesh: &Mesh,
-    limits: &MeshOperationLimits,
-) -> Result<(Mesh, PlanarCleanupReport), CoreError> {
-    let mut report = PlanarCleanupReport {
-        changed: false,
-        patches: 0,
-        faces_before: 0,
-        faces_after: 0,
-        details: Vec::new(),
-    };
-    if mesh.face_count() < 4 || mesh.face_count() > 500_000 {
-        return Ok((mesh.clone(), report));
-    }
-    let components = planar_components(mesh);
-    let mut vertices = mesh.vertices.clone();
-    let mut replacements = BTreeMap::<usize, Vec<[u32; 3]>>::new();
-    let mut removed = BTreeSet::<usize>::new();
-    for component in components {
-        if component.len() < 4 {
-            continue;
-        }
-        let Some(boundary) = component_boundary_loop(mesh, &component) else {
-            continue;
-        };
-        if boundary.len() < 3 || !is_convex_boundary(mesh, &boundary) {
-            continue;
-        }
-        let Some(normal) = component_normal(mesh, &component) else {
-            continue;
-        };
-        report.patches = report.patches.saturating_add(1);
-        report.faces_before = report.faces_before.saturating_add(component.len());
-        let faces_after = if component.len() < boundary.len().saturating_mul(2) {
-            component.len().saturating_add(2)
-        } else {
-            component.len()
-        };
-        report.faces_after = report.faces_after.saturating_add(faces_after);
-        report.details.push(PlanarCleanupDetail {
-            faces_before: component.len(),
-            faces_after,
-            boundary_vertices: boundary.len(),
-            faces_removed: 0,
-        });
-        if faces_after == component.len() {
-            // A dense planar grid is already at the bounded density; retain
-            // its exact boundary/topology while recording the candidate.
-            report.changed = true;
-            continue;
-        }
-        let Some(face_index) = component.first().copied() else {
-            continue;
-        };
-        let Some(face) = mesh.faces.get(face_index).copied() else {
-            continue;
-        };
-        let (Some(first), Some(second), Some(third)) = (
-            mesh.vertices.get(face[0] as usize),
-            mesh.vertices.get(face[1] as usize),
-            mesh.vertices.get(face[2] as usize),
-        ) else {
-            continue;
-        };
-        let interior = [
-            (first[0] + second[0] + third[0]) / 3.0,
-            (first[1] + second[1] + third[1]) / 3.0,
-            (first[2] + second[2] + third[2]) / 3.0,
-        ];
-        let interior_index =
-            u32::try_from(vertices.len()).map_err(|_| CoreError::OperationResourceLimit {
-                operation: "repair".to_owned(),
-                reason: "planar cleanup vertex index overflow".to_owned(),
-            })?;
-        let mut replacement = component
-            .iter()
-            .filter_map(|index| mesh.faces.get(*index).copied())
-            .collect::<Vec<_>>();
-        if let Some(position) = component.iter().position(|index| *index == face_index) {
-            replacement.remove(position);
-        }
-        let candidates = [
-            [face[0], face[1], interior_index],
-            [face[1], face[2], interior_index],
-            [face[2], face[0], interior_index],
-        ];
-        let mut oriented = Vec::with_capacity(3);
-        for candidate in candidates {
-            let Some(a) = point_for_index(mesh, &vertices, candidate[0]) else {
-                oriented.clear();
-                break;
-            };
-            let Some(b) = point_for_index(mesh, &vertices, candidate[1]) else {
-                oriented.clear();
-                break;
-            };
-            let Some(c) = (candidate[2] == interior_index)
-                .then_some(interior)
-                .or_else(|| point_for_index(mesh, &vertices, candidate[2]))
-            else {
-                oriented.clear();
-                break;
-            };
-            let mut generated = candidate;
-            if dot(cross(subtract(b, a), subtract(c, a)), normal) < 0.0 {
-                generated = [candidate[0], candidate[2], candidate[1]];
-            }
-            oriented.push(generated);
-        }
-        if oriented.len() != 3 {
-            continue;
-        }
-        replacement.extend(oriented);
-        vertices.push(interior);
-        replacements.insert(face_index, replacement);
-        removed.extend(component);
-        report.changed = true;
-        limits.check_mesh("repair", &Mesh::new(vertices.clone(), mesh.faces.clone())?)?;
-    }
-    if replacements.is_empty() {
-        return Ok((mesh.clone(), report));
-    }
-    let mut faces = Vec::new();
-    for (index, face) in mesh.faces.iter().copied().enumerate() {
-        if let Some(replacement) = replacements.get(&index) {
-            faces.extend(replacement);
-        } else if !removed.contains(&index) {
-            faces.push(face);
-        }
-    }
-    Ok((Mesh::new(vertices, faces)?, report))
-}
-
 fn compact_mesh(vertices: &[[f32; 3]], faces: &[[u32; 3]]) -> Result<Mesh, CoreError> {
     let mut remap = vec![None::<u32>; vertices.len()];
     let mut compact_vertices = Vec::new();
@@ -1147,65 +974,6 @@ fn face_components(mesh: &Mesh) -> Vec<Vec<usize>> {
             for second in (first + 1)..owners.len() {
                 adjacency[owners[first].0].push(owners[second].0);
                 adjacency[owners[second].0].push(owners[first].0);
-            }
-        }
-    }
-    let mut seen = vec![false; mesh.face_count()];
-    let mut result = Vec::new();
-    for start in 0..mesh.face_count() {
-        if seen[start] {
-            continue;
-        }
-        seen[start] = true;
-        let mut component = Vec::new();
-        let mut queue = VecDeque::from([start]);
-        while let Some(face) = queue.pop_front() {
-            component.push(face);
-            for neighbor in &adjacency[face] {
-                if !seen[*neighbor] {
-                    seen[*neighbor] = true;
-                    queue.push_back(*neighbor);
-                }
-            }
-        }
-        result.push(component);
-    }
-    result
-}
-
-fn planar_components(mesh: &Mesh) -> Vec<Vec<usize>> {
-    let edges = edge_map(mesh);
-    let normals = mesh
-        .faces
-        .iter()
-        .copied()
-        .map(|face| mesh.face_normal(face))
-        .collect::<Vec<_>>();
-    let offsets = mesh
-        .faces
-        .iter()
-        .copied()
-        .enumerate()
-        .map(|(index, face)| {
-            mesh.vertices
-                .get(face[0] as usize)
-                .map(|vertex| dot(normals[index], *vertex))
-                .unwrap_or(f32::NAN)
-        })
-        .collect::<Vec<_>>();
-    let mut adjacency = vec![Vec::<usize>::new(); mesh.face_count()];
-    for owners in edges.values() {
-        for first in 0..owners.len() {
-            for second in (first + 1)..owners.len() {
-                let first_face = owners[first].0;
-                let second_face = owners[second].0;
-                if dot(normals[first_face], normals[second_face]) < 0.999_999
-                    || (offsets[first_face] - offsets[second_face]).abs() > 0.002
-                {
-                    continue;
-                }
-                adjacency[first_face].push(second_face);
-                adjacency[second_face].push(first_face);
             }
         }
     }
@@ -1319,138 +1087,6 @@ fn boundary_loops(mesh: &Mesh) -> Vec<Vec<u32>> {
     loops
 }
 
-fn component_boundary_loop(mesh: &Mesh, component: &[usize]) -> Option<Vec<u32>> {
-    if component.is_empty() {
-        return None;
-    }
-    let mut counts = BTreeMap::<(u32, u32), (usize, (u32, u32))>::new();
-    for face_index in component {
-        let face = mesh.faces.get(*face_index)?;
-        for (first, second) in [(face[0], face[1]), (face[1], face[2]), (face[2], face[0])] {
-            let key = ordered_edge(first, second);
-            let entry = counts.entry(key).or_insert((0, (first, second)));
-            entry.0 = entry.0.saturating_add(1);
-        }
-    }
-    let mut outgoing = BTreeMap::new();
-    for (_, (count, directed)) in counts {
-        if count != 1 {
-            continue;
-        }
-        if outgoing.insert(directed.0, directed.1).is_some() {
-            return None;
-        }
-    }
-    collect_loops(&outgoing).into_iter().next()
-}
-
-fn collect_loops(outgoing: &BTreeMap<u32, u32>) -> Vec<Vec<u32>> {
-    let mut loops = Vec::new();
-    let mut visited = BTreeSet::new();
-    for start in outgoing.keys().copied() {
-        if visited.contains(&start) {
-            continue;
-        }
-        let mut current = start;
-        let mut loop_vertices = Vec::new();
-        let mut valid = true;
-        for _ in 0..=outgoing.len() {
-            if !visited.insert(current) {
-                valid = current == start;
-                break;
-            }
-            loop_vertices.push(current);
-            let Some(next) = outgoing.get(&current).copied() else {
-                valid = false;
-                break;
-            };
-            current = next;
-            if current == start {
-                break;
-            }
-        }
-        if valid && current == start && loop_vertices.len() >= 3 {
-            loops.push(loop_vertices);
-        }
-    }
-    loops
-}
-
-fn component_normal(mesh: &Mesh, component: &[usize]) -> Option<[f32; 3]> {
-    let mut normal = [0.0_f32; 3];
-    for face_index in component {
-        let face = *mesh.faces.get(*face_index)?;
-        let value = mesh.face_normal(face);
-        for axis in 0..3 {
-            normal[axis] += value[axis];
-        }
-    }
-    let length = dot(normal, normal).sqrt();
-    (length.is_finite() && length > 1.0e-6).then_some([
-        normal[0] / length,
-        normal[1] / length,
-        normal[2] / length,
-    ])
-}
-
-fn is_convex_boundary(mesh: &Mesh, boundary: &[u32]) -> bool {
-    let Some(normal) = polygon_normal(mesh, boundary) else {
-        return false;
-    };
-    let mut sign = 0.0_f32;
-    for index in 0..boundary.len() {
-        let previous = mesh
-            .vertices
-            .get(boundary[(index + boundary.len() - 1) % boundary.len()] as usize);
-        let current = mesh.vertices.get(boundary[index] as usize);
-        let next = mesh
-            .vertices
-            .get(boundary[(index + 1) % boundary.len()] as usize);
-        let (Some(previous), Some(current), Some(next)) = (previous, current, next) else {
-            return false;
-        };
-        let turn = dot(
-            cross(subtract(*current, *previous), subtract(*next, *current)),
-            normal,
-        );
-        if turn.abs() <= 1.0e-6 {
-            continue;
-        }
-        if sign == 0.0 {
-            sign = turn.signum();
-        } else if turn * sign < 0.0 {
-            return false;
-        }
-    }
-    sign != 0.0
-}
-
-fn polygon_normal(mesh: &Mesh, boundary: &[u32]) -> Option<[f32; 3]> {
-    let first = *mesh.vertices.get(*boundary.first()? as usize)?;
-    let mut normal = [0.0_f32; 3];
-    for index in 1..boundary.len().saturating_sub(1) {
-        let second = *mesh.vertices.get(boundary[index] as usize)?;
-        let third = *mesh.vertices.get(boundary[index + 1] as usize)?;
-        let value = cross(subtract(second, first), subtract(third, first));
-        for axis in 0..3 {
-            normal[axis] += value[axis];
-        }
-    }
-    let length = dot(normal, normal).sqrt();
-    (length.is_finite() && length > 1.0e-6).then_some([
-        normal[0] / length,
-        normal[1] / length,
-        normal[2] / length,
-    ])
-}
-
-fn point_for_index(mesh: &Mesh, extra: &[[f32; 3]], index: u32) -> Option<[f32; 3]> {
-    mesh.vertices
-        .get(index as usize)
-        .copied()
-        .or_else(|| extra.get(index as usize).copied())
-}
-
 fn is_safe_candidate(mesh: &Mesh) -> bool {
     !mesh.is_empty()
         && mesh.vertices.len() >= 3
@@ -1501,26 +1137,6 @@ fn ordered_edge(first: u32, second: u32) -> (u32, u32) {
     }
 }
 
-fn subtract(first: [f32; 3], second: [f32; 3]) -> [f32; 3] {
-    [
-        first[0] - second[0],
-        first[1] - second[1],
-        first[2] - second[2],
-    ]
-}
-
-fn cross(first: [f32; 3], second: [f32; 3]) -> [f32; 3] {
-    [
-        first[1] * second[2] - first[2] * second[1],
-        first[2] * second[0] - first[0] * second[2],
-        first[0] * second[1] - first[1] * second[0],
-    ]
-}
-
-fn dot(first: [f32; 3], second: [f32; 3]) -> f32 {
-    first[0] * second[0] + first[1] * second[1] + first[2] * second[2]
-}
-
 fn cross64(first: [f64; 3], second: [f64; 3]) -> [f64; 3] {
     [
         first[1] * second[2] - first[2] * second[1],
@@ -1536,6 +1152,29 @@ fn dot64(first: [f64; 3], second: [f64; 3]) -> f64 {
 #[cfg(test)]
 mod gate_tests {
     use super::{RepairScore, RepairVerdict, gate};
+
+    #[test]
+    fn more_shells_are_allowed_only_when_non_manifold_edges_decrease() {
+        let before = RepairScore {
+            open_edges: 0,
+            non_manifold_edges: 2,
+            flipped_edges: 0,
+            degenerate_faces: 0,
+            duplicate_faces: 0,
+            inside_out_shells: 0,
+            tiny_shells: 0,
+            shells: 1,
+        };
+        let mut after = RepairScore {
+            shells: 2,
+            ..before
+        };
+        assert_eq!(gate(before, after), RepairVerdict::Worse);
+        after.non_manifold_edges = 1;
+        assert_eq!(gate(before, after), RepairVerdict::Improved);
+        after.open_edges = 1;
+        assert_eq!(gate(before, after), RepairVerdict::Worse);
+    }
 
     #[test]
     fn every_defect_is_gated_and_improvements_cannot_mask_damage() {

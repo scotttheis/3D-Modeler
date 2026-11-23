@@ -129,7 +129,7 @@ fn repair_fixes_winding_without_mutating_source_and_keeps_stage_contract() {
     let result = repair_mesh(&flipped).expect("repair flipped box");
     assert!(result.report.after.valid);
     assert_eq!(result.report.profile, "extended");
-    assert_eq!(result.report.stages.len(), 12);
+    assert_eq!(result.report.stages.len(), 13);
     assert_eq!(flipped, original);
     assert!((signed_volume(&result.mesh) - 1.0).abs() < 1.0e-4);
 }
@@ -153,6 +153,7 @@ fn extended_repair_closes_a_trivial_open_box_and_reports_exact_stage_names() {
             "StitchGaps (insert vertices)",
             "CloseTrivialHoles",
             "RemoveDoubleTriangles",
+            "SplitNonManifoldEdges",
             "FixFlippedTriangles",
             "CloseTrivialHoles (second pass)",
             "StitchGaps (reuse vertices)",
@@ -194,18 +195,20 @@ fn repair_removes_duplicate_and_tiny_shell_but_keeps_safe_best_effort_multi_shel
 }
 
 #[test]
-fn planar_cleanup_changes_a_fan_and_leaves_dense_grid_open_and_duplicate_free() {
+fn repair_leaves_flat_patches_alone_and_dense_grid_open_and_duplicate_free() {
+    // R4: flat-patch re-triangulation is no longer part of Repair; it added
+    // faces and fixed nothing.
     let source = flat_fan_box();
     let source_volume = signed_volume(&source);
     let result = repair_mesh(&source).expect("repair flat fan");
-    assert!(result.report.planar_cleanup.changed);
+    assert!(!result.report.planar_cleanup.changed);
     assert!(result.report.after.valid);
-    assert!(result.report.planar_cleanup.details[0].faces_after > 4);
+    assert!(result.mesh.face_count() <= source.face_count());
     assert!((signed_volume(&result.mesh) - source_volume).abs() < 1.0e-4);
 
     let grid = flat_grid(4);
     let grid_result = repair_mesh(&grid).expect("repair flat grid");
-    assert!(grid_result.report.planar_cleanup.changed);
+    assert!(!grid_result.report.planar_cleanup.changed);
     assert_eq!(grid_result.report.after.duplicate_faces, 0);
     assert_eq!(grid_result.report.after.non_manifold_edges, 0);
     assert!(grid_result.report.after.boundary_edges > 0);

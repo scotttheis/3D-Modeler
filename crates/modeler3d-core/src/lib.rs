@@ -21,6 +21,7 @@ mod paint;
 mod primitives;
 mod project;
 mod repair;
+mod repair_native;
 mod scene;
 mod shell_ops;
 mod simplify;

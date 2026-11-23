@@ -156,7 +156,7 @@ pasting the previous session's prompt.
   (unwelded triangles are not cavities); open input may lose a loose fin.
   Release exe +45 KB. Snapshot `G:D-Modeler_snapshot_20261123-054045_repair-R3`.
 
-### [ ] R4: native engine A: weld, stitch, non-manifold, thin triangles
+### [x] R4: native engine A: weld, stitch, non-manifold, thin triangles
 
 - Session: **Claude Opus 5.5, medium** (overseer; algorithm review is the
   hard part). Worker: **Codex, high.**
@@ -166,14 +166,28 @@ pasting the previous session's prompt.
   Windows.
 - Acceptance: native fixes f1 book, f5, f7, f8, f10 with no holes opened;
   distance from the original within the spec's bound. Fast gate.
+- Done 2026-11-23: [`repair-r4-card.md`](repair-r4-card.md) (Codex high wrote
+  it; overseer fixed two card errors). Fast gate passed
+  (`logs/gate/20261123-112022-fast`). Native fixture run
+  (`MODELER3D_REPAIR_ENGINE=native`, `repair_fixture_dir`): book fixed
+  (1 zero-area face gone, 0 holes, largest point move 0.0017 mm, volume
+  +0.0007 %), f5, f7 (fin gone, two cubes 2,000 mm3), f8 fixed; f10 sealed
+  with the sliver collapsed (health already calls it valid, so the app does
+  not offer Repair, like 3D Builder); f3, f4, f9 still fixed; f2, f6
+  unchanged (R5, R6); none worse. Decisions: the gate allows more shells only
+  when non-manifold edges went down (two parts touching along an edge are
+  two parts); the second stitch pass only moves points onto the grid, never
+  merges by cell; `regularize_planar_regions` removed from Repair now (was
+  R5). **Book now 5.1 s native (was 2.1 s); R5 must bring it under 5 s**
+  (edge maps are `BTreeMap`s rebuilt per stage).
 
 ### [ ] R5: native engine B: fill holes of any size
 
 - Session: **Claude Opus 5.5, medium.** Worker: **Codex, high.**
 - Fix plan Step 3 item 6, as measured in `repair-spec.md` section 4:
   minimum-total-area fill, no new points, no refine or smooth, flat holes
-  flat; cheaper fill above 300 edges. Remove
-  `regularize_planar_regions` from Repair.
+  flat; cheaper fill above 300 edges. (`regularize_planar_regions` was
+  already removed in R4.)
 - Acceptance: native fixes f2 and f3 and a 500-edge hole; book under 5 s.
   Fast gate.
 

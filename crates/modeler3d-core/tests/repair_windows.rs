@@ -46,6 +46,62 @@ fn volume(mesh: &Mesh) -> f64 {
         .sum()
 }
 
+fn max_move_mm(input: &Mesh, output: &Mesh) -> f64 {
+    let extent = input.extents().into_iter().fold(0.0_f32, f32::max);
+    let step = (f64::from(extent) / (input.vertex_count() as f64).cbrt()).max(0.01);
+    let cell = |point: [f32; 3]| point.map(|v| (f64::from(v) / step).floor() as i64);
+    let mut grid = std::collections::HashMap::<[i64; 3], Vec<[f32; 3]>>::new();
+    for &point in &input.vertices {
+        grid.entry(cell(point)).or_default().push(point);
+    }
+    output
+        .vertices
+        .iter()
+        .map(|&point| {
+            let key = cell(point);
+            let squared = |other: &[f32; 3]| {
+                (0..3)
+                    .map(|i| {
+                        let delta = f64::from(point[i]) - f64::from(other[i]);
+                        delta * delta
+                    })
+                    .sum::<f64>()
+            };
+            let mut nearest = f64::INFINITY;
+            for x in -1..=1 {
+                for y in -1..=1 {
+                    for z in -1..=1 {
+                        if let Some(points) = grid.get(&[key[0] + x, key[1] + y, key[2] + z]) {
+                            for other in points {
+                                nearest = nearest.min(squared(other));
+                            }
+                        }
+                    }
+                }
+            }
+            // Search other occupied cells only when their bounding box can beat
+            // the local candidate; this also handles new hole-fill points.
+            for (key, points) in &grid {
+                let lower = (0..3)
+                    .map(|i| {
+                        let lo = key[i] as f64 * step;
+                        let hi = lo + step;
+                        let p = f64::from(point[i]);
+                        let distance = (lo - p).max(p - hi).max(0.0);
+                        distance * distance
+                    })
+                    .sum::<f64>();
+                if lower < nearest {
+                    for other in points {
+                        nearest = nearest.min(squared(other));
+                    }
+                }
+            }
+            nearest.sqrt()
+        })
+        .fold(0.0, f64::max)
+}
+
 fn assert_never_worse(result: &RepairResult, original: &Mesh) {
     if result.report.can_apply {
         assert_eq!(result.report.verdict, RepairVerdict::Improved);
@@ -320,7 +376,7 @@ fn repair_fixture_dir() -> Result<(), Box<dyn std::error::Error>> {
         let start = Instant::now();
         let result = routed(&mesh, true);
         println!(
-            "{} engine={} verdict={:?} note={:?} score={:?}/{:?} volume={:.6}/{:.6} seconds={:.3}",
+            "{} engine={} verdict={:?} note={:?} score={:?}/{:?} volume={:.6}/{:.6} seconds={:.3} open_edges={} non_manifold_edges={} shells={} max_move_mm={:.6}",
             path.file_stem().unwrap_or_default().to_string_lossy(),
             result.report.engine.as_str(),
             result.report.verdict,
@@ -329,7 +385,11 @@ fn repair_fixture_dir() -> Result<(), Box<dyn std::error::Error>> {
             result.report.score_after,
             volume(&mesh),
             volume(&result.mesh),
-            start.elapsed().as_secs_f64()
+            start.elapsed().as_secs_f64(),
+            result.report.score_after.open_edges,
+            result.report.score_after.non_manifold_edges,
+            result.report.score_after.shells,
+            max_move_mm(&mesh, &result.mesh)
         );
     }
     Ok(())
