@@ -19,10 +19,11 @@ use std::{
 use modeler3d_core::{
     BlobOptions, BooleanOperation, BooleanOptions, BrushDirection, BrushFalloff, BrushSymmetry,
     CreasePolishOptions, ElasticGrabOptions, EmbossFont, GroupedCommand, HollowOptions, Mesh,
-    NormalizeDensityOptions, PrimitiveKind, Scene, SceneChild, SceneObject, SetColorCommand,
-    SetMetadataCommand, SmoothBrushOptions, TextEmbossOptions, Transform, TransformObjectCommand,
-    build_parametric_torus, inspect_mesh, load_project, normalize_face_density_with_hooks,
-    repair_mesh_with_profile, save_mesh, save_project, simplify_mesh, smooth_mesh, subdivide_mesh,
+    NormalizeDensityOptions, PrimitiveKind, RepairProfile, RepairRouteControl, Scene, SceneChild,
+    SceneObject, SetColorCommand, SetMetadataCommand, SmoothBrushOptions, TextEmbossOptions,
+    Transform, TransformObjectCommand, build_parametric_torus, inspect_mesh, load_project,
+    normalize_face_density_with_hooks, repair_mesh_routed, save_mesh, save_project, simplify_mesh,
+    smooth_mesh, subdivide_mesh,
 };
 use modeler3d_platform::{self, SlicerError};
 use rmcp::{
@@ -2384,7 +2385,15 @@ impl R4Server {
             }
             "repair" => {
                 let profile = schema::string_or(args, "profile", "extended")?;
-                let result = repair_mesh_with_profile(&source, &profile)?;
+                RepairProfile::parse(&profile)?;
+                let result = repair_mesh_routed(
+                    &source,
+                    RepairRouteControl {
+                        allow_windows: modeler3d_platform::windows_repair_supported(),
+                        cancelled: &|| cancel.load(Ordering::Acquire),
+                        progress: None,
+                    },
+                )?;
                 if result.report.nothing_to_fix() {
                     // Same rule as the desktop (OF-40): nothing is applied
                     // and no history entry is made.
@@ -3781,6 +3790,8 @@ fn repair_report(report: &modeler3d_core::RepairReport) -> Value {
         modeler3d_core::RepairVerdict::Worse => "Worse",
     };
     json!({
+        "engine":report.engine.as_str(),
+        "engine_note":report.engine_note,
         "profile":report.profile,
         "tolerance_mm":report.tolerance_mm,
         "tiny_shell_tolerance_mm":report.tiny_shell_tolerance_mm,

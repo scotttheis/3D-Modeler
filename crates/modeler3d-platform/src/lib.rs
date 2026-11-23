@@ -19,6 +19,25 @@ pub use window_chrome::set_title_bar_colors;
 pub mod updates;
 
 pub use console::attach_console;
+
+/// Reports whether the Windows repair engine DLL is installed under SystemRoot.
+/// Returns false on other platforms; Windows activation may still fail at runtime.
+#[must_use]
+pub fn windows_repair_supported() -> bool {
+    #[cfg(windows)]
+    {
+        std::env::var_os("SystemRoot").is_some_and(|root| {
+            std::path::PathBuf::from(root)
+                .join("System32/Windows.Graphics.Printing.3D.dll")
+                .is_file()
+        })
+    }
+    #[cfg(not(windows))]
+    {
+        false
+    }
+}
+
 pub use discovery::{
     AdapterKind, AdapterProfile, BackendKind, CapabilityProfile, CpuProfile, DiscoveryError,
     DisplayRelationship, MemoryProfile, OsMemoryBudget, discover_capability_profile,
@@ -41,3 +60,19 @@ pub use slicer::{
     SlicerError, SlicerInfo, SlicerLaunch, discover_slicers, launch_discovered_slicer,
     launch_slicer, slicer_info_from_path,
 };
+
+#[cfg(test)]
+mod repair_tests {
+    #[test]
+    fn repair_support_matches_the_host_installation() {
+        #[cfg(windows)]
+        let expected = std::env::var_os("SystemRoot").is_some_and(|root| {
+            std::path::PathBuf::from(root)
+                .join("System32/Windows.Graphics.Printing.3D.dll")
+                .is_file()
+        });
+        #[cfg(not(windows))]
+        let expected = false;
+        assert_eq!(super::windows_repair_supported(), expected);
+    }
+}

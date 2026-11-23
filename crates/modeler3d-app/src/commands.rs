@@ -9,10 +9,10 @@ use std::path::{Path, PathBuf};
 use modeler3d_core::{
     BlobOptions, BooleanOperation, BooleanOptions, Command as CoreCommand, CoreError,
     CreasePolishOptions, ElasticGrabOptions, GroupedCommand, HollowOptions, Mesh, PrimitiveKind,
-    ReplaceMeshCommand, Scene, SceneObject, SetColorCommand, SetMetadataCommand,
-    SmoothBrushOptions, TextEmbossOptions, TorusParameters, Transform, TransformObjectCommand,
-    build_parametric_torus, load_project, repair_mesh, save_project, torus_metadata,
-    torus_parameters_from_metadata,
+    RepairEngine, RepairRouteControl, ReplaceMeshCommand, Scene, SceneObject, SetColorCommand,
+    SetMetadataCommand, SmoothBrushOptions, TextEmbossOptions, TorusParameters, Transform,
+    TransformObjectCommand, build_parametric_torus, load_project, repair_mesh_routed, save_project,
+    torus_metadata, torus_parameters_from_metadata,
 };
 use modeler3d_mcp::{R4Document, ViewState as McpViewState};
 use modeler3d_viewport::{
@@ -1230,7 +1230,14 @@ impl CommandState {
     pub fn repair_selected(&mut self) -> Result<String, CommandError> {
         let index = self.first_selected("Repair")?;
         let source = self.scene.object(index)?.mesh().clone();
-        let result = repair_mesh(&source)?;
+        let result = repair_mesh_routed(
+            &source,
+            RepairRouteControl {
+                allow_windows: modeler3d_platform::windows_repair_supported(),
+                cancelled: &|| false,
+                progress: None,
+            },
+        )?;
         let unchanged_message = if result.report.nothing_to_fix() {
             Some(modeler3d_core::REPAIR_NOTHING_TO_FIX_MESSAGE)
         } else if result.report.refused() {
@@ -1243,12 +1250,19 @@ impl CommandState {
             return Ok(message.to_owned());
         }
         let command_result = self.scene.replace_mesh(index, result.mesh)?;
-        let message = if command_result.changed {
+        let mut message = if command_result.changed {
             self.dirty = true;
-            format!("Repair: {} stage(s)", result.report.stages.len())
+            if result.report.engine == RepairEngine::Windows {
+                "Repair: Windows repair engine".to_owned()
+            } else {
+                format!("Repair: {} stage(s)", result.report.stages.len())
+            }
         } else {
             String::from("Repair: no changes")
         };
+        if let Some(note) = &result.report.engine_note {
+            message.push_str(&format!(". {note}"));
+        }
         self.status(message.clone());
         Ok(message)
     }
@@ -3254,6 +3268,19 @@ mod tests {
                 .boundary_edges,
             6
         );
+        // A correct cavity takes the native route on every host. Its six-edge
+        // outer hole remains beyond the native pipeline's current fill limit.
+        let mut inner = modeler3d_core::make_sphere(5.0, 1).expect("inner sphere");
+        for face in &mut inner.faces {
+            face.swap(1, 2);
+        }
+        let mesh = Mesh::concatenate(&[mesh, inner]).expect("hollow sphere");
+        assert_eq!(
+            modeler3d_core::inspect_mesh(&mesh)
+                .expect("health")
+                .cavity_shells,
+            1
+        );
         state.scene.replace_mesh(0, mesh).expect("open sphere");
         state.dirty = false;
         state
@@ -3288,11 +3315,11 @@ mod tests {
             result["message"].as_str(),
             Some(modeler3d_core::REPAIR_REFUSED_MESSAGE)
         );
-        assert_eq!(result["report"]["verdict"], "NoBetter");
-        assert_eq!(
-            result["report"]["score_before"],
-            result["report"]["score_after"]
-        );
+        // The native pipeline attempts to reverse the inner surface. The
+        // worsening score must refuse it and preserve both mesh and history.
+        assert_eq!(result["report"]["verdict"], "Worse");
+        assert_eq!(result["report"]["score_before"]["shells"], 1);
+        assert_eq!(result["report"]["score_after"]["shells"], 2);
         assert_eq!(mcp.scene().history_state_id(), history);
         assert_eq!(mcp.scene().revision(), revision);
         assert_eq!(mcp.scene().objects()[0].mesh(), &source);

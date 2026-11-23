@@ -2,9 +2,9 @@
 
 //! Portable 3D Modeler scene, geometry, command, history, and project services.
 //!
-//! This crate intentionally contains no UI, renderer, operating-system, or
-//! MCP dependencies. Desktop and automation adapters share the same command
-//! and project boundaries exposed here.
+//! Desktop and automation adapters share the same command and project
+//! boundaries. The optional Windows repair adapter is isolated from the
+//! portable geometry services and uses only the public WinRT API.
 
 mod brushes;
 mod commands;
@@ -29,6 +29,7 @@ mod subdivide;
 mod texture;
 mod three_mf;
 mod transform;
+mod windows_repair;
 mod wrl;
 mod wrl_import;
 pub use model_import::{PreparedModelImport, import_model, prepare_model_import};
@@ -111,8 +112,10 @@ pub use project::{
 pub use repair::{
     PlanarCleanupDetail, PlanarCleanupReport, REPAIR_DEFAULT_PROFILE,
     REPAIR_NOTHING_TO_FIX_MESSAGE, REPAIR_REFUSED_MESSAGE, REPAIR_TINY_SHELL_TOLERANCE_MM,
-    REPAIR_TOLERANCE_MM, RepairProfile, RepairReport, RepairResult, RepairScore, RepairStageReport,
-    RepairVerdict, repair_mesh, repair_mesh_with_options, repair_mesh_with_profile,
+    REPAIR_TOLERANCE_MM, RepairEngine, RepairProfile, RepairReport, RepairResult,
+    RepairRouteControl, RepairScore, RepairStageReport, RepairVerdict, repair_mesh,
+    repair_mesh_routed, repair_mesh_with_options, repair_mesh_with_profile, repair_time_estimate,
+    repair_time_limit,
 };
 pub use scene::{
     COPY_GAP_MM, CommandResult, DEFAULT_MESH_COLOR, MERGE_NOT_TOUCHING_MESSAGE, ObjectId,

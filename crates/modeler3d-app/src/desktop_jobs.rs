@@ -6,8 +6,9 @@
 use std::path::PathBuf;
 
 use modeler3d_core::{
-    BooleanResult, CoreError, Mesh, MeshOperationLimits, PreparedBoolean, Scene, SceneSnapshot,
-    repair_mesh, simplify_mesh_by_percent, smooth_mesh, subdivide_mesh_even,
+    BooleanResult, CoreError, Mesh, MeshOperationLimits, PreparedBoolean, RepairEngine,
+    RepairRouteControl, Scene, SceneSnapshot, repair_mesh_routed, simplify_mesh_by_percent,
+    smooth_mesh, subdivide_mesh_even,
 };
 use modeler3d_platform::SlicerInfo;
 
@@ -147,7 +148,29 @@ where
             check_cancelled(handle)?;
             let (mesh, detail) = match operation {
                 MeshJobOperation::Repair => {
-                    let result = repair_mesh(&mesh).map_err(|error| error.to_string())?;
+                    let mut progress =
+                        |elapsed: std::time::Duration, estimate: std::time::Duration| {
+                            let percent = (10.0
+                                + 80.0 * elapsed.as_secs_f64() / estimate.as_secs_f64().max(0.001))
+                            .clamp(10.0, 90.0) as u8;
+                            report(
+                                percent,
+                                &format!(
+                                    "Repairing with the Windows engine, {}s of about {:.0}s",
+                                    elapsed.as_secs(),
+                                    estimate.as_secs_f64().ceil()
+                                ),
+                            );
+                        };
+                    let result = repair_mesh_routed(
+                        &mesh,
+                        RepairRouteControl {
+                            allow_windows: modeler3d_platform::windows_repair_supported(),
+                            cancelled: &|| handle.is_cancelled(),
+                            progress: Some(&mut progress),
+                        },
+                    )
+                    .map_err(|error| error.to_string())?;
                     if result.report.nothing_to_fix() {
                         return Ok(DesktopJobResult::Unchanged {
                             message: modeler3d_core::REPAIR_NOTHING_TO_FIX_MESSAGE.to_owned(),
@@ -159,7 +182,15 @@ where
                         });
                     }
                     let stage_count = result.report.stages.len();
-                    (result.mesh, format!("{stage_count} repair stage(s)"))
+                    let mut detail = if result.report.engine == RepairEngine::Windows {
+                        "Windows repair engine".to_owned()
+                    } else {
+                        format!("{stage_count} repair stage(s)")
+                    };
+                    if let Some(note) = &result.report.engine_note {
+                        detail.push_str(&format!(". {note}"));
+                    }
+                    (result.mesh, detail)
                 }
                 MeshJobOperation::Simplify(percent) => {
                     let result =

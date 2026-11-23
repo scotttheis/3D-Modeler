@@ -5,8 +5,10 @@
 //! open, and only claims a valid manifold when inspect_mesh can verify it.
 
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
+use std::time::Duration;
 
 use crate::mesh_ops::is_degenerate_triangle;
+use crate::windows_repair::{WindowsRepairError, run_windows_repair};
 use crate::{CoreError, Mesh, MeshHealthReport, MeshOperationLimits, inspect_mesh};
 
 /// The repair tolerance used by the Python reference, in millimetres.
@@ -15,6 +17,51 @@ pub const REPAIR_TOLERANCE_MM: f32 = 0.001;
 pub const REPAIR_TINY_SHELL_TOLERANCE_MM: f32 = 0.01;
 /// The default repair profile.
 pub const REPAIR_DEFAULT_PROFILE: RepairProfile = RepairProfile::Extended;
+
+/// Engine that produced a repair candidate; identifiers are portable report values.
+#[must_use]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum RepairEngine {
+    /// The optional Windows public WinRT repair service.
+    Windows,
+    /// The portable built-in repair pipeline.
+    Native,
+}
+
+impl RepairEngine {
+    /// Returns the same stable report identifier on every platform.
+    #[must_use]
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Windows => "windows",
+            Self::Native => "native",
+        }
+    }
+}
+
+/// Portable routing controls. Windows availability is supplied by the platform adapter.
+pub struct RepairRouteControl<'a> {
+    /// Permits attempting WinRT; unavailable engines fall back to native repair.
+    pub allow_windows: bool,
+    /// Cooperative user cancellation, checked while waiting and before applying a result.
+    pub cancelled: &'a dyn Fn() -> bool,
+    /// Windows wait progress as elapsed time and an estimated duration, about every 100 ms.
+    pub progress: Option<&'a mut dyn FnMut(Duration, Duration)>,
+}
+
+/// Estimates Windows repair time from measured face scaling, identically on every host.
+#[must_use]
+pub fn repair_time_estimate(faces: usize) -> Duration {
+    Duration::try_from_secs_f64(0.1 * (faces as f64 / 4000.0).powf(1.28)).unwrap_or(Duration::MAX)
+}
+
+/// Bounds Windows repair waits to three estimates, clamped to 30 seconds..10 minutes.
+#[must_use]
+pub fn repair_time_limit(faces: usize) -> Duration {
+    repair_time_estimate(faces)
+        .saturating_mul(3)
+        .clamp(Duration::from_secs(30), Duration::from_secs(600))
+}
 
 /// Ordered repair profile selection.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -182,6 +229,10 @@ fn gate(before: RepairScore, after: RepairScore) -> RepairVerdict {
 /// Health and commit-safety evidence for a repair attempt.
 #[derive(Clone, Debug, PartialEq)]
 pub struct RepairReport {
+    /// Engine that produced this candidate (native on hosts without Windows repair).
+    pub engine: RepairEngine,
+    /// Plain-language reason for using the native fallback, when applicable.
+    pub engine_note: Option<String>,
     /// Profile identifier.
     pub profile: String,
     /// Weld/degenerate tolerance in millimetres.
@@ -249,6 +300,252 @@ pub fn repair_mesh(mesh: &Mesh) -> Result<RepairResult, CoreError> {
     repair_mesh_with_options(mesh, REPAIR_DEFAULT_PROFILE, MeshOperationLimits::default())
 }
 
+/// Repairs through the optional Windows service or the portable native pipeline.
+/// Both routes share the topology gate; Windows candidates also retain bounds and
+/// closed single-shell volume. Correct cavities always use the native pipeline.
+pub fn repair_mesh_routed(
+    mesh: &Mesh,
+    mut control: RepairRouteControl<'_>,
+) -> Result<RepairResult, CoreError> {
+    let check_cancelled = || {
+        if (control.cancelled)() {
+            Err(CoreError::MeshOperation("Repair cancelled".into()))
+        } else {
+            Ok(())
+        }
+    };
+    check_cancelled()?;
+    let before = inspect_mesh(mesh)?;
+    if before.valid {
+        let result = repair_mesh(mesh)?;
+        check_cancelled()?;
+        return Ok(result);
+    }
+    let mut windows_collapsed = false;
+    let mut note = if before.cavity_shells > 0 && has_closed_cavity(mesh) {
+        Some("Repair kept the hollow inside, so the native engine was used.".to_owned())
+    } else if !control.allow_windows
+        || std::env::var("MODELER3D_REPAIR_ENGINE").is_ok_and(|value| value == "native")
+    {
+        None
+    } else {
+        MeshOperationLimits::default().check_mesh("repair", mesh)?;
+        let estimate = repair_time_estimate(mesh.face_count());
+        let mut elapsed = |duration| {
+            if let Some(progress) = control.progress.as_deref_mut() {
+                progress(duration, estimate);
+            }
+        };
+        let attempt = run_windows_repair(
+            mesh,
+            repair_time_limit(mesh.face_count()),
+            control.cancelled,
+            &mut elapsed,
+        );
+        check_cancelled()?;
+        let reason = match attempt {
+            Ok(candidate) => {
+                windows_collapsed = collapsed(mesh, &before, &candidate).is_some();
+                match windows_candidate(mesh, &before, candidate) {
+                    Ok(result) => {
+                        check_cancelled()?;
+                        return Ok(result);
+                    }
+                    Err(reason) => reason,
+                }
+            }
+            Err(WindowsRepairError::Unavailable) => "Windows repair was unavailable".to_owned(),
+            Err(WindowsRepairError::TimedOut) => "Windows repair took too long".to_owned(),
+            Err(WindowsRepairError::Cancelled) => {
+                "Windows repair stopped before it finished".to_owned()
+            }
+            Err(WindowsRepairError::Failed(reason)) => format!("Windows repair failed ({reason})"),
+        };
+        Some(format!("{reason}, so the built-in engine was used."))
+    };
+    check_cancelled()?;
+    let mut result = repair_mesh(mesh)?;
+    check_cancelled()?;
+    // A rejected Windows collapse must not be replaced by the native
+    // pipeline's closed, almost zero-volume triangle sheets. This extra
+    // catastrophic-loss check is limited to that fallback; native-only APIs
+    // and the Windows volume rule for open/multiple shells stay unchanged.
+    if windows_collapsed && nearly_empty_fallback(mesh, &result.mesh) {
+        result.report.candidate_safe = false;
+        result.report.can_apply = false;
+        let reason =
+            "The built-in repair also lost almost all of the model's volume. Nothing was changed.";
+        result.report.errors.push(reason.to_owned());
+        if let Some(note) = &mut note {
+            note.push(' ');
+            note.push_str(reason);
+        }
+    }
+    result.report.engine_note = note;
+    Ok(result)
+}
+
+fn windows_candidate(
+    mesh: &Mesh,
+    before: &MeshHealthReport,
+    candidate: Mesh,
+) -> Result<RepairResult, String> {
+    let after = inspect_mesh(&candidate)
+        .map_err(|error| format!("Windows repair returned an invalid model ({error})"))?;
+    let score_before = RepairScore::from_health(before);
+    let score_after = RepairScore::from_health(&after);
+    let verdict = gate(score_before, score_after);
+    let candidate_safe = is_safe_candidate(&candidate);
+    let candidate_changed = candidate != *mesh;
+    let collapse = collapsed(mesh, before, &candidate);
+    let result = RepairResult {
+        report: RepairReport {
+            engine: RepairEngine::Windows,
+            engine_note: None,
+            profile: REPAIR_DEFAULT_PROFILE.as_str().to_owned(),
+            tolerance_mm: REPAIR_TOLERANCE_MM,
+            tiny_shell_tolerance_mm: REPAIR_TINY_SHELL_TOLERANCE_MM,
+            before: before.clone(),
+            after,
+            score_before,
+            score_after,
+            verdict,
+            candidate_safe,
+            candidate_changed,
+            can_apply: candidate_safe && verdict == RepairVerdict::Improved,
+            errors: Vec::new(),
+            stages: vec![RepairStageReport {
+                name: "Windows repair engine".into(),
+                before_vertices: mesh.vertex_count(),
+                before_triangles: mesh.face_count(),
+                after_vertices: candidate.vertex_count(),
+                after_triangles: candidate.face_count(),
+                changed: candidate_changed,
+                error: None,
+            }],
+            planar_cleanup: PlanarCleanupReport {
+                changed: false,
+                patches: 0,
+                faces_before: 0,
+                faces_after: 0,
+                details: Vec::new(),
+            },
+        },
+        mesh: candidate,
+    };
+    if let Some(reason) = collapse {
+        return Err(reason);
+    }
+    if !result.report.can_apply {
+        return Err("Windows repair could not safely improve this model".to_owned());
+    }
+    Ok(result)
+}
+
+fn collapsed(
+    before_mesh: &Mesh,
+    before_health: &MeshHealthReport,
+    after_mesh: &Mesh,
+) -> Option<String> {
+    let (before_min, before_max) = before_mesh.bounds()?;
+    let Some((after_min, after_max)) = after_mesh.bounds() else {
+        return Some("Windows repair returned an empty model".into());
+    };
+    // Open or non-manifold input may lose loose fins and sheets, which
+    // legitimately shrinks the box, so only a large loss counts there.
+    let closed = before_health.boundary_edges == 0 && before_health.non_manifold_edges == 0;
+    for axis in 0..3 {
+        let lost = (f64::from(after_min[axis]) - f64::from(before_min[axis]))
+            .max(f64::from(before_max[axis]) - f64::from(after_max[axis]));
+        let extent = f64::from(before_max[axis]) - f64::from(before_min[axis]);
+        let extent_lost = extent - (f64::from(after_max[axis]) - f64::from(after_min[axis]));
+        if (closed && lost > 0.1) || (!closed && lost > 0.1 && extent_lost > extent * 0.5) {
+            return Some("Windows repair shrank the model by more than 0.1 mm".into());
+        }
+    }
+    if before_health.body_count == 1
+        && before_health.watertight
+        && before_health.winding_consistent
+        && before_health.non_manifold_edges == 0
+        && before_health.duplicate_faces == 0
+        && before_health.degenerate_faces == 0
+    {
+        let before_volume = repair_volume(before_mesh);
+        if before_volume > 0.0 && repair_volume(after_mesh) < before_volume * 0.97 {
+            return Some("Windows repair reduced the enclosed volume by more than 3%".into());
+        }
+    }
+    // Whatever the input, losing over half the volume is a collapse (the
+    // jittered-soup case), never a legitimate fin or overlap removal.
+    let before_volume = repair_volume(before_mesh).abs();
+    if before_volume > 1.0e-9 && repair_volume(after_mesh).abs() < before_volume * 0.5 {
+        return Some("Windows repair removed over half of the model's volume".into());
+    }
+    None
+}
+
+/// Whether a closed, inward-facing shell sits beside an outward one. Open
+/// pieces (unwelded soup) can have a negative partial volume but are not
+/// cavities, so only fully closed shells count.
+fn has_closed_cavity(mesh: &Mesh) -> bool {
+    let faces = mesh.faces.len();
+    let mut parent: Vec<usize> = (0..faces).collect();
+    fn root(parent: &mut [usize], mut face: usize) -> usize {
+        while parent[face] != face {
+            parent[face] = parent[parent[face]];
+            face = parent[face];
+        }
+        face
+    }
+    let mut edges: BTreeMap<(u32, u32), (usize, u32)> = BTreeMap::new();
+    for (index, face) in mesh.faces.iter().enumerate() {
+        for corner in 0..3 {
+            let (a, b) = (face[corner], face[(corner + 1) % 3]);
+            let entry = edges.entry((a.min(b), a.max(b))).or_insert((index, 0));
+            entry.1 += 1;
+            let (first, second) = (root(&mut parent, entry.0), root(&mut parent, index));
+            if first != second {
+                parent[second] = first;
+            }
+        }
+    }
+    let mut open = BTreeSet::new();
+    for &(owner, count) in edges.values() {
+        if count != 2 {
+            open.insert(root(&mut parent, owner));
+        }
+    }
+    let mut volumes: BTreeMap<usize, f64> = BTreeMap::new();
+    for (index, face) in mesh.faces.iter().enumerate() {
+        let corners = face.map(|vertex| mesh.vertices[vertex as usize].map(f64::from));
+        let shell = root(&mut parent, index);
+        *volumes.entry(shell).or_insert(0.0) +=
+            dot64(corners[0], cross64(corners[1], corners[2])) / 6.0;
+    }
+    // The outer shell may itself still have a hole; only the cavity must be closed.
+    volumes.values().any(|volume| *volume > 0.0)
+        && volumes
+            .iter()
+            .any(|(shell, volume)| *volume < 0.0 && !open.contains(shell))
+}
+
+fn repair_volume(mesh: &Mesh) -> f64 {
+    mesh.faces
+        .iter()
+        .map(|face| {
+            let a = mesh.vertices[face[0] as usize].map(f64::from);
+            let b = mesh.vertices[face[1] as usize].map(f64::from);
+            let c = mesh.vertices[face[2] as usize].map(f64::from);
+            dot64(a, cross64(b, c)) / 6.0
+        })
+        .sum()
+}
+
+fn nearly_empty_fallback(before: &Mesh, after: &Mesh) -> bool {
+    let before_volume = repair_volume(before).abs();
+    before_volume > 1.0e-12 && repair_volume(after).abs() < before_volume * 0.01
+}
+
 /// Repairs a mesh using a named Python-compatible profile.
 pub fn repair_mesh_with_profile(mesh: &Mesh, profile: &str) -> Result<RepairResult, CoreError> {
     let profile = RepairProfile::parse(profile)?;
@@ -312,6 +609,8 @@ pub fn repair_mesh_with_options(
     Ok(RepairResult {
         mesh: current,
         report: RepairReport {
+            engine: RepairEngine::Native,
+            engine_note: None,
             profile: profile.as_str().to_owned(),
             tolerance_mm: REPAIR_TOLERANCE_MM,
             tiny_shell_tolerance_mm: REPAIR_TINY_SHELL_TOLERANCE_MM,
@@ -1261,5 +1560,180 @@ mod gate_tests {
             after[(field + 1) % 8] -= 1;
             assert_eq!(gate(before, score(after)), RepairVerdict::Worse);
         }
+    }
+}
+
+#[cfg(test)]
+mod route_tests {
+    use super::*;
+
+    fn box_mesh(size: f32) -> Mesh {
+        crate::make_box([size; 3]).expect("box")
+    }
+
+    #[test]
+    fn time_estimate_and_limits_match_the_measured_curve() {
+        assert_eq!(repair_time_estimate(0), Duration::ZERO);
+        assert!((repair_time_estimate(4_000).as_secs_f64() - 0.1).abs() < 1.0e-8);
+        assert!((repair_time_estimate(40_000).as_secs_f64() - 1.90546).abs() < 0.0001);
+        assert_eq!(repair_time_limit(4_000), Duration::from_secs(30));
+        assert_eq!(repair_time_limit(0), Duration::from_secs(30));
+        assert_eq!(repair_time_limit(10_000_000), Duration::from_secs(600));
+        assert_eq!(repair_time_limit(usize::MAX), Duration::from_secs(600));
+        assert_eq!(
+            repair_time_limit(1_000_000),
+            repair_time_estimate(1_000_000).saturating_mul(3)
+        );
+    }
+
+    #[test]
+    fn collapse_checks_both_ends_of_every_axis() {
+        let before = box_mesh(10.0);
+        let health = inspect_mesh(&before).expect("health");
+        for axis in 0..3 {
+            for end in [-1.0, 1.0] {
+                let mut after = before.clone();
+                for point in &mut after.vertices {
+                    if point[axis].signum() == end {
+                        point[axis] -= end * 0.11;
+                    }
+                }
+                assert!(collapsed(&before, &health, &after).is_some());
+            }
+        }
+        let mut shifted = before.clone();
+        for point in &mut shifted.vertices {
+            point[0] += 0.09;
+        }
+        assert!(collapsed(&before, &health, &shifted).is_none());
+        assert!(collapsed(&before, &health, &before).is_none());
+        assert!(
+            collapsed(
+                &before,
+                &health,
+                &Mesh {
+                    vertices: vec![],
+                    faces: vec![]
+                }
+            )
+            .is_some()
+        );
+    }
+
+    #[test]
+    fn collapse_volume_guard_only_applies_to_positive_closed_single_manifolds() {
+        // Small bounds losses stay below 0.1 mm while volume drops by 5.9%.
+        let before = box_mesh(1.0);
+        let after = box_mesh(0.98);
+        let health = inspect_mesh(&before).expect("health");
+        assert!(collapsed(&before, &health, &after).is_some());
+        assert!(collapsed(&before, &health, &box_mesh(0.995)).is_none());
+        let mut open = before.clone();
+        open.faces.pop();
+        let mut multiple = before.clone();
+        multiple = Mesh::concatenate(&[multiple, box_mesh(0.5)]).expect("parts");
+        let mut non_manifold = before.clone();
+        non_manifold.faces.push(non_manifold.faces[0]);
+        let mut inward = before.clone();
+        for face in &mut inward.faces {
+            face.swap(1, 2);
+        }
+        for source in [open, multiple, non_manifold, inward] {
+            assert!(collapsed(&source, &inspect_mesh(&source).expect("health"), &after).is_none());
+        }
+    }
+
+    #[test]
+    fn bounding_box_guard_also_protects_open_and_multi_shell_inputs() {
+        let mut open = box_mesh(10.0);
+        open.faces.pop();
+        let multi = Mesh::concatenate(&[box_mesh(10.0), box_mesh(5.0)]).expect("parts");
+        // Closed multi-shell input is held to 0.1 mm; open input only to a
+        // large loss, because loose sheets and fins legitimately go.
+        assert!(
+            collapsed(
+                &multi,
+                &inspect_mesh(&multi).expect("health"),
+                &box_mesh(9.7)
+            )
+            .is_some()
+        );
+        assert!(collapsed(&open, &inspect_mesh(&open).expect("health"), &box_mesh(4.0)).is_some());
+        assert!(collapsed(&open, &inspect_mesh(&open).expect("health"), &box_mesh(9.7)).is_none());
+    }
+
+    #[test]
+    fn windows_candidate_requires_improvement_and_preserved_bounds() {
+        let mut damaged = box_mesh(10.0);
+        damaged.faces.push(damaged.faces[0]);
+        let before = inspect_mesh(&damaged).expect("health");
+        assert!(windows_candidate(&damaged, &before, damaged.clone()).is_err());
+        let shrunken = windows_candidate(&damaged, &before, box_mesh(4.0)).expect_err("collapsed");
+        assert!(shrunken.contains("shrank"));
+        let fixed = windows_candidate(&damaged, &before, box_mesh(10.0)).expect("improved");
+        assert!(fixed.report.can_apply);
+        assert_eq!(fixed.report.engine, RepairEngine::Windows);
+    }
+
+    #[test]
+    fn catastrophic_fallback_loss_is_distinct_from_legitimate_volume_changes() {
+        let mut open = box_mesh(10.0);
+        open.faces.pop();
+        assert!(nearly_empty_fallback(&open, &box_mesh(0.1)));
+        assert!(!nearly_empty_fallback(&open, &box_mesh(9.0)));
+        let mut sheet = box_mesh(10.0);
+        for point in &mut sheet.vertices {
+            point[1] = 0.0;
+        }
+        assert!(nearly_empty_fallback(&open, &sheet));
+        assert!(!nearly_empty_fallback(&sheet, &sheet));
+    }
+
+    #[test]
+    fn disabled_windows_matches_native_and_cancellation_returns_no_candidate() {
+        let mut mesh = box_mesh(10.0);
+        mesh.faces.pop();
+        let native = repair_mesh(&mesh).expect("native");
+        let routed = repair_mesh_routed(
+            &mesh,
+            RepairRouteControl {
+                allow_windows: false,
+                cancelled: &|| false,
+                progress: None,
+            },
+        )
+        .expect("routed");
+        assert_eq!(routed, native);
+        let error = repair_mesh_routed(
+            &mesh,
+            RepairRouteControl {
+                allow_windows: true,
+                cancelled: &|| true,
+                progress: None,
+            },
+        )
+        .expect_err("cancelled");
+        assert!(
+            matches!(error, CoreError::MeshOperation(message) if message == "Repair cancelled")
+        );
+    }
+
+    #[cfg(not(windows))]
+    #[test]
+    fn non_windows_route_falls_back_to_the_same_native_result() {
+        let mut mesh = box_mesh(10.0);
+        mesh.faces.pop();
+        let native = repair_mesh(&mesh).expect("native");
+        let mut routed = repair_mesh_routed(
+            &mesh,
+            RepairRouteControl {
+                allow_windows: true,
+                cancelled: &|| false,
+                progress: None,
+            },
+        )
+        .expect("routed");
+        assert!(routed.report.engine_note.take().is_some());
+        assert_eq!(routed, native);
     }
 }

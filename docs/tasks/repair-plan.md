@@ -130,7 +130,7 @@ pasting the previous session's prompt.
   so the R3 Windows result still needs the volume/bounding-box collapse check
   from the spec added in R3. Boolean operand repair left as it was.
 
-### [ ] R3: Windows engine route (fix plan Step 2)
+### [x] R3: Windows engine route (fix plan Step 2)
 
 - Session: **Claude Sonnet 5.5, medium** (overseer). Worker: **Codex, high**
   (WinRT interop). Review: the Sonnet session; escalate to Opus if review
@@ -146,6 +146,15 @@ pasting the previous session's prompt.
 - Gate: **Full.** All 10 fixtures + book: Windows route matches the R0 table
   (all fixed).
 - Ships: Release rebuilt; owner tries Repair on the book in the app.
+- Done 2026-11-23: [`repair-r3-card.md`](repair-r3-card.md). Full gate passed
+  (capture board not run: it stalls at the Save picker). Fixtures (`repair_fixture_dir`
+  test): Windows route fixed f1 book (12.7 s), f2-f9; f10 is already valid and
+  untouched; none worse. Findings: the engine's input must be doubles with
+  stride 3 (float32 is rejected with "parameter is incorrect"); the collapse check
+  also rejects any result losing over half the volume (the +/-0.01 mm soup case
+  came back at 4.7 of 14,114 mm3); only closed shells count as a correct cavity
+  (unwelded triangles are not cavities); open input may lose a loose fin.
+  Release exe +45 KB. Snapshot `G:D-Modeler_snapshot_20261123-054045_repair-R3`.
 
 ### [ ] R4: native engine A: weld, stitch, non-manifold, thin triangles
 
