@@ -181,7 +181,7 @@ pasting the previous session's prompt.
   R5). **Book now 5.1 s native (was 2.1 s); R5 must bring it under 5 s**
   (edge maps are `BTreeMap`s rebuilt per stage).
 
-### [ ] R5: native engine B: fill holes of any size
+### [x] R5: native engine B: fill holes of any size
 
 - Session: **Claude Opus 5.5, medium.** Worker: **Codex, high.**
 - Fix plan Step 3 item 6, as measured in `repair-spec.md` section 4:
@@ -190,6 +190,18 @@ pasting the previous session's prompt.
   already removed in R4.)
 - Acceptance: native fixes f2 and f3 and a 500-edge hole; book under 5 s.
   Fast gate.
+- Done 2026-11-23: [`repair-r5-card.md`](repair-r5-card.md) (Codex high
+  wrote it). Fast gate passed (`logs/gate/20261123-124229-fast`). Holes are
+  filled with n - 2 triangles and no new points: minimum total area up to
+  300 edges, smallest-area ear clipping above; no zero-area triangle, no edge
+  that already exists, a cap face that repeats an existing face is skipped
+  (overseer fix: a lone triangle is now refused, not cancelled to nothing).
+  Native fixtures (`evidence/repair-eval-2026-11-22/r5/fixtures-native.txt`):
+  f2, f3 (now the exact closed sphere, largest move 0.0015 mm, was 0.9 mm)
+  and a 500-edge hole (`genfx_open500.py`, 0.015 s) fixed; book **2.29 s**
+  (was 5.18 s), sorted edge lists instead of `BTreeMap`s and stages that skip
+  work when there is nothing open; book, f4, f6-f10 output bit-identical to
+  before (hash in the fixture line). f6 still unchanged (R6).
 
 ### [ ] R6: native engine C: Wrap (merge overlaps) and self-intersection check
 

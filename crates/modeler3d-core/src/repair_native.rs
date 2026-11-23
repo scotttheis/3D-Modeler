@@ -1,8 +1,8 @@
 //! Integer geometry for the portable Enhanced/Extended repair stages.
 
-use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet, VecDeque};
+use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
 
-use crate::{CoreError, Mesh};
+use crate::{CoreError, Mesh, MeshOperationLimits};
 
 type Point = [i64; 3];
 type Edge = (u32, u32);
@@ -117,6 +117,28 @@ fn edges(faces: &[[u32; 3]]) -> Owners {
         }
     }
     result
+}
+
+// Sorting once stores all edge owners contiguously without allocating one Vec
+// per edge. Face order within each edge matches the original ordered map.
+pub(super) fn edge_records(faces: &[[u32; 3]]) -> Vec<(Edge, usize, bool)> {
+    let mut records = Vec::with_capacity(faces.len().saturating_mul(3));
+    for (id, face) in faces.iter().enumerate() {
+        for i in 0..3 {
+            let (a, b) = (face[i], face[(i + 1) % 3]);
+            records.push((edge(a, b), id, a <= b));
+        }
+    }
+    records.sort_unstable();
+    records
+}
+
+fn open_points(faces: &[[u32; 3]]) -> BTreeSet<u32> {
+    edge_records(faces)
+        .chunk_by(|a, b| a.0 == b.0)
+        .filter(|owners| owners.len() == 1)
+        .flat_map(|owners| [owners[0].0.0, owners[0].0.1])
+        .collect()
 }
 
 fn boundary_points(owners: &Owners) -> BTreeSet<u32> {
@@ -286,6 +308,17 @@ pub(super) fn collapse(mesh: &Mesh, grid: RepairGrid) -> Result<Mesh, CoreError>
     let Some(points) = grid.points(mesh)? else {
         return Ok(mesh.clone());
     };
+    let mut collinear = false;
+    for face in &mesh.faces {
+        let [a, b, c] = face.map(|v| points[v as usize]);
+        if cross(difference(b, a), difference(c, a))? == [0; 3] {
+            collinear = true;
+            break;
+        }
+    }
+    if !collinear {
+        return clean_faces(&grid.mesh(&points, mesh.faces.clone())?);
+    }
     let mut topology = Topology::new(&mesh.faces);
     let mut queue: VecDeque<_> = (0..mesh.faces.len()).collect();
     let mut iterations = 0;
@@ -334,6 +367,287 @@ pub(super) fn collapse(mesh: &Mesh, grid: RepairGrid) -> Result<Mesh, CoreError>
     clean_faces(&grid.mesh(&points, topology.finish())?)
 }
 
+// The loop direction belongs to the existing surface. Reverse every emitted
+// triangle so the cap already agrees across the boundary, even for inward cups.
+pub(super) fn fill_holes(
+    mesh: &Mesh,
+    grid: RepairGrid,
+    limits: MeshOperationLimits,
+    loops: &[Vec<u32>],
+    maximum: usize,
+) -> Result<Mesh, CoreError> {
+    if !loops
+        .iter()
+        .any(|boundary| (3..=maximum).contains(&boundary.len()))
+    {
+        return Ok(mesh.clone());
+    }
+    let mut count = mesh.face_count();
+    let mut work = 0_u64;
+    for boundary in loops.iter().filter(|b| (3..=maximum).contains(&b.len())) {
+        let n = boundary.len();
+        count = count.checked_add(n - 2).ok_or_else(arithmetic_limit)?;
+        if n > limits.max_vertices || count > limits.max_faces {
+            return Err(fill_limit("hole fill exceeds the vertex or face limit"));
+        }
+        let size = u64::try_from(n).map_err(|_| arithmetic_limit())?;
+        let (units, scratch) = if n <= 300 {
+            (
+                size.checked_mul(size - 1)
+                    .and_then(|v| v.checked_mul(size - 2))
+                    .map(|v| v / 6),
+                size.checked_mul(size).and_then(|v| v.checked_mul(24)),
+            )
+        } else {
+            (
+                size.checked_mul(u64::from(size.ilog2()) + 1)
+                    .and_then(|v| v.checked_mul(3)),
+                size.checked_mul(512),
+            )
+        };
+        work = work
+            .checked_add(units.ok_or_else(arithmetic_limit)?)
+            .ok_or_else(arithmetic_limit)?;
+        limits.check_work("repair", work)?;
+        // Include the original/candidate buffers, lattice and edge membership.
+        let memory = (mesh.vertices.len() as u64)
+            .checked_mul(48)
+            .and_then(|v| v.checked_add((count as u64).checked_mul(192)?))
+            .and_then(|v| v.checked_add(scratch?))
+            .ok_or_else(arithmetic_limit)?;
+        if memory > limits.max_memory_bytes {
+            return Err(fill_limit("hole fill exceeds the working-memory limit"));
+        }
+    }
+    let Some(points) = grid.points(mesh)? else {
+        return Ok(mesh.clone());
+    };
+    let mut existing: HashSet<Edge> = mesh
+        .faces
+        .iter()
+        .flat_map(|f| [edge(f[0], f[1]), edge(f[1], f[2]), edge(f[2], f[0])])
+        .collect();
+    // A cap face on the same three points as an existing face would only
+    // cancel or double it (a lone triangle's "hole" is its own back side).
+    let sorted = |face: &[u32; 3]| {
+        let mut key = *face;
+        key.sort_unstable();
+        key
+    };
+    let mut present: HashSet<[u32; 3]> = mesh.faces.iter().map(sorted).collect();
+    let mut faces = mesh.faces.clone();
+    for boundary in loops.iter().filter(|b| (3..=maximum).contains(&b.len())) {
+        let hole = Hole {
+            mesh,
+            points: &points,
+            boundary,
+            existing: &existing,
+        };
+        let cap = if boundary.len() <= 300 {
+            hole.minimum_area()?
+        } else {
+            hole.ears()?
+        };
+        if let Some(cap) = cap {
+            // A triangulation of distinct cyclic positions uses a diagonal at
+            // most twice. Check before committing this hole, and also prevent
+            // later holes from adding any of its diagonals again.
+            let mut uses = HashMap::<Edge, usize>::new();
+            for face in &cap {
+                for i in 0..3 {
+                    *uses.entry(edge(face[i], face[(i + 1) % 3])).or_default() += 1;
+                }
+            }
+            if uses.values().any(|&count| count > 2)
+                || cap.iter().any(|face| present.contains(&sorted(face)))
+            {
+                continue;
+            }
+            present.extend(cap.iter().map(sorted));
+            existing.extend(uses.keys().copied());
+            faces.extend(cap);
+        }
+    }
+    Mesh::new(mesh.vertices.clone(), faces)
+}
+
+fn fill_limit(reason: &str) -> CoreError {
+    CoreError::OperationResourceLimit {
+        operation: "repair".to_owned(),
+        reason: reason.to_owned(),
+    }
+}
+
+struct Hole<'a> {
+    mesh: &'a Mesh,
+    points: &'a [Point],
+    boundary: &'a [u32],
+    existing: &'a HashSet<Edge>,
+}
+
+impl Hole<'_> {
+    fn allowed_edge(&self, i: usize, j: usize) -> bool {
+        let n = self.boundary.len();
+        i.abs_diff(j) == 1
+            || i.abs_diff(j) == n - 1
+            || !self
+                .existing
+                .contains(&edge(self.boundary[i], self.boundary[j]))
+    }
+
+    fn area(&self, i: usize, j: usize, k: usize) -> Result<Option<f64>, CoreError> {
+        let [a, b, c] = [i, j, k].map(|i| self.points[self.boundary[i] as usize]);
+        if cross(difference(b, a), difference(c, a))? == [0; 3] {
+            return Ok(None);
+        }
+        let [a, b, c] =
+            [i, j, k].map(|i| self.mesh.vertices[self.boundary[i] as usize].map(f64::from));
+        let ab = std::array::from_fn(|axis| b[axis] - a[axis]);
+        let ac = std::array::from_fn(|axis| c[axis] - a[axis]);
+        let normal = crate::repair::cross64(ab, ac);
+        Ok(Some(crate::repair::dot64(normal, normal).sqrt() * 0.5))
+    }
+
+    fn triangle(&self, i: usize, j: usize, k: usize) -> [u32; 3] {
+        [self.boundary[i], self.boundary[k], self.boundary[j]]
+    }
+
+    fn minimum_area(&self) -> Result<Option<Vec<[u32; 3]>>, CoreError> {
+        let n = self.boundary.len();
+        let mut weights = vec![f64::INFINITY; n * n];
+        let mut splits = vec![0; n * n];
+        let allowed: Vec<_> = (0..n)
+            .flat_map(|i| (0..n).map(move |j| self.allowed_edge(i, j)))
+            .collect();
+        for i in 0..n - 1 {
+            weights[i * n + i + 1] = 0.0;
+        }
+        for span in 2..n {
+            for i in 0..n - span {
+                let k = i + span;
+                if !allowed[i * n + k] {
+                    continue;
+                }
+                for m in i + 1..k {
+                    let subtotal = weights[i * n + m] + weights[m * n + k];
+                    if !subtotal.is_finite() {
+                        continue;
+                    }
+                    if let Some(area) = self.area(i, m, k)? {
+                        let candidate = subtotal + area;
+                        // Strict comparison and ascending m preserve the tie rule.
+                        if candidate < weights[i * n + k] {
+                            weights[i * n + k] = candidate;
+                            splits[i * n + k] = m;
+                        }
+                    }
+                }
+            }
+        }
+        if !weights[n - 1].is_finite() {
+            return Ok(None);
+        }
+        let mut pending = vec![(0, n - 1)];
+        let mut cap = Vec::with_capacity(n - 2);
+        while let Some((i, k)) = pending.pop() {
+            if k - i < 2 {
+                continue;
+            }
+            let m = splits[i * n + k];
+            cap.push(self.triangle(i, m, k));
+            pending.extend([(m, k), (i, m)]);
+        }
+        Ok(Some(cap))
+    }
+
+    fn ear(&self, i: usize, previous: &[usize], next: &[usize]) -> Result<Option<Ear>, CoreError> {
+        let (a, b) = (previous[i], next[i]);
+        if !self.allowed_edge(a, b) {
+            return Ok(None);
+        }
+        Ok(self.area(a, i, b)?.map(|area| Ear {
+            area,
+            position: i,
+            previous: a,
+            next: b,
+        }))
+    }
+
+    fn ears(&self) -> Result<Option<Vec<[u32; 3]>>, CoreError> {
+        let n = self.boundary.len();
+        let mut previous: Vec<_> = (0..n).map(|i| if i == 0 { n - 1 } else { i - 1 }).collect();
+        let mut next: Vec<_> = (0..n).map(|i| (i + 1) % n).collect();
+        let mut alive = vec![true; n];
+        let mut heap = BinaryHeap::new();
+        for i in 0..n {
+            if let Some(ear) = self.ear(i, &previous, &next)? {
+                heap.push(ear);
+            }
+        }
+        let mut cap = Vec::with_capacity(n - 2);
+        for _ in 0..n - 3 {
+            let ear = loop {
+                let Some(ear) = heap.pop() else {
+                    return Ok(None);
+                };
+                if alive[ear.position]
+                    && previous[ear.position] == ear.previous
+                    && next[ear.position] == ear.next
+                {
+                    break ear;
+                }
+            };
+            let (a, i, b) = (ear.previous, ear.position, ear.next);
+            cap.push(self.triangle(a, i, b));
+            alive[i] = false;
+            next[a] = b;
+            previous[b] = a;
+            for j in [a, b] {
+                if let Some(ear) = self.ear(j, &previous, &next)? {
+                    heap.push(ear);
+                }
+            }
+        }
+        let Some(i) = alive.iter().position(|&v| v) else {
+            return Ok(None);
+        };
+        if self.area(i, next[i], next[next[i]])?.is_none() {
+            return Ok(None);
+        }
+        cap.push(self.triangle(i, next[i], next[next[i]]));
+        Ok(Some(cap))
+    }
+}
+
+#[derive(Clone, Copy)]
+struct Ear {
+    area: f64,
+    position: usize,
+    previous: usize,
+    next: usize,
+}
+impl PartialEq for Ear {
+    fn eq(&self, other: &Self) -> bool {
+        self.cmp(other).is_eq()
+    }
+}
+impl Eq for Ear {}
+impl PartialOrd for Ear {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+impl Ord for Ear {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        other
+            .area
+            .total_cmp(&self.area)
+            .then_with(|| other.position.cmp(&self.position))
+            .then_with(|| other.previous.cmp(&self.previous))
+            .then_with(|| other.next.cmp(&self.next))
+    }
+}
+
 fn cell(point: Point) -> Point {
     point.map(|coordinate| coordinate.div_euclid(5))
 }
@@ -342,7 +656,10 @@ fn weld(mesh: &Mesh, grid: RepairGrid) -> Result<Mesh, CoreError> {
     let Some(points) = grid.points(mesh)? else {
         return Ok(mesh.clone());
     };
-    let open = boundary_points(&edges(&mesh.faces));
+    let open = open_points(&mesh.faces);
+    if open.is_empty() {
+        return collapse(mesh, grid);
+    }
     let mut buckets = HashMap::<Point, Vec<u32>>::new();
     let mut remap = (0..points.len())
         .map(index)
@@ -459,6 +776,9 @@ fn junctions(mesh: &Mesh, grid: RepairGrid) -> Result<Mesh, CoreError> {
     let Some(points) = grid.points(mesh)? else {
         return Ok(mesh.clone());
     };
+    if open_points(&mesh.faces).is_empty() {
+        return clean_faces(&grid.mesh(&points, mesh.faces.clone())?);
+    }
     let mut topology = Topology::new(&mesh.faces);
     let cap = mesh.face_count().saturating_mul(2);
     let mut splits = 0;
@@ -605,6 +925,13 @@ pub(super) fn split_non_manifold(mesh: &Mesh, grid: RepairGrid) -> Result<Mesh, 
         return Ok(mesh.clone());
     };
     let snapped = grid.mesh(&points, mesh.faces.clone())?;
+    let records = edge_records(&mesh.faces);
+    if records
+        .chunk_by(|a, b| a.0 == b.0)
+        .all(|owners| owners.len() == 2)
+    {
+        return Ok(snapped);
+    }
     let owners = edges(&mesh.faces);
     let mut endpoints = BTreeSet::new();
     let mut links = BTreeMap::<u32, Vec<(usize, usize)>>::new();
@@ -1002,5 +1329,109 @@ mod tests {
         let kept = remove_fins(&with_sheet, unit_grid()).expect("fins");
         assert_eq!(kept.face_count(), 14);
         assert!(kept.vertices.contains(&[40.0, 10.0, 5.0]));
+    }
+
+    #[test]
+    fn fill_opposes_boundary_edges_before_any_winding_stage() {
+        for inward in [false, true] {
+            let mut input = fixture(
+                &[[0, 0, 0], [10, 0, 0], [0, 10, 0], [0, 0, 10]],
+                &[[0, 2, 1], [0, 1, 3], [0, 3, 2]],
+            );
+            let mut boundary = vec![2, 1, 3];
+            if inward {
+                for face in &mut input.faces {
+                    face.swap(1, 2);
+                }
+                boundary.reverse();
+            }
+            let filled = fill_holes(
+                &input,
+                unit_grid(),
+                MeshOperationLimits::default(),
+                &[boundary],
+                4,
+            )
+            .expect("fill");
+            let health = crate::inspect_mesh(&filled).expect("health");
+            assert_eq!(health.boundary_edges, 0);
+            assert_eq!(health.flipped_edges, 0);
+            assert_eq!(health.non_manifold_edges, 0);
+            assert_eq!(filled.vertex_count(), 4);
+            assert_eq!(filled.face_count(), 4);
+        }
+    }
+
+    #[test]
+    fn minimum_area_ties_choose_the_smallest_split_position() {
+        let input = fixture(
+            &[
+                [0, 0, 10],
+                [10, 0, 10],
+                [10, 10, 10],
+                [0, 10, 10],
+                [5, 5, 0],
+            ],
+            &[[4, 0, 1], [4, 1, 2], [4, 2, 3], [4, 3, 0]],
+        );
+        let filled = fill_holes(
+            &input,
+            unit_grid(),
+            MeshOperationLimits::default(),
+            &[vec![0, 1, 2, 3]],
+            4,
+        )
+        .expect("tie fill");
+        assert_eq!(&filled.faces[4..], &[[0, 3, 1], [1, 3, 2]]);
+    }
+
+    #[test]
+    fn impossible_fills_leave_no_partial_cap_or_centre_point() {
+        let line = fixture(&[[0, 0, 0], [10, 0, 0], [20, 0, 0]], &[[0, 1, 2]]);
+        assert_eq!(
+            fill_holes(
+                &line,
+                unit_grid(),
+                MeshOperationLimits::default(),
+                &[vec![0, 1, 2]],
+                4
+            )
+            .expect("collinear hole"),
+            line
+        );
+        let blocked = fixture(
+            &[[0, 0, 0], [10, 0, 0], [10, 10, 0], [0, 10, 0]],
+            &[[0, 1, 2], [0, 2, 3], [0, 3, 1]],
+        );
+        assert_eq!(
+            fill_holes(
+                &blocked,
+                unit_grid(),
+                MeshOperationLimits::default(),
+                &[vec![0, 1, 2, 3]],
+                4
+            )
+            .expect("blocked diagonals"),
+            blocked
+        );
+    }
+
+    #[test]
+    fn hole_lattice_overflow_is_a_typed_resource_error() {
+        let input = Mesh::new(
+            vec![[0.0; 3], [f32::MAX, 0.0, 0.0], [0.0, 1.0, 0.0]],
+            vec![[0, 1, 2]],
+        )
+        .expect("finite mesh");
+        assert!(matches!(
+            fill_holes(
+                &input,
+                unit_grid(),
+                MeshOperationLimits::default(),
+                &[vec![0, 1, 2]],
+                4
+            ),
+            Err(CoreError::OperationResourceLimit { .. })
+        ));
     }
 }

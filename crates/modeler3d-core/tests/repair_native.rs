@@ -281,7 +281,10 @@ fn crack_within_five_steps_welds() {
 fn crack_wider_than_radius_is_not_zipped() {
     let input = cracked_sphere(0.03);
     let result = repair(&input);
-    assert!(open_edges(&result.mesh) > 0);
+    // R5 caps the two five-edge loops separately, without zipping the gap.
+    sealed(&result, 2);
+    assert_eq!(result.mesh.face_count(), input.face_count() + 2 * (5 - 2));
+    assert_eq!(result.mesh.vertex_count(), input.vertex_count());
     let stitch = &result.report.stages[0];
     assert_eq!(stitch.before_vertices, stitch.after_vertices);
     check_bound(&input, &result.mesh, true);
@@ -414,4 +417,336 @@ fn native_repair_is_deterministic() {
         let second = repair(&input);
         assert_eq!(first, second);
     }
+}
+
+fn open_cylinder(n: u32) -> Mesh {
+    let mut vertices = Vec::new();
+    for z in [0.0, 20.0] {
+        for i in 0..n {
+            let angle = std::f64::consts::TAU * f64::from(i) / f64::from(n);
+            vertices.push([(10.0 * angle.cos()) as f32, (10.0 * angle.sin()) as f32, z]);
+        }
+    }
+    vertices.push([0.0; 3]);
+    let mut faces = Vec::new();
+    for i in 0..n {
+        let j = (i + 1) % n;
+        faces.extend([[i, j, n + j], [i, n + j, n + i], [2 * n, j, i]]);
+    }
+    Mesh::new(vertices, faces).expect("open cylinder")
+}
+
+fn check_fill(input: &Mesh, result: &RepairResult) {
+    result
+        .mesh
+        .validate_non_empty()
+        .expect("Mesh::validate via public check");
+    assert!(
+        result.report.errors.is_empty(),
+        "{:?}",
+        result.report.errors
+    );
+    let health = inspect_mesh(&result.mesh).expect("filled mesh health");
+    assert_eq!(health.boundary_edges, 0);
+    assert_eq!(health.non_manifold_edges, 0);
+    assert_eq!(health.degenerate_faces, 0);
+    assert_eq!(health.flipped_edges, 0);
+    assert_eq!(result.report.verdict, RepairVerdict::Improved);
+    assert!(result.report.can_apply);
+    check_bound(input, &result.mesh, false);
+}
+
+fn top_triangles(mesh: &Mesh) -> Vec<[u32; 3]> {
+    mesh.faces
+        .iter()
+        .copied()
+        .filter(|f| f.iter().all(|&v| mesh.vertices[v as usize][2] == 20.0))
+        .collect()
+}
+
+#[test]
+fn r5_cylinders_fill_with_n_minus_two_flat_triangles_and_no_new_points() {
+    for n in [3, 4, 10, 64, 300, 301, 500] {
+        let input = open_cylinder(n);
+        let start = std::time::Instant::now();
+        let result = repair_mesh(&input).expect("cylinder repair");
+        let elapsed = start.elapsed();
+        check_fill(&input, &result);
+        sealed(&result, 1);
+        assert_eq!(top_triangles(&result.mesh).len(), n as usize - 2);
+        assert_eq!(
+            result.mesh.face_count(),
+            input.face_count() + n as usize - 2
+        );
+        assert_eq!(result.mesh.vertex_count(), input.vertex_count());
+        // Compare to the same closed polygonal cylinder (also meaningful at n=3).
+        let polygon_volume =
+            0.5 * f64::from(n) * 100.0 * (std::f64::consts::TAU / f64::from(n)).sin() * 20.0;
+        assert!((volume(&result.mesh) / polygon_volume - 1.0).abs() < 0.01);
+        if n == 64 || n == 500 {
+            assert!((volume(&result.mesh) / (std::f64::consts::PI * 2000.0) - 1.0).abs() < 0.01);
+        }
+        if n == 500 && !cfg!(debug_assertions) {
+            println!("r5 open500 Release seconds={:.6}", elapsed.as_secs_f64());
+            assert!(elapsed < std::time::Duration::from_secs(1), "{elapsed:?}");
+        }
+        let trivial = &result.report.stages[1];
+        assert_eq!(
+            trivial.after_triangles - trivial.before_triangles,
+            if n <= 4 { n as usize - 2 } else { 0 }
+        );
+    }
+}
+
+#[test]
+fn r5_holey_sphere_seals_without_moving_points_off_the_input_surface() {
+    let closed = make_sphere(15.0, 3).expect("sphere");
+    let mut input = closed.clone();
+    // About 3%, with no dependence on a platform RNG or mesh hashes.
+    input.faces = input
+        .faces
+        .into_iter()
+        .enumerate()
+        .filter_map(|(i, f)| (i % 33 != 7).then_some(f))
+        .collect();
+    let result = repair_mesh(&input).expect("holey sphere");
+    check_fill(&input, &result);
+    sealed(&result, 1);
+    assert!((volume(&result.mesh) / volume(&closed) - 1.0).abs() < 0.01);
+    assert!(max_move(&input, &result.mesh, 0.002) < 0.002);
+}
+
+fn collinear_top_box() -> Mesh {
+    let mut input = cube();
+    input
+        .faces
+        .retain(|face| *face != [4, 5, 6] && *face != [4, 6, 7]);
+    for (a, b) in [(4, 5), (5, 6), (6, 7), (7, 4)] {
+        let middle = input.vertices.len() as u32;
+        input.vertices.push(std::array::from_fn(|axis| {
+            (input.vertices[a][axis] + input.vertices[b][axis]) / 2.0
+        }));
+        let id = input
+            .faces
+            .iter()
+            .position(|face| face.contains(&(a as u32)) && face.contains(&(b as u32)))
+            .expect("side face");
+        let face = input.faces.remove(id);
+        let edge = (0..3)
+            .find(|&i| {
+                [face[i], face[(i + 1) % 3]].contains(&(a as u32))
+                    && [face[i], face[(i + 1) % 3]].contains(&(b as u32))
+            })
+            .expect("directed edge");
+        let (a, b, c) = (face[edge], face[(edge + 1) % 3], face[(edge + 2) % 3]);
+        input.faces.extend([[a, middle, c], [middle, b, c]]);
+    }
+    input
+}
+
+#[test]
+fn r5_eight_point_flat_hole_keeps_collinear_side_points_without_zero_area_faces() {
+    let input = collinear_top_box();
+    assert_eq!(open_edges(&input), 8);
+    let result = repair_mesh(&input).expect("collinear rim");
+    check_fill(&input, &result);
+    assert_eq!(result.mesh.face_count(), input.face_count() + 6);
+    assert!((volume(&result.mesh) - 1000.0).abs() < 1e-5);
+}
+
+fn nonplanar_cup() -> Mesh {
+    let mut vertices = vec![
+        [10.0, 0.0, 12.0],
+        [8.66, 5.0, 10.0],
+        [5.0, 8.66, 14.0],
+        [0.0, 10.0, 11.0],
+        [-5.0, 8.66, 13.0],
+        [-8.66, 5.0, 10.0],
+        [-10.0, 0.0, 12.0],
+        [-8.66, -5.0, 14.0],
+        [-5.0, -8.66, 11.0],
+        [0.0, -10.0, 13.0],
+        [5.0, -8.66, 10.0],
+        [8.66, -5.0, 14.0],
+    ];
+    vertices.push([0.0; 3]);
+    Mesh::new(vertices, (0..12).map(|i| [12, (i + 1) % 12, i]).collect()).expect("cup")
+}
+
+fn triangle_area(points: [[f64; 3]; 3]) -> f64 {
+    let normal = cross(sub(points[1], points[0]), sub(points[2], points[0]));
+    dot(normal, normal).sqrt() * 0.5
+}
+
+// Exhaustive recursive search, without the production DP's table or splitting
+// code. Twelve points have only 16,796 triangulations.
+fn brute_area(points: &[[f64; 3]]) -> f64 {
+    if points.len() < 3 {
+        return 0.0;
+    }
+    (1..points.len() - 1)
+        .map(|m| {
+            let area = triangle_area([points[0], points[m], points[points.len() - 1]]);
+            if area == 0.0 {
+                return f64::INFINITY;
+            }
+            area + brute_area(&points[..=m]) + brute_area(&points[m..])
+        })
+        .fold(f64::INFINITY, f64::min)
+}
+
+#[test]
+fn r5_nonplanar_cup_matches_the_exhaustive_minimum_area_fill() {
+    let input = nonplanar_cup();
+    let result = repair_mesh(&input).expect("cup repair");
+    check_fill(&input, &result);
+    let rim: Vec<_> = input.vertices[..12]
+        .iter()
+        .map(|p| {
+            result
+                .mesh
+                .vertices
+                .iter()
+                .copied()
+                .min_by(|a, b| {
+                    let da = sub(a.map(f64::from), p.map(f64::from));
+                    let db = sub(b.map(f64::from), p.map(f64::from));
+                    dot(da, da).total_cmp(&dot(db, db))
+                })
+                .expect("rim survives")
+                .map(f64::from)
+        })
+        .collect();
+    let cap: Vec<_> = result
+        .mesh
+        .faces
+        .iter()
+        .filter(|f| f.iter().all(|&v| result.mesh.vertices[v as usize][2] > 5.0))
+        .collect();
+    assert_eq!(cap.len(), 10);
+    let actual: f64 = cap
+        .iter()
+        .map(|face| triangle_area(face.map(|v| result.mesh.vertices[v as usize].map(f64::from))))
+        .sum();
+    let minimum = brute_area(&rim);
+    assert!(
+        (actual - minimum).abs() < minimum * 1e-12,
+        "{actual} != {minimum}"
+    );
+}
+
+#[test]
+fn r5_fill_avoids_the_smaller_diagonal_already_used_by_the_mesh() {
+    let input = Mesh::new(
+        vec![
+            [0.0, -1.0, 0.0],
+            [0.0, 1.0, 0.0],
+            [-10.0, 0.0, 10.0],
+            [10.0, 0.0, 10.0],
+        ],
+        vec![[0, 2, 1], [0, 1, 3]],
+    )
+    .expect("two triangles sharing a forbidden diagonal");
+    let result = repair_mesh(&input).expect("constrained cap");
+    check_fill(&input, &result);
+    assert_eq!(result.mesh.face_count(), 4);
+    assert_eq!(result.mesh.vertex_count(), 4);
+    assert!((volume(&result.mesh) - 200.0 / 3.0).abs() < 1e-5);
+}
+
+#[test]
+fn r5_fill_preserves_winding_for_outward_and_inside_out_holes() {
+    for mut input in [open_cylinder(64), nonplanar_cup()] {
+        for inward in [false, true] {
+            if inward {
+                for face in &mut input.faces {
+                    face.swap(1, 2);
+                }
+            }
+            let result = repair_mesh(&input).expect("oriented fill");
+            check_fill(&input, &result);
+            assert_eq!(result.report.after.inside_out_shells, 0);
+            assert!(volume(&result.mesh) > 0.0);
+        }
+    }
+}
+
+#[test]
+fn r5_hole_fills_are_deterministic_on_both_algorithm_paths() {
+    for input in [
+        open_cylinder(64),
+        open_cylinder(500),
+        collinear_top_box(),
+        nonplanar_cup(),
+    ] {
+        let first = repair_mesh(&input).expect("first repair");
+        let second = repair_mesh(&input).expect("second repair");
+        check_fill(&input, &first);
+        check_fill(&input, &second);
+        assert_eq!(first, second);
+    }
+}
+
+#[test]
+fn r5_simple_profile_uses_the_same_no_new_point_fill() {
+    for n in [4, 10, 500] {
+        let input = open_cylinder(n);
+        let result =
+            modeler3d_core::repair_mesh_with_profile(&input, "simple").expect("simple fill");
+        check_fill(&input, &result);
+        assert_eq!(top_triangles(&result.mesh).len(), n as usize - 2);
+        assert_eq!(result.mesh.vertex_count(), input.vertex_count());
+    }
+}
+
+#[test]
+fn r5_hole_fill_resource_failures_keep_the_stage_input_and_report_the_error() {
+    use modeler3d_core::{MeshOperationLimits, RepairProfile, repair_mesh_with_options};
+    let input = open_cylinder(64);
+    for limits in [
+        MeshOperationLimits {
+            max_work_units: 1,
+            ..MeshOperationLimits::default()
+        },
+        MeshOperationLimits {
+            max_faces: input.face_count(),
+            ..MeshOperationLimits::default()
+        },
+        MeshOperationLimits {
+            max_memory_bytes: 32_000,
+            ..MeshOperationLimits::default()
+        },
+    ] {
+        let result = repair_mesh_with_options(&input, RepairProfile::Extended, limits)
+            .expect("best effort report");
+        let stage = result
+            .report
+            .stages
+            .iter()
+            .find(|s| s.name == "CloseAllHoles")
+            .expect("fill stage");
+        assert!(stage.error.is_some());
+        assert_eq!(stage.before_triangles, stage.after_triangles);
+        assert_eq!(result.report.after.boundary_edges, 64);
+        result
+            .mesh
+            .validate_non_empty()
+            .expect("unchanged valid structure");
+    }
+}
+
+#[test]
+fn r5_an_isolated_triangle_is_refused_unchanged_not_capped_with_its_back() {
+    let input = Mesh::new(
+        vec![[0.0; 3], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]],
+        vec![[0, 1, 2]],
+    )
+    .expect("triangle");
+    let original = input.clone();
+    let result = repair_mesh(&input).expect("repair");
+    assert_eq!(result.report.verdict, RepairVerdict::NoBetter);
+    assert!(result.report.refused());
+    assert!(!result.report.can_apply);
+    assert_eq!(result.mesh.face_count(), 1);
+    assert_eq!(input, original);
 }

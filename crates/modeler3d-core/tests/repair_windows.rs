@@ -376,7 +376,7 @@ fn repair_fixture_dir() -> Result<(), Box<dyn std::error::Error>> {
         let start = Instant::now();
         let result = routed(&mesh, true);
         println!(
-            "{} engine={} verdict={:?} note={:?} score={:?}/{:?} volume={:.6}/{:.6} seconds={:.3} open_edges={} non_manifold_edges={} shells={} max_move_mm={:.6}",
+            "{} engine={} verdict={:?} note={:?} score={:?}/{:?} volume={:.6}/{:.6} seconds={:.3} open_edges={} non_manifold_edges={} shells={} max_move_mm={:.6} faces={} hash={:016x}",
             path.file_stem().unwrap_or_default().to_string_lossy(),
             result.report.engine.as_str(),
             result.report.verdict,
@@ -389,8 +389,32 @@ fn repair_fixture_dir() -> Result<(), Box<dyn std::error::Error>> {
             result.report.score_after.open_edges,
             result.report.score_after.non_manifold_edges,
             result.report.score_after.shells,
-            max_move_mm(&mesh, &result.mesh)
+            max_move_mm(&mesh, &result.mesh),
+            result.mesh.face_count(),
+            mesh_hash(&result.mesh)
         );
     }
     Ok(())
+}
+
+/// FNV-1a over vertex bits and face indices: equal output, equal hash.
+fn mesh_hash(mesh: &Mesh) -> u64 {
+    let mut hash = 0xcbf2_9ce4_8422_2325_u64;
+    let mut feed = |value: u32| {
+        for byte in value.to_le_bytes() {
+            hash ^= u64::from(byte);
+            hash = hash.wrapping_mul(0x0100_0000_01b3);
+        }
+    };
+    for vertex in &mesh.vertices {
+        for coordinate in vertex {
+            feed(coordinate.to_bits());
+        }
+    }
+    for face in &mesh.faces {
+        for index in face {
+            feed(*index);
+        }
+    }
+    hash
 }

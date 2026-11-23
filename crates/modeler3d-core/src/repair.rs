@@ -7,7 +7,6 @@
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::time::Duration;
 
-use crate::mesh_ops::is_degenerate_triangle;
 use crate::repair_native::{self as native, RepairGrid};
 use crate::windows_repair::{WindowsRepairError, run_windows_repair};
 use crate::{CoreError, Mesh, MeshHealthReport, MeshOperationLimits, inspect_mesh};
@@ -580,9 +579,10 @@ pub fn repair_mesh_with_options(
             let result = match name {
                 "StitchGaps (insert vertices)" => native::stitch(value, grid, true),
                 "StitchGaps (reuse vertices)" => native::stitch(value, grid, false),
-                "CloseTrivialHoles" | "CloseTrivialHoles (second pass)" | "CloseAllHoles" => {
-                    close_small_holes(value)
+                "CloseTrivialHoles" | "CloseTrivialHoles (second pass)" => {
+                    close_holes(value, grid, limits, 4)
                 }
+                "CloseAllHoles" => close_holes(value, grid, limits, usize::MAX),
                 "RemoveDoubleTriangles" => native::clean_faces(value),
                 "SplitNonManifoldEdges" => native::split_non_manifold(value, grid),
                 "FixFlippedTriangles" | "FixFlippedTriangles (second pass)" => fix_winding(value),
@@ -730,21 +730,13 @@ fn fix_winding(mesh: &Mesh) -> Result<Mesh, CoreError> {
     if mesh.faces.is_empty() {
         return Ok(mesh.clone());
     }
-    let mut edge_owners = BTreeMap::<(u32, u32), Vec<(usize, bool)>>::new();
-    for (face_index, face) in mesh.faces.iter().copied().enumerate() {
-        for (first, second) in [(face[0], face[1]), (face[1], face[2]), (face[2], face[0])] {
-            edge_owners
-                .entry(ordered_edge(first, second))
-                .or_default()
-                .push((face_index, first <= second));
-        }
-    }
+    let edges = native::edge_records(&mesh.faces);
     let mut adjacency = vec![Vec::<(usize, bool, bool)>::new(); mesh.face_count()];
-    for owners in edge_owners.values() {
+    for owners in edges.chunk_by(|a, b| a.0 == b.0) {
         for first_index in 0..owners.len() {
             for second_index in (first_index + 1)..owners.len() {
-                let (first_face, first_direction) = owners[first_index];
-                let (second_face, second_direction) = owners[second_index];
+                let (_, first_face, first_direction) = owners[first_index];
+                let (_, second_face, second_direction) = owners[second_index];
                 adjacency[first_face].push((second_face, first_direction, second_direction));
                 adjacency[second_face].push((first_face, second_direction, first_direction));
             }
@@ -800,58 +792,14 @@ fn fix_winding(mesh: &Mesh) -> Result<Mesh, CoreError> {
     Mesh::new(mesh.vertices.clone(), faces)
 }
 
-fn close_small_holes(mesh: &Mesh) -> Result<Mesh, CoreError> {
+fn close_holes(
+    mesh: &Mesh,
+    grid: RepairGrid,
+    limits: MeshOperationLimits,
+    maximum: usize,
+) -> Result<Mesh, CoreError> {
     let loops = boundary_loops(mesh);
-    if loops.is_empty() {
-        return Ok(mesh.clone());
-    }
-    let mut vertices = mesh.vertices.clone();
-    let mut faces = mesh.faces.clone();
-    for boundary in loops {
-        if !(3..=4).contains(&boundary.len()) {
-            continue;
-        }
-        let mut center = [0.0_f32; 3];
-        let mut valid = true;
-        for index in &boundary {
-            let Some(vertex) = vertices.get(*index as usize) else {
-                valid = false;
-                break;
-            };
-            for axis in 0..3 {
-                center[axis] += vertex[axis] / boundary.len() as f32;
-            }
-        }
-        if !valid || center.iter().any(|value| !value.is_finite()) {
-            continue;
-        }
-        let center_index =
-            u32::try_from(vertices.len()).map_err(|_| CoreError::OperationResourceLimit {
-                operation: "repair".to_owned(),
-                reason: "hole-center vertex index overflow".to_owned(),
-            })?;
-        let mut cap = Vec::with_capacity(boundary.len());
-        for index in 0..boundary.len() {
-            let first = boundary[index];
-            let second = boundary[(index + 1) % boundary.len()];
-            let (Some(first_point), Some(second_point)) =
-                (vertices.get(first as usize), vertices.get(second as usize))
-            else {
-                valid = false;
-                break;
-            };
-            if is_degenerate_triangle(*first_point, *second_point, center) {
-                valid = false;
-                break;
-            }
-            cap.push([first, second, center_index]);
-        }
-        if valid {
-            vertices.push(center);
-            faces.extend(cap);
-        }
-    }
-    Mesh::new(vertices, faces)
+    native::fill_holes(mesh, grid, limits, &loops, maximum)
 }
 
 fn wrap_mesh(mesh: &Mesh) -> Result<Mesh, CoreError> {
@@ -953,27 +901,14 @@ fn compact_mesh(vertices: &[[f32; 3]], faces: &[[u32; 3]]) -> Result<Mesh, CoreE
     Mesh::new(compact_vertices, compact_faces)
 }
 
-fn edge_map(mesh: &Mesh) -> BTreeMap<(u32, u32), Vec<(usize, bool)>> {
-    let mut edges = BTreeMap::new();
-    for (face_index, face) in mesh.faces.iter().copied().enumerate() {
-        for (first, second) in [(face[0], face[1]), (face[1], face[2]), (face[2], face[0])] {
-            edges
-                .entry(ordered_edge(first, second))
-                .or_insert_with(Vec::new)
-                .push((face_index, first <= second));
-        }
-    }
-    edges
-}
-
 fn face_components(mesh: &Mesh) -> Vec<Vec<usize>> {
-    let edges = edge_map(mesh);
+    let edges = native::edge_records(&mesh.faces);
     let mut adjacency = vec![Vec::<usize>::new(); mesh.face_count()];
-    for owners in edges.values() {
+    for owners in edges.chunk_by(|a, b| a.0 == b.0) {
         for first in 0..owners.len() {
             for second in (first + 1)..owners.len() {
-                adjacency[owners[first].0].push(owners[second].0);
-                adjacency[owners[second].0].push(owners[first].0);
+                adjacency[owners[first].1].push(owners[second].1);
+                adjacency[owners[second].1].push(owners[first].1);
             }
         }
     }
@@ -1001,13 +936,13 @@ fn face_components(mesh: &Mesh) -> Vec<Vec<usize>> {
 }
 
 fn boundary_loops(mesh: &Mesh) -> Vec<Vec<u32>> {
-    let edges = edge_map(mesh);
+    let edges = native::edge_records(&mesh.faces);
     let mut outgoing = BTreeMap::<u32, Vec<u32>>::new();
-    for (&key, owners) in &edges {
+    for owners in edges.chunk_by(|a, b| a.0 == b.0) {
         if owners.len() != 1 {
             continue;
         }
-        let (face_index, _) = owners[0];
+        let (key, face_index, _) = owners[0];
         let Some(face) = mesh.faces.get(face_index) else {
             continue;
         };
@@ -1137,7 +1072,7 @@ fn ordered_edge(first: u32, second: u32) -> (u32, u32) {
     }
 }
 
-fn cross64(first: [f64; 3], second: [f64; 3]) -> [f64; 3] {
+pub(super) fn cross64(first: [f64; 3], second: [f64; 3]) -> [f64; 3] {
     [
         first[1] * second[2] - first[2] * second[1],
         first[2] * second[0] - first[0] * second[2],
@@ -1145,7 +1080,7 @@ fn cross64(first: [f64; 3], second: [f64; 3]) -> [f64; 3] {
     ]
 }
 
-fn dot64(first: [f64; 3], second: [f64; 3]) -> f64 {
+pub(super) fn dot64(first: [f64; 3], second: [f64; 3]) -> f64 {
     first[0] * second[0] + first[1] * second[1] + first[2] * second[2]
 }
 

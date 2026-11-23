@@ -195,7 +195,7 @@ fn repair_removes_duplicate_and_tiny_shell_but_keeps_safe_best_effort_multi_shel
 }
 
 #[test]
-fn repair_leaves_flat_patches_alone_and_dense_grid_open_and_duplicate_free() {
+fn repair_leaves_flat_patches_alone_and_caps_dense_grid_without_duplicates() {
     // R4: flat-patch re-triangulation is no longer part of Repair; it added
     // faces and fixed nothing.
     let source = flat_fan_box();
@@ -211,8 +211,11 @@ fn repair_leaves_flat_patches_alone_and_dense_grid_open_and_duplicate_free() {
     assert!(!grid_result.report.planar_cleanup.changed);
     assert_eq!(grid_result.report.after.duplicate_faces, 0);
     assert_eq!(grid_result.report.after.non_manifold_edges, 0);
-    assert!(grid_result.report.after.boundary_edges > 0);
-    assert!(grid_result.mesh.face_count() <= grid.face_count());
+    // R5 closes the 16-edge outside loop with 16 - 2 existing-point faces.
+    assert_eq!(grid_result.report.after.boundary_edges, 0);
+    assert_eq!(grid_result.report.after.degenerate_faces, 0);
+    assert_eq!(grid_result.mesh.face_count(), grid.face_count() + 14);
+    assert_eq!(grid_result.mesh.vertex_count(), grid.vertex_count());
 }
 
 #[test]
@@ -365,16 +368,21 @@ fn f9_inside_out_sphere_is_flagged_and_repaired_outward() {
 }
 
 #[test]
-fn six_edge_hole_is_refused_without_claiming_an_improvement() {
+fn six_edge_hole_is_filled_with_four_triangles_and_no_new_points() {
     let mut source = make_sphere(15.0, 1).expect("sphere");
     source.faces.retain(|face| !face.contains(&12));
     assert_eq!(inspect_mesh(&source).expect("health").boundary_edges, 6);
     let original = source.clone();
     let result = repair_mesh(&source).expect("repair");
-    assert_eq!(result.report.verdict, RepairVerdict::NoBetter);
-    assert!(result.report.refused());
-    assert!(!result.report.can_apply);
-    assert_eq!(result.report.score_before, result.report.score_after);
+    assert_eq!(result.report.verdict, RepairVerdict::Improved);
+    assert!(!result.report.refused());
+    assert!(result.report.can_apply);
+    assert_eq!(result.report.after.boundary_edges, 0);
+    assert_eq!(result.report.after.non_manifold_edges, 0);
+    assert_eq!(result.report.after.degenerate_faces, 0);
+    assert_eq!(result.mesh.face_count(), source.face_count() + 4);
+    // The removed fan's unused centre disappears; no point is added.
+    assert_eq!(result.mesh.vertex_count(), source.vertex_count() - 1);
     assert_eq!(source, original);
 }
 
