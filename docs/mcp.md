@@ -2,8 +2,8 @@
 
 3D Modeler can be driven by an AI assistant through the Model Context Protocol
 (MCP). The assistant uses the **same tools you click**, one command at a time,
-and every change can be undone from the desktop. The catalog has **76 tools**
-(contract version `2026-11-17.1`).
+and every change can be undone from the desktop. The catalog has **77 tools**
+(contract version `2026-11-24.1`).
 
 ## How it fits together
 
@@ -62,10 +62,10 @@ Each profile includes everything in the one before it.
 
 | Profile | Tools | What it allows |
 |---|---|---|
-| `observe` | 10 | Look only: status, scene summary, print check, mesh health, measure, view state, settings, update status. |
-| `model` | 62 | Adds everything that edits the model or the view, and undo/redo. |
-| `files` | 73 | Adds file and project tools, inside approved folders only. |
-| `full` | 76 | Adds launching a slicer, quitting the app and answering update prompts. |
+| `observe` | 11 | Look only: status, scene summary, print check, mesh health, measure, view state, settings, update status, problem reports. |
+| `model` | 63 | Adds everything that edits the model or the view, and undo/redo. |
+| `files` | 74 | Adds file and project tools, inside approved folders only. |
+| `full` | 77 | Adds launching a slicer, quitting the app and answering update prompts. |
 
 Start with `observe` or `model` and move up only when you need to.
 
@@ -82,10 +82,16 @@ Start with `observe` or `model` and move up only when you need to.
 - **View:** `view_state`, `set_view`, `frame_view`, `orbit_view`, `pan_view`, `zoom_view`, `view_preset`
 - **Project and files:** `new_project`, `open_project`, `save_project`, `save_project_as`, `import_file`, `export_file`, `recent_files`, `open_recent`, `capture_window`
 - **Print:** `discover_slicers`, `launch_slicer`
-- **Application:** `app_settings`, `set_app_settings`, `customize_ribbon`, `show_screen`, `get_update_status`, `respond_to_update`, `exit_app`
+- **Application:** `app_settings`, `set_app_settings`, `customize_ribbon`, `show_screen`, `get_update_status`, `respond_to_update`, `exit_app`, `report_problem`
 
 Long operations (such as a boolean on a dense model) return an operation id;
 poll it with `operation_status` or stop it with `cancel_operation`.
+
+`report_problem` makes the same report as the desktop's **Report a problem**
+window: the assistant's description (and an optional suggested fix) plus the
+app version, system and recent errors from the log. It returns a link to a
+pre-filled GitHub issue and the report text. It sends nothing; the assistant
+gives the link to the person, who checks and posts it.
 
 ## Safety
 

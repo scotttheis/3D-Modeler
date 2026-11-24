@@ -26,6 +26,7 @@ mod packaging;
 mod preferences;
 mod print_handoff;
 mod print_prep;
+mod problem_report;
 mod recent_preview;
 mod resize_overlay;
 mod review_capture;

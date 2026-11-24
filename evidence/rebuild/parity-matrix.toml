@@ -4294,3 +4294,11 @@ visual_capture_pair = []
 observed_steps = "Review captures of open/held hand and claw in both themes, and the Settings window."
 verification_context = "Windows 11 Enterprise; review build, 96 DPI / 100%; 2026-11-20 on rebuild/work."
 next_slice = "Hand redraw (docs/tasks/grab-cursor-hand.md)"
+
+[[feature]]
+id = "modeler3d.application.report_problem"
+area = "application"
+behavior = "Report a problem (Settings, or Report beside an error, or offered after an internal error): the person's answers plus version, system, graphics and recent log errors with the home folder hidden become a pre-filled GitHub issue link that the person reviews and posts. The app sends nothing."
+mcp_tool = ["report_problem"]
+rust_paths = ["crates/modeler3d-app/src/problem_report.rs", "crates/modeler3d-app/src/diagnostics.rs", "crates/modeler3d-app/src/shell/app_tools.rs"]
+evidence = [".github/ISSUE_TEMPLATE/bug.yml", "CONTRIBUTING.md"]

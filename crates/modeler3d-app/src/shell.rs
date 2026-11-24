@@ -493,6 +493,8 @@ pub struct Modeler3dApp {
     review: Option<crate::review_capture::ReviewCapture>,
     /// A brief notice fading out over the viewport (OF-38).
     toast: Option<crate::toast::Toast>,
+    /// The Report a problem window, while it is open.
+    problem_report: Option<crate::problem_report::ProblemReportWindow>,
 }
 
 impl Default for Modeler3dApp {
@@ -601,6 +603,7 @@ impl Default for Modeler3dApp {
             dialog_generation: 0,
             review: None,
             toast: None,
+            problem_report: None,
         }
     }
 }
@@ -625,6 +628,13 @@ impl Modeler3dApp {
         }
         app.load_preferences();
         app.updater.start(&creation_context.egui_ctx);
+        // An internal error in the last run: offer to report it, once.
+        if let Some(crash) = crate::diagnostics::take_crash_note() {
+            app.problem_report = Some(crate::problem_report::ProblemReportWindow::new(
+                None,
+                Some(&crash),
+            ));
+        }
         app.initialize_viewport(creation_context);
         match crate::mcp_bridge::McpDesktopIntegration::start() {
             Ok(bridge) => app.mcp_bridge = Some(bridge),
@@ -1426,6 +1436,15 @@ impl Modeler3dApp {
                 self.wgpu_render_state = Some(render_state);
             }
             Err(error) => self.set_viewport_error("viewport renderer creation", error.to_string()),
+        }
+    }
+
+    /// Opens Report a problem (Settings, or Report beside an error), keeping
+    /// one that is already open so nothing typed is lost.
+    pub(crate) fn open_problem_report(&mut self, error: Option<&str>) {
+        if self.problem_report.is_none() {
+            self.problem_report =
+                Some(crate::problem_report::ProblemReportWindow::new(error, None));
         }
     }
 
@@ -2663,6 +2682,7 @@ impl Modeler3dApp {
     }
 
     fn report_command_error(&mut self, error: CommandError) {
+        crate::diagnostics::record_error("command failed", &error);
         self.commands.set_status(error.to_string());
     }
 
@@ -5681,7 +5701,7 @@ impl Modeler3dApp {
                 self.viewport_error = None;
                 self.update_native_viewport_texture();
             }
-            Err(error) => self.viewport_error = Some(error.to_string()),
+            Err(error) => self.set_viewport_error("viewport", error.to_string()),
         }
     }
 
@@ -5721,7 +5741,7 @@ impl Modeler3dApp {
         }
         match self.camera.frame_bounds(&bounds) {
             Ok(()) => self.camera_auto_frame_pending = false,
-            Err(error) => self.viewport_error = Some(error.to_string()),
+            Err(error) => self.set_viewport_error("viewport", error.to_string()),
         }
         if let Some([yaw, pitch, distance]) = self.review.as_ref().and_then(|r| r.camera()) {
             let mut state = self.camera.state();
@@ -6084,7 +6104,7 @@ impl Modeler3dApp {
                 self.numeric_edited_axes = [false; 3];
                 self.last_numeric_axis = None;
             }
-            Err(error) => self.viewport_error = Some(error.to_string()),
+            Err(error) => self.set_viewport_error("viewport", error.to_string()),
         }
         self.resize_size_preview = preview;
     }
@@ -6129,7 +6149,7 @@ impl Modeler3dApp {
         let pose = match pose {
             Ok(pose) => pose,
             Err(error) => {
-                self.viewport_error = Some(error.to_string());
+                self.set_viewport_error("viewport", error.to_string());
                 return;
             }
         };
@@ -6138,7 +6158,7 @@ impl Modeler3dApp {
             {
                 Ok(bounds) => bounds.center(),
                 Err(error) => {
-                    self.viewport_error = Some(error.to_string());
+                    self.set_viewport_error("viewport", error.to_string());
                     return;
                 }
             }
@@ -6750,7 +6770,7 @@ impl Modeler3dApp {
                                 self.commands.set_status("Snap preview");
                             }
                             Ok(_) => {}
-                            Err(error) => self.viewport_error = Some(error.to_string()),
+                            Err(error) => self.set_viewport_error("viewport", error.to_string()),
                         }
                     }
                 }
@@ -7862,6 +7882,10 @@ impl Modeler3dApp {
                 }
                 return;
             }
+            DialogAction::ReportProblem(error) => {
+                self.open_problem_report(error.as_deref());
+                return;
+            }
             DialogAction::ClearRecentFiles => {
                 self.clear_recent_files();
                 if let Some(dialog) = self.dialog.as_mut() {
@@ -8314,6 +8338,11 @@ impl eframe::App for Modeler3dApp {
         self.render_overwrite_confirmation(&ctx);
         self.render_confirmation(&ctx);
         self.render_ribbon_customizer(&ctx);
+        if let Some(window) = self.problem_report.as_mut()
+            && window.show(&ctx) == crate::problem_report::WindowResult::Closed
+        {
+            self.problem_report = None;
+        }
         if self.confirm_action.is_none()
             && self.pending_after_save.is_none()
             && self.updater.show(&ctx)

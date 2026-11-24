@@ -1,7 +1,14 @@
 name: Bug report
 description: Something is broken or does not do what you expect.
 labels: [bug]
+# The app's Settings > Report a problem (and the Report button beside an
+# error) opens this form with the fields below filled in by their ids
+# (crates/modeler3d-app/src/problem_report.rs). Keep the ids the same.
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for telling us! Inside 3D Modeler, **Settings > Report a problem** fills most of this in for you.
   - type: textarea
     id: what
     attributes:
@@ -13,25 +20,27 @@ body:
     attributes:
       label: Steps to reproduce
       description: What you clicked, in order. A small model file helps if you can share one.
-    validations:
-      required: true
+  - type: textarea
+    id: fix
+    attributes:
+      label: How could it be fixed?
+      description: Optional. Any idea how it should work, or what might be wrong.
   - type: input
     id: version
     attributes:
-      label: 3D Modeler version
-      description: Shown on the Releases page you downloaded from.
-    validations:
-      required: true
-  - type: dropdown
-    id: os
-    attributes:
-      label: System
-      options: [Windows, macOS, Linux]
+      label: 3D Modeler version and system
+      description: Shown in Settings > About, or on the Releases page you downloaded from.
+      placeholder: 1.0.5 on Windows 11
     validations:
       required: true
   - type: textarea
-    id: log
+    id: details
     attributes:
-      label: Log file
-      description: "modeler3d.log (see CONTRIBUTING.md for where it is). Remove anything private."
+      label: Technical details
+      description: "Filled in by the app: version, graphics and recent errors from modeler3d.log (see CONTRIBUTING.md for where it is). Remove anything private."
       render: text
+  - type: textarea
+    id: media
+    attributes:
+      label: Screenshots
+      description: Optional. Drag a picture of the problem here. Leave out anything private.

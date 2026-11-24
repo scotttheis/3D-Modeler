@@ -196,6 +196,7 @@ impl Modeler3dApp {
     ) -> Result<Value, AdapterError> {
         match name {
             "get_update_status" => Ok(self.updater.status()),
+            "report_problem" => Ok(mcp_problem_report(args).mcp_value()),
             "respond_to_update" => {
                 let response = optional_str(args, "response").unwrap_or("");
                 let version = optional_str(args, "version").unwrap_or("");
@@ -839,6 +840,17 @@ fn merge_lighting(
     .normalized())
 }
 
+/// The report the desktop's Report a problem window makes from the same
+/// answers. It is only prepared: the person posts it.
+fn mcp_problem_report(args: &Map<String, Value>) -> crate::problem_report::ProblemReport {
+    let mut report = crate::problem_report::ProblemReport::new(None);
+    report.what = optional_str(args, "what_happened").unwrap_or("").to_owned();
+    report.steps = optional_str(args, "steps").unwrap_or("").to_owned();
+    report.fix = optional_str(args, "suggested_fix").unwrap_or("").to_owned();
+    report.include_details = optional_bool(args, "include_details").unwrap_or(true);
+    report
+}
+
 fn optional_str<'a>(args: &'a Map<String, Value>, key: &str) -> Option<&'a str> {
     args.get(key).and_then(Value::as_str)
 }
@@ -917,6 +929,36 @@ mod tests {
     fn saved_settings(app: &Modeler3dApp) -> Value {
         serde_json::from_slice(&std::fs::read(&app.settings_path).expect("settings saved"))
             .expect("settings json")
+    }
+
+    #[test]
+    fn mcp_report_problem_matches_the_window_and_sends_nothing() {
+        let (mut ai, directory) = app("report");
+        let result = mcp(
+            &mut ai,
+            "report_problem",
+            json!({"what_happened":"Hollow froze","suggested_fix":"Show progress","include_details":false}),
+        )
+        .unwrap();
+        assert_eq!(result["title"], json!("Hollow froze"));
+        assert!(result["url"].as_str().is_some_and(|url| {
+            url.starts_with("https://github.com/scotttheis/3D-Modeler/issues/new?template=bug.yml")
+        }));
+        assert!(
+            result["report"]
+                .as_str()
+                .is_some_and(|text| text.contains("Show progress"))
+        );
+        assert!(
+            result["report"]
+                .as_str()
+                .is_some_and(|text| text.contains("Not included."))
+        );
+        assert!(matches!(
+            mcp(&mut ai, "report_problem", json!({"what_happened":""})),
+            Err(AdapterError::Validation(_))
+        ));
+        let _ = std::fs::remove_dir_all(directory);
     }
 
     #[test]

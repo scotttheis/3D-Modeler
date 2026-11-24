@@ -140,6 +140,8 @@ pub(crate) enum DialogAction {
     Texture(PathBuf, f32),
     /// Remove the selection's textures.
     RemoveTexture,
+    /// Open Report a problem, with the error the dialog shows, if any.
+    ReportProblem(Option<String>),
     /// Apply torus parameters.
     Torus(TorusParameters),
     /// Update the isolated torus render preview without creating history.
@@ -323,6 +325,7 @@ impl DialogState {
     pub(crate) fn set_error(&mut self, message: impl Into<String>) {
         self.message = message.into();
         self.message_tone = MessageTone::Error;
+        crate::diagnostics::record_error("dialog error", &self.message);
     }
 
     /// Sets a print report using a tone that reflects its blocking findings.
@@ -626,7 +629,17 @@ impl DialogState {
                             );
                         }
                     });
-                copy_button(ui, "dialog-message-copy", &self.message);
+                ui.horizontal(|ui| {
+                    copy_button(ui, "dialog-message-copy", &self.message);
+                    if matches!(self.message_tone, MessageTone::Error)
+                        && ui
+                            .small_button("Report")
+                            .on_hover_text("Report this problem on GitHub")
+                            .clicked()
+                    {
+                        action = Some(DialogAction::ReportProblem(Some(self.message.clone())));
+                    }
+                });
             }
             match self.kind {
                 DialogKind::Settings => self.settings_footer(ui, &mut action),
@@ -966,6 +979,13 @@ impl DialogState {
             ui.label("Application");
             if ui.add(dialog_button("About")).clicked() {
                 self.about_open = true;
+            }
+            if ui
+                .add(dialog_button("Report a problem"))
+                .on_hover_text("Tell us what went wrong. It opens as a report on GitHub.")
+                .clicked()
+            {
+                *action = Some(DialogAction::ReportProblem(None));
             }
             if ui.add(dialog_button("Close")).clicked() {
                 *action = Some(DialogAction::Close);

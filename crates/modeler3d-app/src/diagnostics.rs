@@ -19,7 +19,9 @@ use modeler3d_viewport::ViewportFrameReport;
 
 const LOG_FILE_NAME: &str = "modeler3d.log";
 const PREVIOUS_LOG_FILE_NAME: &str = "modeler3d.previous.log";
+const CRASH_NOTE_FILE_NAME: &str = "last-crash.txt";
 const MAX_LOG_BYTES: u64 = 2 * 1024 * 1024;
+const MAX_REPORT_LOG_BYTES: usize = 256 * 1024;
 const MAX_DETAIL_BYTES: usize = 12 * 1024;
 const MAX_CONTEXT_BYTES: usize = 256;
 const SLOW_FRAME_THRESHOLD: Duration = Duration::from_millis(500);
@@ -67,11 +69,14 @@ pub(crate) fn install_panic_hook() {
                 .location()
                 .map(|location| format!("{}:{}", location.file(), location.line()))
                 .unwrap_or_else(|| String::from("unknown location"));
+            let backtrace = Backtrace::force_capture();
             record(
                 "PANIC",
                 "unhandled panic",
-                &format!("{payload} at {location}\n{}", Backtrace::force_capture()),
+                &format!("{payload} at {location}\n{backtrace}"),
             );
+            // Kept for the next start, which offers to report it.
+            let _ = write_crash_note(&format!("{payload} at {location}\n{backtrace}"));
             previous_hook(panic_info);
         }));
     });
@@ -304,6 +309,48 @@ fn record(level: &str, context: &str, detail: &str) {
             path.display()
         );
     }
+}
+
+/// The last part of the diagnostic log (the previous file, then the current
+/// one), at most `MAX_REPORT_LOG_BYTES`, for a problem report. Empty when
+/// nothing was ever logged.
+pub(crate) fn recent_log_text() -> String {
+    let path = log_path();
+    let mut bytes = fs::read(path.with_file_name(PREVIOUS_LOG_FILE_NAME)).unwrap_or_default();
+    bytes.extend(fs::read(&path).unwrap_or_default());
+    let start = bytes.len().saturating_sub(MAX_REPORT_LOG_BYTES);
+    String::from_utf8_lossy(&bytes[start..]).into_owned()
+}
+
+/// Where the diagnostic log is, for a problem report to name.
+pub(crate) fn log_file_path() -> PathBuf {
+    log_path()
+}
+
+/// Takes the note an internal error left in the last run, if any, so the
+/// app offers to report it once.
+pub(crate) fn take_crash_note() -> Option<String> {
+    let path = log_path().with_file_name(CRASH_NOTE_FILE_NAME);
+    let note = fs::read_to_string(&path).ok()?;
+    let _ = fs::remove_file(&path);
+    let note = note.trim();
+    (!note.is_empty()).then(|| note.to_owned())
+}
+
+fn write_crash_note(text: &str) -> io::Result<()> {
+    let path = log_path().with_file_name(CRASH_NOTE_FILE_NAME);
+    if let Some(parent) = path.parent() {
+        fs::create_dir_all(parent)?;
+    }
+    let mut text = text.to_owned();
+    if text.len() > MAX_DETAIL_BYTES {
+        let mut end = MAX_DETAIL_BYTES;
+        while !text.is_char_boundary(end) {
+            end -= 1;
+        }
+        text.truncate(end);
+    }
+    fs::write(path, text)
 }
 
 fn log_path() -> PathBuf {

@@ -31,7 +31,7 @@ unknown fields are rejected, and responding while a model job is active is
 busy. Progress is polled with `get_update_status`; Later defers restart while
 an accepted download finishes. Installation preserves the desktop save prompt.
 No client-provided URL, path, command or repository can be executed.
-The catalog is 76 tools, version `2026-11-17.1`. Existing tool order and the
+The catalog was 76 tools, version `2026-11-17.1`, when updates were added. Existing tool order and the
 pinned rmcp 3.9.0 transport are preserved. The current official MCP tools
 specification and Rust SDK release notes were reviewed; this adds tools to
 the established transport without changing its negotiated protocol support.

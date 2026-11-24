@@ -20,8 +20,16 @@ If your change mixes kinds, please split it.
 
 ## Reporting a bug
 
-Use the **Bug report** form. It asks for your version, your system and the log
-file, `modeler3d.log`, found here:
+The easiest way is inside 3D Modeler: **Settings > Report a problem**, or the
+**Report** button beside an error message. Say what went wrong and, if you
+like, how it could be fixed. The app adds its version, your system and the
+recent errors from its log (your home folder is hidden, and no models or files
+are included), shows you all of it, and opens a filled-in **Bug report** on
+GitHub for you to check and post. The app never sends anything by itself. If
+3D Modeler hit an internal error, it offers this the next time it starts.
+
+You can also fill in the **Bug report** form by hand. It asks for your
+version, your system and the log file, `modeler3d.log`, found here:
 
 - Windows: `%LOCALAPPDATA%\Modeler3D\logs`
 - macOS: `~/Library/Logs/Modeler3D`

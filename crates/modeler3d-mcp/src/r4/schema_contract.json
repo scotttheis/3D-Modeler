@@ -8437,6 +8437,34 @@
         "can_install",
         "message"
       ]
+    },
+    "440fc8e7ef1c8740b030290e1db0925b025b1a49dd50bc79015871049280cc36": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "report": {
+          "type": "string"
+        },
+        "details_in_link": {
+          "type": "boolean"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "url",
+        "report",
+        "details_in_link",
+        "message"
+      ]
     }
   },
   "tools": {
@@ -13940,6 +13968,40 @@
         ]
       },
       "output_schema_id": "e6205a54aecb77eaeea7a5abc398be4e5199e611bb91d262dafc05bbd0f6fc4b"
+    },
+    "report_problem": {
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "what_happened": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "What went wrong, and what was expected, in the person's words.",
+            "minLength": 1
+          },
+          "steps": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "Optional: what was being done when it happened, in order."
+          },
+          "suggested_fix": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "Optional: how it could be fixed."
+          },
+          "include_details": {
+            "type": "boolean",
+            "default": true,
+            "description": "Add the app version, system, graphics adapter and recent errors from the app's log (home folder hidden; no models or files). Default true."
+          }
+        },
+        "required": [
+          "what_happened"
+        ],
+        "description": "Prepare the same problem report as the desktop's Report a problem window. Returns a link to a pre-filled GitHub issue and the report text. Nothing is sent: give the link to the person, who reviews and posts it."
+      },
+      "output_schema_id": "440fc8e7ef1c8740b030290e1db0925b025b1a49dd50bc79015871049280cc36"
     }
   }
 }
