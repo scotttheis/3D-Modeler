@@ -203,6 +203,7 @@ fn run_inner() -> Result<(), AppError> {
             .with_icon(artwork::load_native_icon(&artwork_root)?)
             .with_inner_size([1_280.0, 840.0])
             .with_min_inner_size([980.0, 640.0]),
+        wgpu_options: wgpu_options(),
         ..Default::default()
     };
     let launch_file = launch_file(env::args_os().skip(1));
@@ -221,6 +222,24 @@ fn run_inner() -> Result<(), AppError> {
     drop(watchdog);
     native_result?;
     Ok(())
+}
+
+/// eframe's graphics setup, asking the adapter for its full texture size
+/// instead of eframe's fixed 8192 pixels. The window surface and the 3D view
+/// are textures, so this is the largest window the app can draw; the window
+/// is capped to it as well (OF-71, see `Modeler3dApp::new`).
+fn wgpu_options() -> eframe::egui_wgpu::WgpuConfiguration {
+    let mut options = eframe::egui_wgpu::WgpuConfiguration::default();
+    if let eframe::egui_wgpu::WgpuSetup::CreateNew(create_new) = &mut options.wgpu_setup {
+        let eframe_descriptor = std::sync::Arc::clone(&create_new.device_descriptor);
+        create_new.device_descriptor = std::sync::Arc::new(move |adapter| {
+            let mut descriptor = eframe_descriptor(adapter);
+            descriptor.required_limits.max_texture_dimension_2d =
+                adapter.limits().max_texture_dimension_2d;
+            descriptor
+        });
+    }
+    options
 }
 
 fn run_smoke_check() -> Result<(), AppError> {

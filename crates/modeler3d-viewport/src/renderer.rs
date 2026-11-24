@@ -392,7 +392,10 @@ impl ViewportRenderer {
     ) -> Result<Self, ViewportError> {
         validate_config(config)?;
         let info = adapter.get_info();
-        let max_texture_dimension_2d = adapter.limits().max_texture_dimension_2d;
+        // The device's limit, not the adapter's: a shared device (eframe's)
+        // may have asked for less than the adapter offers, and a texture
+        // above the device limit is a fatal validation error (OF-71).
+        let max_texture_dimension_2d = device.limits().max_texture_dimension_2d;
         if config.width > max_texture_dimension_2d || config.height > max_texture_dimension_2d {
             return Err(ViewportError::InvalidInput(format!(
                 "renderer dimensions exceed the device limit of {max_texture_dimension_2d} pixels"
@@ -3585,6 +3588,39 @@ mod tests {
 
         let wrong = CpuFrame { width: 4, ..frame };
         assert!(renderer.present_cpu_frame(&wrong).is_err());
+    }
+
+    /// OF-71: a view wider than the device allows (a window stretched by
+    /// another program) is refused with an error. The check used to read the
+    /// adapter's larger limit, so the texture was created anyway and wgpu
+    /// aborted the app. Skipped on a host with no adapter.
+    #[test]
+    fn resize_above_the_device_limit_is_refused_not_fatal() {
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .build()
+            .expect("runtime");
+        let Ok(profile) = runtime.block_on(modeler3d_platform::discover_capability_profile())
+        else {
+            return;
+        };
+        let config = RendererConfig {
+            width: 8,
+            height: 4,
+            adapter_index: None,
+            capture_path: None,
+        };
+        let Ok(mut renderer) = runtime.block_on(ViewportRenderer::new(&profile, &config)) else {
+            return;
+        };
+        let device_limit = renderer.device.limits().max_texture_dimension_2d;
+        assert_eq!(renderer.max_texture_dimension_2d, device_limit);
+        assert!(renderer.resize(device_limit + 1, 4).is_err());
+        assert!(renderer.resize(4, device_limit + 1).is_err());
+        assert_eq!(renderer.size(), (8, 4));
+        renderer
+            .resize(16, 8)
+            .expect("an in-range size still works");
+        assert_eq!(renderer.size(), (16, 8));
     }
 
     #[test]

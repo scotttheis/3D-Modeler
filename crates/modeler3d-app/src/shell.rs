@@ -610,6 +610,7 @@ impl Modeler3dApp {
         creation_context
             .egui_ctx
             .add_plugin(crate::grab_cursor::GrabCursor);
+        cap_window_size(creation_context);
         let mut app = Self::default();
         if let Some(review) = crate::review_capture::ReviewCapture::from_environment() {
             // A review capture starts from defaults in an isolated settings
@@ -9223,6 +9224,44 @@ fn viewport_pointer_interactions_allowed(
     drag_active: bool,
 ) -> bool {
     !interaction_blocked && (pointer_over_viewport || drag_active)
+}
+
+/// Keeps the window no larger than the graphics device can draw (OF-71). The
+/// window surface is one texture, and a texture over the device limit is a
+/// fatal graphics error, so an oversized window (another program or an AI's
+/// desktop tool resizing it) used to close the app. On Windows the cap holds
+/// for every resize, including `SetWindowPos` from another process, and is
+/// also no larger than Windows' own largest drag size (about all monitors
+/// together), so a huge window cannot exhaust graphics memory either;
+/// elsewhere it is the toolkit's maximum inner size, which the window
+/// manager applies.
+fn cap_window_size(creation_context: &eframe::CreationContext<'_>) {
+    let Some(render_state) = creation_context.wgpu_render_state.as_ref() else {
+        return;
+    };
+    let max_pixels = render_state.device.limits().max_texture_dimension_2d;
+    #[cfg(windows)]
+    {
+        use raw_window_handle::HasWindowHandle;
+        let result = creation_context
+            .window_handle()
+            .map_err(|error| error.to_string())
+            .and_then(|handle| {
+                modeler3d_platform::limit_window_size(handle, max_pixels)
+                    .map_err(|error| error.to_string())
+            });
+        if let Err(error) = result {
+            crate::diagnostics::record_warning("window size cap", &error);
+        }
+    }
+    #[cfg(not(windows))]
+    {
+        let ctx = &creation_context.egui_ctx;
+        let points = max_pixels as f32 / ctx.native_pixels_per_point().unwrap_or(1.0);
+        ctx.send_viewport_cmd(egui::ViewportCommand::MaxInnerSize(egui::vec2(
+            points, points,
+        )));
+    }
 }
 
 fn physical_viewport_size(size_points: Vec2, pixels_per_point: f32) -> (u32, u32) {
