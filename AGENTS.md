@@ -213,6 +213,11 @@ The repository is `scotttheis/3D-Modeler`, public from 2026-11-24 (v1.0.4).
 Releases follow [`docs/github-upload.md`](docs/github-upload.md). Push only
 when the owner asks for a release or a push.
 
+Every change a person using the app would notice (new, fixed or different)
+adds a plain-language bullet under `## Unreleased` in `CHANGELOG.md` in the
+same commit as the change (owner rule, 2026-11-24). Do not leave it for
+release time.
+
 Every release must carry plain-language notes of what changed: add the
 `## X.Y.Z` section to `CHANGELOG.md` before tagging (the release workflow
 publishes it and fails without it). See "Every release says what changed" in

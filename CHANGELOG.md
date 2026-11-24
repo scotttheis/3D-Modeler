@@ -4,6 +4,29 @@ All notable changes, in plain words. Newest first.
 
 ## Unreleased
 
+## 1.0.6 (2026-11-24)
+
+- **Report a problem from inside the app.** Settings has a new **Report a
+  problem** button, and error messages have a **Report** button. Say what went
+  wrong and, if you like, how it could be fixed. 3D Modeler adds its version,
+  your system and its recent errors (your home folder is hidden, and no models
+  or files are included), shows you everything, and opens a filled-in report
+  on GitHub for you to check and post. Nothing is sent without you.
+- **After a crash, 3D Modeler offers to report it** the next time it starts.
+- **Errors are now written to the app's log**, so a report says what actually
+  went wrong.
+- **AI assistants can prepare a problem report too** (new MCP tool
+  `report_problem`); you still post it yourself.
+- **Repair keeps the fixes it can make.** When a model can't be fully
+  repaired, Repair now keeps every fix that helps and tells you what it
+  couldn't fix, instead of changing nothing.
+- **The bottom bar is easier to use.** The size and position boxes show plain
+  numbers, one click selects the whole value, and Enter applies it.
+- **The title bar matches the app.** In dark mode it stays dark on every
+  Windows version, including after an update.
+- **Fixed a crash** when another program stretched the window larger than the
+  graphics card can draw.
+- **No more false update offers** on a copy built from the source code.
 - **Double-clicking a file opens it.** Double-click a `.3dp` project and it
   opens in 3D Modeler, ready to work on. Before, the app started empty.
 - **3D Modeler shows up in Windows.** It is listed under "Open with" for STL,

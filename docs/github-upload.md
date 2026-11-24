@@ -112,6 +112,11 @@ until they are listed. Things only the owner can click are marked (owner).
 
 No release goes out without plain-language notes of what changed in it.
 
+0. **As you go** (owner rule, 2026-11-24): every commit that changes
+   something a person using the app would notice adds its bullet under
+   `## Unreleased` in `CHANGELOG.md` in that same commit. At release time,
+   also compare `git log <last tag>..HEAD` with the Unreleased list and add
+   anything missing, so no change ships unmentioned.
 1. Before tagging `vX.Y.Z`, add a `## X.Y.Z (date)` section to `CHANGELOG.md`
    (short bullets a non-programmer can read: what is new, what is fixed, what
    changed for the person using the app). Anything waiting under
