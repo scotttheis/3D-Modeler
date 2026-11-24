@@ -2214,7 +2214,7 @@ dependencies = [
 
 [[package]]
 name = "modeler3d-app"
-version = "1.0.6"
+version = "1.0.7"
 dependencies = [
  "eframe",
  "embed-resource",
@@ -2237,7 +2237,7 @@ dependencies = [
 
 [[package]]
 name = "modeler3d-core"
-version = "1.0.6"
+version = "1.0.7"
 dependencies = [
  "fontdue",
  "image",
@@ -2255,7 +2255,7 @@ dependencies = [
 
 [[package]]
 name = "modeler3d-mcp"
-version = "1.0.6"
+version = "1.0.7"
 dependencies = [
  "jsonschema",
  "modeler3d-core",
@@ -2271,7 +2271,7 @@ dependencies = [
 
 [[package]]
 name = "modeler3d-platform"
-version = "1.0.6"
+version = "1.0.7"
 dependencies = [
  "raw-window-handle",
  "semver",
@@ -2288,7 +2288,7 @@ dependencies = [
 
 [[package]]
 name = "modeler3d-viewport"
-version = "1.0.6"
+version = "1.0.7"
 dependencies = [
  "image",
  "modeler3d-core",
