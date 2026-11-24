@@ -78,6 +78,12 @@ one.
   only" in `docs/STATUS.md` as a resting state.
 - RC installers in `E:\3D-Modeler-RC` are versioned shipping packages, not the
   working app.
+- **If an update window opens** when you launch the app for testing, close it
+  through MCP: `get_update_status`, then `respond_to_update` with
+  `response: "later"` and the offered `version`. Never click it with mouse
+  input. It should not appear: the source version is always one patch ahead
+  of the last GitHub release (OF-75, step 5 of "Every release says what
+  changed" in [`docs/github-upload.md`](docs/github-upload.md)).
 
 ## Sources of truth
 

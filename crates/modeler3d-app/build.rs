@@ -1,12 +1,17 @@
-//! Build script: embeds the Windows icon resource (OF-29).
+//! Build script: embeds the Windows icon resource (OF-29) and the version.
 //!
 //! Only Windows targets get a resource; other platforms take their icon from
 //! the window (`artwork::load_native_icon`) and the package launchers.
+//!
+//! The version is the workspace version in the root `Cargo.toml` (OF-75), so
+//! a build made on any PC knows its own number. `MODELER3D_RELEASE_VERSION`
+//! overrides it only for packaging test builds (`Build-Msi.ps1 -Version`).
 
 fn main() {
     println!("cargo::rerun-if-env-changed=MODELER3D_RELEASE_VERSION");
     println!("cargo::rerun-if-changed=../../packaging/update-feed.json");
-    let version = std::env::var("MODELER3D_RELEASE_VERSION").unwrap_or_else(|_| "0.1.0".into());
+    let version = std::env::var("MODELER3D_RELEASE_VERSION")
+        .unwrap_or_else(|_| env!("CARGO_PKG_VERSION").into());
     if semver::Version::parse(&version).is_err() {
         panic!("MODELER3D_RELEASE_VERSION must be a semantic version");
     }

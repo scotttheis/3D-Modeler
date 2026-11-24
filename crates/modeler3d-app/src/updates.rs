@@ -328,3 +328,16 @@ impl Updater {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    /// OF-75: a build made on any PC carries the workspace version, so About,
+    /// MCP and the update check agree and a local build is never offered the
+    /// release it is ahead of. Packaging test builds may override it with
+    /// `MODELER3D_RELEASE_VERSION`; the test suite never does.
+    #[test]
+    fn app_version_is_the_workspace_version() {
+        assert_eq!(super::VERSION, env!("CARGO_PKG_VERSION"));
+        assert_ne!(super::VERSION, "0.1.0");
+    }
+}

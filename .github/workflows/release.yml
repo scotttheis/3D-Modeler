@@ -17,7 +17,18 @@ env:
   MODELER3D_PUBLIC_RELEASE: "1"
 
 jobs:
+  version:
+    # A tag must match [workspace.package] version in Cargo.toml (OF-75), so a
+    # release never ships a different number from the code. A manual build
+    # (workflow_dispatch) may use any version for testing.
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tag matches the source version
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: scripts/check-release-version.sh "$GITHUB_REF_NAME"
   windows:
+    needs: version
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -48,6 +59,7 @@ jobs:
           name: windows
           path: out/*.msi
   linux:
+    needs: version
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -68,6 +80,7 @@ jobs:
           name: linux
           path: out/*.tar.gz
   macos:
+    needs: version
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4

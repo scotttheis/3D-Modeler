@@ -425,6 +425,30 @@ mod tests {
         assert!(choose(&r, "0.1.0", "windows", "x86_64").unwrap().is_none());
     }
     #[test]
+    fn a_build_ahead_of_or_equal_to_the_release_is_not_offered_it() {
+        // OF-75: the source moves to the next patch right after a release.
+        let published = release("1.0.5", "windows", "x86_64");
+        for (current, offered) in [("1.0.6", false), ("1.0.5", false), ("1.0.4", true)] {
+            assert_eq!(
+                choose(&published, current, "windows", "x86_64")
+                    .unwrap()
+                    .is_some(),
+                offered,
+                "running {current} against 1.0.5"
+            );
+        }
+        assert!(
+            choose(
+                &release("1.0.6", "windows", "x86_64"),
+                "1.0.5",
+                "windows",
+                "x86_64"
+            )
+            .unwrap()
+            .is_some()
+        );
+    }
+    #[test]
     fn picks_only_the_exact_platform_installer() {
         for (os, arch) in [
             ("windows", "x86_64"),

@@ -277,7 +277,7 @@ impl Modeler3dApp {
             "recent_file_count": preferences.recent_files().paths().len(),
             "about": {
                 "product": "3D Modeler",
-                "version": env!("CARGO_PKG_VERSION"),
+                "version": crate::updates::VERSION,
                 "description": ABOUT_DESCRIPTION,
             },
             "window_title": self.window_title(),
@@ -1240,7 +1240,7 @@ mod tests {
         let about = mcp(&mut ai, "show_screen", json!({"screen":"about"})).expect("about");
         assert_eq!(about["open_window"], json!("about"));
         assert_eq!(about["about"]["product"], json!("3D Modeler"));
-        assert_eq!(about["about"]["version"], json!(env!("CARGO_PKG_VERSION")));
+        assert_eq!(about["about"]["version"], json!(crate::updates::VERSION));
         // Going back to the start screen closes Settings, like a press outside it.
         let start = mcp(&mut ai, "show_screen", json!({"screen":"start"})).expect("start");
         assert_eq!(start["open_window"], Value::Null);

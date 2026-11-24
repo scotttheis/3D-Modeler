@@ -116,11 +116,21 @@ No release goes out without plain-language notes of what changed in it.
    (short bullets a non-programmer can read: what is new, what is fixed, what
    changed for the person using the app). Anything waiting under
    `## Unreleased` moves into it.
-2. Tag and push. `release.yml` copies that section into the GitHub release
-   notes, and stops with an error if the section is missing, so a release
-   without notes cannot be published by accident.
+2. Tag and push. The tag must equal `[workspace.package] version` in the
+   root `Cargo.toml` (it already does if step 5 was done after the last
+   release); `release.yml` stops a mismatched tag
+   (`scripts/check-release-version.sh`). It copies the changelog section into
+   the GitHub release notes, and stops with an error if the section is
+   missing, so a release without notes cannot be published by accident.
 3. After publishing, open the release page and check the notes show.
 4. Record the version in `docs/STATUS.md` as usual.
+5. **Advance the source to the next version** (owner rule OF-75,
+   2026-11-24): right after the release is published, raise the last digit of
+   `[workspace.package] version` in the root `Cargo.toml` (v1.0.5 published,
+   source becomes 1.0.6), run `cargo check` so `Cargo.lock` follows, and
+   commit. Every crate inherits that one number, so the app, About, MCP and
+   the update check all show it. A build made on this PC is then newer than
+   GitHub and is never offered an update.
 
 The notes for v0.99.0 to v1.0.2 were written after the fact from
 `docs/STATUS.md` (2026-11-21).
