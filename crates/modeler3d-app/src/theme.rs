@@ -64,24 +64,82 @@ impl UiSize {
     }
 }
 
-/// Matches the Windows 11 caption to the menu row when the app theme changes.
+/// Matches the Windows title bar to the app theme (OF-73).
+///
+/// Two layers: the window's light/dark title-bar mode is set to the app
+/// theme, which Windows 10 (1809+) and every Windows 11 honour; on top of
+/// that, Windows 11 colours the caption like the menu row. Without the
+/// first layer, a Windows that rejects the caption colour drew the bar in
+/// the system's light/dark setting, white under a dark app. The colour is
+/// applied again whenever the window gets focus, so a call that failed or
+/// was undone outside the app does not leave the bar wrong.
 #[cfg(windows)]
 pub(crate) fn apply_native_caption(ctx: &Context, frame: &eframe::Frame, mode: ThemeMode) {
     use raw_window_handle::HasWindowHandle;
     let key = eframe::egui::Id::unique("native-title-bar-theme");
-    if ctx.data(|data| data.get_temp::<ThemeMode>(key)) == Some(mode) {
+    let focused = ctx.input(|input| input.viewport().focused.unwrap_or(false));
+    let previous = ctx.data(|data| data.get_temp::<CaptionState>(key));
+    let step = caption_step(previous, mode, focused);
+    if previous != Some(CaptionState { mode, focused }) {
+        ctx.data_mut(|data| data.insert_temp(key, CaptionState { mode, focused }));
+    }
+    let Some(step) = step else {
         return;
+    };
+    if step.set_window_theme {
+        ctx.send_viewport_cmd(eframe::egui::ViewportCommand::SetTheme(match mode {
+            ThemeMode::Light => eframe::egui::SystemTheme::Light,
+            ThemeMode::Dark => eframe::egui::SystemTheme::Dark,
+        }));
     }
     if let Ok(handle) = frame.window_handle() {
         let palette = ThemePalette::for_mode(mode);
         let [r, g, b, _] = palette.navigation.to_srgba_unmultiplied();
         let [tr, tg, tb, _] = palette.text.to_srgba_unmultiplied();
-        if let Err(error) =
-            modeler3d_platform::set_title_bar_colors(handle, [r, g, b], [tr, tg, tb])
-        {
-            crate::diagnostics::record_error("native title bar", error);
+        let result = modeler3d_platform::set_title_bar_colors(handle, [r, g, b], [tr, tg, tb]);
+        // Windows 10 always refuses the colour; record that once per theme.
+        if let (Err(error), true) = (result, step.set_window_theme) {
+            crate::diagnostics::record_warning("native title bar colour", error);
         }
-        ctx.data_mut(|data| data.insert_temp(key, mode));
+    }
+}
+
+/// What the title bar was last set to, and whether the window had focus.
+#[cfg(any(windows, test))]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+struct CaptionState {
+    mode: ThemeMode,
+    focused: bool,
+}
+
+/// The title-bar work one frame needs.
+#[cfg(any(windows, test))]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+struct CaptionStep {
+    /// The theme changed (or this is the first frame): also set the
+    /// window's light/dark mode.
+    set_window_theme: bool,
+}
+
+/// Decides whether this frame sets the title bar: on the first frame, when
+/// the theme changes, and when the window gets focus. `None` otherwise.
+#[cfg(any(windows, test))]
+fn caption_step(
+    previous: Option<CaptionState>,
+    mode: ThemeMode,
+    focused: bool,
+) -> Option<CaptionStep> {
+    match previous {
+        Some(state) if state.mode != mode => Some(CaptionStep {
+            set_window_theme: true,
+        }),
+        Some(state) if focused && !state.focused => Some(CaptionStep {
+            set_window_theme: false,
+        }),
+        Some(_) => None,
+        None => Some(CaptionStep {
+            set_window_theme: true,
+        }),
     }
 }
 
@@ -448,6 +506,34 @@ fn platform_ui_font_candidates() -> Vec<PathBuf> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn title_bar_is_set_at_start_on_theme_change_and_on_focus() {
+        let dark = |focused| {
+            Some(CaptionState {
+                mode: ThemeMode::Dark,
+                focused,
+            })
+        };
+        let both = Some(CaptionStep {
+            set_window_theme: true,
+        });
+        let colour_only = Some(CaptionStep {
+            set_window_theme: false,
+        });
+        // First frame: window theme and colour, focused or not.
+        assert_eq!(caption_step(None, ThemeMode::Dark, false), both);
+        // Theme switch.
+        assert_eq!(caption_step(dark(true), ThemeMode::Light, true), both);
+        // Focus regained: colour again, so a failed or reset call heals.
+        assert_eq!(
+            caption_step(dark(false), ThemeMode::Dark, true),
+            colour_only
+        );
+        // Nothing changed, or focus lost: no work.
+        assert_eq!(caption_step(dark(true), ThemeMode::Dark, true), None);
+        assert_eq!(caption_step(dark(true), ThemeMode::Dark, false), None);
+    }
 
     #[test]
     fn style_guide_light_palette_is_stable() {
