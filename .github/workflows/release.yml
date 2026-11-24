@@ -23,7 +23,7 @@ jobs:
     # (workflow_dispatch) may use any version for testing.
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Tag matches the source version
         if: startsWith(github.ref, 'refs/tags/v')
         run: scripts/check-release-version.sh "$GITHUB_REF_NAME"
@@ -31,7 +31,7 @@ jobs:
     needs: version
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Version
         id: v
         shell: pwsh
@@ -54,7 +54,7 @@ jobs:
       - name: MSI
         shell: pwsh
         run: ./packaging/msi/Build-Msi.ps1 -Version ${{ steps.v.outputs.version }} -Name 3D-Modeler-${{ steps.v.outputs.version }}-windows-x86_64 -OutDir "$PWD/out" -PublicRelease
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: windows
           path: out/*.msi
@@ -62,7 +62,7 @@ jobs:
     needs: version
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install libraries
         run: |
           sudo apt-get update
@@ -75,7 +75,7 @@ jobs:
         run: |
           v="${{ github.event.inputs.version || github.ref_name }}"
           packaging/linux/build-tarball.sh "${v#v}" out
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: linux
           path: out/*.tar.gz
@@ -83,7 +83,7 @@ jobs:
     needs: version
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: Swatinem/rust-cache@v2
       - name: DMG
         env:
@@ -91,7 +91,7 @@ jobs:
         run: |
           v="${{ github.event.inputs.version || github.ref_name }}"
           packaging/macos/build-dmg.sh "${v#v}" out
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: macos
           path: out/*.dmg
@@ -102,8 +102,8 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
         with:
           path: dist
       - name: Publish
