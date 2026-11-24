@@ -16,10 +16,9 @@
 </p>
 
 <p align="center">
-  <img src="docs/images/main-window-dark.png" alt="The 3D Modeler window with four shapes and the Items list" width="860">
+  <a href="docs/media/fidget-spinner.mp4"><img src="docs/media/fidget-spinner.gif" alt="Building a fidget spinner in 3D Modeler around a bearing and finger caps, then the real 3D-printed spinner spinning in a hand" width="860"></a><br>
+  <sub>Designed in 3D Modeler, printed, and spun. <a href="docs/media/fidget-spinner.mp4">Watch in full quality (MP4)</a>.</sub>
 </p>
-
-<!-- HERO-GIF: replace the picture above with a short demo GIF (see docs/launch-pictures.md, B1). -->
 
 <table align="center"><tr><td align="center"><img src="crates/modeler3d-app/assets/original/insert_icons/Cube.png" width="96" alt="Cube"><br><sub>Cube</sub></td><td align="center"><img src="crates/modeler3d-app/assets/original/insert_icons/Cylinder.png" width="96" alt="Cylinder"><br><sub>Cylinder</sub></td><td align="center"><img src="crates/modeler3d-app/assets/original/insert_icons/Pyramid.png" width="96" alt="Pyramid"><br><sub>Pyramid</sub></td><td align="center"><img src="crates/modeler3d-app/assets/original/insert_icons/Cone.png" width="96" alt="Cone"><br><sub>Cone</sub></td><td align="center"><img src="crates/modeler3d-app/assets/original/insert_icons/Sphere.png" width="96" alt="Sphere"><br><sub>Sphere</sub></td><td align="center"><img src="crates/modeler3d-app/assets/original/insert_icons/Torus.png" width="96" alt="Torus"><br><sub>Torus</sub></td><td align="center"><img src="crates/modeler3d-app/assets/original/insert_icons/Hexagon.png" width="96" alt="Hexagon"><br><sub>Hexagon</sub></td><td align="center"><img src="crates/modeler3d-app/assets/original/insert_icons/Wedge.png" width="96" alt="Wedge"><br><sub>Wedge</sub></td></tr></table>
 
