@@ -169,9 +169,9 @@ pub fn load_mesh_asset_bytes(format: MeshFormat, bytes: &[u8]) -> Result<MeshAss
         return Err(CoreError::MeshFile("file is empty".to_owned()));
     }
     match format {
-        MeshFormat::Stl => decode_stl(bytes),
-        MeshFormat::Obj => decode_obj(bytes),
-        MeshFormat::Ply => decode_ply(bytes),
+        MeshFormat::Stl => z_up_file_to_scene(decode_stl(bytes)?),
+        MeshFormat::Obj => z_up_file_to_scene(decode_obj(bytes)?),
+        MeshFormat::Ply => z_up_file_to_scene(decode_ply(bytes)?),
         MeshFormat::ThreeMf => decode_3mf(bytes),
         MeshFormat::Gltf | MeshFormat::Glb => decode_gltf(bytes),
         MeshFormat::Wrl => {
@@ -220,9 +220,9 @@ pub fn export_mesh_asset(asset: &MeshAsset, format: MeshFormat) -> Result<Vec<u8
     asset.mesh.validate_non_empty()?;
     validate_colors(asset)?;
     match format {
-        MeshFormat::Stl => asset.mesh.to_binary_stl(),
-        MeshFormat::Obj => encode_obj(asset),
-        MeshFormat::Ply => encode_binary_ply(asset),
+        MeshFormat::Stl => scene_to_z_up_file(asset)?.mesh.to_binary_stl(),
+        MeshFormat::Obj => encode_obj(&scene_to_z_up_file(asset)?),
+        MeshFormat::Ply => encode_binary_ply(&scene_to_z_up_file(asset)?),
         MeshFormat::ThreeMf => encode_3mf(asset),
         MeshFormat::Gltf => encode_gltf(asset),
         MeshFormat::Glb => encode_glb(asset),
@@ -269,7 +269,21 @@ fn decode_3mf(bytes: &[u8]) -> Result<MeshAsset, CoreError> {
         .items
         .first()
         .ok_or_else(|| CoreError::MeshFile("3MF contains no mesh instances".to_owned()))?;
-    MeshAsset::new(item.mesh.clone(), None)
+    // The item transform carries the 3MF placement and the Z-up to Y-up turn.
+    MeshAsset::new(item.mesh.transformed(&item.transform)?, None)
+}
+
+/// Turns a Z-up STL/OBJ/PLY mesh into the Y-up scene; colors are per vertex
+/// and unaffected.
+fn z_up_file_to_scene(asset: MeshAsset) -> Result<MeshAsset, CoreError> {
+    let mesh = asset.mesh.transformed(&Transform::z_up_file_to_scene())?;
+    MeshAsset::new(mesh, asset.vertex_colors)
+}
+
+/// Turns a Y-up scene mesh into Z-up file coordinates for STL/OBJ/PLY.
+fn scene_to_z_up_file(asset: &MeshAsset) -> Result<MeshAsset, CoreError> {
+    let mesh = asset.mesh.transformed(&Transform::scene_to_z_up_file())?;
+    MeshAsset::new(mesh, asset.vertex_colors.clone())
 }
 
 fn encode_3mf(asset: &MeshAsset) -> Result<Vec<u8>, CoreError> {

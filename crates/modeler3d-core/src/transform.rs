@@ -30,6 +30,36 @@ impl Transform {
         }
     }
 
+    /// Turns Z-up file coordinates into the Y-up scene: `(x, y, z) -> (x, z, -y)`.
+    ///
+    /// STL, OBJ, PLY and 3MF files are Z-up (3D printing, 3D Builder and
+    /// slicers); the scene is Y-up. The file's front (-Y) becomes the scene's
+    /// front (+Z). Exact for every float, so a save/open round trip is lossless.
+    #[must_use]
+    pub(crate) const fn z_up_file_to_scene() -> Self {
+        Self {
+            rows: [
+                [1.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 1.0, 0.0],
+                [0.0, -1.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 1.0],
+            ],
+        }
+    }
+
+    /// Inverse of [`Self::z_up_file_to_scene`]: `(x, y, z) -> (x, -z, y)`.
+    #[must_use]
+    pub(crate) const fn scene_to_z_up_file() -> Self {
+        Self {
+            rows: [
+                [1.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, -1.0, 0.0],
+                [0.0, 1.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 1.0],
+            ],
+        }
+    }
+
     /// Validates and constructs a transform from row-major float32 values.
     pub fn from_rows(rows: [[f32; 4]; 4]) -> Result<Self, CoreError> {
         let transform = Self { rows };

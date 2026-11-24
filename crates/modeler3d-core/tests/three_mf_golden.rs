@@ -114,7 +114,8 @@ fn python_assembly_fixture_preserves_units_graph_materials_metadata_and_thumbnai
     assert_eq!(item.name, "Placed assembly");
     assert_eq!(item.object_id, "1");
     assert_eq!(item.mesh.extents(), [10.0, 20.0, 30.0]);
-    assert_eq!(item.transform.position(), [70.0, 90.0, 110.0]);
+    // File (x, y, z) is scene (x, z, -y): 3MF is Z-up, the scene is Y-up.
+    assert_eq!(item.transform.position(), [70.0, 110.0, -90.0]);
     assert_eq!(
         item.color,
         [200.0 / 255.0, 100.0 / 255.0, 50.0 / 255.0, 204.0 / 255.0]
@@ -142,7 +143,7 @@ fn production_external_part_is_resolved_only_when_declared_by_relationships() {
     assert_eq!(item.name, "External placement");
     assert_eq!(item.object_id, "1");
     assert_eq!(item.mesh.extents(), [1.0, 2.0, 3.0]);
-    assert_eq!(item.transform.position(), [7.0, 9.0, 11.0]);
+    assert_eq!(item.transform.position(), [7.0, 11.0, -9.0]);
     assert!(
         imported
             .package_parts
@@ -402,4 +403,66 @@ fn single_mesh_format_bridge_reads_and_writes_3mf() {
         &bytes,
     ));
     assert_eq!(asset.mesh(), &mesh);
+}
+
+/// A lid resting on a base in a Z-up 3MF (3D Builder, slicers) must rest on
+/// it along the scene's Y-up axis, and saving must give the same file back.
+#[test]
+fn z_up_3mf_stays_upright_in_the_y_up_scene_and_round_trips() {
+    let model = br#"<?xml version="1.0" encoding="UTF-8"?>
+<model xmlns="http://schemas.microsoft.com/3dmanufacturing/core/2015/02" unit="millimeter">
+  <resources>
+    <object id="1" name="Slab">
+      <mesh>
+        <vertices>
+          <vertex x="0" y="0" z="0" />
+          <vertex x="80" y="0" z="0" />
+          <vertex x="0" y="100" z="0" />
+          <vertex x="0" y="0" z="20" />
+        </vertices>
+        <triangles>
+          <triangle v1="0" v2="2" v3="1" />
+          <triangle v1="0" v2="1" v3="3" />
+          <triangle v1="0" v2="3" v3="2" />
+          <triangle v1="1" v2="2" v3="3" />
+        </triangles>
+      </mesh>
+    </object>
+  </resources>
+  <build>
+    <item objectid="1" partnumber="Base" />
+    <item objectid="1" partnumber="Lid" transform="1 0 0 0 1 0 0 0 1 0 0 25" />
+  </build>
+</model>"#;
+    let imported = must(load_3mf_bytes(&make_package(model, None, None, None)));
+    let world = |index: usize| {
+        let item = &imported.items[index];
+        must(item.mesh.transformed(&item.transform))
+    };
+    let (base, lid) = (world(0), world(1));
+    // 80 wide, 20 tall, 100 deep: the file's Z height is the scene's Y height.
+    assert_eq!(base.extents(), [80.0, 20.0, 100.0]);
+    let base_top = base.bounds().expect("base has bounds").1[1];
+    let lid_bottom = lid.bounds().expect("lid has bounds").0[1];
+    assert_eq!((base_top, lid_bottom), (20.0, 25.0));
+    // The file's front (-Y) faces the scene's front (+Z).
+    assert_eq!(base.bounds().expect("base has bounds").0[2], -100.0);
+
+    let saved = must(export_3mf(&imported.items, None, None));
+    let reopened = must(load_3mf_bytes(&saved));
+    for (before, after) in imported.items.iter().zip(&reopened.items) {
+        assert_eq!(after.transform, before.transform);
+        assert_eq!(after.mesh, before.mesh);
+    }
+    let mut xml = String::new();
+    ZipArchive::new(Cursor::new(saved))
+        .expect("saved package is a zip")
+        .by_name("3D/3dmodel.model")
+        .expect("saved package has a model")
+        .read_to_string(&mut xml)
+        .expect("model is UTF-8");
+    assert!(
+        xml.contains(r#"transform="1 0 0 0 1 0 0 0 1 0 0 25""#),
+        "{xml}"
+    );
 }

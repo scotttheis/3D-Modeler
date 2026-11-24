@@ -4456,7 +4456,8 @@ mod tests {
         let imported = state.scene().object(0);
         assert!(imported.is_ok());
         if let Ok(object) = imported {
-            assert_eq!(object.position(), [0.0, 1.5, 0.0]);
+            // The Z-up file box is 4 mm tall in the Y-up scene.
+            assert_eq!(object.position(), [0.0, 2.0, 0.0]);
         }
 
         let undo = state.scene.undo();
@@ -4758,7 +4759,7 @@ mod tests {
         assert!(result.is_ok());
         assert_eq!(
             state.scene().objects()[0].mesh().extents(),
-            [20.0, 30.0, 40.0]
+            [20.0, 40.0, 30.0]
         );
     }
 
@@ -4819,7 +4820,7 @@ mod tests {
             assert_eq!(state.scene().objects().len(), 1);
             assert_vec3_close(
                 state.scene().objects()[0].mesh().extents(),
-                [2.0, 3.0, 4.0].map(|extent| extent * unit.scale_mm()),
+                [2.0, 4.0, 3.0].map(|extent| extent * unit.scale_mm()),
             );
         }
 
@@ -4827,7 +4828,7 @@ mod tests {
         assert!(default_state.import_from_path(&fixture).is_ok());
         assert_vec3_close(
             default_state.scene().objects()[0].mesh().extents(),
-            [2.0, 3.0, 4.0],
+            [2.0, 4.0, 3.0],
         );
     }
 
@@ -4854,7 +4855,7 @@ mod tests {
                     .and_then(|name| name.to_str())
                     .unwrap_or("")
             );
-            assert_vec3_close(state.scene().objects()[0].mesh().extents(), [2.0, 3.0, 4.0]);
+            assert_vec3_close(state.scene().objects()[0].mesh().extents(), [2.0, 4.0, 3.0]);
         }
 
         for (relative, expected_color) in [
@@ -4871,7 +4872,7 @@ mod tests {
             );
             let object = &state.scene().objects()[0];
             assert_eq!(object.name(), "colored_triangle");
-            assert_vec3_close(object.mesh().extents(), [2.0, 3.0, 4.0]);
+            assert_vec3_close(object.mesh().extents(), [2.0, 4.0, 3.0]);
             assert_color_close(object.color(), expected_color);
         }
     }
@@ -4925,8 +4926,16 @@ mod tests {
             assert_vec3_close(second.mesh().extents(), [2.0, 3.0, 4.0]);
             assert_color_close(first.color(), [0.2, 0.4, 0.8, 128.0 / 255.0]);
             assert_color_close(second.color(), [1.0, 0.0, 0.0, 1.0]);
-            assert_vec3_close(first.position(), [1.0, 10.0, 0.0]);
-            assert_vec3_close(second.position(), [-5.0, 6.0, -3.0]);
+            // The same Python scene, but 3MF files are Z-up while glTF is
+            // Y-up, so the 3MF arrives turned upright: file (x, y, z) is
+            // scene (x, z, -y) before centring on the floor.
+            let (first_at, second_at, minimum) = if relative.ends_with(".3mf") {
+                ([1.0, 15.0, 0.0], [-5.0, 12.0, 4.0], [-6.0, 0.0, -10.0])
+            } else {
+                ([1.0, 10.0, 0.0], [-5.0, 6.0, -3.0], [-6.0, 0.0, -15.0])
+            };
+            assert_vec3_close(first.position(), first_at);
+            assert_vec3_close(second.position(), second_at);
 
             let mut combined_minimum = [f32::INFINITY; 3];
             for object in objects {
@@ -4939,7 +4948,7 @@ mod tests {
                     *minimum = (*minimum).min(bounds.0[axis]);
                 }
             }
-            assert_vec3_close(combined_minimum, [-6.0, 0.0, -15.0]);
+            assert_vec3_close(combined_minimum, minimum);
 
             assert!(matches!(state.scene.undo(), Ok(Some(result)) if result.changed));
             assert!(state.scene().objects().is_empty(), "{relative}");

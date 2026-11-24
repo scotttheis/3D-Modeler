@@ -1965,10 +1965,12 @@ pub fn load_3mf_bytes_with_limits(
     let mut items = Vec::with_capacity(pending.len());
     for pending in pending {
         let mesh = scale_mesh(pending.mesh, unit_scale)?;
-        let transform = pending
-            .transform
-            .scale_translation(unit_scale)?
-            .to_transform()?;
+        let transform = Transform::z_up_file_to_scene().multiply(
+            &pending
+                .transform
+                .scale_translation(unit_scale)?
+                .to_transform()?,
+        )?;
         let mut item = ThreeMfItem::new(
             mesh,
             transform,
@@ -2434,7 +2436,10 @@ fn model_xml(
             &[
                 ("objectid", (index + 2).to_string()),
                 ("partnumber", name),
-                ("transform", transform_text(item.transform)?),
+                (
+                    "transform",
+                    transform_text(Transform::scene_to_z_up_file().multiply(&item.transform)?)?,
+                ),
             ],
         )?;
     }
