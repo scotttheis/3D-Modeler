@@ -23,6 +23,7 @@ mod project;
 mod repair;
 mod repair_native;
 mod scene;
+mod self_intersect;
 mod shell_ops;
 mod simplify;
 mod smooth;

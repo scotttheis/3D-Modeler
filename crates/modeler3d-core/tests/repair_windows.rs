@@ -220,13 +220,9 @@ fn hollow_model_uses_native_and_keeps_its_cavity() {
             .as_deref()
             .is_some_and(|note| note.contains("hollow inside"))
     );
-    let kept = if result.report.can_apply {
-        assert_eq!(result.report.after.boundary_edges, 0);
-        &result.mesh
-    } else {
-        assert!(result.report.refused());
-        &mesh
-    };
+    assert!(result.report.can_apply, "{:?}", result.report);
+    assert_eq!(result.report.after.boundary_edges, 0);
+    let kept = &result.mesh;
     assert_eq!(inspect_mesh(kept).expect("kept cavity").cavity_shells, 1);
 }
 
@@ -343,36 +339,7 @@ fn repair_fixture_dir() -> Result<(), Box<dyn std::error::Error>> {
         .iter()
         .filter(|path| path.extension().is_some_and(|extension| extension == "v"))
     {
-        let vertex_bytes = std::fs::read(path)?;
-        let face_bytes = std::fs::read(path.with_extension("t"))?;
-        if vertex_bytes.len() % 24 != 0 || face_bytes.len() % 12 != 0 {
-            return Err(format!("Invalid fixture record length: {}", path.display()).into());
-        }
-        let vertices = vertex_bytes
-            .as_chunks::<24>()
-            .0
-            .iter()
-            .map(|record| {
-                let mut point = [0.0; 3];
-                for (coordinate, bytes) in point.iter_mut().zip(record.as_chunks::<8>().0.iter()) {
-                    *coordinate = f64::from_le_bytes(*bytes) as f32;
-                }
-                point
-            })
-            .collect();
-        let faces = face_bytes
-            .as_chunks::<12>()
-            .0
-            .iter()
-            .map(|record| {
-                let mut face = [0; 3];
-                for (index, bytes) in face.iter_mut().zip(record.as_chunks::<4>().0.iter()) {
-                    *index = u32::from_le_bytes(*bytes);
-                }
-                face
-            })
-            .collect();
-        let mesh = Mesh::new(vertices, faces)?;
+        let mesh = read_fixture(path)?;
         let start = Instant::now();
         let result = routed(&mesh, true);
         println!(
@@ -397,6 +364,100 @@ fn repair_fixture_dir() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+fn read_fixture(path: &std::path::Path) -> Result<Mesh, Box<dyn std::error::Error>> {
+    let vertex_bytes = std::fs::read(path)?;
+    let face_bytes = std::fs::read(path.with_extension("t"))?;
+    if vertex_bytes.len() % 24 != 0 || face_bytes.len() % 12 != 0 {
+        return Err(format!("Invalid fixture record length: {}", path.display()).into());
+    }
+    let vertices = vertex_bytes
+        .as_chunks::<24>()
+        .0
+        .iter()
+        .map(|record| {
+            let mut point = [0.0; 3];
+            for (coordinate, bytes) in point.iter_mut().zip(record.as_chunks::<8>().0.iter()) {
+                *coordinate = f64::from_le_bytes(*bytes) as f32;
+            }
+            point
+        })
+        .collect();
+    let faces = face_bytes
+        .as_chunks::<12>()
+        .0
+        .iter()
+        .map(|record| {
+            let mut face = [0; 3];
+            for (index, bytes) in face.iter_mut().zip(record.as_chunks::<4>().0.iter()) {
+                *index = u32::from_le_bytes(*bytes);
+            }
+            face
+        })
+        .collect();
+    Ok(Mesh::new(vertices, faces)?)
+}
+
+#[test]
+#[ignore = "Release health timing; set MODELER3D_REPAIR_FIXTURES"]
+fn inspect_mesh_release_timings() -> Result<(), Box<dyn std::error::Error>> {
+    let directory = std::path::PathBuf::from(
+        std::env::var_os("MODELER3D_REPAIR_FIXTURES").ok_or("missing fixture directory")?,
+    );
+    let book = read_fixture(&directory.join("f1_book.v"))?;
+    // An exact 1M-face latitude sphere avoids rounding up the control size.
+    let sphere = latitude_sphere(1000, 501, 15.0);
+    assert_eq!(sphere.face_count(), 1_000_000);
+    for (name, mesh) in [("book", &book), ("sphere_1M", &sphere)] {
+        let mut times = Vec::new();
+        for _ in 0..5 {
+            let start = Instant::now();
+            let health = std::hint::black_box(inspect_mesh(std::hint::black_box(mesh))?);
+            times.push(start.elapsed().as_secs_f64());
+            println!(
+                "inspect {name} faces={} seconds={:.6} intersections={:?}",
+                mesh.face_count(),
+                times[times.len() - 1],
+                health.self_intersections
+            );
+        }
+        times.sort_by(f64::total_cmp);
+        println!("inspect {name} median_seconds={:.6}", times[2]);
+    }
+    Ok(())
+}
+
+fn latitude_sphere(nu: u32, nv: u32, radius: f64) -> Mesh {
+    let mut vertices = vec![[0.0, 0.0, radius as f32]];
+    for i in 1..nv {
+        let theta = std::f64::consts::PI * f64::from(i) / f64::from(nv);
+        for j in 0..nu {
+            let phi = std::f64::consts::TAU * f64::from(j) / f64::from(nu);
+            vertices.push([
+                (radius * theta.sin() * phi.cos()) as f32,
+                (radius * theta.sin() * phi.sin()) as f32,
+                (radius * theta.cos()) as f32,
+            ]);
+        }
+    }
+    let south = vertices.len() as u32;
+    vertices.push([0.0, 0.0, -radius as f32]);
+    let idx = |i, j| 1 + (i - 1) * nu + j % nu;
+    let mut faces = Vec::new();
+    for j in 0..nu {
+        faces.push([0, idx(1, j), idx(1, j + 1)]);
+    }
+    for i in 1..nv - 1 {
+        for j in 0..nu {
+            let [a, b, c, d] = [idx(i, j), idx(i, j + 1), idx(i + 1, j), idx(i + 1, j + 1)];
+            faces.extend([[a, c, d], [a, d, b]]);
+        }
+    }
+    for j in 0..nu {
+        faces.push([south, idx(nv - 1, j + 1), idx(nv - 1, j)]);
+    }
+    Mesh::new(vertices, faces).expect("latitude sphere")
+}
+
 /// FNV-1a over vertex bits and face indices: equal output, equal hash.
 fn mesh_hash(mesh: &Mesh) -> u64 {
     let mut hash = 0xcbf2_9ce4_8422_2325_u64;
@@ -417,4 +478,196 @@ fn mesh_hash(mesh: &Mesh) -> u64 {
         }
     }
     hash
+}
+
+// Code-generated versions of genfx.py f2-f10. The random damage uses a
+// local seeded generator so these tests need neither Python nor fixture files.
+fn fixture_box(lo: [f32; 3], hi: [f32; 3]) -> Mesh {
+    let [x, y, z] = lo;
+    let [xx, yy, zz] = hi;
+    Mesh::new(
+        vec![
+            [x, y, z],
+            [xx, y, z],
+            [xx, yy, z],
+            [x, yy, z],
+            [x, y, zz],
+            [xx, y, zz],
+            [xx, yy, zz],
+            [x, yy, zz],
+        ],
+        vec![
+            [0, 2, 1],
+            [0, 3, 2],
+            [4, 5, 6],
+            [4, 6, 7],
+            [0, 1, 5],
+            [0, 5, 4],
+            [1, 2, 6],
+            [1, 6, 5],
+            [2, 3, 7],
+            [2, 7, 6],
+            [3, 0, 4],
+            [3, 4, 7],
+        ],
+    )
+    .expect("fixture box")
+}
+
+fn fixture_cylinder(top: bool) -> Mesh {
+    let n = 64_u32;
+    let mut vertices = Vec::new();
+    for z in [0.0, 20.0] {
+        for i in 0..n {
+            let a = std::f64::consts::TAU * f64::from(i) / f64::from(n);
+            vertices.push([(10.0 * a.cos()) as f32, (10.0 * a.sin()) as f32, z]);
+        }
+    }
+    vertices.extend([[0.0; 3], [0.0, 0.0, 20.0]]);
+    let mut faces = Vec::new();
+    for i in 0..n {
+        let j = (i + 1) % n;
+        faces.extend([[i, j, n + j], [i, n + j, n + i], [2 * n, j, i]]);
+        if top {
+            faces.push([2 * n + 1, n + i, n + j]);
+        }
+    }
+    Mesh::new(vertices, faces).expect("fixture cylinder")
+}
+
+fn parity_fixtures() -> Vec<(&'static str, Mesh)> {
+    let mut state = 7_u64;
+    let mut random = || {
+        state = state.wrapping_mul(6364136223846793005).wrapping_add(1);
+        (state >> 32) as f64 / f64::from(u32::MAX)
+    };
+    let sphere = latitude_sphere(64, 32, 15.0);
+    let mut holey = sphere.clone();
+    holey.faces = holey
+        .faces
+        .into_iter()
+        .enumerate()
+        .filter_map(|(id, face)| (id % 33 != 7).then_some(face))
+        .collect();
+    let mut flipped = sphere.clone();
+    for face in &mut flipped.faces {
+        if random() < 0.2 {
+            face.swap(1, 2);
+        }
+    }
+    let cylinder = fixture_cylinder(true);
+    let mut vertices = Vec::new();
+    let mut faces = Vec::new();
+    for face in &cylinder.faces {
+        let offset = vertices.len() as u32;
+        let mut corners = face.map(|v| {
+            cylinder.vertices[v as usize].map(|x| x + (random() * 0.0006 - 0.0003) as f32)
+        });
+        let positive_side = corners.iter().map(|p| p[1]).sum::<f32>() > 0.0;
+        for corner in &mut corners {
+            if positive_side && corner[1].atan2(corner[0]).abs() <= 0.001 {
+                corner[1] += 0.01;
+            }
+        }
+        vertices.extend(corners);
+        faces.push([offset, offset + 1, offset + 2]);
+    }
+    let soup = Mesh::new(vertices, faces).expect("soup cylinder");
+    let overlap = Mesh::concatenate(&[
+        fixture_box([0.0; 3], [20.0; 3]),
+        fixture_box([10.0; 3], [30.0; 3]),
+    ])
+    .expect("overlap");
+    let mut non_manifold = Mesh::concatenate(&[
+        fixture_box([0.0; 3], [10.0; 3]),
+        fixture_box([10.0, 10.0, 0.0], [20.0, 20.0, 10.0]),
+    ])
+    .expect("edge touching");
+    for face in &mut non_manifold.faces {
+        for vertex in face {
+            if *vertex == 8 {
+                *vertex = 2;
+            } else if *vertex == 12 {
+                *vertex = 6;
+            }
+        }
+    }
+    non_manifold.vertices.push([5.0, 5.0, 15.0]);
+    non_manifold.faces.push([4, 5, 16]);
+    let mut duplicates = fixture_box([0.0; 3], [10.0; 3]);
+    duplicates.faces.extend_from_within(..2);
+    let mut inward = sphere;
+    for face in &mut inward.faces {
+        face.swap(1, 2);
+    }
+    let mut sliver = fixture_box([0.0; 3], [10.0; 3]);
+    sliver.vertices.push([5.0, 0.00005, 10.0]);
+    sliver.faces.retain(|face| *face != [4, 5, 6]);
+    sliver.faces.extend([[4, 8, 6], [8, 5, 6], [4, 5, 8]]);
+    vec![
+        ("f2", fixture_cylinder(false)),
+        ("f3", holey),
+        ("f4", flipped),
+        ("f5", soup),
+        ("f6", overlap),
+        ("f7", non_manifold),
+        ("f8", duplicates),
+        ("f9", inward),
+        ("f10", sliver),
+    ]
+}
+
+#[test]
+fn both_engines_pass_the_same_generated_f2_through_f10() {
+    if !available() {
+        return;
+    }
+    let mut shell_mismatches = Vec::new();
+    for (name, mesh) in parity_fixtures() {
+        let windows = routed(&mesh, true);
+        let native = routed(&mesh, false);
+        if name != "f10" {
+            assert_eq!(
+                windows.report.engine,
+                RepairEngine::Windows,
+                "{name}: {:?}",
+                windows.report
+            );
+            assert!(windows.report.can_apply, "{name}: {:?}", windows.report);
+            assert!(native.report.can_apply, "{name}: {:?}", native.report);
+        }
+        for result in [&windows, &native] {
+            result.mesh.validate_non_empty().expect("valid result");
+            let health = &result.report.after;
+            assert_eq!(health.boundary_edges, 0, "{name}: {health:?}");
+            assert_eq!(health.non_manifold_edges, 0, "{name}: {health:?}");
+            assert_eq!(health.flipped_edges, 0, "{name}: {health:?}");
+            assert_eq!(health.self_intersections, Some(0), "{name}: {health:?}");
+        }
+        // f7 is two cubes touching along one edge. Windows joins them into
+        // one part; native keeps two parts by design (R4 decision: parts that
+        // only touch are not merged). Everything else must match.
+        if name != "f7" && windows.report.after.body_count != native.report.after.body_count {
+            shell_mismatches.push((
+                name,
+                windows.report.after.body_count,
+                native.report.after.body_count,
+            ));
+        }
+        let (wv, nv) = (volume(&windows.mesh), volume(&native.mesh));
+        assert!((wv / nv - 1.0).abs() < 0.01, "{name}: {wv}/{nv}");
+        println!(
+            "parity {name} windows={:?} native={:?} shells={}/{} volume={wv:.6}/{nv:.6} self_intersections={:?}/{:?}",
+            windows.report.verdict,
+            native.report.verdict,
+            windows.report.after.body_count,
+            native.report.after.body_count,
+            windows.report.after.self_intersections,
+            native.report.after.self_intersections
+        );
+    }
+    assert!(
+        shell_mismatches.is_empty(),
+        "Windows/native shell counts differ: {shell_mismatches:?}"
+    );
 }

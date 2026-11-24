@@ -3781,7 +3781,8 @@ fn repair_report(report: &modeler3d_core::RepairReport) -> Value {
             "duplicate_faces":score.duplicate_faces,
             "inside_out_shells":score.inside_out_shells,
             "tiny_shells":score.tiny_shells,
-            "shells":score.shells
+            "shells":score.shells,
+            "self_intersections":score.self_intersections
         })
     };
     let verdict = match report.verdict {

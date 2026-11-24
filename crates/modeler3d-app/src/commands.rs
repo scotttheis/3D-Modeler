@@ -3260,27 +3260,29 @@ mod tests {
 
     fn model_with_unrepairable_hole() -> CommandState {
         let (mut state, _) = one_cube_pair();
-        let mut mesh = modeler3d_core::make_sphere(15.0, 1).expect("sphere");
-        mesh.faces.retain(|face| !face.contains(&12));
-        assert_eq!(
-            modeler3d_core::inspect_mesh(&mesh)
-                .expect("health")
-                .boundary_edges,
-            6
-        );
-        // A correct cavity takes the native route on every host. Its six-edge
-        // outer hole remains beyond the native pipeline's current fill limit.
-        let mut inner = modeler3d_core::make_sphere(5.0, 1).expect("inner sphere");
+        // A box with one corner pushed through its own bottom crosses itself.
+        // Native Repair does not resolve a single self-crossing part (repair
+        // plan R6), and the correct cavity inside keeps every host on the
+        // native route, so this model is refused everywhere.
+        let mut outer = modeler3d_core::make_box([20.0; 3]).expect("outer box");
+        for vertex in &mut outer.vertices {
+            if *vertex == [10.0; 3] {
+                *vertex = [2.0, -20.0, 2.0];
+            }
+        }
+        let mut inner = modeler3d_core::make_box([4.0; 3]).expect("inner box");
+        for vertex in &mut inner.vertices {
+            for value in vertex.iter_mut() {
+                *value -= 6.0;
+            }
+        }
         for face in &mut inner.faces {
             face.swap(1, 2);
         }
-        let mesh = Mesh::concatenate(&[mesh, inner]).expect("hollow sphere");
-        assert_eq!(
-            modeler3d_core::inspect_mesh(&mesh)
-                .expect("health")
-                .cavity_shells,
-            1
-        );
+        let mesh = Mesh::concatenate(&[outer, inner]).expect("hollow crossing box");
+        let health = modeler3d_core::inspect_mesh(&mesh).expect("health");
+        assert_eq!(health.cavity_shells, 1);
+        assert!(health.self_intersections.is_some_and(|count| count > 0));
         state.scene.replace_mesh(0, mesh).expect("open sphere");
         state.dirty = false;
         state
@@ -3315,11 +3317,10 @@ mod tests {
             result["message"].as_str(),
             Some(modeler3d_core::REPAIR_REFUSED_MESSAGE)
         );
-        // The native pipeline attempts to reverse the inner surface. The
-        // worsening score must refuse it and preserve both mesh and history.
-        assert_eq!(result["report"]["verdict"], "Worse");
-        assert_eq!(result["report"]["score_before"]["shells"], 1);
-        assert_eq!(result["report"]["score_after"]["shells"], 2);
+        // Nothing the native pipeline does removes the crossing, so the score
+        // does not improve and the repair is refused.
+        assert_ne!(result["report"]["verdict"], "Improved");
+        assert_eq!(result["report"]["engine"], "native");
         assert_eq!(mcp.scene().history_state_id(), history);
         assert_eq!(mcp.scene().revision(), revision);
         assert_eq!(mcp.scene().objects()[0].mesh(), &source);

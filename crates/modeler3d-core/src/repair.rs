@@ -165,6 +165,8 @@ pub struct RepairScore {
     pub tiny_shells: usize,
     /// Connected components excluding cavity surfaces.
     pub shells: usize,
+    /// Strictly crossing face pairs (zero when health skipped the check).
+    pub self_intersections: usize,
 }
 
 impl RepairScore {
@@ -182,10 +184,11 @@ impl RepairScore {
                 .body_count
                 .saturating_sub(health.cavity_shells)
                 .max(0) as usize,
+            self_intersections: health.self_intersections.unwrap_or(0),
         }
     }
 
-    fn fields(self) -> [usize; 8] {
+    fn fields(self) -> [usize; 9] {
         [
             self.open_edges,
             self.non_manifold_edges,
@@ -195,6 +198,7 @@ impl RepairScore {
             self.inside_out_shells,
             self.tiny_shells,
             self.shells,
+            self.self_intersections,
         ]
     }
 }
@@ -318,7 +322,12 @@ pub fn repair_mesh_routed(
     check_cancelled()?;
     let before = inspect_mesh(mesh)?;
     if before.valid {
-        let result = repair_mesh(mesh)?;
+        let result = repair_native_with_health(
+            mesh,
+            REPAIR_DEFAULT_PROFILE,
+            MeshOperationLimits::default(),
+            Some(before),
+        )?;
         check_cancelled()?;
         return Ok(result);
     }
@@ -365,7 +374,12 @@ pub fn repair_mesh_routed(
         Some(format!("{reason}, so the built-in engine was used."))
     };
     check_cancelled()?;
-    let mut result = repair_mesh(mesh)?;
+    let mut result = repair_native_with_health(
+        mesh,
+        REPAIR_DEFAULT_PROFILE,
+        MeshOperationLimits::default(),
+        Some(before),
+    )?;
     check_cancelled()?;
     // A rejected Windows collapse must not be replaced by the native
     // pipeline's closed, almost zero-volume triangle sheets. This extra
@@ -559,6 +573,17 @@ pub fn repair_mesh_with_options(
     profile: RepairProfile,
     limits: MeshOperationLimits,
 ) -> Result<RepairResult, CoreError> {
+    repair_native_with_health(mesh, profile, limits, None)
+}
+
+// Routing has already measured this immutable input. Reuse that report so
+// the crossing search runs once before repair, regardless of engine routing.
+fn repair_native_with_health(
+    mesh: &Mesh,
+    profile: RepairProfile,
+    limits: MeshOperationLimits,
+    before: Option<MeshHealthReport>,
+) -> Result<RepairResult, CoreError> {
     mesh.validate()?;
     limits.validate("repair")?;
     limits.check_mesh("repair", mesh)?;
@@ -568,7 +593,10 @@ pub fn repair_mesh_with_options(
         ));
     }
 
-    let before = inspect_mesh(mesh)?;
+    let before = match before {
+        Some(health) => health,
+        None => inspect_mesh(mesh)?,
+    };
     let grid = RepairGrid::from_mesh(mesh);
     let mut current = mesh.clone();
     let mut stages = Vec::new();
@@ -585,7 +613,12 @@ pub fn repair_mesh_with_options(
                 "CloseAllHoles" => close_holes(value, grid, limits, usize::MAX),
                 "RemoveDoubleTriangles" => native::clean_faces(value),
                 "SplitNonManifoldEdges" => native::split_non_manifold(value, grid),
-                "FixFlippedTriangles" | "FixFlippedTriangles (second pass)" => fix_winding(value),
+                // Set neighbouring directions now, but defer outward shell
+                // orientation until holes close: an open outer surface cannot
+                // yet certify its inward child as a correct cavity.
+                "FixFlippedTriangles" | "FixFlippedTriangles (second pass)" => {
+                    orient_winding(value, true)
+                }
                 "Wrap" => wrap_mesh(value),
                 "RemoveDegeneratedFaces" => {
                     remove_degenerate_faces(&native::collapse(value, grid)?)
@@ -611,7 +644,22 @@ pub fn repair_mesh_with_options(
         faces_after: 0,
         details: Vec::new(),
     };
-    let after = inspect_mesh(&current)?;
+    let mut after = inspect_mesh(&current)?;
+    // Separate healthy parts that only touch (or have a gap) are a no-op.
+    // Earlier lattice/compaction stages must not reorder their original data.
+    let original_score = RepairScore::from_health(&before);
+    if original_score.shells > 1
+        && original_score
+            .fields()
+            .iter()
+            .enumerate()
+            .all(|(id, &value)| id == 7 || value == 0)
+        && RepairScore::from_health(&after) == original_score
+        && current.face_count() == mesh.face_count()
+    {
+        current = mesh.clone();
+        after = before.clone();
+    }
     let candidate_safe = is_safe_candidate(&current);
     let candidate_changed = current != *mesh;
     let score_before = RepairScore::from_health(&before);
@@ -727,6 +775,10 @@ fn remove_degenerate_faces(mesh: &Mesh) -> Result<Mesh, CoreError> {
 }
 
 fn fix_winding(mesh: &Mesh) -> Result<Mesh, CoreError> {
+    orient_winding(mesh, false)
+}
+
+fn orient_winding(mesh: &Mesh, defer_open_cavities: bool) -> Result<Mesh, CoreError> {
     if mesh.faces.is_empty() {
         return Ok(mesh.clone());
     }
@@ -779,9 +831,43 @@ fn fix_winding(mesh: &Mesh) -> Result<Mesh, CoreError> {
             *face = [face[0], face[2], face[1]];
         }
     }
-    for component in components {
+    let consistent = Mesh::new(mesh.vertices.clone(), faces)?;
+    let cavities = if components.len() > 1
+        && components.iter().any(|component| {
+            signed_volume_for_faces(&consistent.vertices, &consistent.faces, component) < -1.0e-12
+        }) {
+        let layout = ComponentLayout::new(&consistent, &components);
+        let pairs = crate::self_intersect::crossing_pairs(&consistent);
+        let mut cavities = correct_cavities(&consistent, &components, &layout, &pairs);
+        if defer_open_cavities {
+            // Preserve a possible cavity only during intermediate stages.
+            // Wrap and final winding still require a genuinely closed parent.
+            for (inner, keep) in cavities.iter_mut().enumerate() {
+                if !*keep
+                    && layout.closed[inner]
+                    && layout.volumes[inner] < 0.0
+                    && !pairs.iter().any(|&(a, b)| {
+                        let (a, b) = (layout.owner[a as usize], layout.owner[b as usize]);
+                        a != b && (a == inner || b == inner)
+                    })
+                    && (0..components.len()).any(|outer| {
+                        !layout.closed[outer]
+                            && layout.volumes[outer] > 0.0
+                            && contains_component(&consistent, &components, &layout, outer, inner)
+                    })
+                {
+                    *keep = true;
+                }
+            }
+        }
+        cavities
+    } else {
+        vec![false; components.len()]
+    };
+    let mut faces = consistent.faces;
+    for (id, component) in components.into_iter().enumerate() {
         let volume = signed_volume_for_faces(&mesh.vertices, &faces, &component);
-        if volume < -1.0e-12 {
+        if volume < -1.0e-12 && !cavities[id] {
             for face_index in component {
                 if let Some(face) = faces.get_mut(face_index) {
                     *face = [face[0], face[2], face[1]];
@@ -803,8 +889,244 @@ fn close_holes(
 }
 
 fn wrap_mesh(mesh: &Mesh) -> Result<Mesh, CoreError> {
-    let compacted = compact_mesh(&mesh.vertices, &mesh.faces)?;
-    fix_winding(&compacted)
+    let components = face_components(mesh);
+    if components.len() < 2 {
+        return Ok(mesh.clone());
+    }
+    let layout = ComponentLayout::new(mesh, &components);
+    let pairs = crate::self_intersect::crossing_pairs(mesh);
+    let cavities = correct_cavities(mesh, &components, &layout, &pairs);
+    let mut self_crossing = vec![false; components.len()];
+    for &(a, b) in &pairs {
+        let (a, b) = (layout.owner[a as usize], layout.owner[b as usize]);
+        if a == b {
+            self_crossing[a] = true;
+        }
+    }
+    let eligible = |id: usize| {
+        layout.closed[id] && layout.volumes[id] != 0.0 && !cavities[id] && !self_crossing[id]
+    };
+    let mut parent: Vec<_> = (0..components.len()).collect();
+    for &(a, b) in &pairs {
+        let (a, b) = (layout.owner[a as usize], layout.owner[b as usize]);
+        if a != b && eligible(a) && eligible(b) {
+            join_groups(&mut parent, a, b);
+        }
+    }
+    for a in 0..components.len() {
+        if !eligible(a) {
+            continue;
+        }
+        for b in a + 1..components.len() {
+            if eligible(b)
+                && (contains_component(mesh, &components, &layout, a, b)
+                    || contains_component(mesh, &components, &layout, b, a))
+            {
+                join_groups(&mut parent, a, b);
+            }
+        }
+    }
+    let mut groups = BTreeMap::<usize, Vec<usize>>::new();
+    for id in 0..components.len() {
+        let root = group_root(&mut parent, id);
+        groups.entry(root).or_default().push(id);
+    }
+    let mut groups: Vec<_> = groups
+        .into_values()
+        .filter(|group| group.len() > 1)
+        .collect();
+    groups.sort_unstable_by_key(|group| components[group[0]].iter().copied().min());
+    let mut removed = vec![false; mesh.face_count()];
+    let mut unions = Vec::new();
+    for group in groups {
+        // Kernel failure is local to this group, including result conversion.
+        let attempt = || -> Result<Mesh, CoreError> {
+            let mut result = None;
+            for &id in &group {
+                let mut faces: Vec<_> = components[id]
+                    .iter()
+                    .map(|&face| mesh.faces[face])
+                    .collect();
+                if layout.volumes[id] < 0.0 {
+                    for face in &mut faces {
+                        face.swap(1, 2);
+                    }
+                }
+                let member = compact_mesh(&mesh.vertices, &faces)?;
+                let member = crate::mesh_ops::manifold_from_mesh(&member, 0)?;
+                result = Some(match result {
+                    None => member,
+                    Some(union) => manifold_csg::Manifold::union(&union, &member),
+                });
+            }
+            let union =
+                result.ok_or_else(|| CoreError::MeshOperation("empty Wrap group".into()))?;
+            let (output, _) = crate::mesh_ops::mesh_from_manifold(&union)?;
+            output.validate_non_empty()?;
+            Ok(output)
+        };
+        if let Ok(union) = attempt() {
+            for id in group {
+                for &face in &components[id] {
+                    removed[face] = true;
+                }
+            }
+            unions.push(union);
+        }
+    }
+    if unions.is_empty() {
+        return Ok(mesh.clone());
+    }
+    let mut vertices = mesh.vertices.clone();
+    let mut faces: Vec<_> = mesh
+        .faces
+        .iter()
+        .enumerate()
+        .filter_map(|(id, &face)| (!removed[id]).then_some(face))
+        .collect();
+    for union in unions {
+        let offset =
+            u32::try_from(vertices.len()).map_err(|_| CoreError::OperationResourceLimit {
+                operation: "repair".into(),
+                reason: "Wrap vertex index overflow".into(),
+            })?;
+        for face in union.faces {
+            let mut shifted = [0; 3];
+            for (slot, vertex) in shifted.iter_mut().zip(face) {
+                *slot = offset.checked_add(vertex).ok_or_else(|| {
+                    CoreError::OperationResourceLimit {
+                        operation: "repair".into(),
+                        reason: "Wrap vertex index overflow".into(),
+                    }
+                })?;
+            }
+            faces.push(shifted);
+        }
+        vertices.extend(union.vertices);
+    }
+    compact_mesh(&vertices, &faces)
+}
+
+struct ComponentLayout {
+    owner: Vec<usize>,
+    closed: Vec<bool>,
+    volumes: Vec<f64>,
+    bounds: Vec<([f64; 3], [f64; 3])>,
+}
+
+impl ComponentLayout {
+    fn new(mesh: &Mesh, components: &[Vec<usize>]) -> Self {
+        let mut owner = vec![0; mesh.face_count()];
+        let mut bounds = Vec::with_capacity(components.len());
+        let mut volumes = Vec::with_capacity(components.len());
+        for (id, component) in components.iter().enumerate() {
+            let mut lo = [f64::INFINITY; 3];
+            let mut hi = [f64::NEG_INFINITY; 3];
+            for &face in component {
+                owner[face] = id;
+                for v in mesh.faces[face] {
+                    for i in 0..3 {
+                        lo[i] = lo[i].min(f64::from(mesh.vertices[v as usize][i]));
+                        hi[i] = hi[i].max(f64::from(mesh.vertices[v as usize][i]));
+                    }
+                }
+            }
+            bounds.push((lo, hi));
+            volumes.push(signed_volume_for_faces(
+                &mesh.vertices,
+                &mesh.faces,
+                component,
+            ));
+        }
+        let mut closed = vec![true; components.len()];
+        let records = native::edge_records(&mesh.faces);
+        for owners in records.chunk_by(|a, b| a.0 == b.0) {
+            if owners.len() != 2
+                || owners[0].2 == owners[1].2
+                || owner[owners[0].1] != owner[owners[1].1]
+            {
+                for &(_, face, _) in owners {
+                    closed[owner[face]] = false;
+                }
+            }
+        }
+        Self {
+            owner,
+            closed,
+            volumes,
+            bounds,
+        }
+    }
+}
+
+fn contains_component(
+    mesh: &Mesh,
+    components: &[Vec<usize>],
+    layout: &ComponentLayout,
+    outer: usize,
+    inner: usize,
+) -> bool {
+    let (lo, hi) = layout.bounds[outer];
+    let (a, b) = layout.bounds[inner];
+    if !(0..3).all(|i| a[i] >= lo[i] && b[i] <= hi[i]) {
+        return false;
+    }
+    let Some(&face) = components[inner].first() else {
+        return false;
+    };
+    let point = mesh.vertices[mesh.faces[face][0] as usize].map(f64::from);
+    let mut angle = 0.0;
+    for &face in &components[outer] {
+        let [a, b, c] = mesh.faces[face]
+            .map(|v| std::array::from_fn(|i| f64::from(mesh.vertices[v as usize][i]) - point[i]));
+        let [la, lb, lc] = [a, b, c].map(|p| dot64(p, p).sqrt());
+        angle += 2.0
+            * dot64(a, cross64(b, c))
+                .atan2(la * lb * lc + dot64(a, b) * lc + dot64(b, c) * la + dot64(c, a) * lb);
+    }
+    (angle / (4.0 * std::f64::consts::PI)).abs() > 0.5
+}
+
+// Shared by winding repair and Wrap, evaluated on consistently wound faces.
+fn correct_cavities(
+    mesh: &Mesh,
+    components: &[Vec<usize>],
+    layout: &ComponentLayout,
+    pairs: &[(u32, u32)],
+) -> Vec<bool> {
+    let mut crosses_other = vec![false; components.len()];
+    for &(a, b) in pairs {
+        let (a, b) = (layout.owner[a as usize], layout.owner[b as usize]);
+        if a != b {
+            crosses_other[a] = true;
+            crosses_other[b] = true;
+        }
+    }
+    (0..components.len())
+        .map(|inner| {
+            layout.closed[inner]
+                && layout.volumes[inner] < 0.0
+                && !crosses_other[inner]
+                && (0..components.len()).any(|outer| {
+                    layout.closed[outer]
+                        && layout.volumes[outer] > 0.0
+                        && contains_component(mesh, components, layout, outer, inner)
+                })
+        })
+        .collect()
+}
+
+fn group_root(parent: &mut [usize], mut id: usize) -> usize {
+    while parent[id] != id {
+        parent[id] = parent[parent[id]];
+        id = parent[id];
+    }
+    id
+}
+
+fn join_groups(parent: &mut [usize], a: usize, b: usize) {
+    let (a, b) = (group_root(parent, a), group_root(parent, b));
+    parent[a.max(b)] = a.min(b);
 }
 
 fn remove_tiny_shells(mesh: &Mesh) -> Result<Mesh, CoreError> {
@@ -1099,6 +1421,7 @@ mod gate_tests {
             inside_out_shells: 0,
             tiny_shells: 0,
             shells: 1,
+            self_intersections: 0,
         };
         let mut after = RepairScore {
             shells: 2,
@@ -1113,7 +1436,7 @@ mod gate_tests {
 
     #[test]
     fn every_defect_is_gated_and_improvements_cannot_mask_damage() {
-        let score = |fields: [usize; 8]| RepairScore {
+        let score = |fields: [usize; 9]| RepairScore {
             open_edges: fields[0],
             non_manifold_edges: fields[1],
             flipped_edges: fields[2],
@@ -1122,17 +1445,84 @@ mod gate_tests {
             inside_out_shells: fields[5],
             tiny_shells: fields[6],
             shells: fields[7],
+            self_intersections: fields[8],
         };
-        let before = score([2; 8]);
+        let before = score([2; 9]);
         assert_eq!(gate(before, before), RepairVerdict::NoBetter);
-        for field in 0..8 {
-            let mut after = [2; 8];
+        for field in 0..9 {
+            let mut after = [2; 9];
             after[field] -= 1;
             assert_eq!(gate(before, score(after)), RepairVerdict::Improved);
             after[field] += 2;
             assert_eq!(gate(before, score(after)), RepairVerdict::Worse);
-            after[(field + 1) % 8] -= 1;
+            after[(field + 1) % 9] -= 1;
             assert_eq!(gate(before, score(after)), RepairVerdict::Worse);
+        }
+    }
+}
+
+#[cfg(test)]
+mod wrap_tests {
+    use super::*;
+
+    fn translated_box(size: f32, offset: [f32; 3]) -> Mesh {
+        let mut mesh = crate::make_box([size; 3]).expect("box");
+        for p in &mut mesh.vertices {
+            for i in 0..3 {
+                p[i] += offset[i];
+            }
+        }
+        mesh
+    }
+
+    fn corners(mesh: &Mesh) -> Vec<[[u32; 3]; 3]> {
+        mesh.faces
+            .iter()
+            .map(|f| f.map(|v| mesh.vertices[v as usize].map(f32::to_bits)))
+            .collect()
+    }
+
+    #[test]
+    fn wrap_leaves_open_single_and_self_crossing_parts_bit_identical() {
+        let mut crossing = translated_box(10.0, [0.0; 3]);
+        *crossing
+            .vertices
+            .iter_mut()
+            .find(|p| **p == [5.0; 3])
+            .expect("corner") = [1.0, -10.0, 1.0];
+        assert!(!crate::self_intersect::crossing_pairs(&crossing).is_empty());
+        let mut open = translated_box(5.0, [30.0; 3]);
+        open.faces.pop();
+        let input = Mesh::concatenate(&[crossing, open]).expect("parts");
+        assert_eq!(wrap_mesh(&input).expect("Wrap"), input);
+    }
+
+    #[test]
+    fn wrap_keeps_untouched_faces_in_order_and_unions_groups_by_first_face() {
+        let outer = translated_box(20.0, [0.0; 3]);
+        let mut cavity = translated_box(10.0, [0.0; 3]);
+        for face in &mut cavity.faces {
+            face.swap(1, 2);
+        }
+        let mut open = translated_box(5.0, [-30.0; 3]);
+        open.faces.pop();
+        let first = translated_box(20.0, [100.0; 3]);
+        let second = translated_box(20.0, [110.0; 3]);
+        let third = translated_box(20.0, [200.0; 3]);
+        let fourth = translated_box(20.0, [210.0; 3]);
+        let input =
+            Mesh::concatenate(&[outer, cavity, open, first, third, second, fourth]).expect("parts");
+        let output = wrap_mesh(&input).expect("Wrap");
+        output.validate().expect("valid output");
+        assert_eq!(&corners(&output)[..35], &corners(&input)[..35]);
+        let groups = face_components(&output);
+        assert_eq!(groups.len(), 5);
+        for (group, minimum) in [(3, 90.0), (4, 190.0)] {
+            let first_point = output.vertices[output.faces[groups[group][0]][0] as usize];
+            assert_eq!(
+                first_point.into_iter().fold(f32::INFINITY, f32::min),
+                minimum
+            );
         }
     }
 }

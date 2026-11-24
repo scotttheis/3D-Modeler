@@ -426,6 +426,17 @@ pub fn inspect_mesh(mesh: &Mesh) -> Result<MeshHealthReport, CoreError> {
     if tiny_shells > 0 {
         issues.push(format!("{tiny_shells} tiny shells"));
     }
+    let self_intersections =
+        (faces.len() <= 2_000_000).then(|| crate::self_intersect::count_crossing_pairs(mesh));
+    let self_intersection_status = if self_intersections.is_some() {
+        "checked"
+    } else {
+        "not checked: model has more than 2,000,000 faces"
+    }
+    .to_owned();
+    if let Some(count) = self_intersections.filter(|&count| count > 0) {
+        issues.push(format!("{count} self-intersections"));
+    }
     let signed_volume = signed_volume_mm3(mesh);
     let watertight = boundary_edges == 0 && non_manifold_edges == 0 && !faces.is_empty();
     let is_volume = watertight && winding_consistent && signed_volume.abs() > 1.0e-12;
@@ -461,9 +472,8 @@ pub fn inspect_mesh(mesh: &Mesh) -> Result<MeshHealthReport, CoreError> {
         boundary_edges,
         boundary_edge_loops,
         tiny_shells,
-        self_intersections: None,
-        self_intersection_status: "not checked: optional self-intersection accelerator unavailable"
-            .to_owned(),
+        self_intersections,
+        self_intersection_status,
         issues,
     })
 }

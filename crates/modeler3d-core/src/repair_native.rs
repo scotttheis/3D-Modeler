@@ -367,8 +367,12 @@ pub(super) fn collapse(mesh: &Mesh, grid: RepairGrid) -> Result<Mesh, CoreError>
     clean_faces(&grid.mesh(&points, topology.finish())?)
 }
 
+/// Largest hole rim whose crossing cap is retried from other starting points.
+const MAX_RETRY_RIM: usize = 64;
+
 // The loop direction belongs to the existing surface. Reverse every emitted
 // triangle so the cap already agrees across the boundary, even for inward cups.
+
 pub(super) fn fill_holes(
     mesh: &Mesh,
     grid: RepairGrid,
@@ -436,6 +440,7 @@ pub(super) fn fill_holes(
     };
     let mut present: HashSet<[u32; 3]> = mesh.faces.iter().map(sorted).collect();
     let mut faces = mesh.faces.clone();
+    let mut crossing_search = None;
     for boundary in loops.iter().filter(|b| (3..=maximum).contains(&b.len())) {
         let hole = Hole {
             mesh,
@@ -443,11 +448,84 @@ pub(super) fn fill_holes(
             boundary,
             existing: &existing,
         };
-        let cap = if boundary.len() <= 300 {
+        let mut cap = if boundary.len() <= 300 {
             hole.minimum_area()?
         } else {
             hole.ears()?
         };
+        // Non-planar rims can have several equally minimal caps. A cap may
+        // cross a steep side wall even though it is topologically sealed.
+        // Retry cyclic starts only when necessary, retaining the original
+        // minimum-area requirement and the output of unaffected fixtures.
+        let search =
+            crossing_search.get_or_insert_with(|| crate::self_intersect::Search::new(mesh));
+        // Retrying every rotation costs n times the fill, so only small rims
+        // retry; a larger crossing cap is left open, like a cap with no fill.
+        let crossing = cap
+            .as_ref()
+            .is_some_and(|cap| cap.iter().any(|&face| search.crosses_face(face)));
+        if crossing && boundary.len() > MAX_RETRY_RIM {
+            cap = None;
+        } else if crossing {
+            let minimum: f64 = cap
+                .as_ref()
+                .into_iter()
+                .flatten()
+                .map(|face| {
+                    let [a, b, c] = face.map(|v| mesh.vertices[v as usize].map(f64::from));
+                    let ab = std::array::from_fn(|i| b[i] - a[i]);
+                    let ac = std::array::from_fn(|i| c[i] - a[i]);
+                    let n = crate::repair::cross64(ab, ac);
+                    crate::repair::dot64(n, n).sqrt() * 0.5
+                })
+                .sum();
+            cap = None;
+            for shift in 1..boundary.len() {
+                // Retry work is charged to the same operation budget.
+                let n = boundary.len() as u64;
+                let units = if n <= 300 {
+                    n * (n - 1) * (n - 2) / 6
+                } else {
+                    n * (u64::from(n.ilog2()) + 1) * 3
+                };
+                work = work.checked_add(units).ok_or_else(arithmetic_limit)?;
+                limits.check_work("repair", work)?;
+                let rotated: Vec<_> = boundary
+                    .iter()
+                    .cycle()
+                    .skip(shift)
+                    .take(boundary.len())
+                    .copied()
+                    .collect();
+                let retry = Hole {
+                    boundary: &rotated,
+                    ..hole
+                };
+                let candidate = if boundary.len() <= 300 {
+                    retry.minimum_area()?
+                } else {
+                    retry.ears()?
+                };
+                if let Some(candidate) = candidate {
+                    let area: f64 = candidate
+                        .iter()
+                        .map(|face| {
+                            let [a, b, c] = face.map(|v| mesh.vertices[v as usize].map(f64::from));
+                            let ab = std::array::from_fn(|i| b[i] - a[i]);
+                            let ac = std::array::from_fn(|i| c[i] - a[i]);
+                            let n = crate::repair::cross64(ab, ac);
+                            crate::repair::dot64(n, n).sqrt() * 0.5
+                        })
+                        .sum();
+                    if (boundary.len() > 300 || (area - minimum).abs() <= minimum * 1.0e-12)
+                        && candidate.iter().all(|&face| !search.crosses_face(face))
+                    {
+                        cap = Some(candidate);
+                        break;
+                    }
+                }
+            }
+        }
         if let Some(cap) = cap {
             // A triangulation of distinct cyclic positions uses a diagonal at
             // most twice. Check before committing this hole, and also prevent

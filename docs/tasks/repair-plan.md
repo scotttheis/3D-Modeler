@@ -203,7 +203,7 @@ pasting the previous session's prompt.
   work when there is nothing open; book, f4, f6-f10 output bit-identical to
   before (hash in the fixture line). f6 still unchanged (R6).
 
-### [ ] R6: native engine C: Wrap (merge overlaps) and self-intersection check
+### [x] R6: native engine C: Wrap (merge overlaps) and self-intersection check
 
 - Session: **Claude Opus 5.5, medium.** Worker: **Codex, high.**
 - Fix plan Step 3 item 8: union closed shells with Manifold (already a
@@ -213,6 +213,25 @@ pasting the previous session's prompt.
 - Acceptance: native fixes f6 (one solid, volume 15,000) and all of
   f1-f10; Windows-only test that both engines pass the same fixtures.
   **Full** gate. Ships: Release rebuilt.
+- Done 2026-11-23: [`repair-r6-card.md`](repair-r6-card.md) (Codex high
+  wrote it; overseer bounded the hole-fill retry and fixed three tests).
+  Health now counts self-intersections (`self_intersect.rs`, a box tree;
+  only faces that pass through each other count, touching and coplanar
+  faces do not), so self-crossing models are not "valid" and show the
+  needs-repair marker; the repair score has a 9th field for it. Book check
+  +0.26 s (0.07 to 0.33 s), 1M faces 0.71 s; above 2M faces "not checked".
+  Wrap unions with Manifold only closed parts that cross or nest; parts that
+  only touch stay separate and untouched parts stay bit-identical. Correct
+  cavities are kept (also through the winding fix, which used to turn them
+  outward). Native fixtures (`evidence/repair-eval-2026-11-22/r6/`): f6 one
+  solid, volume 15,000.0; every other hash identical to R5; book 2.77 s.
+  Windows route still fixes all. Parity test: both engines fix f2-f10 the
+  same way except f7 (Windows joins two cubes touching along an edge into
+  one part, native keeps two, R4 decision). Not done: one part crossing
+  itself is detected but not resolved natively (fix plan allows it); a
+  crossing hole cap is retried only for rims up to 64 edges. Full gate
+  passed (`logs/gate/20261123-170536-full`; capture board not run, it stalls
+  at the Save picker).
 
 ### [ ] R7: what the owner sees, and finish
 

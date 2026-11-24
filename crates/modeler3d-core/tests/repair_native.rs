@@ -186,6 +186,159 @@ fn sealed(result: &RepairResult, shells: usize) {
     assert_eq!(result.report.score_after.shells, shells);
 }
 
+fn r6_closed(result: &RepairResult, shells: i32) {
+    result.mesh.validate_non_empty().expect("validated result");
+    let health = inspect_mesh(&result.mesh).expect("health");
+    assert_eq!(health.boundary_edges, 0, "{health:?}");
+    assert_eq!(health.non_manifold_edges, 0, "{health:?}");
+    assert_eq!(health.flipped_edges, 0, "{health:?}");
+    assert_eq!(health.self_intersections, Some(0), "{health:?}");
+    assert_eq!(health.body_count, shells, "{health:?}");
+}
+
+#[test]
+fn r6_f6_overlapping_boxes_union_and_are_deterministic() {
+    // genfx.py f6: a 10 mm overlap on all axes, intersection 1,000 mm3.
+    let input = Mesh::concatenate(&[box_at([0.0; 3], [20.0; 3]), box_at([10.0; 3], [30.0; 3])])
+        .expect("f6");
+    assert!((volume(&input) - 16_000.0).abs() < 1.0e-8);
+    assert!(
+        inspect_mesh(&input)
+            .expect("before")
+            .self_intersections
+            .is_some_and(|n| n > 0)
+    );
+    let result = repair(&input);
+    assert_eq!(result.report.verdict, RepairVerdict::Improved);
+    assert!(result.report.can_apply);
+    r6_closed(&result, 1);
+    assert!((volume(&result.mesh) - 15_000.0).abs() <= 0.5);
+    assert_eq!(result, repair_mesh(&input).expect("repeat"));
+}
+
+#[test]
+fn r6_overlapping_spheres_union_even_when_one_is_inside_out() {
+    let outer = make_sphere(15.0, 4).expect("sphere");
+    let mut other = outer.clone();
+    for point in &mut other.vertices {
+        point[0] += 15.0;
+    }
+    for face in &mut other.faces {
+        face.swap(1, 2);
+    }
+    let input = Mesh::concatenate(&[outer, other]).expect("spheres");
+    let result = repair(&input);
+    assert_eq!(result.report.verdict, RepairVerdict::Improved);
+    r6_closed(&result, 1);
+    let r = 15.0_f64;
+    let d = 15.0;
+    let analytic = 2.0 * 4.0 / 3.0 * std::f64::consts::PI * r.powi(3)
+        - std::f64::consts::PI * (4.0 * r + d) * (2.0 * r - d).powi(2) / 12.0;
+    assert!((volume(&result.mesh) / analytic - 1.0).abs() < 0.01);
+}
+
+#[test]
+fn r6_nested_outward_spheres_keep_only_the_outer_solid() {
+    let outer = make_sphere(15.0, 3).expect("outer");
+    let outer_volume = volume(&outer);
+    let inner = make_sphere(5.0, 3).expect("wrong-way inner");
+    let result = repair(&Mesh::concatenate(&[outer, inner]).expect("nested spheres"));
+    assert_eq!(result.report.verdict, RepairVerdict::Improved);
+    r6_closed(&result, 1);
+    assert!((volume(&result.mesh) / outer_volume - 1.0).abs() < 0.01);
+}
+
+#[test]
+fn r6_holey_hollow_ball_keeps_its_correct_cavity() {
+    let mut outer = make_sphere(15.0, 3).expect("outer");
+    let mut inner = make_sphere(5.0, 3).expect("inner");
+    let expected_volume = volume(&outer) - volume(&inner);
+    outer.faces.pop();
+    for face in &mut inner.faces {
+        face.swap(1, 2);
+    }
+    let input = Mesh::concatenate(&[outer, inner]).expect("hollow");
+    let result = repair(&input);
+    assert_eq!(result.report.verdict, RepairVerdict::Improved);
+    assert!(result.report.can_apply);
+    r6_closed(&result, 2);
+    assert_eq!(result.report.after.cavity_shells, 1);
+    assert!((volume(&result.mesh) / expected_volume - 1.0).abs() < 0.01);
+    let cavity_vertices: Vec<_> = result
+        .mesh
+        .faces
+        .iter()
+        .filter(|face| {
+            face.iter().all(|&v| {
+                dot(
+                    result.mesh.vertices[v as usize].map(f64::from),
+                    result.mesh.vertices[v as usize].map(f64::from),
+                ) < 26.0
+            })
+        })
+        .map(|face| face.map(|v| result.mesh.vertices[v as usize]))
+        .collect();
+    assert_eq!(cavity_vertices.len(), 1280);
+    assert!(
+        cavity_vertices
+            .iter()
+            .map(|&[a, b, c]| dot(a.map(f64::from), cross(b.map(f64::from), c.map(f64::from))))
+            .sum::<f64>()
+            < 0.0
+    );
+}
+
+#[test]
+fn r6_wrong_way_hollow_ball_is_merged_into_a_solid() {
+    let mut outer = make_sphere(15.0, 3).expect("outer");
+    let expected = volume(&outer);
+    outer.faces.pop();
+    let inner = make_sphere(5.0, 3).expect("outward inner");
+    let result = repair(&Mesh::concatenate(&[outer, inner]).expect("wrong cavity"));
+    assert!(result.report.can_apply);
+    r6_closed(&result, 1);
+    assert_eq!(result.report.after.cavity_shells, 0);
+    assert!((volume(&result.mesh) / expected - 1.0).abs() < 0.01);
+}
+
+#[test]
+fn r6_cavity_survives_until_a_nontrivial_outer_hole_has_closed() {
+    let mut outer = make_sphere(15.0, 1).expect("outer");
+    outer.faces.retain(|face| !face.contains(&12));
+    let mut inner = make_sphere(5.0, 1).expect("inner");
+    for face in &mut inner.faces {
+        face.swap(1, 2);
+    }
+    let input = Mesh::concatenate(&[outer, inner]).expect("hollow with six-edge hole");
+    assert_eq!(inspect_mesh(&input).expect("before").boundary_edges, 6);
+    let result = repair(&input);
+    assert!(result.report.can_apply, "{:?}", result.report);
+    r6_closed(&result, 2);
+    assert_eq!(result.report.after.cavity_shells, 1);
+}
+
+#[test]
+fn r6_touching_parts_and_a_small_gap_stay_bit_identical() {
+    for lo in [
+        [10.0, 0.0, 0.0],
+        [10.0, 10.0, 0.0],
+        [10.0; 3],
+        [10.05, 0.0, 0.0],
+    ] {
+        let input =
+            Mesh::concatenate(&[cube(), box_at(lo, lo.map(|x| x + 10.0))]).expect("two parts");
+        assert_eq!(
+            inspect_mesh(&input).expect("before").self_intersections,
+            Some(0)
+        );
+        let result = repair(&input);
+        r6_closed(&result, 2);
+        assert_eq!(result.mesh, input);
+        assert_eq!(result.report.verdict, RepairVerdict::NoBetter);
+        assert!(!result.report.can_apply);
+    }
+}
+
 #[test]
 fn f10_sub_grid_sliver_collapses_without_opening_the_box() {
     let input = sliver(0.00005);
@@ -451,7 +604,12 @@ fn check_fill(input: &Mesh, result: &RepairResult) {
     assert_eq!(health.non_manifold_edges, 0);
     assert_eq!(health.degenerate_faces, 0);
     assert_eq!(health.flipped_edges, 0);
-    assert_eq!(result.report.verdict, RepairVerdict::Improved);
+    assert_eq!(
+        result.report.verdict,
+        RepairVerdict::Improved,
+        "{:?}",
+        result.report
+    );
     assert!(result.report.can_apply);
     check_bound(input, &result.mesh, false);
 }

@@ -414,3 +414,97 @@ fn health_counts_flipped_edges_and_keeps_correct_cavities_out_of_the_score() {
     assert_eq!(health.inside_out_shells, 0);
     assert_eq!(RepairScore::from_health(&health).shells, 1);
 }
+
+#[test]
+fn r6_health_checks_closed_and_book_like_meshes_without_new_issues() {
+    for mesh in [
+        box_mesh([20.0; 3]),
+        make_sphere(15.0, 3).expect("sphere"),
+        add_sealed_slivers(&make_sphere(15.0, 2).expect("sphere"), 50),
+    ] {
+        let health = inspect_mesh(&mesh).expect("health");
+        assert_eq!(health.self_intersections, Some(0), "{health:?}");
+        assert_eq!(health.self_intersection_status, "checked");
+        assert!(health.valid, "{health:?}");
+    }
+}
+
+#[test]
+fn r6_health_flags_f6_crossings_with_an_issue_and_score() {
+    let first = box_mesh([20.0; 3]);
+    let mut second = first.clone();
+    for point in &mut second.vertices {
+        for coordinate in point {
+            *coordinate += 10.0;
+        }
+    }
+    let mesh = Mesh::concatenate(&[first, second]).expect("f6");
+    let health = inspect_mesh(&mesh).expect("health");
+    let count = health.self_intersections.expect("checked");
+    assert!(count > 0);
+    assert!(!health.valid);
+    assert_eq!(health.self_intersection_status, "checked");
+    assert!(
+        health
+            .issues
+            .contains(&format!("{count} self-intersections"))
+    );
+    assert_eq!(RepairScore::from_health(&health).self_intersections, count);
+    let mut reversed = mesh;
+    reversed.faces.reverse();
+    assert_eq!(
+        inspect_mesh(&reversed)
+            .expect("reordered")
+            .self_intersections,
+        Some(count)
+    );
+}
+
+#[test]
+fn r6_health_detects_a_single_part_pushed_through_itself() {
+    let mut mesh = box_mesh([10.0; 3]);
+    let tip = mesh
+        .vertices
+        .iter_mut()
+        .find(|p| **p == [5.0, 5.0, 5.0])
+        .expect("corner");
+    *tip = [1.0, -10.0, 1.0];
+    let health = inspect_mesh(&mesh).expect("crossing box");
+    assert_eq!(health.body_count, 1);
+    assert!(
+        health.self_intersections.is_some_and(|n| n > 0),
+        "{health:?}"
+    );
+    assert!(!health.valid);
+}
+
+#[test]
+fn r6_health_excludes_partial_coplanar_face_contact() {
+    let first = box_mesh([10.0; 3]);
+    let mut second = first.clone();
+    for point in &mut second.vertices {
+        point[0] += 10.0;
+        point[1] += 3.0;
+    }
+    let mesh = Mesh::concatenate(&[first, second]).expect("partial shared face");
+    let health = inspect_mesh(&mesh).expect("health");
+    assert_eq!(health.self_intersections, Some(0));
+    assert_eq!(health.self_intersection_status, "checked");
+    assert_eq!(health.body_count, 2);
+}
+
+#[test]
+fn r6_health_skips_crossings_above_the_two_million_face_limit() {
+    let mesh = Mesh::new(
+        vec![[0.0; 3], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]],
+        vec![[0, 1, 2]; 2_000_001],
+    )
+    .expect("large indexed mesh");
+    let health = inspect_mesh(&mesh).expect("large health check");
+    assert_eq!(health.self_intersections, None);
+    assert_eq!(
+        health.self_intersection_status,
+        "not checked: model has more than 2,000,000 faces"
+    );
+    assert_eq!(RepairScore::from_health(&health).self_intersections, 0);
+}
