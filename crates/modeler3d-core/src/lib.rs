@@ -116,8 +116,8 @@ pub use repair::{
     REPAIR_NOTHING_TO_FIX_MESSAGE, REPAIR_REFUSED_MESSAGE, REPAIR_TINY_SHELL_TOLERANCE_MM,
     REPAIR_TOLERANCE_MM, RepairEngine, RepairProfile, RepairReport, RepairResult,
     RepairRouteControl, RepairScore, RepairStageReport, RepairVerdict, repair_mesh,
-    repair_mesh_routed, repair_mesh_with_options, repair_mesh_with_profile, repair_time_estimate,
-    repair_time_limit,
+    repair_mesh_routed, repair_mesh_with_options, repair_mesh_with_profile, repair_summary,
+    repair_time_estimate, repair_time_limit,
 };
 pub use scene::{
     COPY_GAP_MM, CommandResult, DEFAULT_MESH_COLOR, MERGE_NOT_TOUCHING_MESSAGE, ObjectId,

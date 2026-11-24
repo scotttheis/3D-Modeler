@@ -276,6 +276,124 @@ pub const REPAIR_NOTHING_TO_FIX_MESSAGE: &str =
 /// Shared desktop/MCP message when a flawed mesh cannot be improved safely.
 pub const REPAIR_REFUSED_MESSAGE: &str = "Repair couldn't improve this model. Nothing was changed.";
 
+/// Describes only measured improvements in plain words, identically on every host.
+/// Nothing-to-fix and refused reports retain their shared desktop/MCP messages.
+#[must_use]
+pub fn repair_summary(report: &RepairReport) -> String {
+    if report.nothing_to_fix() {
+        return REPAIR_NOTHING_TO_FIX_MESSAGE.to_owned();
+    }
+    if report.refused() {
+        return REPAIR_REFUSED_MESSAGE.to_owned();
+    }
+    fn number(value: usize) -> String {
+        let digits = value.to_string();
+        let mut result = String::new();
+        for (index, digit) in digits.chars().enumerate() {
+            if index > 0 && (digits.len() - index).is_multiple_of(3) {
+                result.push(',');
+            }
+            result.push(digit);
+        }
+        result
+    }
+    fn counted(
+        parts: &mut Vec<String>,
+        (old, new): (usize, usize),
+        verb: &str,
+        singular: &str,
+        plural: &str,
+    ) {
+        if old > new {
+            let count = old - new;
+            let noun = if count == 1 { singular } else { plural };
+            parts.push(format!("{verb} {} {noun}", number(count)));
+        }
+    }
+    let before = report.score_before;
+    let after = report.score_after;
+    let mut parts = Vec::new();
+    counted(
+        &mut parts,
+        (
+            report.before.boundary_edge_loops,
+            report.after.boundary_edge_loops,
+        ),
+        "closed",
+        "hole",
+        "holes",
+    );
+    counted(
+        &mut parts,
+        (before.inside_out_shells, after.inside_out_shells),
+        "turned",
+        "inside-out part right side out",
+        "inside-out parts right side out",
+    );
+    // Flipped faces are counted as edges, so this part has no number.
+    if before.flipped_edges > after.flipped_edges {
+        parts.push("turned flipped faces the right way".to_owned());
+    }
+    if before.shells > after.shells && before.tiny_shells == after.tiny_shells {
+        parts.push(format!(
+            "merged {} overlapping parts into {}",
+            number(before.shells),
+            number(after.shells)
+        ));
+    }
+    let removed_or_fixed = [
+        (
+            (before.duplicate_faces, after.duplicate_faces),
+            "removed",
+            "duplicate face",
+            "duplicate faces",
+        ),
+        (
+            (before.degenerate_faces, after.degenerate_faces),
+            "removed",
+            "zero-size triangle",
+            "zero-size triangles",
+        ),
+        (
+            (before.tiny_shells, after.tiny_shells),
+            "removed",
+            "tiny loose piece",
+            "tiny loose pieces",
+        ),
+        (
+            (before.non_manifold_edges, after.non_manifold_edges),
+            "fixed",
+            "edge shared by more than two faces",
+            "edges shared by more than two faces",
+        ),
+        (
+            (before.self_intersections, after.self_intersections),
+            "fixed",
+            "place where the model passed through itself",
+            "places where the model passed through itself",
+        ),
+    ];
+    for (counts, verb, singular, plural) in removed_or_fixed {
+        counted(&mut parts, counts, verb, singular, plural);
+    }
+    let mut message = if let Some(last) = parts.pop() {
+        if parts.is_empty() {
+            format!("Repaired: {last}.")
+        } else {
+            format!("Repaired: {} and {last}.", parts.join(", "))
+        }
+    } else {
+        "Repaired.".to_owned()
+    };
+    if let Some(note) = &report.engine_note {
+        message.push(' ');
+        message.push_str(note);
+    } else if report.engine == RepairEngine::Windows {
+        message.push_str(" Used the Windows repair engine.");
+    }
+    message
+}
+
 impl RepairReport {
     /// Whether the mesh had no problems to begin with (OF-40). Adapters then
     /// apply nothing, so Repair on a clean model leaves no history entry.
@@ -1699,5 +1817,77 @@ mod route_tests {
         .expect("routed");
         assert!(routed.report.engine_note.take().is_some());
         assert_eq!(routed, native);
+    }
+}
+
+#[cfg(test)]
+mod summary_tests {
+    use super::*;
+
+    fn open_box_report() -> RepairReport {
+        let mut mesh = crate::make_box([20.0; 3]).expect("box");
+        mesh.faces.pop();
+        repair_mesh(&mesh).expect("native repair").report
+    }
+
+    #[test]
+    fn summary_of_open_box_names_the_closed_hole() {
+        assert_eq!(
+            repair_summary(&open_box_report()),
+            "Repaired: closed 1 hole."
+        );
+    }
+
+    #[test]
+    fn summary_orders_improvements_and_groups_thousands() {
+        let mut report = open_box_report();
+        report.before.boundary_edge_loops = 87;
+        report.score_before.inside_out_shells = 1;
+        report.score_before.flipped_edges = 1858;
+        report.score_before.shells = 2;
+        report.score_before.duplicate_faces = 1858;
+        report.score_before.degenerate_faces = 1;
+        report.score_before.non_manifold_edges = 4;
+        report.score_before.self_intersections = 12;
+        assert_eq!(
+            repair_summary(&report),
+            "Repaired: closed 87 holes, turned 1 inside-out part right side out, turned flipped faces the right way, merged 2 overlapping parts into 1, removed 1,858 duplicate faces, removed 1 zero-size triangle, fixed 4 edges shared by more than two faces and fixed 12 places where the model passed through itself."
+        );
+        report.score_before.tiny_shells = 3;
+        let message = repair_summary(&report);
+        assert!(!message.contains("merged"));
+        assert!(message.contains("removed 3 tiny loose pieces"));
+    }
+
+    #[test]
+    fn summary_handles_singular_plural_engine_and_unchanged_reports() {
+        let mut report = open_box_report();
+        report.score_before.inside_out_shells = 2;
+        report.score_before.duplicate_faces = 1;
+        report.score_before.degenerate_faces = 2;
+        report.score_before.tiny_shells = 1;
+        report.score_before.non_manifold_edges = 1;
+        report.score_before.self_intersections = 1;
+        assert_eq!(
+            repair_summary(&report),
+            "Repaired: closed 1 hole, turned 2 inside-out parts right side out, removed 1 duplicate face, removed 2 zero-size triangles, removed 1 tiny loose piece, fixed 1 edge shared by more than two faces and fixed 1 place where the model passed through itself."
+        );
+        report.score_before = report.score_after;
+        report.before.boundary_edge_loops = report.after.boundary_edge_loops;
+        assert_eq!(repair_summary(&report), "Repaired.");
+        report.engine = RepairEngine::Windows;
+        assert_eq!(
+            repair_summary(&report),
+            "Repaired. Used the Windows repair engine."
+        );
+        report.engine_note = Some("Used native repair after a timeout.".to_owned());
+        assert_eq!(
+            repair_summary(&report),
+            "Repaired. Used native repair after a timeout."
+        );
+        report.can_apply = false;
+        assert_eq!(repair_summary(&report), REPAIR_REFUSED_MESSAGE);
+        report.before.valid = true;
+        assert_eq!(repair_summary(&report), REPAIR_NOTHING_TO_FIX_MESSAGE);
     }
 }

@@ -2410,7 +2410,7 @@ impl R4Server {
                 }
                 (
                     result.mesh,
-                    json!({"action":action,"operation_id":id,"index":index,"object_id":object_id,"report":repair_report(&result.report)}),
+                    json!({"action":action,"operation_id":id,"index":index,"object_id":object_id,"report":repair_report(&result.report),"message":modeler3d_core::repair_summary(&result.report)}),
                 )
             }
             "simplify" => {
@@ -3984,6 +3984,75 @@ mod tests {
         let _ = fs::create_dir_all(&root);
         let roots = ApprovedRoots::from_paths([root]).expect("approved root");
         R4Server::new(R4Config::for_profile(profile, roots))
+    }
+
+    #[test]
+    fn repair_open_box_matches_golden() {
+        if std::env::var("MODELER3D_REPAIR_ENGINE").as_deref() != Ok("native") {
+            let status =
+                std::process::Command::new(std::env::current_exe().expect("test executable"))
+                    .args([
+                        "--exact",
+                        "r4::server::tests::repair_open_box_matches_golden",
+                    ])
+                    .env("MODELER3D_REPAIR_ENGINE", "native")
+                    .status()
+                    .expect("native child");
+            assert!(status.success());
+            return;
+        }
+        let server = server(Profile::Full);
+        let mut scene = Scene::new();
+        let (id, _) = scene
+            .add_primitive(PrimitiveKind::Cube, Some([20.0; 3]), None)
+            .expect("box");
+        let mut mesh = scene.objects()[0].mesh().clone();
+        mesh.faces.pop();
+        scene.replace_mesh(0, mesh).expect("open box");
+        let mut document = Some(R4Document::new(scene));
+        server.replace_document(&mut document).expect("attach");
+        let started = server
+            .call_value("repair", json!({"object_id": id}))
+            .expect("repair");
+        let status = finished_operation(&server, &started);
+        assert_eq!(status["state"], "completed", "{status}");
+        let mut result = status["result"].clone();
+        fn normalize(value: &mut Value) {
+            match value {
+                Value::Object(map) => {
+                    for key in [
+                        "operation_id",
+                        "scene_revision",
+                        "object_id",
+                        "timestamp",
+                        "created_at",
+                        "updated_at",
+                    ] {
+                        map.remove(key);
+                    }
+                    for value in map.values_mut() {
+                        normalize(value);
+                    }
+                    map.sort_keys();
+                }
+                Value::Array(values) => values.iter_mut().for_each(normalize),
+                _ => {}
+            }
+        }
+        normalize(&mut result);
+        let path =
+            PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/repair_open_box.json");
+        let actual = serde_json::to_string_pretty(&result).expect("serialize golden") + "\n";
+        if std::env::var("MODELER3D_UPDATE_GOLDEN").as_deref() == Ok("1") {
+            fs::write(&path, &actual).expect("update golden");
+        }
+        let expected = fs::read_to_string(path).expect("read golden");
+        assert_eq!(actual, expected);
+        let golden: Value = serde_json::from_str(&expected).expect("golden JSON");
+        assert_eq!(golden["changed"], true);
+        assert_eq!(golden["message"], "Repaired: closed 1 hole.");
+        assert_eq!(golden["report"]["verdict"], "Improved");
+        assert_eq!(golden["report"]["engine"], "native");
     }
 
     #[test]

@@ -6,9 +6,9 @@
 use std::path::PathBuf;
 
 use modeler3d_core::{
-    BooleanResult, CoreError, Mesh, MeshOperationLimits, PreparedBoolean, RepairEngine,
-    RepairRouteControl, Scene, SceneSnapshot, repair_mesh_routed, simplify_mesh_by_percent,
-    smooth_mesh, subdivide_mesh_even,
+    BooleanResult, CoreError, Mesh, MeshOperationLimits, PreparedBoolean, RepairRouteControl,
+    Scene, SceneSnapshot, repair_mesh_routed, simplify_mesh_by_percent, smooth_mesh,
+    subdivide_mesh_even,
 };
 use modeler3d_platform::SlicerInfo;
 
@@ -181,16 +181,14 @@ where
                             message: modeler3d_core::REPAIR_REFUSED_MESSAGE.to_owned(),
                         });
                     }
-                    let stage_count = result.report.stages.len();
-                    let mut detail = if result.report.engine == RepairEngine::Windows {
-                        "Windows repair engine".to_owned()
-                    } else {
-                        format!("{stage_count} repair stage(s)")
-                    };
-                    if let Some(note) = &result.report.engine_note {
-                        detail.push_str(&format!(". {note}"));
-                    }
-                    (result.mesh, detail)
+                    let message = modeler3d_core::repair_summary(&result.report);
+                    report(95, "Checking isolated mesh result");
+                    check_cancelled(handle)?;
+                    return Ok(DesktopJobResult::Mesh {
+                        operation,
+                        mesh: result.mesh,
+                        message,
+                    });
                 }
                 MeshJobOperation::Simplify(percent) => {
                     let result =

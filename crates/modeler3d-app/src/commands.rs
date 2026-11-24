@@ -9,7 +9,7 @@ use std::path::{Path, PathBuf};
 use modeler3d_core::{
     BlobOptions, BooleanOperation, BooleanOptions, Command as CoreCommand, CoreError,
     CreasePolishOptions, ElasticGrabOptions, GroupedCommand, HollowOptions, Mesh, PrimitiveKind,
-    RepairEngine, RepairRouteControl, ReplaceMeshCommand, Scene, SceneObject, SetColorCommand,
+    RepairRouteControl, ReplaceMeshCommand, Scene, SceneObject, SetColorCommand,
     SetMetadataCommand, SmoothBrushOptions, TextEmbossOptions, TorusParameters, Transform,
     TransformObjectCommand, build_parametric_torus, load_project, repair_mesh_routed, save_project,
     torus_metadata, torus_parameters_from_metadata,
@@ -1250,19 +1250,12 @@ impl CommandState {
             return Ok(message.to_owned());
         }
         let command_result = self.scene.replace_mesh(index, result.mesh)?;
-        let mut message = if command_result.changed {
+        let message = if command_result.changed {
             self.dirty = true;
-            if result.report.engine == RepairEngine::Windows {
-                "Repair: Windows repair engine".to_owned()
-            } else {
-                format!("Repair: {} stage(s)", result.report.stages.len())
-            }
+            modeler3d_core::repair_summary(&result.report)
         } else {
             String::from("Repair: no changes")
         };
-        if let Some(note) = &result.report.engine_note {
-            message.push_str(&format!(". {note}"));
-        }
         self.status(message.clone());
         Ok(message)
     }
@@ -3256,6 +3249,40 @@ mod tests {
             Some(modeler3d_core::REPAIR_NOTHING_TO_FIX_MESSAGE)
         );
         assert_eq!(mcp.scene().history_state_id(), history);
+    }
+
+    #[test]
+    fn mcp_open_box_repair_message_matches_desktop() {
+        // Isolate the override from the parallel test runner.
+        if std::env::var("MODELER3D_REPAIR_ENGINE").as_deref() != Ok("native") {
+            let status =
+                std::process::Command::new(std::env::current_exe().expect("test executable"))
+                    .args([
+                        "--exact",
+                        "commands::tests::mcp_open_box_repair_message_matches_desktop",
+                    ])
+                    .env("MODELER3D_REPAIR_ENGINE", "native")
+                    .status()
+                    .expect("native child");
+            assert!(status.success());
+            return;
+        }
+        let (mut desktop, mut mcp) = one_cube_pair();
+        for state in [&mut desktop, &mut mcp] {
+            let mut mesh = modeler3d_core::make_box([20.0; 3]).expect("box");
+            mesh.faces.pop();
+            state.scene.replace_mesh(0, mesh).expect("open cube");
+        }
+        let message = desktop.repair_selected().expect("repair");
+        let id = mcp.scene().objects()[0].object_id().to_owned();
+        let result = run_mcp_operation(&mut mcp, "repair", serde_json::json!({"object_id": id}));
+        assert_eq!(message, "Repaired: closed 1 hole.");
+        assert_eq!(result["message"], message);
+        assert_eq!(result["changed"], true);
+        assert_eq!(
+            desktop.scene().objects()[0].mesh(),
+            mcp.scene().objects()[0].mesh()
+        );
     }
 
     fn model_with_unrepairable_hole() -> CommandState {

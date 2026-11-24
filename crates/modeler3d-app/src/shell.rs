@@ -705,7 +705,9 @@ impl Modeler3dApp {
             ReviewState::MergeApart | ReviewState::Sunken => {
                 &[modeler3d_core::PrimitiveKind::Cube; 2]
             }
-            ReviewState::Repair | ReviewState::Paste => &[modeler3d_core::PrimitiveKind::Cube],
+            ReviewState::Repair | ReviewState::RepairRefused | ReviewState::Paste => {
+                &[modeler3d_core::PrimitiveKind::Cube]
+            }
             ReviewState::Align => &[modeler3d_core::PrimitiveKind::Cube; 2],
             ReviewState::Paint | ReviewState::PaintPicker | ReviewState::Xray => &[
                 modeler3d_core::PrimitiveKind::Cube,
@@ -768,9 +770,78 @@ impl Modeler3dApp {
                 self.dispatch(CommandId::Paste);
                 self.dispatch(CommandId::Paste);
             }
-            ReviewState::Repair => {
+            ReviewState::Repair | ReviewState::RepairRefused => {
+                let mut mesh = modeler3d_core::make_box([20.0; 3]);
+                if review.state() == ReviewState::RepairRefused {
+                    mesh = mesh.and_then(|mut outer| {
+                        for vertex in &mut outer.vertices {
+                            if *vertex == [10.0; 3] {
+                                *vertex = [2.0, -20.0, 2.0];
+                            }
+                        }
+                        let mut inner = modeler3d_core::make_box([4.0; 3])?;
+                        for vertex in &mut inner.vertices {
+                            for value in vertex {
+                                *value -= 6.0;
+                            }
+                        }
+                        for face in &mut inner.faces {
+                            face.swap(1, 2);
+                        }
+                        modeler3d_core::Mesh::concatenate(&[outer, inner])
+                    });
+                } else if let Ok(mesh) = &mut mesh {
+                    mesh.faces.pop();
+                }
+                let mesh = match mesh {
+                    Ok(mesh) => mesh,
+                    Err(error) => {
+                        self.commands.set_status(error.to_string());
+                        return;
+                    }
+                };
+                let object_id = self.commands.scene().objects()[0].object_id().to_owned();
+                let setup = self.commands.replace_mesh_if_current(
+                    self.commands.document_generation(),
+                    self.commands.scene().revision(),
+                    &object_id,
+                    mesh,
+                );
+                if let Err(error) = setup {
+                    self.commands.set_status(error.to_string());
+                    return;
+                }
                 self.dispatch(CommandId::Repair);
-                self.apply_dialog_action(crate::dialogs::DialogAction::Repair);
+                // Run the real job synchronously during review setup so even the
+                // first captured frame contains its applied result and dialog.
+                let handle = match self.commands.operations().start("Repair", "desktop", None) {
+                    Ok(handle) => handle,
+                    Err(error) => {
+                        self.commands.set_status(error.to_string());
+                        return;
+                    }
+                };
+                let object = &self.commands.scene().objects()[0];
+                let request = DesktopJobRequest::Mesh {
+                    operation: MeshJobOperation::Repair,
+                    mesh: object.mesh().clone(),
+                };
+                let (_, receiver) = mpsc::sync_channel(1);
+                let job = RunningDesktopJob {
+                    target_object_id: Some(object.object_id().to_owned()),
+                    document_generation: self.commands.document_generation(),
+                    source_revision: self.commands.scene().revision(),
+                    dialog_generation: self.dialog_generation,
+                    resume_dialog: self.dialog.take(),
+                    handle,
+                    receiver,
+                    pending_terminal: None,
+                    title: "Repair".to_owned(),
+                    cancel_on_drop: false,
+                    launch_when_staged: false,
+                };
+                let result = run_desktop_job(request, &job.handle, |_, _| {});
+                self.finish_desktop_job(job, result);
             }
             ReviewState::Align => {
                 self.commands.set_selection_indices([0, 1]);
@@ -13488,6 +13559,61 @@ mod tests {
                 (Axis::Z, "Z", crate::chrome::AXIS_COLORS[2]),
             ]
         );
+    }
+
+    fn repair_marker_for(mesh: modeler3d_core::Mesh) -> bool {
+        let mut scene = modeler3d_core::Scene::new();
+        scene
+            .add_primitive(PrimitiveKind::Cube, Some([20.0; 3]), None)
+            .expect("cube");
+        scene.replace_mesh(0, mesh).expect("test mesh");
+        !item_is_healthy(&scene.objects()[0])
+    }
+
+    #[test]
+    fn items_marker_shows_for_inside_out_cube() {
+        let mut mesh = modeler3d_core::make_box([20.0; 3]).expect("box");
+        for face in &mut mesh.faces {
+            face.swap(1, 2);
+        }
+        assert!(repair_marker_for(mesh));
+    }
+
+    #[test]
+    fn items_marker_shows_for_self_crossing_box() {
+        let mut mesh = modeler3d_core::make_box([20.0; 3]).expect("box");
+        for point in &mut mesh.vertices {
+            if *point == [10.0; 3] {
+                *point = [2.0, -20.0, 2.0];
+            }
+        }
+        let health = modeler3d_core::inspect_mesh(&mesh).expect("health");
+        assert!(health.self_intersections.is_some_and(|n| n > 0));
+        assert!(repair_marker_for(mesh));
+    }
+
+    #[test]
+    fn items_marker_is_absent_for_clean_cube() {
+        assert!(!repair_marker_for(
+            modeler3d_core::make_box([20.0; 3]).expect("box")
+        ));
+    }
+
+    #[test]
+    fn items_marker_is_absent_for_correct_cavity() {
+        let outer = modeler3d_core::make_box([20.0; 3]).expect("outer");
+        let mut inner = modeler3d_core::make_box([4.0; 3]).expect("inner");
+        for face in &mut inner.faces {
+            face.swap(1, 2);
+        }
+        let mesh = modeler3d_core::Mesh::concatenate(&[outer, inner]).expect("hollow box");
+        assert_eq!(
+            modeler3d_core::inspect_mesh(&mesh)
+                .expect("health")
+                .cavity_shells,
+            1
+        );
+        assert!(!repair_marker_for(mesh));
     }
 
     #[test]

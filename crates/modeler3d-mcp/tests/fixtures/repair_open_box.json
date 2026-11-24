@@ -1,0 +1,80 @@
+{
+  "action": "repair",
+  "changed": true,
+  "index": 0,
+  "message": "Repaired: closed 1 hole.",
+  "report": {
+    "after": {
+      "body_count": 1,
+      "boundary_edge_loops": 0,
+      "boundary_edges": 0,
+      "degenerate_faces": 0,
+      "duplicate_faces": 0,
+      "is_volume": true,
+      "issues": [],
+      "non_manifold_edges": 0,
+      "self_intersection_status": "checked",
+      "self_intersections": 0,
+      "tiny_shells": 0,
+      "triangles": 12,
+      "valid": true,
+      "vertices": 8,
+      "watertight": true,
+      "winding_consistent": true
+    },
+    "before": {
+      "body_count": 1,
+      "boundary_edge_loops": 1,
+      "boundary_edges": 3,
+      "degenerate_faces": 0,
+      "duplicate_faces": 0,
+      "is_volume": false,
+      "issues": [
+        "1 boundary edge loops",
+        "not watertight",
+        "does not enclose volume"
+      ],
+      "non_manifold_edges": 0,
+      "self_intersection_status": "checked",
+      "self_intersections": 0,
+      "tiny_shells": 0,
+      "triangles": 11,
+      "valid": false,
+      "vertices": 8,
+      "watertight": false,
+      "winding_consistent": true
+    },
+    "can_apply": true,
+    "candidate_changed": true,
+    "candidate_safe": true,
+    "engine": "native",
+    "engine_note": null,
+    "errors": [],
+    "profile": "extended",
+    "score_after": {
+      "degenerate_faces": 0,
+      "duplicate_faces": 0,
+      "flipped_edges": 0,
+      "inside_out_shells": 0,
+      "non_manifold_edges": 0,
+      "open_edges": 0,
+      "self_intersections": 0,
+      "shells": 1,
+      "tiny_shells": 0
+    },
+    "score_before": {
+      "degenerate_faces": 0,
+      "duplicate_faces": 0,
+      "flipped_edges": 0,
+      "inside_out_shells": 0,
+      "non_manifold_edges": 0,
+      "open_edges": 3,
+      "self_intersections": 0,
+      "shells": 1,
+      "tiny_shells": 0
+    },
+    "tiny_shell_tolerance_mm": 0.009999999776482582,
+    "tolerance_mm": 0.0010000000474974513,
+    "verdict": "Improved"
+  }
+}

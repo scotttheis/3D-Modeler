@@ -234,7 +234,7 @@ pasting the previous session's prompt.
   at the Save picker). Release rebuilt. Snapshot
   `G:D-Modeler_snapshot_20261123-171440_repair-R6`.
 
-### [ ] R7: what the owner sees, and finish
+### [x] R7: what the owner sees, and finish
 
 - Session: **Claude Sonnet 5.5, low** (overseer). Worker: **Codex, medium**,
   or a Haiku subagent for the test/ledger updates.
@@ -246,6 +246,26 @@ pasting the previous session's prompt.
 - **Full** gate, `Update-CurrentBuild.ps1`, snapshot. Owner tries Repair on
   the book and on one downloaded broken model and approves (approval is never
   inferred).
+- Done 2026-11-23 (built; **owner approval pending**):
+  [`repair-r7-card.md`](repair-r7-card.md) (Codex medium wrote it; overseer
+  tidied the summary code and line endings). One core function
+  `repair_summary` writes the result for desktop and MCP, e.g. "Repaired:
+  closed 1 hole." or "Repaired: closed 87 holes and removed 1 zero-size
+  triangle. Used the Windows repair engine."; refused and nothing-to-fix keep
+  their messages. MCP repair results now carry `message` too. Dialog text is
+  plain words. Needs-repair marker tested for inside-out and self-crossing
+  models (and absent for a clean cube and a correct cavity). Fixtures f2-f10
+  and the 500-edge hole are core tests built in code
+  (`tests/repair_fixtures.rs`, no data files; f1 is the owner's book and is
+  not included); one random holey-sphere pattern that left a lone triangle
+  was not closed natively, so the test uses another seed. MCP golden test
+  `repair_open_box_matches_golden` (`crates/modeler3d-mcp/tests/fixtures/repair_open_box.json`,
+  native engine; compared to our own output, since the owner changed this
+  result after the Python build). Captures in both themes, fixed and refused
+  (new review state `repair-refused`):
+  `evidence/rebuild/captures/2026-11-23-repair-r7/`. Full gate passed
+  (`logs/gate/20261123-202434-full`; capture board not run, it stalls at the
+  Save picker). Release rebuilt.
 
 ## Next-session prompt template (end every session with this)
 
