@@ -710,9 +710,10 @@ impl Modeler3dApp {
             ReviewState::MergeApart | ReviewState::Sunken => {
                 &[modeler3d_core::PrimitiveKind::Cube; 2]
             }
-            ReviewState::Repair | ReviewState::RepairRefused | ReviewState::Paste => {
-                &[modeler3d_core::PrimitiveKind::Cube]
-            }
+            ReviewState::Repair
+            | ReviewState::RepairRefused
+            | ReviewState::RepairPartial
+            | ReviewState::Paste => &[modeler3d_core::PrimitiveKind::Cube],
             ReviewState::Align => &[modeler3d_core::PrimitiveKind::Cube; 2],
             ReviewState::Paint | ReviewState::PaintPicker | ReviewState::Xray => &[
                 modeler3d_core::PrimitiveKind::Cube,
@@ -775,14 +776,18 @@ impl Modeler3dApp {
                 self.dispatch(CommandId::Paste);
                 self.dispatch(CommandId::Paste);
             }
-            ReviewState::Repair | ReviewState::RepairRefused => {
+            ReviewState::Repair | ReviewState::RepairRefused | ReviewState::RepairPartial => {
                 let mut mesh = modeler3d_core::make_box([20.0; 3]);
-                if review.state() == ReviewState::RepairRefused {
+                if review.state() != ReviewState::Repair {
+                    let open = review.state() == ReviewState::RepairPartial;
                     mesh = mesh.and_then(|mut outer| {
                         for vertex in &mut outer.vertices {
                             if *vertex == [10.0; 3] {
                                 *vertex = [2.0, -20.0, 2.0];
                             }
+                        }
+                        if open {
+                            outer.faces.remove(0);
                         }
                         let mut inner = modeler3d_core::make_box([4.0; 3])?;
                         for vertex in &mut inner.vertices {

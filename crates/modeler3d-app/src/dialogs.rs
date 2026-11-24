@@ -1232,7 +1232,7 @@ impl DialogState {
     }
 
     fn repair_dialog(&mut self, ui: &mut egui::Ui) {
-        ui.label("Repair closes holes, turns flipped faces the right way and joins overlapping parts. If it can't make the model better, nothing is changed.");
+        ui.label("Repair closes holes, turns flipped faces the right way and joins overlapping parts. It keeps every fix that helps and tells you what it couldn't fix. If it can't make the model better, nothing is changed.");
     }
 
     fn print_prep_dialog(&mut self, ui: &mut egui::Ui, action: &mut Option<DialogAction>) {

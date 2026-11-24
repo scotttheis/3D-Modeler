@@ -323,6 +323,12 @@ pub fn repair_summary(report: &RepairReport) -> String {
         "hole",
         "holes",
     );
+    // A kept fill can shrink a hole without closing it (OF-74).
+    if before.open_edges > after.open_edges
+        && report.before.boundary_edge_loops <= report.after.boundary_edge_loops
+    {
+        parts.push("made the holes smaller".to_owned());
+    }
     counted(
         &mut parts,
         (before.inside_out_shells, after.inside_out_shells),
@@ -376,15 +382,55 @@ pub fn repair_summary(report: &RepairReport) -> String {
     for (counts, verb, singular, plural) in removed_or_fixed {
         counted(&mut parts, counts, verb, singular, plural);
     }
-    let mut message = if let Some(last) = parts.pop() {
-        if parts.is_empty() {
-            format!("Repaired: {last}.")
+    fn joined(mut parts: Vec<String>) -> Option<String> {
+        let last = parts.pop()?;
+        Some(if parts.is_empty() {
+            last
         } else {
-            format!("Repaired: {} and {last}.", parts.join(", "))
-        }
-    } else {
-        "Repaired.".to_owned()
+            format!("{} and {last}", parts.join(", "))
+        })
+    }
+    let mut message = match joined(parts) {
+        Some(fixed) => format!("Repaired: {fixed}."),
+        None => "Repaired.".to_owned(),
     };
+    // OF-74: say plainly what is still wrong after the kept fixes.
+    let mut remaining = Vec::new();
+    let mut still = |count: usize, singular: &str, plural: &str| {
+        if count > 0 {
+            let noun = if count == 1 { singular } else { plural };
+            remaining.push(format!("{} {noun}", number(count)));
+        }
+    };
+    still(report.after.boundary_edge_loops, "hole", "holes");
+    still(
+        after.inside_out_shells,
+        "inside-out part",
+        "inside-out parts",
+    );
+    still(
+        after.self_intersections,
+        "place where the model passes through itself",
+        "places where the model passes through itself",
+    );
+    still(
+        after.non_manifold_edges,
+        "edge shared by more than two faces",
+        "edges shared by more than two faces",
+    );
+    still(after.duplicate_faces, "duplicate face", "duplicate faces");
+    still(
+        after.degenerate_faces,
+        "zero-size triangle",
+        "zero-size triangles",
+    );
+    still(after.tiny_shells, "tiny loose piece", "tiny loose pieces");
+    if after.flipped_edges > 0 {
+        remaining.push("some flipped faces".to_owned());
+    }
+    if let Some(left) = joined(remaining) {
+        message.push_str(&format!(" Couldn't fix: {left}."));
+    }
     if let Some(note) = &report.engine_note {
         message.push(' ');
         message.push_str(note);
@@ -719,37 +765,8 @@ fn repair_native_with_health(
     let mut current = mesh.clone();
     let mut stages = Vec::new();
     let mut errors = Vec::new();
-    let pipeline = stage_names(profile);
-    for name in pipeline {
-        let operation = |value: &Mesh| -> Result<Mesh, CoreError> {
-            let result = match name {
-                "StitchGaps (insert vertices)" => native::stitch(value, grid, true),
-                "StitchGaps (reuse vertices)" => native::stitch(value, grid, false),
-                "CloseTrivialHoles" | "CloseTrivialHoles (second pass)" => {
-                    close_holes(value, grid, limits, 4)
-                }
-                "CloseAllHoles" => close_holes(value, grid, limits, usize::MAX),
-                "RemoveDoubleTriangles" => native::clean_faces(value),
-                "SplitNonManifoldEdges" => native::split_non_manifold(value, grid),
-                // Set neighbouring directions now, but defer outward shell
-                // orientation until holes close: an open outer surface cannot
-                // yet certify its inward child as a correct cavity.
-                "FixFlippedTriangles" | "FixFlippedTriangles (second pass)" => {
-                    orient_winding(value, true)
-                }
-                "Wrap" => wrap_mesh(value),
-                "RemoveDegeneratedFaces" => {
-                    remove_degenerate_faces(&native::collapse(value, grid)?)
-                }
-                "RemoveTinyShells" => remove_tiny_shells(value),
-                "PrepareForExport" => prepare_for_export(value),
-                _ => Err(CoreError::MeshOperation(format!(
-                    "unknown internal repair stage: {name}"
-                ))),
-            }?;
-            limits.check_mesh("repair", &result)?;
-            Ok(result)
-        };
+    for name in stage_names(profile) {
+        let operation = |value: &Mesh| native_stage(name, value, grid, limits);
         current = run_stage(current, name, operation, &mut stages, &mut errors);
     }
 
@@ -778,11 +795,26 @@ fn repair_native_with_health(
         current = mesh.clone();
         after = before.clone();
     }
-    let candidate_safe = is_safe_candidate(&current);
-    let candidate_changed = current != *mesh;
     let score_before = RepairScore::from_health(&before);
-    let score_after = RepairScore::from_health(&after);
-    let verdict = gate(score_before, score_after);
+    let mut candidate_safe = is_safe_candidate(&current);
+    let mut score_after = RepairScore::from_health(&after);
+    let mut verdict = gate(score_before, score_after);
+    // OF-74: when the whole pipeline would be refused because one step made
+    // something worse, keep every step that helps and leave the rest, like
+    // 3D Builder. Results the whole pipeline already improves are unchanged.
+    if !before.valid
+        && !(candidate_safe && verdict == RepairVerdict::Improved)
+        && let Some(kept) = repair_step_by_step(mesh, &before, profile, grid, limits)?
+    {
+        current = kept.mesh;
+        after = kept.after;
+        stages = kept.stages;
+        errors = kept.errors;
+        candidate_safe = true;
+        score_after = RepairScore::from_health(&after);
+        verdict = RepairVerdict::Improved;
+    }
+    let candidate_changed = current != *mesh;
     Ok(RepairResult {
         mesh: current,
         report: RepairReport {
@@ -804,6 +836,99 @@ fn repair_native_with_health(
             can_apply: candidate_safe && verdict == RepairVerdict::Improved,
         },
     })
+}
+
+fn native_stage(
+    name: &str,
+    value: &Mesh,
+    grid: RepairGrid,
+    limits: MeshOperationLimits,
+) -> Result<Mesh, CoreError> {
+    let result = match name {
+        "StitchGaps (insert vertices)" => native::stitch(value, grid, true),
+        "StitchGaps (reuse vertices)" => native::stitch(value, grid, false),
+        "CloseTrivialHoles" | "CloseTrivialHoles (second pass)" => {
+            close_holes(value, grid, limits, 4)
+        }
+        "CloseAllHoles" => close_holes(value, grid, limits, usize::MAX),
+        "RemoveDoubleTriangles" => native::clean_faces(value),
+        "SplitNonManifoldEdges" => native::split_non_manifold(value, grid),
+        // Set neighbouring directions now, but defer outward shell
+        // orientation until holes close: an open outer surface cannot
+        // yet certify its inward child as a correct cavity.
+        "FixFlippedTriangles" | "FixFlippedTriangles (second pass)" => orient_winding(value, true),
+        "Wrap" => wrap_mesh(value),
+        "RemoveDegeneratedFaces" => remove_degenerate_faces(&native::collapse(value, grid)?),
+        "RemoveTinyShells" => remove_tiny_shells(value),
+        "PrepareForExport" => prepare_for_export(value),
+        _ => Err(CoreError::MeshOperation(format!(
+            "unknown internal repair stage: {name}"
+        ))),
+    }?;
+    limits.check_mesh("repair", &result)?;
+    Ok(result)
+}
+
+/// The fixes a step-by-step repair kept.
+struct KeptFixes {
+    mesh: Mesh,
+    after: MeshHealthReport,
+    stages: Vec<RepairStageReport>,
+    errors: Vec<String>,
+}
+
+/// Note on a stage whose result was dropped because it made a defect worse.
+const STAGE_SKIPPED: &str = "skipped: it made another problem worse";
+
+/// Runs the native stages one at a time from the original and keeps each
+/// stage only when it makes no defect worse (the R2 rule, per step). Returns
+/// `None` when no kept stage improves the model.
+fn repair_step_by_step(
+    mesh: &Mesh,
+    before: &MeshHealthReport,
+    profile: RepairProfile,
+    grid: RepairGrid,
+    limits: MeshOperationLimits,
+) -> Result<Option<KeptFixes>, CoreError> {
+    let original = RepairScore::from_health(before);
+    let mut current = mesh.clone();
+    let mut health = before.clone();
+    let mut score = original;
+    let mut stages = Vec::new();
+    let mut errors = Vec::new();
+    for name in stage_names(profile) {
+        let operation = |value: &Mesh| native_stage(name, value, grid, limits);
+        let candidate = run_stage(current.clone(), name, operation, &mut stages, &mut errors);
+        if candidate == current {
+            continue;
+        }
+        let kept = match inspect_mesh(&candidate) {
+            Ok(next) if is_safe_candidate(&candidate) => {
+                let next_score = RepairScore::from_health(&next);
+                (gate(score, next_score) != RepairVerdict::Worse).then_some((next, next_score))
+            }
+            _ => None,
+        };
+        if let Some((next, next_score)) = kept {
+            current = candidate;
+            health = next;
+            score = next_score;
+        } else if let Some(stage) = stages.last_mut() {
+            stage.after_vertices = stage.before_vertices;
+            stage.after_triangles = stage.before_triangles;
+            stage.changed = false;
+            stage.error = Some(STAGE_SKIPPED.to_owned());
+        }
+    }
+    if gate(original, score) != RepairVerdict::Improved {
+        return Ok(None);
+    }
+    Ok(Some(KeptFixes {
+        mesh: current,
+        after: health,
+        stages,
+        errors,
+    }))
 }
 
 fn stage_names(profile: RepairProfile) -> Vec<&'static str> {

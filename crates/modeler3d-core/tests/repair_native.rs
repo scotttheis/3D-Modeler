@@ -1,6 +1,8 @@
 use std::collections::{BTreeMap, HashMap};
 
-use modeler3d_core::{Mesh, RepairResult, RepairVerdict, inspect_mesh, make_sphere, repair_mesh};
+use modeler3d_core::{
+    Mesh, RepairResult, RepairVerdict, inspect_mesh, make_sphere, repair_mesh, repair_summary,
+};
 
 fn box_at(lo: [f32; 3], hi: [f32; 3]) -> Mesh {
     let [x, y, z] = lo;
@@ -907,4 +909,142 @@ fn r5_an_isolated_triangle_is_refused_unchanged_not_capped_with_its_back() {
     assert!(!result.report.can_apply);
     assert_eq!(result.mesh.face_count(), 1);
     assert_eq!(input, original);
+}
+
+/// OF-74 cases: a sphere or box with holes, flipped faces, a duplicate face,
+/// a vertex pushed through the surface and sometimes a crossing box. The
+/// generator is deterministic; each listed seed was refused as a whole
+/// before OF-74 because one stage made a defect worse.
+fn of74_damaged(seed: u64) -> Mesh {
+    struct Random(u64);
+    impl Random {
+        fn next(&mut self) -> f64 {
+            self.0 = self
+                .0
+                .wrapping_mul(6364136223846793005)
+                .wrapping_add(1442695040888963407);
+            (self.0 >> 11) as f64 / ((1_u64 << 53) as f64)
+        }
+        fn pick(&mut self, n: usize) -> usize {
+            (self.next() * n as f64) as usize % n
+        }
+    }
+    let mut r = Random(seed);
+    let mut mesh = if r.next() < 0.5 {
+        make_sphere(15.0, 2).expect("sphere")
+    } else {
+        modeler3d_core::make_box([20.0; 3]).expect("box")
+    };
+    for _ in 0..r.pick(4) {
+        let index = r.pick(mesh.faces.len());
+        mesh.faces.remove(index);
+    }
+    for _ in 0..r.pick(4) {
+        let index = r.pick(mesh.faces.len());
+        mesh.faces[index].swap(1, 2);
+    }
+    if r.next() < 0.5 {
+        let face = mesh.faces[r.pick(mesh.faces.len())];
+        mesh.faces.push(face);
+    }
+    if r.next() < 0.5 {
+        let index = r.pick(mesh.vertices.len());
+        let v = mesh.vertices[index];
+        mesh.vertices[index] = [-v[0] * 0.6, -v[1] * 0.6 + 2.0, -v[2] * 0.6];
+    }
+    if r.next() < 0.4 {
+        let mut other = modeler3d_core::make_box([6.0; 3]).expect("small box");
+        let offset: [f32; 3] = std::array::from_fn(|_| (r.next() * 20.0 - 10.0) as f32);
+        for vertex in &mut other.vertices {
+            for axis in 0..3 {
+                vertex[axis] += offset[axis];
+            }
+        }
+        if r.next() < 0.5 {
+            other.faces.remove(0);
+        }
+        mesh = Mesh::concatenate(&[mesh, other]).expect("two parts");
+    }
+    mesh
+}
+
+#[test]
+fn of74_keeps_the_fixes_that_help_and_leaves_the_rest() {
+    for seed in [19, 251, 617, 1628, 1774, 2602] {
+        let input = of74_damaged(seed);
+        let original = input.clone();
+        let result = repair_mesh(&input).expect("repair");
+        let report = &result.report;
+        assert_eq!(input, original);
+        assert!(report.can_apply, "seed {seed}: {report:?}");
+        assert_eq!(report.verdict, RepairVerdict::Improved, "seed {seed}");
+        assert!(!report.refused(), "seed {seed}");
+        // Never worse: every defect count is the same or lower.
+        let before = report.score_before;
+        let after = report.score_after;
+        for (old, new) in [
+            (before.open_edges, after.open_edges),
+            (before.non_manifold_edges, after.non_manifold_edges),
+            (before.flipped_edges, after.flipped_edges),
+            (before.degenerate_faces, after.degenerate_faces),
+            (before.duplicate_faces, after.duplicate_faces),
+            (before.inside_out_shells, after.inside_out_shells),
+            (before.tiny_shells, after.tiny_shells),
+            (before.shells, after.shells),
+            (before.self_intersections, after.self_intersections),
+        ] {
+            assert!(new <= old, "seed {seed}: {before:?} -> {after:?}");
+        }
+        // The health report describes the mesh that is applied.
+        assert_eq!(inspect_mesh(&result.mesh).expect("health"), report.after);
+        // At least one stage was dropped, and the report says so.
+        assert!(
+            report.stages.iter().any(|stage| stage
+                .error
+                .as_deref()
+                .is_some_and(|e| e.starts_with("skipped"))),
+            "seed {seed}"
+        );
+        assert!(
+            repair_summary(report).starts_with("Repaired"),
+            "seed {seed}"
+        );
+    }
+}
+
+#[test]
+fn of74_summary_says_what_was_fixed_and_what_could_not_be() {
+    // Box with a shrunk but still open hole.
+    let result = repair_mesh(&of74_damaged(19)).expect("repair");
+    assert_eq!(
+        repair_summary(&result.report),
+        "Repaired: made the holes smaller. Couldn't fix: 1 hole."
+    );
+    let result = repair_mesh(&of74_damaged(2602)).expect("repair");
+    assert_eq!(
+        repair_summary(&result.report),
+        "Repaired: turned flipped faces the right way, merged 2 overlapping parts into 1 \
+         and removed 1 duplicate face. Couldn't fix: 1 hole."
+    );
+    // A fully fixed model has no "Couldn't fix" part.
+    let result = repair_mesh(&of74_damaged(1774)).expect("repair");
+    assert!(result.report.after.valid);
+    assert!(!repair_summary(&result.report).contains("Couldn't fix"));
+}
+
+#[test]
+fn of74_a_model_that_was_already_improved_is_repaired_exactly_as_before() {
+    // The whole pipeline still runs first; the step-by-step pass only runs
+    // when it would be refused, so no stage is reported as skipped.
+    let input = open_cylinder(64);
+    let result = repair_mesh(&input).expect("repair");
+    assert!(result.report.can_apply);
+    assert!(
+        result
+            .report
+            .stages
+            .iter()
+            .all(|stage| stage.error.is_none())
+    );
+    assert!(!repair_summary(&result.report).contains("Couldn't fix"));
 }

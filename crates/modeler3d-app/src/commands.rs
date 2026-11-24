@@ -3355,6 +3355,49 @@ mod tests {
     }
 
     #[test]
+    fn partial_repair_keeps_the_fix_and_says_what_is_left_on_desktop_and_mcp() {
+        // OF-74: the self-crossing hollow box plus a duplicate face. The
+        // duplicate is removed; the crossing stays and is reported. The
+        // duplicate hides the cavity, so force the native route (the
+        // Windows engine fixes this one completely) in an isolated child.
+        if std::env::var("MODELER3D_REPAIR_ENGINE").as_deref() != Ok("native") {
+            let status =
+                std::process::Command::new(std::env::current_exe().expect("test executable"))
+                    .args([
+                        "--exact",
+                        "commands::tests::partial_repair_keeps_the_fix_and_says_what_is_left_on_desktop_and_mcp",
+                    ])
+                    .env("MODELER3D_REPAIR_ENGINE", "native")
+                    .status()
+                    .expect("native child");
+            assert!(status.success());
+            return;
+        }
+        let mut desktop = model_with_unrepairable_hole();
+        let mut mcp = model_with_unrepairable_hole();
+        for state in [&mut desktop, &mut mcp] {
+            let mut mesh = state.scene().objects()[0].mesh().clone();
+            mesh.faces.push(mesh.faces[0]);
+            state.scene.replace_mesh(0, mesh).expect("duplicate face");
+        }
+        let history = desktop.scene().history_state_id();
+        let message = desktop.repair_selected().expect("repair");
+        assert_eq!(
+            message,
+            "Repaired: removed 1 duplicate face and fixed 3 edges shared by more than two \
+             faces. Couldn't fix: 11 places where the model passes through itself."
+        );
+        assert_ne!(desktop.scene().history_state_id(), history);
+        let id = mcp.scene().objects()[0].object_id().to_owned();
+        let result = run_mcp_operation(&mut mcp, "repair", serde_json::json!({"object_id": id}));
+        assert_eq!(result["message"], message);
+        assert_eq!(
+            desktop.scene().objects()[0].mesh(),
+            mcp.scene().objects()[0].mesh()
+        );
+    }
+
+    #[test]
     fn mcp_simplify_percent_matches_the_desktop_simplify_slider() {
         // OF-51: MCP `percent` runs the desktop slider's core function.
         let mut mcp = CommandState::default();
