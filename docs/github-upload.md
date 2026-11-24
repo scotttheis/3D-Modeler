@@ -12,6 +12,16 @@ check works. Still for the owner: social preview upload, GitHub billing check,
 Sponsors/Discussions, removing tester `jackharvest`. The `AGENTS.md`
 "Standing boundaries" line still says "No push" (owner to reword).
 
+**Billing and donations (owner, 2026-11-24):** GitHub spending limit stays
+at **$0** so GitHub stops a job rather than charging; the public repository
+builds free. Donations go through Ko-fi (`.github/FUNDING.yml`,
+README `## Support`), worded as "help keep the updates and new features
+coming", never "buy me a coffee". If GitHub Sponsors is approved later, add
+`github: scotttheis` to `.github/FUNDING.yml`. Details in `docs/STATUS.md`.
+
+**If only the publish job fails** and the build jobs are fine, first try
+`gh run rerun <run-id> --failed` (reruns just the failed job, no rebuild).
+
 **If the release workflow's publish job is refused** (for example a GitHub
 billing message), the three build jobs still leave their installers as run
 artifacts. Publish them by hand: `gh run download <run id> -D dist`, make

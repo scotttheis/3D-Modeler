@@ -4,6 +4,8 @@ All notable changes, in plain words. Newest first.
 
 ## Unreleased
 
+## 1.0.5 (2026-11-24)
+
 - **Models from other programs open the right way up.** STL, 3MF, OBJ and PLY
   files from 3D Builder, slicers and most 3D-printing tools now open standing
   the same way they do there, instead of tipped onto their side. Files saved
