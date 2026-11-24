@@ -416,6 +416,9 @@ pub struct Modeler3dApp {
     transform_signature: String,
     last_numeric_axis: Option<usize>,
     numeric_edited_axes: [bool; 3],
+    /// Bottom-bar box that just got focus and should select its whole value
+    /// once the click is released (OF-72).
+    numeric_select_all_pending: Option<usize>,
     position_fields: [String; 3],
     size_fields: [String; 3],
     resize_size_preview: Option<(modeler3d_core::Transform, DisplayUnit, u64)>,
@@ -528,14 +531,15 @@ impl Default for Modeler3dApp {
             transform_signature: String::new(),
             last_numeric_axis: None,
             numeric_edited_axes: [false; 3],
+            numeric_select_all_pending: None,
             position_fields: [String::new(), String::new(), String::new()],
             size_fields: [String::new(), String::new(), String::new()],
             resize_size_preview: None,
             move_rotate_preview: None,
             rotation_fields: [
-                String::from("0 deg"),
-                String::from("0 deg"),
-                String::from("0 deg"),
+                String::from("0.000"),
+                String::from("0.000"),
+                String::from("0.000"),
             ],
             scale_fields: [
                 String::from("1.0x"),
@@ -5057,6 +5061,21 @@ impl Modeler3dApp {
                                         egui::TextEdit::singleline(field)
                                             .align(egui::Align2::LEFT_CENTER),
                                     );
+                                    // One click (or Tab) selects the whole value, so
+                                    // typing replaces it (OF-72). Wait for the button
+                                    // release so the click itself does not move the
+                                    // caret afterwards, and keep a drag selection.
+                                    if response.gained_focus() {
+                                        self.numeric_select_all_pending = Some(axis_index);
+                                    }
+                                    if self.numeric_select_all_pending == Some(axis_index) {
+                                        if !response.has_focus() {
+                                            self.numeric_select_all_pending = None;
+                                        } else if !ui.input(|input| input.pointer.any_down()) {
+                                            self.numeric_select_all_pending = None;
+                                            select_whole_field(ui.ctx(), response.id, field);
+                                        }
+                                    }
                                     if response.changed() {
                                         self.last_numeric_axis = Some(axis_index);
                                         self.numeric_edited_axes[axis_index] = true;
@@ -8427,6 +8446,27 @@ fn discard_unreceived_job_event(event: DesktopJobEvent) {
     drop(event);
 }
 
+/// Selects all of a single-line text box's value unless the user already
+/// dragged out a selection. Takes effect on the next frame.
+fn select_whole_field(ctx: &egui::Context, id: egui::Id, text: &str) {
+    let mut state = egui::text_edit::TextEditState::load(ctx, id).unwrap_or_default();
+    if state
+        .cursor
+        .char_range()
+        .is_some_and(|range| !range.is_empty())
+    {
+        return;
+    }
+    state
+        .cursor
+        .set_char_range(Some(egui::text::CCursorRange::two(
+            egui::text::CCursor::new(0),
+            egui::text::CCursor::new(text.chars().count()),
+        )));
+    state.store(ctx, id);
+    ctx.request_repaint();
+}
+
 fn recent_grid_layout(available_width: f32, item_spacing: f32) -> (usize, f32) {
     let columns = (available_width / 300.0).floor().clamp(1.0, 4.0) as usize;
     let gaps = item_spacing * columns.saturating_sub(1) as f32;
@@ -10436,6 +10476,101 @@ mod tests {
             app.size_fields, size_after_insert,
             "boxes still show the cube after import"
         );
+        assert!(std::fs::remove_dir_all(directory).is_ok());
+    }
+
+    /// OF-72: one click in a bottom-bar box selects the whole value, typing
+    /// replaces it, and Enter applies it as one undo step. Enter again with no
+    /// change adds no history entry. The boxes show no unit text.
+    #[test]
+    fn one_click_selects_the_box_and_enter_applies_one_undo_step() {
+        let (mut app, directory) = shell_for_jobs("of72-strip-enter");
+        app.dispatch(CommandId::AddPrimitive(modeler3d_core::PrimitiveKind::Cube));
+        app.transform_panel_mode = TransformPanelMode::Move;
+        let context = egui::Context::default();
+        let frame = |app: &mut Modeler3dApp, events: Vec<egui::Event>| {
+            let input = egui::RawInput {
+                events,
+                ..Default::default()
+            };
+            let mut output = context.run_ui(input, |ui| {
+                app.render_transform_strip(&ui.ctx().clone());
+            });
+            output.textures_delta.clear();
+            output.shapes
+        };
+        frame(&mut app, Vec::new());
+        let shapes = frame(&mut app, Vec::new());
+        let mut boxes: Vec<egui::Rect> = shapes
+            .iter()
+            .filter_map(|clipped| match &clipped.shape {
+                egui::Shape::Rect(rect)
+                    if (rect.rect.width() - TRANSFORM_FIELD_WIDTH).abs() < 1.0 =>
+                {
+                    Some(rect.rect)
+                }
+                _ => None,
+            })
+            .collect();
+        boxes.sort_by(|a, b| {
+            b.min
+                .y
+                .total_cmp(&a.min.y)
+                .then(a.min.x.total_cmp(&b.min.x))
+        });
+        let x_box = boxes.first().copied().expect("X box drawn");
+        for field in &app.position_fields {
+            assert!(
+                !field.contains("mm") && !field.contains("in"),
+                "unit text in {field}"
+            );
+        }
+        for field in &app.rotation_fields {
+            assert!(!field.contains("deg"), "unit text in {field}");
+        }
+        let start = app.commands.scene().objects()[0].position();
+        let history = app.commands.scene().history_state_id();
+        let click = x_box.center();
+        let press = |pressed| egui::Event::PointerButton {
+            pos: click,
+            button: egui::PointerButton::Primary,
+            pressed,
+            modifiers: egui::Modifiers::NONE,
+        };
+        let enter = || egui::Event::Key {
+            key: Key::Enter,
+            physical_key: None,
+            pressed: true,
+            repeat: false,
+            modifiers: egui::Modifiers::NONE,
+        };
+        frame(&mut app, vec![egui::Event::PointerMoved(click)]);
+        frame(&mut app, vec![press(true)]);
+        frame(&mut app, vec![press(false)]);
+        frame(&mut app, Vec::new());
+        frame(&mut app, Vec::new());
+        frame(&mut app, vec![egui::Event::Text(String::from("25"))]);
+        assert_eq!(
+            app.position_fields[0], "25",
+            "typing must replace the value"
+        );
+        frame(&mut app, vec![enter()]);
+        frame(&mut app, Vec::new());
+        let moved = app.commands.scene().objects()[0].position();
+        assert!((moved[0] - 25.0).abs() < 1e-4, "{moved:?}");
+        assert_eq!(&moved[1..], &start[1..]);
+        let applied = app.commands.scene().history_state_id();
+        assert_ne!(applied, history, "Enter must apply");
+        // Enter again with nothing typed: no new history entry.
+        frame(&mut app, vec![egui::Event::PointerMoved(click)]);
+        frame(&mut app, vec![press(true)]);
+        frame(&mut app, vec![press(false)]);
+        frame(&mut app, vec![enter()]);
+        frame(&mut app, Vec::new());
+        assert_eq!(app.commands.scene().history_state_id(), applied);
+        // One undo puts it back.
+        app.dispatch(CommandId::Undo);
+        assert_eq!(app.commands.scene().objects()[0].position(), start);
         assert!(std::fs::remove_dir_all(directory).is_ok());
     }
 

@@ -46,17 +46,20 @@ pub fn parse_distance_mm(text: &str, display_unit: DisplayUnit) -> Result<f32, &
     Ok(millimetres)
 }
 
-/// Formats a model distance using the selected display unit and a stable
-/// suffix for keyboard editing.
+/// Formats a model distance in the selected display unit as a plain number,
+/// with no unit text (OF-72: the bottom-bar boxes show numbers only; the
+/// unit is the one chosen in Settings). Typing a unit still works because
+/// [`parse_distance_mm`] accepts an optional `mm` or `in` suffix.
 #[must_use]
 pub fn format_distance(value_mm: f32, display_unit: DisplayUnit) -> String {
     let value = display_unit.from_mm(value_mm);
     let value = if value.abs() < 0.000_5 { 0.0 } else { value };
-    format!("{value:.3} {}", display_unit.label())
+    format!("{value:.3}")
 }
 
-/// Formats an angle in degrees for a transform box. Values that would round
-/// to zero show as "0.000", never "-0.000".
+/// Formats an angle in degrees for a transform box as a plain number, with no
+/// unit text (OF-72). Values that would round to zero show as "0.000", never
+/// "-0.000". Typing `deg` or `°` still works in [`parse_angle_degrees`].
 #[must_use]
 pub fn format_angle_degrees(degrees: f32) -> String {
     let degrees = if degrees.abs() < 0.000_5 {
@@ -64,7 +67,7 @@ pub fn format_angle_degrees(degrees: f32) -> String {
     } else {
         degrees
     };
-    format!("{degrees:.3} deg")
+    format!("{degrees:.3}")
 }
 
 /// Parses a finite rotation delta in degrees.
@@ -117,10 +120,23 @@ mod tests {
 
     #[test]
     fn angles_near_zero_show_without_a_minus_sign() {
-        assert_eq!(format_angle_degrees(-0.0), "0.000 deg");
-        assert_eq!(format_angle_degrees(-0.000_2), "0.000 deg");
-        assert_eq!(format_angle_degrees(-90.0), "-90.000 deg");
-        assert_eq!(format_angle_degrees(12.345_6), "12.346 deg");
+        assert_eq!(format_angle_degrees(-0.0), "0.000");
+        assert_eq!(format_angle_degrees(-0.000_2), "0.000");
+        assert_eq!(format_angle_degrees(-90.0), "-90.000");
+        assert_eq!(format_angle_degrees(12.345_6), "12.346");
+    }
+
+    #[test]
+    fn transform_boxes_show_plain_numbers_that_parse_back() {
+        // OF-72: no "mm", "in" or "deg" in the bottom-bar boxes.
+        assert_eq!(format_distance(12.5, DisplayUnit::Millimetre), "12.500");
+        assert_eq!(format_distance(-0.000_1, DisplayUnit::Millimetre), "0.000");
+        assert_eq!(format_distance(25.4, DisplayUnit::Inch), "1.000");
+        assert_eq!(
+            parse_distance_mm(&format_distance(25.4, DisplayUnit::Inch), DisplayUnit::Inch),
+            Ok(25.4)
+        );
+        assert_eq!(parse_angle_degrees(&format_angle_degrees(30.0)), Ok(30.0));
     }
 
     #[test]
