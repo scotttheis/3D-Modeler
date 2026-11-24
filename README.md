@@ -113,6 +113,12 @@ simplicity, new features and look changes are considered one at a time. Read
 [`CONTRIBUTING.md`](CONTRIBUTING.md) first. Security problems: see
 [`SECURITY.md`](SECURITY.md).
 
+## Support
+
+3D Modeler is free and always will be. If it's useful to you, you can help
+keep the updates and new features coming by
+[supporting it on Ko-fi](https://ko-fi.com/scotttheis). Thank you!
+
 ## Licence
 
 Licensed under the Apache License, Version 2.0. See [`LICENSE`](LICENSE) and
