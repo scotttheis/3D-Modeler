@@ -8,9 +8,9 @@ publish.workspace = true
 [dependencies]
 modeler3d-core.workspace = true
 modeler3d-platform.workspace = true
-jsonschema = { version = "=0.60.2", default-features = false }
-rmcp = { version = "=3.9.0", default-features = false, features = ["macros", "server", "transport-io"] }
-schemars = "=1.0.4"
+jsonschema = { version = "=0.62.0", default-features = false }
+rmcp = { version = "=3.11.0", default-features = false, features = ["macros", "server", "transport-io"] }
+schemars = "=1.2.3"
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
