@@ -4,10 +4,20 @@ All notable changes, in plain words. Newest first.
 
 ## Unreleased
 
-- **A note on Repair:** on Windows, Repair uses the advanced 3D-printing repair
-  engine built into Windows. Mac and Linux don't have it, so 3D Modeler uses
-  its own repair there. It handles common problems well, but on badly damaged
-  models it may not be as thorough as the Windows engine.
+## 1.0.4 (2026-11-24)
+
+- **Repair is much better.** On Windows, Repair now uses the advanced
+  3D-printing repair engine built into Windows. Mac and Linux don't have it,
+  so 3D Modeler uses its own repair there, which is also much improved: it
+  closes holes of any size, joins overlapping parts into one solid and keeps
+  hollow models hollow. On badly damaged models it may not be as thorough as
+  the Windows engine.
+- **Repair never makes a model worse.** If it can't improve a model, it says
+  so and leaves it unchanged. When it works, it tells you what it fixed in
+  plain words.
+- **Home screen:** a new Open File button opens an STL, 3MF or other model
+  straight from the home page.
+- The unfinished Emboss button is hidden until it is ready.
 
 ## 1.0.3 (2026-11-22)
 

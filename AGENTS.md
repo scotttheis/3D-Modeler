@@ -203,10 +203,9 @@ as shared source.
 
 ## GitHub upload
 
-The owner plans a public GitHub repository: first a private v0.99 for
-invited testers, then a public v1.00. When they say they are ready for
-either, follow [`docs/github-upload.md`](docs/github-upload.md) ("Release
-plan"); until then do not push.
+The repository is `scotttheis/3D-Modeler`, public from 2026-11-24 (v1.0.4).
+Releases follow [`docs/github-upload.md`](docs/github-upload.md). Push only
+when the owner asks for a release or a push.
 
 Every release must carry plain-language notes of what changed: add the
 `## X.Y.Z` section to `CHANGELOG.md` before tagging (the release workflow
