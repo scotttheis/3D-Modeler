@@ -246,7 +246,10 @@ pasting the previous session's prompt.
 - **Full** gate, `Update-CurrentBuild.ps1`, snapshot. Owner tries Repair on
   the book and on one downloaded broken model and approves (approval is never
   inferred).
-- Done 2026-11-23 (built; **owner approval pending**):
+- Done 2026-11-23. **Owner approved 2026-11-23** ("Approved for now. I may
+  want to revisit it, but call it done."): book unchanged except one
+  zero-size triangle removed; a downloaded model had 2 self-crossings fixed,
+  both by the Windows engine.
   [`repair-r7-card.md`](repair-r7-card.md) (Codex medium wrote it; overseer
   tidied the summary code and line endings). One core function
   `repair_summary` writes the result for desktop and MCP, e.g. "Repaired:
