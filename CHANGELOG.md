@@ -4,6 +4,11 @@ All notable changes, in plain words. Newest first.
 
 ## Unreleased
 
+- **A note on Repair:** on Windows, Repair uses the advanced 3D-printing repair
+  engine built into Windows. Mac and Linux don't have it, so 3D Modeler uses
+  its own repair there. It handles common problems well, but on badly damaged
+  models it may not be as thorough as the Windows engine.
+
 ## 1.0.3 (2026-11-22)
 
 - **The AI (MCP) gateway now comes inside the Windows, Mac and Linux installers,**

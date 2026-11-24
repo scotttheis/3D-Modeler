@@ -95,9 +95,15 @@ to folders you approve. Setup and the full tool list are in
 
 ## Status
 
-Version 1.0 is out. Known limit: very dense models (hundreds of thousands of
-faces) can still make the window pause for a few seconds during a boolean
-operation. Current work is tracked in [`docs/STATUS.md`](docs/STATUS.md) and
+Version 1.0 is out. Known limits:
+
+- **Repair works best on Windows.** On Windows, Repair uses the advanced
+  3D-printing repair engine built into Windows itself. Mac and Linux don't
+  have that engine, so 3D Modeler uses its own repair there. It fixes common
+  problems such as holes and flipped faces well, but on badly damaged models
+  it may not be as thorough as the Windows engine.
+- Very dense models (hundreds of thousands of faces) can still make the window
+  pause for a few seconds during a boolean operation. Current work is tracked in [`docs/STATUS.md`](docs/STATUS.md) and
 changes in [`CHANGELOG.md`](CHANGELOG.md).
 
 ## Contributing
