@@ -231,7 +231,8 @@ pasting the previous session's prompt.
   itself is detected but not resolved natively (fix plan allows it); a
   crossing hole cap is retried only for rims up to 64 edges. Full gate
   passed (`logs/gate/20261123-170536-full`; capture board not run, it stalls
-  at the Save picker).
+  at the Save picker). Release rebuilt. Snapshot
+  `G:D-Modeler_snapshot_20261123-171440_repair-R6`.
 
 ### [ ] R7: what the owner sees, and finish
 
