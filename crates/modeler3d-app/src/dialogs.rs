@@ -982,26 +982,30 @@ impl DialogState {
         ui.horizontal(|ui| {
             ui.text_edit_singleline(&mut self.path_text);
             if ui.add(dialog_button("Browse...")).clicked() {
-                let selected = rfd::FileDialog::new()
-                    .set_title("Import model")
-                    .set_directory(
-                        Path::new(self.path_text.trim())
-                            .parent()
-                            .filter(|path| path.is_dir())
-                            .map(Path::to_path_buf)
-                            .unwrap_or_else(modeler3d_platform::documents_directory),
-                    )
-                    .add_filter("All files", &["*"])
-                    .add_filter(
-                        "3D Modeler models",
-                        &["stl", "obj", "ply", "3mf", "gltf", "glb", "wrl", "3dp"],
-                    )
-                    .add_filter("STL mesh", &["stl"])
-                    .add_filter("OBJ mesh", &["obj"])
-                    .add_filter("PLY mesh", &["ply"])
-                    .add_filter("3D Manufacturing Format", &["3mf"])
-                    .add_filter("glTF", &["gltf", "glb"])
-                    .pick_file();
+                let selected = if native_pickers_blocked() {
+                    None
+                } else {
+                    rfd::FileDialog::new()
+                        .set_title("Import model")
+                        .set_directory(
+                            Path::new(self.path_text.trim())
+                                .parent()
+                                .filter(|path| path.is_dir())
+                                .map(Path::to_path_buf)
+                                .unwrap_or_else(modeler3d_platform::documents_directory),
+                        )
+                        .add_filter("All files", &["*"])
+                        .add_filter(
+                            "3D Modeler models",
+                            &["stl", "obj", "ply", "3mf", "gltf", "glb", "wrl", "3dp"],
+                        )
+                        .add_filter("STL mesh", &["stl"])
+                        .add_filter("OBJ mesh", &["obj"])
+                        .add_filter("PLY mesh", &["ply"])
+                        .add_filter("3D Manufacturing Format", &["3mf"])
+                        .add_filter("glTF", &["gltf", "glb"])
+                        .pick_file()
+                };
                 self.path_text = path_after_browse(&self.path_text, selected.as_deref());
                 if selected.is_some() {
                     self.message.clear();
@@ -1703,7 +1707,17 @@ fn export_path_with_default_extension(path: PathBuf) -> PathBuf {
     }
 }
 
+/// True during an unattended review capture. No native file window may open
+/// then: nobody is there to click it, so it would hang the run. The picker
+/// answers as if the person pressed Cancel. Real use is unaffected.
+pub(crate) fn native_pickers_blocked() -> bool {
+    std::env::var_os("MODELER3D_REVIEW_CAPTURE").is_some()
+}
+
 fn native_path_picker(kind: DialogKind, current: &str) -> Option<PathBuf> {
+    if native_pickers_blocked() {
+        return None;
+    }
     let current_path = Path::new(current.trim());
     let mut dialog = rfd::FileDialog::new();
     if let Some(parent) = current_path
@@ -1727,6 +1741,9 @@ fn native_path_picker(kind: DialogKind, current: &str) -> Option<PathBuf> {
 
 /// The native save window for Save and Export, filtered to one file type.
 fn native_save_picker(request: &SavePickerRequest) -> Option<PathBuf> {
+    if native_pickers_blocked() {
+        return None;
+    }
     let mut dialog = rfd::FileDialog::new().set_title(request.title);
     for file_type in &request.offered {
         dialog = dialog.add_filter(file_type.label(), &[file_type.extension()]);
@@ -1977,6 +1994,9 @@ const MATERIAL_SWATCHES: [[u8; 3]; 16] = [
 ];
 
 pub(crate) fn image_path_picker(current: &str) -> Option<PathBuf> {
+    if native_pickers_blocked() {
+        return None;
+    }
     let current_path = Path::new(current.trim());
     let mut dialog = rfd::FileDialog::new().set_title("Open Image for Average Color");
     if let Some(parent) = current_path
@@ -1995,6 +2015,9 @@ pub(crate) fn image_path_picker(current: &str) -> Option<PathBuf> {
 
 /// Native picker for a texture picture.
 pub(crate) fn texture_path_picker(current: &str) -> Option<PathBuf> {
+    if native_pickers_blocked() {
+        return None;
+    }
     let current_path = Path::new(current.trim());
     let mut dialog = rfd::FileDialog::new().set_title("Choose a Texture Picture");
     if let Some(parent) = current_path

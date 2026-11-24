@@ -8326,6 +8326,9 @@ impl Drop for RunningDesktopJob {
 }
 
 fn native_import_picker(directory: &Path) -> Option<PathBuf> {
+    if crate::dialogs::native_pickers_blocked() {
+        return None;
+    }
     rfd::FileDialog::new()
         .set_title("Import model")
         .set_directory(directory)
@@ -8338,6 +8341,9 @@ fn native_import_picker(directory: &Path) -> Option<PathBuf> {
 }
 
 fn native_slicer_picker(current: Option<&Path>) -> Option<PathBuf> {
+    if crate::dialogs::native_pickers_blocked() {
+        return None;
+    }
     let mut picker = rfd::FileDialog::new().set_title("Select 3D Slicer Executable");
     if let Some(path) = current
         && let Some(parent) = path
