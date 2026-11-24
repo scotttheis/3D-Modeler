@@ -4,6 +4,13 @@ All notable changes, in plain words. Newest first.
 
 ## Unreleased
 
+- **Double-clicking a file opens it.** Double-click a `.3dp` project and it
+  opens in 3D Modeler, ready to work on. Before, the app started empty.
+- **3D Modeler shows up in Windows.** It is listed under "Open with" for STL,
+  3MF, OBJ, PLY, glTF/GLB and WRL files, and in Settings > Apps > Default apps,
+  so you can make it the program that opens them. `.3dp` files open in it
+  automatically.
+
 ## 1.0.5 (2026-11-24)
 
 - **Models from other programs open the right way up.** STL, 3MF, OBJ and PLY

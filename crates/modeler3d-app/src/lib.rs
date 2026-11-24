@@ -41,7 +41,11 @@ mod ui_state;
 mod updates;
 mod view_state;
 
-use std::{env, path::Path};
+use std::{
+    env,
+    ffi::OsString,
+    path::{Path, PathBuf},
+};
 
 use thiserror::Error;
 
@@ -201,11 +205,18 @@ fn run_inner() -> Result<(), AppError> {
             .with_min_inner_size([980.0, 640.0]),
         ..Default::default()
     };
+    let launch_file = launch_file(env::args_os().skip(1));
     let watchdog = diagnostics::UiWatchdog::start();
     let native_result = eframe::run_native(
         "3D Modeler",
         native_options,
-        Box::new(|creation_context| Ok(Box::new(Modeler3dApp::new(creation_context)))),
+        Box::new(move |creation_context| {
+            let mut app = Modeler3dApp::new(creation_context);
+            if let Some(path) = launch_file {
+                app.open_launch_file(&path);
+            }
+            Ok(Box::new(app))
+        }),
     );
     drop(watchdog);
     native_result?;
@@ -238,6 +249,28 @@ fn wants_terminal_output() -> bool {
         || env::var_os("MODELER3D_REVIEW_CAPTURE").is_some()
 }
 
+/// The file to open at startup: the first argument that is not a `--` flag
+/// or the value of one. Windows passes the double-clicked or "Open with"
+/// file this way (`"Modeler3D.exe" "%1"`); a relative path is resolved
+/// against the working directory.
+fn launch_file(arguments: impl IntoIterator<Item = OsString>) -> Option<PathBuf> {
+    const FLAGS_WITH_VALUES: [&str; 3] = ["--package", "--stage-launchers", "--shrink-assets"];
+    let mut arguments = arguments.into_iter();
+    while let Some(argument) = arguments.next() {
+        let text = argument.to_string_lossy();
+        if FLAGS_WITH_VALUES.contains(&text.as_ref()) {
+            arguments.next();
+            continue;
+        }
+        if text.starts_with("--") || text.is_empty() {
+            continue;
+        }
+        let path = PathBuf::from(argument);
+        return Some(std::path::absolute(&path).unwrap_or(path));
+    }
+    None
+}
+
 fn argument_value(name: &str) -> Option<String> {
     let mut arguments = env::args().skip(1);
     while let Some(argument) = arguments.next() {
@@ -246,4 +279,34 @@ fn argument_value(name: &str) -> Option<String> {
         }
     }
     None
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn arguments(values: &[&str]) -> Vec<OsString> {
+        values.iter().map(OsString::from).collect()
+    }
+
+    #[test]
+    fn launch_file_is_the_first_plain_argument() {
+        let file = env::temp_dir().join("part one.3dp");
+        let found = launch_file([OsString::from("--console"), file.clone().into_os_string()]);
+        assert_eq!(found, Some(file));
+    }
+
+    #[test]
+    fn launch_file_skips_flag_values_and_flags() {
+        assert_eq!(launch_file(arguments(&["--package", r"C:\out"])), None);
+        assert_eq!(launch_file(arguments(&["--console", "--smoke"])), None);
+        assert_eq!(launch_file(arguments(&[])), None);
+    }
+
+    #[test]
+    fn launch_file_resolves_a_relative_path() {
+        let found = launch_file(arguments(&["part.stl"])).unwrap_or_default();
+        assert!(found.is_absolute());
+        assert!(found.ends_with("part.stl"));
+    }
 }

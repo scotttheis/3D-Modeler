@@ -84,10 +84,106 @@
                      Name="DesktopShortcut" Type="integer" Value="1" KeyPath="yes" />
     </Component>
 
+    <!--
+      Windows file types (per user, HKCU\Software\Classes). .3dp is 3D Modeler's
+      own format, so it opens in 3D Modeler on double-click. Model formats are
+      only offered in "Open with" and Settings > Default apps; Windows lets the
+      user, not an installer, make 3D Modeler their default for those.
+      Keep the extension list in step with packaging/installers/install_windows.ps1.
+    -->
+    <Component Id="FileTypes" Directory="INSTALLFOLDER">
+      <RegistryValue Root="HKCU" Key="Software\Modeler3D\Installer"
+                     Name="FileTypes" Type="integer" Value="1" KeyPath="yes" />
+
+      <RegistryValue Root="HKCU" Key="Software\Classes\Modeler3D.Project"
+                     Type="string" Value="3D Modeler Project" />
+      <RegistryValue Root="HKCU" Key="Software\Classes\Modeler3D.Project\DefaultIcon"
+                     Type="string" Value="&quot;[#Modeler3DExe]&quot;,0" />
+      <RegistryValue Root="HKCU" Key="Software\Classes\Modeler3D.Project\shell\open\command"
+                     Type="string" Value="&quot;[#Modeler3DExe]&quot; &quot;%1&quot;" />
+      <RegistryValue Root="HKCU" Key="Software\Classes\Modeler3D.Model"
+                     Type="string" Value="3D Model" />
+      <RegistryValue Root="HKCU" Key="Software\Classes\Modeler3D.Model\DefaultIcon"
+                     Type="string" Value="&quot;[#Modeler3DExe]&quot;,0" />
+      <RegistryValue Root="HKCU" Key="Software\Classes\Modeler3D.Model\shell\open\command"
+                     Type="string" Value="&quot;[#Modeler3DExe]&quot; &quot;%1&quot;" />
+
+      <RegistryValue Root="HKCU" Key="Software\Classes\.3dp"
+                     Type="string" Value="Modeler3D.Project" />
+      <RegistryValue Root="HKCU" Key="Software\Classes\.3dp\OpenWithProgids"
+                     Name="Modeler3D.Project" Type="string" Value="" />
+      <RegistryValue Root="HKCU" Key="Software\Classes\.stl\OpenWithProgids"
+                     Name="Modeler3D.Model" Type="string" Value="" />
+      <RegistryValue Root="HKCU" Key="Software\Classes\.obj\OpenWithProgids"
+                     Name="Modeler3D.Model" Type="string" Value="" />
+      <RegistryValue Root="HKCU" Key="Software\Classes\.ply\OpenWithProgids"
+                     Name="Modeler3D.Model" Type="string" Value="" />
+      <RegistryValue Root="HKCU" Key="Software\Classes\.3mf\OpenWithProgids"
+                     Name="Modeler3D.Model" Type="string" Value="" />
+      <RegistryValue Root="HKCU" Key="Software\Classes\.gltf\OpenWithProgids"
+                     Name="Modeler3D.Model" Type="string" Value="" />
+      <RegistryValue Root="HKCU" Key="Software\Classes\.glb\OpenWithProgids"
+                     Name="Modeler3D.Model" Type="string" Value="" />
+      <RegistryValue Root="HKCU" Key="Software\Classes\.wrl\OpenWithProgids"
+                     Name="Modeler3D.Model" Type="string" Value="" />
+
+      <RegistryValue Root="HKCU" Key="Software\Classes\Applications\Modeler3D.exe"
+                     Name="FriendlyAppName" Type="string" Value="3D Modeler" />
+      <RegistryValue Root="HKCU" Key="Software\Classes\Applications\Modeler3D.exe\shell\open\command"
+                     Type="string" Value="&quot;[#Modeler3DExe]&quot; &quot;%1&quot;" />
+      <RegistryValue Root="HKCU" Key="Software\Classes\Applications\Modeler3D.exe\SupportedTypes"
+                     Name=".3dp" Type="string" Value="" />
+      <RegistryValue Root="HKCU" Key="Software\Classes\Applications\Modeler3D.exe\SupportedTypes"
+                     Name=".stl" Type="string" Value="" />
+      <RegistryValue Root="HKCU" Key="Software\Classes\Applications\Modeler3D.exe\SupportedTypes"
+                     Name=".obj" Type="string" Value="" />
+      <RegistryValue Root="HKCU" Key="Software\Classes\Applications\Modeler3D.exe\SupportedTypes"
+                     Name=".ply" Type="string" Value="" />
+      <RegistryValue Root="HKCU" Key="Software\Classes\Applications\Modeler3D.exe\SupportedTypes"
+                     Name=".3mf" Type="string" Value="" />
+      <RegistryValue Root="HKCU" Key="Software\Classes\Applications\Modeler3D.exe\SupportedTypes"
+                     Name=".gltf" Type="string" Value="" />
+      <RegistryValue Root="HKCU" Key="Software\Classes\Applications\Modeler3D.exe\SupportedTypes"
+                     Name=".glb" Type="string" Value="" />
+      <RegistryValue Root="HKCU" Key="Software\Classes\Applications\Modeler3D.exe\SupportedTypes"
+                     Name=".wrl" Type="string" Value="" />
+
+      <RegistryValue Root="HKCU" Key="Software\Modeler3D\Capabilities"
+                     Name="ApplicationName" Type="string" Value="3D Modeler" />
+      <RegistryValue Root="HKCU" Key="Software\Modeler3D\Capabilities"
+                     Name="ApplicationDescription" Type="string"
+                     Value="Build, repair and prepare 3D models for printing." />
+      <RegistryValue Root="HKCU" Key="Software\Modeler3D\Capabilities"
+                     Name="ApplicationIcon" Type="string" Value="&quot;[#Modeler3DExe]&quot;,0" />
+      <RegistryValue Root="HKCU" Key="Software\Modeler3D\Capabilities\FileAssociations"
+                     Name=".3dp" Type="string" Value="Modeler3D.Project" />
+      <RegistryValue Root="HKCU" Key="Software\Modeler3D\Capabilities\FileAssociations"
+                     Name=".stl" Type="string" Value="Modeler3D.Model" />
+      <RegistryValue Root="HKCU" Key="Software\Modeler3D\Capabilities\FileAssociations"
+                     Name=".obj" Type="string" Value="Modeler3D.Model" />
+      <RegistryValue Root="HKCU" Key="Software\Modeler3D\Capabilities\FileAssociations"
+                     Name=".ply" Type="string" Value="Modeler3D.Model" />
+      <RegistryValue Root="HKCU" Key="Software\Modeler3D\Capabilities\FileAssociations"
+                     Name=".3mf" Type="string" Value="Modeler3D.Model" />
+      <RegistryValue Root="HKCU" Key="Software\Modeler3D\Capabilities\FileAssociations"
+                     Name=".gltf" Type="string" Value="Modeler3D.Model" />
+      <RegistryValue Root="HKCU" Key="Software\Modeler3D\Capabilities\FileAssociations"
+                     Name=".glb" Type="string" Value="Modeler3D.Model" />
+      <RegistryValue Root="HKCU" Key="Software\Modeler3D\Capabilities\FileAssociations"
+                     Name=".wrl" Type="string" Value="Modeler3D.Model" />
+      <RegistryValue Root="HKCU" Key="Software\RegisteredApplications"
+                     Name="3D Modeler" Type="string" Value="Software\Modeler3D\Capabilities" />
+      <RemoveRegistryKey Root="HKCU" Key="Software\Classes\Modeler3D.Project" Action="removeOnUninstall" />
+      <RemoveRegistryKey Root="HKCU" Key="Software\Classes\Modeler3D.Model" Action="removeOnUninstall" />
+      <RemoveRegistryKey Root="HKCU" Key="Software\Classes\Applications\Modeler3D.exe" Action="removeOnUninstall" />
+      <RemoveRegistryKey Root="HKCU" Key="Software\Modeler3D\Capabilities" Action="removeOnUninstall" />
+    </Component>
+
     <Feature Id="Main">
       <ComponentGroupRef Id="AppFiles" />
       <ComponentRef Id="StartMenuShortcut" />
       <ComponentRef Id="DesktopShortcut" />
+      <ComponentRef Id="FileTypes" />
     </Feature>
   </Package>
 </Wix>

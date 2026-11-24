@@ -4188,6 +4188,21 @@ impl Modeler3dApp {
         }
     }
 
+    /// Opens the file the operating system handed the app at startup (a
+    /// double-click, "Open with", or a file dropped on the program icon). A
+    /// `.3dp` opens as the project; a model opens the way the Welcome list
+    /// opens it. The scene is new, so nothing unsaved can be lost.
+    pub(crate) fn open_launch_file(&mut self, path: &Path) {
+        if !path.is_file() {
+            self.commands
+                .set_status(format!("File not found: {}", path.display()));
+            return;
+        }
+        if let Err(error) = self.try_open_recent(path, false) {
+            self.report_command_error(error);
+        }
+    }
+
     /// Opens one recent entry the way the Welcome list does: a missing file
     /// is dropped from the list, a `.3dp` opens as the project (with unsaved
     /// changes it asks first when `ask_if_dirty`, otherwise it is refused by
@@ -12510,6 +12525,37 @@ mod tests {
             },
         );
         assert_eq!(app.commands.selected_count(), 2);
+    }
+
+    #[test]
+    fn a_file_windows_hands_the_app_at_startup_opens() {
+        let directory = repository_test_directory("launch-file");
+        let file = directory.join("double-clicked.3dp");
+        let mut saved = Modeler3dApp {
+            settings_path: directory.join("saved-settings.json"),
+            ..Default::default()
+        };
+        saved
+            .commands
+            .dispatch(CommandId::AddPrimitive(PrimitiveKind::Cube))
+            .expect("cube");
+        saved.commands.save_to_path(&file).expect("save");
+
+        let mut app = Modeler3dApp {
+            settings_path: directory.join("settings.json"),
+            ..Default::default()
+        };
+        app.open_launch_file(&file);
+        assert_eq!(app.commands.scene().objects().len(), 1);
+        assert_eq!(app.commands.project_path(), Some(file.as_path()));
+        assert_eq!(app.surface, WorkspaceSurface::Scene);
+
+        let mut empty = Modeler3dApp {
+            settings_path: directory.join("empty-settings.json"),
+            ..Default::default()
+        };
+        empty.open_launch_file(&directory.join("missing.3dp"));
+        assert!(empty.commands.scene().objects().is_empty());
     }
 
     #[test]

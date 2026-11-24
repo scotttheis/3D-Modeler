@@ -98,6 +98,11 @@ if ($Verify) {
                           "$installDir\assets\original\Modeler3D.ico", $startMenu, $desktop) {
             if (-not (Test-Path -LiteralPath $path)) { throw "Installed item missing: $path" }
         }
+        $projectType = (Get-ItemProperty -LiteralPath 'HKCU:\Software\Classes\.3dp' -ErrorAction SilentlyContinue).'(default)'
+        $openCommand = (Get-ItemProperty -LiteralPath 'HKCU:\Software\Classes\Modeler3D.Project\shell\open\command' -ErrorAction SilentlyContinue).'(default)'
+        if ($projectType -ne 'Modeler3D.Project' -or $openCommand -ne "`"$installDir\Modeler3D.exe`" `"%1`"") {
+            throw '.3dp is not registered to open in 3D Modeler.'
+        }
         & "$installDir\Modeler3D.exe" --smoke | Write-Host
         if ($LASTEXITCODE -ne 0) { throw "Installed app failed its smoke check ($LASTEXITCODE)." }
         $app = Start-Process "$installDir\Modeler3D.exe" -PassThru
