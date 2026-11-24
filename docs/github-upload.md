@@ -1,7 +1,24 @@
 # Uploading 3D Modeler to GitHub
 
-Owner goal (2026-11-16): a **public** GitHub repository. Not uploaded yet;
-the owner says when. Until then the "no push" rule in `AGENTS.md` stands.
+**Public since 2026-11-24** at `https://github.com/scotttheis/3D-Modeler`,
+latest release v1.0.4 (owner confirmed "it's live"). Stages 1 and 2 below are
+done and kept as history. New releases follow "Every release says what
+changed" below. Push only when the owner asks for a release or a push.
+
+After going public (2026-11-24): private vulnerability reporting is on; the
+page, releases, downloads, security policy and README images load logged out;
+the anonymous releases API shows the newest release, so the in-app update
+check works. Still for the owner: social preview upload, GitHub billing check,
+Sponsors/Discussions, removing tester `jackharvest`. The `AGENTS.md`
+"Standing boundaries" line still says "No push" (owner to reword).
+
+**If the release workflow's publish job is refused** (for example a GitHub
+billing message), the three build jobs still leave their installers as run
+artifacts. Publish them by hand: `gh run download <run id> -D dist`, make
+`3D-Modeler-SHA256SUMS.txt` with `sha256sum` (two spaces, no `*`), extract
+the `## X.Y.Z` CHANGELOG section to `notes.md`, then `gh release create vX.Y.Z
+--title "3D Modeler X.Y.Z" --notes-file notes.md <installers> <sums file>`.
+Done this way for v1.0.4.
 
 ## Release plan (owner, 2026-11-20)
 

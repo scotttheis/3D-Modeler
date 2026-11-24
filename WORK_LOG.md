@@ -4823,3 +4823,7 @@ Commit `7641f7a`. A sealed operand whose only flaws are zero-area or duplicate t
 ## 2026-11-21 Save opens the native save window directly (like 3D Builder)
 
 Save / Save As no longer show our own STL/3MF dialog first; they open the Windows save window at once with a "Save as type" list (STL default, 3MF). Cancel closes with no dialog left behind. Export unchanged (type drop-down + Export/Cancel). Tests `save_opens_the_file_window_at_once_with_stl_and_3mf_types`, `cancelling_the_save_window_closes_the_dialog`; app tests (303), fmt, Clippy passed; full gate and snapshot not run. Release rebuilt (CURRENT). Not compared side by side with 3D Builder; owner try pending. Supersedes the quick-pick buttons of OF-22/OF-24 for Save.
+
+## 2026-11-24 v1.0.4 and going public
+
+README known limits and CHANGELOG now say Repair uses the Windows built-in engine on Windows and our own, less thorough engine on Mac and Linux. Released v1.0.4 (Repair R1-R7, home Open File, Emboss hidden) after a passing Full gate (`logs/gate/20261124-060611-full`). GitHub built all three installers but refused the publish job over billing, so the release was published by hand from the run's artifacts (steps in `docs/github-upload.md`). Repository switched to public; private vulnerability reporting on; logged-out checks of page, downloads, images and the update API passed. Owner confirmed it is live.
